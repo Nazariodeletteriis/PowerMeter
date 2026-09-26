@@ -1,0 +1,202 @@
+/* Combat pages (meter, report, storico, classifiche, party, share modal).
+   Values are copied from PowerMeter Dashboard.dc.html; one-off layout stays
+   inline in the pages like Home.tsx. */
+
+/* Unstyled button that keeps the look of the element it replaces. */
+.cbPlain {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+/* Row whose resting background comes from --bg and turns s2 on hover (style-hover). */
+.cbHover {
+  background: var(--bg, transparent);
+}
+.cbHover:hover {
+  background: var(--pm-s2);
+}
+
+/* Segmented control (meter modes, rankings period). */
+.cbSeg {
+  display: flex;
+  border: 1px solid var(--pm-line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.cbSeg button {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--pm-t3);
+  cursor: pointer;
+  font-size: 12px;
+}
+.cbSeg button[aria-pressed="true"] {
+  background: var(--pm-s3);
+  color: var(--pm-t1);
+}
+
+.cbSelect {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s1);
+  color: var(--pm-t1);
+}
+
+/* Bar track + fill. Width transitions come from the prototype. */
+.cbTrack {
+  background: var(--pm-s3);
+}
+.cbGrow {
+  height: 100%;
+  transition: width 0.25s ease-out;
+}
+
+/* Chart background grid and SVG layer. */
+.cbGrid {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, var(--pm-line) 0 1px, transparent 1px 50px);
+  opacity: 0.6;
+}
+.cbSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.cbTicks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--pm-mono);
+  font-size: 10px;
+  color: var(--pm-t3);
+}
+
+/* Report tabs. */
+.cbTabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--pm-line);
+  margin-bottom: 14px;
+}
+.cbTabs button {
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--pm-t3);
+  cursor: pointer;
+  font-size: 13px;
+  margin-bottom: -1px;
+  white-space: nowrap;
+}
+.cbTabs button[aria-selected="true"] {
+  border-bottom-color: var(--pm-red);
+  color: var(--pm-t1);
+}
+
+/* Checkbox square of storico (prototype h.toggle). */
+.cbCheck {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--pm-grey);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.cbCheck > svg {
+  font-size: 11px;
+  color: var(--pm-redt);
+}
+
+/* Small sort header of the skill table. */
+.cbSort {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.cbIconBtn {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  background: transparent;
+  color: var(--pm-t2);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.cbUrl {
+  flex: 1;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.cbVisOpt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+}
+.cbRadio {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--pm-grey);
+  display: grid;
+  place-items: center;
+}
+.cbRadio > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.cbState {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cbState > svg {
+  font-size: 26px;
+}
+.cbStateText {
+  color: var(--pm-t2);
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cbGrow {
+    transition: none;
+  }
+}
