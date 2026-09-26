@@ -1,0 +1,651 @@
+/* Characters and builds pages (personaggi, builds, builder, skillplan,
+   daevanion). Values copied from PowerMeter Dashboard.dc.html; classes are
+   prefixed "ch" because every page stylesheet is global. */
+
+/* Reset for rows and tiles that are buttons for keyboard access. */
+.chBtnReset {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Section heading: red dash + kicker. */
+.chSectionHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chDash {
+  width: 14px;
+  height: 2px;
+  flex: none;
+  background: var(--pm-red);
+}
+
+/* Filter pill (region, tag, stat category). */
+.chChip {
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 13px;
+  border: 1px solid var(--pm-line);
+  background: transparent;
+  color: var(--pm-t2);
+  cursor: pointer;
+  font-size: 11px;
+}
+.chChip[aria-pressed="true"] {
+  border-color: var(--pm-red);
+  background: var(--pm-tint);
+  color: var(--pm-t1);
+}
+
+/* Segmented control (Builder / Missing pieces, Owned / Target, skill filter). */
+.chSeg {
+  display: flex;
+  border: 1px solid var(--pm-line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.chSeg button {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--pm-t3);
+  cursor: pointer;
+  font-size: 12px;
+}
+.chSeg button[aria-pressed="true"] {
+  background: var(--pm-s3);
+  color: var(--pm-t1);
+}
+.chSeg button:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Search field with icon (builds sidebar, stats, skill library). */
+.chSearch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+}
+.chSearch > svg {
+  color: var(--pm-t3);
+}
+.chSearch input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--pm-t1);
+  outline: none;
+  font-size: 12px;
+}
+.chSearch:focus-within {
+  outline: 2px solid var(--pm-red);
+  outline-offset: 2px;
+}
+
+/* Square icon button (skill planner toolbar, pagination). */
+.chIconBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+  color: var(--pm-t1);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.chSelect {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s1);
+  color: var(--pm-t1);
+}
+
+.chRegion {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #3fbf7f1f;
+  color: #5fd99a;
+}
+
+.chToolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -8px 0 14px;
+  flex-wrap: wrap;
+}
+
+.chToast {
+  position: fixed;
+  right: 16px;
+  bottom: 70px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--pm-s2);
+  box-shadow: 0 0 0 1px var(--pm-line), 0 12px 30px rgba(0, 0, 0, 0.5);
+  border-bottom: 2px solid #3fbf7f;
+}
+.chToast > svg {
+  color: #5fd99a;
+  font-size: 20px;
+  flex: none;
+}
+
+/* Dropdown panels (item picker, my builds). */
+.chPop {
+  position: absolute;
+  background: var(--pm-s2);
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px var(--pm-grey), 0 16px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- personaggi ---------- */
+.chCharCard .classAvatar {
+  border-radius: 8px;
+  font-size: 11px;
+}
+.chActiveTag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--pm-red);
+  color: var(--pm-redt);
+}
+.chCardIcon {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: transparent;
+  color: var(--pm-t2);
+  cursor: pointer;
+}
+
+/* ---------- builds ---------- */
+.chClassRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 30px;
+  padding: 0 8px;
+  border-radius: 5px;
+  color: var(--pm-t2);
+}
+.chClassRow:hover {
+  background: var(--pm-s2);
+}
+.chClassRow[aria-pressed="true"] {
+  background: var(--pm-s3);
+  color: var(--pm-t1);
+}
+.chClassRow .classAvatar {
+  border-radius: 4px;
+  font-size: 8px;
+}
+.chTab {
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--pm-t3);
+  cursor: pointer;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: -1px;
+}
+.chTab[aria-pressed="true"] {
+  border-bottom-color: var(--pm-red);
+  color: var(--pm-t1);
+}
+.chBuildCard {
+  display: flex;
+  min-height: 122px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--pm-s1);
+  border: 1px solid var(--pm-line);
+  cursor: pointer;
+}
+.chBuildCard:hover {
+  border-color: var(--pm-grey);
+}
+.chBuildCard .classAvatar {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  border-radius: 50%;
+  font-size: 8px;
+}
+.chBuildTitle {
+  display: block;
+  max-width: 100%;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chPill {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.chPage {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+  color: var(--pm-t1);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.chPage[aria-current="page"] {
+  border-color: var(--pm-red);
+  color: var(--pm-redt);
+}
+
+/* ---------- builder ---------- */
+.chMiniClass .classAvatar {
+  border: 0;
+  border-radius: 5px;
+  font-size: 8px;
+}
+.chColl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 15px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--pm-line);
+  cursor: pointer;
+  font-size: 12px;
+}
+.chColl:hover {
+  border-color: var(--pm-red);
+}
+.chMyBuild {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.chMyBuild:hover {
+  background: var(--pm-s3);
+}
+.chSlot {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--pm-s2);
+  border: 1px solid var(--pm-line);
+  min-width: 0;
+}
+.chSlot:hover {
+  border-color: var(--pm-grey);
+}
+.chSlot[aria-pressed="true"] {
+  background: var(--pm-s3);
+  border-color: var(--pm-red);
+}
+.chRailBtn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--pm-t3);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+}
+.chRailBtn[aria-selected="true"] {
+  border-color: var(--pm-red);
+  color: var(--pm-t1);
+}
+.chField {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+  font-size: 12px;
+}
+.chItemBtn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+}
+.chItemBtn:hover {
+  border-color: var(--pm-grey);
+}
+.chItemSide {
+  width: 40px;
+  height: 44px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+  color: var(--pm-t1);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.chPickRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 8px;
+  border-radius: 6px;
+}
+.chPickRow:hover {
+  background: var(--pm-s3);
+}
+.chTrack {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--pm-s3);
+  margin: 0 6px;
+}
+.chTrack > div {
+  height: 100%;
+  border-radius: 3px;
+}
+.chTrack > span {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: var(--pm-t1);
+}
+.chScale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+.chScale button {
+  width: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: center;
+  font-family: var(--pm-mono);
+  font-size: 10px;
+  line-height: inherit;
+  color: var(--pm-t3);
+  cursor: pointer;
+}
+.chMinMax {
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: transparent;
+  color: var(--pm-t2);
+  cursor: pointer;
+  font-size: 11px;
+}
+.chStatRow {
+  display: grid;
+  grid-template-columns: 1fr auto 44px;
+  gap: 6px;
+  font-size: 12px;
+  min-height: 22px;
+  align-items: center;
+  border-bottom: 1px solid var(--pm-line);
+}
+
+/* ---------- skill planner ---------- */
+.chSkillRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.chSkillRow:hover {
+  background: var(--pm-s2);
+}
+.chSkillRow[aria-pressed="true"] {
+  background: var(--pm-s3);
+  box-shadow: inset 2px 0 0 #db0000;
+}
+.chBarCell {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px dashed var(--pm-line);
+  background: transparent;
+  color: var(--pm-t1);
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chBarCell:hover {
+  border-color: var(--pm-red);
+}
+.chRound {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+  color: var(--pm-t1);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.chX {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--pm-t3);
+  cursor: pointer;
+}
+
+/* ---------- daevanion ---------- */
+.chBoardTab {
+  position: relative;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--pm-s1);
+  border: 1px solid var(--pm-line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+.chBoardTab:hover {
+  border-color: var(--pm-grey);
+}
+.chBoardTab[aria-pressed="true"] {
+  background: var(--pm-s3);
+  border-color: var(--pm-red);
+}
+.chNode {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font: 600 9px Inter, sans-serif;
+  cursor: pointer;
+  transition: background 0.15s ease-out;
+}
+.chCheck {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--pm-t2);
+  margin-right: 6px;
+}
+.chCheck > span {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--pm-grey);
+  display: grid;
+  place-items: center;
+}
+.chCheck > span svg {
+  font-size: 11px;
+  color: var(--pm-redt);
+}
+.chCheck input:focus-visible + span {
+  outline: 2px solid var(--pm-red);
+  outline-offset: 2px;
+}
+
+/* ---------- share modal ---------- */
+.chShare {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.chShareClose {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--pm-t2);
+  cursor: pointer;
+}
+.chShareUrl {
+  flex: 1;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.btn.chCopied {
+  border-color: #3fbf7f;
+  color: #5fd99a;
+  font-weight: 500;
+}
+.chVisOpt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-line);
+  background: transparent;
+  color: var(--pm-t1);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.chVisOpt[aria-checked="true"] {
+  border-color: var(--pm-red);
+}
+.chRadio {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--pm-grey);
+  display: grid;
+  place-items: center;
+}
+.chRadio span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.chVisOpt[aria-checked="true"] .chRadio span {
+  background: var(--pm-red);
+}
+.chDiscord {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #1e1f22;
+  border-left: 3px solid #db0000;
+}
+.chOgImage {
+  margin-top: 8px;
+  height: 90px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #1a1717, #0a0909);
+  border: 1px solid #2e2929;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  color: #8a8181;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chNode {
+    transition: none;
+  }
+}
