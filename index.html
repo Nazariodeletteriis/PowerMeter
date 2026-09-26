@@ -10,6 +10,8 @@
       href="/src/styles.css"
       rel="stylesheet"
       type="text/css" />
+    <!-- PowerMeter: the powermeter theme (default). Loaded after styles.css so it wins ties. -->
+    <link href="/src/powermeter-theme.css" rel="stylesheet" type="text/css" />
     <!--
       CJK webfonts, loaded without blocking first paint. Every window pulls the
       whole head before it renders, so as plain stylesheets these four put
@@ -52,10 +54,12 @@
     <div class="container">
       <div class="meter">
         <div class="header">
-          <div class="bossIcon" role="button" tabindex="0" aria-label="Copy screenshot">
+          <!-- PowerMeter: brand mark at the head of the widget bar (design 8.2). -->
+          <svg class="pmLogo" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2" y="13" width="5" height="9" rx="1.2" fill="#8A8181"/><rect x="9.5" y="8" width="5" height="14" rx="1.2" fill="#F5F2F2"/><path d="M17 5.5 22 2v18.8a1.2 1.2 0 0 1-1.2 1.2h-2.6A1.2 1.2 0 0 1 17 20.8z" fill="#DB0000"/></svg>
+          <div class="bossIcon" role="button" tabindex="0" aria-label="Copy screenshot" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
             <img src="/src/assets/logo.png" alt="" />
             <div class="bossIconOverlay" aria-hidden="true">
-              <i data-lucide="camera"></i>
+              <svg class="phIcon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg>
             </div>
           </div>
           <div class="bossNames">
@@ -63,11 +67,12 @@
           </div>
 
           <div class="headerBtns">
-            <div class="headerBtn suspendBtn" style="display:none"><i data-lucide="power"></i></div>
-            <div class="headerBtn dashboardBtn" role="button" tabindex="0" aria-label="PowerMeter dashboard" onclick="__TAURI__.core.invoke('open_dashboard_window')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"><i data-lucide="layout-dashboard"></i></div>
-            <div class="headerBtn historyBtn" role="button" tabindex="0" aria-label="Fight history" data-i18n-aria-label="history.title"><i data-lucide="scroll-text"></i></div>
-            <div class="headerBtn resetBtn"><i data-lucide="rotate-ccw"></i></div>
-            <div class="headerBtn settingsBtn"><i data-lucide="settings"></i></div>
+            <!-- PowerMeter: Phosphor (regular) icons inline, as in the design; paths from @phosphor-icons/react. -->
+            <div class="headerBtn suspendBtn" style="display:none" role="button" tabindex="0" aria-label="Suspend capture" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"><svg class="phIcon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M120,128V48a8,8,0,0,1,16,0v80a8,8,0,0,1-16,0Zm60.37-78.7a8,8,0,0,0-8.74,13.4C194.74,77.77,208,101.57,208,128a80,80,0,0,1-160,0c0-26.43,13.26-50.23,36.37-65.3a8,8,0,0,0-8.74-13.4C47.9,67.38,32,96.06,32,128a96,96,0,0,0,192,0C224,96.06,208.1,67.38,180.37,49.3Z"/></svg></div>
+            <div class="headerBtn dashboardBtn" role="button" tabindex="0" aria-label="PowerMeter dashboard" onclick="__TAURI__.core.invoke('open_dashboard_window')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"><svg class="phIcon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,160H40V56H216V200ZM80,84A12,12,0,1,1,68,72,12,12,0,0,1,80,84Zm40,0a12,12,0,1,1-12-12A12,12,0,0,1,120,84Z"/></svg></div>
+            <div class="headerBtn historyBtn" role="button" tabindex="0" aria-label="Fight history" data-i18n-aria-label="history.title"><svg class="phIcon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M136,80v43.47l36.12,21.67a8,8,0,0,1-8.24,13.72l-40-24A8,8,0,0,1,120,128V80a8,8,0,0,1,16,0Zm-8-48A95.44,95.44,0,0,0,60.08,60.15C52.81,67.51,46.35,74.59,40,82V64a8,8,0,0,0-16,0v40a8,8,0,0,0,8,8H72a8,8,0,0,0,0-16H49c7.15-8.42,14.27-16.35,22.39-24.57a80,80,0,1,1,1.66,114.75,8,8,0,1,0-11,11.64A96,96,0,1,0,128,32Z"/></svg></div>
+            <div class="headerBtn resetBtn" role="button" tabindex="0" aria-label="Reset" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"><svg class="phIcon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></svg></div>
+            <div class="headerBtn settingsBtn" role="button" tabindex="0" aria-label="Settings" data-i18n-aria-label="settings.title" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"><svg class="phIcon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm109.94-52.79a8,8,0,0,0-3.89-5.4l-29.83-17-.12-33.62a8,8,0,0,0-2.83-6.08,111.91,111.91,0,0,0-36.72-20.67,8,8,0,0,0-6.46.59L128,41.85,97.88,25a8,8,0,0,0-6.47-.6A112.1,112.1,0,0,0,54.73,45.15a8,8,0,0,0-2.83,6.07l-.15,33.65-29.83,17a8,8,0,0,0-3.89,5.4,106.47,106.47,0,0,0,0,41.56,8,8,0,0,0,3.89,5.4l29.83,17,.12,33.62a8,8,0,0,0,2.83,6.08,111.91,111.91,0,0,0,36.72,20.67,8,8,0,0,0,6.46-.59L128,214.15,158.12,231a7.91,7.91,0,0,0,3.9,1,8.09,8.09,0,0,0,2.57-.42,112.1,112.1,0,0,0,36.68-20.73,8,8,0,0,0,2.83-6.07l.15-33.65,29.83-17a8,8,0,0,0,3.89-5.4A106.47,106.47,0,0,0,237.94,107.21Zm-15,34.91-28.57,16.25a8,8,0,0,0-3,3c-.58,1-1.19,2.06-1.81,3.06a7.94,7.94,0,0,0-1.22,4.21l-.15,32.25a95.89,95.89,0,0,1-25.37,14.3L134,199.13a8,8,0,0,0-3.91-1h-.19c-1.21,0-2.43,0-3.64,0a8.08,8.08,0,0,0-4.1,1l-28.84,16.1A96,96,0,0,1,67.88,201l-.11-32.2a8,8,0,0,0-1.22-4.22c-.62-1-1.23-2-1.8-3.06a8.09,8.09,0,0,0-3-3.06l-28.6-16.29a90.49,90.49,0,0,1,0-28.26L61.67,97.63a8,8,0,0,0,3-3c.58-1,1.19-2.06,1.81-3.06a7.94,7.94,0,0,0,1.22-4.21l.15-32.25a95.89,95.89,0,0,1,25.37-14.3L122,56.87a8,8,0,0,0,4.1,1c1.21,0,2.43,0,3.64,0a8.08,8.08,0,0,0,4.1-1l28.84-16.1A96,96,0,0,1,188.12,55l.11,32.2a8,8,0,0,0,1.22,4.22c.62,1,1.23,2,1.8,3.06a8.09,8.09,0,0,0,3,3.06l28.6,16.29A90.49,90.49,0,0,1,222.9,142.12Z"/></svg></div>
           </div>
         </div>
         <div class="bossHpBar" style="display:none">
@@ -770,13 +775,6 @@
                   </span>
                   <span data-i18n="settings.discord">Discord</span>
                 </button>
-                <button
-                  type="button"
-                  class="a2toolsButton"
-                  onclick="window.javaBridge?.openBrowser?.('https://github.com/taengu/A2Tools-DPS-Meter')"
-                  title="PowerMeter is based on A2Tools DPS Meter by taengu (GPL-3.0)">
-                  Powered by A2Tools
-                </button>
                 <button class="supportButton" type="button">
                   <span class="supportIcon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -788,6 +786,8 @@
                   </span>
                   <span data-i18n="support.button">Support Me</span>
                 </button>
+                <!-- PowerMeter: brand link. A proper name, never translated. -->
+                <button class="letrionLabsButton" type="button">Powered by LetrionLabs</button>
               </div>
               <button class="quitButton" type="button" data-i18n="settings.quit">Quit</button>
             </div>
@@ -837,7 +837,10 @@
               Monitoring data...
             </div>
           </div>
+          <!-- PowerMeter: fight time again as the footer's "Duration" (mirrored by battleTime.js). -->
+          <span class="pmDuration"><span data-i18n="meter.duration">Duration</span> <span class="tick"></span></span>
           <div class="meterTotalBar" style="display:none">
+            <span class="pmPartyLabel" data-i18n="meter.partyDps">Party DPS</span>
             <span class="meterTotalDps"></span>
             <span class="meterTotalSep">/</span>
             <span class="meterTotalDmg"></span>

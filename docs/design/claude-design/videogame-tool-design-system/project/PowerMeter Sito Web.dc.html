@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/nocturne-adc6caf8-482b-4f97-b0ad-cf737e5e3af7/styles.css">
+<script src="_ds/nocturne-adc6caf8-482b-4f97-b0ad-cf737e5e3af7/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+:root{--pm-bg:#0A0909;--pm-s1:#121010;--pm-s2:#1A1717;--pm-s3:#242020;--pm-line:#2E2929;--pm-t1:#F5F2F2;--pm-t2:#B3ABAB;--pm-t3:#8A8181;--pm-red:#DB0000;--pm-redt:#FF4D4D;--pm-deep:#7F1112;--pm-grey:#564F4F;--pm-fill:transparent;--pm-filltext:#FF4D4D;--pm-band:#121010;--pm-wrgb:10 9 9;--pm-tint:rgba(219,0,0,.12);--pm-canvas:#050404}
+html{background:var(--pm-canvas)}body{margin:0;background:var(--pm-canvas);color:var(--pm-t1);font-family:Inter,"Noto Sans","Noto Sans JP",system-ui,sans-serif}
+a{color:var(--pm-redt)}a:hover{color:var(--pm-t1)}
+button{font-family:inherit}
+</style>
+</helmet>
+<section id="s0" style="padding:40px 48px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+  <div style="font-size:26px;font-weight:500;letter-spacing:-.02em">Sito web pubblico</div>
+  <div style="color:var(--pm-t3)">Sezioni 13.3–14 · desktop 1440 e mobile 390</div>
+  <div style="flex:1"></div>
+  <div style="display:flex;gap:4px;padding:4px;border-radius:8px;background:var(--pm-s2);border:1px solid var(--pm-line);font-size:12px"><span style="padding:6px 8px;color:var(--pm-t3)">Palette</span><sc-for list="{{ demos }}" as="d" hint-placeholder-count="2"><button onClick="{{ d.go }}" style="height:28px;padding:0 10px;border-radius:5px;border:1px solid {{ d.bd }};background:{{ d.bg }};color:var(--pm-t1);cursor:pointer;font-size:12px">{{ d.label }}</button></sc-for></div>
+</section>
+
+<section id="s141" style="padding:16px 48px 40px">
+  <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">14.1 — Landing · desktop 1440</div>
+  <div style="width:1440px;background:var(--pm-bg);border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px var(--pm-line)">
+    <div style="height:64px;display:flex;align-items:center;gap:28px;padding:0 64px;border-bottom:1px solid var(--pm-line)">
+      <div style="display:flex;align-items:center;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24"><rect x="2" y="13" width="5" height="9" rx="1.2" style="fill:var(--pm-grey)"></rect><rect x="9.5" y="8" width="5" height="14" rx="1.2" style="fill:var(--pm-t1)"></rect><path d="M17 5.5 22 2v18.8a1.2 1.2 0 0 1-1.2 1.2h-2.6A1.2 1.2 0 0 1 17 20.8z" style="fill:var(--pm-red)"></path></svg><span style="font-weight:600;font-size:16px">Power<span style="color:var(--pm-redt)">Meter</span></span></div>
+      <div style="display:flex;gap:24px;font-size:14px;color:var(--pm-t2)"><span>Meter</span><span>Log</span><span>Classifiche</span><span>Build</span><span>Database</span><span>Guida</span></div>
+      <div style="flex:1"></div>
+      <span style="font-size:14px;color:var(--pm-t2)">Accedi</span>
+      <button style="height:36px;padding:0 16px;border-radius:6px;border:1px solid var(--pm-red);background:var(--pm-fill);color:var(--pm-filltext);font-weight:500;cursor:pointer;display:flex;gap:8px;align-items:center"><i class="ph ph-windows-logo"></i>Scarica</button>
+    </div>
+    <div style="position:relative;display:grid;grid-template-columns:minmax(0,1fr) 520px;gap:64px;padding:96px 64px 80px;align-items:center;overflow:hidden">
+      <div style="position:absolute;right:-120px;top:-160px;width:760px;height:760px;background:radial-gradient(circle,rgba(219,0,0,.16),transparent 62%);pointer-events:none"></div>
+      <div style="position:relative;display:flex;flex-direction:column;gap:22px">
+        <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--pm-redt)">Per Aion 2 · Global/EU</div>
+        <div style="font-size:64px;line-height:1.02;font-weight:500;letter-spacing:-.035em;text-wrap:balance">Misura il tuo potere.<br></br>Colpo per colpo.</div>
+        <div style="font-size:18px;line-height:1.55;color:var(--pm-t2);max-width:560px;text-wrap:pretty">DPS meter in tempo reale, log di combattimento condivisibili, classifiche e un build planner completo. Gratuito, per tutti.</div>
+        <div style="display:flex;gap:10px;align-items:center"><button style="height:48px;padding:0 22px;border-radius:8px;border:1px solid var(--pm-red);background:var(--pm-fill);color:var(--pm-filltext);font-size:15px;font-weight:500;cursor:pointer;display:flex;gap:10px;align-items:center;box-shadow:0 0 32px rgba(219,0,0,.25)"><i class="ph ph-windows-logo" style="font-size:18px"></i>Scarica per Windows</button><span style="font-size:13px;color:var(--pm-t3)">v1.5.0 · 48 MB · Windows 10/11</span></div>
+        <div style="display:flex;gap:40px;margin-top:18px">
+          <div><div style="font-family:'JetBrains Mono',monospace;font-size:26px">{{ fights }}</div><div style="font-size:12px;color:var(--pm-t3)">combattimenti registrati</div></div>
+          <div><div style="font-family:'JetBrains Mono',monospace;font-size:26px">84.210</div><div style="font-size:12px;color:var(--pm-t3)">giocatori</div></div>
+          <div><div style="font-family:'JetBrains Mono',monospace;font-size:26px;display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#3FBF7F"></span>{{ ago }}</div><div style="font-size:12px;color:var(--pm-t3)">ultimo upload</div></div>
+        </div>
+      </div>
+      <div style="position:relative;height:400px;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at 70% 30%,#3B2A55 0%,transparent 45%),radial-gradient(ellipse at 20% 85%,#5A1E14 0%,transparent 45%),linear-gradient(180deg,#0E1020 0%,#15121C 60%,#0B0A10 100%);box-shadow:0 0 0 1px var(--pm-line)">
+        <div style="position:absolute;right:12px;bottom:10px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35)">Screenshot segnaposto</div>
+        <div style="position:absolute;left:40px;top:44px;width:400px;border-radius:8px;background:rgb(var(--pm-wrgb) / .7);box-shadow:0 0 0 1px rgba(255,255,255,.08),0 20px 50px rgba(0,0,0,.5);color:#F5F2F2;text-shadow:0 1px 2px rgba(0,0,0,.85);font-size:12px;overflow:hidden">
+          <div style="height:24px;display:flex;align-items:center;gap:6px;padding:0 8px;background:rgba(0,0,0,.35)"><span style="font-size:10px;padding:1px 7px;border-radius:3px;background:rgba(219,0,0,.35)">DPS</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#FF6B6B">{{ time }}</span><div style="flex:1"></div><span style="font-size:11px;color:#D2C9C9">Vorathis the Ashbound</span></div>
+          <div style="padding:6px 8px"><div style="height:5px;border-radius:3px;background:rgba(255,255,255,.12)"><div style="height:100%;width:{{ hpW }};background:#DB0000;border-radius:3px;transition:width .6s ease-out"></div></div></div>
+          <div style="padding:0 6px 6px;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6"><div style="position:relative;display:flex;align-items:center;gap:6px;height:26px;padding:0 6px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.05);outline:{{ r.meOutline }}"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ r.barW }};background:{{ r.col }};opacity:.42;transition:width .5s ease-out"></div><span style="position:relative;width:16px;height:16px;border-radius:4px;display:grid;place-items:center;font-size:7px;font-weight:700;background:{{ r.colBg }};color:{{ r.col }};border:1px solid {{ r.col }};text-shadow:none">{{ r.init }}</span><span style="position:relative;flex:1">{{ r.n }}</span><span style="position:relative;font-family:'JetBrains Mono',monospace;font-weight:600">{{ r.dps }}</span><span style="position:relative;font-family:'JetBrains Mono',monospace;width:42px;text-align:right;color:#E8E1E1">{{ r.pct }}</span></div></sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--pm-line);border-top:1px solid var(--pm-line);border-bottom:1px solid var(--pm-line)">
+      <sc-for list="{{ feats }}" as="f" hint-placeholder-count="5"><div style="background:var(--pm-bg);padding:32px 28px;display:flex;flex-direction:column;gap:10px"><i class="ph {{ f.ic }}" style="font-size:24px;color:var(--pm-redt)"></i><div style="font-size:17px;font-weight:500">{{ f.t }}</div><div style="font-size:14px;line-height:1.55;color:var(--pm-t2);text-wrap:pretty">{{ f.d }}</div></div></sc-for>
+    </div>
+    <div style="position:relative;padding:72px 64px;background:var(--pm-band);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:64px;align-items:center">
+      <div style="position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,transparent,#DB0000 20%,#DB0000 80%,transparent)"></div>
+      <div><div style="font-size:40px;font-weight:500;letter-spacing:-.025em;line-height:1.1;color:#FAF7F7">Gratis per tutti.<br></br>Per sempre completo.</div></div>
+      <div style="display:flex;flex-direction:column;gap:14px"><div style="font-size:16px;line-height:1.6;color:#E8E1E1">Nessuna funzione a pagamento. Chi vuole può sostenere il progetto su Patreon: tiene in vita i server di log e classifiche, e riceve un piccolo grazie.</div><div><button style="height:40px;padding:0 16px;border-radius:6px;border:1px solid #FF4D4D;background:transparent;color:#FAF7F7;cursor:pointer;display:flex;gap:8px;align-items:center"><i class="ph-fill ph-heart" style="color:#FF4D4D"></i>Diventa Supporter</button></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:64px;padding:72px 64px">
+      <div><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:14px">Requisiti</div>
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:15px"><div style="display:flex;gap:10px"><i class="ph ph-windows-logo" style="color:var(--pm-t2)"></i>Windows 10/11 64 bit</div><div style="display:flex;gap:10px"><i class="ph ph-plugs-connected" style="color:var(--pm-t2)"></i>Npcap con modalità WinPcap API-compatible</div><div style="display:flex;gap:10px"><i class="ph ph-shield-check" style="color:var(--pm-t2)"></i>Esecuzione come amministratore</div></div></div>
+      <div><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:6px">Domande frequenti</div>
+        <sc-for list="{{ faqs }}" as="q" hint-placeholder-count="4"><div onClick="{{ q.go }}" style="border-bottom:1px solid var(--pm-line);padding:16px 0;cursor:pointer"><div style="display:flex;gap:12px;align-items:center;font-size:15px"><span style="flex:1">{{ q.q }}</span><i class="ph {{ q.ic }}" style="color:var(--pm-t3)"></i></div><sc-if value="{{ q.open }}"><div style="font-size:14px;line-height:1.6;color:var(--pm-t2);margin-top:8px;max-width:620px">{{ q.a }}</div></sc-if></div></sc-for>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--pm-line);padding:32px 64px;display:flex;gap:32px;align-items:flex-start;font-size:13px;color:var(--pm-t3)">
+      <div style="display:flex;flex-direction:column;gap:6px;max-width:520px"><span style="color:var(--pm-t1);font-weight:500">PowerMeter <span style="color:var(--pm-t3);font-weight:400">by Letrion Labs</span></span><span style="line-height:1.55">Tool non ufficiale, non affiliato a NCSoft. Aion 2 è un marchio dei rispettivi proprietari.</span></div>
+      <div style="flex:1"></div>
+      <div style="display:flex;gap:16px;align-items:center"><i class="ph ph-discord-logo" style="font-size:18px"></i><i class="ph ph-github-logo" style="font-size:18px"></i><select style="height:32px;border-radius:6px;border:1px solid var(--pm-line);background:var(--pm-s1);color:var(--pm-t1)"><option>Italiano</option><option>English</option><option>Deutsch</option><option>Français</option><option>Español</option><option>Português</option><option>Русский</option><option>日本語</option><option>한국어</option><option>简体中文</option><option>繁體中文</option></select></div>
+    </div>
+  </div>
+</section>
+<section id="smob" style="padding:16px 48px 40px">
+  <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">Web mobile 390 — landing, report, build pubblica, profilo, classifiche, errore</div>
+  <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start">
+
+    <div style="width:390px;height:844px;background:var(--pm-bg);border-radius:28px;overflow:hidden;box-shadow:0 0 0 1px var(--pm-line),0 0 0 8px var(--pm-s2);display:flex;flex-direction:column">
+      <div style="height:56px;flex:none;display:flex;align-items:center;gap:8px;padding:0 16px;border-bottom:1px solid var(--pm-line)"><svg width="20" height="20" viewBox="0 0 24 24"><rect x="2" y="13" width="5" height="9" rx="1.2" style="fill:var(--pm-grey)"></rect><rect x="9.5" y="8" width="5" height="14" rx="1.2" style="fill:var(--pm-t1)"></rect><path d="M17 5.5 22 2v18.8a1.2 1.2 0 0 1-1.2 1.2h-2.6A1.2 1.2 0 0 1 17 20.8z" style="fill:var(--pm-red)"></path></svg><span style="font-weight:600">Power<span style="color:var(--pm-redt)">Meter</span></span><div style="flex:1"></div><button title="Menu" style="width:44px;height:44px;border:0;background:transparent;color:var(--pm-t1);font-size:20px"><i class="ph ph-list"></i></button></div>
+      <div style="flex:1;overflow:auto;padding:28px 20px;display:flex;flex-direction:column;gap:18px">
+        <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--pm-redt)">Per Aion 2</div>
+        <div style="font-size:38px;line-height:1.04;font-weight:500;letter-spacing:-.03em">Misura il tuo potere. Colpo per colpo.</div>
+        <div style="font-size:15px;line-height:1.55;color:var(--pm-t2)">DPS meter, log condivisibili, classifiche e build planner. Gratuito.</div>
+        <button style="height:48px;border-radius:8px;border:1px solid var(--pm-red);background:var(--pm-fill);color:var(--pm-filltext);font-weight:500;font-size:15px;display:flex;gap:8px;align-items:center;justify-content:center"><i class="ph ph-windows-logo"></i>Scarica per Windows</button>
+        <div style="font-size:12px;color:var(--pm-t3);text-align:center">Il meter funziona su PC. Da telefono puoi vedere log, build e classifiche.</div>
+        <div style="border-radius:10px;overflow:hidden;height:230px;position:relative;background:radial-gradient(ellipse at 70% 30%,#3B2A55 0%,transparent 45%),linear-gradient(180deg,#0E1020 0%,#15121C 60%,#0B0A10 100%)"><div style="position:absolute;left:14px;right:14px;top:18px;border-radius:8px;background:rgb(var(--pm-wrgb) / .7);padding:6px;display:flex;flex-direction:column;gap:2px;color:#F5F2F2;font-size:11px"><sc-for list="{{ rows }}" as="r"><div style="position:relative;display:flex;gap:6px;align-items:center;height:26px;padding:0 6px;border-radius:4px;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ r.barW }};background:{{ r.col }};opacity:.42;transition:width .5s ease-out"></div><span style="position:relative;flex:1">{{ r.n }}</span><span style="position:relative;font-family:'JetBrains Mono',monospace;font-weight:600">{{ r.dps }}</span></div></sc-for></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><div style="font-family:'JetBrains Mono',monospace;font-size:20px">{{ fights }}</div><div style="font-size:11px;color:var(--pm-t3)">combattimenti</div></div><div><div style="font-family:'JetBrains Mono',monospace;font-size:20px">84.210</div><div style="font-size:11px;color:var(--pm-t3)">giocatori</div></div></div>
+      </div>
+    </div>
+
+    <div style="width:390px;height:844px;background:var(--pm-bg);border-radius:28px;overflow:hidden;box-shadow:0 0 0 1px var(--pm-line),0 0 0 8px var(--pm-s2);display:flex;flex-direction:column">
+      <div style="height:56px;flex:none;display:flex;align-items:center;gap:6px;padding:0 8px;border-bottom:1px solid var(--pm-line)"><button title="Indietro" style="width:44px;height:44px;border:0;background:transparent;color:var(--pm-t1);font-size:18px"><i class="ph ph-caret-left"></i></button><div style="flex:1;min-width:0"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Vorathis the Ashbound</div><div style="font-size:11px;color:var(--pm-t3)">Ashen Sanctum · Tentativo 4</div></div><button title="Condividi" style="width:44px;height:44px;border:0;background:transparent;color:var(--pm-t1);font-size:18px"><i class="ph ph-share-network"></i></button></div>
+      <div style="flex:1;overflow:auto;padding:14px 0">
+        <div style="display:flex;gap:8px;align-items:center;padding:0 16px 12px;flex-wrap:wrap"><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;background:#3FBF7F22;color:#5FD99A">KILL</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px">5:12</span><span style="font-size:12px;color:var(--pm-t3)">26 set · EU</span></div>
+        <div style="padding:0 16px 12px"><select style="width:100%;height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--pm-line);background:var(--pm-s1);color:var(--pm-t1);font-size:15px"><option>Panoramica</option><option>Skill</option><option>Timeline skill</option><option>Timeline buff</option><option>Danno ricevuto</option><option>Cure</option><option>Bersagli</option></select></div>
+        <div style="margin:0 16px 14px;height:110px;border-radius:8px;background:var(--pm-s1);border:1px solid var(--pm-line);padding:10px;box-sizing:border-box"><svg viewBox="0 0 100 40" preserveAspectRatio="none" style="width:100%;height:100%"><path d="M0,20 L10,14 L20,16 L30,10 L40,13 L50,30 L55,32 L60,12 L70,9 L80,12 L90,8 L100,10" fill="none" stroke="#4F93EA" stroke-width="2" vector-effect="non-scaling-stroke"></path><path d="M0,24 L10,20 L20,22 L30,17 L40,19 L50,33 L55,34 L60,18 L70,15 L80,19 L90,14 L100,17" fill="none" stroke="#B377E8" stroke-width="1.4" vector-effect="non-scaling-stroke"></path></svg></div>
+        <div style="overflow-x:auto;border-top:1px solid var(--pm-line)">
+          <div style="display:grid;grid-template-columns:130px 70px 64px 56px 50px;width:max-content;font-size:11px;color:var(--pm-t3)"><span style="position:sticky;left:0;background:var(--pm-bg);padding:10px 8px 10px 16px">Giocatore</span><span style="padding:10px 8px;text-align:right">DPS</span><span style="padding:10px 8px;text-align:right">Danno</span><span style="padding:10px 8px;text-align:right">%</span><span style="padding:10px 16px 10px 8px;text-align:right">Morti</span></div>
+          <sc-for list="{{ mRows }}" as="r"><div style="display:grid;grid-template-columns:130px 70px 64px 56px 50px;width:max-content;align-items:center;min-height:48px;border-top:1px solid var(--pm-line);font-size:13px"><span style="position:sticky;left:0;background:var(--pm-bg);padding:0 8px 0 16px;display:flex;align-items:center;gap:8px;min-height:48px;box-shadow:1px 0 0 var(--pm-line)"><span style="width:22px;height:22px;border-radius:5px;display:grid;place-items:center;font-size:8px;font-weight:700;background:{{ r.colBg }};color:{{ r.col }};flex:none">{{ r.init }}</span>{{ r.n }}</span><span style="font-family:'JetBrains Mono',monospace;padding:0 8px;text-align:right">{{ r.dps }}</span><span style="font-family:'JetBrains Mono',monospace;padding:0 8px;text-align:right;color:var(--pm-t2)">{{ r.dmg }}</span><span style="font-family:'JetBrains Mono',monospace;padding:0 8px;text-align:right;color:var(--pm-t2)">{{ r.pct }}</span><span style="font-family:'JetBrains Mono',monospace;padding:0 16px 0 8px;text-align:right;color:var(--pm-t2)">{{ r.d }}</span></div></sc-for>
+        </div>
+        <div style="font-size:11px;color:var(--pm-t3);padding:10px 16px">Scorri la tabella lateralmente · prima colonna fissa</div>
+      </div>
+    </div>
+
+    <div style="width:390px;height:844px;background:var(--pm-bg);border-radius:28px;overflow:hidden;box-shadow:0 0 0 1px var(--pm-line),0 0 0 8px var(--pm-s2);display:flex;flex-direction:column">
+      <div style="height:56px;flex:none;display:flex;align-items:center;gap:6px;padding:0 8px;border-bottom:1px solid var(--pm-line)"><button style="width:44px;height:44px;border:0;background:transparent;color:var(--pm-t1);font-size:18px"><i class="ph ph-caret-left"></i></button><span style="font-weight:500;flex:1">Build pubblica</span></div>
+      <div style="flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;gap:12px;align-items:center"><div style="width:44px;height:44px;border-radius:8px;display:grid;place-items:center;font-weight:700;font-size:12px;background:url(assets/icons/sorcerer.png) center/80% no-repeat, #AB61DD1c;color:#AB61DD;border:1px solid #4F93EA"></div><div style="flex:1"><div style="font-size:18px;font-weight:500">Ashen Burst</div><div style="font-size:12px;color:var(--pm-t3)">Sorcerer · di kaelthas · 3 giorni fa</div></div></div>
+        <div style="display:flex;gap:6px"><span style="font-size:11px;padding:3px 8px;border-radius:4px;background:var(--pm-s3)">PvE</span><span style="font-size:11px;padding:3px 8px;border-radius:4px;background:var(--pm-s3)">DPS</span><div style="flex:1"></div><span style="font-size:12px;color:var(--pm-t2)"><i class="ph ph-heart"></i> 214 · <i class="ph ph-eye"></i> 3.902</span></div>
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:11px;color:var(--pm-t3)">CP</span><span style="font-family:'JetBrains Mono',monospace;font-size:30px">50.380</span></div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px"><sc-for list="{{ mSlots }}" as="s"><div style="aspect-ratio:1;border-radius:6px;border:1.5px solid {{ s.c }};background:var(--pm-s1);display:grid;place-items:center;font-size:9px;color:var(--pm-t3);position:relative">{{ s.l }}<span style="position:absolute;right:3px;bottom:1px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--pm-t1)">{{ s.e }}</span></div></sc-for></div>
+        <div style="border-radius:8px;background:var(--pm-s1);border:1px solid var(--pm-line);padding:12px;font-size:13px;line-height:1.6;color:var(--pm-t2)"><div style="font-size:11px;color:var(--pm-t3);margin-bottom:4px">Note dell’autore</div>Priorità Critical Strike fino a 1.250, poi Magic Boost. Soul Freeze solo per le fasi con add.</div>
+        <div style="display:flex;flex-direction:column;gap:8px"><button style="height:48px;border-radius:8px;border:1px solid var(--pm-red);background:var(--pm-fill);color:var(--pm-filltext);font-weight:500;font-size:15px">Importa in PowerMeter</button><div style="display:flex;gap:8px"><button style="flex:1;height:44px;border-radius:8px;border:1px solid var(--pm-line);background:transparent;color:var(--pm-t1)"><i class="ph ph-heart"></i> Mi piace</button><button style="flex:1;height:44px;border-radius:8px;border:1px solid var(--pm-line);background:transparent;color:var(--pm-t1)"><i class="ph ph-link"></i> Copia link</button></div></div>
+      </div>
+    </div>
+
+    <div style="width:390px;height:844px;background:var(--pm-bg);border-radius:28px;overflow:hidden;box-shadow:0 0 0 1px var(--pm-line),0 0 0 8px var(--pm-s2);display:flex;flex-direction:column">
+      <div style="height:56px;flex:none;display:flex;align-items:center;gap:6px;padding:0 8px;border-bottom:1px solid var(--pm-line)"><button style="width:44px;height:44px;border:0;background:transparent;color:var(--pm-t1);font-size:18px"><i class="ph ph-caret-left"></i></button><span style="font-weight:500;flex:1">Profilo</span><button style="width:44px;height:44px;border:0;background:transparent;color:var(--pm-t1);font-size:18px"><i class="ph ph-share-network"></i></button></div>
+      <div style="flex:1;overflow:auto">
+        <div style="padding:20px 16px;display:flex;gap:14px;align-items:center;border-bottom:1px solid var(--pm-line)"><div style="width:72px;height:88px;border-radius:8px;border:1px dashed var(--pm-grey);background:var(--pm-s1);display:grid;place-items:center;font-size:10px;color:var(--pm-t3)">Ritratto</div><div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:500;display:flex;align-items:center;gap:6px">Nyxara <i class="ph-fill ph-heart" title="Supporter" style="color:var(--pm-redt);font-size:12px"></i></div><div style="font-size:12px;color:var(--pm-t2)">Assassin · Lv 45 · Siel</div><div style="font-size:11px;color:var(--pm-t3)">«Shadow of the Ashen Tide» · <span style="color:#F4C77A;display:inline-flex;align-items:center;gap:3px;vertical-align:-3px"><img src="assets/icons/asmodian.png" alt="" style="width:14px;height:14px">Asmodian</span></div><div style="font-family:'JetBrains Mono',monospace;font-size:24px;margin-top:6px">47.880 <span style="font-size:11px;color:var(--pm-t3);font-family:Inter,sans-serif">CP</span></div></div></div>
+        <div style="display:flex;gap:4px;padding:10px 12px;overflow-x:auto;border-bottom:1px solid var(--pm-line)"><span style="flex:none;height:36px;padding:0 12px;border-radius:18px;background:var(--pm-s3);display:flex;align-items:center;font-size:13px">Equipaggiamento</span><span style="flex:none;height:36px;padding:0 12px;border-radius:18px;display:flex;align-items:center;font-size:13px;color:var(--pm-t2)">Statistiche</span><span style="flex:none;height:36px;padding:0 12px;border-radius:18px;display:flex;align-items:center;font-size:13px;color:var(--pm-t2)">Skill</span><span style="flex:none;height:36px;padding:0 12px;border-radius:18px;display:flex;align-items:center;font-size:13px;color:var(--pm-t2)">Daevanion</span><span style="flex:none;height:36px;padding:0 12px;border-radius:18px;display:flex;align-items:center;font-size:13px;color:var(--pm-t2)">Log recenti</span></div>
+        <sc-for list="{{ mGear }}" as="g"><div style="display:flex;gap:12px;align-items:center;min-height:52px;padding:0 16px;border-bottom:1px solid var(--pm-line)"><div style="width:32px;height:32px;border-radius:6px;border:1.5px solid {{ g.c }};background:var(--pm-s1)"></div><div style="flex:1;min-width:0"><div style="font-size:11px;color:var(--pm-t3)">{{ g.s }}</div><div style="color:{{ g.c }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.n }}</div></div><span style="font-family:'JetBrains Mono',monospace;font-size:12px">{{ g.e }}</span></div></sc-for>
+        <div style="padding:16px"><button style="width:100%;height:48px;border-radius:8px;border:1px solid var(--pm-red);background:var(--pm-fill);color:var(--pm-filltext);font-weight:500">Apri in PowerMeter</button></div>
+      </div>
+    </div>
+
+    <div style="width:390px;height:844px;background:var(--pm-bg);border-radius:28px;overflow:hidden;box-shadow:0 0 0 1px var(--pm-line),0 0 0 8px var(--pm-s2);display:flex;flex-direction:column">
+      <div style="height:56px;flex:none;display:flex;align-items:center;gap:6px;padding:0 16px;border-bottom:1px solid var(--pm-line)"><span style="font-weight:500;flex:1">Classifiche</span><button title="Filtri" style="width:44px;height:44px;border:0;background:transparent;color:var(--pm-t1);font-size:18px"><i class="ph ph-funnel"></i></button></div>
+      <div style="padding:10px 16px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--pm-line);font-size:12px"><span style="flex:none;padding:8px 10px;border-radius:6px;border:1px solid var(--pm-line)">EU</span><span style="flex:none;padding:8px 10px;border-radius:6px;border:1px solid var(--pm-line)">Vorathis the Ashbound</span><span style="flex:none;padding:8px 10px;border-radius:6px;border:1px solid var(--pm-line)">Tutte le classi</span><span style="flex:none;padding:8px 10px;border-radius:6px;border:1px solid var(--pm-red);color:var(--pm-redt)">Settimana</span></div>
+      <div style="flex:1;overflow:auto">
+        <sc-for list="{{ mBoard }}" as="r"><div style="display:flex;gap:10px;align-items:center;min-height:56px;padding:0 16px;border-bottom:1px solid var(--pm-line);background:{{ r.bg }}"><span style="font-family:'JetBrains Mono',monospace;width:26px;color:{{ r.pc }};font-size:15px">{{ r.pos }}</span><span style="width:26px;height:26px;border-radius:6px;display:grid;place-items:center;font-size:9px;font-weight:700;background:{{ r.colBg }};color:{{ r.col }};flex:none">{{ r.init }}</span><div style="flex:1;min-width:0"><div>{{ r.n }}</div><div style="font-size:11px;color:var(--pm-t3)">{{ r.cls }} · {{ r.d }}</div></div><span style="font-family:'JetBrains Mono',monospace">{{ r.dps }}</span></div></sc-for>
+      </div>
+      <div style="flex:none;display:flex;gap:10px;align-items:center;min-height:60px;padding:0 16px;background:var(--pm-tint);border-top:1px solid var(--pm-red)"><span style="font-family:'JetBrains Mono',monospace;width:26px;color:var(--pm-redt)">142</span><span style="width:26px;height:26px;border-radius:6px;display:grid;place-items:center;font-size:9px;font-weight:700;background:url(assets/icons/sorcerer.png) center/80% no-repeat, #AB61DD1c;color:#AB61DD"></span><div style="flex:1">Kaelthas <span style="font-size:11px;color:var(--pm-t3)">(tu)</span></div><span style="font-family:'JetBrains Mono',monospace">18.420</span></div>
+    </div>
+
+    <div style="width:390px;height:844px;background:var(--pm-bg);border-radius:28px;overflow:hidden;box-shadow:0 0 0 1px var(--pm-line),0 0 0 8px var(--pm-s2);display:flex;flex-direction:column;position:relative">
+      <div style="height:56px;flex:none;display:flex;align-items:center;gap:8px;padding:0 16px;border-bottom:1px solid var(--pm-line)"><span style="font-weight:600">Power<span style="color:var(--pm-redt)">Meter</span></span></div>
+      <div style="flex:1;padding:80px 24px;display:flex;flex-direction:column;gap:14px"><i class="ph ph-lock-key" style="font-size:36px;color:var(--pm-redt)"></i><div style="font-size:26px;font-weight:500;letter-spacing:-.02em">Questo log è privato</div><div style="color:var(--pm-t2);line-height:1.6">Chi l’ha caricato ha deciso di tenerlo per sé. Se è tuo, accedi con Discord per vederlo.</div><button style="height:48px;border-radius:8px;border:1px solid var(--pm-red);background:var(--pm-fill);color:var(--pm-filltext);font-weight:500">Accedi con Discord</button><button style="height:44px;border-radius:8px;border:1px solid var(--pm-line);background:transparent;color:var(--pm-t1)">Torna alla home</button></div>
+      <sc-if value="{{ cookie }}"><div style="position:absolute;left:12px;right:12px;bottom:12px;border-radius:10px;background:var(--pm-s2);box-shadow:0 0 0 1px var(--pm-line),0 12px 30px rgba(0,0,0,.5);padding:14px;display:flex;flex-direction:column;gap:10px"><div style="font-size:13px;line-height:1.5;color:var(--pm-t2)">Usiamo cookie tecnici e, solo con il tuo consenso, cookie di analisi anonimi. <span style="color:var(--pm-redt)">Informativa</span></div><div style="display:flex;gap:8px"><button onClick="{{ closeCookie }}" style="flex:1;height:44px;border-radius:8px;border:1px solid var(--pm-line);background:transparent;color:var(--pm-t1)">Rifiuta</button><button onClick="{{ closeCookie }}" style="flex:1;height:44px;border-radius:8px;border:1px solid var(--pm-line);background:transparent;color:var(--pm-t1)">Accetta</button></div></div></sc-if>
+    </div>
+  </div>
+</section>
+
+<section id="s142" style="padding:16px 48px 40px">
+  <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">14.2 · 14.3 — Download e Guida/FAQ</div>
+  <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start">
+    <div style="width:720px;background:var(--pm-bg);border-radius:10px;box-shadow:0 0 0 1px var(--pm-line);padding:40px;display:flex;flex-direction:column;gap:22px">
+      <div style="font-size:32px;font-weight:500;letter-spacing:-.02em">Scarica PowerMeter</div>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><button style="height:48px;padding:0 22px;border-radius:8px;border:1px solid var(--pm-red);background:var(--pm-fill);color:var(--pm-filltext);font-weight:500;font-size:15px;display:flex;gap:10px;align-items:center"><i class="ph ph-download-simple" style="font-size:18px"></i>PowerMeter-Setup-1.5.0.exe</button><div style="font-size:12px;color:var(--pm-t3);line-height:1.5">48 MB · 25 set 2026<br></br><span style="color:var(--pm-redt)">Note di rilascio</span></div><div style="flex:1"></div><span style="display:flex;gap:6px;align-items:center;font-size:12px;padding:6px 10px;border-radius:6px;border:1px solid #3FBF7F55;color:#5FD99A"><i class="ph ph-shield-check"></i>Scansionato su VirusTotal · 0/72</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+        <sc-for list="{{ steps }}" as="s"><div style="border-radius:8px;background:var(--pm-s1);border:1px solid var(--pm-line);overflow:hidden"><div style="height:100px;background:var(--pm-s2);display:grid;place-items:center;font-size:10px;color:var(--pm-t3);border-bottom:1px solid var(--pm-line)">Illustrazione passo {{ s.n }}</div><div style="padding:12px"><div style="font-family:'JetBrains Mono',monospace;color:var(--pm-redt);font-size:12px">0{{ s.n }}</div><div style="font-weight:500;margin:4px 0">{{ s.t }}</div><div style="font-size:12px;color:var(--pm-t2);line-height:1.5">{{ s.d }}</div></div></div></sc-for>
+      </div>
+    </div>
+    <div style="width:560px;background:var(--pm-bg);border-radius:10px;box-shadow:0 0 0 1px var(--pm-line);padding:40px;display:flex;flex-direction:column;gap:14px">
+      <div style="font-size:32px;font-weight:500;letter-spacing:-.02em">Guida</div>
+      <div style="display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--pm-line);background:var(--pm-s1);color:var(--pm-t3)"><i class="ph ph-magnifying-glass"></i>Cerca nella guida…</div>
+      <sc-for list="{{ faqs }}" as="q"><div onClick="{{ q.go }}" style="border-bottom:1px solid var(--pm-line);padding:14px 0;cursor:pointer"><div style="display:flex;gap:12px;align-items:center"><span style="flex:1">{{ q.q }}</span><i class="ph {{ q.ic }}" style="color:var(--pm-t3)"></i></div><sc-if value="{{ q.open }}"><div style="font-size:13px;line-height:1.6;color:var(--pm-t2);margin-top:8px">{{ q.a }}</div></sc-if></div></sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="s144" style="padding:16px 48px 40px">
+  <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">14.4 · 14.5 — Pagine di errore e banner cookie</div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
+    <sc-for list="{{ errors }}" as="e" hint-placeholder-count="4"><div style="width:320px;min-height:260px;background:var(--pm-bg);border-radius:10px;box-shadow:0 0 0 1px var(--pm-line);padding:28px;display:flex;flex-direction:column;gap:10px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--pm-redt)">{{ e.code }}</span><div style="font-size:20px;font-weight:500;letter-spacing:-.015em">{{ e.t }}</div><div style="font-size:13px;line-height:1.6;color:var(--pm-t2);flex:1">{{ e.d }}</div><div><button style="height:36px;padding:0 14px;border-radius:6px;border:1px solid var(--pm-red);background:var(--pm-fill);color:var(--pm-filltext);font-weight:500">{{ e.a }}</button></div></div></sc-for>
+    <div style="width:680px;background:var(--pm-s2);border-radius:10px;box-shadow:0 0 0 1px var(--pm-line);padding:18px 20px;display:flex;align-items:center;gap:18px;align-self:flex-start"><i class="ph ph-cookie" style="font-size:22px;color:var(--pm-t2)"></i><div style="flex:1;font-size:13px;line-height:1.5;color:var(--pm-t2)">Usiamo cookie tecnici necessari e, solo con il tuo consenso, cookie di analisi anonimi per migliorare il sito. <span style="color:var(--pm-redt)">Informativa</span></div><button style="height:36px;padding:0 16px;border-radius:6px;border:1px solid var(--pm-line);background:transparent;color:var(--pm-t1)">Rifiuta</button><button style="height:36px;padding:0 16px;border-radius:6px;border:1px solid var(--pm-line);background:transparent;color:var(--pm-t1)">Accetta</button></div>
+  </div>
+</section>
+
+<section id="s134" style="padding:16px 48px 64px">
+  <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">13.4 — Anteprime Open Graph 1200×630 (mostrate al 50%)</div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap">
+    <div style="width:600px;height:315px;border-radius:8px;overflow:hidden;position:relative;background:radial-gradient(circle at 85% 20%,rgba(219,0,0,.25),transparent 55%),#0A0909;box-shadow:0 0 0 1px #2E2929;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;color:#F5F2F2">
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="font-weight:600">Power<span style="color:#FF4D4D">Meter</span></span><span style="color:#8A8181">· Log</span></div>
+      <div style="margin-top:18px;display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;background:#3FBF7F33;color:#5FD99A">KILL</span><span style="font-family:'JetBrains Mono',monospace;font-size:18px">5:12</span></div>
+      <div style="font-size:30px;font-weight:500;letter-spacing:-.02em;margin-top:6px">Vorathis the Ashbound</div>
+      <div style="flex:1"></div>
+      <sc-for list="{{ ogTop }}" as="r"><div style="position:relative;display:flex;align-items:center;gap:10px;height:30px;padding:0 10px;border-radius:5px;overflow:hidden;margin-top:4px;background:rgba(255,255,255,.05)"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ r.w }};background:{{ r.col }};opacity:.4"></div><span style="background:{{ r.colBg }};position:relative;font-size:10px;font-weight:700;color:{{ r.col }}">{{ r.init }}</span><span style="position:relative;flex:1;font-size:14px">{{ r.n }}</span><span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600">{{ r.dps }}</span></div></sc-for>
+    </div>
+    <div style="width:600px;height:315px;border-radius:8px;overflow:hidden;background:radial-gradient(circle at 85% 20%,rgba(219,0,0,.25),transparent 55%),#0A0909;box-shadow:0 0 0 1px #2E2929;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;color:#F5F2F2">
+      <div style="font-size:13px"><span style="font-weight:600">Power<span style="color:#FF4D4D">Meter</span></span><span style="color:#8A8181"> · Build</span></div>
+      <div style="font-size:30px;font-weight:500;letter-spacing:-.02em;margin-top:22px">Ashen Burst</div><div style="color:#4F93EA;font-size:15px">Sorcerer · PvE</div>
+      <div style="flex:1"></div>
+      <div style="display:flex;align-items:flex-end;gap:20px"><div><div style="font-size:12px;color:#8A8181">CP</div><div style="font-family:'JetBrains Mono',monospace;font-size:40px">50.380</div></div><div style="flex:1"></div><sc-for list="{{ ogSlots }}" as="s"><div style="width:52px;height:52px;border-radius:8px;border:2px solid {{ s.c }};background:#1A1717"></div></sc-for></div>
+    </div>
+    <div style="width:600px;height:315px;border-radius:8px;overflow:hidden;background:radial-gradient(circle at 85% 20%,rgba(219,0,0,.25),transparent 55%),#0A0909;box-shadow:0 0 0 1px #2E2929;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;color:#F5F2F2">
+      <div style="font-size:13px"><span style="font-weight:600">Power<span style="color:#FF4D4D">Meter</span></span><span style="color:#8A8181"> · Profilo</span></div>
+      <div style="flex:1;display:flex;align-items:center;gap:24px"><div style="width:110px;height:130px;border-radius:10px;border:1px dashed #564F4F;display:grid;place-items:center;font-size:11px;color:#8A8181">Ritratto</div><div><div style="font-size:36px;font-weight:500;letter-spacing:-.02em">Nyxara</div><div style="color:#B377E8;font-size:15px">Assassin · Siel (EU)</div><div style="font-family:'JetBrains Mono',monospace;font-size:36px;margin-top:10px">47.880 <span style="font-size:13px;color:#8A8181;font-family:Inter,sans-serif">CP</span></div></div></div>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;palette&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;brace&quot;,&quot;carbonio&quot;,&quot;chiaro&quot;],&quot;default&quot;:&quot;brace&quot;,&quot;tsType&quot;:&quot;'brace'|'carbonio'|'chiaro'&quot;}}">
+class Component extends DCLogic {
+  state = { demo:null, tick:0, faq:0, cookie:true };
+  THEMES = {
+    a:{'--pm-bg':'#0A0909','--pm-s1':'#121010','--pm-s2':'#1A1717','--pm-s3':'#242020','--pm-line':'#2E2929','--pm-t1':'#F5F2F2','--pm-t2':'#B3ABAB','--pm-t3':'#8A8181','--pm-red':'#DB0000','--pm-redt':'#FF4D4D','--pm-fill':'transparent','--pm-filltext':'#FF4D4D','--pm-band':'#121010','--pm-wrgb':'10 9 9','--pm-tint':'rgba(219,0,0,.12)','--pm-canvas':'#050404'},
+    b:{'--pm-bg':'#0A0909','--pm-s1':'#141111','--pm-s2':'#1D1919','--pm-s3':'#2A2424','--pm-line':'#3A3333','--pm-t1':'#FAF7F7','--pm-t2':'#D2C9C9','--pm-t3':'#A89E9E','--pm-red':'#DB0000','--pm-redt':'#FF6B6B','--pm-fill':'#7F1112','--pm-filltext':'#FAF7F7','--pm-band':'#7F1112','--pm-wrgb':'12 10 10','--pm-tint':'rgba(219,0,0,.2)','--pm-canvas':'#050404'},
+    c:{'--pm-bg':'#E4E0DA','--pm-s1':'#EDEAE5','--pm-s2':'#DDD8D1','--pm-s3':'#D1CBC3','--pm-line':'#C2BBB2','--pm-t1':'#140F0F','--pm-t2':'#453E3B','--pm-t3':'#5E5652','--pm-red':'#DB0000','--pm-redt':'#B00000','--pm-deep':'#7F1112','--pm-grey':'#948B83','--pm-navon':'#7F1112','--pm-navfg':'#FFFFFF','--pm-bar':'#7F1112','--pm-fill':'#7F1112','--pm-filltext':'#FFFFFF','--pm-band':'#7F1112','--pm-tint':'rgba(219,0,0,.10)','--pm-wrgb':'12 10 10','--pm-wbar':'rgba(127,17,18,.85)','--pm-canvas':'#D9D4CD','--color-bg':'#E4E0DA','--color-surface':'#EDEAE5','--color-text':'#140F0F','--color-accent':'#DB0000','--color-divider':'#C2BBB2'}
+  };
+  CLS={Gladiator:['GL','#52A5DB'],Templar:['TE','#4CA8E0'],Assassin:['AS','#42C169'],Ranger:['RA','#4BC670'],Sorcerer:['SO','#AB61DD'],Spiritmaster:['SP','#C24DAE'],Cleric:['CL','#C8C171'],Chanter:['CH','#CAC172'],Brawler:['BR','#C58B55']};
+  ICO(c){ return c==='Brawler'?'':'assets/icons/'+c.toLowerCase()+'.png'; }
+  RAR={Common:'#9C9494',Uncommon:'#6CC46A',Rare:'#4F93EA',Heroic:'#B377E8',Legendary:'#F0A63A',Mythic:'#FF4040'};
+  demo(){ return this.state.demo ?? ({carbonio:'a',chiaro:'c'}[this.props.palette]||'b'); }
+  applyTheme(){ const d=this.demo(); if(this._d===d) return; this._d=d; const t=this.THEMES[d]; for(const k in t) document.documentElement.style.setProperty(k,t[k]); }
+  componentDidMount(){ this.applyTheme(); this.iv=setInterval(()=>this.setState(s=>({tick:s.tick+1})),1000); }
+  componentDidUpdate(){ this.applyTheme(); }
+  componentWillUnmount(){ clearInterval(this.iv); }
+  fmt(n){ return Math.round(n).toLocaleString('it-IT',{useGrouping:'always'}); }
+  CLS_L={Gladiator:'#2B7DB3',Templar:'#2A80B8',Assassin:'#23904A',Ranger:'#279550',Sorcerer:'#8A3FBF',Spiritmaster:'#A0328C',Cleric:'#8A8230',Chanter:'#8C8433',Brawler:'#98602C'};
+  cl(c){ const col=(this.demo()==='c'&&this.CLS_L[c])||this.CLS[c][1]; const ic=this.ICO(c); return {cls:c,init:ic?'':this.CLS[c][0],col,icon:ic,colBg:ic?`url(${ic}) center/80% no-repeat, ${col}1c`:col+'22'}; }
+  renderVals(){
+    const S=this.state, set=o=>this.setState(o), T=S.tick, demo=this.demo();
+    const cyc=T%40, el=cyc*8;
+    const base=[['Kaelthas','Sorcerer',18420,true],['Nyxara','Assassin',17950],['Vharok','Gladiator',14310],['Ironveil','Templar',8840],['Elowyn','Chanter',7210],['Solenne','Cleric',3120]];
+    const r=base.map(([n,c,d,me],i)=>({n,c,me,d:d*(0.85+0.2*Math.sin(T*0.6+i*2.1))}));
+    const tot=r.reduce((a,x)=>a+x.d,0), max=Math.max(...r.map(x=>x.d));
+    const rows=r.sort((a,b)=>b.d-a.d).map(x=>({n:x.n,...this.cl(x.c),dps:this.fmt(x.d),pct:(x.d/tot*100).toFixed(1).replace('.',',')+'%',barW:(x.d/max*100).toFixed(1)+'%',meOutline:x.me?'1px solid rgba(255,77,77,.9)':'none'}));
+    const faqs=[['Il meter non rileva il gioco','Controlla che Npcap sia installato in modalità WinPcap e che PowerMeter sia avviato come amministratore. Con VPN o ping reducer scegli l’adattatore manualmente in Impostazioni → Meter.'],['Il mio nome non compare','Il nome viene letto dal titolo della finestra di Aion 2. Puoi impostarlo a mano in Impostazioni → Meter.'],['Funziona con la VPN?','Sì: seleziona l’adattatore della VPN nella diagnosi del meter.'],['È sicuro? Cosa legge?','PowerMeter legge in modo passivo il traffico di combattimento. Non modifica il gioco né invia dati al server di gioco. Il codice è open source (GPL-3.0).']].map(([q,a],i)=>({q,a,open:S.faq===i,ic:S.faq===i?'ph-minus':'ph-plus',go:()=>set({faq:S.faq===i?-1:i})}));
+    return {
+      demos:[['b','Brace'],['a','Carbonio'],['c','Chiaro']].map(([id,label])=>({label,go:()=>set({demo:id}),bg:demo===id?'var(--pm-tint)':'transparent',bd:demo===id?'var(--pm-red)':'transparent'})),
+      rows,time:`${Math.floor(el/60)}:${String(el%60).padStart(2,'0')}`,hpW:Math.max(4,100-cyc*2.4)+'%',
+      fights:this.fmt(2481337+T*3),ago:`${(T%9)+3} s fa`,faqs,
+      feats:[['ph-gauge','Meter live','DPS, cure e breakdown delle skill mentre combatti, in un overlay leggibile su qualsiasi scena.'],['ph-chart-line','Log e classifiche','Report dettagliati con timeline, buff e confronto. Classifiche per boss, classe e regione.'],['ph-sword','Build planner','Equipaggiamento, skill e Daevanion. Posseduto contro obiettivo, CP live, pezzi mancanti.'],['ph-map-trifold','Database e mappa','Oggetti, skill, NPC, dungeon e una mappa interattiva con tracker dei collezionabili.'],['ph-check-square','Organizer','Daily, weekly, timer di reset e liste della spesa per tutti i tuoi personaggi.']].map(([ic,t,d])=>({ic,t,d})),
+      ...this.more(S,set,T)
+    };
+  }
+  more(S,set){
+    const P=[['Kaelthas','Sorcerer',18420,0],['Nyxara','Assassin',17950,0],['Vharok','Gladiator',14310,1],['Ironveil','Templar',8840,0],['Elowyn','Chanter',7210,0],['Solenne','Cleric',3120,0]];
+    const tot=P.reduce((a,p)=>a+p[2],0);
+    const mRows=P.map(([n,c,d,x])=>({n,...this.cl(c),dps:this.fmt(d),dmg:(d*312/1e6).toFixed(1).replace('.',',')+' M',pct:(d/tot*100).toFixed(1).replace('.',',')+'%',d:x}));
+    const R=this.RAR;
+    const mSlots=[['MH','Mythic','+15'],['OH','Legendary','+12'],['H','Heroic','+10'],['S','Legendary','+12'],['C','Legendary','+11'],['G','Heroic','+10'],['L','Legendary','+12'],['B','Legendary','+10'],['W','Legendary','+10'],['N','Heroic',''],['E','Heroic',''],['E','Rare',''],['R','Heroic',''],['R','Rare',''],['Be','Heroic','+7']].map(([l,r,e])=>({l,e,c:R[r]}));
+    const mGear=[['Main Hand','Fang of the Veiled Night','Mythic','+15'],['Off Hand','Fang of the Veiled Night','Legendary','+12'],['Head','Hood of Silent Steps','Heroic','+10'],['Chest','Jerkin of the Ashbound','Legendary','+11'],['Gloves','Gloves of Storm Oath','Heroic','+8'],['Wings','Wings of Dawnfire','Legendary','+10']].map(([s,n,r,e])=>({s,n,e,c:R[r]}));
+    const bn=[['Varkhan','Gladiator','26.940'],['Lyssandra','Assassin','26.515'],['Oberyth','Sorcerer','26.102'],['Nyxara','Assassin','24.800'],['Seraphine','Sorcerer','24.390'],['Duskwarden','Ranger','23.890'],['Vaelric','Gladiator','23.620'],['Morwyn','Spiritmaster','23.310'],['Thalanor','Assassin','23.020'],['Ysolde','Sorcerer','22.700']];
+    const medal=['#F0C24A','#C9C4C4','#C58B55'];
+    const mBoard=bn.map(([n,c,dps],i)=>({n,...this.cl(c),dps,pos:i+1,d:`3:${String(2+i*3).padStart(2,'0')}`,pc:medal[i]||'var(--pm-t3)',bg:i<3?'var(--pm-s1)':'transparent'}));
+    return {mRows,mSlots,mGear,mBoard,cookie:S.cookie,closeCookie:()=>set({cookie:false}),
+      steps:[[1,'Installa Npcap','Durante l’installazione attiva «WinPcap API-compatible Mode».'],[2,'Installa PowerMeter','Esegui il setup e avvia come amministratore.'],[3,'Entra in gioco','Il widget si apre al primo combattimento.']].map(([n,t,d])=>({n,t,d})),
+      errors:[['404','Pagina non trovata','Questa pagina si è persa nell’Abisso. Controlla il link o torna alla home.','Torna alla home'],['403','Questo log è privato','Chi l’ha caricato ha scelto di non condividerlo.','Esplora i log pubblici'],['410','Link scaduto o rimosso','Il contenuto è stato eliminato o archiviato dopo 30 giorni.','Torna indietro'],['401','Accedi per vedere questo contenuto','Serve un account Discord collegato a PowerMeter.','Accedi con Discord']].map(([code,t,d,a])=>({code,t,d,a})),
+      ogTop:P.slice(0,3).map(([n,c,d])=>({n,...this.cl(c),dps:this.fmt(d)+' DPS',w:(d/18420*100)+'%'})),
+      ogSlots:['Mythic','Legendary','Legendary','Heroic'].map(r=>({c:R[r]}))};
+  }
+}
+</script>
+</body>
+</html>

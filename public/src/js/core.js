@@ -65,14 +65,27 @@ class DpsApp {
       showSuspendBtn: "dpsMeter.showSuspendBtn",
     };
 
-    this.dpsFormatter = new Intl.NumberFormat("en-US");
+    // PowerMeter: digits grouped the way the UI language does ("18.420" in
+    // Italian, "9.264" too: Italian skips 4-digit grouping by default), as the
+    // design shows. A stable object because details/history
+    // hold on to it; the formatter underneath follows language changes.
+    const numberFormats = new Map();
+    this.dpsFormatter = {
+      format: (n) => {
+        const lang = window.i18n?.getLanguage?.() || "en";
+        if (!numberFormats.has(lang)) numberFormats.set(lang, new Intl.NumberFormat(lang, { useGrouping: "always" }));
+        return numberFormats.get(lang).format(n);
+      },
+    };
     this.lastJson = null;
     this.isCollapse = false;
     this._windowHidden = false;
     this.displayMode = "dps";
     this.betaUi = true;
-    this.theme = "aion2";
+    // PowerMeter: the design's own theme is the default.
+    this.theme = "powermeter";
     this.availableThemes = [
+      "powermeter",
       "aion2",
       "asmodian",
       "cogni",
@@ -332,6 +345,7 @@ class DpsApp {
       graceArmMs: this.GRACE_ARM_MS,
       idleMs: 60000,
       visibleClass: "isVisible",
+      mirrorRootEl: document.querySelector(".pmDuration"),
     });
     this.battleTime.setVisible(false);
     this.updateConnectionStatusUi();
@@ -343,8 +357,9 @@ class DpsApp {
     this._pingTimer = setInterval(() => this.updatePing(), 30000);
 
     this.showTotalDps = this.safeGetSetting(this.storageKeys.showTotalDps) !== "false";
-    // Defaults on: `!== "false"` treats "never set" as enabled.
-    this.roundDps = this.safeGetSetting(this.storageKeys.roundDps) !== "false";
+    // PowerMeter: defaults off, so the meter shows the full figure ("18.420")
+    // as the design does. `=== "true"` treats "never set" as disabled.
+    this.roundDps = this.safeGetSetting(this.storageKeys.roundDps) === "true";
     this.meterTotalBar = document.querySelector(".meterTotalBar");
     this.meterTotalDpsEl = document.querySelector(".meterTotalDps");
     this.meterTotalDmgEl = document.querySelector(".meterTotalDmg");
@@ -2198,7 +2213,7 @@ class DpsApp {
       const storedWindowOpacity = this.safeGetStorage(this.storageKeys.windowOpacity);
       const resolvedWindowOpacity = storedWindowOpacity !== null && String(storedWindowOpacity).trim() !== ""
         ? Math.max(0, Math.min(100, Math.round(Number(storedWindowOpacity))))
-        : 40;
+        : 60; // PowerMeter: the design's standard widget opacity.
       this.applyWindowOpacity(resolvedWindowOpacity, { persist: false });
       this.windowOpacityInput.value = String(resolvedWindowOpacity);
       this.windowOpacityValue.textContent = `${resolvedWindowOpacity}%`;
@@ -2319,6 +2334,10 @@ class DpsApp {
     });
     this.supportActionButtons?.forEach((button) => {
       button.addEventListener("click", () => this.handleSupportAction(button));
+    });
+
+    document.querySelector(".letrionLabsButton")?.addEventListener("click", () => {
+      window.javaBridge?.openBrowser?.("https://letrionlabs.it");
     });
 
     this.kofiButton?.addEventListener("click", () => {
@@ -2501,7 +2520,7 @@ class DpsApp {
       const textColor = computed.getPropertyValue("--text-color").trim() || "#ffffff";
       const nameShadow = computed.getPropertyValue("--player-name-shadow").trim() || "none";
       const rowFill = computed.getPropertyValue("--row-fill").trim() || "#2f2f2f";
-      root.dataset.theme = previous || "aion2";
+      root.dataset.theme = previous || "powermeter";
       return { textColor, nameShadow, rowFill };
     };
 
@@ -2581,6 +2600,7 @@ class DpsApp {
     ];
 
     const themeOptions = [
+      { value: "powermeter", label: this.i18n?.t("settings.theme.options.powermeter", "PowerMeter") },
       { value: "aion2", label: this.i18n?.t("settings.theme.options.aion2", "AION2") },
       { value: "asmodian", label: this.i18n?.t("settings.theme.options.asmodian", "Asmodian") },
       { value: "cogni", label: this.i18n?.t("settings.theme.options.cogni", "Cogni") },
@@ -3834,7 +3854,11 @@ class DpsApp {
       const pctEl = this.elBossHpText.querySelector(".bossHpPct");
       const amtEl = this.elBossHpText.querySelector(".bossHpAmt");
       if (pctEl && amtEl) {
-        pctEl.textContent = `${Math.round(pct)}%`;
+        // PowerMeter: one decimal in the UI language ("62,0%"), as in the design.
+        pctEl.textContent = `${pct.toLocaleString(this.i18n?.getLanguage?.() || "en", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })}%`;
         amtEl.textContent = `${this.formatAbbreviatedNumber(remaining)} / ${this.formatAbbreviatedNumber(max)}`;
       } else {
         this.elBossHpText.textContent = `${this.formatAbbreviatedNumber(remaining)} · ${Math.round(pct)}%`;
@@ -3951,7 +3975,9 @@ class DpsApp {
   }
 
   getMetricForRow(row) {
-    if (this.displayMode === "totalDamage") {
+    // PowerMeter: the theme shows DPS and total damage side by side and has no
+    // DPS/DMG toggle, so the metric column always reads DPS there.
+    if (this.displayMode === "totalDamage" && this.theme !== "powermeter") {
       const totalDamage = Number(row?.totalDamage) || 0;
       return {
         value: totalDamage,
@@ -3961,8 +3987,14 @@ class DpsApp {
     const dps = Number(row?.dps) || 0;
     return {
       value: dps,
-      text: `${this.formatDpsThousands(dps)}${this.i18n?.t("meter.dpsSuffix", "/s") ?? "/s"}`,
+      text: `${this.formatDpsThousands(dps)}${this.getDpsSuffix()}`,
     };
+  }
+
+  // PowerMeter: the design prints DPS as a bare number, so its theme drops the "/s".
+  getDpsSuffix() {
+    if (this.theme === "powermeter") return "";
+    return this.i18n?.t("meter.dpsSuffix", "/s") ?? "/s";
   }
 
   updateMeterTotalBar(rows) {
@@ -3977,7 +4009,7 @@ class DpsApp {
     if (this.meterTotalDpsEl) {
       // Matches the per-row readout directly above it; a full-precision total
       // over abbreviated rows reads as two different units.
-      this.meterTotalDpsEl.textContent = `${this.formatDpsThousands(totalDps)}${this.i18n?.t("meter.dpsSuffix", "/s") ?? "/s"}`;
+      this.meterTotalDpsEl.textContent = `${this.formatDpsThousands(totalDps)}${this.getDpsSuffix()}`;
     }
     if (this.meterTotalDmgEl) {
       this.meterTotalDmgEl.textContent = this.formatAbbreviatedNumber(totalDmg);
@@ -4244,8 +4276,8 @@ class DpsApp {
       return;
     }
     const textEl = this.pingEl.querySelector(".pingText");
-    if (textEl) textEl.textContent = `${ms}ms`;
-    else this.pingEl.textContent = `${ms}ms`;
+    if (textEl) textEl.textContent = `${ms} ms`;
+    else this.pingEl.textContent = `${ms} ms`;
     this.pingEl.classList.add("isVisible");
     this.pingEl.classList.remove("ping-good", "ping-warn", "ping-high", "ping-bad");
     this.pingEl.classList.add(
@@ -4610,21 +4642,13 @@ class DpsApp {
     this._updateSuspendStatusMessage();
   }
 
+  // PowerMeter: the header icons are inline Phosphor SVGs, so the suspended
+  // state is shown by colour (.isSuspended) and announced via aria-pressed
+  // instead of swapping the glyph.
   _updateSuspendBtnIcon() {
     if (!this.suspendBtn) return;
-    const iconEl = this.suspendBtn.querySelector("i, svg");
-    if (!iconEl) return;
-    const iconName = this._captureSuspended ? "power-off" : "power";
     this.suspendBtn.classList.toggle("isSuspended", !!this._captureSuspended);
-    if (iconEl.tagName === "I") {
-      iconEl.setAttribute("data-lucide", iconName);
-    } else {
-      // SVG already rendered — replace with a new <i> tag and re-render
-      const newIcon = document.createElement("i");
-      newIcon.setAttribute("data-lucide", iconName);
-      this.suspendBtn.replaceChildren(newIcon);
-    }
-    window.lucide?.createIcons?.({ root: this.suspendBtn });
+    this.suspendBtn.setAttribute("aria-pressed", String(!!this._captureSuspended));
   }
 
   _updateSuspendStatusMessage() {

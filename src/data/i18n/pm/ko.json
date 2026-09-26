@@ -2,18 +2,13 @@
   "common.continue": "계속",
   "common.back": "뒤로",
   "common.error": "문제가 발생했습니다: {message}",
-
   "onboarding.step": "{total}단계 중 {n}단계",
-
   "welcome.title": "PowerMeter에 오신 것을 환영합니다",
   "welcome.body": "PowerMeter는 Aion 2의 전투 데이터를 수동으로 읽어와, 게임 내 오버레이와 이 대시보드에서 DPS, 스킬, 전투 기록을 보여줍니다.",
   "welcome.language": "언어",
-
   "req.title": "시스템 점검",
-  "req.body": "PowerMeter가 전투 데이터를 캡처하려면 다음이 필요합니다. 이 목록은 2초마다 새로고침됩니다.",
   "req.ok": "OK",
   "req.missing": "없음",
-  "req.checking": "확인 중…",
   "req.notDetected": "감지되지 않음",
   "req.npcap": "Npcap 설치됨",
   "req.npcapHint": "설치를 클릭하면 PowerMeter가 npcap.com에서 공식 설치 프로그램을 다운로드합니다. Npcap 창에서 I Agree, Install, Finish 순서로 클릭하세요.",
@@ -22,23 +17,17 @@
   "req.admin": "관리자 권한으로 실행 중",
   "req.adminHint": "PowerMeter를 시작하면 Windows가 권한을 요청합니다. 예를 선택하세요. 아니요를 선택했다면 PowerMeter를 다시 시작하세요.",
   "req.game": "Aion 2 감지됨",
-  "req.gameHint": "선택 사항: 게임은 나중에 실행해도 됩니다.",
   "req.blocked": "계속하려면 Npcap과 관리자 권한이 필요합니다.",
-
   "char.title": "내 캐릭터",
-  "char.body": "캐릭터 이름은 게임 창 제목에서도 자동으로 감지됩니다.",
   "char.region": "지역",
   "char.name": "캐릭터 이름",
   "char.nameHint": "선택 사항입니다. 비워 두면 자동으로 감지됩니다.",
-
   "account.title": "Discord 계정",
   "account.body": "로그를 업로드하고 빌드를 공유하기 위한 Discord 로그인은 다음 버전에서 제공됩니다.",
-
   "disclaimer.title": "시작하기 전에",
   "disclaimer.body": "PowerMeter는 비공식 도구이며 NCSoft와 관련이 없습니다. 전투 데이터를 수동으로 읽습니다. 사용에 따른 책임은 본인에게 있습니다.",
   "disclaimer.accept": "이해했으며 동의합니다",
   "disclaimer.finish": "PowerMeter 사용 시작",
-
   "nav.home": "홈",
   "nav.combat": "전투",
   "nav.dpsMeter": "DPS Meter",
@@ -70,8 +59,6 @@
   "nav.flowMap": "Flow Map",
   "nav.supporter": "후원자",
   "nav.settings": "설정",
-  "nav.soon": "{release}에서 제공",
-
   "status.checking": "미터 확인 중…",
   "status.noGame": "게임이 감지되지 않음",
   "status.noGameHint": "캡처를 시작하려면 Aion 2를 실행하세요.",
@@ -81,18 +68,9 @@
   "status.connectedHint": "미터가 전투 데이터를 캡처하고 있습니다.",
   "status.error": "오류",
   "status.errorHint": "미터 상태를 읽을 수 없습니다.",
-
-  "home.meter": "미터",
-  "home.port": "포트",
-  "home.device": "네트워크 장치",
-  "home.character": "캐릭터",
-  "home.name": "이름",
-  "home.region": "지역",
   "home.notSet": "설정되지 않음",
   "home.fights": "최근 전투",
-  "home.fightsEmpty": "전투에 참여하면 첫 데이터를 볼 수 있습니다.",
   "home.colBoss": "보스",
   "home.colDate": "날짜",
-  "home.colDuration": "지속 시간",
   "home.reviewOnboarding": "온보딩 다시 보기"
 }

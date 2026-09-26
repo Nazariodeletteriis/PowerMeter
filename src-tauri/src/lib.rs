@@ -1819,6 +1819,8 @@ pub fn run() {
             powermeter::install_npcap,
             powermeter::open_dashboard_window,
             powermeter::show_overlay,
+            powermeter::set_click_through,
+            powermeter::get_click_through,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

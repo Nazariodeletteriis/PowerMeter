@@ -1,0 +1,578 @@
+/* ============================================================
+   POWERMETER THEME
+   ------------------------------------------------------------
+   The widget from the Claude Design handoff
+   (docs/design/claude-design/videogame-tool-design-system/project/
+   PowerMeter Widget.dc.html, section 8.2 "Modalità DPS in
+   combattimento", Standard 400x300, palette "brace").
+
+   Loaded after styles.css (see index.html), so equal-specificity
+   rules here win. Three parts:
+   1. Tokens and fonts for every window (meter, Settings, History,
+      Details), so nothing is left in the old blue/violet palette.
+   2. The meter overlay itself, laid out as the design's widget.
+   3. Panel recolours for the hard-coded colours in styles.css.
+   ============================================================ */
+
+/* Fonts bundled locally (no Google Fonts at runtime). Only the weights used. */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/600.css";
+
+/* Elements added for this theme. Every other theme keeps its old layout. */
+.pmLogo,
+.pmDuration,
+.pmPartyLabel,
+.list .item .dps .dpsTotal {
+  display: none;
+}
+
+/* ---------- 1. tokens ---------- */
+
+:root[data-theme="powermeter"] {
+  /* Design tokens, brace palette */
+  --pm-bg: #0a0909;
+  --pm-s1: #141111;
+  --pm-s2: #1d1919;
+  --pm-s3: #2a2424;
+  --pm-line: #3a3333;
+  --pm-t1: #faf7f7;
+  --pm-t2: #d2c9c9;
+  --pm-t3: #a89e9e;
+  --pm-red: #db0000;
+  --pm-redt: #ff6b6b;
+  --pm-deep: #7f1112;
+  --pm-grey: #564f4f;
+  /* Widget surfaces (design THEMES.b) */
+  --pm-wrgb: 12 10 10;
+  --pm-wbar: rgba(127, 17, 18, 0.85);
+  --pm-widget-text: #f5f2f2;
+  --pm-widget-muted: #b3abab;
+  --pm-sans: "Inter", var(--cjk-font-stack);
+  --pm-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* The app's own variables, re-pointed at the palette */
+  --row-fill: var(--pm-deep);
+  --isUser-fill: var(--pm-red);
+  --dmg-fill-bg: rgba(219, 0, 0, 0.8);
+  --warning-fill: #e8b03a;
+  --error-fill: #ff4d4d;
+  --dps: var(--pm-t1);
+  --dps-text: var(--pm-t1);
+  --text-color: var(--pm-t1);
+  --title: var(--pm-t1);
+  --accent: var(--pm-redt);
+  --panel-border: var(--pm-line);
+  --panel-bg: rgba(20, 17, 17, 0.97);
+  --panel-field-bg: rgba(0, 0, 0, 0.35);
+  --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  --player-name-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  --dps-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  --indicator-combat: var(--pm-redt);
+  --indicator-end: #3fbf7f;
+  --indicator-wait: #3fbf7f;
+  --indicator-idle: #e8b03a;
+  --hud-bg: 10, 9, 9;
+  --hud-name: var(--pm-t1);
+  --hud-num: var(--pm-t1);
+  --hud-sub: var(--pm-t3);
+  --hud-faint: var(--pm-grey);
+  --hud-tech: "Inter", "Segoe UI", sans-serif;
+  --hud-ident: "Inter", "Segoe UI", sans-serif;
+  --window-opacity: 0.6;
+}
+
+/* Inter for Latin UIs. Korean and Chinese keep their own stacks from styles.css. */
+:root[data-theme="powermeter"]:not(:lang(ko), :lang(zh-CN), :lang(zh-Hans), :lang(zh-TW), :lang(zh-Hant)),
+:root[data-theme="powermeter"]:not(:lang(ko), :lang(zh-CN), :lang(zh-Hans), :lang(zh-TW), :lang(zh-Hant)) body {
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+/* ---------- 2. the meter overlay (design 8.2) ---------- */
+
+/* Main overlay window only, beta layout only: the tool windows reuse this
+   document with the meter hidden, and the classic layout has its own skin. */
+:root[data-theme="powermeter"]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
+  /* Widget shell: 400 wide, radius 8, tinted glass at the user's opacity. */
+  .meter {
+    width: 400px;
+    border: 0;
+    border-radius: 8px;
+    background: rgb(var(--pm-wrgb) / var(--window-opacity));
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 24px rgba(0, 0, 0, 0.35);
+    color: var(--pm-widget-text);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+    font-family: var(--pm-sans);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  /* 8.1: on hover the frame is ringed in red and the resize grip shows. */
+  .meter:hover {
+    box-shadow: 0 0 0 1px rgba(255, 77, 77, 0.7), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+  .resizeHandle {
+    right: -4px;
+    bottom: -4px;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    background: var(--pm-red);
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+  .resizeHandle::before { content: none; }
+  .meter:hover .resizeHandle { opacity: 1; }
+
+  /* --- Bar (24px) + target block ---
+     The header wraps: row one is the 24px bar (logo, timer, actions), row two
+     is the target name. The bar colour is painted only behind row one. */
+  .header {
+    flex-wrap: wrap;
+    gap: 0 6px;
+    padding: 0 6px 4px 8px;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(var(--pm-wbar), var(--pm-wbar)) top / 100% 24px no-repeat;
+  }
+  .pmLogo {
+    display: block;
+    flex: none;
+    order: 0;
+  }
+  .header .bossIcon,
+  .header .headerBtns .headerBtn {
+    width: 12px;
+    height: 12px;
+    color: var(--pm-widget-muted);
+    border-radius: 2px;
+    transition: color 120ms ease;
+  }
+  .header .bossIcon {
+    order: 1;
+    margin-left: auto;
+    margin-right: 1px; /* 6px flex gap + 1 = the design's 7px icon rhythm */
+  }
+  .header .headerBtns {
+    order: 2;
+    height: 24px;
+    gap: 7px;
+    color: var(--pm-widget-muted);
+  }
+  .header .bossIconOverlay svg,
+  .header .headerBtns .headerBtn svg {
+    width: 12px;
+    height: 12px;
+  }
+  .header .bossIcon:hover,
+  .header .headerBtns .headerBtn:hover {
+    color: var(--pm-widget-text);
+  }
+  .header .bossIcon:focus-visible,
+  .header .headerBtns .headerBtn:focus-visible {
+    outline: 1px solid var(--pm-redt);
+    outline-offset: 2px;
+  }
+  .header .headerBtns .suspendBtn.isSuspended { color: var(--pm-redt); }
+
+  /* Target name: second row of the header. Right padding keeps it clear of
+     the target-mode pill, which is positioned over the row (see below). */
+  .header .bossNames {
+    order: 3;
+    flex: 0 0 100%;
+    margin-top: 6px;
+    padding-right: 60px;
+    box-sizing: border-box;
+  }
+  .header .bossNames .bossName,
+  .header .bossNames .bossName:lang(ko),
+  .header .bossNames .bossName:lang(zh-CN),
+  .header .bossNames .bossName:lang(zh-Hans),
+  .header .bossNames .bossName:lang(zh-TW),
+  .header .bossNames .bossName:lang(zh-Hant) {
+    font-family: var(--pm-sans);
+    font-variation-settings: normal;
+    font-weight: 600;
+    /* 12px at the default 15px "Target name size"; still follows the setting. */
+    font-size: calc(var(--boss-name-size, 15px) * 0.8);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--pm-widget-text);
+    text-shadow: inherit;
+    line-height: 1.55;
+  }
+
+  /* Fight timer / status, in the bar after the logo. The element lives in the
+     footer markup; it is lifted here rather than moved so other themes keep it. */
+  .battleTime {
+    position: absolute;
+    top: 0;
+    left: 26px; /* 8px padding + 12px logo + 6px gap */
+    height: 24px;
+    max-width: calc(100% - 140px);
+    gap: 6px;
+    margin: 0;
+    z-index: 1;
+  }
+  .battleTime.isVisible { margin: 0; }
+  .battleTime .status {
+    width: 6px;
+    height: 6px;
+  }
+  /* In a fight the bar shows only the red timer (8.2); out of it, a dot and
+     the status text (8.4). */
+  .battleTime.state-fighting .status { display: none; }
+  .battleTime.state-ended .tick,
+  .battleTime.state-idle .tick { display: none; }
+  .battleTime .tick {
+    font-family: var(--pm-mono);
+    font-variation-settings: normal;
+    font-size: 11px;
+    line-height: 1.55;
+    color: var(--pm-redt);
+  }
+  .battleTime .analysisStatus {
+    font-family: var(--pm-sans);
+    font-variation-settings: normal;
+    font-size: 11px;
+    color: var(--pm-widget-text);
+  }
+
+  /* Target-mode pill ("Boss ▾"), beside the target name. */
+  .footerBtns { display: contents; }
+  .footerBtns .metricToggleBtn,
+  .footerBtns .collapseBtn { display: none; }
+  .footerBtns .targetModeBtn {
+    position: absolute;
+    top: 30.5px; /* 24px bar + 6px gap, centred on the 18.6px name line */
+    right: 8px;
+    display: inline-block;
+    height: auto;
+    min-width: 0;
+    padding: 0 5px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--pm-t2);
+    font-family: var(--pm-sans);
+    font-variation-settings: normal;
+    font-weight: 400;
+    font-size: 10px;
+    line-height: 1.55;
+    letter-spacing: 0;
+    /* The mode is written "BOSS"; the design sets it "Boss". */
+    text-transform: lowercase;
+    text-shadow: none;
+    transition: color 120ms ease, border-color 120ms ease;
+  }
+  .footerBtns .targetModeBtn::first-letter { text-transform: uppercase; }
+  .footerBtns .targetModeBtn::after { content: " ▾"; }
+  .footerBtns .targetModeBtn:hover {
+    color: var(--pm-widget-text);
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+  .footerBtns .targetModeBtn:focus-visible {
+    outline: 1px solid var(--pm-redt);
+    outline-offset: 1px;
+  }
+
+  /* Boss HP: 6px bar, then "HP 62,0%" underneath. */
+  .bossHpBar {
+    height: auto;
+    margin: 0 8px 4px;
+    padding-top: 10px; /* 6px bar + 4px gap */
+    overflow: visible;
+    background: none;
+    border: 0;
+  }
+  .bossHpBar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .bossHpFill,
+  .bossHpBar.isMid .bossHpFill,
+  .bossHpBar.isLow .bossHpFill {
+    bottom: auto;
+    height: 6px;
+    border-radius: 3px 0 0 3px;
+    background: var(--pm-red);
+    opacity: 1;
+    transition: none;
+  }
+  .bossHpFill::after { content: none; }
+  .bossHpText {
+    position: static;
+    padding: 0;
+    font-family: var(--pm-mono);
+    font-variation-settings: normal;
+    font-size: 10px;
+    line-height: 1.55;
+    letter-spacing: 0;
+    color: var(--pm-t2);
+    text-shadow: inherit;
+  }
+  .bossHpText .bossHpPct::before { content: "HP "; }
+  /* The design's right-hand slot is the boss phase, which the engine does not
+     report. Absolute HP has no place in 8.2, so it stays hidden. */
+  .bossHpText .bossHpAmt { display: none; }
+
+  /* --- Player rows (26px) --- */
+  .list {
+    gap: 2px;
+    padding: 0 6px;
+  }
+  .list.hasRows { padding: 2px 6px; }
+  .list .item {
+    height: 26px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .list .item:hover { background: rgba(255, 255, 255, 0.08); }
+  .list .item.isUser { outline: 1px solid rgba(255, 77, 77, 0.9); }
+  .list .item.isUser::before { content: none; }
+
+  /* Class-coloured bar at .42 (the design's value at the default 80% "Meter
+     bar opacity"; the setting still scales it). */
+  .list .item .fill,
+  .list .item.isUser .fill,
+  .list .item.warning .fill,
+  .list .item.error .fill {
+    --bar: var(--cls, var(--pm-grey));
+    background: var(--bar);
+    opacity: calc(var(--meter-fill-opacity, 0.8) * 0.525);
+    transition: width 0.3s ease-out;
+  }
+  .list .item .fill::before,
+  .list .item .fill::after { content: none; }
+
+  .list .item .content { gap: 6px; }
+  .list .item .rank,
+  .list .item .combatPower { display: none; }
+
+  .list .item .classIcon {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    box-sizing: border-box;
+    border: 1px solid var(--cls, rgba(255, 255, 255, 0.18));
+    border-radius: 4px;
+    background: var(--cls-icon, none) center / 85% no-repeat, rgba(0, 0, 0, 0.55);
+    color: var(--cls);
+    font-family: var(--pm-sans);
+    font-size: 7px;
+    font-weight: 700;
+    line-height: 1;
+    text-shadow: none;
+  }
+  .list .item .classIcon .classIconImg { display: none; }
+
+  /* Wins over the "Bold names/DPS" toggles by specificity: the design sets
+     names at 400 (600 for you) and DPS at 600. */
+  .list .item .name,
+  .list .item .name.isCjk {
+    flex: 1 1 auto;
+    font-family: var(--pm-sans);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.55;
+    letter-spacing: 0;
+    color: inherit;
+    text-shadow: inherit;
+  }
+  .list .item.isUser .name { font-weight: 600; }
+  .list .item.isIdentifying .content .name {
+    font-size: 12px;
+    color: var(--pm-t3);
+  }
+
+  .list .item .dps {
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    background: none;
+    font-family: var(--pm-mono);
+    text-shadow: inherit;
+  }
+  .list .item .dps > p {
+    font-variation-settings: normal;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.55;
+    letter-spacing: 0;
+    color: var(--pm-widget-text);
+  }
+  .list .item .dps .dpsContribution,
+  .list .item .dps .dpsTotal {
+    display: block;
+    text-align: right;
+    font-weight: 400;
+  }
+  .list .item .dps .dpsContribution {
+    width: 40px;
+    min-width: 0;
+    color: #e8e1e1;
+  }
+  .list .item .dps .dpsTotal {
+    width: 44px;
+    color: var(--pm-t2);
+  }
+
+  /* --- Footer (22px): ping, Duration, party DPS --- */
+  .meterFooter {
+    justify-content: flex-start;
+    gap: 10px;
+    height: 22px;
+    padding: 0 8px;
+    border-top: 0;
+    border-radius: 0 0 8px 8px;
+    background: var(--pm-wbar);
+    font-size: 10px;
+    color: var(--pm-t2);
+  }
+  .pingDisplay {
+    order: 0;
+    font-family: var(--pm-mono);
+    font-variation-settings: normal;
+    font-size: 10px;
+    line-height: 1.55;
+    text-shadow: inherit;
+  }
+  .pingDisplay .pingIcon { display: none; }
+  .pingDisplay.ping-good { color: #5fd99a; }
+  .pingDisplay.ping-warn { color: #e8b03a; }
+  .pingDisplay.ping-high,
+  .pingDisplay.ping-bad { color: #ff4d4d; }
+  .pmDuration { order: 1; }
+  .pmDuration.isVisible { display: inline; }
+  .pmDuration .tick {
+    font-family: var(--pm-mono);
+    color: var(--pm-widget-text);
+  }
+  .meterTotalBar {
+    order: 2;
+    margin-left: auto;
+    align-items: baseline;
+    gap: 0.25em;
+    font-family: var(--pm-sans);
+    font-variation-settings: normal;
+    font-size: 10px;
+    color: var(--pm-t2);
+  }
+  .pmPartyLabel { display: inline; }
+  .meterTotalBar .meterTotalDps {
+    font-family: var(--pm-mono);
+    color: var(--pm-widget-text);
+  }
+  .meterTotalBar .meterTotalSep,
+  .meterTotalBar .meterTotalDmg { display: none; }
+
+  /* --- "Beta slim" layout = the design's Compatto: name, DPS, bar --- */
+  .meter.slim .header { padding-bottom: 0; }
+  .meter.slim .header .bossNames,
+  .meter.slim .bossHpBar,
+  .meter.slim .footerBtns .targetModeBtn,
+  .meter.slim .meterFooter { display: none; }
+  .meter.slim .list.hasRows { padding-bottom: 4px; }
+  .meter.slim .list .item { height: 22px; }
+  .meter.slim .list .item .dps .dpsContribution,
+  .meter.slim .list .item .dps .dpsTotal { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .list .item .fill { transition: none; }
+  }
+}
+
+/* Class colour and icon per row (design CLS map, icons from the handoff). */
+.list .item[data-cls="gladiator"] { --cls: #52a5db; --cls-icon: url("./assets/pm/gladiator.png"); }
+.list .item[data-cls="templar"] { --cls: #4ca8e0; --cls-icon: url("./assets/pm/templar.png"); }
+.list .item[data-cls="assassin"] { --cls: #42c169; --cls-icon: url("./assets/pm/assassin.png"); }
+.list .item[data-cls="ranger"] { --cls: #4bc670; --cls-icon: url("./assets/pm/ranger.png"); }
+.list .item[data-cls="sorcerer"] { --cls: #ab61dd; --cls-icon: url("./assets/pm/sorcerer.png"); }
+.list .item[data-cls="spiritmaster"] { --cls: #c24dae; --cls-icon: url("./assets/pm/spiritmaster.png"); }
+.list .item[data-cls="cleric"] { --cls: #c8c171; --cls-icon: url("./assets/pm/cleric.png"); }
+.list .item[data-cls="chanter"] { --cls: #cac172; --cls-icon: url("./assets/pm/chanter.png"); }
+/* No Brawler icon in the handoff: the design prints its initials instead. */
+.list .item[data-cls="brawler"] { --cls: #c58b55; }
+:root[data-theme="powermeter"] .list .item[data-cls="brawler"] .classIcon::before { content: "BR"; }
+
+/* ---------- 3. panels: hard-coded colours in styles.css ---------- */
+
+:root[data-theme="powermeter"] {
+  html.settingsWindow&,
+  html.settingsWindow& body,
+  html.settingsWindow& .settingsPanel,
+  html.settingsWindow& .settingsHeader { background: var(--pm-bg); }
+
+  .settingsPanel .settingsTitle,
+  .settingsPanel .settingsMiniTitle,
+  .historyPanel .historyTitle,
+  .detailsPanel .detailsSectionTitle { font-weight: 600; }
+  .settingsPanel .discordButton,
+  .settingsPanel .supportButton,
+  .settingsPanel .letrionLabsButton,
+  .settingsPanel .quitButton { font-weight: 600; }
+  .settingsPanel button:focus-visible {
+    outline: 1px solid var(--pm-redt);
+    outline-offset: 2px;
+  }
+  .settingsPanel .discordButton,
+  .settingsPanel .supportButton {
+    background: var(--pm-s3);
+    border-color: var(--pm-line);
+  }
+
+  .historyPanel { background: rgba(20, 17, 17, 0.97); }
+  .historyIconWrap[data-tip]::after,
+  .historyClassDropdownMenu,
+  .historyFilterSelect option,
+  .detailsPanel .detailsDropdownMenu,
+  .detailsPanel .detailsSettingsMenu,
+  .detailsPanel .detailsHeader .detailsDropdownMenu,
+  .detailsPanel .detailsHeader .detailsSettingsMenu,
+  .detailsPanel .detailsSkills .skillHeader .cell[data-tip]::after { background: var(--pm-s2); }
+  .historyList::-webkit-scrollbar-track,
+  .detailsPanel .detailsSkills::-webkit-scrollbar-track,
+  .detailsPanel .detailsSkills .skills::-webkit-scrollbar-track,
+  .detailsPanel .detailsBody::-webkit-scrollbar-track,
+  .detailsPanel .timelineViewport::-webkit-scrollbar-track { background: var(--pm-s1); }
+  .historyList::-webkit-scrollbar-thumb,
+  .detailsPanel ::-webkit-scrollbar-thumb { background-color: var(--pm-line); }
+  .historyTrainToggle.active,
+  .historyViewBtn.active {
+    color: var(--pm-redt);
+    background: rgba(219, 0, 0, 0.14);
+  }
+
+  .detailsPanel { background: rgba(20, 17, 17, var(--details-bg-opacity, 0.5)); }
+  .detailsPanel .detailsHeader .detailsFightTitle .fightTitleBossName { color: var(--pm-redt); }
+  .detailsPanel .detailsHeader .detailsModeBtn[data-mode="dmg"].isActive,
+  .detailsPanel .detailsHeader .detailsModeBtn[data-mode="heal"].isActive { color: var(--pm-bg); }
+  .detailsPanel .detailsSkills .cell.name .skillSpecIndicator .specDot.isActive { background: var(--pm-redt); }
+
+  .updateModal .updateModalCard,
+  .supportModal .supportModalCard { background: var(--pm-s1); }
+  .updateModal .updateModalCard .updateModalBtn.updateNotesBtn {
+    background: var(--pm-deep);
+    border-color: var(--pm-red);
+  }
+  .updateModal .updateModalCard .updateModalBtn.updateManualBtn { background: var(--pm-s3); }
+  .supportModal .supportIconButton.isActive {
+    background: rgba(219, 0, 0, 0.2);
+    box-shadow: 0 0 0 1px rgba(219, 0, 0, 0.45);
+  }
+  .supportModal .supportIconButton[data-support="afdian"],
+  .supportModal .supportIconButton[data-support="kofi"] { background: var(--pm-deep); }
+
+  .hoverDetailsTooltip { background: rgba(20, 17, 17, 0.92); }
+}

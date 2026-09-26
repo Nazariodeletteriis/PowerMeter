@@ -1,15 +1,3 @@
-@keyframes a2toolsPulse {
-  0% { transform: scale(0.85); opacity: 0; }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes a2toolsShimmer {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
 :root {
   /* Bars */
   --row-fill: #5fbf87;
@@ -1839,7 +1827,7 @@ body.mainPlayerNamesBold .settingsPanel .themeDropdownMenu .settingsDropdownItem
    apart, and none of them is louder than the panel it sits in. */
 .settingsPanel .discordButton,
 .settingsPanel .supportButton,
-.settingsPanel .a2toolsButton,
+.settingsPanel .letrionLabsButton,
 .settingsPanel .quitButton {
   height: 28px;
   box-sizing: border-box;
@@ -1864,14 +1852,16 @@ body.mainPlayerNamesBold .settingsPanel .themeDropdownMenu .settingsDropdownItem
 .settingsPanel .supportButton {
   background: linear-gradient(90deg, #7f5fe8, #6f4cd8);
 }
-.settingsPanel .a2toolsButton {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899, #6366f1);
-  background-size: 300% 300%;
-  animation: a2toolsShimmer 6s ease infinite;
+/* PowerMeter: brand link, drawn as the design's filled button (brace fill
+   #7F1112 edged in #DB0000). Replaces the old "Powered by A2Tools" shimmer. */
+.settingsPanel .letrionLabsButton {
+  background: #7f1112;
+  border-color: #db0000;
+  color: #faf7f7;
 }
 .settingsPanel .discordButton:hover,
 .settingsPanel .supportButton:hover,
-.settingsPanel .a2toolsButton:hover {
+.settingsPanel .letrionLabsButton:hover {
   filter: brightness(1.12);
 }
 .settingsPanel .discordButton .discordIcon,
@@ -1906,7 +1896,6 @@ body.mainPlayerNamesBold .settingsPanel .themeDropdownMenu .settingsDropdownItem
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .settingsPanel .a2toolsButton { animation: none; }
   .settingsPanel .keybindBtn.recording { animation: none; }
   .settingsPanel .settingsToggleTrack::after { transition: none; }
 }

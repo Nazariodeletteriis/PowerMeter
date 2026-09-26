@@ -9,10 +9,18 @@ const createBattleTimeUI = ({
   graceArmMs,
   idleMs = 60000,
   visibleClass,
+  // PowerMeter: a second place that shows the fight time (the footer's
+  // "Duration"). It gets the same text and the same visibility as rootEl.
+  mirrorRootEl = null,
 } = {}) => {
   if (!rootEl) return null;
 
   const tickEl = rootEl.querySelector(tickSelector);
+  const mirrorTickEl = mirrorRootEl?.querySelector(tickSelector) ?? null;
+  const setTickText = (text) => {
+    if (tickEl && tickEl.textContent !== text) tickEl.textContent = text;
+    if (mirrorTickEl && mirrorTickEl.textContent !== text) mirrorTickEl.textContent = text;
+  };
   const statusEl = statusSelector ? rootEl.querySelector(statusSelector) : null;
   const analysisEl = analysisSelector ? rootEl.querySelector(analysisSelector) : null;
 
@@ -29,7 +37,8 @@ const createBattleTimeUI = ({
   const formatMMSS = (ms) => {
     const v = Math.max(0, Math.floor(Number(ms) || 0));
     const sec = Math.floor(v / 1000);
-    const mm = String(Math.floor(sec / 60)).padStart(2, "0");
+    // PowerMeter: minutes unpadded ("3:12"), as in the design.
+    const mm = String(Math.floor(sec / 60));
     const ss = String(sec % 60).padStart(2, "0");
     return `${mm}:${ss}`;
   };
@@ -55,6 +64,7 @@ const createBattleTimeUI = ({
 
   const setVisible = (visible) => {
     rootEl.classList.toggle(visibleClass, !!visible);
+    mirrorRootEl?.classList.toggle(visibleClass, !!visible);
     if (!visible) {
       setState("");
     }
@@ -65,7 +75,7 @@ const createBattleTimeUI = ({
     lastChangedAt = 0;
     lastSeenAt = 0;
 
-    if (tickEl) tickEl.textContent = "00:00";
+    setTickText("0:00");
     setState("");
   };
 
@@ -81,7 +91,7 @@ const createBattleTimeUI = ({
       lastBattleTimeMs = bt;
       lastChangedAt = now;
       const formatted = formatMMSS(bt);
-      if (tickEl && tickEl.textContent !== formatted) tickEl.textContent = formatted;
+      setTickText(formatted);
       setState("state-fighting");
       return;
     }
@@ -90,7 +100,7 @@ const createBattleTimeUI = ({
       lastBattleTimeMs = bt;
       lastChangedAt = now;
       const formatted = formatMMSS(bt);
-      if (tickEl && tickEl.textContent !== formatted) tickEl.textContent = formatted;
+      setTickText(formatted);
       setState("state-fighting");
       return;
     }
@@ -106,7 +116,7 @@ const createBattleTimeUI = ({
       if (frozenMs < VISUAL_TICK_MS) {
         const visualMs = bt + frozenMs;
         const formatted = formatMMSS(visualMs);
-        if (tickEl && tickEl.textContent !== formatted) tickEl.textContent = formatted;
+        setTickText(formatted);
       }
       setState("state-fighting");
     }
@@ -123,7 +133,7 @@ const createBattleTimeUI = ({
       if (frozenMs < VISUAL_TICK_MS) {
         const visualMs = lastBattleTimeMs + frozenMs;
         const formatted = formatMMSS(visualMs);
-        if (tickEl && tickEl.textContent !== formatted) tickEl.textContent = formatted;
+        setTickText(formatted);
       }
       setState("state-fighting");
     }

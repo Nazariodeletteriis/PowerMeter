@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/nocturne-adc6caf8-482b-4f97-b0ad-cf737e5e3af7/styles.css">
+<script src="_ds/nocturne-adc6caf8-482b-4f97-b0ad-cf737e5e3af7/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+:root{--pm-bg:#0A0909;--pm-s1:#121010;--pm-s2:#1A1717;--pm-s3:#242020;--pm-line:#2E2929;--pm-t1:#F5F2F2;--pm-t2:#B3ABAB;--pm-t3:#8A8181;--pm-red:#DB0000;--pm-redt:#FF4D4D;--pm-deep:#7F1112;--pm-grey:#564F4F;--pm-fill:transparent;--pm-filltext:#FF4D4D;--pm-wrgb:10 9 9;--pm-wbar:rgba(0,0,0,.35);--pm-tint:rgba(219,0,0,.12)}
+html{background:var(--pm-bg)}body{margin:0;background:var(--pm-bg);color:var(--pm-t1);font-family:Inter,"Noto Sans","Noto Sans JP",system-ui,sans-serif}
+a{color:var(--pm-redt)}a:hover{color:var(--pm-t1)}
+button{font-family:inherit}
+</style>
+</helmet>
+<section id="w1" style="padding:40px 48px 24px;display:flex;flex-direction:column;gap:14px">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <svg width="26" height="26" viewBox="0 0 24 24"><rect x="2" y="13" width="5" height="9" rx="1.2" style="fill:var(--pm-grey)"></rect><rect x="9.5" y="8" width="5" height="14" rx="1.2" style="fill:var(--pm-t1)"></rect><path d="M17 5.5 22 2v18.8a1.2 1.2 0 0 1-1.2 1.2h-2.6A1.2 1.2 0 0 1 17 20.8z" style="fill:var(--pm-red)"></path></svg>
+    <div style="font-size:26px;font-weight:500;letter-spacing:-.02em">Widget overlay</div>
+    <div style="color:var(--pm-t3)">Sezione 8 · sopra screenshot di gioco segnaposto (chiaro e scuro)</div>
+    <div style="flex:1"></div>
+    <div style="display:flex;gap:4px;padding:4px;border-radius:8px;background:var(--pm-s2);border:1px solid var(--pm-line);font-size:12px"><span style="padding:6px 8px;color:var(--pm-t3)">Palette</span><sc-for list="{{ demos }}" as="d" hint-placeholder-count="2"><button onClick="{{ d.go }}" style="height:28px;padding:0 10px;border-radius:5px;border:1px solid {{ d.bd }};background:{{ d.bg }};color:var(--pm-t1);cursor:pointer;font-size:12px">{{ d.label }}</button></sc-for></div>
+    <a href="PowerMeter Dashboard.dc.html" style="font-size:13px">Dashboard →</a>
+  </div>
+</section>
+
+<section id="wdet" style="padding:12px 48px 32px">
+  <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:6px">9.1 — Meter staccato (“Stacca nel widget”) · trascinalo</div>
+  <div style="font-size:12px;color:var(--pm-t3);margin-bottom:14px">Finestra libera sopra il gioco. Schede DPS · Cure · Aggro per DPS, healer e tank.</div>
+  <div onMouseMove="{{ dmMove }}" onMouseUp="{{ dmUp }}" onMouseLeave="{{ dmUp }}" style="position:relative;width:100%;max-width:1100px;height:420px;border-radius:10px;overflow:hidden;background:radial-gradient(ellipse at 70% 30%,#3B2A55 0%,transparent 45%),radial-gradient(ellipse at 20% 85%,#5A1E14 0%,transparent 45%),linear-gradient(180deg,#0E1020 0%,#15121C 60%,#0B0A10 100%)">
+    <div style="position:absolute;right:12px;bottom:10px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35)">Screenshot segnaposto</div>
+    <div style="position:absolute;left:{{ dmX }};top:{{ dmY }};width:430px;border-radius:12px;background:rgba(12,10,10,.88);box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 0 1px {{ dmRing }},0 20px 50px rgba(0,0,0,.55);color:#F5F2F2;font-size:12px;overflow:hidden;user-select:none">
+      <div onMouseDown="{{ dmDown }}" style="display:flex;align-items:center;gap:8px;height:40px;padding:0 10px 0 14px;cursor:grab;background:linear-gradient(90deg,rgba(127,17,18,.55),rgba(127,17,18,0) 70%)">
+        <span style="width:7px;height:7px;border-radius:50%;background:#3FBF7F;box-shadow:0 0 8px #3FBF7F"></span>
+        <span style="font-weight:600">Boss</span><span style="font-family:'JetBrains Mono',monospace;color:#FF8A8A">{{ time }}</span>
+        <div style="display:flex;margin-left:8px;border-radius:5px;overflow:hidden;border:1px solid rgba(255,255,255,.14)"><sc-for list="{{ dmTabs }}" as="t"><button onMouseDown="{{ stopProp }}" onClick="{{ t.go }}" style="height:22px;padding:0 9px;border:0;background:{{ t.bg }};color:{{ t.fg }};cursor:pointer;font-size:11px">{{ t.l }}</button></sc-for></div>
+        <div style="flex:1"></div>
+        <div style="display:flex;gap:10px;color:#B3ABAB;font-size:14px"><i class="ph ph-gear-six" title="Impostazioni"></i><i class="ph ph-clipboard-text" title="Copia riepilogo"></i><i class="ph ph-arrow-counter-clockwise" title="Reset"></i><i class="ph ph-minus" title="Riduci"></i><i class="ph ph-x" title="Chiudi"></i></div>
+      </div>
+      <div style="margin:4px 10px 8px;padding:10px 12px;border-radius:8px;background:rgba(127,17,18,.28);border:1px solid rgba(219,0,0,.35)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><i class="ph ph-skull" style="color:#FF8A8A"></i><span style="font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Vorathis the Ashbound</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#D2C9C9">{{ dmHp }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#FF6B6B;font-weight:600">{{ hp }}</span></div>
+        <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;width:{{ hpW }};background:linear-gradient(90deg,#7F1112,#DB0000);transition:width .6s ease-out"></div></div>
+        <sc-if value="{{ dg.on }}"><div style="margin-top:8px;display:flex;align-items:center;gap:8px"><i class="ph-fill ph-warning" style="color:{{ dg.col }};font-size:13px"></i><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px"><span style="font-weight:600;color:{{ dg.col }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ dg.name }} · {{ dg.act }}</span><span style="font-family:'JetBrains Mono',monospace;color:#F5F2F2">{{ dg.sec }} s</span></div><div style="height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;width:{{ dg.w }};background:{{ dg.col }}"></div></div></div></div></sc-if>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;padding:0 10px 8px">
+        <sc-for list="{{ dmRows }}" as="r" hint-placeholder-count="6"><div style="position:relative;display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:7px;overflow:hidden;background:rgba(255,255,255,.04);box-shadow:{{ r.meRing }}">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:{{ r.barW }};background:linear-gradient(90deg,{{ r.col }}66,{{ r.col }}33);transition:width .35s ease-out"></div>
+          <span style="position:relative;width:18px;height:18px;flex:none;background:url({{ r.icon }}) center/contain no-repeat"></span>
+          <span style="position:relative;font-weight:600;white-space:nowrap">{{ r.n }}</span><sc-if value="{{ r.me }}"><span style="position:relative;font-size:9px;font-weight:700;color:#FF6B6B">TU</span></sc-if>
+          <span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:10px;color:#B3ABAB">{{ r.cp }}</span>
+          <div style="flex:1"></div>
+          <span style="position:relative;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px">{{ r.v }}</span>
+          <span style="position:relative;font-family:'JetBrains Mono',monospace;width:44px;text-align:right;color:#E8E1E1">{{ r.pct }}</span>
+          <span style="position:relative;font-family:'JetBrains Mono',monospace;width:50px;text-align:right;color:#B3ABAB">{{ r.tot }}</span>
+        </div></sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;height:30px;padding:0 14px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:#B3ABAB">
+        <img src="assets/icons/sorcerer.png" alt="" style="width:16px;height:16px"><span style="color:#F5F2F2">Kaelthas</span><div style="flex:1"></div>
+        <span><i class="ph ph-sword"></i> <span style="font-family:'JetBrains Mono',monospace;color:#F5F2F2">48.215</span> <span style="color:#5FD99A">(+1.240)</span></span>
+        <span><i class="ph ph-cell-signal-high" style="color:#5FD99A"></i> <span style="font-family:'JetBrains Mono',monospace;color:#5FD99A">38 ms</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="wdodge" style="padding:12px 48px 32px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3)">Feature · Avviso schivata</span><span style="font-size:10px;padding:2px 6px;border-radius:4px;border:1px solid var(--pm-red);color:var(--pm-redt)">Nuovo</span></div>
+  <div style="font-size:12px;color:var(--pm-t3);margin-bottom:14px;max-width:760px;line-height:1.6">Compare solo quando il boss carica una skill da evadere o da schivare: un contatore grande al centro dello schermo con i secondi rimasti. Nel meter la stessa skill appare come barra sotto la vita del boss. Quando non c’è pericolo non si vede niente.</div>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+    <div style="position:relative;width:760px;height:420px;border-radius:10px;overflow:hidden;background:radial-gradient(ellipse at 50% 70%,#5A1E14 0%,transparent 55%),radial-gradient(ellipse at 70% 20%,#3B2A55 0%,transparent 45%),linear-gradient(180deg,#0E1020 0%,#15121C 60%,#0B0A10 100%)">
+      <div style="position:absolute;right:12px;bottom:10px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35)">Screenshot segnaposto · live</div>
+      <div style="position:absolute;left:14px;top:12px;width:230px;border-radius:8px;background:rgba(12,10,10,.8);padding:8px 10px;color:#F5F2F2;font-size:11px"><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><i class="ph ph-skull" style="color:#FF8A8A"></i><span style="font-weight:600;flex:1">Vorathis the Ashbound</span><span style="font-family:'JetBrains Mono',monospace;color:#FF6B6B">{{ hp }}</span></div><div style="height:4px;border-radius:2px;background:rgba(255,255,255,.1)"><div style="height:100%;width:{{ hpW }};background:#DB0000;border-radius:2px"></div></div>
+        <sc-if value="{{ dg.on }}"><div style="margin-top:7px;display:flex;gap:6px;align-items:center"><i class="ph-fill ph-warning" style="color:{{ dg.col }}"></i><div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px"><span style="color:{{ dg.col }};font-weight:600">{{ dg.name }}</span><span style="font-family:'JetBrains Mono',monospace">{{ dg.sec }} s</span></div><div style="height:3px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;width:{{ dg.w }};background:{{ dg.col }}"></div></div></div></div></sc-if>
+      </div>
+      <sc-if value="{{ dg.on }}">
+        <div style="position:absolute;inset:0;box-shadow:inset 0 0 120px {{ dg.glow }};pointer-events:none"></div>
+        <div style="position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:10px;color:#F5F2F2;text-shadow:0 2px 8px rgba(0,0,0,.9)">
+          <div style="position:relative;width:150px;height:150px;border-radius:50%;background:conic-gradient({{ dg.col }} {{ dg.deg }},rgba(255,255,255,.1) 0);display:grid;place-items:center;box-shadow:0 0 40px {{ dg.glow }}">
+            <div style="width:130px;height:130px;border-radius:50%;background:rgba(10,9,9,.82);display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'JetBrains Mono',monospace;font-size:52px;font-weight:600;line-height:1;color:{{ dg.col }}">{{ dg.sec }}</span><span style="font-size:10px;letter-spacing:.14em;color:#D2C9C9;margin-top:4px">SECONDI</span></div>
+          </div>
+          <div style="font-size:22px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:{{ dg.col }}">{{ dg.act }}</div>
+          <div style="font-size:13px;color:#E8E1E1">{{ dg.name }} · <span style="color:#B3ABAB">{{ dg.hint }}</span></div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ dg.off }}"><div style="position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font-size:11px;color:rgba(255,255,255,.45);white-space:nowrap">Nessun attacco in arrivo · prossimo tra ~{{ dg.next }} s</div></sc-if>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;width:300px">
+      <div style="font-size:12px;color:var(--pm-t2)">Stati del contatore</div>
+      <sc-for list="{{ dgStates }}" as="s"><div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:#0C0A0A;box-shadow:0 0 0 1px {{ s.col }}55;color:#F5F2F2">
+        <div style="width:54px;height:54px;border-radius:50%;background:conic-gradient({{ s.col }} {{ s.deg }},rgba(255,255,255,.1) 0);display:grid;place-items:center;flex:none"><div style="width:44px;height:44px;border-radius:50%;background:#0C0A0A;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:{{ s.col }}">{{ s.v }}</div></div>
+        <div style="min-width:0"><div style="font-weight:600;color:{{ s.col }};font-size:13px">{{ s.t }}</div><div style="font-size:11px;color:#B3ABAB;line-height:1.45">{{ s.d }}</div></div>
+      </div></sc-for>
+      <div style="border-radius:8px;background:var(--pm-s1);border:1px solid var(--pm-line);padding:12px;display:flex;flex-direction:column;gap:8px;font-size:12px">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--pm-t3)">Opzioni</div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--pm-t2)">Posizione</span><span>Centro schermo</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--pm-t2)">Dimensione</span><span>Grande · Compatta</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--pm-t2)">Suono di avviso</span><span>Ultimo secondo</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--pm-t2)">Mostra da</span><span style="font-family:'JetBrains Mono',monospace">5,0 s</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="w82" style="padding:12px 48px 32px">
+  <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:14px">8.2 · 8.1 · 8.7 — Modalità DPS in combattimento, opacità, dimensioni, tedesco</div>
+  <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+    <sc-for list="{{ dpsV }}" as="v" hint-placeholder-count="4">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;color:var(--pm-t2)">{{ v.label }}</div>
+        <div style="position:relative;width:{{ v.sw }};height:{{ v.sh }};background:{{ v.scene }};border-radius:8px;overflow:hidden;padding:20px;box-sizing:border-box">
+          <div style="position:absolute;right:10px;bottom:8px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:{{ v.sceneLbl }}">Screenshot segnaposto</div>
+          <div style="position:relative;width:{{ v.w }};height:{{ v.h }};background:rgb(var(--pm-wrgb) / {{ v.alpha }});border-radius:8px;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 8px 24px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden;color:#F5F2F2;text-shadow:0 1px 2px rgba(0,0,0,.85);font-size:12px">
+            <div style="height:24px;flex:none;display:flex;align-items:center;gap:6px;padding:0 6px 0 8px;background:var(--pm-wbar);cursor:move">
+              <svg width="12" height="12" viewBox="0 0 24 24"><rect x="2" y="13" width="5" height="9" rx="1.2" fill="#8A8181"></rect><rect x="9.5" y="8" width="5" height="14" rx="1.2" fill="#F5F2F2"></rect><path d="M17 5.5 22 2v18.8a1.2 1.2 0 0 1-1.2 1.2h-2.6A1.2 1.2 0 0 1 17 20.8z" fill="#DB0000"></path></svg>
+              <sc-if value="{{ v.full }}"><div style="display:flex;border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,.14);font-size:10px"><span style="padding:1px 7px;background:rgba(219,0,0,.35)">DPS</span><span style="padding:1px 7px;color:#B3ABAB">Build</span></div></sc-if>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#FF6B6B">{{ time }}</span>
+              <div style="flex:1"></div>
+              <sc-if value="{{ v.full }}"><div style="display:flex;gap:7px;color:#B3ABAB;font-size:12px"><i class="ph ph-lock-simple-open" title="Blocca (click-through)"></i><i class="ph ph-circle-half" title="Opacità"></i><i class="ph ph-arrows-in-simple" title="Riduci a pillola"></i><i class="ph ph-app-window" title="Apri dashboard"></i><i class="ph ph-x" title="Chiudi"></i></div></sc-if>
+            </div>
+            <sc-if value="{{ v.full }}">
+              <div style="padding:6px 8px 4px;display:flex;flex-direction:column;gap:4px">
+                <div style="display:flex;align-items:center;gap:6px"><span style="font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Vorathis the Ashbound</span><span title="{{ v.berserkTip }}" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ berserkCol }}"><i class="ph ph-hourglass-medium"></i> {{ berserk }}</span><span style="font-size:10px;padding:0 5px;border-radius:3px;border:1px solid rgba(255,255,255,.18);color:#D2C9C9">Boss ▾</span></div>
+                <div style="position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden"><div style="height:100%;width:{{ hpW }};background:#DB0000"></div></div>
+                <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:#D2C9C9"><span>HP {{ hp }}</span><span>{{ v.phase }}</span></div>
+              </div>
+            </sc-if>
+            <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:2px;padding:2px 6px;overflow:hidden">
+              <sc-for list="{{ v.rows }}" as="r" hint-placeholder-count="6">
+                <div style="position:relative;display:flex;align-items:center;gap:6px;height:{{ v.rowH }};padding:0 6px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.05);outline:{{ r.meOutline }};flex:none">
+                  <div style="position:absolute;left:0;top:0;bottom:0;width:{{ r.barW }};background:{{ r.col }};opacity:.42;transition:width .3s ease-out"></div>
+                  <span style="position:relative;width:16px;height:16px;border-radius:4px;display:grid;place-items:center;font-size:7px;font-weight:700;background:{{ r.ib }};color:{{ r.col }};border:1px solid {{ r.col }};flex:none;text-shadow:none">{{ r.init }}</span>
+                  <span style="position:relative;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:{{ r.fw }}">{{ r.n }}</span>
+                  <span style="position:relative;font-family:'JetBrains Mono',monospace;font-weight:600">{{ r.dps }}</span>
+                  <sc-if value="{{ v.full }}"><span style="position:relative;font-family:'JetBrains Mono',monospace;width:40px;text-align:right;color:#E8E1E1">{{ r.pct }}</span><span style="position:relative;font-family:'JetBrains Mono',monospace;width:44px;text-align:right;color:#D2C9C9">{{ r.dmg }}</span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ v.spark }}"><div style="height:64px;flex:none;padding:4px 8px;border-top:1px solid rgba(255,255,255,.08)"><div style="font-size:10px;color:#D2C9C9;margin-bottom:2px">{{ v.sparkLbl }}</div><svg viewBox="0 0 100 40" preserveAspectRatio="none" style="width:100%;height:40px"><path d="{{ spark }}" fill="none" stroke="#DB0000" stroke-width="1.5" vector-effect="non-scaling-stroke"></path></svg></div></sc-if>
+            <sc-if value="{{ v.full }}"><div style="height:22px;flex:none;display:flex;align-items:center;gap:10px;padding:0 8px;background:var(--pm-wbar);font-size:10px;color:#D2C9C9"><span><span style="color:#5FD99A;font-family:'JetBrains Mono',monospace">38 ms</span></span><span>{{ v.durL }} <span style="font-family:'JetBrains Mono',monospace;color:#F5F2F2">{{ time }}</span></span><div style="flex:1"></div><span>{{ v.partyL }} <span style="font-family:'JetBrains Mono',monospace;color:#F5F2F2">{{ partyDps }}</span></span></div></sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+<section id="w81" style="padding:12px 48px 32px">
+  <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:14px">8.1 — Cornice: passaggio del mouse, bloccato (click-through), pillola ridotta</div>
+  <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--pm-t2)">Al passaggio del mouse · maniglie di ridimensionamento</div>
+      <div style="width:360px;height:180px;padding:24px;box-sizing:border-box;border-radius:8px;background:radial-gradient(ellipse at 70% 30%,#3B2A55 0%,transparent 45%),radial-gradient(ellipse at 20% 85%,#5A1E14 0%,transparent 45%),linear-gradient(180deg,#0E1020 0%,#15121C 60%,#0B0A10 100%)">
+        <div style="position:relative;width:300px;height:124px;border-radius:8px;background:rgb(var(--pm-wrgb) / .6);box-shadow:0 0 0 1px rgba(255,77,77,.7);color:#F5F2F2;font-size:12px">
+          <div style="height:24px;display:flex;align-items:center;gap:6px;padding:0 8px;background:var(--pm-wbar);border-radius:8px 8px 0 0;cursor:move"><i class="ph ph-arrows-out-cardinal" style="color:#B3ABAB"></i><span style="color:#D2C9C9;font-size:11px">Trascina per spostare</span></div>
+          <div style="padding:10px;color:#D2C9C9;font-size:11px">Le maniglie compaiono solo al passaggio del mouse.</div>
+          <span style="position:absolute;right:-4px;bottom:-4px;width:9px;height:9px;border-radius:2px;background:#DB0000;cursor:nwse-resize"></span><span style="position:absolute;left:-4px;bottom:-4px;width:9px;height:9px;border-radius:2px;background:#DB0000"></span><span style="position:absolute;right:-4px;top:-4px;width:9px;height:9px;border-radius:2px;background:#DB0000"></span><span style="position:absolute;left:-4px;top:-4px;width:9px;height:9px;border-radius:2px;background:#DB0000"></span><span style="position:absolute;right:-3px;top:50%;width:6px;height:18px;margin-top:-9px;border-radius:2px;background:#DB0000"></span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--pm-t2)">Bloccato · il mouse passa attraverso</div>
+      <div style="width:360px;height:180px;padding:24px;box-sizing:border-box;border-radius:8px;background:radial-gradient(ellipse at 20% 30%,#FFF6DD 0%,transparent 50%),linear-gradient(180deg,#BFD9EE 0%,#EADBB9 55%,#A8B983 100%)">
+        <div style="position:relative;width:300px;border-radius:8px;background:rgb(var(--pm-wrgb) / .55);color:#F5F2F2;text-shadow:0 1px 2px rgba(0,0,0,.85);font-size:12px;padding:4px 6px 6px">
+          <div style="position:absolute;right:6px;top:4px;font-size:10px;color:#D2C9C9"><i class="ph-fill ph-lock-simple"></i></div>
+          <div style="height:3px;width:40px;border-radius:2px;background:rgba(255,255,255,.25);margin:0 auto 5px"></div>
+          <sc-for list="{{ lockRows }}" as="r"><div style="position:relative;display:flex;align-items:center;gap:6px;height:22px;padding:0 6px;border-radius:4px;overflow:hidden;margin-bottom:2px;background:rgba(255,255,255,.05)"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ r.barW }};background:{{ r.col }};opacity:.42"></div><span style="position:relative;flex:1">{{ r.n }}</span><span style="position:relative;font-family:'JetBrains Mono',monospace;font-weight:600">{{ r.dps }}</span></div></sc-for>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--pm-t3);max-width:360px">Sblocca con Ctrl+Shift+L o dal menu della tray.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--pm-t2)">Pillola ridotta · 160×32 · clic per espandere</div>
+      <div style="width:260px;height:180px;padding:24px;box-sizing:border-box;border-radius:8px;display:flex;flex-direction:column;gap:14px;background:radial-gradient(ellipse at 70% 30%,#3B2A55 0%,transparent 45%),linear-gradient(180deg,#0E1020 0%,#15121C 60%,#0B0A10 100%)">
+        <div style="width:160px;height:32px;border-radius:16px;background:rgb(var(--pm-wrgb) / .8);box-shadow:0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;gap:8px;padding:0 12px;color:#F5F2F2;cursor:pointer;box-sizing:border-box"><span style="width:6px;height:6px;border-radius:50%;background:#DB0000"></span><span style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px">{{ myDps }}</span><div style="flex:1"></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#D2C9C9">{{ time }}</span></div>
+        <div style="width:160px;height:32px;border-radius:16px;background:rgb(var(--pm-wrgb) / .8);box-shadow:0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;gap:8px;padding:0 12px;color:#D2C9C9;box-sizing:border-box;font-size:11px"><span style="width:6px;height:6px;border-radius:50%;background:#3FBF7F"></span>Pronto</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="w83" style="padding:12px 48px 32px">
+  <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:14px">8.3 — Dettaglio giocatore (danno e cure)</div>
+  <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+    <sc-for list="{{ detailV }}" as="v" hint-placeholder-count="2">
+      <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--pm-t2)">{{ v.label }}</div>
+        <div style="width:440px;height:340px;padding:20px;box-sizing:border-box;border-radius:8px;background:radial-gradient(ellipse at 70% 30%,#3B2A55 0%,transparent 45%),radial-gradient(ellipse at 20% 85%,#5A1E14 0%,transparent 45%),linear-gradient(180deg,#0E1020 0%,#15121C 60%,#0B0A10 100%)">
+          <div style="width:400px;height:300px;border-radius:8px;background:rgb(var(--pm-wrgb) / .7);box-shadow:0 0 0 1px rgba(255,255,255,.08);color:#F5F2F2;text-shadow:0 1px 2px rgba(0,0,0,.85);font-size:12px;display:flex;flex-direction:column;overflow:hidden">
+            <div style="height:28px;flex:none;display:flex;align-items:center;gap:8px;padding:0 8px;background:var(--pm-wbar)"><i class="ph ph-arrow-left" title="Indietro" style="cursor:pointer"></i><span style="width:16px;height:16px;border-radius:4px;display:grid;place-items:center;font-size:7px;font-weight:700;background:{{ v.ib }};color:{{ v.col }};border:1px solid {{ v.col }};text-shadow:none">{{ v.init }}</span><span style="font-weight:600">{{ v.n }}</span><div style="flex:1"></div><span style="font-family:'JetBrains Mono',monospace;font-weight:600">{{ v.total }}</span><span style="font-size:10px;color:#D2C9C9">{{ v.unit }}</span></div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:6px 8px">
+              <sc-for list="{{ v.badges }}" as="b"><div style="text-align:center;border-radius:4px;background:rgba(255,255,255,.06);padding:3px 0"><div style="font-size:8px;letter-spacing:.1em;color:#D2C9C9">{{ b.l }}</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px">{{ b.v }}</div></div></sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 58px 42px 34px 42px;gap:6px;padding:2px 12px;font-size:9px;color:#B3ABAB;text-shadow:none"><span>Skill</span><span style="text-align:right">{{ v.colL }}</span><span style="text-align:right">%</span><span style="text-align:right">Colpi</span><span style="text-align:right">Crit%</span></div>
+            <div style="flex:1;overflow:hidden;padding:0 6px">
+              <sc-for list="{{ v.skills }}" as="s"><div style="position:relative;display:grid;grid-template-columns:1fr 58px 42px 34px 42px;gap:6px;align-items:center;height:24px;padding:0 6px;border-radius:4px;overflow:hidden;margin-bottom:2px;background:rgba(255,255,255,.04)"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ s.w }};background:{{ v.col }};opacity:.3"></div><span style="position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.n }}</span><span style="position:relative;font-family:'JetBrains Mono',monospace;text-align:right">{{ s.v }}</span><span style="position:relative;font-family:'JetBrains Mono',monospace;text-align:right;color:#E8E1E1">{{ s.p }}</span><span style="position:relative;font-family:'JetBrains Mono',monospace;text-align:right;color:#D2C9C9">{{ s.h }}</span><span style="position:relative;font-family:'JetBrains Mono',monospace;text-align:right;color:#D2C9C9">{{ s.c }}</span></div></sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section id="w84" style="padding:12px 48px 32px">
+  <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:14px">8.4 — In attesa, fine combattimento, errore di cattura</div>
+  <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--pm-t2)">In attesa · ultimo risultato in grigio</div>
+      <div style="width:440px;height:260px;padding:20px;box-sizing:border-box;border-radius:8px;background:radial-gradient(ellipse at 20% 30%,#FFF6DD 0%,transparent 50%),linear-gradient(180deg,#BFD9EE 0%,#EADBB9 55%,#A8B983 100%)">
+        <div style="width:400px;height:220px;border-radius:8px;background:rgb(var(--pm-wrgb) / .7);color:#F5F2F2;text-shadow:0 1px 2px rgba(0,0,0,.85);display:flex;flex-direction:column;overflow:hidden;font-size:12px">
+          <div style="height:24px;display:flex;align-items:center;gap:6px;padding:0 8px;background:var(--pm-wbar)"><span style="width:6px;height:6px;border-radius:50%;background:#E8B03A"></span><span style="font-size:11px">In attesa di Aion 2…</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px"><i class="ph ph-hourglass-simple" style="font-size:22px;color:#D2C9C9"></i><div style="font-weight:500">Nessun combattimento attivo</div><div style="font-size:11px;color:#D2C9C9">Colpisci un bersaglio per iniziare</div></div>
+          <div style="padding:8px;border-top:1px solid rgba(255,255,255,.08);color:#B3ABAB;font-size:11px;display:flex;gap:8px"><span>Ultimo: Vorathis the Ashbound · Kill 5:12</span><div style="flex:1"></div><span style="font-family:'JetBrains Mono',monospace">18.420 DPS</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--pm-t2)">Fine combattimento · upload manuale</div>
+      <div style="width:440px;height:260px;padding:20px;box-sizing:border-box;border-radius:8px;background:radial-gradient(ellipse at 70% 30%,#3B2A55 0%,transparent 45%),linear-gradient(180deg,#0E1020 0%,#15121C 60%,#0B0A10 100%)">
+        <div style="width:400px;height:220px;border-radius:8px;background:rgb(var(--pm-wrgb) / .8);color:#F5F2F2;display:flex;flex-direction:column;overflow:hidden;font-size:12px">
+          <div style="height:24px;display:flex;align-items:center;gap:6px;padding:0 8px;background:var(--pm-wbar)"><span style="font-size:11px">Fine combattimento</span></div>
+          <div style="padding:12px;display:flex;flex-direction:column;gap:10px;flex:1">
+            <div style="display:flex;align-items:center;gap:8px"><span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;background:#3FBF7F33;color:#5FD99A">KILL</span><span style="font-weight:600">Vorathis the Ashbound</span></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><div><div style="font-size:10px;color:#B3ABAB">Durata</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px">5:12</div></div><div><div style="font-size:10px;color:#B3ABAB">Tuo DPS</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px">18.420</div></div><div><div style="font-size:10px;color:#B3ABAB">Posizione</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px">1 / 6</div></div></div>
+            <div style="flex:1"></div>
+            <div style="display:flex;gap:6px"><button style="flex:1;height:32px;border-radius:6px;border:1px solid #DB0000;background:var(--pm-fill);color:var(--pm-filltext);cursor:pointer;font-weight:500"><i class="ph ph-cloud-arrow-up"></i> Carica log</button><button style="flex:1;height:32px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:transparent;color:#F5F2F2;cursor:pointer">Apri report</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--pm-t2)">Fine combattimento · upload automatico</div>
+      <div style="width:440px;height:130px;padding:20px;box-sizing:border-box;border-radius:8px;background:radial-gradient(ellipse at 70% 30%,#3B2A55 0%,transparent 45%),linear-gradient(180deg,#0E1020 0%,#15121C 60%,#0B0A10 100%)">
+        <div style="width:400px;border-radius:8px;background:rgb(var(--pm-wrgb) / .8);color:#F5F2F2;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:12px;box-sizing:border-box"><i class="ph-fill ph-check-circle" style="color:#5FD99A;font-size:18px"></i><div style="flex:1"><div style="font-weight:500">Caricato ✓</div><div style="font-size:11px;color:#B3ABAB">Kill 5:12 · 18.420 DPS · #1</div></div><button style="height:30px;padding:0 10px;border-radius:6px;border:1px solid #DB0000;background:var(--pm-fill);color:var(--pm-filltext);cursor:pointer">Copia link</button></div>
+      </div>
+      <div style="font-size:12px;color:var(--pm-t2);margin-top:6px">Errore di cattura</div>
+      <div style="width:440px;height:120px;padding:20px;box-sizing:border-box;border-radius:8px;background:radial-gradient(ellipse at 20% 30%,#FFF6DD 0%,transparent 50%),linear-gradient(180deg,#BFD9EE 0%,#EADBB9 55%,#A8B983 100%)">
+        <div style="width:400px;border-radius:8px;background:rgb(var(--pm-wrgb) / .85);box-shadow:0 0 0 1px #DB0000;color:#F5F2F2;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:12px;box-sizing:border-box"><i class="ph-fill ph-warning-octagon" style="color:#FF4D4D;font-size:18px"></i><div style="flex:1"><div style="font-weight:500">Cattura interrotta</div><div style="font-size:11px;color:#D2C9C9">Nessun traffico sull’adattatore selezionato</div></div><button style="height:30px;padding:0 10px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#F5F2F2;cursor:pointer">Diagnosi</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="w85" style="padding:12px 48px 32px">
+  <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:14px">8.5 · 8.6 — Modalità Build e Lobby dungeon</div>
+  <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--pm-t2)">Build · clicca le schede</div>
+      <div style="width:460px;height:400px;padding:20px;box-sizing:border-box;border-radius:8px;background:radial-gradient(ellipse at 70% 30%,#3B2A55 0%,transparent 45%),radial-gradient(ellipse at 20% 85%,#5A1E14 0%,transparent 45%),linear-gradient(180deg,#0E1020 0%,#15121C 60%,#0B0A10 100%)">
+        <div style="width:420px;height:360px;border-radius:8px;background:rgb(var(--pm-wrgb) / .8);box-shadow:0 0 0 1px rgba(255,255,255,.08);color:#F5F2F2;font-size:12px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="height:24px;flex:none;display:flex;align-items:center;gap:6px;padding:0 8px;background:var(--pm-wbar)"><div style="display:flex;border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,.14);font-size:10px"><span style="padding:1px 7px;color:#B3ABAB">DPS</span><span style="padding:1px 7px;background:rgba(219,0,0,.35)">Build</span><span style="padding:1px 7px;color:#B3ABAB">Lobby</span></div><div style="flex:1"></div><span style="font-size:10px;padding:0 6px;border-radius:3px;border:1px solid rgba(255,255,255,.18);color:#D2C9C9">Kaelthas · Ashen Burst ▾</span></div>
+          <div style="padding:8px 10px;display:flex;flex-direction:column;gap:5px"><div style="display:flex;align-items:baseline;gap:8px"><span style="font-weight:600">Ashen Burst</span><span style="font-size:10px;color:#4F93EA">Sorcerer</span><div style="flex:1"></div><span style="font-family:'JetBrains Mono',monospace">48.215</span><span style="color:#B3ABAB">→</span><span style="font-family:'JetBrains Mono',monospace;color:#FF6B6B">50.380</span></div><div style="height:5px;border-radius:3px;background:rgba(255,255,255,.12)"><div style="height:100%;width:73%;background:#DB0000;border-radius:3px"></div></div></div>
+          <div style="display:flex;gap:2px;padding:0 8px;border-bottom:1px solid rgba(255,255,255,.1)"><sc-for list="{{ btabs }}" as="t"><button onClick="{{ t.go }}" style="height:26px;padding:0 10px;border:0;border-bottom:2px solid {{ t.bd }};background:transparent;color:{{ t.fg }};cursor:pointer;font-size:11px">{{ t.l }}</button></sc-for></div>
+          <div style="flex:1;overflow:hidden;padding:8px 10px">
+            <sc-if value="{{ bt.slots }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:repeat(8,1fr);gap:5px"><sc-for list="{{ wslots }}" as="s"><div title="{{ s.tip }}" style="aspect-ratio:1;border-radius:5px;border:{{ s.bd }};opacity:{{ s.op }};background:rgba(0,0,0,.35);display:grid;place-items:center;font-size:8px;color:#D2C9C9;position:relative">{{ s.short }}<span style="position:absolute;right:2px;bottom:0;font-family:'JetBrains Mono',monospace;font-size:8px;color:#F5F2F2">{{ s.enh }}</span></div></sc-for></div><div style="font-size:10px;color:#B3ABAB;margin-top:8px">Tratteggiati: pezzi mancanti · passa il mouse per l’oggetto obiettivo</div></sc-if>
+            <sc-if value="{{ bt.missing }}"><sc-for list="{{ wmissing }}" as="m"><div style="display:flex;gap:8px;align-items:center;min-height:30px;border-bottom:1px solid rgba(255,255,255,.07)"><span style="width:18px;height:18px;border-radius:4px;border:1.5px dashed {{ m.col }}"></span><div style="flex:1;min-width:0"><div style="color:{{ m.col }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.n }}</div><div style="font-size:10px;color:#B3ABAB">{{ m.src }}</div></div></div></sc-for></sc-if>
+            <sc-if value="{{ bt.stats }}"><sc-for list="{{ wstats }}" as="s"><div style="display:grid;grid-template-columns:1fr 60px 16px 60px;gap:4px;min-height:24px;align-items:center;border-bottom:1px solid rgba(255,255,255,.07)"><span style="color:#D2C9C9">{{ s.n }}</span><span style="font-family:'JetBrains Mono',monospace;text-align:right">{{ s.a }}</span><span style="color:#8A8181;text-align:center">→</span><span style="font-family:'JetBrains Mono',monospace;text-align:right;color:#5FD99A">{{ s.b }}</span></div></sc-for></sc-if>
+          </div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;padding:0 10px;background:var(--pm-wbar);font-size:11px"><span style="color:#B3ABAB">11/15 posseduti</span><div style="flex:1"></div><span style="color:#FF8A8A;cursor:pointer">Apri nel builder ↗</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--pm-t2)">Lobby dungeon (R2) · controllo prima del pull</div>
+      <div style="width:440px;height:300px;padding:20px;box-sizing:border-box;border-radius:8px;background:radial-gradient(ellipse at 20% 30%,#FFF6DD 0%,transparent 50%),linear-gradient(180deg,#BFD9EE 0%,#EADBB9 55%,#A8B983 100%)">
+        <div style="width:400px;border-radius:8px;background:rgb(var(--pm-wrgb) / .75);color:#F5F2F2;text-shadow:0 1px 2px rgba(0,0,0,.85);font-size:12px;overflow:hidden">
+          <div style="height:24px;display:flex;align-items:center;gap:6px;padding:0 8px;background:var(--pm-wbar)"><span style="font-size:11px">Lobby · Ashen Sanctum</span><div style="flex:1"></div><span style="font-size:11px;color:#5FD99A">5/6 pronti</span></div>
+          <div style="display:grid;grid-template-columns:1fr 56px 52px 74px;gap:6px;padding:4px 10px;font-size:9px;color:#B3ABAB;text-shadow:none"><span>Giocatore</span><span style="text-align:right">CP</span><span style="text-align:right" title="Gear score">GS</span><span style="text-align:right">Stato</span></div>
+          <sc-for list="{{ lobby }}" as="l"><div style="display:grid;grid-template-columns:1fr 56px 52px 74px;gap:6px;align-items:center;height:28px;padding:0 10px;border-top:1px solid rgba(255,255,255,.06)"><span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:16px;border-radius:4px;display:grid;place-items:center;font-size:7px;font-weight:700;background:{{ l.ib }};color:{{ l.col }};border:1px solid {{ l.col }};text-shadow:none">{{ l.init }}</span>{{ l.n }}</span><span style="font-family:'JetBrains Mono',monospace;text-align:right">{{ l.cp }}</span><span style="font-family:'JetBrains Mono',monospace;text-align:right;color:#D2C9C9">{{ l.gs }}</span><span style="text-align:right;color:{{ l.sc }}">{{ l.st }}</span></div></sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--pm-t2)">6.5 · Menu della tray di Windows</div>
+      <div style="width:240px;border-radius:8px;background:var(--pm-s2);box-shadow:0 0 0 1px var(--pm-line),0 12px 30px rgba(0,0,0,.5);padding:4px;font-size:13px">
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 10px 8px;border-bottom:1px solid var(--pm-line);margin-bottom:4px"><svg width="16" height="16" viewBox="0 0 24 24"><rect x="2" y="13" width="5" height="9" rx="1.2" style="fill:var(--pm-grey)"></rect><rect x="9.5" y="8" width="5" height="14" rx="1.2" style="fill:var(--pm-t1)"></rect><path d="M17 5.5 22 2v18.8a1.2 1.2 0 0 1-1.2 1.2h-2.6A1.2 1.2 0 0 1 17 20.8z" style="fill:var(--pm-red)"></path></svg><span style="font-weight:500">PowerMeter</span></div>
+        <sc-for list="{{ tray }}" as="t"><div style="display:flex;align-items:center;gap:10px;min-height:32px;padding:0 10px;border-radius:5px;cursor:pointer;border-top:{{ t.sep }}" style-hover="background:var(--pm-s3)"><i class="ph {{ t.ic }}" style="color:var(--pm-t2)"></i><span style="flex:1">{{ t.l }}</span><span style="font-size:11px;color:var(--pm-t3)">{{ t.k }}</span></div></sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;palette&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;brace&quot;,&quot;carbonio&quot;,&quot;chiaro&quot;],&quot;default&quot;:&quot;brace&quot;,&quot;tsType&quot;:&quot;'brace'|'carbonio'|'chiaro'&quot;},&quot;live&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { demo:null, tick:0, btab:'slots' };
+  THEMES = {
+    a:{'--pm-bg':'#0A0909','--pm-s1':'#121010','--pm-s2':'#1A1717','--pm-s3':'#242020','--pm-line':'#2E2929','--pm-t1':'#F5F2F2','--pm-t2':'#B3ABAB','--pm-t3':'#8A8181','--pm-red':'#DB0000','--pm-redt':'#FF4D4D','--pm-fill':'transparent','--pm-filltext':'#FF4D4D','--pm-wrgb':'10 9 9','--pm-wbar':'rgba(0,0,0,.35)','--pm-tint':'rgba(219,0,0,.12)'},
+    b:{'--pm-bg':'#0A0909','--pm-s1':'#141111','--pm-s2':'#1D1919','--pm-s3':'#2A2424','--pm-line':'#3A3333','--pm-t1':'#FAF7F7','--pm-t2':'#D2C9C9','--pm-t3':'#A89E9E','--pm-red':'#DB0000','--pm-redt':'#FF6B6B','--pm-fill':'#7F1112','--pm-filltext':'#FAF7F7','--pm-wrgb':'12 10 10','--pm-wbar':'rgba(127,17,18,.85)','--pm-tint':'rgba(219,0,0,.2)'},
+    c:{'--pm-bg':'#E4E0DA','--pm-s1':'#EDEAE5','--pm-s2':'#DDD8D1','--pm-s3':'#D1CBC3','--pm-line':'#C2BBB2','--pm-t1':'#140F0F','--pm-t2':'#453E3B','--pm-t3':'#5E5652','--pm-red':'#DB0000','--pm-redt':'#B00000','--pm-deep':'#7F1112','--pm-grey':'#948B83','--pm-navon':'#7F1112','--pm-navfg':'#FFFFFF','--pm-bar':'#7F1112','--pm-fill':'#7F1112','--pm-filltext':'#FFFFFF','--pm-band':'#7F1112','--pm-tint':'rgba(219,0,0,.10)','--pm-wrgb':'12 10 10','--pm-wbar':'rgba(127,17,18,.85)','--pm-canvas':'#D9D4CD','--color-bg':'#E4E0DA','--color-surface':'#EDEAE5','--color-text':'#140F0F','--color-accent':'#DB0000','--color-divider':'#C2BBB2'}
+  };
+  CLS={Gladiator:['GL','#52A5DB'],Templar:['TE','#4CA8E0'],Assassin:['AS','#42C169'],Ranger:['RA','#4BC670'],Sorcerer:['SO','#AB61DD'],Spiritmaster:['SP','#C24DAE'],Cleric:['CL','#C8C171'],Chanter:['CH','#CAC172'],Brawler:['BR','#C58B55']};
+  IB(c){ const i=this.ICO(c); return i?`url(${i}) center/85% no-repeat, rgba(0,0,0,.55)`:'rgba(0,0,0,.55)'; }
+  ICO(c){ return c==='Brawler'?'':'assets/icons/'+c.toLowerCase()+'.png'; }
+  RAR={Common:'#9C9494',Uncommon:'#6CC46A',Rare:'#4F93EA',Heroic:'#B377E8',Legendary:'#F0A63A',Mythic:'#FF4040'};
+  demo(){ return this.state.demo ?? ({carbonio:'a',chiaro:'c'}[this.props.palette]||'b'); }
+  applyTheme(){ const d=this.demo(); if(this._d===d) return; this._d=d; const t=this.THEMES[d]; for(const k in t) document.documentElement.style.setProperty(k,t[k]); }
+  componentDidMount(){ this.applyTheme(); if(this.props.live!==false){ this.iv=setInterval(()=>this.setState(s=>({tick:s.tick+1})),900); this.iv2=setInterval(()=>this.setState({now:Date.now()}),100); } }
+  componentDidUpdate(){ this.applyTheme(); }
+  componentWillUnmount(){ clearInterval(this.iv); clearInterval(this.iv2); }
+  fmt(n){ return Math.round(n).toLocaleString('it-IT',{useGrouping:'always'}); }
+  ab(n){ return n>=1e6?(n/1e6).toFixed(1).replace('.',',')+' M':Math.round(n/1e3)+' K'; }
+  rows(T,n=6,de=false){
+    const base=[['Kaelthas','Sorcerer',18420,true],['Nyxara','Assassin',17950],['Vharok','Gladiator',14310],['Ironveil','Templar',8840],['Elowyn','Chanter',7210],['Solenne','Cleric',3120],['Thalanor','Ranger',12040],['Morwyn','Spiritmaster',11880],['Brakkus','Brawler',10920],['Ysolde','Sorcerer',10110],['Duskwarden','Ranger',9400],['Seraphine','Cleric',2800]].slice(0,n);
+    const r=base.map(([nm,c,d,me],i)=>({nm,c,me:!!me,d:d*(1+0.06*Math.sin(T*0.7+i*1.9))}));
+    const tot=r.reduce((a,x)=>a+x.d,0), max=Math.max(...r.map(x=>x.d)), el=192+T;
+    return r.sort((a,b)=>b.d-a.d).map(x=>({n:x.nm,init:this.ICO(x.c)?'':this.CLS[x.c][0],ib:this.IB(x.c),col:this.CLS[x.c][1],dps:this.fmt(x.d),pct:(x.d/tot*100).toFixed(1).replace('.',',')+'%',dmg:this.ab(x.d*el),barW:(x.d/max*100).toFixed(1)+'%',fw:x.me?'600':'400',meOutline:x.me?'1px solid rgba(255,77,77,.9)':'none'}));
+  }
+  renderVals(){
+    const S=this.state, set=o=>this.setState(o), T=S.tick, demo=this.demo();
+    const el=192+T, time=`${Math.floor(el/60)}:${String(el%60).padStart(2,'0')}`;
+    const bs=Math.max(0,(420-el)%420), berserk=`${Math.floor(bs/60)}:${String(bs%60).padStart(2,'0')}`;
+    const hpP=Math.max(3,62-T*0.35);
+    const bright='radial-gradient(ellipse at 20% 30%,#FFF6DD 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,#9FBF84 0%,transparent 55%),linear-gradient(180deg,#BFD9EE 0%,#EADBB9 55%,#A8B983 100%)';
+    const dark='radial-gradient(ellipse at 70% 30%,#3B2A55 0%,transparent 45%),radial-gradient(ellipse at 20% 85%,#5A1E14 0%,transparent 45%),linear-gradient(180deg,#0E1020 0%,#15121C 60%,#0B0A10 100%)';
+    const it={durL:'Durata',partyL:'DPS party',sparkLbl:'DPS nel tempo',berserkTip:'Timer berserk: diventa rosso negli ultimi 30 s'};
+    const de={durL:'Dauer',partyL:'Gruppen-DPS',sparkLbl:'DPS im Zeitverlauf',berserkTip:'Berserk-Timer'};
+    const V=(label,scene,alpha,w,h,o={})=>({label,scene,sceneLbl:scene===bright?'rgba(0,0,0,.45)':'rgba(255,255,255,.35)',alpha,w,h,sw:`calc(${w} + 40px)`,sh:`calc(${h} + 40px)`,full:true,spark:false,rowH:'26px',phase:'Fase 2',rows:this.rows(T,6),...it,...o});
+    const dpsV=[
+      V('Standard 400×300 · scena chiara · opacità 60%',bright,'.6','400px','300px'),
+      V('Standard 400×300 · scena scura · opacità 60%',dark,'.6','400px','300px'),
+      V('Opacità 30%',bright,'.3','400px','300px'),
+      V('Opacità 90%',bright,'.9','400px','300px'),
+      V('Compatto 280×160 · solo nome, DPS, barra',dark,'.7','280px','160px',{full:false,rowH:'22px',rows:this.rows(T,5)}),
+      V('Esteso 520×480 · raid 12 giocatori + grafico mini',dark,'.75','520px','480px',{spark:true,rowH:'24px',rows:this.rows(T,12)}),
+      V('Deutsch · Standard 400×300',bright,'.6','400px','300px',{...de,phase:'Phase 2'})
+    ];
+    let spark=''; for(let k=0;k<=40;k++){ const v=0.55+0.25*Math.sin((k+T)*0.4)+0.12*Math.sin((k+T)*1.3); spark+=`${k?'L':'M'}${(k/40*100).toFixed(1)},${(40-v*36).toFixed(1)}`; }
+    return {
+      demos:[['b','Brace'],['a','Carbonio'],['c','Chiaro']].map(([id,label])=>({label,go:()=>set({demo:id}),bg:demo===id?'var(--pm-tint)':'transparent',bd:demo===id?'var(--pm-red)':'transparent'})),
+      dpsV,time,berserk,berserkCol:bs<=30?'#FF4D4D':'#F5F2F2',hp:hpP.toFixed(1).replace('.',',')+'%',hpW:hpP+'%',spark,
+      partyDps:this.fmt(this.rows(T,6).reduce((a,r)=>a+parseInt(r.dps.replace(/\./g,'')),0)),
+      ...this.more(S,set,T),
+      ...this.dm(S,set,T),
+      ...this.dodge(S)
+    };
+  }
+  dodge(S){
+    const now=S.now||Date.now(), per=13000, win=4500, ph=now%per, k=Math.floor(now/per)%3;
+    const SK=[['Ashen Cataclysm','Schiva!','Evadi con lo scatto','#DB0000'],['Cinder Nova','Esci dall’area','Allontanati dal boss','#E8B03A'],['Molten Slam','Schiva!','Colpo frontale · spostati di lato','#DB0000']][k];
+    const on=ph<win, rem=on?(win-ph)/1000:0, urgent=rem<1.2;
+    const col=on&&urgent?'#FF3B3B':SK[3];
+    return {dg:{on,off:!on,name:SK[0],act:SK[1],hint:SK[2],sec:rem.toFixed(1).replace('.',','),w:(100-rem/(win/1000)*100).toFixed(1)+'%',deg:(rem/(win/1000)*360).toFixed(0)+'deg',col,glow:urgent?'rgba(255,59,59,.45)':'rgba(219,0,0,.25)',next:Math.ceil((per-ph)/1000)},
+      dgStates:[['#E8B03A','3,8','Preavviso','Skill ad area in carica: esci dal cerchio.','260deg'],['#DB0000','2,1','Schiva','Skill da evadere: prepara lo scatto.','150deg'],['#FF3B3B','0,6','Adesso!','Ultimo secondo: bordo pulsante e suono.','40deg'],['#3FBF7F','✓','Evitata','Conferma breve, poi il contatore sparisce.','360deg']].map(([col,v,t,d,deg])=>({col,v,t,d,deg}))};
+  }
+  dm(S,set,T){
+    const tab=S.dmTab||'dps', pos=S.dmPos||{x:60,y:40};
+    const IC={Gladiator:'ph-sword',Templar:'ph-shield',Assassin:'ph-knife',Ranger:'ph-crosshair',Sorcerer:'ph-magic-wand',Spiritmaster:'ph-flame',Cleric:'ph-sun-horizon',Chanter:'ph-music-notes',Brawler:'ph-hand-fist'};
+    const P={dps:[['Kaelthas','Sorcerer',18420,48215,true],['Nyxara','Assassin',17950,47880],['Vharok','Gladiator',14310,46120],['Ironveil','Templar',8840,49010],['Elowyn','Chanter',7210,45300],['Solenne','Cleric',3120,46650]],
+      heal:[['Solenne','Cleric',7084,46650],['Elowyn','Chanter',2690,45300],['Ironveil','Templar',673,49010],['Kaelthas','Sorcerer',205,48215,true]],
+      aggro:[['Ironveil','Templar',100,49010],['Vharok','Gladiator',93,46120],['Nyxara','Assassin',81,47880],['Kaelthas','Sorcerer',68,48215,true],['Solenne','Cleric',44,46650],['Elowyn','Chanter',31,45300]]}[tab];
+    const el=192+T;
+    const r=P.map(([n,c,v,cp,me],i)=>({n,c,cp,me:!!me,v:tab==='aggro'?(i===0?100:v+5*Math.sin(T*0.5+i)):v*(1+0.05*Math.sin(T*0.7+i*1.9))}));
+    const tot=r.reduce((a,x)=>a+x.v,0), max=Math.max(...r.map(x=>x.v));
+    const dmRows=r.sort((a,b)=>b.v-a.v).map(x=>({n:x.n,me:x.me,icon:this.ICO(x.c),col:this.CLS[x.c][1],cp:(x.cp/1000).toFixed(1).replace('.',',')+'K',
+      v:tab==='aggro'?Math.round(x.v)+'%':this.fmt(x.v),pct:tab==='aggro'?(x.v>=90&&x.n!=='Ironveil'?'⚠':''):(x.v/tot*100).toFixed(1).replace('.',',')+'%',tot:tab==='aggro'?'':this.ab(x.v*el),
+      barW:(tab==='aggro'?x.v/130*100:x.v/max*100).toFixed(1)+'%',meRing:x.me?'inset 0 0 0 1px rgba(255,77,77,.8)':'none'}));
+    const hpP=Math.max(3,62-T*0.35);
+    return {dmRows,dmX:pos.x+'px',dmY:pos.y+'px',dmRing:this._dmDrag?'rgba(219,0,0,.8)':'transparent',
+      dmTabs:[['dps','DPS'],['heal','Cure'],['aggro','Aggro']].map(([id,l])=>({l,go:()=>set({dmTab:id}),bg:tab===id?'rgba(219,0,0,.45)':'transparent',fg:tab===id?'#F5F2F2':'#B3ABAB'})),
+      dmHp:(1240*hpP/100).toFixed(0)+' M / 1,24 B',stopProp:e=>e.stopPropagation(),
+      dmDown:e=>{ this._dmDrag={sx:e.clientX,sy:e.clientY,x:pos.x,y:pos.y}; this.forceUpdate(); },
+      dmMove:e=>{ const d=this._dmDrag; if(!d) return; const b=e.currentTarget.getBoundingClientRect(); set({dmPos:{x:Math.max(0,Math.min(b.width-430,d.x+e.clientX-d.sx)),y:Math.max(0,Math.min(b.height-60,d.y+e.clientY-d.sy))}}); },
+      dmUp:()=>{ if(this._dmDrag){ this._dmDrag=null; this.forceUpdate(); } }};
+  }
+  more(S,set,T){
+    const r6=this.rows(T,6), me=r6.find(r=>r.fw==='600');
+    const pc=v=>v.toFixed(1).replace('.',',')+'%';
+    const mkSk=(list,tot)=>{ const sh=[.26,.2,.15,.12,.1,.08,.05,.04]; return list.map((n,j)=>({n,v:this.ab(tot*sh[j]),p:pc(sh[j]*100),h:[28,34,52,20,96,140,18,160][j],c:pc(28+(j*7)%22),w:(sh[j]/.26*100)+'%'})); };
+    const badges=[['CRIT',38.4],['BACK',14.2],['PARRY',3.1],['PERFECT',9.6],['DOUBLE',7.8]].map(([l,v])=>({l,v:pc(v)}));
+    const detailV=[
+      {label:'Danno · Kaelthas',n:'Kaelthas',init:'',ib:this.IB('Sorcerer'),col:'#AB61DD',total:me?me.dps:'18.420',unit:'DPS',colL:'Danno',badges,skills:mkSk(['Flame Cage','Cyclone of Wrath','Ice Chain','Blaze of Aether','Summon Wind Spirit','Burning Wave','Soul Freeze','Auto Attack'],5.5e6)},
+      {label:'Variante cure (HPS) · Solenne',n:'Solenne',init:'',ib:this.IB('Cleric'),col:'#C8C171',total:'7.084',unit:'HPS',colL:'Cure',badges:[['CRIT',22.1],['BACK',0],['PARRY',0],['PERFECT',11.4],['DOUBLE',4.2]].map(([l,v])=>({l,v:pc(v)})),skills:mkSk(['Healing Light','Radiant Cure','Word of Revival','Healing Wind','Light of Renewal','Salvation','Blessing of Stone','Healing Conduit'],2.2e6)}
+    ];
+    const bt={}; bt[S.btab]=true;
+    const btabs=[['slots','Slot'],['missing','Mancanti'],['stats','Statistiche']].map(([id,l])=>({l,go:()=>set({btab:id}),bd:S.btab===id?'#DB0000':'transparent',fg:S.btab===id?'#F5F2F2':'#B3ABAB'}));
+    const sl=[['MH','Mythic',15,1,'Staff of the Ashen Tide'],['OH','Legendary',12,0,'Orb of the Crimson Veil'],['H','Heroic',10,1],['S','Legendary',12,1],['C','Legendary',11,1],['G','Heroic',8,0,'Gloves of Storm Oath'],['L','Legendary',12,1],['B','Rare',9,0,'Shoes of the Ashen Tide'],['Be','Heroic',7,1],['W','Legendary',10,1],['N','Heroic',0,1],['E1','Rare',0,0,'Earring of the Ashen Tide'],['E2','Rare',0,1],['R1','Heroic',0,0,'Ring of Crimson Oath'],['R2','Rare',0,1],['Ti','Common',0,1]];
+    const wslots=sl.map(([short,r,e,own,t])=>({short,enh:e?'+'+e:'',bd:own?`1.5px solid ${this.RAR[r]}`:`1.5px dashed ${this.RAR[r]}`,op:own?'1':'.55',tip:own?'Posseduto':'Obiettivo: '+t}));
+    const wmissing=[['Orb of the Crimson Veil','Legendary','Drop · Vorathis the Ashbound'],['Gloves of Storm Oath','Heroic','Crafting · Armorsmith'],['Shoes of the Ashen Tide','Legendary','Drop · Grimtooth Warden'],['Earring of the Ashen Tide','Heroic','Drop · Vorathis the Ashbound'],['Ring of Crimson Oath','Heroic','Negozio · 1.800 Abyss Points']].map(([n,r,src])=>({n,src,col:this.RAR[r]}));
+    const wstats=[['Attack','3.412','3.580'],['Magic Boost','2.890','3.105'],['Critical Strike','1.180','1.265'],['Accuracy','2.240','2.240'],['Casting Speed','24%','24%'],['HP','28.400','28.950']].map(([n,a,b])=>({n,a,b}));
+    const lobby=[['Kaelthas','Sorcerer','48.215','312',1],['Nyxara','Assassin','47.880','309',1],['Vharok','Gladiator','46.120','301',1],['Ironveil','Templar','49.010','318',1],['Elowyn','Chanter','45.300','296',0],['Solenne','Cleric','46.650','304',1]].map(([n,c,cp,gs,ok])=>({n,cp,gs,init:this.ICO(c)?'':this.CLS[c][0],ib:this.IB(c),col:this.CLS[c][1],st:ok?'Pronto':'Non pronto',sc:ok?'#5FD99A':'#FFB199'}));
+    const tray=[['ph-app-window','Apri dashboard',''],['ph-eye','Mostra / nascondi widget','Ctrl+⇧+W'],['ph-lock-simple','Blocca widget','Ctrl+⇧+L'],['ph-swap','Modalità DPS / Build','Ctrl+⇧+M'],['ph-sign-out','Esci','']].map(([ic,l,k],i)=>({ic,l,k,sep:i===4?'1px solid var(--pm-line)':'0'}));
+    return {lockRows:r6.slice(0,4),myDps:me?me.dps:'',detailV,bt,btabs,wslots,wmissing,wstats,lobby,tray};
+  }
+}
+</script>
+</body>
+</html>

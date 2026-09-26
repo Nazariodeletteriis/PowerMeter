@@ -184,6 +184,7 @@
     "theme": {
       "label": "Tema",
       "options": {
+        "powermeter": "PowerMeter",
         "aion2": "AION2",
         "asmodian": "Asmodian",
         "cogni": "Cogni",
@@ -302,7 +303,9 @@
   },
   "meter": {
     "identifyingPlayer": "#{id}",
-    "dpsSuffix": "/s"
+    "dpsSuffix": "/s",
+    "duration": "Durata",
+    "partyDps": "DPS party"
   },
   "skills": {
     "fallback": "Skill {code}",

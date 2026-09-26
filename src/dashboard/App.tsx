@@ -1,20 +1,23 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { initialLanguage, LANGUAGE_SETTING, translator } from "./i18n";
 import { Onboarding } from "./Onboarding";
 import { Shell } from "./Shell";
+import { TitleBar } from "./TitleBar";
 
 export type Settings = Record<string, string>;
 export type SaveSetting = (key: string, value: string) => Promise<void>;
 
 export function App() {
   const [settings, setSettings] = useState<Settings>();
-  const [loadError, setLoadError] = useState<string>();
+  const [error, setError] = useState<string>();
+  const [startStep, setStartStep] = useState(1);
+  const onError = useCallback((e: unknown) => setError(String(e)), []);
 
   useEffect(() => {
     invoke<Settings>("get_settings").then(setSettings, (e) => {
-      setLoadError(String(e));
+      setError(String(e));
       setSettings({});
     });
     // The Settings window and the meter write through update_settings too;
@@ -32,26 +35,34 @@ export function App() {
     document.documentElement.lang = lang;
   }, [lang]);
 
-  if (!settings) return null;
-
   const t = translator(lang);
   const save: SaveSetting = async (key, value) => {
     await invoke("update_settings", { key, value });
     setSettings((s) => ({ ...s, [key]: value }));
   };
+  const reviewOnboarding = (step: number) => {
+    setStartStep(step);
+    save("pm.onboarded", "0").catch(onError);
+  };
 
   return (
-    <>
-      {loadError && (
-        <p className="error banner" role="alert">
-          {t("common.error", { message: loadError })}
+    <div className="app">
+      {/* Always drawn, so the window can be moved and closed during onboarding. */}
+      <TitleBar t={t} onError={onError} />
+      {error && (
+        <p className="error updateBanner" role="alert">
+          {t("common.error", { message: error })}
+          <button type="button" className="close" title={t("window.close")} aria-label={t("window.close")} onClick={() => setError(undefined)}>
+            ×
+          </button>
         </p>
       )}
-      {settings["pm.onboarded"] === "1" ? (
-        <Shell t={t} lang={lang} settings={settings} save={save} />
-      ) : (
-        <Onboarding t={t} lang={lang} settings={settings} save={save} />
-      )}
-    </>
+      {settings &&
+        (settings["pm.onboarded"] === "1" ? (
+          <Shell t={t} lang={lang} settings={settings} save={save} onError={onError} reviewOnboarding={reviewOnboarding} />
+        ) : (
+          <Onboarding t={t} lang={lang} settings={settings} save={save} startStep={startStep} />
+        ))}
+    </div>
   );
 }

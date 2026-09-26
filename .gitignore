@@ -50,3 +50,5 @@ settings.properties
 # PowerMeter: strumenti interni, mai nel repo
 HANDOFF.md
 graphify-out/
+*:Zone.Identifier
+docs/design/*.zip

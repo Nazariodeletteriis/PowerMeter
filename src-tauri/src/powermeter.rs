@@ -5,7 +5,7 @@
 
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 
 use crate::platform::hotkeys::{parse_hotkey_label, HotkeyManager};
 use crate::AppState;
@@ -18,12 +18,25 @@ const CLICK_THROUGH_HOTKEY_KEY: &str = "pm.clickThroughHotkey";
 /// who forgot the hotkey is never locked out of it.
 static CLICK_THROUGH: AtomicBool = AtomicBool::new(false);
 
-/// Lets mouse input pass through the overlay to the game underneath.
-fn set_click_through(app: &tauri::AppHandle, enabled: bool) -> Result<(), String> {
+/// Lets mouse input pass through the overlay to the game underneath. Emits
+/// `pm-click-through` so the overlay's lock button reflects the state.
+fn apply_click_through(app: &tauri::AppHandle, enabled: bool) -> Result<(), String> {
     let window = app.get_webview_window("main").ok_or("overlay window not found")?;
     window.set_ignore_cursor_events(enabled).map_err(|e| e.to_string())?;
     CLICK_THROUGH.store(enabled, Ordering::SeqCst);
+    let _ = app.emit("pm-click-through", enabled);
     Ok(())
+}
+
+/// The overlay's lock button (design: widget header).
+#[tauri::command]
+pub fn set_click_through(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
+    apply_click_through(&app, enabled)
+}
+
+#[tauri::command]
+pub fn get_click_through() -> bool {
+    CLICK_THROUGH.load(Ordering::SeqCst)
 }
 
 /// Brings the overlay back if it was hidden with the toggle hotkey.
@@ -55,7 +68,7 @@ pub fn start_click_through_hotkey(app: &tauri::AppHandle) {
         0,
         move || {
             let next = !CLICK_THROUGH.load(Ordering::SeqCst);
-            if let Err(e) = set_click_through(&app, next) {
+            if let Err(e) = apply_click_through(&app, next) {
                 tracing::warn!("Click-through toggle failed: {}", e);
             }
         },
@@ -128,6 +141,8 @@ fn show_dashboard(app: &tauri::AppHandle) -> Result<(), String> {
     }
     tauri::WebviewWindowBuilder::new(app, "dashboard", tauri::WebviewUrl::App("dashboard.html".into()))
         .title("PowerMeter")
+        // The dashboard draws its own title bar (design: 34px bar with window controls).
+        .decorations(false)
         .inner_size(1280.0, 800.0)
         .min_inner_size(1024.0, 640.0)
         .background_color(tauri::window::Color(10, 14, 22, 255))

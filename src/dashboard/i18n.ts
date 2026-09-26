@@ -1,14 +1,11 @@
-import de from "../data/i18n/pm/de.json";
 import en from "../data/i18n/pm/en.json";
-import es from "../data/i18n/pm/es.json";
-import fr from "../data/i18n/pm/fr.json";
-import it from "../data/i18n/pm/it.json";
-import ja from "../data/i18n/pm/ja.json";
-import ko from "../data/i18n/pm/ko.json";
-import pt from "../data/i18n/pm/pt.json";
-import ru from "../data/i18n/pm/ru.json";
-import zhHans from "../data/i18n/pm/zh-Hans.json";
-import zhHant from "../data/i18n/pm/zh-Hant.json";
+
+// Dictionaries: pm/<lang>.json plus one folder per page area, pm/<area>/<lang>.json,
+// so page areas can add strings without touching the shared files.
+const FILES = import.meta.glob<Record<string, string>>("../data/i18n/pm/**/*.json", {
+  eager: true,
+  import: "default",
+});
 
 // Same codes and native names as the meter's language dropdown (core.js).
 export const LANGUAGES = [
@@ -27,13 +24,16 @@ export const LANGUAGES = [
 
 export const LANGUAGE_SETTING = "dpsMeter.language";
 
-export type Key = keyof typeof en;
+// Core keys are checked; page-area keys live in their own files.
+export type Key = keyof typeof en | (string & {});
 export type T = (key: Key, vars?: Record<string, string | number>) => string;
 
 // A key missing from a language falls back to en.
-const DICTS: Record<string, Partial<Record<Key, string>>> = {
-  de, en, es, fr, it, ja, ko, pt, ru, "zh-Hans": zhHans, "zh-Hant": zhHant,
-};
+const DICTS: Record<string, Record<string, string>> = {};
+for (const [path, dict] of Object.entries(FILES)) {
+  const lang = path.slice(path.lastIndexOf("/") + 1, -".json".length);
+  Object.assign((DICTS[lang] ??= {}), dict);
+}
 
 function isLanguage(code: string | undefined): code is string {
   return LANGUAGES.some((l) => l.code === code);
@@ -49,9 +49,9 @@ export function initialLanguage(saved: string | undefined): string {
 }
 
 export function translator(lang: string): T {
-  const dict = DICTS[lang] ?? en;
+  const dict = DICTS[lang] ?? DICTS.en;
   return (key, vars) => {
-    let text = dict[key] ?? en[key];
+    let text = dict[key] ?? DICTS.en[key] ?? key;
     for (const [name, value] of Object.entries(vars ?? {})) {
       text = text.replace(`{${name}}`, String(value));
     }

@@ -2,18 +2,13 @@
   "common.continue": "続ける",
   "common.back": "戻る",
   "common.error": "エラーが発生しました: {message}",
-
   "onboarding.step": "ステップ {n}/{total}",
-
   "welcome.title": "PowerMeterへようこそ",
   "welcome.body": "PowerMeterはAion 2の戦闘データをパッシブに読み取り、ゲーム内オーバーレイとこのダッシュボードでDPS、スキル、戦闘履歴を表示します。",
   "welcome.language": "言語",
-
   "req.title": "システムチェック",
-  "req.body": "PowerMeterが戦闘データを取得するにはこれらが必要です。このリストは2秒ごとに更新されます。",
   "req.ok": "OK",
   "req.missing": "未対応",
-  "req.checking": "確認中…",
   "req.notDetected": "検出されていません",
   "req.npcap": "Npcapがインストール済み",
   "req.npcapHint": "「インストール」をクリックすると、PowerMeterがnpcap.comから公式インストーラーをダウンロードします。Npcapのウィンドウで I Agree、Install、Finish の順にクリックしてください。",
@@ -22,23 +17,17 @@
   "req.admin": "管理者として実行中",
   "req.adminHint": "PowerMeterの起動時にWindowsが許可を求めます。「はい」を選択してください。「いいえ」を選んだ場合はPowerMeterを再起動してください。",
   "req.game": "Aion 2を検出",
-  "req.gameHint": "任意: ゲームは後から起動しても構いません。",
   "req.blocked": "続けるにはNpcapと管理者権限が必要です。",
-
   "char.title": "あなたのキャラクター",
-  "char.body": "キャラクター名は、ゲームウィンドウのタイトルからも自動的に検出されます。",
   "char.region": "リージョン",
   "char.name": "キャラクター名",
   "char.nameHint": "任意。空欄にすると自動的に検出されます。",
-
   "account.title": "Discordアカウント",
   "account.body": "ログを送信してビルドを共有するためのDiscordログインは、次のバージョンで実装予定です。",
-
   "disclaimer.title": "始める前に",
   "disclaimer.body": "PowerMeterは非公式ツールであり、NCSoftとは関係ありません。戦闘データをパッシブに読み取ります。ご利用は自己責任でお願いします。",
   "disclaimer.accept": "理解して同意します",
   "disclaimer.finish": "PowerMeterの利用を開始",
-
   "nav.home": "ホーム",
   "nav.combat": "戦闘",
   "nav.dpsMeter": "DPS Meter",
@@ -70,8 +59,6 @@
   "nav.flowMap": "Flow Map",
   "nav.supporter": "サポーター",
   "nav.settings": "設定",
-  "nav.soon": "{release}で追加予定",
-
   "status.checking": "メーターを確認中…",
   "status.noGame": "ゲームが検出されていません",
   "status.noGameHint": "キャプチャを開始するにはAion 2を起動してください。",
@@ -81,18 +68,9 @@
   "status.connectedHint": "メーターは戦闘データを取得しています。",
   "status.error": "エラー",
   "status.errorHint": "メーターの状態を読み取れませんでした。",
-
-  "home.meter": "メーター",
-  "home.port": "ポート",
-  "home.device": "ネットワークデバイス",
-  "home.character": "キャラクター",
-  "home.name": "名前",
-  "home.region": "リージョン",
   "home.notSet": "未設定",
   "home.fights": "最近の戦闘",
-  "home.fightsEmpty": "戦闘に参加すると、最初のデータが表示されます。",
   "home.colBoss": "ボス",
   "home.colDate": "日付",
-  "home.colDuration": "時間",
   "home.reviewOnboarding": "オンボーディングを見直す"
 }

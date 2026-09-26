@@ -2,18 +2,13 @@
   "common.continue": "Weiter",
   "common.back": "Zurück",
   "common.error": "Etwas ist schiefgelaufen: {message}",
-
   "onboarding.step": "Schritt {n} von {total}",
-
   "welcome.title": "Willkommen bei PowerMeter",
   "welcome.body": "PowerMeter liest passiv die Kampfdaten von Aion 2 und zeigt deine DPS, Skills und den Kampfverlauf in einem Overlay im Spiel und in diesem Dashboard.",
   "welcome.language": "Sprache",
-
   "req.title": "Systemprüfung",
-  "req.body": "PowerMeter benötigt Folgendes, um Kampfdaten zu erfassen. Diese Liste aktualisiert sich alle 2 Sekunden.",
   "req.ok": "OK",
   "req.missing": "Fehlt",
-  "req.checking": "Wird geprüft…",
   "req.notDetected": "Nicht erkannt",
   "req.npcap": "Npcap installiert",
   "req.npcapHint": "Klicke auf Installieren: PowerMeter lädt den offiziellen Installer von npcap.com herunter. Klicke im Npcap-Fenster auf I Agree, Install und dann Finish.",
@@ -22,23 +17,17 @@
   "req.admin": "Als Administrator ausgeführt",
   "req.adminHint": "Beim Start von PowerMeter fragt Windows nach der Berechtigung: Antworte mit Ja. Falls du Nein gewählt hast, starte PowerMeter neu.",
   "req.game": "Aion 2 erkannt",
-  "req.gameHint": "Optional: Du kannst das Spiel auch später starten.",
   "req.blocked": "Npcap und Administratorrechte sind erforderlich, um fortzufahren.",
-
   "char.title": "Dein Charakter",
-  "char.body": "Der Charaktername wird außerdem automatisch aus dem Fenstertitel des Spiels erkannt.",
   "char.region": "Region",
   "char.name": "Charaktername",
   "char.nameHint": "Optional. Leer lassen, um ihn automatisch zu erkennen.",
-
   "account.title": "Discord-Konto",
   "account.body": "Die Anmeldung mit Discord zum Hochladen von Logs und Teilen von Builds kommt in der nächsten Version.",
-
   "disclaimer.title": "Bevor du startest",
   "disclaimer.body": "PowerMeter ist ein inoffizielles Tool und steht in keiner Verbindung zu NCSoft. Es liest Kampfdaten passiv aus. Nutzung auf eigene Gefahr.",
   "disclaimer.accept": "Ich verstehe und akzeptiere",
   "disclaimer.finish": "PowerMeter jetzt nutzen",
-
   "nav.home": "Start",
   "nav.combat": "Kampf",
   "nav.dpsMeter": "DPS Meter",
@@ -70,8 +59,6 @@
   "nav.flowMap": "Flow Map",
   "nav.supporter": "Unterstützer",
   "nav.settings": "Einstellungen",
-  "nav.soon": "Kommt in {release}",
-
   "status.checking": "Meter wird geprüft…",
   "status.noGame": "Spiel nicht erkannt",
   "status.noGameHint": "Starte Aion 2, um die Erfassung zu beginnen.",
@@ -81,18 +68,9 @@
   "status.connectedHint": "Der Meter erfasst Kampfdaten.",
   "status.error": "Fehler",
   "status.errorHint": "Der Meter-Status konnte nicht gelesen werden.",
-
-  "home.meter": "Meter",
-  "home.port": "Port",
-  "home.device": "Netzwerkgerät",
-  "home.character": "Charakter",
-  "home.name": "Name",
-  "home.region": "Region",
   "home.notSet": "Nicht festgelegt",
   "home.fights": "Letzte Kämpfe",
-  "home.fightsEmpty": "Bestreite einen Kampf, um deine ersten Daten zu sehen.",
   "home.colBoss": "Boss",
   "home.colDate": "Datum",
-  "home.colDuration": "Dauer",
   "home.reviewOnboarding": "Einführung erneut ansehen"
 }

@@ -14,6 +14,35 @@ const createMeterUI = ({
   const cjkRegex = /[\u3400-\u9FFF\uF900-\uFAFF]/;
   const classIconSrcByJob = new Map();
 
+  // PowerMeter: the backend names classes in Korean. The row carries a stable
+  // English key so the theme can set the class colour and icon in CSS
+  // (see src/powermeter-theme.css).
+  const CLASS_KEY_BY_JOB = {
+    \uAC80\uC131: "gladiator",
+    \uC218\uD638\uC131: "templar",
+    \uC0B4\uC131: "assassin",
+    \uAD81\uC131: "ranger",
+    \uB9C8\uB3C4\uC131: "sorcerer",
+    \uC815\uB839\uC131: "spiritmaster",
+    \uCE58\uC720\uC131: "cleric",
+    \uD638\uBC95\uC131: "chanter",
+    \uAD8C\uC131: "brawler",
+  };
+
+  // PowerMeter: one decimal in the UI language ("30,1" in Italian), as the design shows.
+  const formatOneDecimal = (n) =>
+    n.toLocaleString(window.i18n?.getLanguage?.() || "en", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+      useGrouping: "always",
+    });
+  // PowerMeter: total damage abbreviated the way the design does it: "3,5 M", "912 K".
+  const formatDamageShort = (n) => {
+    if (n >= 1e6) return `${formatOneDecimal(n / 1e6)} M`;
+    if (n >= 1e3) return `${dpsFormatter.format(Math.round(n / 1e3))} K`;
+    return dpsFormatter.format(Math.round(n));
+  };
+
   const rowViewById = new Map();
   let lastVisibleIds = new Set();
   let pendingRenderRows = null;
@@ -69,9 +98,13 @@ const createMeterUI = ({
     dpsContainer.className = "dps";
     const dpsContribution = document.createElement("p");
     dpsContribution.className = "dpsContribution";
+    // PowerMeter: total damage column. Hidden outside the powermeter theme.
+    const dpsTotal = document.createElement("p");
+    dpsTotal.className = "dpsTotal";
 
     dpsContainer.appendChild(dpsNumber);
     dpsContainer.appendChild(dpsContribution);
+    dpsContainer.appendChild(dpsTotal);
 
     contentEl.appendChild(rankEl);
     contentEl.appendChild(classIconEl);
@@ -93,6 +126,7 @@ const createMeterUI = ({
       classIconImg,
       dpsNumber,
       dpsContribution,
+      dpsTotal,
       fillEl,
       currentRow: null,
       lastSeenAt: 0,
@@ -102,6 +136,7 @@ const createMeterUI = ({
       lastIsCjk: false,
       lastMetricText: "",
       lastContributionText: "",
+      lastTotalText: "",
       lastRankText: "",
       lastFillRatio: -1,
       lastClassIconSrc: "",
@@ -296,6 +331,9 @@ const createMeterUI = ({
         view.lastCombatPowerText = combatPowerText;
       }
 
+      const classKey = CLASS_KEY_BY_JOB[row.job] || "";
+      if (view.rowEl.dataset.cls !== classKey) view.rowEl.dataset.cls = classKey;
+
       if (row.job && !!row.job) {
         if (!classIconSrcByJob.has(row.job)) {
           classIconSrcByJob.set(row.job, `./assets/${row.job}.png`);
@@ -345,10 +383,16 @@ const createMeterUI = ({
         view.lastMetricText = metricText;
       }
 
-      const contributionText = `${damageContribution.toFixed(1)}%`;
+      const contributionText = `${formatOneDecimal(damageContribution)}%`;
       if (view.lastContributionText !== contributionText) {
         view.dpsContribution.textContent = contributionText;
         view.lastContributionText = contributionText;
+      }
+
+      const totalText = formatDamageShort(Number(row.totalDamage) || 0);
+      if (view.lastTotalText !== totalText) {
+        view.dpsTotal.textContent = totalText;
+        view.lastTotalText = totalText;
       }
 
       const rankText = String(rankById?.get(id) ?? "");

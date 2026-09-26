@@ -1,9 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import logo from "../assets/logo.png";
+import {
+  CaretDoubleLeftIcon,
+  CaretDoubleRightIcon,
+  CaretDownIcon,
+  CaretUpIcon,
+  MagnifyingGlassIcon,
+  PictureInPictureIcon,
+  TrayIcon,
+  UserIcon,
+} from "@phosphor-icons/react";
 import type { SaveSetting, Settings } from "./App";
 import { Home } from "./Home";
-import type { Key, T } from "./i18n";
+import type { T } from "./i18n";
+import { ALL_PAGES, NAV, NAV_BOTTOM, type NavPage } from "./nav";
+import { Palette } from "./Palette";
+import { SAMPLE_CHARACTER } from "./sampleData";
+import { Supporter } from "./Supporter";
+import { ClassAvatar, EmptyState, fmt } from "./ui";
+import type { PageProps } from "./pages/types";
 import { usePoll } from "./usePoll";
 
 /** Shape of get_capture_status (src-tauri/src/lib.rs). */
@@ -16,89 +31,67 @@ export type CaptureStatus = {
   characterName: string | null;
 };
 
+// "In combat" (red pill + fight timer in the prototype) is not observable
+// from these calls yet.
 export type MeterStatus = "checking" | "noGame" | "waiting" | "connected" | "error";
+const STATUS_COLOR: Record<MeterStatus, string> = {
+  checking: "var(--pm-muted)",
+  noGame: "var(--pm-muted)",
+  waiting: "var(--pm-warn)",
+  connected: "var(--pm-ok)",
+  error: "var(--pm-err)",
+};
 
 export const PATREON_URL = "https://www.patreon.com/c/powermeter";
+export const USER_NAME_KEY = "dpsMeter.userName";
 
 const getCaptureStatus = () => invoke<CaptureStatus>("get_capture_status");
 const getGameTitle = () => invoke<string | null>("get_aion2_window_title");
 
-// Sidebar per brief 5.1. Home, Settings and the two R1 entries below work
-// today; the rest show the release they are planned for (docs/ROADMAP.md).
-
-// R1 entries open the engine's own windows until the dashboard pages exist.
-const ACTIONS: Partial<Record<Key, () => Promise<unknown>>> = {
-  "nav.dpsMeter": () => invoke("show_overlay"),
-  "nav.fightHistory": () => invoke("request_details_view", { payload: { kind: "history" } }),
-  "nav.supporter": () => invoke("open_url", { url: PATREON_URL }),
+// Engine windows that stand in for R1 pages until the dashboard has them.
+const ENGINE: Record<string, [label: "soon.openMeter" | "soon.openHistory" | "soon.openSettings", () => Promise<unknown>]> = {
+  meter: ["soon.openMeter", () => invoke("show_overlay")],
+  storico: ["soon.openHistory", () => invoke("request_details_view", { payload: { kind: "history" } })],
+  impostazioni: ["soon.openSettings", () => invoke("open_settings_window")],
 };
-const NAV: { group?: Key; items: [Key, string][] }[] = [
-  {
-    group: "nav.combat",
-    items: [
-      ["nav.dpsMeter", "R1"],
-      ["nav.fightHistory", "R1"],
-      ["nav.onlineLogs", "R2"],
-      ["nav.rankings", "R2"],
-      ["nav.classStats", "R2"],
-    ],
-  },
-  {
-    group: "nav.characters",
-    items: [
-      ["nav.myCharacters", "R3"],
-      ["nav.builds", "R3"],
-      ["nav.skillPlanner", "R3"],
-      ["nav.daevanion", "R3"],
-    ],
-  },
-  {
-    group: "nav.database",
-    items: [
-      ["nav.search", "R3"],
-      ["nav.items", "R3"],
-      ["nav.skills", "R3"],
-      ["nav.npcs", "R3"],
-      ["nav.quests", "R3"],
-      ["nav.dungeons", "R3"],
-    ],
-  },
-  {
-    group: "nav.world",
-    items: [
-      ["nav.map", "R4"],
-      ["nav.crafting", "R4"],
-      ["nav.calculators", "R4"],
-      ["nav.armory", "R4"],
-    ],
-  },
-  {
-    group: "nav.organizer",
-    items: [
-      ["nav.tasks", "R5"],
-      ["nav.timers", "R5"],
-      ["nav.shopping", "R5"],
-      ["nav.flowMap", "R5"],
-    ],
-  },
-  { items: [["nav.supporter", "R6"]] },
-];
 
-type Props = { t: T; lang: string; settings: Settings; save: SaveSetting };
+type Props = {
+  t: T;
+  lang: string;
+  settings: Settings;
+  save: SaveSetting;
+  onError: (e: unknown) => void;
+  reviewOnboarding: (step: number) => void;
+};
 
-export function Shell({ t, lang, settings, save }: Props) {
+// Every src/dashboard/pages/<id>.tsx is the page with that nav id (nav.ts),
+// so pages are added without touching the shell.
+const PAGES = Object.fromEntries(
+  Object.entries(
+    import.meta.glob<(props: PageProps) => ReactNode>("./pages/*.tsx", { eager: true, import: "default" }),
+  ).map(([path, Page]) => [path.slice("./pages/".length, -".tsx".length), Page]),
+);
+
+export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Props) {
   const capture = usePoll(getCaptureStatus, 2000);
   const game = usePoll(getGameTitle, 2000);
-  const [version, setVersion] = useState("");
-  const [error, setError] = useState<string>();
+  const [page, setPage] = useState("home");
+  const [collapsed, setCollapsed] = useState(false);
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [palette, setPalette] = useState(false);
 
   useEffect(() => {
-    invoke<string>("get_app_version").then(setVersion, (e) => setError(String(e)));
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPalette(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // get_capture_status only says whether a game connection is locked; the
-  // window title separates "game not running" from "waiting for traffic".
-  // "In combat" is not observable from these two calls.
+  // The window title separates "game not running" from "waiting for traffic".
   const status: MeterStatus = capture.error
     ? "error"
     : !capture.data
@@ -109,79 +102,159 @@ export function Shell({ t, lang, settings, save }: Props) {
           ? "waiting"
           : "noGame";
 
-  const openSettings = () =>
-    invoke("open_settings_window").then(
-      () => setError(undefined),
-      (e) => setError(String(e)),
-    );
+  const name = capture.data?.characterName || localStorage.getItem(USER_NAME_KEY) || t("home.notSet");
+  const cls = settings["pm.class"];
+  const run = (action: () => Promise<unknown>) => action().catch(onError);
+  const openWidget = () => run(() => invoke("show_overlay"));
+  const current = ALL_PAGES.find((x) => x.id === page)!;
+  const group = NAV.find((g) => g.items.includes(current))?.label;
+
+  const item = (x: NavPage, indent: boolean) => (
+    <button
+      key={x.id}
+      type="button"
+      className={indent ? "navItem indent" : "navItem"}
+      title={t(x.label)}
+      aria-current={x.id === page ? "page" : undefined}
+      onClick={() => setPage(x.id)}
+    >
+      <x.icon aria-hidden="true" />
+      {collapsed ? <span className="srOnly">{t(x.label)}</span> : <span>{t(x.label)}</span>}
+    </button>
+  );
 
   return (
-    <div className="shell">
-      <nav className="sidebar" aria-label="PowerMeter">
-        <div className="brand">
-          <img src={logo} alt="" width={28} height={28} />
-          <span>PowerMeter</span>
+    <div className="frame">
+      <nav className={collapsed ? "sidebar collapsed" : "sidebar"} aria-label="PowerMeter">
+        <div className="navScroll">
+          {NAV.map((g) => {
+            if (!g.label) return g.items.map((x) => item(x, false));
+            const has = g.items.includes(current);
+            // Collapsed: groups flatten into one icon column.
+            const isOpen = collapsed || (open[g.label] ?? has);
+            const GroupIcon = g.icon!;
+            return (
+              <div key={g.label} style={{ display: "contents" }}>
+                {!collapsed && (
+                  <button
+                    type="button"
+                    className={has ? "navGroup has" : "navGroup"}
+                    aria-expanded={isOpen}
+                    onClick={() => setOpen({ ...open, [g.label!]: !isOpen })}
+                  >
+                    <GroupIcon aria-hidden="true" />
+                    <span className="label">{t(g.label)}</span>
+                    {has && !isOpen && <span className="dot" />}
+                    {isOpen ? <CaretUpIcon className="caret" aria-hidden="true" /> : <CaretDownIcon className="caret" aria-hidden="true" />}
+                  </button>
+                )}
+                {isOpen && g.items.map((x) => item(x, !collapsed))}
+              </div>
+            );
+          })}
         </div>
-        <span className="navItem active" aria-current="page">
-          {t("nav.home")}
-        </span>
-        {NAV.map(({ group, items }) => (
-          <div className={group ? "navGroup" : "navGroup bottom"} key={group ?? items[0][0]}>
-            {group && <h2>{t(group)}</h2>}
-            <ul>
-              {items.map(([key, release]) => {
-                const action = ACTIONS[key];
-                return action ? (
-                  <li key={key}>
-                    <button
-                      type="button"
-                      className="navItem"
-                      onClick={() => action().then(() => setError(undefined), (e) => setError(String(e)))}
-                    >
-                      {t(key)}
-                    </button>
-                  </li>
-                ) : (
-                  <li key={key} className="navItem disabled">
-                    <span>{t(key)}</span>
-                    <span className="badge">{t("nav.soon", { release })}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
-        <button type="button" className="navItem" onClick={openSettings}>
-          {t("nav.settings")}
-        </button>
+        <div className="navBottom">
+          {NAV_BOTTOM.map((x) => item(x, false))}
+          <button
+            type="button"
+            className="navItem toggle"
+            title={t("nav.toggleSidebar")}
+            aria-expanded={!collapsed}
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? <CaretDoubleRightIcon aria-hidden="true" /> : <CaretDoubleLeftIcon aria-hidden="true" />}
+            {collapsed ? <span className="srOnly">{t("nav.toggleSidebar")}</span> : <span>{t("nav.collapse")}</span>}
+          </button>
+        </div>
       </nav>
 
       <div className="main">
         <header className="topbar">
-          <h1>{t("nav.home")}</h1>
-          <span className={`pill ${status}`} title={hint(t, status)} role="status">
-            {t(`status.${status}`)}
-          </span>
-          {version && <span className="muted num">v{version}</span>}
+          <button type="button" className="searchBox" onClick={() => setPalette(true)}>
+            <MagnifyingGlassIcon aria-hidden="true" />
+            <span className="label">{t("search.placeholder")}</span>
+            <span className="kbd">Ctrl K</span>
+          </button>
+          <div style={{ flex: 1 }} />
+          <div
+            className={status === "waiting" ? "statusPill pulse" : "statusPill"}
+            style={{ "--c": STATUS_COLOR[status] } as CSSProperties}
+            title={status === "checking" ? undefined : t(`status.${status}Hint`)}
+            role="status"
+          >
+            <span className="statusDot" />
+            <span>{t(`status.${status}`)}</span>
+          </div>
+          <div className="charChip">
+            <ClassAvatar cls={cls} />
+            <div className="who">
+              <div>{name}</div>
+              <div className="sub">
+                {cls && `${cls} · `}
+                <span className="mono">CP {fmt(SAMPLE_CHARACTER.cp, lang)}</span>
+              </div>
+            </div>
+            <CaretDownIcon aria-hidden="true" />
+          </div>
+          <button type="button" className="btn fill" onClick={openWidget}>
+            <PictureInPictureIcon aria-hidden="true" />
+            {t("topbar.openWidget")}
+          </button>
+          <div className="avatar" title={t("topbar.account")} role="img" aria-label={t("topbar.account")}>
+            <UserIcon aria-hidden="true" />
+          </div>
         </header>
-        {error && (
-          <p className="error" role="alert">
-            {t("common.error", { message: error })}
-          </p>
-        )}
-        <Home
-          t={t}
-          lang={lang}
-          settings={settings}
-          save={save}
-          status={status}
-          capture={capture.data}
-        />
+
+        <main className="content">
+          <div className="pageHead">
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {/* Like the prototype, unbuilt pages show their group as breadcrumb. */}
+              {group && <div className="crumb">{t(group)}</div>}
+              <h1>{t(current.label)}</h1>
+            </div>
+          </div>
+          {page === "home" ? (
+            <Home
+              t={t}
+              lang={lang}
+              settings={settings}
+              name={name}
+              openWidget={openWidget}
+              openHistory={() => run(ENGINE.storico[1])}
+              openFight={(fightId) => run(() => invoke("request_details_view", { payload: { kind: "fight", fightId } }))}
+              reviewOnboarding={reviewOnboarding}
+            />
+          ) : page === "supporter" ? (
+            <Supporter t={t} name={name} onError={onError} />
+          ) : PAGES[page] ? (
+            (() => {
+              const Page = PAGES[page];
+              return <Page t={t} lang={lang} settings={settings} save={save} name={name} go={setPage} run={run} onError={onError} />;
+            })()
+          ) : (
+            <section className="card" style={{ maxWidth: 560 }}>
+              <EmptyState icon={<TrayIcon aria-hidden="true" />} title={t("soon.title", { release: current.release })} text={t("soon.text")}>
+                {ENGINE[page] && (
+                  <button type="button" className="btn fill" onClick={() => run(ENGINE[page][1])}>
+                    {t(ENGINE[page][0])}
+                  </button>
+                )}
+              </EmptyState>
+            </section>
+          )}
+        </main>
       </div>
+
+      {palette && (
+        <Palette
+          t={t}
+          onClose={() => setPalette(false)}
+          onPick={(id) => {
+            setPage(id);
+            setPalette(false);
+          }}
+        />
+      )}
     </div>
   );
-}
-
-export function hint(t: T, status: MeterStatus) {
-  return status === "checking" ? "" : t(`status.${status}Hint`);
 }

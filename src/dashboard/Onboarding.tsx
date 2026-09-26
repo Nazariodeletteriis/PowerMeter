@@ -1,21 +1,32 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import logo from "../assets/logo.png";
+import {
+  CheckCircleIcon,
+  CircleDashedIcon,
+  DiscordLogoIcon,
+  InfoIcon,
+  WarningCircleIcon,
+  XCircleIcon,
+} from "@phosphor-icons/react";
 import type { SaveSetting, Settings } from "./App";
 import { LANGUAGE_SETTING, LANGUAGES, type Key, type T } from "./i18n";
-import { usePoll, type Polled } from "./usePoll";
+import { USER_NAME_KEY } from "./Shell";
+import { CLASSES, Logo } from "./ui";
+import { usePoll } from "./usePoll";
 
 // Region names are shown as the game shows them, so they are not translated.
 export const REGIONS = [
-  { value: "global-eu", label: "Global / EU" },
-  { value: "us-na", label: "US / NA" },
-  { value: "kr-tw", label: "KR / TW" },
+  { value: "global-eu", label: "Global/EU" },
+  { value: "us-na", label: "NA" },
+  { value: "kr", label: "KR" },
+  { value: "tw", label: "TW" },
 ];
+// Prototype order (Brawler has no art yet and is not offered).
+const CLASS_OPTIONS = ["Sorcerer", "Gladiator", "Templar", "Assassin", "Ranger", "Spiritmaster", "Cleric", "Chanter"];
 
-// The meter keeps the character name in localStorage under this key (core.js
-// storageKeys.userName) and pushes it to the backend with set_character_name.
-// All windows share one origin, so the meter reads what we write here.
-export const USER_NAME_KEY = "dpsMeter.userName";
+// The meter keeps the character name in localStorage under USER_NAME_KEY
+// (core.js storageKeys.userName) and pushes it to the backend with
+// set_character_name. All windows share one origin, so the meter reads it.
 const NAME_MAX_LENGTH = 32;
 const STEPS = 5;
 const NPCAP_URL = "https://npcap.com/#download";
@@ -24,10 +35,10 @@ const checkNpcap = () => invoke<boolean>("npcap_installed");
 const checkAdmin = () => invoke<boolean>("is_admin");
 const checkGame = () => invoke<string | null>("get_aion2_window_title");
 
-type Props = { t: T; lang: string; settings: Settings; save: SaveSetting };
+type Props = { t: T; lang: string; settings: Settings; save: SaveSetting; startStep: number };
 
-export function Onboarding({ t, lang, settings, save }: Props) {
-  const [step, setStep] = useState(1);
+export function Onboarding({ t, lang, settings, save, startStep }: Props) {
+  const [step, setStep] = useState(startStep);
   const nav = {
     t,
     step,
@@ -42,11 +53,7 @@ export function Onboarding({ t, lang, settings, save }: Props) {
     case 3:
       return <Character {...nav} settings={settings} save={save} />;
     case 4:
-      return (
-        <Frame {...nav} title="account.title" next={<NextButton {...nav} />}>
-          <p>{t("account.body")}</p>
-        </Frame>
-      );
+      return <Account {...nav} />;
     default:
       return <Disclaimer {...nav} save={save} />;
   }
@@ -79,46 +86,52 @@ function Frame({
   step,
   onBack,
   title,
+  hero,
+  gap = hero ? 14 : 12,
   error,
   next,
   children,
-}: StepProps & { title: Key; error?: string; next: ReactNode; children: ReactNode }) {
+}: StepProps & { title: ReactNode; hero?: boolean; gap?: number; error?: string; next: ReactNode; children: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null);
   // Each step mounts its own Frame: moving focus to the title lets keyboard
   // and screen reader users follow the step change.
   useEffect(() => heading.current?.focus(), []);
   return (
     <main className="onboarding">
-      <section className="onboardingCard">
-        <header className="onboardingHead">
-          <img src={logo} alt="" width={32} height={32} />
-          <span className="muted">{t("onboarding.step", { n: step, total: STEPS })}</span>
-        </header>
-        <h1 ref={heading} tabIndex={-1}>
-          {t(title)}
-        </h1>
-        {children}
-        {error && (
-          <p className="error" role="alert">
-            {t("common.error", { message: error })}
-          </p>
-        )}
-        <footer className="onboardingFoot">
-          {step > 1 && (
-            <button type="button" onClick={onBack}>
-              {t("common.back")}
-            </button>
+      <div className="onbColumn">
+        <div className="onbDots" aria-hidden="true">
+          {Array.from({ length: STEPS }, (_, k) => (
+            <span key={k} className={k < step ? "on" : undefined} />
+          ))}
+        </div>
+        <div className="onbStep">{t("onboarding.step", { n: step, total: STEPS })}</div>
+        <div className="onbBody" style={{ gap }}>
+          {hero && <Logo size={44} />}
+          <h1 ref={heading} tabIndex={-1} className={hero ? "hero" : undefined}>
+            {title}
+          </h1>
+          {children}
+          {error && (
+            <p className="error" role="alert">
+              {t("common.error", { message: error })}
+            </p>
           )}
+        </div>
+        <div className="onbFoot">
+          {/* Shown on step 1 too, like the prototype, but inert there. */}
+          <button type="button" className="btn lg" onClick={onBack} disabled={step === 1}>
+            {t("common.back")}
+          </button>
           {next}
-        </footer>
-      </section>
+        </div>
+      </div>
     </main>
   );
 }
 
 function NextButton({ t, onNext, disabled }: StepProps & { disabled?: boolean }) {
   return (
-    <button type="button" className="primary" onClick={onNext} disabled={disabled}>
+    <button type="button" className="btn fill lg next" onClick={onNext} disabled={disabled}>
       {t("common.continue")}
     </button>
   );
@@ -135,11 +148,11 @@ function Welcome(props: StepProps & { lang: string; save: SaveSetting }) {
       await invoke("set_language", { language });
     });
   return (
-    <Frame {...props} title="welcome.title" error={error} next={<NextButton {...props} />}>
-      <p>{t("welcome.body")}</p>
-      <label className="field">
-        <span>{t("welcome.language")}</span>
-        <select value={lang} disabled={busy} onChange={(e) => changeLanguage(e.target.value)}>
+    <Frame {...props} hero title={t("welcome.title")} error={error} next={<NextButton {...props} />}>
+      <p className="lead">{t("welcome.body")}</p>
+      <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span style={{ color: "var(--pm-t2)" }}>{t("welcome.language")}</span>
+        <select className="input sm" value={lang} disabled={busy} onChange={(e) => changeLanguage(e.target.value)}>
           {LANGUAGES.map((l) => (
             <option key={l.code} value={l.code}>
               {l.name}
@@ -161,68 +174,85 @@ function Requirements(props: StepProps) {
   // Download and launch the official installer; if that fails, fall back to
   // the download page so the user is never stuck.
   const installNpcap = () =>
-    run(() => invoke("install_npcap")).then(
-      (ok) => ok || invoke("open_url", { url: NPCAP_URL }),
-    );
+    run(() => invoke("install_npcap")).then((ok) => ok || invoke("open_url", { url: NPCAP_URL }));
   return (
     <Frame
       {...props}
-      title="req.title"
+      title={t("req.title")}
+      gap={10}
       error={error}
       next={<NextButton {...props} disabled={!ready} />}
     >
-      <p>{t("req.body")}</p>
-      <ul className="checks">
-        <Check t={t} label="req.npcap" state={npcap}>
-          <p className="muted">{t(busy ? "req.npcapDownloading" : "req.npcapHint")}</p>
-          <button type="button" onClick={installNpcap} disabled={busy}>
-            {t("req.npcapInstall")}
-          </button>
-        </Check>
-        <Check t={t} label="req.admin" state={admin}>
-          <p className="muted">{t("req.adminHint")}</p>
-        </Check>
-        <Check
+      <ul style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {/* The app only ships for Windows x64, so running it proves this one. */}
+        <Req t={t} label="req.windows" state="ok" />
+        <Req
+          t={t}
+          label="req.npcap"
+          state={npcap.error ? "bad" : npcap.data === undefined ? "pending" : npcap.data ? "ok" : "bad"}
+          hint={npcap.error ?? (npcap.data ? undefined : t(busy ? "req.npcapDownloading" : "req.npcapHint"))}
+        >
+          {!npcap.data && (
+            <button type="button" className="btn fill sm" onClick={installNpcap} disabled={busy}>
+              {t("req.npcapInstall")}
+            </button>
+          )}
+        </Req>
+        <Req
+          t={t}
+          label="req.admin"
+          state={admin.error ? "bad" : admin.data === undefined ? "pending" : admin.data ? "ok" : "warn"}
+          hint={admin.error ?? (admin.data === false ? t("req.adminHint") : undefined)}
+        />
+        <Req
           t={t}
           label="req.game"
-          state={{ error: game.error, data: game.data === undefined ? undefined : game.data !== null }}
           optional
-        >
-          <p className="muted">{t("req.gameHint")}</p>
-        </Check>
+          state={game.data ? "ok" : "pending"}
+          hint={game.error}
+        />
       </ul>
-      {!ready && <p className="muted">{t("req.blocked")}</p>}
+      {!ready && <p className="onbInfo">{t("req.blocked")}</p>}
     </Frame>
   );
 }
 
-function Check({
+const REQ_ICON = {
+  ok: [CheckCircleIcon, "#3FBF7F", "req.ok"],
+  bad: [XCircleIcon, "#FF4D4D", "req.missing"],
+  warn: [WarningCircleIcon, "#E8B03A", "req.missing"],
+  pending: [CircleDashedIcon, "var(--pm-t3)", "req.notDetected"],
+} as const;
+
+function Req({
   t,
   label,
   state,
+  hint,
   optional,
   children,
 }: {
   t: T;
   label: Key;
-  state: Polled<boolean>;
+  state: keyof typeof REQ_ICON;
+  hint?: string;
   optional?: boolean;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
-  const [cls, text] = state.error
-    ? ["bad", t("common.error", { message: state.error })]
-    : state.data === undefined
-      ? ["", t("req.checking")]
-      : state.data
-        ? ["ok", t("req.ok")]
-        : [optional ? "" : "bad", t(optional ? "req.notDetected" : "req.missing")];
+  const [Icon, color, text] = REQ_ICON[state];
+  const faded = optional && state !== "ok";
   return (
-    <li className="check">
-      <div className="checkRow">
-        <span>{t(label)}</span>
-        <span className={`tag ${cls}`}>{text}</span>
+    <li className={hint ? "reqRow tall" : "reqRow"}>
+      <Icon weight={state === "pending" ? "regular" : "fill"} style={{ color }} aria-hidden="true" />
+      <div className="what" style={faded ? { color: "var(--pm-t2)" } : undefined}>
+        <div>
+          {t(label)}
+          {optional && <span style={{ color: "var(--pm-t3)" }}> {t("common.optional")}</span>}
+          <span className="srOnly">: {t(text)}</span>
+        </div>
+        {hint && <div className="hint">{hint}</div>}
       </div>
-      {!state.data && children}
+      {children}
     </li>
   );
 }
@@ -231,12 +261,15 @@ function Character(props: StepProps & { settings: Settings; save: SaveSetting })
   const { t, settings, save, onNext } = props;
   const [region, setRegion] = useState(settings["pm.region"] || REGIONS[0].value);
   const [name, setName] = useState(() => localStorage.getItem(USER_NAME_KEY) ?? "");
+  const [cls, setCls] = useState(settings["pm.class"] || CLASS_OPTIONS[0]);
   const { busy, error, run } = useAction();
 
   const submit = async () => {
     const trimmed = name.trim();
     const saved = await run(async () => {
+      if (!(cls in CLASSES)) throw new Error(`unknown class ${cls}`);
       await save("pm.region", region);
+      await save("pm.class", cls);
       // Empty means "detect it from the game window", so keep what the meter has.
       if (trimmed) {
         localStorage.setItem(USER_NAME_KEY, trimmed);
@@ -249,25 +282,25 @@ function Character(props: StepProps & { settings: Settings; save: SaveSetting })
   return (
     <Frame
       {...props}
-      title="char.title"
+      title={t("char.title")}
       error={error}
       next={
-        <button type="submit" form="characterForm" className="primary" disabled={busy}>
+        <button type="submit" form="characterForm" className="btn fill lg next" disabled={busy}>
           {t("common.continue")}
         </button>
       }
     >
-      <p>{t("char.body")}</p>
       <form
         id="characterForm"
+        style={{ display: "flex", flexDirection: "column", gap: 12 }}
         onSubmit={(e) => {
           e.preventDefault();
           submit();
         }}
       >
         <label className="field">
-          <span>{t("char.region")}</span>
-          <select value={region} onChange={(e) => setRegion(e.target.value)}>
+          {t("char.region")}
+          <select className="input" value={region} onChange={(e) => setRegion(e.target.value)}>
             {REGIONS.map((r) => (
               <option key={r.value} value={r.value}>
                 {r.label}
@@ -276,20 +309,55 @@ function Character(props: StepProps & { settings: Settings; save: SaveSetting })
           </select>
         </label>
         <label className="field">
-          <span>{t("char.name")}</span>
+          {t("char.name")}
           <input
+            className="input"
             value={name}
             maxLength={NAME_MAX_LENGTH}
             autoComplete="off"
             spellCheck={false}
-            aria-describedby="nameHint"
             onChange={(e) => setName(e.target.value)}
           />
-          <small id="nameHint" className="muted">
-            {t("char.nameHint")}
-          </small>
         </label>
+        <label className="field">
+          {t("char.class")}
+          <select className="input" value={cls} onChange={(e) => setCls(e.target.value)}>
+            {CLASS_OPTIONS.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+        </label>
+        <p className="onbInfo">
+          <InfoIcon aria-hidden="true" /> {t("char.nameHint")}
+        </p>
       </form>
+    </Frame>
+  );
+}
+
+function Account(props: StepProps) {
+  const { t, onNext } = props;
+  return (
+    <Frame
+      {...props}
+      title={
+        <>
+          {t("account.title")} <span style={{ color: "var(--pm-t3)", fontSize: 14 }}>{t("common.optional")}</span>
+        </>
+      }
+      next={<NextButton {...props} />}
+    >
+      <p className="lead">{t("account.body")}</p>
+      <div style={{ display: "flex", gap: 8 }}>
+        {/* Discord login ships with R2 (server + OAuth). */}
+        <button type="button" className="btn discordBtn" disabled title={t("soon.title", { release: "R2" })}>
+          <DiscordLogoIcon aria-hidden="true" />
+          {t("account.discord")}
+        </button>
+        <button type="button" className="btn" style={{ height: 40, padding: "0 16px" }} onClick={onNext}>
+          {t("account.later")}
+        </button>
+      </div>
     </Frame>
   );
 }
@@ -307,18 +375,18 @@ function Disclaimer(props: StepProps & { save: SaveSetting }) {
   return (
     <Frame
       {...props}
-      title="disclaimer.title"
+      title={t("disclaimer.title")}
       error={error}
       next={
-        <button type="button" className="primary" disabled={!accepted || busy} onClick={finish}>
+        <button type="button" className="btn fill lg next" disabled={!accepted || busy} onClick={finish}>
           {t("disclaimer.finish")}
         </button>
       }
     >
-      <p>{t("disclaimer.body")}</p>
-      <label className="checkbox">
+      <div className="notice">{t("disclaimer.body")}</div>
+      <label className="check">
         <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
-        <span>{t("disclaimer.accept")}</span>
+        {t("disclaimer.accept")}
       </label>
     </Frame>
   );

@@ -2,18 +2,13 @@
   "common.continue": "继续",
   "common.back": "返回",
   "common.error": "出错了：{message}",
-
   "onboarding.step": "第 {n} 步（共 {total} 步）",
-
   "welcome.title": "欢迎使用 PowerMeter",
   "welcome.body": "PowerMeter 被动读取《Aion 2》的战斗数据，并在游戏内悬浮窗和本仪表盘中显示你的 DPS、技能和战斗历史。",
   "welcome.language": "语言",
-
   "req.title": "系统检查",
-  "req.body": "PowerMeter 需要以下条件才能捕获战斗数据。此列表每 2 秒刷新一次。",
   "req.ok": "OK",
   "req.missing": "缺失",
-  "req.checking": "检查中…",
   "req.notDetected": "未检测到",
   "req.npcap": "已安装 Npcap",
   "req.npcapHint": "点击“安装”：PowerMeter 会从 npcap.com 下载官方安装程序。在 Npcap 窗口中依次点击 I Agree、Install 和 Finish。",
@@ -22,23 +17,17 @@
   "req.admin": "以管理员身份运行",
   "req.adminHint": "启动 PowerMeter 时 Windows 会请求权限：请选择“是”。如果选择了“否”，请重新启动 PowerMeter。",
   "req.game": "已检测到 Aion 2",
-  "req.gameHint": "可选：你可以稍后再启动游戏。",
   "req.blocked": "需要 Npcap 和管理员权限才能继续。",
-
   "char.title": "你的角色",
-  "char.body": "角色名称也会从游戏窗口标题自动检测。",
   "char.region": "区域",
   "char.name": "角色名称",
   "char.nameHint": "可选。留空以自动检测。",
-
   "account.title": "Discord 账号",
   "account.body": "使用 Discord 登录以上传日志和分享配装，将在下一版本推出。",
-
   "disclaimer.title": "开始之前",
   "disclaimer.body": "PowerMeter 是一个非官方工具，与 NCSoft 无关。它被动读取战斗数据。使用风险自负。",
   "disclaimer.accept": "我已理解并同意",
   "disclaimer.finish": "开始使用 PowerMeter",
-
   "nav.home": "首页",
   "nav.combat": "战斗",
   "nav.dpsMeter": "DPS Meter",
@@ -70,8 +59,6 @@
   "nav.flowMap": "Flow Map",
   "nav.supporter": "赞助者",
   "nav.settings": "设置",
-  "nav.soon": "将在 {release} 推出",
-
   "status.checking": "正在检查计量器…",
   "status.noGame": "未检测到游戏",
   "status.noGameHint": "启动 Aion 2 以开始捕获。",
@@ -81,18 +68,9 @@
   "status.connectedHint": "计量器正在捕获战斗数据。",
   "status.error": "错误",
   "status.errorHint": "无法读取计量器状态。",
-
-  "home.meter": "计量器",
-  "home.port": "端口",
-  "home.device": "网络设备",
-  "home.character": "角色",
-  "home.name": "名称",
-  "home.region": "区域",
   "home.notSet": "未设置",
   "home.fights": "最近战斗",
-  "home.fightsEmpty": "进入一场战斗即可查看你的首批数据。",
   "home.colBoss": "Boss",
   "home.colDate": "日期",
-  "home.colDuration": "时长",
   "home.reviewOnboarding": "重新查看引导"
 }

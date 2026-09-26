@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-adc6caf8-482b-4f97-b0ad-cf737e5e3af7/styles.css">
+<script src="_ds/nocturne-adc6caf8-482b-4f97-b0ad-cf737e5e3af7/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+:root{--pm-bg:#0A0909;--pm-s1:#121010;--pm-s2:#1A1717;--pm-s3:#242020;--pm-line:#2E2929;--pm-t1:#F5F2F2;--pm-t2:#B3ABAB;--pm-t3:#8A8181;--pm-red:#DB0000;--pm-redt:#FF4D4D;--pm-grey:#564F4F;--pm-fill:transparent;--pm-filltext:#FF4D4D;--pm-tint:rgba(219,0,0,.12)}
+html{background:var(--pm-bg)}body{margin:0;background:var(--pm-bg);color:var(--pm-t1);font-family:Inter,"Noto Sans","Noto Sans JP","Noto Sans KR","Noto Sans SC",system-ui,sans-serif}
+a{color:var(--pm-redt)}a:hover{color:var(--pm-t1)}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="max-width:1200px;padding:48px;display:flex;flex-direction:column;gap:48px">
+  <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="flex:1;min-width:300px"><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--pm-t3)">PowerMeter · Design system</div><div style="font-size:40px;font-weight:500;letter-spacing:-.03em;margin-top:6px">Rosso come segnale, nero come campo.</div><div style="color:var(--pm-t2);max-width:640px;line-height:1.6;margin-top:8px">La tua palette (#DB0000 · nero · bianco · #564F4F · #7F1112) sulla struttura Nocturne: densa, calma, bordi sottili. Il rosso significa sempre “tu / attivo / attenzione”: mai decorazione.</div></div>
+    <div style="display:flex;gap:4px;padding:4px;border-radius:8px;background:var(--pm-s2);border:1px solid var(--pm-line);font-size:12px"><sc-for list="{{ demos }}" as="d" hint-placeholder-count="2"><button onClick="{{ d.go }}" style="height:28px;padding:0 10px;border-radius:5px;border:1px solid {{ d.bd }};background:{{ d.bg }};color:var(--pm-t1);cursor:pointer;font-size:12px">{{ d.label }}</button></sc-for></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+    <div style="border-radius:10px;padding:22px;background:#0A0909;box-shadow:0 0 0 1px #2E2929;display:flex;flex-direction:column;gap:12px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:18px;font-weight:500;color:#F5F2F2">Demo A · Carbonio</span><span style="font-size:12px;color:#8A8181">nero dominante, rosso solo come linea e bagliore</span></div>
+      <div style="display:flex;height:64px;border-radius:6px;overflow:hidden"><div style="flex:3;background:#0A0909;box-shadow:inset 0 0 0 1px #2E2929"></div><div style="flex:1;background:#121010"></div><div style="flex:1;background:#1A1717"></div><div style="flex:1;background:#242020"></div><div style="flex:1;background:#564F4F"></div><div style="flex:1;background:#7F1112"></div><div style="flex:1;background:#DB0000"></div><div style="flex:1;background:#F5F2F2"></div></div>
+      <div style="font-size:12px;line-height:1.7;color:#B3ABAB">Pulsante primario: contorno rosso su trasparente. Voce di menu attiva: testo rosso su #1F1B1B. Barra del titolo nera.</div></div>
+    <div style="border-radius:10px;padding:22px;background:#0A0909;box-shadow:0 0 0 1px #7F1112;display:flex;flex-direction:column;gap:12px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:18px;font-weight:500;color:#FAF7F7">Demo B · Brace</span><span style="font-size:12px;color:#A89E9E">fondo nero, rosso scuro pieno come presenza · scelta</span></div>
+      <div style="display:flex;height:64px;border-radius:6px;overflow:hidden"><div style="flex:3;background:#0A0909;box-shadow:inset 0 0 0 1px #3A3333"></div><div style="flex:1;background:#141111"></div><div style="flex:1;background:#1D1919"></div><div style="flex:1;background:#2A2424"></div><div style="flex:1;background:#564F4F"></div><div style="flex:1;background:#7F1112"></div><div style="flex:1;background:#DB0000"></div><div style="flex:1;background:#FAF7F7"></div></div>
+      <div style="font-size:12px;line-height:1.7;color:#D2C9C9">Pulsante primario: pieno #7F1112 con bordo #DB0000. Voce attiva e barra del titolo in #7F1112. Bande Supporter/landing in #7F1112.</div></div>
+  </div>
+
+  <div><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">Token della palette corrente</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px"><sc-for list="{{ tokens }}" as="t" hint-placeholder-count="12"><div style="display:flex;flex-direction:column;gap:6px"><div style="height:48px;border-radius:6px;background:{{ t.v }};box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)"></div><div style="font-size:12px">{{ t.n }}</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--pm-t3)">{{ t.k }} · {{ t.v }}</div></div></sc-for></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+    <div><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">Classi · icone e colori ufficiali</div>
+      <sc-for list="{{ classes }}" as="c"><div style="display:flex;align-items:center;gap:10px;min-height:32px"><span style="width:28px;height:28px;border-radius:6px;display:grid;place-items:center;font-size:9px;font-weight:700;background:{{ c.bg }};color:{{ c.c }};border:1px solid {{ c.c }}">{{ c.i }}</span><span style="flex:1">{{ c.n }}</span><div style="width:80px;height:5px;border-radius:3px;background:{{ c.c }}"></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--pm-t3);width:62px">{{ c.c }}</span></div></sc-for>
+      <div style="font-size:11px;color:var(--pm-t3);margin-top:6px">Colori campionati dalle icone ufficiali. Brawler: icona in arrivo (solo KR/TW).</div>
+    </div>
+    <div><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">Rarità · 6 gradi (nomi da confermare)</div>
+      <sc-for list="{{ rar }}" as="r"><div style="display:flex;align-items:center;gap:10px;min-height:36px"><span style="width:26px;height:26px;border-radius:5px;border:1.5px solid {{ r.c }};background:var(--pm-s2)"></span><span style="flex:1;color:{{ r.c }}">{{ r.n }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--pm-t3)">{{ r.c }}</span></div></sc-for>
+      <div style="display:flex;gap:8px;margin-top:10px"><span style="width:26px;height:26px;border-radius:5px;border:1.5px solid #B377E8;background:var(--pm-s2)"></span><span style="width:26px;height:26px;border-radius:5px;border:1.5px dashed #B377E8;opacity:.55"></span><span style="font-size:11px;color:var(--pm-t3);align-self:center">posseduto · mancante</span></div>
+    </div>
+    <div><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">Fazioni e stati</div>
+      <div style="display:flex;gap:16px;margin-bottom:14px"><div style="display:flex;flex-direction:column;align-items:center;gap:6px"><img src="assets/icons/elyos.png" alt="Elyos" style="width:56px;height:56px"><span style="font-size:12px;color:#7FD3F0">Elyos · #55C2E9</span></div><div style="display:flex;flex-direction:column;align-items:center;gap:6px"><img src="assets/icons/asmodian.png" alt="Asmodian" style="width:56px;height:56px"><span style="font-size:12px;color:#F4C77A">Asmodian · #F4B352</span></div></div>
+      <sc-for list="{{ status }}" as="s"><div style="display:flex;align-items:center;gap:10px;min-height:32px"><span style="width:8px;height:8px;border-radius:50%;background:{{ s.c }}"></span><span style="flex:1">{{ s.n }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--pm-t3)">{{ s.c }}</span></div></sc-for>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px">
+    <div><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">Tipografia</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:40px;font-weight:500;letter-spacing:-.03em">Inter 500 · Titoli</div>
+        <div style="font-size:15px;color:var(--pm-t2);line-height:1.6">Inter 400 per l’interfaccia. Fallback dichiarati: Noto Sans (cirillico), Noto Sans JP / KR / SC per CJK.</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:28px">18.420 · 27,7% · 5,5 M</div>
+        <div style="font-size:13px;color:var(--pm-t2)">JetBrains Mono per ogni numero: cifre tabellari, le colonne non “ballano” mentre cambiano.</div>
+        <div style="font-size:14px;color:var(--pm-t2)">Русский · Deutsch: Schadensverlauf · 日本語 ダメージ · 한국어 피해량 · 简体中文 伤害</div>
+      </div>
+    </div>
+    <div><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">Logo</div>
+      <div style="display:flex;align-items:center;gap:14px;padding:20px;border-radius:10px;background:var(--pm-s1);border:1px solid var(--pm-line)"><svg width="56" height="56" viewBox="0 0 24 24"><rect x="2" y="13" width="5" height="9" rx="1.2" style="fill:var(--pm-grey)"></rect><rect x="9.5" y="8" width="5" height="14" rx="1.2" style="fill:var(--pm-t1)"></rect><path d="M17 5.5 22 2v18.8a1.2 1.2 0 0 1-1.2 1.2h-2.6A1.2 1.2 0 0 1 17 20.8z" style="fill:var(--pm-red)"></path></svg><div><div style="font-size:30px;font-weight:600;letter-spacing:-.02em">Power<span style="color:var(--pm-redt)">Meter</span></div><div style="font-size:12px;color:var(--pm-t3)">by Letrion Labs</div></div></div>
+      <div style="display:flex;align-items:flex-end;gap:18px;margin-top:14px"><svg width="32" height="32" viewBox="0 0 24 24"><rect x="2" y="13" width="5" height="9" rx="1.2" style="fill:var(--pm-grey)"></rect><rect x="9.5" y="8" width="5" height="14" rx="1.2" style="fill:var(--pm-t1)"></rect><path d="M17 5.5 22 2v18.8a1.2 1.2 0 0 1-1.2 1.2h-2.6A1.2 1.2 0 0 1 17 20.8z" style="fill:var(--pm-red)"></path></svg><svg width="24" height="24" viewBox="0 0 24 24"><rect x="2" y="13" width="5" height="9" rx="1.2" style="fill:var(--pm-grey)"></rect><rect x="9.5" y="8" width="5" height="14" rx="1.2" style="fill:var(--pm-t1)"></rect><path d="M17 5.5 22 2v18.8a1.2 1.2 0 0 1-1.2 1.2h-2.6A1.2 1.2 0 0 1 17 20.8z" style="fill:var(--pm-red)"></path></svg><svg width="16" height="16" viewBox="0 0 24 24"><rect x="2" y="13" width="5" height="9" rx="1.2" style="fill:var(--pm-grey)"></rect><rect x="9.5" y="8" width="5" height="14" rx="1.2" style="fill:var(--pm-t1)"></rect><path d="M17 5.5 22 2v18.8a1.2 1.2 0 0 1-1.2 1.2h-2.6A1.2 1.2 0 0 1 17 20.8z" style="fill:var(--pm-red)"></path></svg><span style="font-size:11px;color:var(--pm-t3)">32 · 24 · 16 px (tray)</span></div>
+      <div style="font-size:12px;color:var(--pm-t2);margin-top:10px;line-height:1.6">Tre barre di potenza crescenti; l’ultima taglia in diagonale come la punta di un’ala.</div>
+    </div>
+  </div>
+
+  <div><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pm-t3);margin-bottom:12px">Componenti base</div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:20px;border-radius:10px;background:var(--pm-s1);border:1px solid var(--pm-line)">
+      <button style="height:32px;padding:0 12px;border-radius:6px;border:1px solid var(--pm-red);background:var(--pm-fill);color:var(--pm-filltext);font-weight:500;cursor:pointer" style-hover="background:var(--pm-tint)">Primario</button>
+      <button style="height:32px;padding:0 12px;border-radius:6px;border:1px solid var(--pm-line);background:transparent;color:var(--pm-t1);cursor:pointer" style-hover="background:var(--pm-s3)">Secondario</button>
+      <button style="height:32px;padding:0 8px;border-radius:6px;border:0;background:transparent;color:var(--pm-redt);cursor:pointer" style-hover="background:var(--pm-tint)">Ghost</button>
+      <button disabled style="height:32px;padding:0 12px;border-radius:6px;border:1px solid var(--pm-line);background:transparent;color:var(--pm-t1);opacity:.45">Disabilitato</button>
+      <input placeholder="Input" style="height:32px;width:160px;padding:0 10px;border-radius:6px;border:1px solid var(--pm-line);background:var(--pm-s2);color:var(--pm-t1)"></input>
+      <div style="display:flex;border:1px solid var(--pm-line);border-radius:6px;overflow:hidden"><span style="padding:6px 12px;background:var(--pm-s3);font-size:12px">Boss</span><span style="padding:6px 12px;font-size:12px;color:var(--pm-t3)">Last Hit</span><span style="padding:6px 12px;font-size:12px;color:var(--pm-t3)">All Targets</span></div>
+      <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;background:#3FBF7F22;color:#5FD99A">KILL</span><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;background:#DB000022;color:#FF6B6B">WIPE</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 6px;border-radius:4px;border:1px solid #DB000088;color:#FF6B6B">♥ Supporter</span>
+      <span style="position:relative;font-size:12px;padding:6px 10px;border-radius:6px;background:var(--pm-s3);box-shadow:0 0 0 1px var(--pm-grey)">Back%: colpi alle spalle del bersaglio</span>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--pm-s2);box-shadow:0 0 0 1px var(--pm-line),0 8px 20px rgba(0,0,0,.4);font-size:13px"><i class="ph ph-check-circle" style="color:#5FD99A"></i>Toast · Link copiato</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;font-size:13px;color:var(--pm-t2);line-height:1.6">
+    <div><div style="color:var(--pm-t1);font-weight:500;margin-bottom:4px">Spaziature e raggi</div>Scala Nocturne 0,7× (2,8 · 5,6 · 8,4 · 11,2 · 16,8 · 22,4 px). Raggi 4 / 6 / 8 / 12. Elevazione = bordo sottile + ombra ambiente, niente ombre pesanti.</div>
+    <div><div style="color:var(--pm-t1);font-weight:500;margin-bottom:4px">Motion</div>150–250 ms, ease-out. Nel widget si muovono solo le barre (300 ms). Con “riduci movimento” le barre saltano al valore senza transizione.</div>
+    <div><div style="color:var(--pm-t1);font-weight:500;margin-bottom:4px">Icone</div>Phosphor Regular, lineari, 16–20 px. Icone di classi e oggetti: segnaposto con iniziali finché non arrivano i dati di gioco.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;palette&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;brace&quot;,&quot;carbonio&quot;,&quot;chiaro&quot;],&quot;default&quot;:&quot;brace&quot;,&quot;tsType&quot;:&quot;'brace'|'carbonio'|'chiaro'&quot;}}">
+class Component extends DCLogic {
+  state = { demo:null };
+  THEMES = {
+    a:{'--pm-bg':'#0A0909','--pm-s1':'#121010','--pm-s2':'#1A1717','--pm-s3':'#242020','--pm-line':'#2E2929','--pm-t1':'#F5F2F2','--pm-t2':'#B3ABAB','--pm-t3':'#8A8181','--pm-red':'#DB0000','--pm-redt':'#FF4D4D','--pm-fill':'transparent','--pm-filltext':'#FF4D4D','--pm-tint':'rgba(219,0,0,.12)'},
+    b:{'--pm-bg':'#0A0909','--pm-s1':'#141111','--pm-s2':'#1D1919','--pm-s3':'#2A2424','--pm-line':'#3A3333','--pm-t1':'#FAF7F7','--pm-t2':'#D2C9C9','--pm-t3':'#A89E9E','--pm-red':'#DB0000','--pm-redt':'#FF6B6B','--pm-fill':'#7F1112','--pm-filltext':'#FAF7F7','--pm-tint':'rgba(219,0,0,.2)'},
+    c:{'--pm-bg':'#E4E0DA','--pm-s1':'#EDEAE5','--pm-s2':'#DDD8D1','--pm-s3':'#D1CBC3','--pm-line':'#C2BBB2','--pm-t1':'#140F0F','--pm-t2':'#453E3B','--pm-t3':'#5E5652','--pm-red':'#DB0000','--pm-redt':'#B00000','--pm-deep':'#7F1112','--pm-grey':'#948B83','--pm-navon':'#7F1112','--pm-navfg':'#FFFFFF','--pm-bar':'#7F1112','--pm-fill':'#7F1112','--pm-filltext':'#FFFFFF','--pm-band':'#7F1112','--pm-tint':'rgba(219,0,0,.10)','--pm-wrgb':'12 10 10','--pm-wbar':'rgba(127,17,18,.85)','--pm-canvas':'#D9D4CD','--color-bg':'#E4E0DA','--color-surface':'#EDEAE5','--color-text':'#140F0F','--color-accent':'#DB0000','--color-divider':'#C2BBB2'}
+  };
+  demo(){ return this.state.demo ?? ({carbonio:'a',chiaro:'c'}[this.props.palette]||'b'); }
+  applyTheme(){ const d=this.demo(); if(this._d===d) return; this._d=d; const t=this.THEMES[d]; for(const k in t) document.documentElement.style.setProperty(k,t[k]); }
+  componentDidMount(){ this.applyTheme(); }
+  componentDidUpdate(){ this.applyTheme(); }
+  renderVals(){
+    const demo=this.demo(), t=this.THEMES[demo], set=o=>this.setState(o);
+    const names={'--pm-bg':'Sfondo (elev. 0)','--pm-s1':'Superficie 1','--pm-s2':'Superficie 2','--pm-s3':'Superficie 3','--pm-line':'Bordo','--pm-t1':'Testo primario','--pm-t2':'Testo secondario','--pm-t3':'Testo terziario','--pm-red':'Accento · linea','--pm-redt':'Accento · testo','--pm-fill':'Pulsante primario'};
+    return {
+      demos:[['b','Brace'],['a','Carbonio'],['c','Chiaro']].map(([id,label])=>({label,go:()=>set({demo:id}),bg:demo===id?'var(--pm-tint)':'transparent',bd:demo===id?'var(--pm-red)':'transparent'})),
+      tokens:Object.keys(names).map(k=>({k,n:names[k],v:t[k]==='transparent'?'transparent':t[k]})),
+      classes:[['Gladiator','GL','#52A5DB'],['Templar','TE','#4CA8E0'],['Assassin','AS','#42C169'],['Ranger','RA','#4BC670'],['Sorcerer','SO','#AB61DD'],['Spiritmaster','SP','#C24DAE'],['Cleric','CL','#C8C171'],['Chanter','CH','#CAC172'],['Brawler','BR','#C58B55']].map(([n,i,c])=>({n,i:n==='Brawler'?i:'',c,bg:n==='Brawler'?c+'22':`url(assets/icons/${n.toLowerCase()}.png) center/80% no-repeat, ${c}1c`})),
+      rar:[['Common','#9C9494'],['Uncommon','#6CC46A'],['Rare','#4F93EA'],['Heroic','#B377E8'],['Legendary','#F0A63A'],['Mythic','#FF4040']].map(([n,c])=>({n,c})),
+      status:[['Successo · Kill · Pronto','#3FBF7F'],['Avviso · In attesa','#E8B03A'],['Errore · Wipe','#FF4D4D'],['Info','#5A9BE8'],['Inattivo','#8A8181']].map(([n,c])=>({n,c}))
+    };
+  }
+}
+</script>
+</body>
+</html>

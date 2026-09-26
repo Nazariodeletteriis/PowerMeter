@@ -1,0 +1,103 @@
+import type { CSSProperties, ReactNode } from "react";
+
+// Class and faction art from the design bundle (src/assets/pm/<name>.png).
+const ART = import.meta.glob<string>("../assets/pm/*.png", { eager: true, import: "default" });
+export const art = (name: string) => ART[`../assets/pm/${name.toLowerCase()}.png`];
+
+// Class colors and fallback initials (prototype CLS). Brawler has no icon yet.
+export const CLASSES: Record<string, [initials: string, color: string]> = {
+  Gladiator: ["GL", "#52A5DB"],
+  Templar: ["TE", "#4CA8E0"],
+  Assassin: ["AS", "#42C169"],
+  Ranger: ["RA", "#4BC670"],
+  Sorcerer: ["SO", "#AB61DD"],
+  Spiritmaster: ["SP", "#C24DAE"],
+  Cleric: ["CL", "#C8C171"],
+  Chanter: ["CH", "#CAC172"],
+  Brawler: ["BR", "#C58B55"],
+};
+
+// Item rarity colors (prototype RAR).
+export const RARITY: Record<string, string> = {
+  Common: "#9C9494",
+  Uncommon: "#6CC46A",
+  Rare: "#4F93EA",
+  Heroic: "#B377E8",
+  Legendary: "#F0A63A",
+  Mythic: "#FF4040",
+};
+
+/** The PowerMeter mark: three bars, the last one red. */
+export function Logo({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="2" y="13" width="5" height="9" rx="1.2" fill="var(--pm-grey)" />
+      <rect x="9.5" y="8" width="5" height="14" rx="1.2" fill="var(--pm-t1)" />
+      <path d="M17 5.5 22 2v18.8a1.2 1.2 0 0 1-1.2 1.2h-2.6A1.2 1.2 0 0 1 17 20.8z" fill="var(--pm-red)" />
+    </svg>
+  );
+}
+
+/** Class icon on a square tinted with the class color; unknown class → empty grey square. */
+export function ClassAvatar({ cls, size = 28 }: { cls?: string; size?: number }) {
+  const [initials, color] = (cls && CLASSES[cls]) || ["", "var(--pm-grey)"];
+  const icon = cls && art(cls);
+  return (
+    <span
+      className="classAvatar"
+      style={{ "--c": color, width: size, height: size } as CSSProperties}
+      aria-hidden="true"
+    >
+      {icon ? <img src={icon} alt="" /> : initials}
+    </span>
+  );
+}
+
+/** Card with the small uppercase heading and an optional right-side slot. */
+export function Card({
+  title,
+  aside,
+  style,
+  children,
+}: {
+  title: string;
+  aside?: ReactNode;
+  style?: CSSProperties;
+  children: ReactNode;
+}) {
+  return (
+    <section className="card" style={style}>
+      <div className="cardHead">
+        <h2 className="kicker">{title}</h2>
+        {aside}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/** Standard empty/error state (prototype "states" page). */
+export function EmptyState({
+  icon,
+  title,
+  text,
+  children,
+}: {
+  icon: ReactNode;
+  title: string;
+  text?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="empty">
+      {icon}
+      <div className="emptyTitle">{title}</div>
+      {text && <div className="emptyText">{text}</div>}
+      {children && <div style={{ display: "flex", gap: 8 }}>{children}</div>}
+    </div>
+  );
+}
+
+/** Integer with thousands separators even for 4 digits, like the prototype (it: 1.240). */
+export const fmt = (n: number, lang: string) =>
+  Math.round(n).toLocaleString(lang, { useGrouping: "always" } as unknown as Intl.NumberFormatOptions);
