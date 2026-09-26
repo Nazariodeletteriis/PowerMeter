@@ -1,0 +1,48 @@
+/* Dashboard palettes (prototype THEMES a / b / c, "Palette: Brace / Carbonio /
+   Chiaro"). Brace is the :root default in dashboard.css; the other two override
+   the same --pm-* tokens. Set by applyPalette() in theme.ts. */
+html[data-pm-palette="carbonio"] {
+  --pm-bg: #0a0909;
+  --pm-s1: #121010;
+  --pm-s2: #1a1717;
+  --pm-s3: #242020;
+  --pm-line: #2e2929;
+  --pm-t1: #f5f2f2;
+  --pm-t2: #b3abab;
+  --pm-t3: #8a8181;
+  --pm-red: #db0000;
+  --pm-redt: #ff4d4d;
+  --pm-deep: #7f1112;
+  --pm-grey: #564f4f;
+  --pm-navon: #1f1b1b;
+  --pm-navfg: #ff4d4d;
+  --pm-bar: #0a0909;
+  --pm-fill: transparent;
+  --pm-filltext: #ff4d4d;
+  --pm-band: #121010;
+  --pm-tint: rgba(219, 0, 0, 0.12);
+}
+
+html[data-pm-palette="chiaro"] {
+  --pm-bg: #e4e0da;
+  --pm-s1: #edeae5;
+  --pm-s2: #ddd8d1;
+  --pm-s3: #d1cbc3;
+  --pm-line: #c2bbb2;
+  --pm-t1: #140f0f;
+  --pm-t2: #453e3b;
+  --pm-t3: #5e5652;
+  --pm-red: #db0000;
+  --pm-redt: #b00000;
+  --pm-deep: #7f1112;
+  --pm-grey: #948b83;
+  --pm-navon: #7f1112;
+  --pm-navfg: #ffffff;
+  --pm-bar: #7f1112;
+  --pm-fill: #7f1112;
+  --pm-filltext: #ffffff;
+  --pm-band: #7f1112;
+  --pm-tint: rgba(219, 0, 0, 0.1);
+  /* Native controls (select popups, scrollbars) follow the light surface. */
+  color-scheme: light;
+}

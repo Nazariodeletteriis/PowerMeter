@@ -1,0 +1,110 @@
+/* Organizer pages (prototype pg.attivita / pg.timer). Values copied from the
+   prototype's inline styles. */
+
+/* Buttons that stand in for the prototype's clickable divs. */
+.orgRow,
+.orgCell {
+  border: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.orgTabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-bottom: 1px solid var(--pm-line);
+  margin-bottom: 14px;
+}
+.orgTab {
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--pm-t3);
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.orgTab[aria-selected="true"] {
+  border-bottom-color: var(--pm-red);
+  color: var(--pm-t1);
+}
+
+.orgList {
+  max-width: 760px;
+  background: var(--pm-s1);
+  border: 1px solid var(--pm-line);
+  border-radius: 8px;
+  padding: 6px;
+}
+.orgRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+}
+.orgRow:hover {
+  background: var(--pm-s2);
+}
+.orgBox {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid var(--pm-grey);
+  display: grid;
+  place-items: center;
+}
+.orgBox svg {
+  font-size: 12px;
+  color: var(--pm-redt);
+}
+
+.orgMatrix {
+  background: var(--pm-s1);
+  border: 1px solid var(--pm-line);
+  border-radius: 8px;
+  padding: 6px 10px;
+  max-width: 900px;
+}
+.orgMatrix > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(4, 110px);
+  gap: 8px;
+  align-items: center;
+  min-height: 38px;
+  border-bottom: 1px solid var(--pm-line);
+}
+.orgMatrix > div:first-child {
+  align-items: normal;
+  min-height: 0;
+  padding: 8px 0;
+  font-size: 11px;
+  color: var(--pm-t3);
+}
+.orgCell {
+  height: 28px;
+  border-radius: 5px;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  color: var(--pm-redt);
+}
+.orgCell[aria-checked="true"] {
+  background: var(--pm-tint);
+}
+.orgCell:hover {
+  outline: 1px solid var(--pm-grey);
+}
+
+.orgTimers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
