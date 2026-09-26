@@ -193,7 +193,8 @@
         "frost": "霜冻",
         "natura": "自然",
         "obsidian": "黑曜",
-        "varian": "瓦里安"
+        "varian": "瓦里安",
+        "powermeter": "PowerMeter"
       }
     },
     "language": {
@@ -297,12 +298,14 @@
   "battleTime": {
     "analysing": "正在监控数据...",
     "idle": "空闲",
-    "notRunning": "AION2 not running",
+    "notRunning": "正在等待 Aion 2...",
     "suspended": "应用已暂停"
   },
   "meter": {
     "identifyingPlayer": "#{id}",
-    "dpsSuffix": "/秒"
+    "dpsSuffix": "/秒",
+    "duration": "时长",
+    "partyDps": "队伍 DPS"
   },
   "skills": {
     "fallback": "技能 {code}",
@@ -345,6 +348,73 @@
       "exploration": "探索",
       "normal": "普通",
       "hard": "困难"
+    }
+  },
+  "pmWidget": {
+    "modeLabel": "小工具模式",
+    "expand": "点击展开",
+    "ready": "已就绪",
+    "locked": "已锁定",
+    "lock": "锁定（点击穿透）",
+    "opacity": "不透明度",
+    "pill": "缩小为胶囊条",
+    "dashboard": "打开控制台",
+    "close": "关闭",
+    "back": "返回",
+    "berserkTip": "狂暴计时器：最后 30 秒变为红色",
+    "phase": "阶段 {n}",
+    "sparkLabel": "DPS 时间曲线",
+    "detail": {
+      "skill": "技能",
+      "damage": "伤害",
+      "heal": "治疗",
+      "hits": "命中次数",
+      "crit": "Crit%"
+    },
+    "waiting": {
+      "title": "当前无战斗",
+      "hint": "攻击目标即可开始",
+      "last": "上次：{boss} · {outcome} {time}"
+    },
+    "end": {
+      "title": "战斗结束",
+      "duration": "时长",
+      "yourDps": "你的 DPS",
+      "position": "排名",
+      "upload": "上传日志",
+      "uploadUnavailable": "无法上传",
+      "openReport": "打开报告",
+      "uploaded": "已上传 ✓",
+      "copyLink": "复制链接",
+      "linkCopied": "链接已复制"
+    },
+    "error": {
+      "title": "捕获已停止",
+      "noTraffic": "所选适配器上没有流量",
+      "npcap": "Npcap 不可用",
+      "diagnose": "诊断"
+    },
+    "build": {
+      "slots": "格位",
+      "missing": "缺失",
+      "stats": "属性",
+      "slotsHint": "虚线：缺失的部位 · 将鼠标悬停可查看目标物品",
+      "owned": "{owned}/{total} 已拥有",
+      "openBuilder": "在构建器中打开 ↗",
+      "ownedTip": "已拥有",
+      "targetTip": "目标：{item}",
+      "source": {
+        "drop": "掉落",
+        "craft": "制作",
+        "shop": "商店"
+      }
+    },
+    "lobby": {
+      "ready": "{n}/{total} 已准备",
+      "player": "玩家",
+      "status": "状态",
+      "notReady": "未准备",
+      "gsTip": "装备评分"
     }
   }
 }

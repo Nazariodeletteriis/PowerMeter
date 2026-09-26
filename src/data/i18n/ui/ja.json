@@ -193,7 +193,8 @@
         "frost": "Frost",
         "natura": "Natura",
         "obsidian": "Obsidian",
-        "varian": "Varian"
+        "varian": "Varian",
+        "powermeter": "PowerMeter"
       }
     },
     "language": {
@@ -297,12 +298,14 @@
   "battleTime": {
     "analysing": "データを監視中...",
     "idle": "待機中",
-    "notRunning": "AION2が起動していません",
+    "notRunning": "AION2を待機中…",
     "suspended": "アプリを一時停止中"
   },
   "meter": {
     "identifyingPlayer": "#{id}",
-    "dpsSuffix": "/s"
+    "dpsSuffix": "/s",
+    "duration": "経過時間",
+    "partyDps": "パーティDPS"
   },
   "skills": {
     "fallback": "スキル {code}",
@@ -345,6 +348,73 @@
       "exploration": "探索",
       "normal": "ノーマル",
       "hard": "ハード"
+    }
+  },
+  "pmWidget": {
+    "modeLabel": "ウィジェットモード",
+    "expand": "クリックで展開",
+    "ready": "準備完了",
+    "locked": "ロック中",
+    "lock": "ロック（クリック透過）",
+    "opacity": "不透明度",
+    "pill": "ピルに最小化",
+    "dashboard": "ダッシュボードを開く",
+    "close": "閉じる",
+    "back": "戻る",
+    "berserkTip": "バーサークタイマー：残り30秒で赤くなります",
+    "phase": "フェーズ{n}",
+    "sparkLabel": "DPSの推移",
+    "detail": {
+      "skill": "スキル",
+      "damage": "ダメージ",
+      "heal": "回復",
+      "hits": "ヒット数",
+      "crit": "Crit%"
+    },
+    "waiting": {
+      "title": "戦闘なし",
+      "hint": "ターゲットを攻撃して開始",
+      "last": "前回：{boss}・{outcome} {time}"
+    },
+    "end": {
+      "title": "戦闘終了",
+      "duration": "経過時間",
+      "yourDps": "あなたのDPS",
+      "position": "順位",
+      "upload": "ログをアップロード",
+      "uploadUnavailable": "アップロード不可",
+      "openReport": "レポートを開く",
+      "uploaded": "アップロード済み ✓",
+      "copyLink": "リンクをコピー",
+      "linkCopied": "リンクをコピーしました"
+    },
+    "error": {
+      "title": "キャプチャ停止",
+      "noTraffic": "選択したアダプターにトラフィックがありません",
+      "npcap": "Npcapが利用できません",
+      "diagnose": "診断"
+    },
+    "build": {
+      "slots": "スロット",
+      "missing": "不足",
+      "stats": "ステータス",
+      "slotsHint": "破線：不足している部位・目標アイテムはホバーで確認",
+      "owned": "{owned}/{total} 所持",
+      "openBuilder": "ビルダーで開く ↗",
+      "ownedTip": "所持済み",
+      "targetTip": "目標：{item}",
+      "source": {
+        "drop": "ドロップ",
+        "craft": "クラフト",
+        "shop": "ショップ"
+      }
+    },
+    "lobby": {
+      "ready": "{n}/{total} 準備完了",
+      "player": "プレイヤー",
+      "status": "状態",
+      "notReady": "未準備",
+      "gsTip": "Gear score"
     }
   }
 }

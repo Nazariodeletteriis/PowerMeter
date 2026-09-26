@@ -193,7 +193,8 @@
         "frost": "Frost",
         "natura": "Natura",
         "obsidian": "Obsidian",
-        "varian": "Varian"
+        "varian": "Varian",
+        "powermeter": "PowerMeter"
       }
     },
     "language": {
@@ -297,12 +298,14 @@
   "battleTime": {
     "analysing": "Surveillance des données...",
     "idle": "Inactif",
-    "notRunning": "AION2 n'est pas lancé",
+    "notRunning": "En attente d'Aion 2…",
     "suspended": "Application en pause"
   },
   "meter": {
     "identifyingPlayer": "#{id}",
-    "dpsSuffix": "/s"
+    "dpsSuffix": "/s",
+    "duration": "Durée",
+    "partyDps": "DPS du groupe"
   },
   "skills": {
     "fallback": "Compétence {code}",
@@ -345,6 +348,73 @@
       "exploration": "Exploration",
       "normal": "Normal",
       "hard": "Difficile"
+    }
+  },
+  "pmWidget": {
+    "modeLabel": "Mode du widget",
+    "expand": "Cliquer pour développer",
+    "ready": "Prêt",
+    "locked": "Verrouillé",
+    "lock": "Verrouiller (clic traversant)",
+    "opacity": "Opacité",
+    "pill": "Réduire en pilule",
+    "dashboard": "Ouvrir le tableau de bord",
+    "close": "Fermer",
+    "back": "Retour",
+    "berserkTip": "Minuteur de rage : devient rouge dans les 30 dernières s",
+    "phase": "Phase {n}",
+    "sparkLabel": "DPS dans le temps",
+    "detail": {
+      "skill": "Compétence",
+      "damage": "Dégâts",
+      "heal": "Soins",
+      "hits": "Coups",
+      "crit": "Crit%"
+    },
+    "waiting": {
+      "title": "Aucun combat en cours",
+      "hint": "Frappe une cible pour commencer",
+      "last": "Dernier : {boss} · {outcome} {time}"
+    },
+    "end": {
+      "title": "Combat terminé",
+      "duration": "Durée",
+      "yourDps": "Ton DPS",
+      "position": "Position",
+      "upload": "Envoyer le journal",
+      "uploadUnavailable": "Envoi indisponible",
+      "openReport": "Ouvrir le rapport",
+      "uploaded": "Envoyé ✓",
+      "copyLink": "Copier le lien",
+      "linkCopied": "Lien copié"
+    },
+    "error": {
+      "title": "Capture arrêtée",
+      "noTraffic": "Aucun trafic sur l'adaptateur sélectionné",
+      "npcap": "Npcap n'est pas disponible",
+      "diagnose": "Diagnostiquer"
+    },
+    "build": {
+      "slots": "Emplacements",
+      "missing": "Manquant",
+      "stats": "Stats",
+      "slotsHint": "En pointillés : pièces manquantes · survole pour voir l'objet cible",
+      "owned": "{owned}/{total} possédés",
+      "openBuilder": "Ouvrir dans le builder ↗",
+      "ownedTip": "Possédé",
+      "targetTip": "Cible : {item}",
+      "source": {
+        "drop": "Drop",
+        "craft": "Fabrication",
+        "shop": "Boutique"
+      }
+    },
+    "lobby": {
+      "ready": "{n}/{total} prêts",
+      "player": "Joueur",
+      "status": "Statut",
+      "notReady": "Pas prêt",
+      "gsTip": "Gear Score"
     }
   }
 }

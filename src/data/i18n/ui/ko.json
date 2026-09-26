@@ -193,7 +193,8 @@
         "frost": "프로스트",
         "natura": "나투라",
         "obsidian": "옵시디언",
-        "varian": "바리안"
+        "varian": "바리안",
+        "powermeter": "PowerMeter"
       }
     },
     "language": {
@@ -297,12 +298,14 @@
   "battleTime": {
     "analysing": "데이터 모니터링 중...",
     "idle": "대기 중",
-    "notRunning": "AION2 not running",
+    "notRunning": "Aion 2 대기 중...",
     "suspended": "앱 일시정지됨"
   },
   "meter": {
     "identifyingPlayer": "#{id}",
-    "dpsSuffix": "/초"
+    "dpsSuffix": "/초",
+    "duration": "지속시간",
+    "partyDps": "파티 DPS"
   },
   "skills": {
     "fallback": "스킬 {code}",
@@ -345,6 +348,73 @@
       "exploration": "탐험",
       "normal": "일반",
       "hard": "매우 어려움"
+    }
+  },
+  "pmWidget": {
+    "modeLabel": "위젯 모드",
+    "expand": "클릭하여 확장",
+    "ready": "준비 완료",
+    "locked": "잠김",
+    "lock": "잠금 (클릭 통과)",
+    "opacity": "불투명도",
+    "pill": "미니 바로 축소",
+    "dashboard": "대시보드 열기",
+    "close": "닫기",
+    "back": "뒤로",
+    "berserkTip": "광폭화 타이머: 마지막 30초 동안 빨간색으로 표시됩니다",
+    "phase": "페이즈 {n}",
+    "sparkLabel": "시간별 DPS",
+    "detail": {
+      "skill": "스킬",
+      "damage": "피해",
+      "heal": "회복",
+      "hits": "타격",
+      "crit": "Crit%"
+    },
+    "waiting": {
+      "title": "진행 중인 전투 없음",
+      "hint": "대상을 공격하면 시작됩니다",
+      "last": "마지막: {boss} · {outcome} {time}"
+    },
+    "end": {
+      "title": "전투 종료",
+      "duration": "지속시간",
+      "yourDps": "내 DPS",
+      "position": "순위",
+      "upload": "로그 업로드",
+      "uploadUnavailable": "업로드 불가",
+      "openReport": "리포트 열기",
+      "uploaded": "업로드됨 ✓",
+      "copyLink": "링크 복사",
+      "linkCopied": "링크가 복사되었습니다"
+    },
+    "error": {
+      "title": "캡처 중지됨",
+      "noTraffic": "선택한 어댑터에 트래픽이 없습니다",
+      "npcap": "Npcap을 사용할 수 없습니다",
+      "diagnose": "진단"
+    },
+    "build": {
+      "slots": "슬롯",
+      "missing": "누락",
+      "stats": "스탯",
+      "slotsHint": "점선: 누락된 부위 · 목표 아이템은 마우스를 올려 확인",
+      "owned": "{owned}/{total} 보유",
+      "openBuilder": "빌더에서 열기 ↗",
+      "ownedTip": "보유 중",
+      "targetTip": "목표: {item}",
+      "source": {
+        "drop": "드롭",
+        "craft": "제작",
+        "shop": "상점"
+      }
+    },
+    "lobby": {
+      "ready": "{n}/{total} 준비 완료",
+      "player": "플레이어",
+      "status": "상태",
+      "notReady": "준비 안 됨",
+      "gsTip": "장비 점수"
     }
   }
 }

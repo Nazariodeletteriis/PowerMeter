@@ -193,7 +193,8 @@
         "frost": "Frost",
         "natura": "Natura",
         "obsidian": "Obsidian",
-        "varian": "Varian"
+        "varian": "Varian",
+        "powermeter": "PowerMeter"
       }
     },
     "language": {
@@ -297,12 +298,14 @@
   "battleTime": {
     "analysing": "Monitorando dados...",
     "idle": "Ocioso",
-    "notRunning": "AION2 não está em execução",
+    "notRunning": "Aguardando o AION2…",
     "suspended": "Aplicativo pausado"
   },
   "meter": {
     "identifyingPlayer": "#{id}",
-    "dpsSuffix": "/s"
+    "dpsSuffix": "/s",
+    "duration": "Duração",
+    "partyDps": "DPS do grupo"
   },
   "skills": {
     "fallback": "Habilidade {code}",
@@ -345,6 +348,73 @@
       "exploration": "Exploração",
       "normal": "Normal",
       "hard": "Difícil"
+    }
+  },
+  "pmWidget": {
+    "modeLabel": "Modo do widget",
+    "expand": "Clique para expandir",
+    "ready": "Pronto",
+    "locked": "Bloqueado",
+    "lock": "Bloquear (click-through)",
+    "opacity": "Opacidade",
+    "pill": "Minimizar para pílula",
+    "dashboard": "Abrir painel",
+    "close": "Fechar",
+    "back": "Voltar",
+    "berserkTip": "Temporizador de berserk: fica vermelho nos últimos 30 s",
+    "phase": "Fase {n}",
+    "sparkLabel": "DPS ao longo do tempo",
+    "detail": {
+      "skill": "Habilidade",
+      "damage": "Dano",
+      "heal": "Cura",
+      "hits": "Golpes",
+      "crit": "Crit%"
+    },
+    "waiting": {
+      "title": "Nenhuma luta ativa",
+      "hint": "Acerte um alvo para começar",
+      "last": "Última: {boss} · {outcome} {time}"
+    },
+    "end": {
+      "title": "Luta encerrada",
+      "duration": "Duração",
+      "yourDps": "Seu DPS",
+      "position": "Posição",
+      "upload": "Enviar log",
+      "uploadUnavailable": "Envio indisponível",
+      "openReport": "Abrir relatório",
+      "uploaded": "Enviado ✓",
+      "copyLink": "Copiar link",
+      "linkCopied": "Link copiado"
+    },
+    "error": {
+      "title": "Captura interrompida",
+      "noTraffic": "Nenhum tráfego no adaptador selecionado",
+      "npcap": "Npcap não está disponível",
+      "diagnose": "Diagnosticar"
+    },
+    "build": {
+      "slots": "Slots",
+      "missing": "Faltando",
+      "stats": "Estatísticas",
+      "slotsHint": "Tracejado: peças faltando · passe o mouse para ver o item desejado",
+      "owned": "{owned}/{total} possuídos",
+      "openBuilder": "Abrir no builder ↗",
+      "ownedTip": "Possuído",
+      "targetTip": "Alvo: {item}",
+      "source": {
+        "drop": "Drop",
+        "craft": "Crafting",
+        "shop": "Loja"
+      }
+    },
+    "lobby": {
+      "ready": "{n}/{total} prontos",
+      "player": "Jogador",
+      "status": "Status",
+      "notReady": "Não pronto",
+      "gsTip": "Gear score"
     }
   }
 }

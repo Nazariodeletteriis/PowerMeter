@@ -193,7 +193,8 @@
         "frost": "Frost",
         "natura": "Natura",
         "obsidian": "Obsidian",
-        "varian": "Varian"
+        "varian": "Varian",
+        "powermeter": "PowerMeter"
       }
     },
     "language": {
@@ -297,12 +298,14 @@
   "battleTime": {
     "analysing": "Отслеживание данных...",
     "idle": "Ожидание",
-    "notRunning": "AION2 не запущен",
+    "notRunning": "Ожидание AION2…",
     "suspended": "Приложение приостановлено"
   },
   "meter": {
     "identifyingPlayer": "#{id}",
-    "dpsSuffix": "/s"
+    "dpsSuffix": "/s",
+    "duration": "Продолжительность",
+    "partyDps": "DPS группы"
   },
   "skills": {
     "fallback": "Умение {code}",
@@ -345,6 +348,73 @@
       "exploration": "Исследование",
       "normal": "Обычный",
       "hard": "Сложный"
+    }
+  },
+  "pmWidget": {
+    "modeLabel": "Режим виджета",
+    "expand": "Нажми, чтобы развернуть",
+    "ready": "Готово",
+    "locked": "Заблокировано",
+    "lock": "Блокировка (click-through)",
+    "opacity": "Непрозрачность",
+    "pill": "Свернуть в плашку",
+    "dashboard": "Открыть панель",
+    "close": "Закрыть",
+    "back": "Назад",
+    "berserkTip": "Таймер берсерка: становится красным в последние 30 с",
+    "phase": "Фаза {n}",
+    "sparkLabel": "DPS во времени",
+    "detail": {
+      "skill": "Умение",
+      "damage": "Урон",
+      "heal": "Лечение",
+      "hits": "Попадания",
+      "crit": "Crit%"
+    },
+    "waiting": {
+      "title": "Нет активного боя",
+      "hint": "Атакуй цель, чтобы начать",
+      "last": "Последний: {boss} · {outcome} {time}"
+    },
+    "end": {
+      "title": "Бой завершён",
+      "duration": "Продолжительность",
+      "yourDps": "Твой DPS",
+      "position": "Позиция",
+      "upload": "Загрузить лог",
+      "uploadUnavailable": "Загрузка недоступна",
+      "openReport": "Открыть отчёт",
+      "uploaded": "Загружено ✓",
+      "copyLink": "Скопировать ссылку",
+      "linkCopied": "Ссылка скопирована"
+    },
+    "error": {
+      "title": "Захват остановлен",
+      "noTraffic": "Нет трафика на выбранном адаптере",
+      "npcap": "Npcap недоступен",
+      "diagnose": "Диагностика"
+    },
+    "build": {
+      "slots": "Слоты",
+      "missing": "Не хватает",
+      "stats": "Характеристики",
+      "slotsHint": "Пунктиром отмечены недостающие части · наведи курсор, чтобы увидеть нужный предмет",
+      "owned": "{owned}/{total} есть",
+      "openBuilder": "Открыть в билдере ↗",
+      "ownedTip": "Есть",
+      "targetTip": "Цель: {item}",
+      "source": {
+        "drop": "Дроп",
+        "craft": "Крафт",
+        "shop": "Магазин"
+      }
+    },
+    "lobby": {
+      "ready": "{n}/{total} готовы",
+      "player": "Игрок",
+      "status": "Статус",
+      "notReady": "Не готов",
+      "gsTip": "Gear score"
     }
   }
 }

@@ -193,7 +193,8 @@
         "frost": "Frost",
         "natura": "Natura",
         "obsidian": "Obsidian",
-        "varian": "Varian"
+        "varian": "Varian",
+        "powermeter": "PowerMeter"
       }
     },
     "language": {
@@ -297,12 +298,14 @@
   "battleTime": {
     "analysing": "Daten werden überwacht...",
     "idle": "Inaktiv",
-    "notRunning": "AION2 läuft nicht",
+    "notRunning": "Warte auf Aion 2…",
     "suspended": "App pausiert"
   },
   "meter": {
     "identifyingPlayer": "#{id}",
-    "dpsSuffix": "/s"
+    "dpsSuffix": "/s",
+    "duration": "Dauer",
+    "partyDps": "Gruppen-DPS"
   },
   "skills": {
     "fallback": "Skill {code}",
@@ -345,6 +348,73 @@
       "exploration": "Erkundung",
       "normal": "Normal",
       "hard": "Schwer"
+    }
+  },
+  "pmWidget": {
+    "modeLabel": "Widget-Modus",
+    "expand": "Klicken zum Erweitern",
+    "ready": "Bereit",
+    "locked": "Gesperrt",
+    "lock": "Sperren (Klicks durchlassen)",
+    "opacity": "Deckkraft",
+    "pill": "Auf Pille minimieren",
+    "dashboard": "Dashboard öffnen",
+    "close": "Schließen",
+    "back": "Zurück",
+    "berserkTip": "Berserker-Timer: wird in den letzten 30 s rot",
+    "phase": "Phase {n}",
+    "sparkLabel": "DPS im Zeitverlauf",
+    "detail": {
+      "skill": "Skill",
+      "damage": "Schaden",
+      "heal": "Heilung",
+      "hits": "Treffer",
+      "crit": "Crit%"
+    },
+    "waiting": {
+      "title": "Kein aktiver Kampf",
+      "hint": "Triff ein Ziel, um zu starten",
+      "last": "Zuletzt: {boss} · {outcome} {time}"
+    },
+    "end": {
+      "title": "Kampf beendet",
+      "duration": "Dauer",
+      "yourDps": "Dein DPS",
+      "position": "Position",
+      "upload": "Log hochladen",
+      "uploadUnavailable": "Upload nicht verfügbar",
+      "openReport": "Bericht öffnen",
+      "uploaded": "Hochgeladen ✓",
+      "copyLink": "Link kopieren",
+      "linkCopied": "Link kopiert"
+    },
+    "error": {
+      "title": "Aufzeichnung gestoppt",
+      "noTraffic": "Kein Datenverkehr auf dem ausgewählten Adapter",
+      "npcap": "Npcap ist nicht verfügbar",
+      "diagnose": "Diagnose"
+    },
+    "build": {
+      "slots": "Slots",
+      "missing": "Fehlt",
+      "stats": "Stats",
+      "slotsHint": "Gestrichelt: fehlende Teile · Ziel-Item beim Hover",
+      "owned": "{owned}/{total} vorhanden",
+      "openBuilder": "Im Builder öffnen ↗",
+      "ownedTip": "Vorhanden",
+      "targetTip": "Ziel: {item}",
+      "source": {
+        "drop": "Drop",
+        "craft": "Herstellung",
+        "shop": "Shop"
+      }
+    },
+    "lobby": {
+      "ready": "{n}/{total} bereit",
+      "player": "Spieler",
+      "status": "Status",
+      "notReady": "Nicht bereit",
+      "gsTip": "Gear Score"
     }
   }
 }
