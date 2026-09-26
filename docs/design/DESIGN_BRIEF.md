@@ -100,8 +100,8 @@ Proponi e documenta:
   un colore accento del brand, colori di stato (successo, avviso, errore, info).
 - **Colori delle classi**: uno distinto per ogni classe, riconoscibile anche nelle barre sottili del
   widget e accessibile ai daltonici (abbinalo sempre all'icona di classe, mai solo il colore).
-  Classi da coprire: Gladiator, Templar, Assassin, Ranger, Sorcerer, Elementalist, Cleric, Chanter,
-  Brawler *(lista da verificare sui dati reali: prevedi slot per 8–10 classi)*.
+  Classi da coprire (9, confermate dai dati del meter): Gladiator, Templar, Assassin, Ranger,
+  Sorcerer, Elementalist, Cleric, Chanter, Brawler.
 - **Colori di rarità degli oggetti**: una scala di 6 gradi (dal più comune al più raro).
   I nomi esatti dei gradi di Aion 2 arriveranno dai dati: prevedi 6 slot.
 - **Colori delle fazioni**: Elyos e Asmodian.

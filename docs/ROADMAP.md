@@ -21,6 +21,7 @@
 | Build Windows | GitHub Actions (runner Windows) produce l'MSI; Nazario testa in gioco |
 | Rischio ToS NCSoft | Accettato. Disclaimer "tool non ufficiale" in app e sul sito |
 | Design | Prima Claude Design (brief in `docs/design/DESIGN_BRIEF.md`), poi rifinitura |
+| Struttura repo | Fork di A2Tools con storia, remote `upstream` per mergiare i loro fix di protocollo/dati. File del motore toccati il meno possibile: il codice PowerMeter vive in `src-tauri/src/powermeter.rs`, `src/dashboard/`, `src/data/i18n/pm/`. Server in `server/` da R2 |
 
 ## Fonti delle feature
 
@@ -33,8 +34,8 @@
 
 Ogni release è utilizzabile da sola. Alla fine di R6 ci sono tutte le feature delle 4 fonti.
 
-### R1 — Meter
-- Monorepo, CI GitHub Actions con MSI Windows, i18n 11 lingue (it, en, de, fr, es, pt, ru, ja, ko, zh-Hans, zh-Hant)
+### R1 — Meter ✅ (codice completo, in attesa di test in gioco)
+- Fork A2Tools + rebrand, CI GitHub Actions con MSI Windows, i18n 11 lingue (it, en, de, fr, es, pt, ru, ja, ko, zh-Hans, zh-Hant)
 - App desktop: shell della dashboard, onboarding (requisiti Npcap/admin, lingua, personaggio, disclaimer)
 - **DPS meter** nel widget overlay trascinabile: party DPS, breakdown skill, crit/back/parry/perfect/double, DOT, evocazioni, 4 target mode (Boss, Last Hit, All Targets, Train), grafico, ping, temi, hotkey, click-through
 - Storico combattimenti locale con auto-save sui boss
