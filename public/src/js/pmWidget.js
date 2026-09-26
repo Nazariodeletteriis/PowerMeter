@@ -117,7 +117,7 @@ const createPmWidget = (app) => {
   // --- close: hides the overlay; the dashboard (show_overlay) or Ctrl+Alt+Up bring it back.
   $(".pmCloseBtn")?.addEventListener("click", () => {
     Promise.resolve()
-      .then(() => window.__TAURI__.window.getCurrentWindow().hide())
+      .then(() => window.__TAURI__.core.invoke("hide_overlay"))
       .catch((err) => console.error("[PowerMeter] hide failed", err));
   });
 

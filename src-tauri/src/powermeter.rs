@@ -39,10 +39,31 @@ pub fn get_click_through() -> bool {
     CLICK_THROUGH.load(Ordering::SeqCst)
 }
 
+/// Set when the user closes the overlay, so the engine's auto-hide loop does
+/// not bring it back when Aion 2 regains focus. Cleared by any explicit show.
+static USER_HIDDEN: AtomicBool = AtomicBool::new(false);
+
+pub fn user_hidden() -> bool {
+    USER_HIDDEN.load(Ordering::SeqCst)
+}
+
+pub fn set_user_hidden(hidden: bool) {
+    USER_HIDDEN.store(hidden, Ordering::SeqCst);
+}
+
+/// The overlay's close button.
+#[tauri::command]
+pub fn hide_overlay(app: tauri::AppHandle) -> Result<(), String> {
+    let window = app.get_webview_window("main").ok_or("overlay window not found")?;
+    set_user_hidden(true);
+    window.hide().map_err(|e| e.to_string())
+}
+
 /// Brings the overlay back if it was hidden with the toggle hotkey.
 #[tauri::command]
 pub fn show_overlay(app: tauri::AppHandle) -> Result<(), String> {
     let window = app.get_webview_window("main").ok_or("overlay window not found")?;
+    set_user_hidden(false);
     window.show().map_err(|e| e.to_string())?;
     let _ = window.unminimize();
     let _ = window.set_always_on_top(true);

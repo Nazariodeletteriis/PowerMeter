@@ -1578,8 +1578,10 @@ pub fn run() {
                         // Toggle window visibility
                         if let Some(window) = h.get_webview_window("main") {
                             if window.is_visible().unwrap_or(false) {
+                                powermeter::set_user_hidden(true);
                                 let _ = window.hide();
                             } else {
+                                powermeter::set_user_hidden(false);
                                 let _ = window.show();
                                 let _ = window.set_always_on_top(true);
                                 let _ = window.set_focus();
@@ -1640,7 +1642,8 @@ pub fn run() {
                                     use windows::Win32::UI::WindowsAndMessaging::*;
                                     if let Ok(raw) = window.hwnd() {
                                         let hwnd = HWND(raw.0);
-                                        if aion_fg || is_self_fg {
+                                        // PowerMeter: a user-closed overlay stays closed.
+                                        if (aion_fg || is_self_fg) && !powermeter::user_hidden() {
                                             hide_delay = 0;
                                             if !is_visible || is_minimized {
                                                 unsafe {
@@ -1819,6 +1822,7 @@ pub fn run() {
             powermeter::install_npcap,
             powermeter::open_dashboard_window,
             powermeter::show_overlay,
+            powermeter::hide_overlay,
             powermeter::set_click_through,
             powermeter::get_click_through,
         ])
