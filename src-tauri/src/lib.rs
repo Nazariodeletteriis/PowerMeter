@@ -6,6 +6,7 @@ pub mod history;
 pub mod i18n;
 pub mod logging;
 pub mod platform;
+pub mod powermeter;
 
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -1465,6 +1466,8 @@ pub fn run() {
             };
 
             app.manage(state);
+            powermeter::open_onboarding_if_needed(app.handle());
+            powermeter::start_click_through_hotkey(app.handle());
 
             // Reopen the Details window if it was left enabled. Done here rather
             // than from JS because the backend already has settings loaded — the
@@ -1811,6 +1814,11 @@ pub fn run() {
             test_auto_hide,
             fetch_url,
             show_update_window,
+            powermeter::npcap_installed,
+            powermeter::open_dashboard_window,
+            powermeter::set_click_through,
+            powermeter::get_click_through,
+            powermeter::show_overlay,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

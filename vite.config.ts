@@ -1,10 +1,19 @@
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
+  // React is used only by the PowerMeter dashboard (src/dashboard). The meter
+  // (index.html + public/src/js) stays plain scripts that Vite leaves alone.
+  plugins: [react()],
+  build: {
+    rollupOptions: {
+      input: { index: "index.html", dashboard: "dashboard.html" },
+    },
+  },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
