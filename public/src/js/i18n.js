@@ -192,6 +192,12 @@ const createI18n = ({
       const text = t(key, el.getAttribute("aria-label") ?? "");
       if (text) el.setAttribute("aria-label", text);
     });
+
+    // PowerMeter: native tooltips on the widget's icon buttons, as in the design.
+    document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+      const text = t(el.dataset.i18nTitle, el.getAttribute("title") ?? "");
+      if (text) el.setAttribute("title", text);
+    });
   };
 
   const setLanguage = async (lang, { persist = true } = {}) => {

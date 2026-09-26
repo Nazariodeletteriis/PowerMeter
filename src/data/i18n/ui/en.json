@@ -298,7 +298,7 @@
   "battleTime": {
     "analysing": "Monitoring data...",
     "idle": "Idle",
-    "notRunning": "AION2 not running",
+    "notRunning": "Waiting for Aion 2…",
     "suspended": "App suspended"
   },
   "meter": {
@@ -348,6 +348,73 @@
       "exploration": "Exploration",
       "normal": "Normal",
       "hard": "Hard"
+    }
+  },
+  "pmWidget": {
+    "modeLabel": "Widget mode",
+    "expand": "Click to expand",
+    "ready": "Ready",
+    "locked": "Locked",
+    "lock": "Lock (click-through)",
+    "opacity": "Opacity",
+    "pill": "Minimise to pill",
+    "dashboard": "Open dashboard",
+    "close": "Close",
+    "back": "Back",
+    "berserkTip": "Berserk timer: turns red in the last 30 s",
+    "phase": "Phase {n}",
+    "sparkLabel": "DPS over time",
+    "detail": {
+      "skill": "Skill",
+      "damage": "Damage",
+      "heal": "Healing",
+      "hits": "Hits",
+      "crit": "Crit%"
+    },
+    "waiting": {
+      "title": "No active fight",
+      "hint": "Hit a target to start",
+      "last": "Last: {boss} · {outcome} {time}"
+    },
+    "end": {
+      "title": "Fight over",
+      "duration": "Duration",
+      "yourDps": "Your DPS",
+      "position": "Position",
+      "upload": "Upload log",
+      "uploadUnavailable": "Upload unavailable",
+      "openReport": "Open report",
+      "uploaded": "Uploaded ✓",
+      "copyLink": "Copy link",
+      "linkCopied": "Link copied"
+    },
+    "error": {
+      "title": "Capture stopped",
+      "noTraffic": "No traffic on the selected adapter",
+      "npcap": "Npcap is not available",
+      "diagnose": "Diagnose"
+    },
+    "build": {
+      "slots": "Slots",
+      "missing": "Missing",
+      "stats": "Stats",
+      "slotsHint": "Dashed: missing pieces · hover for the target item",
+      "owned": "{owned}/{total} owned",
+      "openBuilder": "Open in builder ↗",
+      "ownedTip": "Owned",
+      "targetTip": "Target: {item}",
+      "source": {
+        "drop": "Drop",
+        "craft": "Crafting",
+        "shop": "Shop"
+      }
+    },
+    "lobby": {
+      "ready": "{n}/{total} ready",
+      "player": "Player",
+      "status": "Status",
+      "notReady": "Not ready",
+      "gsTip": "Gear score"
     }
   }
 }

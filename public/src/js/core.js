@@ -279,32 +279,44 @@ class DpsApp {
       },
       onClickUserRow: (row) => {
         if (!row || this.isWindowDragging) return;
-        const rowId = Number(row?.id);
-        const pinnedId = Number.isFinite(rowId) && rowId > 0 ? rowId : null;
-        this.hideHoverTooltip();
-        const options = this.getDefaultDetailsOpenOptions();
-        // Details lives in its own window; the overlay only says what to show.
-        // Only the in-overlay fallback pins the row — pinning suppresses the
-        // hover tooltip, which should stay live when the panel is elsewhere.
-        this.openDetailsSurface(
-          {
-            kind: "row",
-            row: {
-              id: pinnedId,
-              name: row?.name ?? "",
-              job: row?.job ?? "",
-              isIdentifying: !!row?.isIdentifying,
-            },
-            defaultTargetAll: !!options.defaultTargetAll,
-            defaultTargetId: options.defaultTargetId ?? null,
-          },
-          () => {
-            this.pinnedDetailsRowId = pinnedId;
-            this.detailsUI.open(row, { pin: true, ...options });
-          }
-        );
+        // PowerMeter: the breakdown opens inside the widget (design 8.3); its
+        // header still leads to the full Details window.
+        if (this.pmWidget?.isActive()) {
+          this.hideHoverTooltip();
+          this.pmWidget.openDetail(row);
+          return;
+        }
+        this.openRowDetailsWindow(row);
       },
     });
+    // PowerMeter: the Details window for a row, out of onClickUserRow so the
+    // widget's breakdown and fight summary can open it too.
+    this.openRowDetailsWindow = (row) => {
+      const rowId = Number(row?.id);
+      const pinnedId = Number.isFinite(rowId) && rowId > 0 ? rowId : null;
+      this.hideHoverTooltip();
+      const options = this.getDefaultDetailsOpenOptions();
+      // Details lives in its own window; the overlay only says what to show.
+      // Only the in-overlay fallback pins the row — pinning suppresses the
+      // hover tooltip, which should stay live when the panel is elsewhere.
+      this.openDetailsSurface(
+        {
+          kind: "row",
+          row: {
+            id: pinnedId,
+            name: row?.name ?? "",
+            job: row?.job ?? "",
+            isIdentifying: !!row?.isIdentifying,
+          },
+          defaultTargetAll: !!options.defaultTargetAll,
+          defaultTargetId: options.defaultTargetId ?? null,
+        },
+        () => {
+          this.pinnedDetailsRowId = pinnedId;
+          this.detailsUI.open(row, { pin: true, ...options });
+        }
+      );
+    };
 
 
     const withBacklog = (text) => {
@@ -526,6 +538,10 @@ class DpsApp {
         })
       : null;
 
+    // PowerMeter: widget chrome and modes (public/src/js/pmWidget.js).
+    this.pmWidget =
+      window.A2_VIEW === "main" && typeof createPmWidget === "function" ? createPmWidget(this) : null;
+
     this.startPolling();
     this.startWindowTitlePolling();
     this.fetchDps();
@@ -595,7 +611,10 @@ class DpsApp {
 
   startPolling() {
     if (this._pollTimer) return;
-    this._pollTimer = setInterval(() => this.fetchDps(), this.POLL_MS);
+    this._pollTimer = setInterval(() => {
+      this.fetchDps();
+      this.pmWidget?.tick(); // PowerMeter: widget states (waiting, fight over, error)
+    }, this.POLL_MS);
   }
 
   startWindowTitlePolling() {
@@ -726,6 +745,8 @@ class DpsApp {
 
   openHoverDetailsRow(row, event = null) {
     if (!row || this.pinnedDetailsRowId !== null || this.shouldSuppressRowInteractions()) return;
+    // PowerMeter: the design has no hover tooltip; a click opens the breakdown in place.
+    if (this.pmWidget?.isActive()) return;
     const rowId = Number(row?.id);
     if (!Number.isFinite(rowId) || rowId <= 0) return;
     if (event && Number.isFinite(event.clientX) && Number.isFinite(event.clientY)) {
@@ -917,6 +938,8 @@ class DpsApp {
       targetMaxHp,
       targetTotalDamage,
       targetCurrentHp,
+      targetBerserkMs,
+      targetPhase,
     } = this.buildRowsFromPayload(raw);
     if (this.refreshPending) {
       const pendingAgeMs = Math.max(0, now - (Number(this.refreshPendingStartedAt) || 0));
@@ -1078,6 +1101,15 @@ class DpsApp {
     this.hoverTooltipCacheByRowId.clear();
     this.updateMeterTotalBar(rowsToRender);
     this.meterUI.updateFromRows(rowsToRender);
+    this.pmWidget?.onFrame({
+      rows: rowsToRender,
+      targetMode,
+      targetMaxHp,
+      targetTotalDamage,
+      targetCurrentHp,
+      targetBerserkMs,
+      targetPhase,
+    });
   }
 
   buildRowsFromPayload(raw) {
@@ -1115,6 +1147,10 @@ class DpsApp {
       targetMaxHp,
       targetTotalDamage,
       targetCurrentHp,
+      // PowerMeter: berserk countdown (ms left) and boss phase for the widget's
+      // target header. The engine does not send them yet; absent = hidden.
+      targetBerserkMs: payload?.targetBerserkMs ?? null,
+      targetPhase: payload?.targetPhase ?? null,
     };
   }
 
@@ -3726,6 +3762,7 @@ class DpsApp {
   setBetaUi(enabled, { persist = false } = {}) {
     this.betaUi = !!enabled;
     document.body.classList.toggle("legacyUi", !this.betaUi);
+    this.pmWidget?.syncTheme();
     // Both skins show the same placeholder text; only the type scale and the
     // uppercase transform differ, so the fitted size has to be recomputed.
     this.fitBossName();
@@ -3788,6 +3825,7 @@ class DpsApp {
     const normalized = this.availableThemes.includes(themeId) ? themeId : this.availableThemes[0];
     this.theme = normalized;
     document.documentElement.dataset.theme = normalized;
+    this.pmWidget?.syncTheme();
     if (this.settingsSelections) {
       this.settingsSelections.theme = normalized;
     }
@@ -4121,6 +4159,7 @@ class DpsApp {
 
     // Show Npcap error if present
     const pcapErr = typeof info?.pcapError === "string" ? info.pcapError.trim() : "";
+    this.pcapError = pcapErr; // PowerMeter: read by the widget's capture-error state
     if (pcapErr) {
       this.lockedIp.textContent = "";
       this.lockedPort.textContent = pcapErr;
@@ -4584,19 +4623,25 @@ class DpsApp {
     if (!this.resizeHandle || !this.meterEl) return;
 
     let isResizing = false;
+    let axes = "xy";
     let startX = 0;
     let startY = 0;
     let startWidth = 0;
     let startHeight = 0;
-    const minWidth = 300;
+    // PowerMeter: the design's minimum widget size is 280x160 (Compact).
+    const minWidth = 280;
     const minHeight = 30;
 
     const onMouseMove = (event) => {
       if (!isResizing) return;
-      const nextWidth = Math.max(minWidth, startWidth + (event.clientX - startX));
-      const nextHeight = Math.max(minHeight, startHeight + (event.clientY - startY));
-      this.meterEl.style.width = `${nextWidth}px`;
-      this.meterEl.style.height = `${nextHeight}px`;
+      if (axes.includes("x")) {
+        const nextWidth = Math.max(minWidth, startWidth + (event.clientX - startX));
+        this.meterEl.style.width = `${nextWidth}px`;
+      }
+      if (axes.includes("y")) {
+        const nextHeight = Math.max(minHeight, startHeight + (event.clientY - startY));
+        this.meterEl.style.height = `${nextHeight}px`;
+      }
     };
 
     const onMouseUp = () => {
@@ -4611,15 +4656,21 @@ class DpsApp {
       }
     };
 
-    this.resizeHandle.addEventListener("mousedown", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const rect = this.meterEl.getBoundingClientRect();
-      startWidth = rect.width;
-      startHeight = rect.height;
-      startX = event.clientX;
-      startY = event.clientY;
-      isResizing = true;
+    // PowerMeter: the design's frame has several grips (8.1). Each one says which
+    // axes it drags in data-resize; the window grows right and down only, so the
+    // grips on the left/top edges resize the axis they can.
+    document.querySelectorAll(".meter .resizeHandle").forEach((handle) => {
+      handle.addEventListener("mousedown", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const rect = this.meterEl.getBoundingClientRect();
+        axes = handle.dataset.resize || "xy";
+        startWidth = rect.width;
+        startHeight = rect.height;
+        startX = event.clientX;
+        startY = event.clientY;
+        isResizing = true;
+      });
     });
 
     document.addEventListener("mousemove", onMouseMove);

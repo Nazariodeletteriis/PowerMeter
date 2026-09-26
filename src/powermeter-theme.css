@@ -23,6 +23,11 @@
 @import "@fontsource/jetbrains-mono/600.css";
 
 /* Elements added for this theme. Every other theme keeps its old layout. */
+:root:not([data-theme="powermeter"]) .pmOnly,
+:root:is(.detailsWindow, .historyWindow, .settingsWindow) .pmOnly,
+body.legacyUi .pmOnly {
+  display: none !important;
+}
 .pmLogo,
 .pmDuration,
 .pmPartyLabel,
@@ -46,6 +51,8 @@
   --pm-redt: #ff6b6b;
   --pm-deep: #7f1112;
   --pm-grey: #564f4f;
+  --pm-fill: #7f1112;
+  --pm-filltext: #faf7f7;
   /* Widget surfaces (design THEMES.b) */
   --pm-wrgb: 12 10 10;
   --pm-wbar: rgba(127, 17, 18, 0.85);
@@ -127,12 +134,17 @@
   .meter:hover .resizeHandle { opacity: 1; }
 
   /* --- Bar (24px) + target block ---
-     The header wraps: row one is the 24px bar (logo, timer, actions), row two
-     is the target name. The bar colour is painted only behind row one. */
+     The header wraps: row one is the 24px bar, row two the target name. The
+     bar colour is painted only behind row one. .headerBtns is flattened so its
+     buttons line up with the rest of the bar by `order`:
+     logo, DPS|Build tabs, timer (or state title), spacer, the A2Tools actions
+     (screenshot, suspend, history, reset, settings: shown on hover only, the
+     design has no slot for them), then the design's five controls
+     (lock, opacity, pill, dashboard, close). */
   .header {
     flex-wrap: wrap;
     gap: 0 6px;
-    padding: 0 6px 4px 8px;
+    padding: 0 6px 0 8px;
     border-radius: 8px 8px 0 0;
     background: linear-gradient(var(--pm-wbar), var(--pm-wbar)) top / 100% 24px no-repeat;
   }
@@ -141,24 +153,96 @@
     flex: none;
     order: 0;
   }
+  .header .headerBtns { display: contents; }
   .header .bossIcon,
   .header .headerBtns .headerBtn {
     width: 12px;
     height: 12px;
+    margin-left: 1px; /* 6px flex gap + 1 = the design's 7px icon rhythm */
     color: var(--pm-widget-muted);
     border-radius: 2px;
     transition: color 120ms ease;
   }
-  .header .bossIcon {
-    order: 1;
-    margin-left: auto;
-    margin-right: 1px; /* 6px flex gap + 1 = the design's 7px icon rhythm */
+  .header button.headerBtn {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
   }
-  .header .headerBtns {
-    order: 2;
-    height: 24px;
-    gap: 7px;
+  .header .bossIcon { order: 50; }
+  .header .suspendBtn { order: 51; }
+  .header .historyBtn { order: 52; }
+  .header .resetBtn { order: 53; }
+  .header .settingsBtn { order: 54; }
+  .pmSep { order: 60; display: block; width: 1px; height: 12px; background: rgba(255, 255, 255, 0.18); }
+  .header .pmLockBtn { order: 61; }
+  .header .pmOpacityBtn { order: 62; }
+  .header .pmPillBtn { order: 63; }
+  .header .dashboardBtn { order: 64; }
+  .header .pmCloseBtn { order: 65; }
+  .meter:not(:hover, :has(:focus-visible)) :is(.bossIcon, .suspendBtn, .historyBtn, .resetBtn, .settingsBtn, .pmSep) {
+    display: none;
+  }
+  .pmTabs {
+    order: 10;
+    display: flex;
+    flex: none;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 4px;
+    overflow: hidden;
+    font-size: 10px;
+  }
+  .pmTab {
+    padding: 1px 7px;
+    border: 0;
+    background: transparent;
     color: var(--pm-widget-muted);
+    font: inherit;
+    line-height: 1.55;
+    text-shadow: inherit;
+    cursor: pointer;
+    transition: color 120ms ease;
+  }
+  .pmTab:hover { color: var(--pm-widget-text); }
+  .pmTab.isActive {
+    background: rgba(219, 0, 0, 0.35);
+    color: var(--pm-widget-text);
+  }
+  .pmTab[hidden] { display: none; }
+  .pmTab:focus-visible {
+    outline: 1px solid var(--pm-redt);
+    outline-offset: -1px;
+  }
+  /* Timer/status and state title take the free space (basis 0), so a long
+     status text is cut short instead of pushing the icons onto a second row. */
+  .pmBarTitle {
+    order: 30;
+    display: block;
+    flex: 3 1 0;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pmBarTitle:empty { display: none; }
+  .pmBarTitle:not(:empty) ~ .pmSpacer { flex-grow: 0; }
+  .pmSpacer {
+    display: block;
+    flex: 1;
+  }
+  .header .pmSpacer {
+    order: 40;
+    flex: 1 1 0;
+    height: 24px;
+  }
+  .pmBarRight {
+    order: 45;
+    display: block;
+    font-size: 11px;
+    white-space: nowrap;
   }
   .header .bossIconOverlay svg,
   .header .headerBtns .headerBtn svg {
@@ -179,12 +263,36 @@
   /* Target name: second row of the header. Right padding keeps it clear of
      the target-mode pill, which is positioned over the row (see below). */
   .header .bossNames {
-    order: 3;
+    order: 100;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     flex: 0 0 100%;
-    margin-top: 6px;
-    padding-right: 60px;
+    margin: 6px 0 4px;
+    padding-right: 2px;
     box-sizing: border-box;
   }
+  .header .bossNames .bossName {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Berserk countdown, red for the last 30 s (design 8.2). */
+  .pmBerserk {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    flex: none;
+    font-family: var(--pm-mono);
+    font-size: 11px;
+    line-height: 1.55;
+    color: var(--pm-widget-text);
+  }
+  .pmBerserk svg { width: 11px; height: 11px; }
+  .pmBerserk.isUrgent { color: #ff4d4d; }
+  .pmBerserk[hidden] { display: none; }
   .header .bossNames .bossName,
   .header .bossNames .bossName:lang(ko),
   .header .bossNames .bossName:lang(zh-CN),
@@ -203,17 +311,16 @@
     line-height: 1.55;
   }
 
-  /* Fight timer / status, in the bar after the logo. The element lives in the
-     footer markup; it is lifted here rather than moved so other themes keep it. */
+  /* Fight timer / status, in the bar after the tabs. pmWidget.js moves the
+     element here from the footer, and back for every other theme. */
   .battleTime {
-    position: absolute;
-    top: 0;
-    left: 26px; /* 8px padding + 12px logo + 6px gap */
+    order: 20;
+    position: static;
+    flex: 3 1 0;
     height: 24px;
-    max-width: calc(100% - 140px);
+    min-width: 0;
     gap: 6px;
     margin: 0;
-    z-index: 1;
   }
   .battleTime.isVisible { margin: 0; }
   .battleTime .status {
@@ -233,20 +340,24 @@
     color: var(--pm-redt);
   }
   .battleTime .analysisStatus {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-family: var(--pm-sans);
     font-variation-settings: normal;
     font-size: 11px;
     color: var(--pm-widget-text);
   }
 
-  /* Target-mode pill ("Boss ▾"), beside the target name. */
+  /* Target-mode pill ("Boss ▾"), at the end of the target row (moved there
+     by pmWidget.js). */
   .footerBtns { display: contents; }
   .footerBtns .metricToggleBtn,
   .footerBtns .collapseBtn { display: none; }
-  .footerBtns .targetModeBtn {
-    position: absolute;
-    top: 30.5px; /* 24px bar + 6px gap, centred on the 18.6px name line */
-    right: 8px;
+  .targetModeBtn {
+    position: static;
+    flex: none;
     display: inline-block;
     height: auto;
     min-width: 0;
@@ -266,14 +377,14 @@
     text-shadow: none;
     transition: color 120ms ease, border-color 120ms ease;
   }
-  .footerBtns .targetModeBtn::first-letter { text-transform: uppercase; }
-  .footerBtns .targetModeBtn::after { content: " ▾"; }
-  .footerBtns .targetModeBtn:hover {
+  .targetModeBtn::first-letter { text-transform: uppercase; }
+  .targetModeBtn::after { content: " ▾"; }
+  .targetModeBtn:hover {
     color: var(--pm-widget-text);
     background: transparent;
     border-color: rgba(255, 255, 255, 0.35);
   }
-  .footerBtns .targetModeBtn:focus-visible {
+  .targetModeBtn:focus-visible {
     outline: 1px solid var(--pm-redt);
     outline-offset: 1px;
   }
@@ -310,6 +421,8 @@
   .bossHpFill::after { content: none; }
   .bossHpText {
     position: static;
+    display: flex;
+    justify-content: space-between;
     padding: 0;
     font-family: var(--pm-mono);
     font-variation-settings: normal;
@@ -323,6 +436,7 @@
   /* The design's right-hand slot is the boss phase, which the engine does not
      report. Absolute HP has no place in 8.2, so it stays hidden. */
   .bossHpText .bossHpAmt { display: none; }
+  .pmPhase[hidden] { display: none; }
 
   /* --- Player rows (26px) --- */
   .list {
@@ -478,11 +592,19 @@
   .meterTotalBar .meterTotalDmg { display: none; }
 
   /* --- "Beta slim" layout = the design's Compatto: name, DPS, bar --- */
-  .meter.slim .header { padding-bottom: 0; }
+  .meter.slim {
+    width: 280px;
+    min-height: 160px;
+  }
   .meter.slim .header .bossNames,
   .meter.slim .bossHpBar,
-  .meter.slim .footerBtns .targetModeBtn,
   .meter.slim .meterFooter { display: none; }
+  /* The design's Compact bar is logo and timer only; the controls come back on
+     hover so the widget stays usable. */
+  .meter.slim:not(:hover, :has(:focus-visible)) :is(.pmTabs, .headerBtn) { display: none; }
+  /* 280px has room for Settings (the way back to the Standard layout) beside
+     the five controls, not for the tabs and every A2Tools action. */
+  .meter.slim :is(.pmTabs, .bossIcon, .suspendBtn, .historyBtn, .resetBtn) { display: none; }
   .meter.slim .list.hasRows { padding-bottom: 4px; }
   .meter.slim .list .item { height: 22px; }
   .meter.slim .list .item .dps .dpsContribution,
@@ -493,18 +615,704 @@
   }
 }
 
-/* Class colour and icon per row (design CLS map, icons from the handoff). */
-.list .item[data-cls="gladiator"] { --cls: #52a5db; --cls-icon: url("./assets/pm/gladiator.png"); }
-.list .item[data-cls="templar"] { --cls: #4ca8e0; --cls-icon: url("./assets/pm/templar.png"); }
-.list .item[data-cls="assassin"] { --cls: #42c169; --cls-icon: url("./assets/pm/assassin.png"); }
-.list .item[data-cls="ranger"] { --cls: #4bc670; --cls-icon: url("./assets/pm/ranger.png"); }
-.list .item[data-cls="sorcerer"] { --cls: #ab61dd; --cls-icon: url("./assets/pm/sorcerer.png"); }
-.list .item[data-cls="spiritmaster"] { --cls: #c24dae; --cls-icon: url("./assets/pm/spiritmaster.png"); }
-.list .item[data-cls="cleric"] { --cls: #c8c171; --cls-icon: url("./assets/pm/cleric.png"); }
-.list .item[data-cls="chanter"] { --cls: #cac172; --cls-icon: url("./assets/pm/chanter.png"); }
+/* ---------- 4. widget modes and states (design 8.1-8.7) ----------
+   pmWidget.js sets the state classes on .meter:
+   pmMode-dps|build|lobby, pmView-live|waiting|ended|error, isPmDetail,
+   isPmPill, isPmLocked, isPmIdle, isPmUploaded, hasPmLast, hasPmSpark. */
+:root[data-theme="powermeter"]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
+  /* Standard size 400x300 (design 8.7); the list fills the space above the footer. */
+  .meter {
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* the 280px minimum is enforced by the resize grips */
+    min-height: 300px;
+    container: pmMeter / inline-size;
+  }
+  .list {
+    flex: 1 1 auto;
+    align-content: start;
+  }
+
+  /* The design's boxes are border-box throughout. */
+  .meter :is(.pmBuild, .pmLobby, .pmDetail, .pmEnd, .pmError, .pmUploaded, .pmEmpty, .pmLast, .pmSpark),
+  .meter :is(.pmBuild, .pmLobby, .pmDetail, .pmEnd, .pmError, .pmUploaded, .pmEmpty, .pmLast, .pmSpark) * {
+    box-sizing: border-box;
+  }
+
+  /* Everything a state does not use starts hidden. */
+  .pmPill,
+  .pmGrabber,
+  .pmLockBadge,
+  .pmSpark,
+  .pmEmpty,
+  .pmError,
+  .pmEnd,
+  .pmUploaded,
+  .pmBuild,
+  .pmLobby,
+  .pmDetail,
+  .pmLast { display: none; }
+
+  button:is(.pmBackBtn, .pmDetailReportBtn, .pmLinkBtn, .pmSubTab, .pmPill) {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-shadow: inherit;
+    cursor: pointer;
+  }
+  :is(.pmBackBtn, .pmDetailReportBtn, .pmLinkBtn, .pmSubTab, .pmPill, .pmFillBtn, .pmGhostBtn):focus-visible {
+    outline: 1px solid var(--pm-redt);
+    outline-offset: 2px;
+  }
+  .pmMono { font-family: var(--pm-mono); }
+
+  /* --- 8.1 hover frame: grips on the corners and the right edge --- */
+  .pmGrip {
+    display: block;
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    background: var(--pm-red);
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+  .meter:hover .pmGrip { opacity: 1; }
+  .pmGripTR { top: -4px; right: -4px; bottom: auto; cursor: ew-resize; }
+  .pmGripTL { top: -4px; left: -4px; cursor: move; }
+  .pmGripBL { bottom: -4px; left: -4px; right: auto; cursor: ns-resize; }
+  .pmGripR {
+    top: 50%;
+    right: -3px;
+    bottom: auto;
+    width: 6px;
+    height: 18px;
+    margin-top: -9px;
+    cursor: ew-resize;
+  }
+
+  /* --- 8.7 Extended: "DPS over time" under the list from 520px wide --- */
+  .pmSpark {
+    flex: none;
+    height: 64px;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .pmSparkLabel {
+    margin-bottom: 2px;
+    font-size: 10px;
+    line-height: 1.55;
+    color: var(--pm-t2);
+  }
+  .pmSpark svg {
+    display: block;
+    width: 100%;
+    height: 40px;
+  }
+  /* Extended keeps 12+ rows on screen with 24px rows (Standard 26, Compact 22). */
+  @container pmMeter (min-width: 520px) {
+    .meter.hasPmSpark.pmMode-dps.pmView-live .pmSpark { display: block; }
+    .meter:not(.slim, .isPmLocked) .list .item { height: 24px; }
+  }
+
+  /* --- 8.4 waiting --- */
+  .meter.pmMode-dps:is(.pmView-waiting, .pmView-error, .pmView-ended) :is(.header .bossNames, .bossHpBar, .list, .meterFooter) {
+    display: none;
+  }
+  .meter.pmMode-dps.pmView-waiting { min-height: 220px; }
+  .meter.pmMode-dps.pmView-waiting .pmEmpty {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .pmEmpty svg {
+    width: 22px;
+    height: 22px;
+    color: var(--pm-t2);
+  }
+  .pmEmptyTitle { font-weight: 500; }
+  .pmEmptyHint {
+    font-size: 11px;
+    color: var(--pm-t2);
+  }
+  .meter.pmMode-dps.pmView-waiting.hasPmLast .pmLast {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 11px;
+    color: var(--pm-widget-muted);
+  }
+  .pmLastDps { font-family: var(--pm-mono); }
+
+  /* --- 8.4 capture error: the whole widget is ringed in red --- */
+  .meter.pmMode-dps.pmView-error {
+    min-height: 0;
+    box-shadow: 0 0 0 1px var(--pm-red);
+  }
+  .meter.pmMode-dps.pmView-error .pmError,
+  .meter.pmMode-dps.pmView-ended.isPmUploaded .pmUploaded {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    text-shadow: none;
+  }
+  :is(.pmError, .pmUploaded) > svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+  }
+  .pmError > svg { color: #ff4d4d; }
+  .pmUploaded > svg { color: #5fd99a; }
+  .pmCardText {
+    flex: 1;
+    min-width: 0;
+  }
+  .pmCardTitle { font-weight: 500; }
+  .pmCardSub {
+    font-size: 11px;
+    color: var(--pm-widget-muted);
+  }
+  .pmError .pmCardSub { color: var(--pm-t2); }
+
+  /* --- 8.4 fight over --- */
+  .meter.pmMode-dps.pmView-ended { min-height: 220px; }
+  .meter.pmMode-dps.pmView-ended.isPmUploaded { min-height: 0; }
+  .meter.pmMode-dps.pmView-ended .battleTime { display: none; }
+  .meter.pmMode-dps.pmView-ended:not(.isPmUploaded) .pmEnd {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    text-shadow: none;
+  }
+  .pmEndHead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+  }
+  .pmOutcome {
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: #3fbf7f33;
+    color: #5fd99a;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .pmOutcome.isWipe {
+    background: rgba(219, 0, 0, 0.2);
+    color: var(--pm-redt);
+  }
+  .pmEndStats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .pmStatLabel {
+    font-size: 10px;
+    color: var(--pm-widget-muted);
+  }
+  .pmStatValue {
+    font-family: var(--pm-mono);
+    font-size: 16px;
+  }
+  .pmEndActions {
+    display: flex;
+    gap: 6px;
+    margin-top: auto;
+  }
+  .pmFillBtn,
+  .pmGhostBtn {
+    height: 32px;
+    padding: 0 10px;
+    overflow: hidden;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 13.3333px; /* the design's buttons inherit only the family: browser default size */
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color 120ms ease, background-color 120ms ease;
+  }
+  .pmEndActions > button { flex: 1; }
+  .pmFillBtn {
+    border: 1px solid var(--pm-red);
+    background: var(--pm-fill);
+    color: var(--pm-filltext);
+  }
+  .pmEnd .pmFillBtn { font-weight: 500; }
+  .pmFillBtn svg {
+    width: 12px;
+    height: 12px;
+    vertical-align: -2px;
+  }
+  .pmGhostBtn {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: transparent;
+    color: var(--pm-widget-text);
+  }
+  .pmError .pmGhostBtn { border-color: rgba(255, 255, 255, 0.25); }
+  :is(.pmError, .pmUploaded) button { height: 30px; flex: none; }
+  .pmFillBtn:disabled { cursor: default; opacity: 0.6; }
+  @media (hover: hover) and (pointer: fine) {
+    .pmFillBtn:not(:disabled):hover { background: #9a1516; }
+    .pmGhostBtn:hover { border-color: rgba(255, 255, 255, 0.35); }
+  }
+
+  /* --- 8.5 Build: 420x360 --- */
+  .meter.pmMode-build {
+    width: 420px !important; /* the Build card has its own size, whatever the DPS size */
+    min-height: 360px !important;
+    text-shadow: none;
+  }
+  .meter:is(.pmMode-build, .pmMode-lobby) :is(.pmLogo, .header .bossNames, .bossHpBar, .list, .meterFooter, .battleTime) {
+    display: none;
+  }
+  .pmMode-build .pmBarRight {
+    padding: 0 6px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 3px;
+    color: var(--pm-t2);
+    font-size: 10px;
+    line-height: 1.55;
+  }
+  .meter.pmMode-build .pmBuild {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .pmBuildHead {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px 10px;
+  }
+  .pmBuildTitle {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .pmBuildName { font-weight: 600; }
+  .pmBuildClass {
+    font-size: 10px;
+    color: #4f93ea;
+  }
+  .pmBuildArrow { color: var(--pm-widget-muted); }
+  .pmBuildTarget { color: var(--pm-redt); }
+  .pmBuildBar {
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .pmBuildBar > div {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--pm-red);
+  }
+  .pmSubTabs {
+    display: flex;
+    gap: 2px;
+    padding: 0 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  button.pmSubTab {
+    height: 26px;
+    padding: 0 10px;
+    border-bottom: 2px solid transparent;
+    color: var(--pm-widget-muted);
+    font-size: 11px;
+    transition: color 120ms ease;
+  }
+  button.pmSubTab:hover { color: var(--pm-widget-text); }
+  button.pmSubTab[aria-selected="true"] {
+    border-bottom-color: var(--pm-red);
+    color: var(--pm-widget-text);
+  }
+  .pmBuildBody {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 8px 10px;
+  }
+  .pmSlots {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+  }
+  .pmSlot {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border: 1.5px solid var(--rar);
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.35);
+    color: var(--pm-t2);
+    font-size: 8px;
+  }
+  .pmSlot.isMissing {
+    border-style: dashed;
+    opacity: 0.55;
+  }
+  .pmSlotEnh {
+    position: absolute;
+    right: 2px;
+    bottom: 0;
+    font-family: var(--pm-mono);
+    font-size: 8px;
+    color: var(--pm-widget-text);
+  }
+  .pmSlotsHint {
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--pm-widget-muted);
+  }
+  .pmMissing {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .pmMissingIcon {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    box-sizing: border-box;
+    border: 1.5px dashed var(--rar);
+    border-radius: 4px;
+  }
+  .pmMissingText {
+    flex: 1;
+    min-width: 0;
+  }
+  .pmMissingName {
+    overflow: hidden;
+    color: var(--rar);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pmMissingSrc {
+    font-size: 10px;
+    color: var(--pm-widget-muted);
+  }
+  .pmStat {
+    display: grid;
+    grid-template-columns: 1fr 60px 16px 60px;
+    gap: 4px;
+    align-items: center;
+    min-height: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .pmStat > :nth-child(1) { color: var(--pm-t2); }
+  .pmStat > :nth-child(2),
+  .pmStat > :nth-child(4) {
+    font-family: var(--pm-mono);
+    text-align: right;
+  }
+  .pmStat > :nth-child(3) {
+    color: #8a8181;
+    text-align: center;
+  }
+  .pmStat > :nth-child(4) { color: #5fd99a; }
+  .pmBuildFoot {
+    display: flex;
+    align-items: center;
+    flex: none;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 0 0 8px 8px;
+    background: var(--pm-wbar);
+    font-size: 11px;
+    color: var(--pm-widget-muted);
+  }
+  button.pmLinkBtn {
+    color: #ff8a8a;
+    transition: color 120ms ease;
+  }
+  button.pmLinkBtn:hover { color: var(--pm-widget-text); }
+
+  /* --- 8.6 Lobby --- */
+  .meter.pmMode-lobby { min-height: 0; }
+  .pmMode-lobby .pmBarRight { color: #5fd99a; }
+  .meter.pmMode-lobby .pmLobby { display: block; }
+  .pmLobbyGrid {
+    display: grid;
+    grid-template-columns: 1fr 56px 52px 74px;
+    gap: 6px;
+    align-items: center;
+    padding: 0 10px;
+  }
+  .pmLobbyGrid > :not(:first-child) { text-align: right; }
+  .pmLobbyHead {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-size: 9px;
+    color: var(--pm-widget-muted);
+    text-shadow: none;
+  }
+  .pmLobbyRow {
+    height: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .pmLobbyRow > :nth-child(2),
+  .pmLobbyRow > :nth-child(3) { font-family: var(--pm-mono); }
+  .pmLobbyRow > :nth-child(3) { color: var(--pm-t2); }
+  .pmLobbyName {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pmLobbyRow .isReady { color: #5fd99a; }
+  .pmLobbyRow .isNotReady { color: #ffb199; }
+
+  /* Class badge used by the breakdown and the lobby (same as the row's). */
+  .pmCls {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 16px;
+    height: 16px;
+    box-sizing: border-box;
+    border: 1px solid var(--cls, rgba(255, 255, 255, 0.18));
+    border-radius: 4px;
+    background: var(--cls-icon, none) center / 85% no-repeat, rgba(0, 0, 0, 0.55);
+    color: var(--cls);
+    font-size: 7px;
+    font-weight: 700;
+    line-height: 1;
+    text-shadow: none;
+  }
+
+  /* --- 8.3 player breakdown: replaces the whole widget, 400x300 --- */
+  .meter.isPmDetail > :not(.pmDetail, .resizeHandle, .pmGrip) { display: none; }
+  .meter.isPmDetail .pmDetail {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .pmDetailHead {
+    display: flex;
+    align-items: center;
+    flex: none;
+    gap: 8px;
+    height: 28px;
+    padding: 0 8px;
+    border-radius: 8px 8px 0 0;
+    background: var(--pm-wbar);
+  }
+  button.pmBackBtn {
+    display: grid;
+    place-items: center;
+    width: 12px;
+    height: 12px;
+  }
+  .pmBackBtn svg {
+    width: 12px;
+    height: 12px;
+  }
+  .pmDetailName { font-weight: 600; }
+  button.pmDetailReportBtn { transition: color 120ms ease; }
+  button.pmDetailReportBtn:hover { color: #ff8a8a; }
+  .pmDetailTotal {
+    font-family: var(--pm-mono);
+    font-weight: 600;
+  }
+  .pmDetailUnit {
+    font-size: 10px;
+    color: var(--pm-t2);
+  }
+  .pmBadges {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    padding: 6px 8px;
+  }
+  .pmBadge {
+    padding: 3px 0;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    text-align: center;
+  }
+  .pmBadge > :first-child {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    color: var(--pm-t2);
+  }
+  .pmBadge > :last-child {
+    font-family: var(--pm-mono);
+    font-size: 11px;
+  }
+  .pmSkillGrid {
+    display: grid;
+    grid-template-columns: 1fr 58px 42px 34px 42px;
+    gap: 6px;
+  }
+  .pmSkillGrid > :not(:first-child, .pmSkillBar) { text-align: right; }
+  .pmSkillHead {
+    padding: 2px 12px;
+    font-size: 9px;
+    color: var(--pm-widget-muted);
+    text-shadow: none;
+  }
+  .pmSkills {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 6px;
+    scrollbar-width: none;
+  }
+  .pmSkill {
+    position: relative;
+    align-items: center;
+    height: 24px;
+    margin-bottom: 2px;
+    padding: 0 6px;
+    overflow: hidden;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .pmSkill > span { position: relative; }
+  .pmSkill > span:nth-child(2) {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pmSkill > span:nth-child(n + 3) { font-family: var(--pm-mono); }
+  .pmSkill > span:nth-child(4) { color: #e8e1e1; }
+  .pmSkill > span:nth-child(5),
+  .pmSkill > span:nth-child(6) { color: var(--pm-t2); }
+  .pmSkillBar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background: var(--cls, var(--pm-grey));
+    opacity: 0.3;
+  }
+
+  /* --- 8.1 locked (click-through): bar reduced to a grabber and a lock --- */
+  .meter.isPmLocked {
+    min-height: 0;
+    padding: 4px 6px 6px;
+    box-shadow: none;
+  }
+  .meter.isPmLocked > :not(.list, .pmGrabber, .pmLockBadge) { display: none; }
+  .meter.isPmLocked .pmGrabber {
+    display: block;
+    width: 40px;
+    height: 3px;
+    margin: 0 auto 5px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.25);
+  }
+  .meter.isPmLocked .pmLockBadge {
+    display: block;
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    color: var(--pm-t2);
+    line-height: 0;
+  }
+  .pmLockBadge svg {
+    width: 10px;
+    height: 10px;
+  }
+  .meter.isPmLocked .list,
+  .meter.isPmLocked .list.hasRows {
+    gap: 2px;
+    padding: 0;
+  }
+  .meter.isPmLocked .list .item {
+    height: 22px;
+    outline: 0;
+  }
+  .meter.isPmLocked .list .item .name { font-weight: 400; }
+  .meter.isPmLocked .list .item :is(.classIcon, .dpsContribution, .dpsTotal) { display: none; }
+
+  /* --- 8.1 pill: 160x32, your DPS and the timer; click to expand --- */
+  .meter.isPmPill {
+    width: 160px !important; /* the meter keeps its own size inline for the way back */
+    height: 32px !important;
+    min-height: 0 !important;
+    padding: 0;
+    border-radius: 16px;
+    background: rgb(var(--pm-wrgb) / 0.8);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+    text-shadow: none;
+  }
+  .meter.isPmPill > :not(.pmPill) { display: none !important; }
+  .meter.isPmPill .pmPill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+    padding: 0 12px;
+    box-sizing: border-box;
+    border-radius: 16px;
+    color: var(--pm-widget-text);
+  }
+  .pmPillDot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--pm-red);
+  }
+  .pmPillDps {
+    font-family: var(--pm-mono);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .pmPillTime {
+    margin-left: auto;
+    font-family: var(--pm-mono);
+    font-size: 11px;
+    color: var(--pm-t2);
+  }
+  .pmPillReady {
+    font-size: 11px;
+    color: var(--pm-t2);
+  }
+  .meter.isPmIdle .pmPill { color: var(--pm-t2); }
+  .meter.isPmIdle .pmPillDot { background: #3fbf7f; }
+  .meter:not(.isPmIdle) .pmPillReady,
+  .meter.isPmIdle :is(.pmPillDps, .pmPillTime) { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pmGrip { transition: none; }
+  }
+}
+
+/* Class colour and icon per row, breakdown and lobby member (design CLS map,
+   icons from the handoff). */
+[data-cls="gladiator"] { --cls: #52a5db; --cls-icon: url("./assets/pm/gladiator.png"); }
+[data-cls="templar"] { --cls: #4ca8e0; --cls-icon: url("./assets/pm/templar.png"); }
+[data-cls="assassin"] { --cls: #42c169; --cls-icon: url("./assets/pm/assassin.png"); }
+[data-cls="ranger"] { --cls: #4bc670; --cls-icon: url("./assets/pm/ranger.png"); }
+[data-cls="sorcerer"] { --cls: #ab61dd; --cls-icon: url("./assets/pm/sorcerer.png"); }
+[data-cls="spiritmaster"] { --cls: #c24dae; --cls-icon: url("./assets/pm/spiritmaster.png"); }
+[data-cls="cleric"] { --cls: #c8c171; --cls-icon: url("./assets/pm/cleric.png"); }
+[data-cls="chanter"] { --cls: #cac172; --cls-icon: url("./assets/pm/chanter.png"); }
 /* No Brawler icon in the handoff: the design prints its initials instead. */
-.list .item[data-cls="brawler"] { --cls: #c58b55; }
-:root[data-theme="powermeter"] .list .item[data-cls="brawler"] .classIcon::before { content: "BR"; }
+[data-cls="brawler"] { --cls: #c58b55; }
+:root[data-theme="powermeter"] [data-cls="brawler"] :is(.classIcon, .pmCls)::before,
+:root[data-theme="powermeter"] .pmCls[data-cls="brawler"]::before { content: "BR"; }
 
 /* ---------- 3. panels: hard-coded colours in styles.css ---------- */
 
