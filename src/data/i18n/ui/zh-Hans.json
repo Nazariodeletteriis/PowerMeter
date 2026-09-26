@@ -383,6 +383,7 @@
       "position": "排名",
       "upload": "上传日志",
       "uploadUnavailable": "无法上传",
+      "signIn": "请在控制面板中使用 Discord 登录",
       "openReport": "打开报告",
       "uploaded": "已上传 ✓",
       "copyLink": "复制链接",

@@ -7,6 +7,7 @@ pub mod i18n;
 pub mod logging;
 pub mod platform;
 pub mod powermeter;
+pub mod pm_account;
 
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -1819,6 +1820,10 @@ pub fn run() {
             fetch_url,
             show_update_window,
             powermeter::npcap_installed,
+            pm_account::pm_account,
+            pm_account::pm_login,
+            pm_account::pm_logout,
+            pm_account::upload_combat_log,
             powermeter::install_npcap,
             powermeter::open_dashboard_window,
             powermeter::show_overlay,

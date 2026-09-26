@@ -105,10 +105,12 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
   const [profile, setProfile] = useState({ first: "", last: "", pg: localStorage.getItem(USER_NAME_KEY) ?? "" });
   const [photo, setPhoto] = useState<"discord" | "upload" | "none">("discord");
   const [photoUrl, setPhotoUrl] = useState("");
+  const [account, setAccount] = useState<{ name: string } | null>(null);
   const capture = usePoll(getCapture, 2000).data;
 
   useEffect(() => {
     run(() => invoke<boolean>("get_click_through").then(setClickThrough));
+    run(() => invoke<{ name: string } | null>("pm_account").then(setAccount));
     run(() => invoke<string[]>("get_available_devices").then(setDevices));
     run(() => invoke<string>("get_app_version").then(setVersion));
   }, []); // once per visit: `run` is a new function every render
@@ -381,8 +383,10 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
             onKeyDown={(e) => e.key === "Enter" && saveCharacter()}
           />
         </Row>
-        <Row label="Discord" desc={`kaelthas · ${t("organizer.set.linked")}`}>
-          {button(t("organizer.set.disconnect"))}
+        <Row label="Discord" desc={account ? `${account.name} · ${t("organizer.set.linked")}` : t("account.body")}>
+          {account
+            ? button(t("organizer.set.disconnect"), () => run(() => invoke("pm_logout").then(() => setAccount(null))))
+            : button(t("account.discord"), () => run(() => invoke<{ name: string }>("pm_login").then(setAccount)))}
         </Row>
         <Row label="Patreon" desc={t("organizer.set.patreonSince")}>
           {button(t("organizer.set.manage"), () => open(PATREON_URL))}

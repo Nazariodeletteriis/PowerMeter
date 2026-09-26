@@ -383,6 +383,7 @@
       "position": "順位",
       "upload": "ログをアップロード",
       "uploadUnavailable": "アップロード不可",
+      "signIn": "ダッシュボードからDiscordでログインしてください",
       "openReport": "レポートを開く",
       "uploaded": "アップロード済み ✓",
       "copyLink": "リンクをコピー",

@@ -290,7 +290,6 @@ const createPmWidget = (app) => {
   const uploadBtn = $(".pmUploadBtn");
   uploadBtn?.addEventListener("click", () => {
     uploadBtn.disabled = true;
-    // Not in the backend yet: see the report for upload_combat_log.
     invoke("upload_combat_log")
       .then((result) => {
         upload = { url: String(result?.url || "") };
@@ -298,7 +297,11 @@ const createPmWidget = (app) => {
       })
       .catch((err) => {
         console.warn("[PowerMeter] upload_combat_log failed", err);
-        $(".pmUploadLabel").textContent = t("pmWidget.end.uploadUnavailable", "Upload unavailable");
+        const signedOut = err === "not signed in" || err === "unauthorized";
+        $(".pmUploadLabel").textContent = signedOut
+          ? t("pmWidget.end.signIn", "Sign in with Discord from the dashboard")
+          : t("pmWidget.end.uploadUnavailable", "Upload unavailable");
+        uploadBtn.disabled = false;
       });
   });
   const copyBtn = $(".pmCopyLinkBtn");

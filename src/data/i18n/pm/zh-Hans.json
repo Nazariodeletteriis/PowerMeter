@@ -34,6 +34,7 @@
   "account.body": "使用 Discord 登录，上传日志、分享配装与资料，并出现在排行榜中。",
   "account.discord": "使用 Discord 登录",
   "account.later": "稍后",
+  "account.browser": "请在刚打开的浏览器页面中完成登录。",
   "disclaimer.title": "开始之前",
   "disclaimer.body": "PowerMeter 是一个非官方工具，与 NCSoft 无关。它被动读取战斗数据。使用风险自负。",
   "disclaimer.accept": "我已阅读并同意",

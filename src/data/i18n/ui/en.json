@@ -383,6 +383,7 @@
       "position": "Position",
       "upload": "Upload log",
       "uploadUnavailable": "Upload unavailable",
+      "signIn": "Sign in with Discord from the dashboard",
       "openReport": "Open report",
       "uploaded": "Uploaded ✓",
       "copyLink": "Copy link",

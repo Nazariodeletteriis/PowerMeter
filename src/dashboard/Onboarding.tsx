@@ -337,9 +337,12 @@ function Character(props: StepProps & { settings: Settings; save: SaveSetting })
 
 function Account(props: StepProps) {
   const { t, onNext } = props;
+  const { busy, error, run } = useAction();
+  const login = () => run(() => invoke("pm_login")).then((ok) => ok && onNext());
   return (
     <Frame
       {...props}
+      error={error}
       title={
         <>
           {t("account.title")} <span style={{ color: "var(--pm-t3)", fontSize: 14 }}>{t("common.optional")}</span>
@@ -349,8 +352,7 @@ function Account(props: StepProps) {
     >
       <p className="lead">{t("account.body")}</p>
       <div style={{ display: "flex", gap: 8 }}>
-        {/* Discord login ships with R2 (server + OAuth). */}
-        <button type="button" className="btn discordBtn" disabled title={t("soon.title", { release: "R2" })}>
+        <button type="button" className="btn discordBtn" disabled={busy} onClick={login}>
           <DiscordLogoIcon aria-hidden="true" />
           {t("account.discord")}
         </button>
@@ -358,6 +360,7 @@ function Account(props: StepProps) {
           {t("account.later")}
         </button>
       </div>
+      {busy && <p className="onbInfo">{t("account.browser")}</p>}
     </Frame>
   );
 }

@@ -34,6 +34,7 @@
   "account.body": "Discordでログインすると、ログのアップロード、ビルドやプロフィールの共有、ランキングへの参加ができます。",
   "account.discord": "Discordでログイン",
   "account.later": "後で",
+  "account.browser": "開いたブラウザのページでログインを完了してください。",
   "disclaimer.title": "始める前に",
   "disclaimer.body": "PowerMeterは非公式ツールであり、NCSoftとは関係ありません。戦闘データをパッシブに読み取ります。ご利用は自己責任でお願いします。",
   "disclaimer.accept": "内容を読んで同意します",

@@ -34,6 +34,7 @@
   "account.body": "Connecte-toi avec Discord pour envoyer tes logs, partager builds et profils et apparaître dans les classements.",
   "account.discord": "Se connecter avec Discord",
   "account.later": "Plus tard",
+  "account.browser": "Termine la connexion dans la page du navigateur qui vient de s'ouvrir.",
   "disclaimer.title": "Avant de commencer",
   "disclaimer.body": "PowerMeter est un outil non officiel, sans affiliation avec NCSoft. Il lit passivement les données de combat. Utilise-le à tes propres risques.",
   "disclaimer.accept": "J'ai lu et j'accepte",
