@@ -298,7 +298,7 @@
   "battleTime": {
     "analysing": "Monitoraggio dati...",
     "idle": "Inattivo",
-    "notRunning": "AION2 non è in esecuzione",
+    "notRunning": "In attesa di Aion 2…",
     "suspended": "App sospesa"
   },
   "meter": {
@@ -348,6 +348,73 @@
       "exploration": "Exploration",
       "normal": "Normal",
       "hard": "Hard"
+    }
+  },
+  "pmWidget": {
+    "modeLabel": "Modalità del widget",
+    "expand": "Clic per espandere",
+    "ready": "Pronto",
+    "locked": "Bloccato",
+    "lock": "Blocca (click-through)",
+    "opacity": "Opacità",
+    "pill": "Riduci a pillola",
+    "dashboard": "Apri dashboard",
+    "close": "Chiudi",
+    "back": "Indietro",
+    "berserkTip": "Timer berserk: diventa rosso negli ultimi 30 s",
+    "phase": "Fase {n}",
+    "sparkLabel": "DPS nel tempo",
+    "detail": {
+      "skill": "Skill",
+      "damage": "Danno",
+      "heal": "Cure",
+      "hits": "Colpi",
+      "crit": "Crit%"
+    },
+    "waiting": {
+      "title": "Nessun combattimento attivo",
+      "hint": "Colpisci un bersaglio per iniziare",
+      "last": "Ultimo: {boss} · {outcome} {time}"
+    },
+    "end": {
+      "title": "Fine combattimento",
+      "duration": "Durata",
+      "yourDps": "Tuo DPS",
+      "position": "Posizione",
+      "upload": "Carica log",
+      "uploadUnavailable": "Upload non disponibile",
+      "openReport": "Apri report",
+      "uploaded": "Caricato ✓",
+      "copyLink": "Copia link",
+      "linkCopied": "Link copiato"
+    },
+    "error": {
+      "title": "Cattura interrotta",
+      "noTraffic": "Nessun traffico sull’adattatore selezionato",
+      "npcap": "Npcap non disponibile",
+      "diagnose": "Diagnosi"
+    },
+    "build": {
+      "slots": "Slot",
+      "missing": "Mancanti",
+      "stats": "Statistiche",
+      "slotsHint": "Tratteggiati: pezzi mancanti · passa il mouse per l’oggetto obiettivo",
+      "owned": "{owned}/{total} posseduti",
+      "openBuilder": "Apri nel builder ↗",
+      "ownedTip": "Posseduto",
+      "targetTip": "Obiettivo: {item}",
+      "source": {
+        "drop": "Drop",
+        "craft": "Crafting",
+        "shop": "Negozio"
+      }
+    },
+    "lobby": {
+      "ready": "{n}/{total} pronti",
+      "player": "Giocatore",
+      "status": "Stato",
+      "notReady": "Non pronto",
+      "gsTip": "Gear score"
     }
   }
 }
