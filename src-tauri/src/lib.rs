@@ -1816,8 +1816,6 @@ pub fn run() {
             show_update_window,
             powermeter::npcap_installed,
             powermeter::open_dashboard_window,
-            powermeter::set_click_through,
-            powermeter::get_click_through,
             powermeter::show_overlay,
         ])
         .run(tauri::generate_context!())

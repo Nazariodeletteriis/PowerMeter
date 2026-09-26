@@ -1,5 +1,14 @@
+import de from "../data/i18n/pm/de.json";
 import en from "../data/i18n/pm/en.json";
+import es from "../data/i18n/pm/es.json";
+import fr from "../data/i18n/pm/fr.json";
 import it from "../data/i18n/pm/it.json";
+import ja from "../data/i18n/pm/ja.json";
+import ko from "../data/i18n/pm/ko.json";
+import pt from "../data/i18n/pm/pt.json";
+import ru from "../data/i18n/pm/ru.json";
+import zhHans from "../data/i18n/pm/zh-Hans.json";
+import zhHant from "../data/i18n/pm/zh-Hant.json";
 
 // Same codes and native names as the meter's language dropdown (core.js).
 export const LANGUAGES = [
@@ -21,8 +30,10 @@ export const LANGUAGE_SETTING = "dpsMeter.language";
 export type Key = keyof typeof en;
 export type T = (key: Key, vars?: Record<string, string | number>) => string;
 
-// Only en and it exist so far; every other language falls back to en.
-const DICTS: Record<string, Partial<Record<Key, string>>> = { en, it };
+// A key missing from a language falls back to en.
+const DICTS: Record<string, Partial<Record<Key, string>>> = {
+  de, en, es, fr, it, ja, ko, pt, ru, "zh-Hans": zhHans, "zh-Hant": zhHant,
+};
 
 function isLanguage(code: string | undefined): code is string {
   return LANGUAGES.some((l) => l.code === code);

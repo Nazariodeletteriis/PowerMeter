@@ -5,7 +5,7 @@
 
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use tauri::{Emitter, Manager};
+use tauri::Manager;
 
 use crate::platform::hotkeys::{parse_hotkey_label, HotkeyManager};
 use crate::AppState;
@@ -19,12 +19,10 @@ const CLICK_THROUGH_HOTKEY_KEY: &str = "pm.clickThroughHotkey";
 static CLICK_THROUGH: AtomicBool = AtomicBool::new(false);
 
 /// Lets mouse input pass through the overlay to the game underneath.
-#[tauri::command]
-pub fn set_click_through(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
+fn set_click_through(app: &tauri::AppHandle, enabled: bool) -> Result<(), String> {
     let window = app.get_webview_window("main").ok_or("overlay window not found")?;
     window.set_ignore_cursor_events(enabled).map_err(|e| e.to_string())?;
     CLICK_THROUGH.store(enabled, Ordering::SeqCst);
-    let _ = app.emit("pm-click-through", enabled);
     Ok(())
 }
 
@@ -36,11 +34,6 @@ pub fn show_overlay(app: tauri::AppHandle) -> Result<(), String> {
     let _ = window.unminimize();
     let _ = window.set_always_on_top(true);
     Ok(())
-}
-
-#[tauri::command]
-pub fn get_click_through() -> bool {
-    CLICK_THROUGH.load(Ordering::SeqCst)
 }
 
 /// Global hotkey toggling click-through (default Ctrl+Alt+L). Uses a second
@@ -62,7 +55,7 @@ pub fn start_click_through_hotkey(app: &tauri::AppHandle) {
         0,
         move || {
             let next = !CLICK_THROUGH.load(Ordering::SeqCst);
-            if let Err(e) = set_click_through(app.clone(), next) {
+            if let Err(e) = set_click_through(&app, next) {
                 tracing::warn!("Click-through toggle failed: {}", e);
             }
         },
