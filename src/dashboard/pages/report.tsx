@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import {
   ArrowsLeftRightIcon,
   CaretDownIcon,
@@ -11,8 +11,9 @@ import {
   SkullIcon,
 } from "@phosphor-icons/react";
 import { fmt } from "../ui";
-import { BOSS, BOSS_STATS, BUFFS, CLASS_SKILLS, DEATH, DURATION, FIGHT_DATE, PHASE, PLAYER_EXTRA, REPORT_LISTS, TL_PERIOD } from "../sample/combat";
-import { ab, Av, Chart, classColor, clock, pc, sampleBadges, sampleParty, sampleSeries, sampleSkills, ShareModal, type Skill } from "./combat/parts";
+import { BOSS, DUNGEON, BOSS_STATS, BUFFS, CLASS_SKILLS, DEATH, DURATION, FIGHT_DATE, PHASE, PLAYER_EXTRA, REPORT_LISTS, TL_PERIOD } from "../sample/combat";
+import { ab, Av, Chart, classColor, clock, pc, sampleBadges, sampleParty, sampleSeries, sampleSkills, type Skill } from "./combat/parts";
+import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
 
 // Every number on this page is the prototype's sample fight until online logs
@@ -25,7 +26,10 @@ const SKILL_COLS = "minmax(220px,1.6fr) repeat(12,minmax(58px,1fr))";
 // Sort keys; labels are combat.col.<key>, tooltips combat.tip.<key>.
 const SKILL_HEAD: (keyof Skill)[] = ["n", "dmg", "pct", "hits", "crit", "min", "max", "avg", "back", "parry", "perfect", "double", "multi"];
 
-export default function Report({ t, lang }: PageProps) {
+export default function Report({ t, lang, onError, setHeader }: PageProps) {
+  // ponytail: the sample fight's; the fight record viewer will pass the real one.
+  const crumb = `${DUNGEON} → ${BOSS} → ${t("shell.attempt", { n: 4 })}`;
+  useEffect(() => setHeader({ title: BOSS, crumb }), [setHeader, crumb]);
   const [sel, setSel] = useState(0);
   const [tab, setTab] = useState<Tab>("overview");
   const [range, setRange] = useState<[number, number] | null>(null);
@@ -466,7 +470,7 @@ export default function Report({ t, lang }: PageProps) {
         </>
       )}
 
-      {share && <ShareModal t={t} lang={lang} onClose={() => setShare(false)} />}
+      {share && <ShareModal t={t} lang={lang} kind="log" onClose={() => setShare(false)} onError={onError} />}
     </>
   );
 }

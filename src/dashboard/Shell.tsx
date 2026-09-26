@@ -7,7 +7,6 @@ import {
   CaretUpIcon,
   MagnifyingGlassIcon,
   PictureInPictureIcon,
-  TrayIcon,
   UserIcon,
 } from "@phosphor-icons/react";
 import type { SaveSetting, Settings } from "./App";
@@ -17,8 +16,10 @@ import { ALL_PAGES, NAV, NAV_BOTTOM, type NavPage } from "./nav";
 import { Palette } from "./Palette";
 import { SAMPLE_CHARACTER } from "./sampleData";
 import { Supporter } from "./Supporter";
-import { ClassAvatar, EmptyState, fmt } from "./ui";
-import type { PageProps } from "./pages/types";
+import { ClassAvatar, fmt } from "./ui";
+import States from "./pages/shared/States";
+import { Diagnosis } from "./pages/system/Diagnosis";
+import type { PageHeader, PageProps } from "./pages/types";
 import { usePoll } from "./usePoll";
 
 /** Shape of get_capture_status (src-tauri/src/lib.rs). */
@@ -48,13 +49,6 @@ export const USER_NAME_KEY = "dpsMeter.userName";
 const getCaptureStatus = () => invoke<CaptureStatus>("get_capture_status");
 const getGameTitle = () => invoke<string | null>("get_aion2_window_title");
 
-// Engine windows that stand in for R1 pages until the dashboard has them.
-const ENGINE: Record<string, [label: "soon.openMeter" | "soon.openHistory" | "soon.openSettings", () => Promise<unknown>]> = {
-  meter: ["soon.openMeter", () => invoke("show_overlay")],
-  storico: ["soon.openHistory", () => invoke("request_details_view", { payload: { kind: "history" } })],
-  impostazioni: ["soon.openSettings", () => invoke("open_settings_window")],
-};
-
 type Props = {
   t: T;
   lang: string;
@@ -79,6 +73,13 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
   const [collapsed, setCollapsed] = useState(false);
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [palette, setPalette] = useState(false);
+  const [diagnosis, setDiagnosis] = useState(false);
+  const [header, setHeader] = useState<PageHeader>({});
+  // Cleared on navigation; the new page sets its own from an effect.
+  const go = (id: string) => {
+    setHeader({});
+    setPage(id);
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -108,6 +109,9 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
   const openWidget = () => run(() => invoke("show_overlay"));
   const current = ALL_PAGES.find((x) => x.id === page)!;
   const group = NAV.find((g) => g.items.includes(current))?.label;
+  // Like the prototype, only pages without their own design (the states page)
+  // show their group as breadcrumb.
+  const crumb = header.crumb ?? (group && (!PAGES[page] || PAGES[page] === States) ? t(group) : undefined);
 
   const item = (x: NavPage, indent: boolean) => (
     <button
@@ -116,7 +120,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
       className={indent ? "navItem indent" : "navItem"}
       title={t(x.label)}
       aria-current={x.id === page ? "page" : undefined}
-      onClick={() => setPage(x.id)}
+      onClick={() => go(x.id)}
     >
       <x.icon aria-hidden="true" />
       {collapsed ? <span className="srOnly">{t(x.label)}</span> : <span>{t(x.label)}</span>}
@@ -176,15 +180,30 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
             <span className="kbd">Ctrl K</span>
           </button>
           <div style={{ flex: 1 }} />
-          <div
-            className={status === "waiting" ? "statusPill pulse" : "statusPill"}
-            style={{ "--c": STATUS_COLOR[status] } as CSSProperties}
-            title={status === "checking" ? undefined : t(`status.${status}Hint`)}
-            role="status"
-          >
-            <span className="statusDot" />
-            <span>{t(`status.${status}`)}</span>
-          </div>
+          {status === "error" ? (
+            // Prototype: clicking the pill in "Errore" opens the diagnosis.
+            <button
+              type="button"
+              className="statusPill"
+              style={{ "--c": STATUS_COLOR.error } as CSSProperties}
+              title={`${t("status.errorHint")} ${t("shell.diagnoseHint")}`}
+              aria-haspopup="dialog"
+              onClick={() => setDiagnosis(true)}
+            >
+              <span className="statusDot" />
+              <span>{t("status.error")}</span>
+            </button>
+          ) : (
+            <div
+              className={status === "waiting" ? "statusPill pulse" : "statusPill"}
+              style={{ "--c": STATUS_COLOR[status] } as CSSProperties}
+              title={status === "checking" ? undefined : t(`status.${status}Hint`)}
+              role="status"
+            >
+              <span className="statusDot" />
+              <span>{t(`status.${status}`)}</span>
+            </div>
+          )}
           <div className="charChip">
             <ClassAvatar cls={cls} />
             <div className="who">
@@ -208,9 +227,8 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
         <main className="content">
           <div className="pageHead">
             <div style={{ flex: 1, minWidth: 0 }}>
-              {/* Like the prototype, unbuilt pages show their group as breadcrumb. */}
-              {group && <div className="crumb">{t(group)}</div>}
-              <h1>{t(current.label)}</h1>
+              {crumb && <div className="crumb">{crumb}</div>}
+              <h1>{header.title ?? t(current.label)}</h1>
             </div>
           </div>
           {page === "home" ? (
@@ -220,27 +238,17 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
               settings={settings}
               name={name}
               openWidget={openWidget}
-              openHistory={() => run(ENGINE.storico[1])}
+              openHistory={() => go("storico")}
               openFight={(fightId) => run(() => invoke("request_details_view", { payload: { kind: "fight", fightId } }))}
               reviewOnboarding={reviewOnboarding}
             />
           ) : page === "supporter" ? (
             <Supporter t={t} name={name} onError={onError} />
-          ) : PAGES[page] ? (
+          ) : (
             (() => {
               const Page = PAGES[page];
-              return <Page t={t} lang={lang} settings={settings} save={save} name={name} go={setPage} run={run} onError={onError} />;
+              return <Page t={t} lang={lang} settings={settings} save={save} name={name} go={go} run={run} onError={onError} setHeader={setHeader} />;
             })()
-          ) : (
-            <section className="card" style={{ maxWidth: 560 }}>
-              <EmptyState icon={<TrayIcon aria-hidden="true" />} title={t("soon.title", { release: current.release })} text={t("soon.text")}>
-                {ENGINE[page] && (
-                  <button type="button" className="btn fill" onClick={() => run(ENGINE[page][1])}>
-                    {t(ENGINE[page][0])}
-                  </button>
-                )}
-              </EmptyState>
-            </section>
           )}
         </main>
       </div>
@@ -250,11 +258,12 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
           t={t}
           onClose={() => setPalette(false)}
           onPick={(id) => {
-            setPage(id);
+            go(id);
             setPalette(false);
           }}
         />
       )}
+      {diagnosis && <Diagnosis t={t} onClose={() => setDiagnosis(false)} onError={onError} />}
     </div>
   );
 }

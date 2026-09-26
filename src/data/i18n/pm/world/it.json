@@ -63,18 +63,5 @@
   "world.layer.npcs": "NPC",
   "world.layer.monsters": "Mostri",
   "world.layer.gathering": "Raccolta",
-  "world.layer.monoliths": "Monolith",
-  "world.states.intro": "Questa pagina segue gli stessi pattern di Storico e Database. Qui sotto i quattro stati standard che ogni schermata con dati deve prevedere.",
-  "world.states.loading": "Caricamento",
-  "world.states.empty": "Vuoto",
-  "world.states.emptyTitle": "Ancora niente qui",
-  "world.states.emptyText": "Crea il primo elemento o importalo da un file.",
-  "world.states.create": "Crea",
-  "world.states.error": "Errore",
-  "world.states.errorTitle": "Non siamo riusciti a caricare i dati",
-  "world.states.errorText": "Il server ha risposto con un errore (503). Riprova tra qualche istante.",
-  "world.states.retry": "Riprova",
-  "world.states.offline": "Offline",
-  "world.states.offlineTitle": "Sei offline",
-  "world.states.offlineText": "Il meter continua a funzionare e salva i combattimenti in locale. Li caricheremo quando torni online."
+  "world.layer.monoliths": "Monolith"
 }

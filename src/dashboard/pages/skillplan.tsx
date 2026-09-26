@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CaretDownIcon,
   CaretUpIcon,
@@ -15,7 +15,8 @@ import {
 } from "@phosphor-icons/react";
 import { SKILL_BUILDS, SKILL_START, skillDetail, SKILLS, SKILLS_STIGMA, type Skill } from "../sample/characters";
 import { fmt } from "../ui";
-import { SectionHead, ShareModal, useMem } from "./characters/shared";
+import { SectionHead, useMem } from "./characters/shared";
+import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "−", "="];
@@ -28,7 +29,9 @@ const MAX_STIGMA = 6;
 const CARD = { background: "var(--pm-s1)", border: "1px solid var(--pm-line)", borderRadius: 8 } as const;
 
 // Prototype pg.skillplan (pSkill + pX).
-export default function SkillPlan({ t, lang, onError }: PageProps) {
+export default function SkillPlan({ t, lang, name, onError, setHeader }: PageProps) {
+  const title = `${t("nav.skillPlanner")} · ${name}`;
+  useEffect(() => setHeader({ title }), [setHeader, title]);
   const [selId, setSel] = useMem("skSel", "a1");
   const [stig, setStig] = useMem("stig", SKILL_START.stig);
   const [lvl, setLvl] = useMem<Record<string, number>>("skLv", {});
@@ -326,7 +329,7 @@ export default function SkillPlan({ t, lang, onError }: PageProps) {
           </section>
         </div>
       </div>
-      {share && <ShareModal t={t} onClose={() => setShare(false)} onError={onError} />}
+      {share && <ShareModal t={t} lang={lang} kind="skillPlan" onClose={() => setShare(false)} onError={onError} />}
     </>
   );
 }

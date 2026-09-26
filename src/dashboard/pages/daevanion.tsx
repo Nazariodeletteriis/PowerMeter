@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowCounterClockwiseIcon, CheckIcon, ChecksIcon, FloppyDiskIcon, ShareNetworkIcon } from "@phosphor-icons/react";
 import { DV_BOARDS, DV_BUILDS, DV_CENTER, DV_COST, DV_N, dvLabel, dvPoints, dvType, type DvType } from "../sample/characters";
-import { ShareModal, useMem, useToast } from "./characters/shared";
+import { useMem, useToast } from "./characters/shared";
+import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
 
 type Board = Record<string, true>;
@@ -34,7 +35,9 @@ function connected(on: Board): Board {
 }
 
 // Prototype pg.daevanion (pDaev + pX).
-export default function Daevanion({ t, onError }: PageProps) {
+export default function Daevanion({ t, lang, name, onError, setHeader }: PageProps) {
+  const title = `${t("nav.daevanion")} · ${name}`;
+  useEffect(() => setHeader({ title }), [setHeader, title]);
   const [all, setAll] = useMem<Record<string, Board>>("dv", {});
   const [bd, setBd] = useMem("dvB", DV_BOARDS[0][0]);
   const [icons, setIcons] = useMem("dvIcons", true);
@@ -240,7 +243,7 @@ export default function Daevanion({ t, onError }: PageProps) {
         </div>
       </div>
       {toast}
-      {share && <ShareModal t={t} onClose={() => setShare(false)} onError={onError} />}
+      {share && <ShareModal t={t} lang={lang} kind="daevanion" onClose={() => setShare(false)} onError={onError} />}
     </>
   );
 }

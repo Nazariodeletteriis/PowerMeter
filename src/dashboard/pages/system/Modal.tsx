@@ -1,16 +1,18 @@
 import { useEffect, useId, type ReactNode } from "react";
 
 /**
- * Prototype modal shell (md.diag / md.update): dimmed overlay, 20px card,
+ * Prototype modal shell (md.diag / md.update / md.share): dimmed overlay, 20px card,
  * closes on backdrop click and Esc. No open/close animation, like the prototype.
  */
 export function Modal({
   width,
+  gap = 12,
   title,
   onClose,
   children,
 }: {
   width: number;
+  gap?: number;
   title: (id: string) => ReactNode;
   onClose: () => void;
   children: ReactNode;
@@ -28,7 +30,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={id}
-        style={{ width, padding: 20, display: "flex", flexDirection: "column", gap: 12, overflow: "visible", fontSize: 13 }}
+        style={{ width, padding: 20, display: "flex", flexDirection: "column", gap, overflow: "visible", fontSize: 13 }}
         onClick={(e) => e.stopPropagation()}
       >
         {title(id)}

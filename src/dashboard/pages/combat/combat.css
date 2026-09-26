@@ -136,52 +136,6 @@
   user-select: none;
 }
 
-.cbIconBtn {
-  width: 30px;
-  height: 30px;
-  border: 0;
-  background: transparent;
-  color: var(--pm-t2);
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-}
-.cbUrl {
-  flex: 1;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  border-radius: 6px;
-  border: 1px solid var(--pm-line);
-  background: var(--pm-s2);
-  font-size: 12px;
-  overflow: hidden;
-  white-space: nowrap;
-}
-.cbVisOpt {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 40px;
-  padding: 0 10px;
-  border-radius: 6px;
-  border: 1px solid var(--pm-line);
-}
-.cbRadio {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1.5px solid var(--pm-grey);
-  display: grid;
-  place-items: center;
-}
-.cbRadio > span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
 .cbState {
   display: flex;
   flex-direction: column;

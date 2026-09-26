@@ -34,17 +34,3 @@ export const SAMPLE_ORG_TIMERS = [
   { name: "Pozione Aether", sub: "Personalizzato · 45 min", left: 1930, period: 2700, win: false, discord: false },
   { name: "Raid serale", sub: "Personalizzato · 21:00", left: 12600, period: 86400, win: true, discord: true },
 ];
-
-// md.update — latest.json only has version + msiUrl (+ releaseNotesUrl).
-export const SAMPLE_UPDATE = {
-  version: "1.5.0",
-  msiUrl: "",
-  date: "2026-09-25",
-  sizeMb: 48,
-  notes: [
-    "Nuova scheda Timeline buff nel report",
-    "Rilevamento automatico di VPN e ping reducer",
-    "Il widget ricorda la posizione per ogni monitor",
-    "Correzioni: nomi con caratteri speciali, Double non contati su DOT",
-  ],
-};

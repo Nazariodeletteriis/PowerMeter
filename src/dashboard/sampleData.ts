@@ -30,10 +30,9 @@ export const SAMPLE_UPGRADES = [
   { name: "Ring of Quiet Aether", rarity: "Heroic", source: "Shop · Abyss Points" },
 ];
 
-// pHome.homeTimers — seconds left when the page opens; days are shown apart.
+// pHome.homeTimers — seconds left when the page opens.
+// The daily/weekly resets are real (pages/organizer/resets.ts).
 export const SAMPLE_TIMERS = [
-  { name: "Reset giornaliero", seconds: 29520 },
-  { name: "Reset settimanale", days: 2, seconds: 15120 },
   { name: "Shugo Market", seconds: 2715 },
   { name: "Rift · Eltnen", seconds: 840 },
 ];

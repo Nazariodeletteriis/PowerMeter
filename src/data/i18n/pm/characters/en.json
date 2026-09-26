@@ -157,18 +157,5 @@
   "characters.dv.noGains": "No active nodes besides the core.",
   "characters.dv.savedTitle": "Saved",
   "characters.dv.savedText": "Daevanion build updated",
-  "characters.share.button": "Share",
-  "characters.share.title": "Share log",
-  "characters.share.copy": "Copy",
-  "characters.share.copied": "Copied!",
-  "characters.share.visibility": "Visibility",
-  "characters.share.public": "Public",
-  "characters.share.unlisted": "Unlisted",
-  "characters.share.private": "Private",
-  "characters.share.publicHint": "Visible in searches and rankings",
-  "characters.share.unlistedHint": "Only people with the link",
-  "characters.share.privateHint": "Only you",
-  "characters.share.discordPreview": "Discord preview",
-  "characters.share.killIn": "Kill in {d}",
-  "characters.share.ogImage": "Open Graph image 1200×630"
+  "characters.share.button": "Share"
 }

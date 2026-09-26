@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import {
   ArrowLeftIcon,
   BookOpenIcon,
@@ -44,7 +44,9 @@ const CATEGORIES: [id: string, icon: Icon][] = [
   ["daevanionNodes", LightningIcon],
 ];
 
-export default function Database({ t, go }: PageProps) {
+export default function Database({ t, go, setHeader }: PageProps) {
+  const title = t("shell.databaseTitle");
+  useEffect(() => setHeader({ title }), [setHeader, title]);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string | null>(null);
   const query = q.toLowerCase();

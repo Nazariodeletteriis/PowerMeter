@@ -157,18 +157,5 @@
   "characters.dv.noGains": "Nessun nodo attivo oltre al nucleo.",
   "characters.dv.savedTitle": "Salvato",
   "characters.dv.savedText": "Build Daevanion aggiornata",
-  "characters.share.button": "Condividi",
-  "characters.share.title": "Condividi log",
-  "characters.share.copy": "Copia",
-  "characters.share.copied": "Copiato!",
-  "characters.share.visibility": "Visibilità",
-  "characters.share.public": "Pubblico",
-  "characters.share.unlisted": "Non in elenco",
-  "characters.share.private": "Privato",
-  "characters.share.publicHint": "Visibile nelle ricerche e nelle classifiche",
-  "characters.share.unlistedHint": "Solo chi ha il link",
-  "characters.share.privateHint": "Solo tu",
-  "characters.share.discordPreview": "Anteprima su Discord",
-  "characters.share.killIn": "Kill in {d}",
-  "characters.share.ogImage": "Immagine Open Graph 1200×630"
+  "characters.share.button": "Condividi"
 }

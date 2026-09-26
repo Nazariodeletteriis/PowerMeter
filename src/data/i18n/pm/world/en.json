@@ -63,18 +63,5 @@
   "world.layer.npcs": "NPCs",
   "world.layer.monsters": "Monsters",
   "world.layer.gathering": "Gathering",
-  "world.layer.monoliths": "Monoliths",
-  "world.states.intro": "This page follows the same patterns as History and Database. Below are the four standard states every data screen must handle.",
-  "world.states.loading": "Loading",
-  "world.states.empty": "Empty",
-  "world.states.emptyTitle": "Nothing here yet",
-  "world.states.emptyText": "Create the first item or import it from a file.",
-  "world.states.create": "Create",
-  "world.states.error": "Error",
-  "world.states.errorTitle": "We couldn't load the data",
-  "world.states.errorText": "The server responded with an error (503). Try again in a moment.",
-  "world.states.retry": "Retry",
-  "world.states.offline": "Offline",
-  "world.states.offlineTitle": "You're offline",
-  "world.states.offlineText": "The meter keeps working and saves fights locally. We'll upload them when you're back online."
+  "world.layer.monoliths": "Monoliths"
 }

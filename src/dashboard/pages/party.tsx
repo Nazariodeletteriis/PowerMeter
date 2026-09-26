@@ -16,7 +16,8 @@ import {
 } from "@phosphor-icons/react";
 import { RARITY } from "../ui";
 import { BOSS, PT_BANDS, PT_BUFFS, PT_HUES, PT_MEMBERS, PT_OPENER, PT_SKILLS, ptGear, ptScrolls } from "../sample/combat";
-import { Av, classColor, initials, ShareModal } from "./combat/parts";
+import { Av, classColor, initials } from "./combat/parts";
+import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
 
 // Sample party of the prototype (pParty) until the roster and rotations are read from fights.
@@ -35,7 +36,7 @@ const TICKS = ["0:00", "0:10", "0:20", "0:30", "0:40", "0:50", "1:00"];
 const row: CSSProperties = { display: "flex", gap: 8, fontSize: 12, alignItems: "center", borderBottom: "1px solid var(--pm-line)" };
 const ellipsis: CSSProperties = { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" };
 
-export default function Party({ t, lang }: PageProps) {
+export default function Party({ t, lang, onError }: PageProps) {
   const [sel, setSel] = useState("Kaelthas");
   const [share, setShare] = useState(false);
   const me = PT_MEMBERS.find((m) => m[0] === sel)!;
@@ -301,7 +302,7 @@ export default function Party({ t, lang }: PageProps) {
         </section>
       </div>
 
-      {share && <ShareModal t={t} lang={lang} onClose={() => setShare(false)} />}
+      {share && <ShareModal t={t} lang={lang} kind="party" onClose={() => setShare(false)} onError={onError} />}
     </>
   );
 }

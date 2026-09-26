@@ -14,4 +14,11 @@ export type PageProps = {
   /** Run a Tauri action and surface its error in the shell banner. */
   run: (action: () => Promise<unknown>) => void;
   onError: (e: unknown) => void;
+  /**
+   * Page's own title and breadcrumb (prototype `titles` / `crumbs`), set from
+   * an effect. Without it the shell shows the menu label.
+   */
+  setHeader: (header: PageHeader) => void;
 };
+
+export type PageHeader = { title?: string; crumb?: string };

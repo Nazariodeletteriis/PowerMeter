@@ -4,6 +4,7 @@ import { CaretRightIcon, CheckIcon, SwordIcon } from "@phosphor-icons/react";
 import type { Settings } from "./App";
 import type { T } from "./i18n";
 import { REGIONS } from "./Onboarding";
+import { nextDailyReset, nextWeeklyReset } from "./pages/organizer/resets";
 import { SAMPLE_CHARACTER, SAMPLE_NEWS, SAMPLE_TIMERS, SAMPLE_TODAY, SAMPLE_UPGRADES } from "./sampleData";
 import { art, Card, fmt, RARITY } from "./ui";
 import { usePoll } from "./usePoll";
@@ -210,33 +211,42 @@ function BuildCard({ t }: { t: T }) {
 }
 
 function TimersCard({ t }: { t: T }) {
-  // Counts down from when the page opened, like the prototype's tick.
-  const [elapsed, setElapsed] = useState(0);
+  const [now, setNow] = useState(Date.now);
+  // Sample timers count down from when the page opened, like the prototype's tick.
+  const [start] = useState(now);
   useEffect(() => {
-    const start = Date.now();
-    const id = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+    const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
+  const timers: [name: string, end: number][] = [
+    [t("organizer.dailyReset"), nextDailyReset(new Date(now)).getTime()],
+    [t("organizer.weeklyReset"), nextWeeklyReset(new Date(now)).getTime()],
+    ...SAMPLE_TIMERS.map((x): [string, number] => [x.name, start + x.seconds * 1000]),
+  ];
   return (
     <Card title={t("home.timers")} style={{ gridColumn: "span 3", display: "flex", flexDirection: "column", gap: 8 }}>
-      {SAMPLE_TIMERS.map((x) => (
-        <div
-          key={x.name}
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 8,
-            padding: "6px 0",
-            borderBottom: "1px solid var(--pm-line)",
-          }}
-        >
-          <span style={{ color: "var(--pm-t2)" }}>{x.name}</span>
-          <span className="mono">
-            {x.days ? t("home.days", { n: x.days }) + " " : ""}
-            {clock(x.seconds - elapsed, true)}
-          </span>
-        </div>
-      ))}
+      {timers.map(([name, end]) => {
+        const left = Math.max(0, Math.round((end - now) / 1000));
+        const days = Math.floor(left / 86400);
+        return (
+          <div
+            key={name}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 8,
+              padding: "6px 0",
+              borderBottom: "1px solid var(--pm-line)",
+            }}
+          >
+            <span style={{ color: "var(--pm-t2)" }}>{name}</span>
+            <span className="mono">
+              {days ? t("home.days", { n: days }) + " " : ""}
+              {clock(left % 86400, true)}
+            </span>
+          </div>
+        );
+      })}
     </Card>
   );
 }

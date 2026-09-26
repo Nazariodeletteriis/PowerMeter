@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import {
   ArrowLeftIcon,
   BirdIcon,
@@ -47,7 +47,8 @@ import {
   SLOT_GROUPS,
 } from "../sample/characters";
 import { art, ClassAvatar, CLASSES, fmt, RARITY } from "../ui";
-import { ago, SectionHead, ShareModal, useMem, useToast, type BuildSrc } from "./characters/shared";
+import { ago, SectionHead, useMem, useToast, type BuildSrc } from "./characters/shared";
+import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
 
 const COLL_ICONS = { tshirt: TShirtIcon, paw: PawPrintIcon, bird: BirdIcon, diamond: DiamondIcon, crown: CrownSimpleIcon, columns: ColumnsIcon, sparkle: SparkleIcon };
@@ -62,7 +63,7 @@ const DEFAULT_SRC: BuildSrc = { t: "Ashen Burst · PvE e PvP", au: SAMPLE_ME, cl
 const LABEL: CSSProperties = { fontSize: 11, color: "var(--pm-t3)", marginBottom: 6 };
 
 // Prototype pg.builder (pBuilder + pX + pBRO).
-export default function Builder({ t, lang, go, onError }: PageProps) {
+export default function Builder({ t, lang, go, onError, setHeader }: PageProps) {
   const [src, setSrc] = useMem("bSrc", DEFAULT_SRC);
   const [mode, setMode] = useMem("bmode", "dummy");
   const [view, setView] = useMem("bview", "owned");
@@ -89,6 +90,8 @@ export default function Builder({ t, lang, go, onError }: PageProps) {
   const tgt = view === "target";
   const [, clsCol] = CLASSES[src.cls];
   const title = isNew ? newName || t("characters.builder.newBuild") : src.t;
+  const crumb = t("shell.crumb.builder");
+  useEffect(() => setHeader({ title, crumb }), [setHeader, title, crumb]);
 
   // Slots (pBuilder.slots + pX.slotGroups + pBRO isNew overrides).
   const slots = SAMPLE_SLOTS.map(([id, label, name, rar, e, target]) => {
@@ -285,9 +288,12 @@ export default function Builder({ t, lang, go, onError }: PageProps) {
       {mode === "dummy" && (
         <>
           {/* Header band: class, title, gear score, combat power, collections. */}
-          <div style={{ position: "relative", borderRadius: 10, overflow: "hidden", marginBottom: 12, background: "linear-gradient(100deg,var(--pm-s2) 0%,var(--pm-s1) 55%,var(--pm-bg) 100%)", border: "1px solid var(--pm-line)" }}>
-            <div style={{ position: "absolute", inset: "0 0 auto 0", height: 2, background: "linear-gradient(90deg,transparent,#DB0000 20%,#DB0000 60%,transparent)" }} />
-            <div style={{ position: "absolute", right: -60, top: -80, width: 360, height: 360, background: "radial-gradient(circle,rgba(219,0,0,.16),transparent 65%)", pointerEvents: "none" }} />
+          {/* Only the decoration is clipped (the prototype clipped the whole band, cutting off the "my builds" menu). */}
+          <div style={{ position: "relative", borderRadius: 10, marginBottom: 12, background: "linear-gradient(100deg,var(--pm-s2) 0%,var(--pm-s1) 55%,var(--pm-bg) 100%)", border: "1px solid var(--pm-line)" }}>
+            <div aria-hidden="true" style={{ position: "absolute", inset: 0, borderRadius: "inherit", overflow: "hidden", pointerEvents: "none" }}>
+              <div style={{ position: "absolute", inset: "0 0 auto 0", height: 2, background: "linear-gradient(90deg,transparent,#DB0000 20%,#DB0000 60%,transparent)" }} />
+              <div style={{ position: "absolute", right: -60, top: -80, width: 360, height: 360, background: "radial-gradient(circle,rgba(219,0,0,.16),transparent 65%)" }} />
+            </div>
             <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 18, padding: "16px 20px", flexWrap: "wrap" }}>
               <div style={{ width: 56, height: 56, transform: "rotate(45deg)", borderRadius: 10, border: `1.5px solid ${clsCol}`, background: `${clsCol}1a`, display: "grid", placeItems: "center", flex: "none" }}>
                 <div title={src.cls} style={{ transform: "rotate(-45deg)", width: 34, height: 34, background: art(src.cls) ? `url(${art(src.cls)}) center/contain no-repeat` : undefined }} />
@@ -724,7 +730,7 @@ export default function Builder({ t, lang, go, onError }: PageProps) {
           </section>
         </>
       )}
-      {share && <ShareModal t={t} onClose={() => setShare(false)} onError={onError} />}
+      {share && <ShareModal t={t} lang={lang} kind="build" onClose={() => setShare(false)} onError={onError} />}
     </>
   );
 }

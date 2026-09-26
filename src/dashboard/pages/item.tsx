@@ -1,8 +1,9 @@
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { HammerIcon, ShareNetworkIcon, ShoppingCartIcon, SkullIcon, SwordIcon } from "@phosphor-icons/react";
 import { DB_ITEMS, ITEM_DETAILS } from "../sample/world";
 import { fmt, RARITY } from "../ui";
 import { SELECTED_ITEM } from "./database";
+import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
 import "./world/world.css";
 
@@ -11,7 +12,11 @@ const MONO: CSSProperties = { fontFamily: "var(--pm-mono)" };
 // Opened from the database (sessionStorage) or the sidebar (last one, else the
 // prototype's). Only the prototype's item has a detail; the others show their
 // row data and the prototype's empty recipe text.
-export default function Item({ t, lang }: PageProps) {
+export default function Item({ t, lang, onError, setHeader }: PageProps) {
+  const [share, setShare] = useState(false);
+  const title = t("shell.itemTitle");
+  const crumb = `${t("nav.database")} → ${t("nav.items")}`;
+  useEffect(() => setHeader({ title, crumb }), [setHeader, title, crumb]);
   const item = DB_ITEMS.find((i) => i.name === sessionStorage.getItem(SELECTED_ITEM)) ?? DB_ITEMS[0];
   const d = ITEM_DETAILS[item.name];
   const col = item.rarity ? RARITY[item.rarity] : undefined;
@@ -73,7 +78,7 @@ export default function Item({ t, lang }: PageProps) {
             <ShoppingCartIcon aria-hidden="true" />
             {t("world.item.addShopping")}
           </button>
-          <button type="button" className="btn">
+          <button type="button" className="btn" onClick={() => setShare(true)}>
             <ShareNetworkIcon aria-hidden="true" />
             {t("world.item.share")}
           </button>
@@ -112,6 +117,7 @@ export default function Item({ t, lang }: PageProps) {
           <div style={{ fontSize: 13, color: "var(--pm-t2)" }}>{t("world.item.usedInNone")}</div>
         </section>
       </div>
+      {share && <ShareModal t={t} lang={lang} kind="item" onClose={() => setShare(false)} onError={onError} />}
     </div>
   );
 }

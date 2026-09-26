@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { initialLanguage, LANGUAGE_SETTING, translator } from "./i18n";
 import { Onboarding } from "./Onboarding";
+import { applyPalette } from "./pages/system/theme";
 import { Shell } from "./Shell";
 import { TitleBar } from "./TitleBar";
 
@@ -34,6 +35,9 @@ export function App() {
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
+  useEffect(() => {
+    if (settings) applyPalette(settings);
+  }, [settings]);
 
   const t = translator(lang);
   const save: SaveSetting = async (key, value) => {
@@ -48,7 +52,7 @@ export function App() {
   return (
     <div className="app">
       {/* Always drawn, so the window can be moved and closed during onboarding. */}
-      <TitleBar t={t} onError={onError} />
+      <TitleBar t={t} lang={lang} onError={onError} />
       {error && (
         <p className="error updateBanner" role="alert">
           {t("common.error", { message: error })}

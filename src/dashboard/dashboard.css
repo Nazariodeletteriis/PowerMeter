@@ -224,6 +224,11 @@ button {
   font-size: 12px;
   white-space: nowrap;
 }
+button.statusPill {
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
 .statusPill .statusDot {
   width: 8px;
   height: 8px;
