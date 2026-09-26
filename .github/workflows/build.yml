@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write # release upload on v* tags
     steps:
       - uses: actions/checkout@v4
 
@@ -40,7 +42,21 @@ jobs:
           path: src-tauri/target/release/bundle/msi/*.msi
           if-no-files-found: error
 
+      # latest.json is what the app polls for updates (checkRelease.js reads
+      # releases/latest/download/latest.json).
+      - name: Update manifest
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          name=$(basename src-tauri/target/release/bundle/msi/*.msi)
+          base="https://github.com/${GITHUB_REPOSITORY}/releases"
+          printf '{"version":"%s","msiUrl":"%s","releaseNotesUrl":"%s"}\n' \
+            "${GITHUB_REF_NAME#v}" "$base/download/$GITHUB_REF_NAME/$name" "$base/tag/$GITHUB_REF_NAME" > latest.json
+          cat latest.json
+
       - if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: src-tauri/target/release/bundle/msi/*.msi
+          files: |
+            src-tauri/target/release/bundle/msi/*.msi
+            latest.json

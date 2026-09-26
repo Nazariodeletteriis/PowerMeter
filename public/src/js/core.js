@@ -2303,7 +2303,7 @@ class DpsApp {
     });
 
     this.supportButton?.addEventListener("click", () => {
-      this.openSupportModal();
+      window.javaBridge?.openBrowser?.("https://www.patreon.com/c/powermeter");
     });
     this.supportModalClose?.addEventListener("click", () => this.closeSupportModal());
     this.supportModal?.addEventListener("click", (event) => {

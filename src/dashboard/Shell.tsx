@@ -18,6 +18,8 @@ export type CaptureStatus = {
 
 export type MeterStatus = "checking" | "noGame" | "waiting" | "connected" | "error";
 
+export const PATREON_URL = "https://www.patreon.com/c/powermeter";
+
 const getCaptureStatus = () => invoke<CaptureStatus>("get_capture_status");
 const getGameTitle = () => invoke<string | null>("get_aion2_window_title");
 
@@ -28,6 +30,7 @@ const getGameTitle = () => invoke<string | null>("get_aion2_window_title");
 const ACTIONS: Partial<Record<Key, () => Promise<unknown>>> = {
   "nav.dpsMeter": () => invoke("show_overlay"),
   "nav.fightHistory": () => invoke("request_details_view", { payload: { kind: "history" } }),
+  "nav.supporter": () => invoke("open_url", { url: PATREON_URL }),
 };
 const NAV: { group?: Key; items: [Key, string][] }[] = [
   {

@@ -8,8 +8,8 @@ import { usePoll, type Polled } from "./usePoll";
 // Region names are shown as the game shows them, so they are not translated.
 export const REGIONS = [
   { value: "global-eu", label: "Global / EU" },
-  { value: "kr", label: "Korea" },
-  { value: "tw", label: "Taiwan" },
+  { value: "us-na", label: "US / NA" },
+  { value: "kr-tw", label: "KR / TW" },
 ];
 
 // The meter keeps the character name in localStorage under this key (core.js
