@@ -52,3 +52,4 @@ HANDOFF.md
 graphify-out/
 *:Zone.Identifier
 docs/design/*.zip
+.graphify_*
