@@ -2326,7 +2326,7 @@ class DpsApp {
     });
 
     this.settingsVersionLink?.addEventListener("click", () => {
-      window.javaBridge?.openBrowser?.("https://github.com/taengu/AION2-DPS-Meter/releases");
+      window.javaBridge?.openBrowser?.("https://github.com/Nazariodeletteriis/PowerMeter/releases");
     });
 
     this.quitButton?.addEventListener("click", () => {
@@ -2571,6 +2571,7 @@ class DpsApp {
       { value: "de", label: "Deutsch" },
       { value: "es", label: "Español" },
       { value: "fr", label: "Français" },
+      { value: "it", label: "Italiano" },
       { value: "ja", label: "日本語" },
       { value: "ko", label: "한국어" },
       { value: "pt", label: "Português" },
@@ -4359,7 +4360,7 @@ class DpsApp {
       }
       return this.i18n?.t("target.train", "Training Scarecrow") ?? "Training Scarecrow";
     }
-    return this.i18n?.t("header.title", "A2Tools DPS Meter") ?? "A2Tools DPS Meter";
+    return this.i18n?.t("header.title", "PowerMeter") ?? "PowerMeter";
   }
 
   getTargetLabel({ targetId = 0, targetName = "", targetMode = "" } = {}) {

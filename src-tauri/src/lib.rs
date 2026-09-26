@@ -312,7 +312,7 @@ async fn show_update_window(app: tauri::AppHandle, current: String, latest: Stri
             use windows::Win32::UI::WindowsAndMessaging::*;
             use windows::core::PCWSTR;
             let msg_w: Vec<u16> = msg.encode_utf16().chain(std::iter::once(0)).collect();
-            let title: Vec<u16> = "A2Tools - Update Available".encode_utf16().chain(std::iter::once(0)).collect();
+            let title: Vec<u16> = "PowerMeter - Update Available".encode_utf16().chain(std::iter::once(0)).collect();
             let result = unsafe {
                 MessageBoxW(None, PCWSTR(msg_w.as_ptr()), PCWSTR(title.as_ptr()), MB_YESNO | MB_ICONINFORMATION | MB_TOPMOST | MB_SETFOREGROUND)
             };
@@ -337,7 +337,7 @@ async fn show_update_window(app: tauri::AppHandle, current: String, latest: Stri
                         use windows::core::PCWSTR;
                         let msg: Vec<u16> = format!("Download failed: {}\n\nPlease download manually.", e)
                             .encode_utf16().chain(std::iter::once(0)).collect();
-                        let title: Vec<u16> = "A2Tools - Update Error".encode_utf16().chain(std::iter::once(0)).collect();
+                        let title: Vec<u16> = "PowerMeter - Update Error".encode_utf16().chain(std::iter::once(0)).collect();
                         unsafe { MessageBoxW(None, PCWSTR(msg.as_ptr()), PCWSTR(title.as_ptr()), MB_OK | MB_ICONERROR | MB_TOPMOST); }
                     }
                 }).await;
@@ -345,7 +345,7 @@ async fn show_update_window(app: tauri::AppHandle, current: String, latest: Stri
         });
     } else if accepted {
         // No MSI URL, open releases page
-        let _ = std::process::Command::new("cmd").args(["/C", "start", "", "https://github.com/taengu/A2Tools-DPS-Meter/releases"]).spawn();
+        let _ = std::process::Command::new("cmd").args(["/C", "start", "", "https://github.com/Nazariodeletteriis/PowerMeter/releases"]).spawn();
     }
 
     Ok(accepted)
@@ -599,7 +599,7 @@ fn open_details_on_monitor_inner(
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'details';")
-    .title("A2Tools DPS Meter — Details")
+    .title("PowerMeter — Details")
     .decorations(false)
     .transparent(false)
     // Intentional: the point of this window is to stay readable on a second
@@ -785,7 +785,7 @@ fn build_settings_window(app: &tauri::AppHandle) -> Result<(), String> {
     // Injected before any page script. WebviewUrl::App is a path, so a ?query
     // gets percent-encoded — this is the one channel that is reliable.
     .initialization_script("window.__A2_VIEW__ = 'settings';")
-    .title("A2Tools DPS Meter — Settings")
+    .title("PowerMeter — Settings")
     .decorations(false)
     .transparent(false)
     // Matches Details: the overlay itself is always-on-top, so a settings window
@@ -1013,7 +1013,7 @@ fn open_fight_window(app: &tauri::AppHandle, label: &str) -> Result<(), String> 
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'details';")
-    .title("A2Tools DPS Meter — Fight")
+    .title("PowerMeter — Fight")
     .decorations(false)
     .transparent(false)
     .always_on_top(true)
@@ -1047,7 +1047,7 @@ fn open_history_window_inner(app: &tauri::AppHandle) -> Result<(), String> {
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'history';")
-    .title("A2Tools DPS Meter — Battle History")
+    .title("PowerMeter — Battle History")
     .decorations(false)
     .transparent(false)
     .always_on_top(true)
@@ -1083,7 +1083,7 @@ fn open_details_windowed(app: &tauri::AppHandle) -> Result<(), String> {
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'details';")
-    .title("A2Tools DPS Meter — Details")
+    .title("PowerMeter — Details")
     .decorations(false)
     .transparent(false)
     .always_on_top(true)

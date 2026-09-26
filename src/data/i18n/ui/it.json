@@ -1,0 +1,350 @@
+{
+  "header": {
+    "title": "PowerMeter",
+    "display": {
+      "dps": "DPS",
+      "total": "DMG",
+      "ariaDps": "Visualizzazione DPS",
+      "ariaDamage": "Visualizzazione danno totale"
+    }
+  },
+  "details": {
+    "header": "Dettagli",
+    "title": "Dettagli di {name}",
+    "tooltip": "I colpi dei danni nel tempo (DOT) non sono inclusi nelle percentuali totali di Crit, Double, Perfect, Back Attack e Parry.",
+    "settings": {
+      "ariaLabel": "Apri impostazioni dei dettagli"
+    },
+    "panelBackground": "Sfondo del pannello",
+    "fontSize": {
+      "label": "Dimensione testo"
+    },
+    "iconSize": {
+      "label": "Dimensione icone skill"
+    },
+    "screenshots": {
+      "label": "Screenshot",
+      "includeMeter": "Includi il DPS meter principale",
+      "saveToFolder": "Salva gli screenshot in una cartella"
+    },
+    "columns": {
+      "label": "Colonne skill"
+    },
+    "screenshot": {
+      "ariaLabel": "Copia screenshot negli appunti",
+      "captured": "Screenshot acquisito",
+      "savedToClipboard": "Copiato negli appunti"
+    },
+    "sort": {
+      "recent": "Recenti",
+      "time": "Tempo",
+      "damage": "Danno"
+    },
+    "skills": {
+      "skill": "Skill",
+      "skillTooltip": "Nome skill",
+      "hits": "Cast",
+      "hitsTooltip": "Cast",
+      "dmg": "Dmg",
+      "dmgTooltip": "Danno",
+      "dmgPct": "D%",
+      "dmgPctTooltip": "Danno %",
+      "crit": "Crit",
+      "critTooltip": "Crit %",
+      "parry": "Par",
+      "parryTooltip": "Parry %",
+      "perfect": "Per",
+      "perfectTooltip": "Perfect %",
+      "double": "Dbl",
+      "doubleTooltip": "Double %",
+      "back": "Back",
+      "backTooltip": "Back Attack %",
+      "frontal": "Front",
+      "frontalTooltip": "Frontal %",
+      "powershard": "PS",
+      "powershardTooltip": "PowerShard %",
+      "regen": "Reg",
+      "regenTooltip": "Rigenerazione da life-steal",
+      "multiHit": "MH%",
+      "multiHitTooltip": "Multi-hit %",
+      "multiHitDamage": "MHD",
+      "multiHitDamageTooltip": "Danno multi-hit",
+      "minDmg": "Min",
+      "minDmgTooltip": "Danno minimo",
+      "avgDmg": "Media",
+      "avgDmgTooltip": "Danno medio",
+      "maxDmg": "Max",
+      "maxDmgTooltip": "Danno massimo"
+    },
+    "stats": {
+      "totalDamage": "Danno totale",
+      "contribution": "Contributo",
+      "hits": "Colpi",
+      "critRate": "Crit Rate",
+      "perfectRate": "Perfect Rate",
+      "doubleRate": "Double Rate",
+      "backRate": "Back Attack Rate",
+      "parryRate": "Parry Rate",
+      "combatTime": "Durata combattimento",
+      "selfHealing": "Auto-cura",
+      "multiHitDamage": "Danno multi-hit",
+      "multiHitHits": "Multi-hit",
+      "maxHp": "Max HP"
+    },
+    "titleFor": "per",
+    "titleVs": "vs",
+    "fightVs": "Combattimento vs",
+    "all": "Tutti",
+    "history": {
+      "allPlayers": "Tutti i giocatori"
+    },
+    "dpsChart": "Grafico DPS",
+    "historyBtn": "Storico",
+    "timeline": "Timeline"
+  },
+  "history": {
+    "title": "Storico combattimenti",
+    "empty": "Nessun combattimento contro boss registrato.",
+    "delete": "Elimina",
+    "showTraining": "Mostra allenamento",
+    "hideTraining": "Nascondi allenamento",
+    "showTrainingBattles": "Mostra combattimenti di allenamento",
+    "hideTrainingBattles": "Nascondi combattimenti di allenamento",
+    "trainBadge": "Allenamento",
+    "liveBadge": "Live",
+    "filterBoss": "Nome del boss...",
+    "filterPlayer": "Classe del giocatore...",
+    "filterDate": "Data (AAAA-MM-GG)...",
+    "viewList": "Vista elenco",
+    "viewGrouped": "Raggruppa per boss",
+    "fightCount": "{n} combattimenti",
+    "fightCountOne": "1 combattimento",
+    "previewUpload": "Anteprima upload",
+    "previewUploadTip": "Scrive cosa verrebbe caricato condividendo questo combattimento. Non viene inviato nulla.",
+    "previewWorking": "Preparazione dell'anteprima…",
+    "previewDone": "Scritti {slice} KB ({sent} KB compressi, cioè quello che invierebbe un upload). Tenuti {kept} pacchetti su {seen}, oscurati {blinded} nomi. Non è stato caricato nulla. Salvato in {dir}"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "lockedPort": "Dispositivo/porta rilevati",
+    "resetDetection": "Reimposta",
+    "characterName": "Nome#ID",
+    "characterNamePlaceholder": "Inserisci il nome del tuo personaggio",
+    "pinMeToTop": "Mostrami sempre in cima",
+    "slimMode": "Modalità compatta",
+    "meterLayout": {
+      "label": "Layout del meter",
+      "beta": "Interfaccia Beta",
+      "betaSlim": "Beta compatta",
+      "classic": "Interfaccia classica",
+      "classicSlim": "Classica compatta"
+    },
+    "detailsMonitor": {
+      "label": "Mostra i dettagli sul monitor",
+      "off": "Disattivato",
+      "primary": "principale",
+      "missing": "Quello schermo non è collegato.",
+      "single": "Rilevato un solo schermo: collega un secondo monitor per usare questa opzione.",
+      "badge": "Monitor",
+      "side": {
+        "left": "a sinistra",
+        "right": "a destra",
+        "above": "sopra",
+        "below": "sotto"
+      }
+    },
+    "appearance": "Aspetto",
+    "connection": "Connessione",
+    "diagnostics": "Diagnostica",
+    "device": {
+      "label": "Dispositivo di cattura",
+      "autoDetect": "Rilevamento automatico"
+    },
+    "advanced": "Avanzate",
+    "bossLogs": "Attiva log per boss",
+    "saveRawPackets": "Attiva log dei pacchetti",
+    "resetAllSettings": "Ripristina tutte le impostazioni",
+    "bold": {
+      "label": "Grassetto",
+      "names": "Nomi",
+      "dps": "DPS"
+    },
+    "showPing": "Mostra ping",
+    "showTotalDps": "Mostra DPS/DMG totale",
+    "roundDps": "Arrotonda DPS",
+    "autoHideMeter": "Nascondi automaticamente il meter",
+    "showSuspendBtn": "Mostra pulsante di sospensione",
+    "playerLimit": {
+      "label": "Numero massimo di giocatori"
+    },
+    "debugLogging": "Attiva log di debug",
+    "quit": "Esci",
+    "discord": "Discord",
+    "version": "Versione",
+    "theme": {
+      "label": "Tema",
+      "options": {
+        "aion2": "AION2",
+        "asmodian": "Asmodian",
+        "cogni": "Cogni",
+        "elyos": "Elyos",
+        "ember": "Ember",
+        "fera": "Fera",
+        "frost": "Frost",
+        "natura": "Natura",
+        "obsidian": "Obsidian",
+        "varian": "Varian"
+      }
+    },
+    "language": {
+      "label": "Lingua"
+    },
+    "windowOpacity": {
+      "label": "Opacità della finestra"
+    },
+    "meterOpacity": {
+      "label": "Opacità delle barre"
+    },
+    "bossNameSize": {
+      "label": "Dimensione nome bersaglio"
+    },
+    "targetWindow": {
+      "label": "Intervallo del bersaglio",
+      "options": {
+        "5s": "5 secondi",
+        "10s": "10 secondi",
+        "15s": "15 secondi",
+        "20s": "20 secondi",
+        "30s": "30 secondi"
+      }
+    },
+    "targetSelection": {
+      "label": "Selezione del bersaglio (sperimentale)",
+      "options": {
+        "mostDamage": "Più danno (attuale)",
+        "mostRecent": "Colpito più di recente",
+        "lastHitByMe": "Ultimo colpito da me",
+        "allTargets": "Tutti i bersagli insieme"
+      }
+    },
+    "allTargetsWindow": {
+      "label": "Intervallo di All Targets",
+      "options": {
+        "30s": "30 secondi",
+        "1m": "1 minuto",
+        "2m": "2 minuti",
+        "3m": "3 minuti",
+        "5m": "5 minuti"
+      }
+    },
+    "meterSettings": "Impostazioni del meter",
+    "keybinds": "Scorciatoie",
+    "keybind": {
+      "reload": "Ricarica i dati",
+      "toggle": "Mostra/Nascondi finestra",
+      "pressKeys": "Premi i tasti...",
+      "needModifiers": "Servono 2+ modificatori"
+    },
+    "defaultMeterMode": {
+      "label": "Modalità predefinita"
+    },
+    "trainingMode": {
+      "label": "Bersaglio in allenamento",
+      "options": {
+        "all": "Tutti",
+        "highestDamage": "Danno più alto"
+      }
+    },
+    "showSupporterColors": "Mostra i colori dei supporter",
+    "showSupporterColorsHint": "I nomi dei supporter appaiono in oro. Solo estetico: non cambia mai nessun numero.",
+    "account": {
+      "title": "Account",
+      "signedOut": "Non connesso",
+      "signedIn": "Connesso come {name}",
+      "hint": "Accedi per sincronizzare personaggi e impostazioni.",
+      "connect": "Accedi",
+      "signOut": "Esci",
+      "codePrompt": "Approva questo codice nel browser:",
+      "codeHint": "La pagina dovrebbe essersi già aperta. Il codice scade tra 10 minuti.",
+      "working": "In attesa di approvazione…",
+      "failed": "Accesso non riuscito: {error}",
+      "supporter": "Supporter"
+    }
+  },
+  "support": {
+    "button": "Sostieni A2Tools",
+    "title": "Sostieni l'autore di A2Tools su Ko-fi",
+    "titleWechat": "Sostieni l'autore di A2Tools su WeChat",
+    "label": {
+      "wechat": "WeChat"
+    },
+    "copy": {
+      "btc": "Indirizzo BTC copiato",
+      "eth": "Indirizzo ETH copiato",
+      "usdc": "Indirizzo USDC copiato"
+    },
+    "aria": {
+      "afdian": "Apri Afdian",
+      "kofi": "Apri Ko-fi",
+      "close": "Chiudi finestra di supporto",
+      "wechat": "Mostra codice QR WeChat",
+      "paypal": "Apri PayPal",
+      "btc": "Copia indirizzo BTC",
+      "eth": "Copia indirizzo ETH",
+      "usdc": "Copia indirizzo USDC"
+    }
+  },
+  "battleTime": {
+    "analysing": "Monitoraggio dati...",
+    "idle": "Inattivo",
+    "notRunning": "AION2 non è in esecuzione",
+    "suspended": "App sospesa"
+  },
+  "meter": {
+    "identifyingPlayer": "#{id}",
+    "dpsSuffix": "/s"
+  },
+  "skills": {
+    "fallback": "Skill {code}",
+    "dot": "{name} - DOT"
+  },
+  "update": {
+    "title": "Nuovo aggiornamento disponibile",
+    "install": "Installa ora",
+    "notes": "Note di rilascio",
+    "manual": "Installazione manuale",
+    "later": "Più tardi",
+    "text": "È disponibile un nuovo aggiornamento!\n\nVersione attuale: {current}\nUltima versione: {latest}",
+    "installing": "Installazione dell'aggiornamento...",
+    "downloadError": "Download non riuscito. Riprova o installa manualmente."
+  },
+  "connection": {
+    "auto": "Auto",
+    "detecting": "Rilevamento della connessione di AION2...",
+    "loopback": "Loopback locale"
+  },
+  "target": {
+    "all": "All Targets",
+    "identifying": "Identificazione in corso...",
+    "train": "Training Scarecrow",
+    "boss": "Boss Targets"
+  },
+  "classes": {
+    "GLADIATOR": "Gladiator",
+    "TEMPLAR": "Templar",
+    "RANGER": "Ranger",
+    "ASSASSIN": "Assassin",
+    "SORCERER": "Sorcerer",
+    "CLERIC": "Cleric",
+    "ELEMENTALIST": "Elementalist",
+    "CHANTER": "Chanter",
+    "FIGHTER": "Brawler"
+  },
+  "dungeon": {
+    "difficulty": {
+      "exploration": "Exploration",
+      "normal": "Normal",
+      "hard": "Hard"
+    }
+  }
+}

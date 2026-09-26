@@ -46,3 +46,7 @@ settings.properties
 # Debug binaries
 /src-tauri/src/bin/
 .claude/
+
+# PowerMeter: strumenti interni, mai nel repo
+HANDOFF.md
+graphify-out/

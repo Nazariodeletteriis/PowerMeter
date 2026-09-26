@@ -2,8 +2,11 @@ const createI18n = ({
   defaultLanguage = "en",
   storageKey = "dpsMeter.language",
   supportedLanguages = [
-    "en", "de", "es", "fr", "ja", "ko", "pt", "ru", "zh-Hant", "zh-Hans",
+    "en", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zh-Hant", "zh-Hans",
   ],
+  // The game isn't localised in these languages: players see English names
+  // in-game, so skills/NPCs/dungeons stay English while the UI is translated.
+  contentLanguageOverrides = { it: "en" },
 } = {}) => {
   let currentLanguage = defaultLanguage;
   let uiStrings = {};
@@ -199,11 +202,12 @@ const createI18n = ({
       safeSetStorage(storageKey, next);
     }
 
+    const content = contentLanguageOverrides[next] || next;
     const [ui, skills, npcs, dungeons] = await Promise.all([
       loadJson(`./i18n/ui/${next}.json`),
-      loadJson(`./i18n/skills/${next}.json`),
-      loadJson(`./i18n/npcs/${next}.json`),
-      loadJson(`./i18n/dungeons/${next}.json`),
+      loadJson(`./i18n/skills/${content}.json`),
+      loadJson(`./i18n/npcs/${content}.json`),
+      loadJson(`./i18n/dungeons/${content}.json`),
     ]);
 
     uiStrings = ui || {};
@@ -217,7 +221,8 @@ const createI18n = ({
 
   const init = async () => {
     const stored = safeGetStorage(storageKey);
-    await setLanguage(stored || defaultLanguage, { persist: false });
+    const system = (navigator.language || "").split("-")[0];
+    await setLanguage(stored || system || defaultLanguage, { persist: false });
   };
 
   const onChange = (listener) => {

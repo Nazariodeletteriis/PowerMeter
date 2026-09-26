@@ -1,5 +1,5 @@
 (() => {
-  const CDN_MANIFEST = "https://a2tools.app/latest-v2.json";
+  const CDN_MANIFEST = "https://powermeter.letrionlabs.it/latest.json";
   const START_DELAY = 800,
     RETRY = 500,
     LIMIT = 5;

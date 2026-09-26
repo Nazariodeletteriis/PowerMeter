@@ -1,6 +1,6 @@
 {
   "header": {
-    "title": "A2Tools DPS Meter",
+    "title": "PowerMeter",
     "display": {
       "dps": "DPS",
       "total": "DMG",
@@ -272,9 +272,9 @@
     }
   },
   "support": {
-    "button": "Support Me",
-    "title": "Support the author on Ko-fi",
-    "titleWechat": "Support the author on WeChat",
+    "button": "Support A2Tools",
+    "title": "Support the A2Tools author on Ko-fi",
+    "titleWechat": "Support the A2Tools author on WeChat",
     "label": {
       "wechat": "WeChat"
     },
