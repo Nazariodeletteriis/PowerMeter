@@ -124,9 +124,270 @@
   cursor: pointer;
 }
 
+/* Account tab: profile header, fields, save bar, connected accounts. */
+.acctForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 4px 0 18px;
+}
+.acctHero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--pm-line);
+  border-radius: 8px;
+  /* A trace of the brand red from the avatar side, then the plain surface. */
+  background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--pm-deep) 38%, transparent), transparent 60%), var(--pm-s2);
+}
+.acctHero .avatar {
+  border: 0;
+  box-shadow: 0 0 0 3px var(--pm-s2), 0 0 0 4px var(--pm-deep);
+  color: var(--pm-t1);
+  background: var(--pm-s3);
+}
+.acctWho {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.acctName {
+  max-width: 100%;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.acctChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  border: 1px solid var(--pm-line);
+  font-size: 12px;
+  color: var(--pm-t3);
+}
+.acctChip.on {
+  border-color: color-mix(in srgb, var(--pm-ok) 55%, transparent);
+  color: var(--pm-t1);
+}
+.acctChip.on > svg {
+  color: var(--pm-okt);
+}
+.acctPhoto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.acctPhoto .btn.icon {
+  width: 30px;
+  padding: 0;
+  color: var(--pm-t2);
+}
+.acctPhoto .btn[aria-pressed="true"] {
+  border-color: var(--pm-red);
+  background: var(--pm-tint);
+}
+/* Keyboard focus lands on the hidden file input: ring its visible label. */
+.acctPhoto label:focus-within {
+  outline: 2px solid var(--pm-red);
+  outline-offset: 2px;
+}
+.acctWho .desc,
+.acctFields .desc {
+  font-size: 12px;
+  color: var(--pm-t3);
+}
+.acctFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px 16px;
+}
+.acctFields .wide {
+  grid-column: 1 / -1;
+}
+.acctFields .setInput {
+  width: 100%;
+  font-size: 13px;
+}
+.acctFields .setInput:focus-visible {
+  outline-offset: 0;
+  border-color: var(--pm-red);
+}
+.acctSave {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 14px 0 4px;
+  border-top: 1px solid var(--pm-line);
+  /* Stays in view while the form scrolls, so unsaved changes can't be missed. */
+  position: sticky;
+  bottom: 0;
+  background: var(--pm-s1);
+}
+.acctSave [role="status"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.acctSave .unsaved {
+  color: var(--pm-warn);
+}
+.acctSave .saved {
+  color: var(--pm-okt);
+}
+.acctSave .saved:not(:empty) {
+  animation: pmrise 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.acctSave .btn {
+  height: 34px;
+  padding: 0 16px;
+}
+.acctSection {
+  padding: 14px 0 6px;
+  border-top: 1px solid var(--pm-line);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pm-t3);
+}
+.acctSection + .setRow {
+  border-top: 0;
+}
+@keyframes pmrise {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+@keyframes pmfade {
+  from {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .acctSave .saved:not(:empty) {
+    animation-name: pmfade;
+  }
   .switch,
   .switch span {
     transition: none;
+  }
+}
+
+/* Update modal: download / install / error views (motion in Update.tsx via anime.js). */
+.updPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.updHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.updGlyph {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--pm-tint);
+  color: var(--pm-redt);
+  font-size: 20px;
+}
+/* The Lottie arrow: 300px comp drawn at glyph size, filled with the live token. */
+.updLottie {
+  width: 28px;
+  height: 28px;
+}
+.updLottie svg path {
+  fill: var(--pm-red);
+}
+.updGlyph.err {
+  background: color-mix(in srgb, var(--pm-err) 14%, transparent);
+  color: var(--pm-err);
+}
+.updText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.updText b {
+  font-weight: 500;
+}
+.updText span {
+  font-size: 12px;
+  color: var(--pm-t3);
+}
+.updPct {
+  font-size: 22px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  min-width: 4ch;
+  text-align: right;
+}
+.updTrack {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--pm-s3);
+  overflow: hidden;
+}
+.updFill,
+.updSweep {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--pm-deep), var(--pm-red));
+}
+.updFill {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.updSweep {
+  width: 30%;
+  transform: translateX(-100%);
+}
+.updSize {
+  margin-top: -6px;
+  font-size: 11px;
+  color: var(--pm-t3);
+  font-variant-numeric: tabular-nums;
+}
+.updError {
+  max-height: 72px;
+  overflow: auto;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--pm-s2);
+  border: 1px solid var(--pm-line);
+  font-size: 11px;
+  color: var(--pm-t2);
+  overflow-wrap: anywhere;
+}
+/* Reduced motion: no sweep, the track just reads as "in progress". */
+@media (prefers-reduced-motion: reduce) {
+  .updSweep {
+    width: 100%;
+    transform: none;
+    opacity: 0.35;
   }
 }

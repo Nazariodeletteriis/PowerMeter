@@ -7,7 +7,6 @@ import {
   CaretUpIcon,
   MagnifyingGlassIcon,
   PictureInPictureIcon,
-  UserIcon,
 } from "@phosphor-icons/react";
 import type { SaveSetting, Settings } from "./App";
 import { Home } from "./Home";
@@ -16,7 +15,7 @@ import { ALL_PAGES, NAV, NAV_BOTTOM, type NavPage } from "./nav";
 import { Palette } from "./Palette";
 import { SAMPLE_CHARACTER } from "./sampleData";
 import { Supporter } from "./Supporter";
-import { ClassAvatar, fmt } from "./ui";
+import { ClassAvatar, fmt, ProfileAvatar } from "./ui";
 import States from "./pages/shared/States";
 import { Diagnosis } from "./pages/system/Diagnosis";
 import type { PageHeader, PageProps } from "./pages/types";
@@ -219,9 +218,13 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
             <PictureInPictureIcon aria-hidden="true" />
             {t("topbar.openWidget")}
           </button>
-          <div className="avatar" title={t("topbar.account")} role="img" aria-label={t("topbar.account")}>
-            <UserIcon aria-hidden="true" />
-          </div>
+          {/* Same settings the Account tab saves; photo is a data URL or the Discord avatar URL. */}
+          <ProfileAvatar
+            size={30}
+            src={settings["pm.profile.photoSource"] === "none" ? undefined : settings["pm.profile.photo"]}
+            name={settings["pm.profile.first"] || capture.data?.characterName || localStorage.getItem(USER_NAME_KEY) || ""}
+            label={t("organizer.set.photo")}
+          />
         </header>
 
         <main className="content">

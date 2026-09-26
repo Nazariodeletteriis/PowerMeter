@@ -353,6 +353,13 @@ async fn show_update_window(app: tauri::AppHandle, current: String, latest: Stri
     Ok(accepted)
 }
 
+/// Dashboard updater: downloads the MSI (emitting `download-progress` 0-100),
+/// starts msiexec and exits so the installer can replace the running app.
+#[tauri::command]
+async fn install_update(app: tauri::AppHandle, msi_url: String) -> Result<(), String> {
+    download_and_install_msi_inner(&app, &msi_url).await
+}
+
 async fn download_and_install_msi_inner(app: &tauri::AppHandle, url: &str) -> Result<(), String> {
     use tokio::io::AsyncWriteExt;
     use futures_util::StreamExt;
@@ -1820,6 +1827,7 @@ pub fn run() {
             fetch_url,
             show_update_window,
             powermeter::npcap_installed,
+            install_update,
             pm_account::pm_account,
             pm_account::pm_login,
             pm_account::pm_logout,

@@ -74,7 +74,7 @@ export function TitleBar({ t, lang, onError }: { t: T; lang: string; onError: (e
           </button>
         </div>
       )}
-      {update && notes && <UpdateModal t={t} lang={lang} update={update} onClose={() => setNotes(false)} onError={onError} />}
+      {update && notes && <UpdateModal t={t} lang={lang} update={update} onClose={() => setNotes(false)} />}
     </>
   );
 }

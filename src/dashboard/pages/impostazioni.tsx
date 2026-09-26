@@ -2,9 +2,11 @@ import { useEffect, useState, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   BellIcon,
+  CheckIcon,
   DatabaseIcon,
   DiscordLogoIcon,
   GaugeIcon,
+  HeartIcon,
   InfoIcon,
   KeyboardIcon,
   PictureInPictureIcon,
@@ -16,6 +18,7 @@ import {
 import { LANGUAGE_SETTING, LANGUAGES, type Key } from "../i18n";
 import { PATREON_URL, USER_NAME_KEY, type CaptureStatus } from "../Shell";
 import { usePoll } from "../usePoll";
+import { ProfileAvatar } from "../ui";
 import { PALETTE_SETTING, PALETTES } from "./system/theme";
 import "./system/system.css";
 import type { PageProps } from "./types";
@@ -23,7 +26,13 @@ import type { PageProps } from "./types";
 const REPO_URL = "https://github.com/Nazariodeletteriis/PowerMeter";
 const PHOTO_TYPES = ["image/png", "image/jpeg", "image/webp"];
 const PHOTO_MAX_BYTES = 2 * 1024 * 1024;
+const PHOTO_SIZE = 256; // stored photo: square JPEG, small enough for settings.json
 const NAME_MAX_LENGTH = 32; // same cap as onboarding
+// Profile settings; the character name keeps its own storage (USER_NAME_KEY).
+const PROFILE = { first: "pm.profile.first", last: "pm.profile.last", source: "pm.profile.photoSource", photo: "pm.profile.photo" };
+type PhotoSource = "discord" | "upload" | "none";
+/** pm_account / pm_login (src-tauri/src/pm_account.rs). */
+type Account = { id: string; name: string; avatarUrl: string | null };
 
 const TABS = [
   ["generale", "organizer.set.general", SlidersIcon],
@@ -102,15 +111,25 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
   const [devices, setDevices] = useState<string[]>([]);
   const [device, setDevice] = useState(""); // "" = automatic
   const [version, setVersion] = useState("");
-  const [profile, setProfile] = useState({ first: "", last: "", pg: localStorage.getItem(USER_NAME_KEY) ?? "" });
-  const [photo, setPhoto] = useState<"discord" | "upload" | "none">("discord");
-  const [photoUrl, setPhotoUrl] = useState("");
-  const [account, setAccount] = useState<{ name: string } | null>(null);
+  // What is stored now; the form edits `draft` and Save writes it back.
+  const stored = {
+    first: settings[PROFILE.first] ?? "",
+    last: settings[PROFILE.last] ?? "",
+    pg: localStorage.getItem(USER_NAME_KEY) ?? "",
+    source: (settings[PROFILE.source] || "discord") as PhotoSource,
+    photo: settings[PROFILE.photo] ?? "",
+  };
+  const [draft, setDraft] = useState({ ...stored, upload: stored.source === "upload" ? stored.photo : "" });
+  const [savedNow, setSavedNow] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
+  const [account, setAccount] = useState<Account | null>(); // undefined until pm_account answers
   const capture = usePoll(getCapture, 2000).data;
 
   useEffect(() => {
     run(() => invoke<boolean>("get_click_through").then(setClickThrough));
-    run(() => invoke<{ name: string } | null>("pm_account").then(setAccount));
+    // On failure: treat as signed out so "Sign in" stays usable.
+    run(() => invoke<Account | null>("pm_account").then(setAccount, (e) => (setAccount(null), Promise.reject(e))));
     run(() => invoke<string[]>("get_available_devices").then(setDevices));
     run(() => invoke<string>("get_app_version").then(setVersion));
   }, []); // once per visit: `run` is a new function every render
@@ -144,26 +163,77 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
     </Row>
   );
 
+  const edit = (patch: Partial<typeof draft>) => {
+    setDraft((d) => ({ ...d, ...patch }));
+    setSavedNow(false);
+  };
+  const invalidPhoto = () => Promise.reject(t("organizer.set.photoInvalid"));
+  // Center-cropped 256px JPEG so settings.json stays small.
   const pickPhoto = (file?: File) => {
     if (!file) return;
-    if (!PHOTO_TYPES.includes(file.type) || file.size > PHOTO_MAX_BYTES) {
-      run(() => Promise.reject(t("organizer.set.photoInvalid")));
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setPhotoUrl(String(reader.result));
-      setPhoto("upload");
-    };
-    reader.readAsDataURL(file);
+    if (!PHOTO_TYPES.includes(file.type) || file.size > PHOTO_MAX_BYTES) return run(invalidPhoto);
+    run(async () => {
+      const img = await createImageBitmap(file).catch(invalidPhoto);
+      const side = Math.min(img.width, img.height);
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = PHOTO_SIZE;
+      const ctx = canvas.getContext("2d")!;
+      ctx.fillStyle = "#1d1919"; // --pm-s2 behind transparent PNGs (JPEG has no alpha)
+      ctx.fillRect(0, 0, PHOTO_SIZE, PHOTO_SIZE);
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, PHOTO_SIZE, PHOTO_SIZE);
+      img.close();
+      edit({ source: "upload", upload: canvas.toDataURL("image/jpeg", 0.85) });
+    });
   };
-  // Empty means "detect it from the game window", like onboarding.
-  const saveCharacter = () => {
-    const trimmed = profile.pg.trim();
-    if (!trimmed || trimmed === localStorage.getItem(USER_NAME_KEY)) return;
-    localStorage.setItem(USER_NAME_KEY, trimmed);
-    run(() => invoke("set_character_name", { name: trimmed }));
+
+  const discordPhoto = account?.avatarUrl ?? "";
+  const draftPhoto = draft.source === "upload" ? draft.upload : draft.source === "discord" ? discordPhoto : "";
+  // Empty character name means "detect it from the game window", like onboarding: nothing to save.
+  const pg = draft.pg.trim();
+  const pgDirty = !!pg && pg !== stored.pg;
+  const dirty =
+    pgDirty ||
+    draft.first.trim() !== stored.first ||
+    draft.last.trim() !== stored.last ||
+    draft.source !== stored.source ||
+    (draft.source === "upload" && draft.upload !== stored.photo) ||
+    // Discord avatar changed since the last save (only once pm_account has answered).
+    (draft.source === "discord" && account !== undefined && discordPhoto !== stored.photo);
+
+  const saveProfile = () =>
+    run(async () => {
+      setSaving(true);
+      try {
+        await save(PROFILE.first, draft.first.trim());
+        await save(PROFILE.last, draft.last.trim());
+        await save(PROFILE.source, draft.source);
+        await save(PROFILE.photo, draftPhoto);
+        if (pgDirty) {
+          localStorage.setItem(USER_NAME_KEY, pg);
+          await invoke("set_character_name", { name: pg });
+        }
+        setSavedNow(true);
+      } finally {
+        setSaving(false);
+      }
+    });
+  // Signing in or out changes what a saved "discord" choice shows: keep the stored photo in step.
+  const linkDiscord = (next: Account | null) => {
+    setAccount(next);
+    if (stored.source === "discord") return save(PROFILE.photo, next?.avatarUrl ?? "");
   };
+  const signIn = (then?: () => void) =>
+    run(async () => {
+      setSigningIn(true);
+      try {
+        await linkDiscord(await invoke<Account>("pm_login"));
+        then?.();
+      } finally {
+        setSigningIn(false);
+      }
+    });
+  const signOut = () => run(() => invoke("pm_logout").then(() => linkDiscord(null)));
   const setDeviceTo = (d: string) => {
     setDevice(d);
     run(() => invoke("set_manual_device", { device: d }).then(() => invoke("reset_auto_detection")));
@@ -172,8 +242,17 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
   const palette = PALETTES.find((p) => p === settings[PALETTE_SETTING]) ?? "brace";
   const playerLimit = settings["dpsMeter.playerLimit"] || "6";
   const actor = capture?.localPlayerId ? ` · 0x${capture.localPlayerId.toString(16).toUpperCase()}` : "";
-  const photoBg =
-    photo === "upload" ? `url(${photoUrl}) center/cover` : photo === "discord" ? "linear-gradient(135deg,#5865F2,#3B44C4)" : "var(--pm-s3)";
+  const displayName = `${draft.first.trim()} ${draft.last.trim()}`.trim() || pg || name;
+  const photoStatus =
+    draft.source === "upload"
+      ? t("organizer.set.photoUploaded")
+      : draft.source === "none"
+        ? t("organizer.set.noPhoto")
+        : !account
+          ? t("organizer.set.discordPhotoSignIn")
+          : account.avatarUrl
+            ? `${t("organizer.set.photoFromDiscord")} · ${account.name}`
+            : t("organizer.set.discordDefaultAvatar");
 
   const rows: Record<(typeof TABS)[number][0], ReactNode> = {
     generale: (
@@ -287,30 +366,24 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
     ),
     account: (
       <>
-        <Row label={t("organizer.set.photo")} desc={t("organizer.set.photoHint")}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              role="img"
-              aria-label={t("organizer.set.photo")}
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: "50%",
-                background: photoBg,
-                boxShadow: "0 0 0 2px var(--pm-line)",
-                display: "grid",
-                placeItems: "center",
-                fontSize: 20,
-                fontWeight: 600,
-                color: "#FFFFFF",
-                flex: "none",
-              }}
-            >
-              {photo === "discord" && name.charAt(0).toUpperCase()}
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <div style={{ display: "flex", gap: 6 }}>
-                <label className="btn fill" style={{ fontSize: 12 }}>
+        {/* Enter in any field submits: one Save for photo, names and character. */}
+        <form
+          className="acctForm"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (dirty && !saving) saveProfile();
+          }}
+        >
+          <div className="acctHero">
+            <ProfileAvatar size={76} src={draftPhoto} name={displayName} label={t("organizer.set.photo")} />
+            <div className="acctWho">
+              <div className="acctName">{displayName}</div>
+              <span className={account ? "acctChip on" : "acctChip"}>
+                <DiscordLogoIcon aria-hidden="true" weight="fill" />
+                {account ? account.name : t("organizer.set.discordNotLinked")}
+              </span>
+              <div className="acctPhoto">
+                <label className="btn sm">
                   <UploadSimpleIcon aria-hidden="true" />
                   {t("organizer.set.uploadPhoto")}
                   <input
@@ -325,71 +398,111 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
                 </label>
                 <button
                   type="button"
-                  className="btn"
-                  style={{ fontSize: 12, borderColor: photo === "discord" ? "var(--pm-red)" : undefined }}
-                  onClick={() => setPhoto("discord")}
+                  className="btn sm"
+                  aria-pressed={draft.source === "discord"}
+                  disabled={signingIn}
+                  // Not signed in: sign in first, then use the avatar.
+                  onClick={() => (account ? edit({ source: "discord" }) : signIn(() => edit({ source: "discord" })))}
                 >
                   <DiscordLogoIcon aria-hidden="true" />
                   {t("organizer.set.useDiscordPhoto")}
                 </button>
                 <button
                   type="button"
-                  className="btn"
+                  className="btn sm icon"
                   title={t("organizer.set.removePhoto")}
                   aria-label={t("organizer.set.removePhoto")}
-                  style={{ width: 32, padding: 0, color: "var(--pm-t2)" }}
-                  onClick={() => setPhoto("none")}
+                  disabled={draft.source === "none"}
+                  onClick={() => edit({ source: "none" })}
                 >
                   <TrashIcon aria-hidden="true" />
                 </button>
               </div>
-              <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>
-                {photo === "upload"
-                  ? t("organizer.set.photoUploaded")
-                  : photo === "discord"
-                    ? `${t("organizer.set.photoFromDiscord")} · kaelthas`
-                    : t("organizer.set.noPhoto")}
-              </span>
+              <div className="desc" aria-live="polite">
+                {signingIn ? t("account.browser") : photoStatus}
+              </div>
             </div>
           </div>
+
+          <div className="acctFields">
+            <label className="field">
+              {t("organizer.set.firstName")}
+              <input
+                className="setInput"
+                value={draft.first}
+                autoComplete="given-name"
+                placeholder={t("organizer.set.firstNamePh")}
+                aria-describedby="acct-first-hint"
+                onChange={(e) => edit({ first: e.target.value })}
+              />
+              <span id="acct-first-hint" className="desc">
+                {t("organizer.set.firstNameHint")}
+              </span>
+            </label>
+            <label className="field">
+              {t("organizer.set.lastName")}
+              <input
+                className="setInput"
+                value={draft.last}
+                autoComplete="family-name"
+                placeholder={t("organizer.set.lastNamePh")}
+                aria-describedby="acct-last-hint"
+                onChange={(e) => edit({ last: e.target.value })}
+              />
+              <span id="acct-last-hint" className="desc">
+                {t("organizer.set.optional")}
+              </span>
+            </label>
+            <label className="field wide">
+              {t("organizer.set.character")}
+              <input
+                className="setInput"
+                value={draft.pg}
+                maxLength={NAME_MAX_LENGTH}
+                placeholder="Kaelthas"
+                aria-describedby="acct-pg-hint"
+                onChange={(e) => edit({ pg: e.target.value })}
+              />
+              <span id="acct-pg-hint" className="desc">
+                {t("organizer.set.characterHint")}
+              </span>
+            </label>
+          </div>
+
+          <div className="acctSave">
+            <span role="status" className={dirty ? "unsaved" : "saved"}>
+              {dirty ? (
+                t("organizer.set.unsaved")
+              ) : savedNow ? (
+                <>
+                  <CheckIcon aria-hidden="true" />
+                  {t("organizer.set.saved")}
+                </>
+              ) : null}
+            </span>
+            <button type="submit" className="btn fill" disabled={!dirty || saving}>
+              {t("organizer.set.saveProfile")}
+            </button>
+          </div>
+        </form>
+
+        <h3 className="acctSection">{t("organizer.set.connectedAccounts")}</h3>
+        <Row label="Discord" desc={account ? `${account.name} · ${t("organizer.set.linked")}` : signingIn ? t("account.browser") : t("account.body")}>
+          {account ? (
+            button(t("organizer.set.disconnect"), signOut)
+          ) : (
+            <button type="button" className="btn" disabled={signingIn || account === undefined} onClick={() => signIn()}>
+              <DiscordLogoIcon aria-hidden="true" />
+              {t("account.discord")}
+            </button>
+          )}
         </Row>
-        <Row label={t("organizer.set.firstName")} desc={t("organizer.set.firstNameHint")}>
-          <input
-            className="setInput"
-            aria-label={t("organizer.set.firstName")}
-            value={profile.first}
-            placeholder={t("organizer.set.firstNamePh")}
-            onChange={(e) => setProfile({ ...profile, first: e.target.value })}
-          />
-        </Row>
-        <Row label={t("organizer.set.lastName")} desc={t("organizer.set.optional")}>
-          <input
-            className="setInput"
-            aria-label={t("organizer.set.lastName")}
-            value={profile.last}
-            placeholder={t("organizer.set.lastNamePh")}
-            onChange={(e) => setProfile({ ...profile, last: e.target.value })}
-          />
-        </Row>
-        <Row label={t("organizer.set.character")} desc={t("organizer.set.characterHint")}>
-          <input
-            className="setInput"
-            aria-label={t("organizer.set.character")}
-            value={profile.pg}
-            maxLength={NAME_MAX_LENGTH}
-            placeholder="Kaelthas"
-            onChange={(e) => setProfile({ ...profile, pg: e.target.value })}
-            onBlur={saveCharacter}
-            onKeyDown={(e) => e.key === "Enter" && saveCharacter()}
-          />
-        </Row>
-        <Row label="Discord" desc={account ? `${account.name} · ${t("organizer.set.linked")}` : t("account.body")}>
-          {account
-            ? button(t("organizer.set.disconnect"), () => run(() => invoke("pm_logout").then(() => setAccount(null))))
-            : button(t("account.discord"), () => run(() => invoke<{ name: string }>("pm_login").then(setAccount)))}
-        </Row>
-        <Row label="Patreon" desc={t("organizer.set.patreonSince")}>
-          {button(t("organizer.set.manage"), () => open(PATREON_URL))}
+        {/* Supporter status doesn't exist yet (R6): an honest invitation, no fake "since" date. */}
+        <Row label="Patreon" desc={t("organizer.set.patreonHint")}>
+          <button type="button" className="btn" onClick={() => open(PATREON_URL)}>
+            <HeartIcon aria-hidden="true" />
+            {t("organizer.set.becomeSupporter")}
+          </button>
         </Row>
       </>
     ),
@@ -443,6 +556,11 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
           <button key={id} type="button" className="setTab" aria-current={id === tab} onClick={() => setTab(id)}>
             <Icon aria-hidden="true" />
             {t(label)}
+            {id === "account" && dirty && (
+              <span className="dot" style={{ marginLeft: "auto", background: "var(--pm-warn)" }} title={t("organizer.set.unsaved")}>
+                <span className="srOnly">{t("organizer.set.unsaved")}</span>
+              </span>
+            )}
           </button>
         ))}
       </nav>

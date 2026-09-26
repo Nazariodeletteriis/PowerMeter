@@ -1,4 +1,5 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
+import { UserIcon } from "@phosphor-icons/react";
 
 // Class and faction art from the design bundle (src/assets/pm/<name>.png).
 const ART = import.meta.glob<string>("../assets/pm/*.png", { eager: true, import: "default" });
@@ -49,6 +50,25 @@ export function ClassAvatar({ cls, size = 28 }: { cls?: string; size?: number })
       aria-hidden="true"
     >
       {icon ? <img src={icon} alt="" /> : initials}
+    </span>
+  );
+}
+
+/**
+ * Round profile picture (pm.profile.photo): the photo, else the name's
+ * initial, else a user glyph. A broken URL (e.g. an old Discord avatar)
+ * falls back to the initial.
+ */
+export function ProfileAvatar({ src, name, size, label }: { src?: string; name: string; size: number; label?: string }) {
+  const [broken, setBroken] = useState<string>();
+  const initial = name.trim().charAt(0).toUpperCase();
+  return (
+    <span
+      className="avatar"
+      style={{ width: size, height: size, fontSize: size * 0.42 }}
+      {...(label ? { role: "img", "aria-label": label, title: label } : { "aria-hidden": true })}
+    >
+      {src && broken !== src ? <img src={src} alt="" onError={() => setBroken(src)} /> : initial || <UserIcon />}
     </span>
   );
 }
