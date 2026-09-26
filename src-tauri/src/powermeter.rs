@@ -70,6 +70,48 @@ pub fn npcap_installed() -> bool {
     unsafe { libloading::Library::new("wpcap.dll") }.is_ok()
 }
 
+/// Lets `wpcap.dll` load from Npcap's own folder, so capture works even when
+/// Npcap was installed without "WinPcap API-compatible Mode" (the engine loads
+/// it by bare name). Appended, so a compat-mode copy in System32 still wins.
+/// Call first thing in `run()`, before any thread reads the environment.
+pub fn add_npcap_to_dll_path() {
+    let Some(root) = std::env::var_os("SystemRoot") else { return };
+    let path = std::env::var_os("PATH").unwrap_or_default();
+    let dirs = std::env::split_paths(&path)
+        .chain([std::path::Path::new(&root).join("System32").join("Npcap")]);
+    if let Ok(joined) = std::env::join_paths(dirs) {
+        unsafe { std::env::set_var("PATH", joined) };
+    }
+}
+
+/// Downloads the official Npcap installer from npcap.com and starts it.
+/// Npcap's free license forbids bundling it with PowerMeter, so the user's
+/// machine fetches it from the source and the user clicks through its wizard.
+#[tauri::command]
+pub async fn install_npcap() -> Result<(), String> {
+    let page = reqwest::get("https://npcap.com/")
+        .await
+        .map_err(|e| e.to_string())?
+        .text()
+        .await
+        .map_err(|e| e.to_string())?;
+    let file = page
+        .split('"')
+        .find(|s| s.starts_with("dist/npcap-") && s.ends_with(".exe"))
+        .ok_or("Npcap download link not found on npcap.com")?;
+    let bytes = reqwest::get(format!("https://npcap.com/{file}"))
+        .await
+        .and_then(|r| r.error_for_status())
+        .map_err(|e| e.to_string())?
+        .bytes()
+        .await
+        .map_err(|e| e.to_string())?;
+    let installer = std::env::temp_dir().join(file.trim_start_matches("dist/"));
+    std::fs::write(&installer, &bytes).map_err(|e| e.to_string())?;
+    std::process::Command::new(&installer).spawn().map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 /// Async for the same reason as `open_settings_window`: building a window from
 /// a synchronous command deadlocks WebView2 on Windows.
 #[tauri::command]

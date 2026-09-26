@@ -1375,6 +1375,7 @@ fn decode_replay_hex(hex: &str) -> Option<Vec<u8>> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    powermeter::add_npcap_to_dll_path();
     logging::logger::init_logging();
 
     tauri::Builder::default()
@@ -1815,6 +1816,7 @@ pub fn run() {
             fetch_url,
             show_update_window,
             powermeter::npcap_installed,
+            powermeter::install_npcap,
             powermeter::open_dashboard_window,
             powermeter::show_overlay,
         ])

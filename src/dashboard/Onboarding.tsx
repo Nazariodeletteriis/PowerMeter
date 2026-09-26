@@ -156,8 +156,14 @@ function Requirements(props: StepProps) {
   const npcap = usePoll(checkNpcap, 2000);
   const admin = usePoll(checkAdmin, 2000);
   const game = usePoll(checkGame, 2000);
-  const { error, run } = useAction();
+  const { busy, error, run } = useAction();
   const ready = npcap.data === true && admin.data === true;
+  // Download and launch the official installer; if that fails, fall back to
+  // the download page so the user is never stuck.
+  const installNpcap = () =>
+    run(() => invoke("install_npcap")).then(
+      (ok) => ok || invoke("open_url", { url: NPCAP_URL }),
+    );
   return (
     <Frame
       {...props}
@@ -168,9 +174,9 @@ function Requirements(props: StepProps) {
       <p>{t("req.body")}</p>
       <ul className="checks">
         <Check t={t} label="req.npcap" state={npcap}>
-          <p className="muted">{t("req.npcapHint")}</p>
-          <button type="button" onClick={() => run(() => invoke("open_url", { url: NPCAP_URL }))}>
-            {t("req.npcapDownload")}
+          <p className="muted">{t(busy ? "req.npcapDownloading" : "req.npcapHint")}</p>
+          <button type="button" onClick={installNpcap} disabled={busy}>
+            {t("req.npcapInstall")}
           </button>
         </Check>
         <Check t={t} label="req.admin" state={admin}>

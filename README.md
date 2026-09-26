@@ -17,8 +17,10 @@ after every game patch. Thank you!
 ## Requirements
 
 - Windows 10/11 (x64)
-- [Npcap](https://npcap.com) installed with **"WinPcap API-compatible Mode"** enabled
-- Run PowerMeter **as Administrator** (raw packet capture)
+- [Npcap](https://npcap.com). Its free license forbids bundling it, so the first-run onboarding
+  downloads the official installer from npcap.com and starts it. "WinPcap API-compatible Mode"
+  is not required: PowerMeter also loads Npcap from its own folder.
+- Admin rights (raw packet capture). The app manifest requests them, so Windows asks on launch.
 
 ## Download
 
@@ -31,7 +33,7 @@ Prerequisites: Rust (stable), Node.js 24, Npcap.
 
 ```bash
 npm install
-npm run tauri dev     # run
+npm run tauri dev     # run (from an elevated terminal: the app requires admin)
 npm run tauri build   # MSI in src-tauri/target/release/bundle/msi/
 cargo test --manifest-path src-tauri/Cargo.toml
 ```
