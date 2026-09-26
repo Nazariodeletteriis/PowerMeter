@@ -14,18 +14,18 @@ The packet capture and DPS engine come from
 GPL-3.0. PowerMeter tracks it as the `upstream` remote so protocol and game-data fixes can be merged
 after every game patch. Thank you!
 
-## Requirements
+## Install
 
-- Windows 10/11 (x64)
-- [Npcap](https://npcap.com). Its free license forbids bundling it, so the first-run onboarding
-  downloads the official installer from npcap.com and starts it. "WinPcap API-compatible Mode"
-  is not required: PowerMeter also loads Npcap from its own folder.
-- Admin rights (raw packet capture). The app manifest requests them, so Windows asks on launch.
+Windows 10/11 (x64). One download, nothing to install beforehand:
 
-## Download
+1. Download the PowerMeter `.msi` from the [latest release](../../releases/latest) and run it.
+2. Launch PowerMeter and accept the Windows admin prompt (packet capture needs it).
+3. The first-run setup checks for Npcap, the capture driver. If it is missing, click
+   **Install Npcap**: PowerMeter fetches the official installer from npcap.com and starts it —
+   just click *I Agree → Install → Finish*. No special options are needed.
 
-Windows installers are built by GitHub Actions on every push to `main`
-(artifact `PowerMeter-msi` on the workflow run) and attached to releases on `v*` tags.
+Npcap's license does not allow shipping it inside the MSI, which is why the setup fetches it for
+you instead. Updates arrive in-app.
 
 ## Development
 
