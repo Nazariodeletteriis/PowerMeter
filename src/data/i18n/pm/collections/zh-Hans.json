@@ -1,5 +1,4 @@
 {
-  "collections.soon": "将在后续更新中推出",
   "collections.elyos": "天族",
   "collections.asmodian": "魔族",
   "collections.reshanta": "雷尚塔",
@@ -20,5 +19,18 @@
   "collections.title.season": "赛季",
   "collections.none": "无",
   "collections.stats": "收藏属性",
-  "collections.noStats": "暂无属性：请先添加收藏。"
+  "collections.noStats": "暂无属性：请先添加收藏。",
+  "collections.pets": "宠物",
+  "collections.genus": "Genus Insight",
+  "collections.clear": "清空",
+  "collections.slot": "槽位 {n}",
+  "collections.back": "返回",
+  "collections.empty": "空",
+  "collections.remove": "移除",
+  "collections.pantheon.artwork": "画框",
+  "collections.pantheon.statue": "雕像",
+  "collections.pantheon.colossus": "巨像",
+  "collections.arcana.level": "卡牌等级",
+  "collections.arcana.sub": "副技能",
+  "collections.arcana.set": "套装效果"
 }

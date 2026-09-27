@@ -12,6 +12,7 @@ type Fight = { id: string; bossName: string; startTimeMs: number; durationMs: nu
 const getFights = () => invoke<Fight[]>("get_fight_history");
 const COLS = "28px 100px minmax(0,1.6fr) 64px 60px 80px 50px 44px 100px";
 const DAY = 864e5;
+const UPLOADED = "pm.uploadedFights";
 
 export default function Storico(props: PageProps) {
   // Remounting the list is the retry: usePoll starts over.
@@ -26,12 +27,24 @@ function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
   const [bossOnly, setBossOnly] = useState(false);
   const [chk, setChk] = useState<Record<string, boolean>>({});
   const [deleted, setDeleted] = useState<Record<string, boolean>>({});
+  // Fight id → share URL of the fights uploaded from this PC.
+  const [uploaded, setUploaded] = useState<Record<string, string>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(UPLOADED) ?? "{}");
+    } catch {
+      return {};
+    }
+  });
+  const [uploading, setUploading] = useState(false);
+  const [copied, setCopied] = useState("");
 
   const all = (fights.data ?? []).filter((f) => !deleted[f.id]);
   const since = period === "all" ? 0 : Date.now() - Number(period) * DAY;
   const list = all.filter((f) => f.startTimeMs >= since && (!boss || f.bossName === boss) && (!bossOnly || !f.isTrain));
   const bosses = [...new Set(all.map((f) => f.bossName).filter(Boolean))].sort();
   const picked = list.filter((f) => chk[f.id]);
+  // Training fights are not uploaded (the server refuses them).
+  const toUpload = picked.filter((f) => !f.isTrain && !uploaded[f.id]);
   const day = new Intl.DateTimeFormat(lang, { day: "2-digit", month: "2-digit" });
   const time = new Intl.DateTimeFormat(lang, { hour: "2-digit", minute: "2-digit" });
 
@@ -44,6 +57,27 @@ function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
         setDeleted((d) => ({ ...d, [f.id]: true }));
       }
       setChk({});
+    });
+  };
+
+  const upload = () => {
+    setUploading(true);
+    run(async () => {
+      try {
+        for (const f of toUpload) {
+          const res = await invoke<{ url?: string }>("upload_combat_log", { id: f.id }).catch((e) => {
+            throw e === "not signed in" || e === "unauthorized" ? t("combat.upSignIn") : e;
+          });
+          setUploaded((u) => {
+            const next = { ...u, [f.id]: String(res?.url ?? "") };
+            localStorage.setItem(UPLOADED, JSON.stringify(next));
+            return next;
+          });
+        }
+        setChk({});
+      } finally {
+        setUploading(false);
+      }
     });
   };
 
@@ -84,8 +118,7 @@ function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
         </label>
         <div style={{ flex: 1 }} />
         {picked.length > 0 && <span style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("combat.nSelected", { n: picked.length })}</span>}
-        {/* ponytail: upload lands with online logs (R2). */}
-        <button type="button" className="btn fill">
+        <button type="button" className="btn fill" disabled={!toUpload.length || uploading} title={toUpload.length ? undefined : t("combat.upPick")} onClick={upload}>
           <CloudArrowUpIcon aria-hidden="true" />
           {t("combat.upload")}
         </button>
@@ -179,10 +212,27 @@ function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
                   <span className="num" style={{ color: "var(--pm-t2)" }}>
                     {f.jobs.length || "—"}
                   </span>
-                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
-                    <span className="dot" style={{ background: "var(--pm-t3)" }} />
-                    {t("combat.up.local")}
-                  </span>
+                  {f.id in uploaded ? (
+                    // Uploaded: clicking copies the share link.
+                    <button
+                      type="button"
+                      className="cbPlain"
+                      title={uploaded[f.id]}
+                      style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (uploaded[f.id]) run(() => navigator.clipboard.writeText(uploaded[f.id]).then(() => setCopied(f.id)));
+                      }}
+                    >
+                      <span className="dot" style={{ background: "var(--pm-ok)" }} />
+                      {t(copied === f.id ? "combat.linkCopied" : "combat.up.online")}
+                    </button>
+                  ) : (
+                    <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+                      <span className="dot" style={{ background: "var(--pm-t3)" }} />
+                      {t("combat.up.local")}
+                    </span>
+                  )}
                 </div>
               ))}
         </div>

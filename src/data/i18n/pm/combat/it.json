@@ -131,5 +131,9 @@
   "combat.vis.public": "Pubblico",
   "combat.week": "Settimana",
   "combat.wipeOnly": "Solo Wipe",
-  "combat.you": "(tu)"
+  "combat.you": "(tu)",
+  "combat.up.online": "Online",
+  "combat.upSignIn": "Accedi con Discord in Impostazioni → Account per caricare i combattimenti.",
+  "combat.upPick": "Seleziona i combattimenti da caricare",
+  "combat.linkCopied": "Link copiato"
 }

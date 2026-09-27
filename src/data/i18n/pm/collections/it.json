@@ -1,5 +1,4 @@
 {
-  "collections.soon": "In arrivo in un prossimo aggiornamento",
   "collections.elyos": "Elyos",
   "collections.asmodian": "Asmodian",
   "collections.reshanta": "Reshanta",
@@ -20,5 +19,18 @@
   "collections.title.season": "Stagione",
   "collections.none": "Nessuno",
   "collections.stats": "Stat della collezione",
-  "collections.noStats": "Ancora nessuna stat: aggiungi qualcosa alla collezione."
+  "collections.noStats": "Ancora nessuna stat: aggiungi qualcosa alla collezione.",
+  "collections.pets": "Pet",
+  "collections.genus": "Genus Insight",
+  "collections.clear": "Svuota",
+  "collections.slot": "Slot {n}",
+  "collections.back": "Indietro",
+  "collections.empty": "Vuoto",
+  "collections.remove": "Rimuovi",
+  "collections.pantheon.artwork": "Cornici",
+  "collections.pantheon.statue": "Statue",
+  "collections.pantheon.colossus": "Colosso",
+  "collections.arcana.level": "Livello carta",
+  "collections.arcana.sub": "Sub skill",
+  "collections.arcana.set": "Bonus set"
 }

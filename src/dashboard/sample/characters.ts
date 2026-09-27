@@ -102,18 +102,6 @@ export const SAMPLE_MY_BUILDS: { n: string; on: boolean }[] = [
   { n: "Frost Control · PvP", on: false },
 ];
 export const MY_BUILD_ICONS = ["Mythic", "Legendary", "Legendary", "Heroic", "Rare"];
-// pBuilder.G — character stats; group is an i18n key suffix, "%" values use a dot.
-export const SAMPLE_STATS: [group: string, rows: [string, number | string][]][] = [
-  ["main", [["Max Attack", 682], ["Min Attack", 463], ["Accuracy", 2240], ["Critical Hit", 1180], ["HP", 28400], ["MP", 2280], ["Defense", 2050], ["Critical Hit Resist", 1061], ["Combat Speed", "24%"], ["Move Speed", "28.3%"]]],
-  ["attributes", [["Might", 148], ["Dexterity", 65], ["Constitution", 46], ["Precision", 124]]],
-  ["attack", [["Attack", 3412], ["Attack Bonus", 955], ["Magic Boost", 2890], ["Penetration", 6910], ["Critical Attack", 25], ["Back Attack", 235], ["Damage Boost", "31.5%"], ["Critical Damage Boost", "26.1%"], ["Weapon Damage Boost", "26.7%"], ["Boss Attack", 865], ["Perfect Chance", "28%"], ["Double Chance", "17.9%"]]],
-  ["defense", [["Defense", 9915], ["Defense Bonus", 6430], ["Parry Damage Reduction", "27%"], ["Evasion Bonus", 1172], ["Block", 1865], ["Magic Resist", 1880]]],
-  ["pvp", [["PvP Attack", 57], ["PvP Defense", 1665], ["PvP Accuracy", 115], ["PvP Damage Boost", "17%"]]],
-  ["pve", [["PvE Attack", 702], ["PvE Defense", 1740], ["PvE Damage Boost", "24%"], ["Boss Damage Boost", "4%"]]],
-  ["movement", [["Combat Speed", "49%"], ["Flight Speed", "4%"]]],
-  ["recovery", [["Natural HP Regen", 1242], ["Healing Received", "16.5%"]]],
-  ["cooldown", [["Cooldown Reduction", "6.5%"]]],
-];
 // Comments tab: [author, ago, text]
 export const SAMPLE_COMMENTS: [string, Ago, string][] = [
   ["nyxara", [2, "hour"], "Con Double Chance al Max su entrambi gli orecchini guadagno ~400 DPS. Ottima guida."],

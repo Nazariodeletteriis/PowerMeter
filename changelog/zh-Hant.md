@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.11
+
+- 新增：Character Builder 中的屬性變為真實且即時更新：職業基礎屬性、裝備（魔石和其他所有欄位）、Daevanion、收藏和稱號，均按照 questlog 的方式計算。目標檢視會顯示每項屬性的變化。
+- 新增：Pantheon、Arcana 和 Genus Insight 收藏，及其在建構器中的屬性。
+- 新增：資料庫中的技能和任務會顯示英文頁面，下方顯示你所選語言的同一頁面（義大利語為非官方翻譯）。
+- 新增：刪除你建立或複製的配置；重啟後你的配置和 Daevanion 節點都會保留。
+- 新增：新的 Windows 圖示。
+- 變更：裝備評分按照 questlog 的方式計算（強化、突破、魔石、神石、Arcana、Daevanion 點數）。
+- 變更：配置只能複製到相同職業的角色上。
+- 變更：統一為一個返回按鈕：從缺少部件返回配置，其他情況都返回 Character Builder。
+- 修正：戰鬥紀錄中的上傳會上傳選取的戰鬥。
+- 修正：已裝備的翅膀和稱號會提供其加成；沒有屬性的翅膀和稱號不再列出；飛行力不再虛高。
+- 修正：護手外觀和 Brawler 的翅膀會隱藏，直到 Brawler 在 EU/NA 上線。
+
 ## 0.2.10
 
 - 新增：Character Builder 收藏（外觀、寵物、翅膀、石碑、稱號）及真實屬性合計；新角色從 0 開始。Genus Insight、Pantheon 和 Arcana 將在專門更新中推出。

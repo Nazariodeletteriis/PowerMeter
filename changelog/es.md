@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.11
+
+- Nuevo: las estadísticas del Character Builder son reales y en vivo: estadísticas base de la clase, equipo (Magicstones y el resto de ranuras), Daevanion, colecciones y títulos, calculadas como lo hace questlog. La vista Objetivo muestra el cambio en cada estadística.
+- Nuevo: colecciones de Pantheon, Arcana y Genus Insight, con sus estadísticas en el builder.
+- Nuevo: las habilidades y misiones de la base de datos muestran la ficha en inglés y, debajo, la misma ficha en tu idioma (el italiano es una traducción no oficial).
+- Nuevo: elimina las builds que creaste o clonaste; tus builds y tus nodos de Daevanion se conservan tras un reinicio.
+- Nuevo: nuevo icono de Windows.
+- Cambiado: el Gear Score se calcula como lo hace questlog (mejora, avance, Magicstones, Theostone, Arcana, puntos de Daevanion).
+- Cambiado: una build solo puede clonarse en un personaje de la misma clase.
+- Cambiado: un único botón Atrás: a la build desde Piezas que faltan, y al Character Builder en el resto de los casos.
+- Corregido: Subir en el Historial de combates sube los combates seleccionados.
+- Corregido: las alas y títulos equipados dan sus bonificaciones; las alas y títulos sin estadísticas ya no aparecen en la lista; el poder de vuelo ya no está inflado.
+- Corregido: el aspecto de guantelete y las alas del Brawler están ocultos hasta que el Brawler salga en EU/NA.
+
 ## 0.2.10
 
 - Nuevo: colecciones en el Character Builder (aspectos, mascotas, alas, monolito, títulos) con sus totales reales de estadísticas; un personaje nuevo empieza en 0. Genus Insight, Pantheon y Arcana llegarán en una actualización dedicada.

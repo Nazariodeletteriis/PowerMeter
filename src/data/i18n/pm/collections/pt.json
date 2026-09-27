@@ -1,5 +1,4 @@
 {
-  "collections.soon": "Chega numa próxima atualização",
   "collections.elyos": "Elyos",
   "collections.asmodian": "Asmodian",
   "collections.reshanta": "Reshanta",
@@ -20,5 +19,18 @@
   "collections.title.season": "Temporada",
   "collections.none": "Nenhum",
   "collections.stats": "Atributos da coleção",
-  "collections.noStats": "Ainda sem atributos: adicione algo à coleção."
+  "collections.noStats": "Ainda sem atributos: adicione algo à coleção.",
+  "collections.pets": "Mascotes",
+  "collections.genus": "Genus Insight",
+  "collections.clear": "Limpar",
+  "collections.slot": "Espaço {n}",
+  "collections.back": "Voltar",
+  "collections.empty": "Vazio",
+  "collections.remove": "Remover",
+  "collections.pantheon.artwork": "Molduras",
+  "collections.pantheon.statue": "Estátuas",
+  "collections.pantheon.colossus": "Colosso",
+  "collections.arcana.level": "Nível da carta",
+  "collections.arcana.sub": "Habilidades secundárias",
+  "collections.arcana.set": "Bônus de conjunto"
 }

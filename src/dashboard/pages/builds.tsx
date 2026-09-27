@@ -8,13 +8,15 @@ import {
   PlusIcon,
   SquaresFourIcon,
   StackIcon,
+  TrashIcon,
   UserIcon,
 } from "@phosphor-icons/react";
 import { REGIONS } from "../Onboarding";
 import { BUILD_REGIONS, BUILD_TAGS, SAMPLE_BUILDS, SAMPLE_ME, type Ago } from "../sample/characters";
 import { planClass } from "../skills";
 import { ClassAvatar, CLASSES, RELEASED_CLASSES } from "../ui";
-import { ago, openBuild, useMem, type BuildSrc } from "./characters/shared";
+import { GEAR_KEY, gearKey, readGear, type BuildGear } from "./characters/gear";
+import { ago, closeBuild, MY_BUILDS_KEY, openBuild, readMyBuilds, useMem } from "./characters/shared";
 import type { PageProps } from "./types";
 
 // Standard class portraits, hotlinked at runtime (never bundled): NCSoft's game
@@ -43,14 +45,24 @@ const TABS = [
 ] as const;
 
 // Prototype pg.builds (pBuilds).
-export default function Builds({ t, lang, go, settings }: PageProps) {
+export default function Builds({ t, lang, go, settings, save, onError }: PageProps) {
   const [f, setF] = useMem("bf", { reg: ALL, cls: ALL, tag: ALL, q: "", tab: "all", page: 1 });
   const [broken, setBroken] = useState<Record<string, boolean>>({});
   // Same like state as the Character Builder, keyed by build title.
   const [liked, setLiked] = useMem<Record<string, boolean>>("liked", {});
   // Builds created or cloned in the Character Builder (newest first).
-  // ponytail: module memory until builds are stored per account (R2).
-  const [myBuilds] = useMem<BuildSrc[]>("myBuilds", []);
+  const myBuilds = readMyBuilds(settings[MY_BUILDS_KEY]);
+  // The builder's saved gear (same module memory as builder.tsx and item.tsx).
+  const [stored, setStored] = useMem<Record<string, BuildGear>>("gear", readGear(settings[GEAR_KEY]));
+  /** Delete one of your builds, with its gear. */
+  const remove = (b: { t: string; cls: string }) => {
+    if (!window.confirm(t("characters.builds.deleteConfirm", { build: b.t }))) return;
+    closeBuild(b.t);
+    save(MY_BUILDS_KEY, JSON.stringify(myBuilds.filter((x) => x.t !== b.t))).catch(onError);
+    const { [gearKey(b.t, b.cls)]: _gone, ...rest } = stored;
+    setStored(rest);
+    save(GEAR_KEY, JSON.stringify(rest)).catch(onError);
+  };
   // Any filter change goes back to the first page.
   const upd = (o: Partial<typeof f>) => setF({ ...f, page: 1, ...o });
 
@@ -58,7 +70,7 @@ export default function Builds({ t, lang, go, settings }: PageProps) {
   const all = [
     ...myBuilds
       .filter((m) => !SAMPLE_BUILDS.some((x) => x.t === m.t))
-      .map((m) => ({ t: m.t, cls: m.cls, sub: "", n: 1, reg, tags: m.tags ?? [], ago: [0, "minute"] as Ago, au: SAMPLE_ME, likes: 0 })),
+      .map((m) => ({ t: m.t, cls: m.cls, sub: "", n: 1, reg, tags: m.tags ?? [], ago: [0, "minute"] as Ago, au: SAMPLE_ME, likes: 0, mine: true })),
     ...SAMPLE_BUILDS,
   ];
   const q = f.q.trim().toLowerCase();
@@ -206,6 +218,20 @@ export default function Builds({ t, lang, go, settings }: PageProps) {
                       <HeartIcon weight={L ? "fill" : "regular"} aria-hidden="true" />
                       {x.likes + (L ? 1 : 0)}
                     </button>
+                    {"mine" in x && (
+                      <button
+                        type="button"
+                        title={t("characters.delete")}
+                        aria-label={`${t("characters.delete")} ${x.t}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          remove(x);
+                        }}
+                        style={{ height: 24, padding: "0 7px", borderRadius: 5, border: "1px solid var(--pm-line)", background: "transparent", color: "var(--pm-t2)", cursor: "pointer", display: "flex", alignItems: "center", fontSize: 11, flex: "none" }}
+                      >
+                        <TrashIcon aria-hidden="true" />
+                      </button>
+                    )}
                   </div>
                   <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                     <span className="chPill" style={{ background: "var(--pm-s3)", display: "flex", gap: 4, alignItems: "center" }}>

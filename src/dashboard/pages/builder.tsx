@@ -30,18 +30,19 @@ import {
   SAMPLE_ME,
   SAMPLE_MY_BUILDS,
   SAMPLE_SLOTS,
-  SAMPLE_STATS,
   SLOT_GROUPS,
   BUILD_TAGS,
 } from "../sample/characters";
 import { iconUrl, ItemIcon } from "../items";
-import { Collections } from "./characters/collections";
-import { dvSummary } from "./daevanion";
+import { Collections, equippedArcana, useCollectionStats } from "./characters/collections";
+import { dvStats, finalStats, STAT_GROUPS } from "./characters/charstats";
+import { dvSummary, readDv } from "./daevanion";
 import { REGIONS } from "../Onboarding";
 import { classSkills, planClass, SkillIcon } from "../skills";
 import { art, ClassAvatar, CLASSES, fmt, RARITY } from "../ui";
-import { ago, SectionHead, useMem, useToast, type BuildSrc } from "./characters/shared";
+import { ago, MY_BUILDS_KEY, readMyBuilds, SectionHead, useMem, useToast, type BuildSrc } from "./characters/shared";
 import {
+  arcanaScore,
   baseStats,
   buildGear,
   GEAR_KEY,
@@ -96,12 +97,6 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   useEffect(() => {
     if (src.own && !src.isNew && src.cls !== myCls) setSrc({ ...src, cls: myCls });
   }, [myCls]); // eslint-disable-line react-hooks/exhaustive-deps
-  // The own build last worked on: "back" returns to it from any other build.
-  const [ownT, setOwnT] = useMem("ownBuild", OWN_BUILD);
-  const onOwn = src.own && !src.isNew;
-  useEffect(() => {
-    if (onOwn && src.t !== ownT) setOwnT(src.t);
-  }, [onOwn, src.t]); // eslint-disable-line react-hooks/exhaustive-deps
   const [mode, setMode] = useMem("bmode", "dummy");
   const [view, setView] = useMem("bview", "owned");
   const [cur, setCur] = useMem("slot", "mh");
@@ -114,14 +109,15 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   const [newTags, setNewTags] = useMem<string[]>("newTags", []);
   const [liked, setLiked] = useMem<Record<string, boolean>>("liked", {});
   // Builds created or cloned here, listed under "Your builds" (builds.tsx); one per title.
-  const [myBuilds, setMyBuilds] = useMem<BuildSrc[]>("myBuilds", []);
-  const addMine = (b: BuildSrc) => setMyBuilds([b, ...myBuilds.filter((x) => x.t !== b.t)]);
-  const [dv] = useMem<Record<string, Record<string, true>>>("dvCls", {});
+  const myBuilds = readMyBuilds(settings[MY_BUILDS_KEY]);
+  const addMine = (b: BuildSrc) => saveSetting(MY_BUILDS_KEY, JSON.stringify([b, ...myBuilds.filter((x) => x.t !== b.t)])).catch(onError);
+  const dv = readDv(settings);
   const [itemOpen, setItemOpen] = useState(false);
   const [bOpen, setBOpen] = useState(false);
   const [itemQ, setItemQ] = useState("");
   const [share, setShare] = useState(false);
   const [compare, setCompare] = useState(false);
+  const [noClone, setNoClone] = useState(false);
   const [toast, showToast] = useToast();
 
   const n = (x: number) => fmt(x, lang);
@@ -209,37 +205,43 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   const itemQl = itemQ.toLowerCase();
   const choices = itemOpen ? slotItems(cur, src.cls).filter((i) => i.name.toLowerCase().includes(itemQl)) : [];
 
-  // Gear Score: the item levels of the pieces (base + enhancement), from the
-  // game data. Combat Power is computed by the game from far more than gear:
-  // it isn't shown rather than guessed.
-  const gsOwned = gearScore(g.owned);
-  const gsTarget = gearScore(g.target);
+  // Gear Score as questlog's calculateTotalGearscore: equipment (gear.ts) +
+  // equipped Arcana + Daevanion points spent. Arcana and Daevanion are the
+  // active character's: none for someone else's build. Combat Power isn't
+  // shown: neither the game data nor questlog has a formula for it.
+  const gsExtra = ro ? 0 : arcanaScore(equippedArcana(settings)) + dvSummary(planClass(src.cls), dv).reduce((sum, [, pts]) => sum + pts, 0);
+  const gsOwned = gearScore(g.owned) + gsExtra;
+  const gsTarget = gearScore(g.target) + gsExtra;
   const gs = tgt ? gsTarget : gsOwned;
   const gsOn = Math.round((gsTarget ? Math.min(1, gsOwned / gsTarget) : 0) * 30);
 
-  // Stats (pBuilder.statGroups): the target view adds what the target gear
-  // changes. Gear stats are by stat id; the character sheet is by stat name.
+  // Stats (pBuilder.statGroups): the character's final stats (charstats.ts) with the
+  // owned gear, or with the target gear and what it changes. Titles, collections and
+  // Daevanion are the active character's: none for someone else's build.
   const ownedStats = gearStats(g.owned);
   const targetStats = gearStats(g.target);
-  const byName = (st: Record<string, number>) => {
-    const out: Record<string, number> = {};
-    for (const [id, v] of Object.entries(st)) out[statName(id)] = (out[statName(id)] ?? 0) + statValue(id, v);
-    return out;
-  };
-  const ownedN = byName(ownedStats);
-  const targetN = byName(targetStats);
+  const coll = useCollectionStats(settings, ro);
+  const dvS = ro ? {} : dvStats(planClass(src.cls), dv);
+  const ownedF = finalStats(src.cls, ownedStats, coll, dvS);
+  const targetF = finalStats(src.cls, targetStats, coll, dvS);
+  const shownF = tgt ? targetF : ownedF;
   const q = statQ.toLowerCase();
-  const statGroups = SAMPLE_STATS.map(([g, rows]) => ({
-    g,
-    rows: rows
-      .filter(([name]) => name.toLowerCase().includes(q))
-      .map(([name, v]) => {
-        const d = tgt ? (targetN[name] ?? 0) - (ownedN[name] ?? 0) : 0;
-        const pct = typeof v === "string";
-        const val = (pct ? Number(v.slice(0, -1)) : v) + d;
-        return { name, v: pct ? dec(val) + "%" : n(Math.round(val)), delta: d ? signed(d) : "" };
-      }),
-  })).filter((x) => x.rows.length);
+  const grouped = new Set(STAT_GROUPS.flatMap(([, ids]) => ids));
+  const other = Object.keys(shownF).filter((id) => !grouped.has(id));
+  const statGroups = [...STAT_GROUPS, ["other", other] as const]
+    .map(([g, ids]) => ({
+      g,
+      rows: ids
+        .filter((id) => (shownF[id] || ownedF[id]) && statName(id).toLowerCase().includes(q))
+        .map((id) => {
+          const v = statValue(id, shownF[id] ?? 0);
+          const pct = statIsPct(id);
+          // Same rounding as the value: whole numbers, percents to 2 decimals.
+          const d = tgt ? Math.round((v - statValue(id, ownedF[id] ?? 0)) * (pct ? 100 : 1)) / (pct ? 100 : 1) : 0;
+          return { name: statName(id), v: pct ? dec(v) + "%" : n(Math.round(v)), delta: d ? signed(d) + (pct ? "%" : "") : "", up: d > 0 };
+        }),
+    }))
+    .filter((x) => x.rows.length);
   const statShown = sCat ? statGroups.filter((g) => g.g === sCat) : statGroups;
 
   // Every slot not covered by the owned gear: the target item not owned yet, or
@@ -259,8 +261,8 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
       where,
     };
   });
-  const statDiff = [...new Set([...Object.keys(ownedStats), ...Object.keys(targetStats)])]
-    .map((k) => [k, ownedStats[k] ?? 0, targetStats[k] ?? 0] as const)
+  const statDiff = [...new Set([...Object.keys(ownedF), ...Object.keys(targetF)])]
+    .map((k) => [k, ownedF[k] ?? 0, targetF[k] ?? 0] as const)
     .filter(([, a, b]) => a !== b);
   const slotDiff = slots.filter(({ id }) => g.owned[id]?.id !== g.target[id]?.id || g.owned[id]?.enh !== g.target[id]?.enh);
   const pieceName = (p?: Piece) => (p && itemById(p.id) ? `${itemById(p.id)!.name}${p.enh ? ` +${p.enh}` : ""}` : "—");
@@ -319,6 +321,8 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
 
   const copySuffix = t("characters.builder.copySuffix");
   const clone = () => {
+    // Only a build of the active character's class can become one of yours.
+    if (src.cls !== myCls) return setNoClone(true);
     showToast({ title: t("characters.builder.clonedTitle"), text: t("characters.builder.clonedText") });
     const copy = (src.t.endsWith(copySuffix) ? src.t.slice(0, -copySuffix.length) : src.t) + copySuffix;
     storeGear(`${copy}|${src.cls}`, g);
@@ -401,19 +405,10 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   return (
     <>
       <div className="chToolbar">
-        {/* From someone else's or a new build, back to the build you were working on; from yours, to the list. */}
-        <button
-          type="button"
-          className="btn sm"
-          onClick={() => {
-            if (onOwn) return go("builds");
-            setSrc({ t: ownT, au: SAMPLE_ME, cls: myCls, own: true });
-            setMode("dummy");
-            setCur("mh");
-          }}
-        >
+        {/* From "missing pieces", back to the build; from any build, to the list. */}
+        <button type="button" className="btn sm" onClick={() => (mode === "missing" ? setMode("dummy") : go("builds"))}>
           <ArrowLeftIcon aria-hidden="true" />
-          {onOwn ? t("characters.builder.back") : t("characters.builder.backToBuild", { build: ownT })}
+          {t("characters.builder.back")}
         </button>
         <span className="chRegion">{(REGIONS.find((r) => r.value === settings["pm.region"]) ?? REGIONS[0]).label}</span>
         <span className="chMiniClass" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--pm-t2)" }}>
@@ -1015,7 +1010,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
                     <div key={r.name} className="chStatRow">
                       <span style={{ color: "var(--pm-t2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.name}</span>
                       <span className="mono">{r.v}</span>
-                      <span className="mono" style={{ textAlign: "right", fontSize: 10, color: "#5FD99A" }}>
+                      <span className="mono" style={{ textAlign: "right", fontSize: 10, color: r.up ? "#5FD99A" : "#FF6B6B" }}>
                         {r.delta}
                       </span>
                     </div>
@@ -1025,6 +1020,24 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
             </div>
           </section>
         </>
+      )}
+      {noClone && (
+        <Modal
+          width={420}
+          onClose={() => setNoClone(false)}
+          title={(id) => (
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <h2 id={id} style={{ fontSize: 17, fontWeight: 500, flex: 1 }}>
+                {t("characters.builder.noCloneTitle")}
+              </h2>
+              <button type="button" className="shareClose" autoFocus onClick={() => setNoClone(false)} title={t("window.close")} aria-label={t("window.close")}>
+                <XIcon aria-hidden="true" />
+              </button>
+            </div>
+          )}
+        >
+          <div style={{ color: "var(--pm-t2)" }}>{t("characters.builder.noCloneText", { cls: src.cls, mine: myCls })}</div>
+        </Modal>
       )}
       {share && <ShareModal t={t} lang={lang} kind="build" text={shareText} onClose={() => setShare(false)} onError={onError} />}
       {compare && (

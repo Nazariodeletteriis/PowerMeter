@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.11
+
+- Neu: die Werte im Character Builder sind echt und live: Klassen-Basiswerte, Ausrüstung (Magiesteine und jeder andere Slot), Daevanion, Sammlungen und Titel, berechnet so wie questlog es macht. Die Ziel-Ansicht zeigt die Änderung bei jedem Wert.
+- Neu: Sammlungen für Pantheon, Arcana und Genus Insight, mit ihren Werten im Builder.
+- Neu: Fertigkeiten und Quests in der Datenbank zeigen die englische Seite und darunter dieselbe Seite in deiner Sprache (Italienisch ist eine inoffizielle Übersetzung).
+- Neu: lösche die Builds, die du erstellt oder geklont hast; deine Builds und deine Daevanion-Knoten bleiben nach einem Neustart erhalten.
+- Neu: neues Windows-Symbol.
+- Geändert: Gear Score wird berechnet, so wie questlog es macht (Verstärkung, Durchbruch, Magiesteine, Theostein, Arcana, Daevanion-Punkte).
+- Geändert: ein Build kann nur auf einen Charakter derselben Klasse geklont werden.
+- Geändert: ein einziger Zurück-Button: zum Build von Fehlende Teile aus, überall sonst zum Character Builder.
+- Behoben: Hochladen im Kampfverlauf lädt die ausgewählten Kämpfe hoch.
+- Behoben: ausgerüstete Flügel und Titel geben ihre Boni; Flügel und Titel ohne Werte werden nicht mehr aufgelistet; die Flugkraft ist nicht mehr aufgebläht.
+- Behoben: der Handschuh-Skin und die Brawler-Flügel sind ausgeblendet, bis der Brawler in EU/NA erscheint.
+
 ## 0.2.10
 
 - Neu: Sammlungen im Character Builder (Skins, Begleiter, Flügel, Monolith, Titel) mit echten Wertesummen; ein neuer Charakter beginnt bei 0. Genus Insight, Pantheon und Arcana folgen in einem eigenen Update.

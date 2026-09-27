@@ -131,5 +131,9 @@
   "combat.vis.public": "公開",
   "combat.week": "週",
   "combat.wipeOnly": "僅Wipe",
-  "combat.you": "（你）"
+  "combat.you": "（你）",
+  "combat.up.online": "線上",
+  "combat.upSignIn": "請在 設定 → 帳戶 中以 Discord 登入後再上傳戰鬥。",
+  "combat.upPick": "選擇要上傳的戰鬥",
+  "combat.linkCopied": "連結已複製"
 }

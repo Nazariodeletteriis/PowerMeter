@@ -131,5 +131,9 @@
   "combat.vis.public": "Публично",
   "combat.week": "Неделя",
   "combat.wipeOnly": "Только Wipe",
-  "combat.you": "(ты)"
+  "combat.you": "(ты)",
+  "combat.up.online": "Онлайн",
+  "combat.upSignIn": "Войдите через Discord в Настройки → Аккаунт, чтобы загружать бои.",
+  "combat.upPick": "Выберите бои для загрузки",
+  "combat.linkCopied": "Ссылка скопирована"
 }

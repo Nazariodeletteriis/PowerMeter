@@ -131,5 +131,9 @@
   "combat.vis.public": "Público",
   "combat.week": "Semana",
   "combat.wipeOnly": "Solo wipes",
-  "combat.you": "(tú)"
+  "combat.you": "(tú)",
+  "combat.up.online": "En línea",
+  "combat.upSignIn": "Inicia sesión con Discord en Ajustes → Cuenta para subir combates.",
+  "combat.upPick": "Selecciona los combates que quieres subir",
+  "combat.linkCopied": "Enlace copiado"
 }

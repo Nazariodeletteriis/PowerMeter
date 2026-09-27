@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { ArrowCounterClockwiseIcon, CheckIcon, ChecksIcon, FloppyDiskIcon, PlusIcon, ShareNetworkIcon } from "@phosphor-icons/react";
 import DV from "../../data/daevanion.json";
+import type { Settings } from "../App";
+import { activeId, readCharacters } from "../characters";
 import { DV_BUILDS } from "../sample/characters";
 import { GAME_SKILLS, planClass, SkillIcon, type GameSkill } from "../skills";
 import { useMem, useToast } from "./characters/shared";
@@ -48,6 +50,19 @@ function connected(on: Board, start: string): Board {
   return seen;
 }
 
+/** Planner state per character: settings["pm.daevanion"] = { [characterId]: { "<Class>:<board>": Board } }. */
+const DV_KEY = "pm.daevanion";
+const readAll = (settings: Settings): Record<string, Record<string, Board>> => {
+  try {
+    return JSON.parse(settings[DV_KEY] ?? "{}") ?? {};
+  } catch {
+    return {}; // unreadable setting: every board at its start node
+  }
+};
+const charId = (settings: Settings) => activeId(settings, readCharacters(settings)) ?? "";
+/** The active character's boards (this page and the Character Builder). */
+export const readDv = (settings: Settings) => readAll(settings)[charId(settings)] ?? {};
+
 /** Points spent / total per board of a class, from the planner's saved state (Character Builder tab). */
 export function dvSummary(cls: string, all: Record<string, Board>) {
   return BOARDS[cls].map((b) => {
@@ -58,13 +73,14 @@ export function dvSummary(cls: string, all: Record<string, Board>) {
 }
 
 // Prototype pg.daevanion (pDaev + pX).
-export default function Daevanion({ t, lang, name, settings, onError, setHeader }: PageProps) {
+export default function Daevanion({ t, lang, name, settings, save, onError, setHeader }: PageProps) {
   const title = `${t("nav.daevanion")} · ${name}`;
   useEffect(() => setHeader({ title }), [setHeader, title]);
   // The class's own boards; the state is per class too, so a character switch swaps the tree.
   const cls = planClass(settings["pm.class"]);
   const boards = BOARDS[cls];
-  const [all, setAll] = useMem<Record<string, Board>>("dvCls", {});
+  const all = readDv(settings);
+  const setAll = (next: Record<string, Board>) => save(DV_KEY, JSON.stringify({ ...readAll(settings), [charId(settings)]: next })).catch(onError);
   const [bd, setBd] = useMem("dvB", boards[0].name);
   const [icons, setIcons] = useMem("dvIcons", true);
   const [pick, setPick] = useMem<string | null>("dvPick", null);

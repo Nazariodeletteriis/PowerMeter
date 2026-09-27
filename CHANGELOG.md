@@ -4,6 +4,20 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.2.11
+
+- New: the Character Builder stats are real and live: class base stats, gear (Magicstones and every other socket), Daevanion, collections and titles, computed the way questlog does. The Target view shows the change on each stat.
+- New: Pantheon, Arcana and Genus Insight collections, with their stats in the builder.
+- New: skills and quests in the database show the English card and, under it, the same card in your language (Italian is an unofficial translation).
+- New: delete the builds you created or cloned; your builds and your Daevanion nodes are kept after a restart.
+- New: new Windows icon.
+- Changed: Gear Score is computed the way questlog does (enhancement, breakthrough, Magicstones, Theostone, Arcana, Daevanion points).
+- Changed: a build can only be cloned onto a character of the same class.
+- Changed: one Back button: to the build from Missing pieces, to the Character Builder everywhere else.
+- Fixed: Upload in Fight history uploads the selected fights.
+- Fixed: equipped wings and titles give their bonuses; wings and titles with no stats are no longer listed; flight power is no longer inflated.
+- Fixed: the gauntlet skin and the Brawler wings are hidden until the Brawler is out in EU/NA.
+
 ## 0.2.10
 
 - New: Character Builder collections (skins, pets, wings, monolith, titles) with their real stat totals; a new character starts from 0. Genus Insight, Pantheon and Arcana are coming in a dedicated update.

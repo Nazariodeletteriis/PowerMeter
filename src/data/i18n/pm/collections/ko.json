@@ -1,5 +1,4 @@
 {
-  "collections.soon": "추후 업데이트 예정",
   "collections.elyos": "천족",
   "collections.asmodian": "마족",
   "collections.reshanta": "레샨타",
@@ -20,5 +19,18 @@
   "collections.title.season": "시즌",
   "collections.none": "없음",
   "collections.stats": "수집 능력치",
-  "collections.noStats": "아직 능력치가 없습니다: 수집품을 추가하세요."
+  "collections.noStats": "아직 능력치가 없습니다: 수집품을 추가하세요.",
+  "collections.pets": "펫",
+  "collections.genus": "Genus Insight",
+  "collections.clear": "초기화",
+  "collections.slot": "슬롯 {n}",
+  "collections.back": "뒤로",
+  "collections.empty": "비어 있음",
+  "collections.remove": "제거",
+  "collections.pantheon.artwork": "액자",
+  "collections.pantheon.statue": "조각상",
+  "collections.pantheon.colossus": "거상",
+  "collections.arcana.level": "카드 레벨",
+  "collections.arcana.sub": "보조 스킬",
+  "collections.arcana.set": "세트 효과"
 }

@@ -131,5 +131,9 @@
   "combat.vis.public": "Public",
   "combat.week": "Semaine",
   "combat.wipeOnly": "Wipes uniquement",
-  "combat.you": "(toi)"
+  "combat.you": "(toi)",
+  "combat.up.online": "En ligne",
+  "combat.upSignIn": "Connecte-toi avec Discord dans Paramètres → Compte pour envoyer des combats.",
+  "combat.upPick": "Sélectionne les combats à envoyer",
+  "combat.linkCopied": "Lien copié"
 }
