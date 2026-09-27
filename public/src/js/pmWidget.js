@@ -83,6 +83,8 @@ const createPmWidget = (app) => {
     locked = !!on;
     meter.classList.toggle("isPmLocked", locked);
     lockBtn?.setAttribute("aria-pressed", String(locked));
+    if (locked) reportLockHotspot();
+    else meter.classList.remove("isPmLockHot");
     clearTimeout(lockHintTimer);
     if (!lockHint || !locked || wasLocked) {
       if (lockHint && !locked) lockHint.hidden = true;
@@ -97,12 +99,20 @@ const createPmWidget = (app) => {
         lockHintTimer = setTimeout(() => (lockHint.hidden = true), 5000);
       });
   };
-  // Locked: the badge is the only clickable spot (see watch_lock_corner in powermeter.rs).
-  $(".pmLockBadge")?.addEventListener("click", () => {
-    invoke("set_click_through", { enabled: false })
-      .then(() => setLocked(false))
-      .catch((err) => console.error("[PowerMeter] set_click_through failed", err));
-  });
+  // Locked: Rust watches the cursor over the badge and unlocks on click
+  // (watch_lock_corner in powermeter.rs); it needs the badge's current rect.
+  const reportLockHotspot = () =>
+    requestAnimationFrame(() => {
+      const r = $(".pmLockBadge")?.getBoundingClientRect();
+      if (!r?.width) return;
+      const pad = 6;
+      invoke("set_lock_hotspot", { x: r.left - pad, y: r.top - pad, w: r.width + 2 * pad, h: r.height + 2 * pad }).catch((err) =>
+        console.error("[PowerMeter] set_lock_hotspot failed", err)
+      );
+    });
+  window.__TAURI__.event
+    .listen("pm-lock-hot", (event) => meter.classList.toggle("isPmLockHot", !!event?.payload))
+    .catch((err) => console.error("[PowerMeter] pm-lock-hot listener failed", err));
   lockBtn?.addEventListener("click", () => {
     const next = !locked;
     invoke("set_click_through", { enabled: next })

@@ -26,43 +26,63 @@ fn apply_click_through(app: &tauri::AppHandle, enabled: bool) -> Result<(), Stri
     Ok(())
 }
 
-/// While locked, the whole window ignores the mouse, so the lock badge in the
-/// top-right corner couldn't be clicked. This loop polls the cursor and makes
-/// the window clickable again only while the cursor is over that corner; the
-/// badge's click handler (pmWidget.js) then unlocks. Started once at setup.
+/// Lock badge rect in CSS px of the meter viewport, reported by pmWidget.js
+/// whenever the meter locks (the badge moves with the meter's layout).
+static LOCK_HOTSPOT: std::sync::Mutex<Option<[f64; 4]>> = std::sync::Mutex::new(None);
+
+#[tauri::command]
+pub fn set_lock_hotspot(x: f64, y: f64, w: f64, h: f64) {
+    *LOCK_HOTSPOT.lock().unwrap_or_else(|e| e.into_inner()) = Some([x, y, w, h]);
+}
+
+/// While locked, the whole window ignores the mouse, so the lock badge can't
+/// be clicked through the webview. This loop polls the cursor: over the badge
+/// the window takes the mouse (so the click doesn't reach the game) and emits
+/// `pm-lock-hot` for the hover style; a left-button press there unlocks.
+/// Detecting the press here keeps it working whatever the webview does.
+#[cfg(windows)]
 fn watch_lock_corner(app: tauri::AppHandle) {
-    const CORNER_W: f64 = 40.0; // CSS px, covers the 10 px badge at top 4 / right 6
-    const CORNER_H: f64 = 26.0;
+    use windows::Win32::Foundation::POINT;
+    use windows::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_LBUTTON};
+    use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
+
     std::thread::spawn(move || {
-        let mut hot = false;
+        let (mut hot, mut was_down) = (false, false);
         loop {
-            std::thread::sleep(std::time::Duration::from_millis(60));
+            std::thread::sleep(std::time::Duration::from_millis(30));
             let Some(window) = app.get_webview_window("main") else { continue };
-            if !CLICK_THROUGH.load(Ordering::SeqCst) {
-                hot = false;
-                continue;
-            }
-            let over = (|| {
-                let cursor = window.cursor_position().ok()?;
-                let pos = window.outer_position().ok()?;
-                let size = window.outer_size().ok()?;
-                let scale = window.scale_factor().ok()?;
-                let right = pos.x as f64 + size.width as f64;
-                Some(
-                    cursor.x <= right
-                        && cursor.x >= right - CORNER_W * scale
-                        && cursor.y >= pos.y as f64
-                        && cursor.y <= pos.y as f64 + CORNER_H * scale,
-                )
-            })()
-            .unwrap_or(false);
+            let spot = *LOCK_HOTSPOT.lock().unwrap_or_else(|e| e.into_inner());
+            let over = CLICK_THROUGH.load(Ordering::SeqCst)
+                && (|| {
+                    let [x, y, w, h] = spot?;
+                    let mut cursor = POINT::default();
+                    unsafe { GetCursorPos(&mut cursor) }.ok()?;
+                    let origin = window.inner_position().ok()?;
+                    let scale = window.scale_factor().ok()?;
+                    let (cx, cy) = ((cursor.x - origin.x) as f64 / scale, (cursor.y - origin.y) as f64 / scale);
+                    Some(cx >= x && cx <= x + w && cy >= y && cy <= y + h)
+                })()
+                .unwrap_or(false);
             if over != hot {
                 hot = over;
-                let _ = window.set_ignore_cursor_events(!over);
+                let _ = window.set_ignore_cursor_events(!over && CLICK_THROUGH.load(Ordering::SeqCst));
+                let _ = app.emit("pm-lock-hot", over);
             }
+            let down = unsafe { GetAsyncKeyState(VK_LBUTTON.0 as i32) } as u16 & 0x8000 != 0;
+            if over && down && !was_down {
+                hot = false;
+                let _ = app.emit("pm-lock-hot", false);
+                if let Err(e) = apply_click_through(&app, false) {
+                    tracing::warn!("Unlock from the lock badge failed: {}", e);
+                }
+            }
+            was_down = down;
         }
     });
 }
+
+#[cfg(not(windows))]
+fn watch_lock_corner(_app: tauri::AppHandle) {}
 
 /// The overlay's lock button (design: widget header).
 #[tauri::command]

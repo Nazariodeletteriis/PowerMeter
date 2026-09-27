@@ -3995,6 +3995,7 @@ class DpsApp {
     // until restart. Apply it directly; no persist, so there is no echo.
     if (key === this.storageKeys.betaUi) return this.setBetaUi(value !== "false");
     if (key === this.storageKeys.slimMode) return this.setSlimMode(value === "true");
+    if (key === this.storageKeys.theme) return this.applyTheme(value);
     const selector = REMOTE_APPLIED_SETTING_CONTROLS[key];
     if (!selector) return;
     const control = document.querySelector(selector);

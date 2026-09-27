@@ -1840,6 +1840,7 @@ pub fn run() {
             powermeter::show_overlay,
             powermeter::hide_overlay,
             powermeter::set_click_through,
+            powermeter::set_lock_hotspot,
             powermeter::get_click_through,
         ])
         .run(tauri::generate_context!())

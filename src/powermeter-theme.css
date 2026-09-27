@@ -1269,8 +1269,8 @@ body.legacyUi .pmOnly {
     padding: 4px 6px 8px 14px;
     cursor: pointer;
   }
-  .meter.isPmLocked .pmLockBadge:hover { color: #ff4d4d; }
-  .meter.isPmLocked .pmLockBadge:hover svg { transform: scale(1.3); }
+  .meter.isPmLocked.isPmLockHot .pmLockBadge { color: #ff4d4d; }
+  .meter.isPmLocked.isPmLockHot .pmLockBadge svg { transform: scale(1.3); }
   .pmLockBadge svg { transition: transform 120ms ease-out; }
   .meter.isPmLocked .list,
   .meter.isPmLocked .list.hasRows {
