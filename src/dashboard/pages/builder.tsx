@@ -2,15 +2,11 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   ArrowLeftIcon,
-  BirdIcon,
   CaretDownIcon,
   ChartBarIcon,
   ChatCircleIcon,
-  ColumnsIcon,
   CopyIcon,
-  CrownSimpleIcon,
   DatabaseIcon,
-  DiamondIcon,
   EyeIcon,
   FloppyDiskIcon,
   GraphIcon,
@@ -18,13 +14,11 @@ import {
   LightningIcon,
   LockSimpleIcon,
   MagnifyingGlassIcon,
-  PawPrintIcon,
   PictureInPictureIcon,
   PlusCircleIcon,
   PlusIcon,
   ScalesIcon,
   ShareNetworkIcon,
-  SparkleIcon,
   TargetIcon,
   TextAlignLeftIcon,
   TShirtIcon,
@@ -32,30 +26,55 @@ import {
 } from "@phosphor-icons/react";
 import {
   MY_BUILD_ICONS,
-  SAMPLE_BUILD_SCORE,
-  SAMPLE_COLLECTIONS,
   SAMPLE_COMMENTS,
   SAMPLE_ME,
   SAMPLE_MY_BUILDS,
   SAMPLE_SLOTS,
   SAMPLE_STATS,
-  SAMPLE_SUBS,
   SLOT_GROUPS,
   BUILD_TAGS,
 } from "../sample/characters";
-import { ItemIcon } from "../items";
+import { iconUrl, ItemIcon } from "../items";
+import { Collections } from "./characters/collections";
 import { dvSummary } from "./daevanion";
 import { REGIONS } from "../Onboarding";
 import { classSkills, planClass, SkillIcon } from "../skills";
 import { art, ClassAvatar, CLASSES, fmt, RARITY } from "../ui";
 import { ago, SectionHead, useMem, useToast, type BuildSrc } from "./characters/shared";
-import { defaultGear, defaultSubs, gearStats, itemById, missingSlots, pieceStats, rarityOf, slotItems, sourceOf, type BuildGear, type Gear, type Piece } from "./characters/gear";
+import {
+  baseStats,
+  buildGear,
+  GEAR_KEY,
+  gearKey as keyOf,
+  gearScore,
+  gearStats,
+  itemById,
+  magicstoneOptions,
+  maxEnh,
+  missingSlots,
+  newPiece,
+  OWN_BUILD,
+  rarityOf,
+  readGear,
+  slotItems,
+  sockets,
+  soulPool,
+  sourceOf,
+  statIsPct,
+  statName,
+  statValue,
+  THEOSTONES,
+  useGearData,
+  type BuildGear,
+  type Gear,
+  type Line,
+  type Piece,
+} from "./characters/gear";
 import { SELECTED_ITEM } from "./database";
 import { ShareModal } from "./shared/ShareModal";
 import { Modal } from "./system/Modal";
 import type { PageProps } from "./types";
 
-const COLL_ICONS = { tshirt: TShirtIcon, paw: PawPrintIcon, bird: BirdIcon, diamond: DiamondIcon, crown: CrownSimpleIcon, columns: ColumnsIcon, sparkle: SparkleIcon };
 const TABS = [
   ["equip", TShirtIcon],
   ["skills", LightningIcon],
@@ -66,25 +85,23 @@ const TABS = [
 const PICK_MAX = 60;
 const LABEL: CSSProperties = { fontSize: 11, color: "var(--pm-t3)", marginBottom: 6 };
 
-const GEAR_KEY = "pm.builderGear";
 const EMPTY_GEAR: BuildGear = { owned: {}, target: {} };
-function readGear(json?: string): Record<string, BuildGear> {
-  try {
-    return JSON.parse(json ?? "") ?? {};
-  } catch {
-    return {}; // missing or hand-edited: every build shows its defaults
-  }
-}
 
 // Prototype pg.builder (pBuilder + pX + pBRO).
 export default function Builder({ t, lang, name, go, run, onError, setHeader, settings, save: saveSetting }: PageProps) {
   // New and default builds use the active character's class (onboarding).
   const myCls = planClass(settings["pm.class"]);
-  const [src, setSrc] = useMem<BuildSrc>("bSrc", { t: "Ashen Burst · PvE e PvP", au: SAMPLE_ME, cls: myCls, own: true });
+  const [src, setSrc] = useMem<BuildSrc>("bSrc", { t: OWN_BUILD, au: SAMPLE_ME, cls: myCls, own: true });
   // Your own build follows the active character: switching character re-targets it.
   useEffect(() => {
     if (src.own && !src.isNew && src.cls !== myCls) setSrc({ ...src, cls: myCls });
   }, [myCls]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The own build last worked on: "back" returns to it from any other build.
+  const [ownT, setOwnT] = useMem("ownBuild", OWN_BUILD);
+  const onOwn = src.own && !src.isNew;
+  useEffect(() => {
+    if (onOwn && src.t !== ownT) setOwnT(src.t);
+  }, [onOwn, src.t]); // eslint-disable-line react-hooks/exhaustive-deps
   const [mode, setMode] = useMem("bmode", "dummy");
   const [view, setView] = useMem("bview", "owned");
   const [cur, setCur] = useMem("slot", "mh");
@@ -118,9 +135,11 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
 
   // Equipment: owned and target per build and class, saved in settings; a
   // build never edited shows the class's default kit, a new one starts empty.
-  const gearKey = `${src.t}|${src.cls}`;
-  const defaults = useMemo(() => ({ owned: defaultGear(src.cls, false), target: defaultGear(src.cls, true) }), [src.cls]);
-  const g: BuildGear = isNew ? newGear : (stored[gearKey] ?? defaults);
+  const ready = useGearData(); // equip.json: stats, sockets, enhancement levels
+  const gearKey = keyOf(src.t, src.cls);
+  const saved = stored[gearKey];
+  const defaults = useMemo(() => buildGear({}, src.t, src.cls), [src.cls, ready]); // eslint-disable-line react-hooks/exhaustive-deps
+  const g: BuildGear = isNew ? newGear : (saved ?? defaults);
   const storeGear = (key: string, next: BuildGear) => {
     const all = { ...stored, [key]: next };
     setStored(all);
@@ -149,6 +168,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
     const rar = rarityOf(item);
     const col = item ? RARITY[rar] : "var(--pm-t3)";
     const lv = item ? p.enh : 0;
+    const words = label.replace(/ II$/, " 2").replace(/ I$/, " 1").split(" ");
     return {
       id,
       label,
@@ -160,7 +180,9 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
       enh: lv ? `+${lv}` : "",
       bd: !item ? "1.5px dashed var(--pm-grey)" : has ? `1.5px solid ${col}` : `1.5px dashed ${col}`,
       op: !item ? 0.7 : has ? 1 : 0.6,
-      short: label.replace(/ II$/, " 2").replace(/ I$/, " 1").split(" ").map((w) => w[0]).join("").slice(0, 2),
+      // "MH", "E1", "Gu" (Guard) vs "Gl" (Gloves): the fallback when an icon is missing.
+      short: words.length > 1 ? words.map((w) => w[0]).join("").slice(0, 2) : label.slice(0, 2),
+      // Enhancement levels in red, breakthrough levels (past the item's enhancement cap) in amber.
       pips: Array.from({ length: 20 }, (_, i) => (i < lv ? (i >= 15 ? "#F0A63A" : "var(--pm-red)") : "var(--pm-s3)")),
       // Owned view: the build's target for this slot, when it is another item.
       target: !tgt && want && want.id !== item?.id ? want.name : "",
@@ -169,29 +191,50 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   const s = slots.find((x) => x.id === cur)!;
   const sel = s.item ? s : { ...s, name: t("characters.builder.pickItem"), col: "var(--pm-t2)", rar: "—" };
   const lvNow = piece?.enh ?? 0;
-  const potNow = piece?.pot ?? 0;
-  const mainStats = pieceStats(cur, piece, src.cls).slice(0, 2);
-  const num2 = (x: number, u: string) => (u ? x.toLocaleString(lang, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : String(Math.round(x))) + u;
+  const lvMax = maxEnh(piece?.id) || 20; // 20 until equip.json has loaded
+  const dec = (x: number) => x.toLocaleString(lang, { maximumFractionDigits: 2 });
+  const signed = (x: number) => (x > 0 ? "+" : x < 0 ? "−" : "") + dec(Math.abs(x));
+  /** "Damage Boost 5%", "Attack 91": a stat line as the game shows it. */
+  const statText = (id: string, v: number) => `${dec(statValue(id, v))}${statIsPct(id) ? "%" : ""}`;
+  const mainStats = Object.entries(baseStats(piece)).filter(([, v]) => v);
+  const pool = soulPool(piece?.id);
+  const sock = sockets(piece?.id);
+  const msOpts = useMemo(() => (ready ? magicstoneOptions() : []), [ready]);
+  // Magicstone menu grouped by stat name.
+  const msGroups = useMemo(() => {
+    const groups = new Map<string, typeof msOpts>();
+    for (const o of msOpts) groups.set(statName(o[0]), [...(groups.get(statName(o[0])) ?? []), o]);
+    return [...groups].sort(([a], [b]) => a.localeCompare(b));
+  }, [msOpts]);
   const itemQl = itemQ.toLowerCase();
   const choices = itemOpen ? slotItems(cur, src.cls).filter((i) => i.name.toLowerCase().includes(itemQl)) : [];
 
-  const gs = isNew ? 0 : tgt ? SAMPLE_BUILD_SCORE.gsTarget : SAMPLE_BUILD_SCORE.gs;
-  const gsOn = Math.round((gs / SAMPLE_BUILD_SCORE.gsMax) * 30);
-  const cpShown = isNew ? "—" : n(tgt ? SAMPLE_BUILD_SCORE.cpTarget : SAMPLE_BUILD_SCORE.cp);
-  const cpDelta = !isNew && tgt ? `+${n(SAMPLE_BUILD_SCORE.cpTarget - SAMPLE_BUILD_SCORE.cp)}` : "";
+  // Gear Score: the item levels of the pieces (base + enhancement), from the
+  // game data. Combat Power is computed by the game from far more than gear:
+  // it isn't shown rather than guessed.
+  const gsOwned = gearScore(g.owned);
+  const gsTarget = gearScore(g.target);
+  const gs = tgt ? gsTarget : gsOwned;
+  const gsOn = Math.round((gsTarget ? Math.min(1, gsOwned / gsTarget) : 0) * 30);
 
-  // Stats (pBuilder.statGroups): the target view adds what the target gear changes.
-  const ownedStats = gearStats(g.owned, src.cls);
-  const targetStats = gearStats(g.target, src.cls);
-  const dec = (x: number) => x.toLocaleString(lang, { maximumFractionDigits: 2 });
-  const signed = (x: number) => (x > 0 ? "+" : x < 0 ? "−" : "") + dec(Math.abs(x));
+  // Stats (pBuilder.statGroups): the target view adds what the target gear
+  // changes. Gear stats are by stat id; the character sheet is by stat name.
+  const ownedStats = gearStats(g.owned);
+  const targetStats = gearStats(g.target);
+  const byName = (st: Record<string, number>) => {
+    const out: Record<string, number> = {};
+    for (const [id, v] of Object.entries(st)) out[statName(id)] = (out[statName(id)] ?? 0) + statValue(id, v);
+    return out;
+  };
+  const ownedN = byName(ownedStats);
+  const targetN = byName(targetStats);
   const q = statQ.toLowerCase();
   const statGroups = SAMPLE_STATS.map(([g, rows]) => ({
     g,
     rows: rows
       .filter(([name]) => name.toLowerCase().includes(q))
       .map(([name, v]) => {
-        const d = tgt ? (targetStats[name] ?? 0) - (ownedStats[name] ?? 0) : 0;
+        const d = tgt ? (targetN[name] ?? 0) - (ownedN[name] ?? 0) : 0;
         const pct = typeof v === "string";
         const val = (pct ? Number(v.slice(0, -1)) : v) + d;
         return { name, v: pct ? dec(val) + "%" : n(Math.round(val)), delta: d ? signed(d) : "" };
@@ -199,17 +242,21 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   })).filter((x) => x.rows.length);
   const statShown = sCat ? statGroups.filter((g) => g.g === sCat) : statGroups;
 
+  // Every slot not covered by the owned gear: the target item not owned yet, or
+  // an empty slot with no target (then there is no source to point to).
   const missing = missingSlots(g).map((id) => {
     const [, label] = SAMPLE_SLOTS.find((x) => x[0] === id)!;
-    const want = itemById(g.target[id].id)!;
+    const want = itemById(g.target[id]?.id);
     const [kind, where] = sourceOf(id);
     return {
       id,
       label,
       have: itemById(g.owned[id]?.id)?.name ?? "—",
-      want: want.name,
-      col: RARITY[rarityOf(want)],
-      src: kind === "shop" ? t("characters.builder.shopSrc", { n: n(Number(where)) }) : where || "Drop",
+      want,
+      col: want ? RARITY[rarityOf(want)] : "var(--pm-t3)",
+      kind,
+      src: !want ? "" : kind === "shop" ? t("characters.builder.shopSrc", { n: n(Number(where)) }) : where || "Drop",
+      where,
     };
   });
   const statDiff = [...new Set([...Object.keys(ownedStats), ...Object.keys(targetStats)])]
@@ -225,33 +272,47 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
     "PowerMeter",
   ].join("\n");
 
-  // Widget: hand the build to the meter's Build mode (pmWidget.js reads it) and show the meter.
+  // Widget: hand the build to the meter's Build mode (pmWidget.js reads it) and
+  // show the meter. Every slot counts: owned = slots whose piece is in hand.
+  const total = SAMPLE_SLOTS.length;
+  const widgetJson = JSON.stringify({
+    key: gearKey,
+    character: name,
+    name: title,
+    className: src.cls,
+    gs: gsOwned,
+    gsTarget,
+    owned: total - missing.length,
+    total,
+    progress: (total - missing.length) / total,
+    // [short label, rarity, enhancement, owned, target item when missing, icon URL]
+    slots: SAMPLE_SLOTS.map(([id, label]) => {
+      const x = slots.find((y) => y.id === id)!;
+      const mine = itemById(g.owned[id]?.id);
+      const want = itemById(g.target[id]?.id);
+      const shown = mine ?? want;
+      return [x.short, rarityOf(shown), g.owned[id]?.enh ?? 0, !missing.some((m) => m.id === id), want?.name ?? label, shown ? iconUrl(shown.icon) : ""];
+    }),
+    missing: missing.map((m) => ({
+      item: m.want?.name ?? `${m.label} · ${t("characters.builder.noTarget")}`,
+      rarity: rarityOf(m.want),
+      icon: m.want ? iconUrl(m.want.icon) : "",
+      source: { kind: m.kind, text: !m.want ? "—" : m.kind === "shop" ? `${n(Number(m.where))} Abyss Points` : m.where || "—" },
+    })),
+    stats: Object.entries(ownedStats)
+      .slice(0, 6)
+      .map(([k, a]) => [statName(k), statText(k, a), statText(k, targetStats[k] ?? 0)]),
+  });
+  // The meter shows whatever build was handed last: keep it current while this one is edited.
+  useEffect(() => {
+    try {
+      if (JSON.parse(localStorage.getItem("pm.widgetBuild") ?? "null")?.key === gearKey) localStorage.setItem("pm.widgetBuild", widgetJson);
+    } catch {
+      // unreadable handover: the next Widget click rewrites it
+    }
+  }, [widgetJson, gearKey]);
   const toWidget = () => {
-    const total = Object.keys(g.target).length;
-    localStorage.setItem(
-      "pm.widgetBuild",
-      JSON.stringify({
-        character: name,
-        name: title,
-        className: src.cls,
-        cp: SAMPLE_BUILD_SCORE.cp,
-        cpTarget: SAMPLE_BUILD_SCORE.cpTarget,
-        owned: total - missing.length,
-        total,
-        progress: total ? (total - missing.length) / total : 0,
-        slots: SAMPLE_SLOTS.filter(([id]) => g.owned[id] || g.target[id]).map(([id, label]) => {
-          const x = slots.find((y) => y.id === id)!;
-          const mine = itemById(g.owned[id]?.id);
-          const want = itemById(g.target[id]?.id);
-          return [x.short, rarityOf(mine ?? want), g.owned[id]?.enh ?? 0, !want || want.id === mine?.id, want?.name ?? label];
-        }),
-        missing: missing.map((m) => {
-          const [kind, where] = sourceOf(m.id);
-          return { item: m.want, rarity: rarityOf(itemById(g.target[m.id].id)), source: { kind, text: kind === "shop" ? `${n(Number(where))} Abyss Points` : where || "—" } };
-        }),
-        stats: Object.entries(ownedStats).slice(0, 6).map(([k, a]) => [k, dec(a), dec(targetStats[k] ?? 0)]),
-      }),
-    );
+    localStorage.setItem("pm.widgetBuild", widgetJson);
     localStorage.setItem("pm.widgetMode", "build");
     run(() => invoke("show_overlay"));
   };
@@ -291,12 +352,68 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
     </div>
   );
 
+  /** A stat line from an item's [stat, min, max] pool: stat menu, value, Min / Max. `none` = the "no line" choice. */
+  const lineRow = (key: string, label: string, line: Line | undefined, from: [string, number, number][], set: (l?: Line) => void, none?: string) => {
+    const [stat, v] = line ?? ["", 0];
+    const [, mn, mx] = from.find((x) => x[0] === stat) ?? ["", 0, 0];
+    return (
+      <div key={key} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
+        <label className="chField" style={{ flex: 1, minWidth: 0 }}>
+          <ChartBarIcon aria-hidden="true" style={{ color: "var(--pm-t3)", flex: "none" }} />
+          <select
+            className="chFieldSelect"
+            value={stat}
+            aria-label={label}
+            onChange={(e) => {
+              const p = from.find((x) => x[0] === e.target.value);
+              set(p ? [p[0], p[2]] : undefined);
+            }}
+          >
+            {(none !== undefined || !line) && <option value="">{none ?? "—"}</option>}
+            {from.map(([id, a, b]) => (
+              <option key={id} value={id}>
+                {statName(id)} {a === b ? statText(id, a) : `${statText(id, a)} – ${statText(id, b)}`}
+              </option>
+            ))}
+          </select>
+          <CaretDownIcon aria-hidden="true" style={{ color: "var(--pm-t3)", flex: "none", pointerEvents: "none" }} />
+        </label>
+        <span className="mono" style={{ width: 62, height: 30, display: "grid", placeItems: "center", borderRadius: 6, border: "1px solid var(--pm-line)", fontSize: 12, flex: "none" }}>
+          {line ? statText(stat, v) : "—"}
+        </span>
+        <button type="button" className="chMinMax" disabled={!line} aria-pressed={!!line && v === mn} style={{ background: line && v === mn ? "var(--pm-s3)" : "transparent" }} onClick={() => set([stat, mn])}>
+          Min
+        </button>
+        <button
+          type="button"
+          className="chMinMax"
+          disabled={!line}
+          aria-pressed={!!line && v === mx}
+          style={{ background: line && v === mx ? "#3FBF7F" : "transparent", color: line && v === mx ? "#0A0909" : "var(--pm-t2)", fontWeight: 600 }}
+          onClick={() => set([stat, mx])}
+        >
+          Max
+        </button>
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="chToolbar">
-        <button type="button" className="btn sm" onClick={() => go("builds")}>
+        {/* From someone else's or a new build, back to the build you were working on; from yours, to the list. */}
+        <button
+          type="button"
+          className="btn sm"
+          onClick={() => {
+            if (onOwn) return go("builds");
+            setSrc({ t: ownT, au: SAMPLE_ME, cls: myCls, own: true });
+            setMode("dummy");
+            setCur("mh");
+          }}
+        >
           <ArrowLeftIcon aria-hidden="true" />
-          {t("characters.builder.back")}
+          {onOwn ? t("characters.builder.back") : t("characters.builder.backToBuild", { build: ownT })}
         </button>
         <span className="chRegion">{(REGIONS.find((r) => r.value === settings["pm.region"]) ?? REGIONS[0]).label}</span>
         <span className="chMiniClass" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--pm-t2)" }}>
@@ -399,11 +516,26 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
             <div key={m.id} style={{ display: "grid", gridTemplateColumns: "100px minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr) 100px", gap: 12, alignItems: "center", minHeight: 44, borderTop: "1px solid var(--pm-line)" }}>
               <span style={{ color: "var(--pm-t3)", fontSize: 12 }}>{m.label}</span>
               <span style={{ color: "var(--pm-t2)", fontSize: 12 }}>{m.have}</span>
-              <span style={{ color: m.col }}>→ {m.want}</span>
+              <span style={{ color: m.col }}>→ {m.want?.name ?? t("characters.builder.noTarget")}</span>
               <span style={{ fontSize: 12, color: "var(--pm-t2)" }}>{m.src}</span>
-              <button type="button" className="chBtnReset" style={{ fontSize: 12, color: "var(--pm-redt)" }} onClick={() => openItem(m.want)}>
-                {t("characters.builder.goToSource")}
-              </button>
+              {m.want ? (
+                <button type="button" className="chBtnReset" style={{ fontSize: 12, color: "var(--pm-redt)" }} onClick={() => openItem(m.want!.name)}>
+                  {t("characters.builder.goToSource")}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="chBtnReset"
+                  style={{ fontSize: 12, color: "var(--pm-redt)" }}
+                  onClick={() => {
+                    setMode("dummy");
+                    setView("target");
+                    setCur(m.id);
+                  }}
+                >
+                  {t("characters.builder.setTarget")}
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -476,11 +608,17 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
                 )}
               </div>
               <div style={{ flex: 1 }} />
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 260 }}>
+              {/* Gear Score from the pieces' item levels; owned → target on the bar. No Combat Power: see gsNote. */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, width: 300 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                   <span className="kicker">Gear Score</span>
                   <span className="mono" style={{ fontSize: 18 }}>
-                    {n(gs)} <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>/ {n(SAMPLE_BUILD_SCORE.gsMax)}</span>
+                    {n(gs)}{" "}
+                    {tgt ? (
+                      gsTarget !== gsOwned && <span style={{ fontSize: 12, color: gsTarget > gsOwned ? "#5FD99A" : "#FF6B6B" }}>{signed(gsTarget - gsOwned)}</span>
+                    ) : (
+                      <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>/ {n(gsTarget)}</span>
+                    )}
                   </span>
                 </div>
                 <div style={{ display: "flex", gap: 2 }} aria-hidden="true">
@@ -488,27 +626,11 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
                     <span key={i} style={{ flex: 1, height: 6, borderRadius: 1, background: i < gsOn ? "var(--pm-red)" : "var(--pm-s3)", transform: "skewX(-20deg)" }} />
                   ))}
                 </div>
-              </div>
-              <div style={{ paddingLeft: 18, borderLeft: "1px solid var(--pm-line)" }}>
-                <div className="kicker">Combat Power</div>
-                <div className="mono" style={{ fontSize: 30, lineHeight: 1.1 }}>
-                  {cpShown} <span style={{ fontSize: 12, color: "#5FD99A" }}>{cpDelta}</span>
-                </div>
+                <div style={{ fontSize: 10.5, lineHeight: 1.35, color: "var(--pm-t3)" }}>{t("characters.builder.gsNote")}</div>
               </div>
             </div>
             <div style={{ position: "relative", display: "flex", gap: 6, padding: "0 20px 14px", flexWrap: "wrap" }}>
-              {SAMPLE_COLLECTIONS.map(([ic, key, tip, count]) => {
-                const Icon = COLL_ICONS[ic as keyof typeof COLL_ICONS];
-                return (
-                  <div key={key} className="chColl" title={tip.startsWith("tip.") ? t(`characters.coll.${tip}`) : tip || undefined}>
-                    <Icon aria-hidden="true" style={{ color: "var(--pm-t2)" }} />
-                    <span style={{ color: "var(--pm-t2)" }}>{t(`characters.coll.${key}`)}</span>
-                    <span className="mono" style={{ color: "var(--pm-redt)" }}>
-                      {count}
-                    </span>
-                  </div>
-                );
-              })}
+              <Collections t={t} lang={lang} settings={settings} save={saveSetting} onError={onError} readOnly={ro} />
             </div>
           </div>
 
@@ -638,8 +760,8 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
                                     className="chBtnReset chPickRow"
                                     aria-current={i.id === piece?.id || undefined}
                                     onClick={() => {
-                                      const base = piece ?? g.owned[cur] ?? { enh: 0, pot: 0, subs: defaultSubs(src.cls) };
-                                      setPiece({ ...base, id: i.id });
+                                      // A new item: its own soul imprint pool and sockets; the enhancement level carries over.
+                                      setPiece(newPiece(i.id, piece?.enh ?? g.owned[cur]?.enh ?? 0));
                                       setItemOpen(false);
                                       setItemQ("");
                                     }}
@@ -678,15 +800,15 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
                         type="range"
                         className="chRange"
                         min={0}
-                        max={20}
+                        max={lvMax}
                         value={lvNow}
                         disabled={!piece}
                         aria-label={t("characters.builder.enhancement")}
                         onChange={(e) => piece && setPiece({ ...piece, enh: Number(e.target.value) })}
-                        style={{ "--p": `${(lvNow / 20) * 100}%`, "--c": "#F0A63A" } as CSSProperties}
+                        style={{ "--p": `${(lvNow / lvMax) * 100}%`, "--c": "#F0A63A" } as CSSProperties}
                       />
                       <div className="chScale" aria-hidden="true">
-                        {Array.from({ length: 21 }, (_, i) => (
+                        {Array.from({ length: lvMax + 1 }, (_, i) => (
                           <button
                             key={i}
                             type="button"
@@ -700,116 +822,103 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
                         ))}
                       </div>
                     </div>
-                    <div style={{ maxWidth: 220 }}>
-                      <div style={{ fontSize: 11, color: "var(--pm-t3)", marginBottom: 8 }}>{t("characters.builder.potential")}</div>
-                      <input
-                        type="range"
-                        className="chRange"
-                        min={0}
-                        max={4}
-                        value={potNow}
-                        disabled={!piece}
-                        aria-label={t("characters.builder.potential")}
-                        onChange={(e) => piece && setPiece({ ...piece, pot: Number(e.target.value) })}
-                        style={{ "--p": `${(potNow / 4) * 100}%`, "--c": "var(--pm-red)" } as CSSProperties}
-                      />
-                      <div className="chScale" aria-hidden="true">
-                        {Array.from({ length: 5 }, (_, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            tabIndex={-1}
-                            disabled={!piece}
-                            onClick={() => piece && setPiece({ ...piece, pot: i })}
-                            style={{ color: i === potNow ? "var(--pm-t1)" : "var(--pm-t3)", fontWeight: i === potNow ? 600 : 400 }}
-                          >
-                            {i}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
                     <div>
-                      <div style={LABEL} title={t("characters.builder.estimate")}>
-                        {t("characters.builder.mainStats")}
-                      </div>
+                      <div style={LABEL}>{t("characters.builder.mainStats")}</div>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "4px 12px", fontSize: 12 }}>
-                        {mainStats.map(([name, v]) => (
-                          <div key={name} style={{ display: "contents" }}>
-                            <span style={{ color: "var(--pm-t2)" }}>{name}</span>
-                            <span className="mono">{n(v)}</span>
+                        {mainStats.map(([id, v]) => (
+                          <div key={id} style={{ display: "contents" }}>
+                            <span style={{ color: "var(--pm-t2)" }}>{statName(id)}</span>
+                            <span className="mono">{statText(id, v)}</span>
                           </div>
                         ))}
                       </div>
                     </div>
-                    {piece && (
+                    {piece && pool.pick > 0 && (
                       <div>
-                        <div style={LABEL}>{t("characters.builder.subStats")}</div>
-                        {piece.subs.map(([stat, v], k) => {
-                          const [, mn, mx, u] = SAMPLE_SUBS.find((x) => x[0] === stat) ?? [stat, v, v, ""];
-                          const setSub = (next: [string, number]) => setPiece({ ...piece, subs: piece.subs.map((x, j) => (j === k ? next : x)) });
-                          return (
-                            <div key={k} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
-                              <label className="chField" style={{ flex: 1, minWidth: 0 }}>
-                                <ChartBarIcon aria-hidden="true" style={{ color: "var(--pm-t3)", flex: "none" }} />
-                                <select
-                                  className="chFieldSelect"
-                                  value={stat}
-                                  aria-label={t("characters.builder.subStat", { n: k + 1 })}
-                                  onChange={(e) => setSub([e.target.value, SAMPLE_SUBS.find((x) => x[0] === e.target.value)![2]])}
-                                >
-                                  {SAMPLE_SUBS.map(([name, a, b, unit]) => (
-                                    <option key={name} value={name}>
-                                      {name} {num2(a, unit)} – {num2(b, unit)}
-                                    </option>
-                                  ))}
-                                </select>
-                                <CaretDownIcon aria-hidden="true" style={{ color: "var(--pm-t3)", flex: "none", pointerEvents: "none" }} />
-                              </label>
-                              <span className="mono" style={{ width: 62, height: 30, display: "grid", placeItems: "center", borderRadius: 6, border: "1px solid var(--pm-line)", fontSize: 12, flex: "none" }}>
-                                {num2(v, u)}
-                              </span>
-                              <button type="button" className="chMinMax" aria-pressed={v === mn} style={{ background: v === mn ? "var(--pm-s3)" : "transparent" }} onClick={() => setSub([stat, mn])}>
-                                Min
-                              </button>
-                              <button type="button" className="chMinMax" aria-pressed={v === mx} style={{ background: v === mx ? "#3FBF7F" : "transparent", color: v === mx ? "#0A0909" : "var(--pm-t2)", fontWeight: 600 }} onClick={() => setSub([stat, mx])}>
-                                Max
-                              </button>
-                            </div>
-                          );
+                        <div style={LABEL}>{t("characters.builder.subStats", { n: pool.pick })}</div>
+                        {Array.from({ length: pool.pick }, (_, k) => {
+                          const line = piece.subs[k] && pool.pool.some(([id]) => id === piece.subs[k][0]) ? piece.subs[k] : undefined;
+                          return lineRow(`sub${k}`, t("characters.builder.subStat", { n: k + 1 }), line, pool.pool, (l) => {
+                            const subs = Array.from({ length: pool.pick }, (_, j) => (j === k ? l : piece.subs[j]));
+                            setPiece({ ...piece, subs: subs.filter((x): x is Line => !!x) });
+                          });
                         })}
                       </div>
                     )}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                      <div>
-                        <div style={LABEL}>Philosopher's Stone</div>
-                        <div className="chField" style={{ color: "var(--pm-t2)" }}>
-                          <span style={{ flex: 1 }}>{t("characters.builder.none")}</span>
-                          <CaretDownIcon aria-hidden="true" />
-                        </div>
-                      </div>
-                      <div>
-                        <div style={LABEL}>Magicstone (2/4)</div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                          {[["#6CC46A", "Magic Boost +24"], ["#F0A63A", "Damage Boost +100"]].map(([c, label]) => (
-                            <div key={label} className="chField" style={{ color: c }}>
-                              <span style={{ width: 8, height: 8, borderRadius: "50%", background: c }} />
-                              {label}
+                    {piece && (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                        {!sock.ph && !sock.gs && !sock.ms && <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "var(--pm-t3)" }}>{t("characters.builder.noSockets")}</div>}
+                        {sock.ph && (
+                          <div style={{ gridColumn: "1 / -1" }}>
+                            <div style={LABEL} title={t("characters.builder.philosopherHint")}>
+                              Philosopher's Stone
                             </div>
-                          ))}
-                          <div className="chField" style={{ background: "transparent", border: "1px dashed var(--pm-line)", color: "var(--pm-t3)" }}>
-                            {t("characters.builder.emptySocket")}
+                            {lineRow("ph", "Philosopher's Stone", piece.ph, pool.pool, (l) => setPiece({ ...piece, ph: l }), t("characters.builder.notFused"))}
                           </div>
-                        </div>
+                        )}
+                        {sock.gs > 0 && (
+                          <div style={{ minWidth: 0 }}>
+                            <div style={LABEL} title={t("characters.builder.theostoneHint")}>
+                              Theostone
+                            </div>
+                            <label className="chField" style={{ color: piece.gs ? RARITY[rarityOf(itemById(piece.gs))] : "var(--pm-t2)" }}>
+                              <select className="chFieldSelect" value={piece.gs ?? ""} aria-label="Theostone" onChange={(e) => setPiece({ ...piece, gs: e.target.value || undefined })}>
+                                <option value="">{t("characters.builder.none")}</option>
+                                {THEOSTONES.map((i) => (
+                                  <option key={i.id} value={i.id}>
+                                    {i.name.replace(/^Theostone: /, "")} · {rarityOf(i)}
+                                  </option>
+                                ))}
+                              </select>
+                              <CaretDownIcon aria-hidden="true" style={{ color: "var(--pm-t3)", flex: "none", pointerEvents: "none" }} />
+                            </label>
+                          </div>
+                        )}
+                        {sock.ms > 0 && (
+                          <div style={{ minWidth: 0 }}>
+                            <div style={LABEL}>
+                              Magicstone ({(piece.ms ?? []).filter(Boolean).length}/{sock.ms})
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                              {Array.from({ length: sock.ms }, (_, k) => {
+                                const x = piece.ms?.[k] ?? null;
+                                const grade = x && msOpts.find(([st, v]) => st === x[0] && v === x[1])?.[2];
+                                return (
+                                  <label
+                                    key={k}
+                                    className="chField"
+                                    style={x ? { color: RARITY[rarityOf(grade ? { grade } : undefined)] } : { background: "transparent", border: "1px dashed var(--pm-line)", color: "var(--pm-t3)" }}
+                                  >
+                                    <select
+                                      className="chFieldSelect"
+                                      value={x ? `${x[0]}:${x[1]}` : ""}
+                                      aria-label={`Magicstone ${k + 1}`}
+                                      onChange={(e) => {
+                                        const [st, v] = e.target.value.split(":");
+                                        const ms = Array.from({ length: sock.ms }, (_, j): Line | null => (j === k ? (st ? [st, Number(v)] : null) : (piece.ms?.[j] ?? null)));
+                                        setPiece({ ...piece, ms });
+                                      }}
+                                    >
+                                      <option value="">{t("characters.builder.emptySocket")}</option>
+                                      {msGroups.map(([label, opts]) => (
+                                        <optgroup key={label} label={label}>
+                                          {opts.map(([st, v, gr]) => (
+                                            <option key={st + v} value={`${st}:${v}`}>
+                                              {label} +{statText(st, v)} · {rarityOf({ grade: gr })}
+                                            </option>
+                                          ))}
+                                        </optgroup>
+                                      ))}
+                                    </select>
+                                    <CaretDownIcon aria-hidden="true" style={{ flex: "none", pointerEvents: "none" }} />
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    <div style={{ borderTop: "1px solid var(--pm-line)", paddingTop: 12 }}>
-                      <div style={LABEL}>{t("characters.builder.setBonus", { set: "Ashen Tide", n: 3, of: 5 })}</div>
-                      <div style={{ fontSize: 12, lineHeight: 1.7 }}>
-                        <div style={{ color: "#5FD99A" }}>{t("characters.builder.pieces", { n: 2 })}: Magic Boost +120</div>
-                        <div style={{ color: "#5FD99A" }}>{t("characters.builder.pieces", { n: 3 })}: Critical Hit +80</div>
-                        <div style={{ color: "var(--pm-t3)" }}>{t("characters.builder.pieces", { n: 5 })}: Aether Surge — +6% magic damage for 8 s</div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 )}
                 {tab === "skills" && (
@@ -949,17 +1058,20 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
             </div>
           )}
           {statDiff.length > 0 && (
-            <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 90px 90px 70px", gap: "4px 12px", fontSize: 12 }} title={t("characters.builder.estimate")}>
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 90px 90px 70px", gap: "4px 12px", fontSize: 12, maxHeight: 300, overflowY: "auto" }}>
               <span className="kicker">{t("characters.builder.compareStats")}</span>
               <span className="kicker" style={{ textAlign: "right" }}>{t("characters.builder.owned")}</span>
               <span className="kicker" style={{ textAlign: "right" }}>{t("characters.builder.target")}</span>
               <span className="kicker" style={{ textAlign: "right" }}>Δ</span>
               {statDiff.map(([k, a, b]) => (
                 <div key={k} style={{ display: "contents" }}>
-                  <span style={{ color: "var(--pm-t2)" }}>{k}</span>
-                  <span className="mono" style={{ textAlign: "right" }}>{dec(a)}</span>
-                  <span className="mono" style={{ textAlign: "right" }}>{dec(b)}</span>
-                  <span className="mono" style={{ textAlign: "right", color: b > a ? "#5FD99A" : "#FF6B6B" }}>{signed(b - a)}</span>
+                  <span style={{ color: "var(--pm-t2)" }}>{statName(k)}</span>
+                  <span className="mono" style={{ textAlign: "right" }}>{statText(k, a)}</span>
+                  <span className="mono" style={{ textAlign: "right" }}>{statText(k, b)}</span>
+                  <span className="mono" style={{ textAlign: "right", color: b > a ? "#5FD99A" : "#FF6B6B" }}>
+                    {signed(statValue(k, b - a))}
+                    {statIsPct(k) ? "%" : ""}
+                  </span>
                 </div>
               ))}
             </div>

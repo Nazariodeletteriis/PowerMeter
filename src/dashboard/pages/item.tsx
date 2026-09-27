@@ -1,6 +1,10 @@
-import { useEffect, useState, type CSSProperties } from "react";
-import { HammerIcon, ScrollIcon, ShareNetworkIcon, ShoppingCartIcon, SwordIcon } from "@phosphor-icons/react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { HammerIcon, ScrollIcon, ShareNetworkIcon, SwordIcon, TargetIcon } from "@phosphor-icons/react";
+import { SAMPLE_ME } from "../sample/characters";
+import { planClass } from "../skills";
 import { fmt } from "../ui";
+import { activeBuild, addToOwned, addToTarget, GEAR_KEY, itemSlots, OWN_BUILD, readGear, useGearData, type BuildGear } from "./characters/gear";
+import { useMem, useToast, type BuildSrc } from "./characters/shared";
 import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
 import { Credit, EntryHead, EntryLink, term, TypePage, useDb, type DbRow } from "./world/db";
@@ -20,14 +24,36 @@ const loadStats = () =>
     .then(([equip, stats]) => ({ equip, stats }))
     .catch(() => ({ equip: {}, stats: {} })));
 
+// Adding to the active character's build writes the Character Builder's own
+// state (gear.ts): module memory "gear" (what an open builder reads) and
+// pm.builderGear (what a reload reads).
+
 // Opened from the database, the builder (by name) or a link; else its list.
 export default function Item({ t, go, setHeader, ...rest }: PageProps) {
   return <TypePage type="items" t={t} go={go} setHeader={setHeader} title={t("shell.itemTitle")} card={(row, open) => <ItemCard {...rest} t={t} go={go} setHeader={setHeader} row={row} open={open} />} />;
 }
 
 // Prototype pg.item layout, with the scraped data.
-function ItemCard({ t, lang, onError, row, open }: PageProps & { row: DbRow; open: (r: DbRow) => void }) {
+function ItemCard({ t, lang, onError, settings, save, row, open }: PageProps & { row: DbRow; open: (r: DbRow) => void }) {
   const [share, setShare] = useState(false);
+  const cls = planClass(settings["pm.class"]);
+  // The build open in the builder when it is yours, else your default one.
+  const [src] = useMem<BuildSrc>("bSrc", { t: OWN_BUILD, au: SAMPLE_ME, cls, own: true });
+  const build = activeBuild(src);
+  const [stored, setStored] = useMem<Record<string, BuildGear>>("gear", readGear(settings[GEAR_KEY]));
+  const [toast, showToast] = useToast();
+  useGearData(); // a new piece's soul imprint lines and enhancement cap come from equip.json
+  // Slots the item fits for the class, by name and grade: the builder keeps one
+  // id per item the scrape lists twice.
+  const fits = useMemo(() => itemSlots(row, cls), [row, cls]);
+  const why = fits.length ? "" : row.cat === "weapon" ? t("db.item.notClass", { cls }) : t("db.item.noSlot");
+  const add = (view: keyof BuildGear) => {
+    const done = (view === "owned" ? addToOwned : addToTarget)(stored, build, cls, row);
+    if (!done) return;
+    setStored(done.all);
+    save(GEAR_KEY, JSON.stringify(done.all)).catch(onError);
+    showToast({ title: t(view === "owned" ? "db.item.addedOwned" : "db.item.addedTarget"), text: `${row.name} → ${done.label} · ${build}` });
+  };
   const [data, setData] = useState<StatData>();
   useEffect(() => void loadStats().then(setData), []);
   const rel = useDb(["recipes", "quests"]);
@@ -74,19 +100,24 @@ function ItemCard({ t, lang, onError, row, open }: PageProps & { row: DbRow; ope
           </div>
         )}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button type="button" className="btn fill">
+          <button type="button" className="btn fill" disabled={!!why} aria-describedby={why ? "itemWhy" : undefined} onClick={() => add("owned")}>
             <SwordIcon aria-hidden="true" />
             {t("world.item.addBuild")}
           </button>
-          <button type="button" className="btn">
-            <ShoppingCartIcon aria-hidden="true" />
-            {t("world.item.addShopping")}
+          <button type="button" className="btn" disabled={!!why} aria-describedby={why ? "itemWhy" : undefined} onClick={() => add("target")}>
+            <TargetIcon aria-hidden="true" />
+            {t("db.item.addTarget")}
           </button>
           <button type="button" className="btn" onClick={() => setShare(true)}>
             <ShareNetworkIcon aria-hidden="true" />
             {t("world.item.share")}
           </button>
         </div>
+        {why && (
+          <div id="itemWhy" style={{ fontSize: 12, color: "var(--pm-t3)", marginTop: -8 }}>
+            {why}
+          </div>
+        )}
         <Credit t={t} row={row} />
       </section>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -123,6 +154,7 @@ function ItemCard({ t, lang, onError, row, open }: PageProps & { row: DbRow; ope
           )}
         </section>
       </div>
+      {toast}
       {share && <ShareModal t={t} lang={lang} kind="item" onClose={() => setShare(false)} onError={onError} />}
     </div>
   );

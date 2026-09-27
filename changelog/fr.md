@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.10
+
+- Nouveau : collections dans le Character Builder (apparences, familiers, ailes, monolithe, titres) avec leurs vrais totaux de stats ; un nouveau personnage part de 0. Genus Insight, Pantheon et Arcana arrivent dans une mise à jour dédiée.
+- Nouveau : vraies stats d'objets dans le Character Builder (base, enchantement, percée, lignes d'empreinte d'âme), vraies pierres de mana, théopierres et pierres philosophales, et Gear Score calculé à partir de vos pièces.
+- Nouveau : depuis une fiche objet, Ajouter à la build le place dans votre équipement actuel et Ajouter à l'objectif dans votre équipement cible.
+- Nouveau : Comparer et Exporter dans le rapport de combat ; Exporter dans l'historique des combats.
+- Modifié : l'emplacement de main secondaire est la Guard pour toutes les classes ; le curseur Potentiel a été retiré ; la Combat Power n'est plus affichée avec des chiffres inventés.
+- Corrigé : le widget de build affiche les icônes des objets.
+- Corrigé : Pièces manquantes compte tous les emplacements (bracelets compris) ; Actuel affiche vide une build vide ; Retour à la build ramène à la build sur laquelle vous travailliez.
+- Corrigé : les barres de soins, dégâts subis et cibles du rapport de combat sont à l'échelle du combat entier, et le compteur de tentatives change d'une tentative à l'autre.
+- Corrigé : les portraits de Build community montrent le visage du personnage.
+
 ## 0.2.9
 
 - Nouveau : toute la base de données du jeu est dans l'app (objets, PNJ, quêtes, donjons, compétences, recettes, titres, succès, familiers, ailes et plus) avec de vrais détails, des liens entre fiches et la recherche Ctrl+K.

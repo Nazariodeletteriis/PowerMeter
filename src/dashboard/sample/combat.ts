@@ -21,6 +21,16 @@ export const DUNGEON = "Ashen Sanctum";
 export const DURATION = 312;
 /** 26 set 2026, 21:14 (local time). */
 export const FIGHT_DATE = new Date(2026, 8, 26, 21, 14);
+/**
+ * Attempts on BOSS, oldest first (the attempt number is the chronological index):
+ * [result, duration s, party DPS vs the kill, minutes before FIGHT_DATE]. The last is the fight above.
+ */
+export const ATTEMPTS: ["KILL" | "WIPE", number, number, number][] = [
+  ["WIPE", 168, 0.84, 41],
+  ["WIPE", 235, 0.9, 29],
+  ["WIPE", 271, 0.95, 16],
+  ["KILL", 312, 1, 0],
+];
 
 // pReport: skills per class (real skill names, src/data/skills.json; "Auto Attack" is not a skill there)
 export const CLASS_SKILLS: Record<string, string[]> = {

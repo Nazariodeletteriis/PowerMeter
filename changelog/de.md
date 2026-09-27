@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.10
+
+- Neu: Sammlungen im Character Builder (Skins, Begleiter, Flügel, Monolith, Titel) mit echten Wertesummen; ein neuer Charakter beginnt bei 0. Genus Insight, Pantheon und Arcana folgen in einem eigenen Update.
+- Neu: echte Gegenstandswerte im Character Builder (Basis, Verstärkung, Durchbruch, Seelenprägungs-Zeilen), echte Magiesteine, Theosteine und Steine der Weisen sowie Gear Score aus deinen Teilen.
+- Neu: auf einer Gegenstandsseite legt Zum Build hinzufügen ihn in deine aktuelle Ausrüstung und Zum Ziel hinzufügen in deine Zielausrüstung.
+- Neu: Vergleichen und Exportieren im Kampfbericht; Exportieren im Kampfverlauf.
+- Geändert: der Nebenhand-Slot ist für jede Klasse die Guard; der Potenzial-Regler ist entfernt; Combat Power wird nicht mehr mit erfundenen Zahlen angezeigt.
+- Behoben: das Build-Widget zeigt Gegenstandssymbole.
+- Behoben: Fehlende Teile zählt jeden Slot (auch Armreifen); Aktuell zeigt einen leeren Build als leer; Zurück zum Build führt zum Build, an dem du gearbeitet hast.
+- Behoben: die Balken für Heilung, erlittenen Schaden und Ziele im Kampfbericht skalieren über den ganzen Kampf, und der Versuchszähler wechselt zwischen den Versuchen.
+- Behoben: die Porträts in Build community zeigen das Gesicht der Figur.
+
 ## 0.2.9
 
 - Neu: die gesamte Spieldatenbank ist in der App (Gegenstände, NPCs, Quests, Dungeons, Fertigkeiten, Rezepte, Titel, Erfolge, Begleiter, Flügel und mehr) mit echten Details, Verknüpfungen und Suche per Strg+K.

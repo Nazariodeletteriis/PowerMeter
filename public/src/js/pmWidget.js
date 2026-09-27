@@ -257,12 +257,15 @@ const createPmWidget = (app) => {
       )
       .join("");
     let body = "";
+    // The item's game icon over the slot's short label; a broken icon removes itself and the label shows.
+    const icon = (url) =>
+      url ? `<img src="${esc(url)}" alt="" loading="lazy" draggable="false" onerror="this.remove()" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit">` : "";
     if (buildTab === "slots") {
       body =
         `<div class="pmSlots">${b.slots
-          .map(([label, rarity, enchant, owned, target]) => {
+          .map(([label, rarity, enchant, owned, target, url]) => {
             const tip = owned ? t("pmWidget.build.ownedTip", "Owned") : tf("pmWidget.build.targetTip", { item: target }, `Target: ${target}`);
-            return `<div class="pmSlot${owned ? "" : " isMissing"}" style="--rar:${RARITY[rarity]}" title="${esc(tip)}">${esc(label)}<span class="pmSlotEnh">${enchant ? `+${enchant}` : ""}</span></div>`;
+            return `<div class="pmSlot${owned ? "" : " isMissing"}" style="--rar:${RARITY[rarity]}" title="${esc(tip)}">${esc(label)}${icon(url)}<span class="pmSlotEnh">${enchant ? `+${enchant}` : ""}</span></div>`;
           })
           .join("")}</div>` +
         `<div class="pmSlotsHint">${esc(t("pmWidget.build.slotsHint", "Dashed: missing pieces · hover for the target item"))}</div>`;
@@ -270,7 +273,7 @@ const createPmWidget = (app) => {
       body = b.missing
         .map(
           (m) =>
-            `<div class="pmMissing" style="--rar:${RARITY[m.rarity]}"><span class="pmMissingIcon"></span><div class="pmMissingText"><div class="pmMissingName">${esc(m.item)}</div><div class="pmMissingSrc">${esc(t(`pmWidget.build.source.${m.source.kind}`, m.source.kind))} · ${esc(m.source.text)}</div></div></div>`
+            `<div class="pmMissing" style="--rar:${RARITY[m.rarity]}"><span class="pmMissingIcon" style="position:relative">${icon(m.icon)}</span><div class="pmMissingText"><div class="pmMissingName">${esc(m.item)}</div><div class="pmMissingSrc">${esc(t(`pmWidget.build.source.${m.source.kind}`, m.source.kind))} · ${esc(m.source.text)}</div></div></div>`
         )
         .join("");
     } else {
@@ -282,7 +285,7 @@ const createPmWidget = (app) => {
         .join("");
     }
     buildEl.innerHTML =
-      `<div class="pmBuildHead"><div class="pmBuildTitle"><span class="pmBuildName">${esc(b.name)}</span><span class="pmBuildClass">${esc(b.className)}</span><span class="pmSpacer"></span><span class="pmMono">${num(b.cp)}</span><span class="pmBuildArrow">→</span><span class="pmMono pmBuildTarget">${num(b.cpTarget)}</span></div>` +
+      `<div class="pmBuildHead"><div class="pmBuildTitle"><span class="pmBuildName">${esc(b.name)}</span><span class="pmBuildClass">${esc(b.className)}</span><span class="pmSpacer"></span><span class="pmMono" title="Gear Score">${num(b.gs ?? b.cp)}</span><span class="pmBuildArrow">→</span><span class="pmMono pmBuildTarget">${num(b.gsTarget ?? b.cpTarget)}</span></div>` +
       `<div class="pmBuildBar"><div style="width:${(b.progress * 100).toFixed(1)}%"></div></div></div>` +
       `<div class="pmSubTabs" role="tablist">${tabs}</div>` +
       `<div class="pmBuildBody">${body}</div>` +

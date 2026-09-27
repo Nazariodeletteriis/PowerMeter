@@ -4,6 +4,18 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.2.10
+
+- New: Character Builder collections (skins, pets, wings, monolith, titles) with their real stat totals; a new character starts from 0. Genus Insight, Pantheon and Arcana are coming in a dedicated update.
+- New: real item stats in the Character Builder (base, enhancement, breakthrough, soul imprint lines), real Magicstones, Theostones and Philosopher's Stones, and Gear Score from your pieces.
+- New: from an item page, Add to build puts it in your owned gear and Add to target in your target gear.
+- New: Compare and Export in the fight report; Export in Fight history.
+- Changed: the off-hand slot is the Guard for every class; the Potential slider is gone; Combat Power is no longer shown with made-up numbers.
+- Fixed: the build widget shows item icons.
+- Fixed: Missing pieces counts every slot (bracelets too); Owned shows an empty build as empty; Back to build returns to the build you were working on.
+- Fixed: healing, damage taken and targets bars in the fight report scale over the whole fight, and the attempt counter moves between attempts.
+- Fixed: Build community portraits show the character's face.
+
 ## 0.2.9
 
 - New: the whole game database is in the app (items, NPCs, quests, dungeons, skills, recipes, titles, achievements, pets, wings and more) with real details, links between entries and Ctrl+K search.

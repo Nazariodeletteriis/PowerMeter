@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.10
+
+- Novo: coleções no Character Builder (visuais, mascotes, asas, monólito, títulos) com os totais reais de atributos; um personagem novo começa do 0. Genus Insight, Pantheon e Arcana chegam numa atualização dedicada.
+- Novo: atributos reais dos itens no Character Builder (base, aprimoramento, avanço, linhas de impressão de alma), Magicstones, Theostones e Pedras filosofais reais, e Gear Score calculado pelas suas peças.
+- Novo: na página de um item, Adicionar à build o coloca no seu equipamento atual e Adicionar ao alvo no equipamento alvo.
+- Novo: Comparar e Exportar no relatório de combate; Exportar no Histórico de combates.
+- Alterado: o slot da mão secundária é a Guard para todas as classes; o controle de Potencial foi removido; o Combat Power não é mais mostrado com números inventados.
+- Corrigido: o widget de build mostra os ícones dos itens.
+- Corrigido: Peças faltando conta todos os slots (inclusive braceletes); Atual mostra vazia uma build vazia; Voltar à build retorna à build em que você estava trabalhando.
+- Corrigido: as barras de curas, dano recebido e alvos do relatório de combate usam a escala do combate inteiro, e o contador de tentativas muda entre as tentativas.
+- Corrigido: os retratos de Build community mostram o rosto do personagem.
+
 ## 0.2.9
 
 - Novo: todo o banco de dados do jogo está no app (itens, NPCs, missões, masmorras, habilidades, receitas, títulos, conquistas, mascotes, asas e mais) com detalhes reais, links entre entradas e busca com Ctrl+K.

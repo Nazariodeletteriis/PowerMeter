@@ -60,10 +60,11 @@ export const BUILD_REGIONS = ["EU", "NA"];
 export const BUILD_TAGS = ["PvE", "PvP", "Arena", "Dungeon", "Siege", "Large-Scale", "Beginner Friendly", "Budget Build", "Endgame Build", "Tank", "DPS", "Healer", "Support"];
 
 // pBuilder.SL: [id, slot label, owned item, rarity, enhancement, target item]
-// Item names are real (src/data/items.json), rarity by their game grade.
+// Item names are real (src/data/items.json), rarity by their game grade. The
+// off hand is a Guard for every class; weapon and Guard follow the class (gear.ts).
 export const SAMPLE_SLOTS: [id: string, label: string, name: string, rarity: string, enh: number, target: string][] = [
   ["mh", "Main Hand", "Ludra's Grimoire", "Legendary", 15, "Ludra's Grimoire"],
-  ["oh", "Off Hand", "Tranquility Orb", "Legendary", 12, "Fallen Ancient God Orb"],
+  ["oh", "Guard", "Wisdom Guard", "Legendary", 12, "Ludra's Heart"],
   ["head", "Head", "Wisdom Helm", "Legendary", 10, "Wisdom Helm"],
   ["neck", "Necklace", "Tranquility Ruby Necklace", "Legendary", 5, "Tranquility Ruby Necklace"],
   ["sh", "Shoulders", "Wisdom Pauldrons", "Legendary", 12, "Wisdom Pauldrons"],
@@ -95,31 +96,6 @@ export const SAMPLE_SOURCES: Record<string, string> = {
   ring1: "shop:1800",
   feet: "Ashen Sanctum · Grimtooth Warden",
 };
-// pBuilder.subs: [stat, min, max, unit] — the sub-stat pool; a piece rolls four
-// (the first four are the prototype's defaults).
-export const SAMPLE_SUBS: [string, number, number, string][] = [
-  ["Double Chance", 1.75, 2.08, "%"],
-  ["Magic Boost", 42, 58, ""],
-  ["Critical Hit", 28, 36, ""],
-  ["Attack Increase", 1.75, 2.08, "%"],
-  ["Attack", 14, 20, ""],
-  ["Accuracy", 28, 36, ""],
-  ["Penetration", 28, 36, ""],
-  ["Back Attack", 14, 20, ""],
-  ["Defense", 40, 56, ""],
-  ["HP", 180, 240, ""],
-  ["Critical Hit Resist", 28, 36, ""],
-];
-// pBuilder.colls: [icon key, i18n key suffix, tooltip (i18n key suffix or game text), count]
-export const SAMPLE_COLLECTIONS: [string, string, string, string][] = [
-  ["tshirt", "skins", "tip.skins", "10/17"],
-  ["paw", "pets", "tip.pets", "208/208"],
-  ["bird", "wings", "Forest Spirit Wings", "25"],
-  ["diamond", "monolith", "Elyos Lv 30 · Reshanta Lv 20", "50"],
-  ["crown", "titles", "tip.titles", "568/568"],
-  ["columns", "pantheon", "", "17/17"],
-  ["sparkle", "arcana", "", "5/5"],
-];
 // pBuilder.myBuilds
 export const SAMPLE_MY_BUILDS: { n: string; on: boolean }[] = [
   { n: "Ashen Burst · PvE", on: true },
@@ -138,8 +114,6 @@ export const SAMPLE_STATS: [group: string, rows: [string, number | string][]][] 
   ["recovery", [["Natural HP Regen", 1242], ["Healing Received", "16.5%"]]],
   ["cooldown", [["Cooldown Reduction", "6.5%"]]],
 ];
-// Builder header numbers: owned vs target view.
-export const SAMPLE_BUILD_SCORE = { gs: 2564, gsTarget: 2702, gsMax: 3000, cp: 48215, cpTarget: 50380 };
 // Comments tab: [author, ago, text]
 export const SAMPLE_COMMENTS: [string, Ago, string][] = [
   ["nyxara", [2, "hour"], "Con Double Chance al Max su entrambi gli orecchini guadagno ~400 DPS. Ottima guida."],

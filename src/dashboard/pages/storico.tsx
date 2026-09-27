@@ -47,6 +47,14 @@ function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
     });
   };
 
+  // The picked fights, else the filtered list; saved to Downloads by the backend.
+  const exportFights = () =>
+    run(async () => {
+      const records = await Promise.all((picked.length ? picked : list).map((f) => invoke("load_fight", { id: f.id })));
+      const stamp = new Date().toISOString().slice(0, 16).replace(/[T:]/g, "-");
+      await invoke("save_to_downloads", { name: `powermeter-fights-${stamp}.json`, contents: JSON.stringify(records, null, 2) });
+    });
+
   return (
     <>
       <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
@@ -76,12 +84,12 @@ function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
         </label>
         <div style={{ flex: 1 }} />
         {picked.length > 0 && <span style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("combat.nSelected", { n: picked.length })}</span>}
-        {/* ponytail: upload and export land with online logs (R2). */}
+        {/* ponytail: upload lands with online logs (R2). */}
         <button type="button" className="btn fill">
           <CloudArrowUpIcon aria-hidden="true" />
           {t("combat.upload")}
         </button>
-        <button type="button" className="btn">
+        <button type="button" className="btn" disabled={!list.length} onClick={exportFights}>
           <ExportIcon aria-hidden="true" />
           {t("combat.export")}
         </button>

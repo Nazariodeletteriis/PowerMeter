@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import {
   ArrowsLeftRightIcon,
   CaretDownIcon,
@@ -11,7 +11,8 @@ import {
   SkullIcon,
 } from "@phosphor-icons/react";
 import { fmt } from "../ui";
-import { BOSS, DUNGEON, BOSS_STATS, BUFFS, CLASS_SKILLS, DEATH, DURATION, FIGHT_DATE, PHASE, PLAYER_EXTRA, REPORT_LISTS, TL_PERIOD } from "../sample/combat";
+import { invoke } from "@tauri-apps/api/core";
+import { ATTEMPTS, BOSS, DUNGEON, BOSS_STATS, BUFFS, CLASS_SKILLS, DEATH, DURATION, FIGHT_DATE, PHASE, PLAYER_EXTRA, REPORT_LISTS, TL_PERIOD } from "../sample/combat";
 import { ab, Av, Chart, classColor, clock, pc, rank, sampleBadges, sampleParty, samplePoints, sampleSeries, sampleSkills, type Row, type Skill } from "./combat/parts";
 import { SkillIcon } from "../skills";
 import { ShareModal } from "./shared/ShareModal";
@@ -21,16 +22,19 @@ import type { PageProps } from "./types";
 // (R2) and the fight record viewer are wired to it.
 const TABS = ["overview", "skill", "tl", "buff", "taken", "heal", "targets"] as const;
 type Tab = (typeof TABS)[number];
-const X_TICKS = ["0:00", "1:00", "2:00", "3:00", "4:00", "5:12"];
+type ListTab = keyof typeof REPORT_LISTS;
 const OVERVIEW_COLS = "30px minmax(160px,1fr) 80px 90px minmax(200px,1.4fr) 70px 64px 56px";
 const SKILL_COLS = "minmax(220px,1.6fr) repeat(12,minmax(58px,1fr))";
 // Sort keys; labels are combat.col.<key>, tooltips combat.tip.<key>.
 const SKILL_HEAD: (keyof Skill)[] = ["n", "dmg", "pct", "hits", "crit", "min", "max", "avg", "back", "parry", "perfect", "double", "multi"];
 
-export default function Report({ t, lang, onError, setHeader }: PageProps) {
-  // ponytail: the sample fight's; the fight record viewer will pass the real one.
-  const crumb = `${DUNGEON} → ${BOSS} → ${t("shell.attempt", { n: 4 })}`;
+export default function Report({ t, lang, run, onError, setHeader }: PageProps) {
+  // ponytail: sample attempts; the fight record viewer will number the saved fights on a boss by start time.
+  const [att, setAtt] = useState(ATTEMPTS.length - 1);
+  const [result, dur, , ago] = ATTEMPTS[att];
+  const crumb = `${DUNGEON} → ${BOSS} → ${t("shell.attempt", { n: att + 1 })}`;
   useEffect(() => setHeader({ title: BOSS, crumb }), [setHeader, crumb]);
+  const [cmp, setCmp] = useState<number | null>(null);
   const [sel, setSel] = useState(0);
   const [tab, setTab] = useState<Tab>("overview");
   const [range, setRange] = useState<[number, number] | null>(null);
@@ -40,21 +44,56 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
   const [mine, setMine] = useState(true);
   const [share, setShare] = useState(false);
 
-  const full = sampleParty();
+  const full = attemptParty(att);
   // Stats below the chart follow the dragged window; the whole fight when there is none.
   const win: [number, number] | null = range && Math.abs(range[1] - range[0]) >= 0.01 ? [Math.min(...range), Math.max(...range)] : null;
-  const party = win ? inWindow(full, win) : full;
-  const t0 = win ? win[0] * DURATION : 0;
-  const secs = win ? (win[1] - win[0]) * DURATION : DURATION;
+  const party = win ? inWindow(full, win, dur) : full;
+  const t0 = win ? win[0] * dur : 0;
+  const secs = win ? (win[1] - win[0]) * dur : dur;
+  // The sample per-player/boss totals are the 5:12 kill's: scale them by time.
   const tf = secs / DURATION;
+  // Bars are on the whole attempt's scale, so a short window near 0:00 reads almost empty.
+  const dmgMax = Math.max(...full.map((r) => r.dmg));
+  const list = (k: ListTab) =>
+    REPORT_LISTS[k]
+      .map(([a, b, v], i) => {
+        const all = (v * dur) / DURATION;
+        // Each row follows its own sample curve (busy at a different time), so the window reshuffles the bars too.
+        return { a, b, all, v: win ? all * portion(samplePoints({ n: a, i, dps: 1 }).map((y, j) => y * (1.2 + Math.sin(j / 8 + i * 2))), win) : all };
+      })
+      .sort((x, y) => y.v - x.v);
   const p = party.find((r) => r.i === sel)!;
   const df = p.dmg / full.find((r) => r.i === sel)!.dmg;
   // dmg already follows the window (p); hits scale with it, so avg/min/max stay put.
   const skills = sampleSkills(p, ...sort).map((s) => ({ ...s, hits: Math.round(s.hits * df) }));
   // Timelines below zoom to the window: % position of second `s` in it, and its axis.
   const px = (s: number) => ((s - t0) / secs) * 100;
-  const ticks = win ? [0, 1, 2, 3, 4, 5].map((k) => clock(t0 + (k * secs) / 5)) : X_TICKS;
-  const date = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(FIGHT_DATE);
+  const ticks = [0, 1, 2, 3, 4, 5].map((k) => clock(t0 + (k * secs) / 5));
+  const when = new Date(FIGHT_DATE.getTime() - ago * 6e4);
+  const date = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(when);
+  // Compare defaults to your best other attempt (your DPS).
+  const myDps = (k: number) => attemptParty(k).find((r) => r.me)!.dps;
+  const top = (ks: number[]) => ks.reduce((b, k) => (myDps(k) > myDps(b) ? k : b));
+  const others = ATTEMPTS.map((_, k) => k).filter((k) => k !== att);
+  const best = top([att, ...others]);
+
+  const exportJson = () => {
+    const report = {
+      sample: true,
+      dungeon: DUNGEON,
+      boss: BOSS,
+      attempt: att + 1,
+      attempts: ATTEMPTS.length,
+      result,
+      date: when.toISOString(),
+      durationS: dur,
+      window: win ? [Math.round(t0), Math.round(t0 + secs)] : null,
+      party: party.map((q) => ({ name: q.n, class: q.cls, cp: q.cp, dps: Math.round(q.dps), damage: Math.round(q.dmg), pct: +q.pct.toFixed(1), hits: q.hits, deaths: q.deaths })),
+      ...Object.fromEntries((Object.keys(REPORT_LISTS) as ListTab[]).map((k) => [k, list(k).map(({ a, b, v }) => ({ name: a, detail: b.startsWith("combat.") ? t(b) : b, amount: Math.round(v) }))])),
+    };
+    const name = `powermeter-${BOSS.toLowerCase().replace(/\W+/g, "-")}-attempt-${att + 1}.json`;
+    run(() => invoke("save_to_downloads", { name, contents: JSON.stringify(report, null, 2) }));
+  };
 
   const pos = (e: MouseEvent<HTMLDivElement>) => {
     const b = e.currentTarget.getBoundingClientRect();
@@ -64,36 +103,43 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
     drag.current = null;
     if (range && Math.abs(range[1] - range[0]) < 0.01) setRange(null);
   };
-  const at = (f: number) => clock(f * DURATION);
+  const at = (f: number) => clock(f * dur);
   const outline = { height: 30, padding: "0 12px" };
 
   return (
     <>
       <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "-6px 0 14px", flexWrap: "wrap" }}>
-        {/* ponytail: one sample attempt; attempts come with the fight record viewer. */}
-        <button type="button" className="btn" title={t("combat.prevAttempt")} aria-label={t("combat.prevAttempt")} style={{ width: 30, height: 30, padding: 0 }}>
-          <CaretLeftIcon aria-hidden="true" />
-        </button>
-        <span style={{ fontSize: 12, color: "var(--pm-t2)" }}>
-          {t("combat.attemptOf", { total: 4 })
-            .split("{n}")
-            .flatMap((part, k) => (k ? [<b key={k} style={{ color: "var(--pm-t1)", fontWeight: 500 }}>4</b>, part] : [part]))}
-        </span>
-        <button
-          type="button"
-          className="btn"
-          disabled
-          title={t("combat.nextAttempt")}
-          aria-label={t("combat.nextAttempt")}
-          style={{ width: 30, height: 30, padding: 0, color: "var(--pm-t3)", opacity: 0.45, cursor: "default" }}
-        >
-          <CaretRightIcon aria-hidden="true" />
-        </button>
-        <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 4, background: "#3FBF7F22", color: "#5FD99A", border: "1px solid #3FBF7F55" }}>KILL</span>
+        {[-1, 0, 1].map((d) => {
+          if (!d)
+            return (
+              <span key={d} style={{ fontSize: 12, color: "var(--pm-t2)" }}>
+                {t("combat.attemptOf", { total: ATTEMPTS.length })
+                  .split("{n}")
+                  .flatMap((part, k) => (k ? [<b key={k} style={{ color: "var(--pm-t1)", fontWeight: 500 }}>{att + 1}</b>, part] : [part]))}
+              </span>
+            );
+          const off = !ATTEMPTS[att + d];
+          const label = t(d < 0 ? "combat.prevAttempt" : "combat.nextAttempt");
+          return (
+            <button
+              key={d}
+              type="button"
+              className="btn"
+              disabled={off}
+              title={label}
+              aria-label={label}
+              onClick={() => (setAtt(att + d), setRange(null), setCmp(null))}
+              style={{ width: 30, height: 30, padding: 0, ...(off ? { color: "var(--pm-t3)", opacity: 0.45, cursor: "default" } : {}) }}
+            >
+              {d < 0 ? <CaretLeftIcon aria-hidden="true" /> : <CaretRightIcon aria-hidden="true" />}
+            </button>
+          );
+        })}
+        <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 4, ...(result === "KILL" ? { background: "#3FBF7F22", color: "#5FD99A", border: "1px solid #3FBF7F55" } : { background: "#DB000022", color: "var(--pm-redt)", border: "1px solid #DB000055" }) }}>{result}</span>
         <span style={{ fontSize: 12, color: "var(--pm-t2)" }}>
           {t("combat.duration")}{" "}
           <span className="mono" style={{ color: "var(--pm-t1)" }}>
-            {clock(DURATION)}
+            {clock(dur)}
           </span>{" "}
           · {date} · EU · <GlobeSimpleIcon aria-hidden="true" style={{ verticalAlign: "-2px" }} /> {t("combat.vis.public")}
         </span>
@@ -109,15 +155,27 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
           <ShareNetworkIcon aria-hidden="true" />
           {t("combat.share")}
         </button>
-        <button type="button" className="btn" style={outline}>
+        <button type="button" className="btn" style={outline} aria-pressed={cmp != null} onClick={() => setCmp(cmp == null ? top(others) : null)}>
           <ColumnsIcon aria-hidden="true" />
           {t("combat.compare")}
         </button>
-        <button type="button" className="btn" style={outline}>
+        <button type="button" className="btn" style={outline} onClick={exportJson}>
           <ExportIcon aria-hidden="true" />
           {t("combat.export")}
         </button>
       </div>
+      <p style={{ fontSize: 11, color: "var(--pm-t3)", margin: "-6px 0 12px" }}>{t("combat.sampleNote", { n: ATTEMPTS.length })}</p>
+
+      {cmp != null && (
+        <Compare
+          t={t}
+          lang={lang}
+          a={att}
+          b={cmp}
+          options={others.map((k) => [k, `${t("shell.attempt", { n: k + 1 })} · ${ATTEMPTS[k][0]}${k === best ? ` · ${t("combat.bestAttempt")}` : ""}`])}
+          onPick={setCmp}
+        />
+      )}
 
       <section className="card" style={{ padding: "14px 16px", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
@@ -182,7 +240,7 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
           </div>
         </Chart>
         <div className="cbTicks" style={{ marginTop: 6 }}>
-          {X_TICKS.map((x) => (
+          {[0, 1, 2, 3, 4, 5].map((k) => clock((k * dur) / 5)).map((x) => (
             <span key={x}>{x}</span>
           ))}
         </div>
@@ -242,7 +300,7 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
               </span>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div className="cbTrack" style={{ flex: 1, height: 14, borderRadius: 3, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${q.barW}%`, background: classColor(q.cls), opacity: 0.85 }} />
+                  <div style={{ height: "100%", width: `${(q.dmg / dmgMax) * 100}%`, background: classColor(q.cls), opacity: 0.85 }} />
                 </div>
                 <span className="num" style={{ fontSize: 12, width: 64 }}>
                   {ab(q.dmg, lang)}
@@ -450,11 +508,7 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
       {(tab === "taken" || tab === "heal" || tab === "targets") && (
         <>
           <div style={{ fontSize: 12, color: "var(--pm-t3)", marginBottom: 8 }}>{t(`combat.caption.${tab}`)}</div>
-          {REPORT_LISTS[tab]
-            // Each row follows its own sample curve (busy at a different time), so the window reshuffles the bars too.
-            .map(([a, b, v], i) => [a, b, win ? v * portion(samplePoints({ n: a, i, dps: 1 }).map((y, k) => y * (1.2 + Math.sin(k / 8 + i * 2))), win) : v] as const)
-            .sort((x, y) => y[2] - x[2])
-            .map(([a, b, v], _, list) => (
+          {list(tab).map(({ a, b, v }, _, rows) => (
             <div
               key={a}
               style={{
@@ -475,7 +529,7 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
                 <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>{b.startsWith("combat.") ? t(b) : b}</div>
               </div>
               <div className="cbTrack" style={{ height: 8, borderRadius: 4 }}>
-                <div style={{ height: "100%", width: `${(v / list[0][2]) * 100}%`, background: "var(--pm-red)", borderRadius: 4 }} />
+                <div style={{ height: "100%", width: `${(v / Math.max(...rows.map((r) => r.all))) * 100}%`, background: "var(--pm-red)", borderRadius: 4 }} />
               </div>
               <span className="num">{ab(v, lang)}</span>
               <span className="num" style={{ color: "var(--pm-t2)", fontSize: 12 }}>
@@ -502,14 +556,76 @@ function portion(pts: number[], w: [number, number]) {
   return (mean(cut.length ? cut : [pts[Math.round(((w[0] + w[1]) / 2) * 59)]]) / mean(pts)) * (w[1] - w[0]);
 }
 
+/** Party of sample attempt k: the kill's party at that attempt's DPS and length; a wipe kills everyone. */
+function attemptParty(k: number) {
+  const [result, dur, f] = ATTEMPTS[k];
+  // Wipes wobble per player, so the compare deltas are not one flat percentage.
+  return rank(
+    sampleParty().map((r) => {
+      const dps = r.dps * f * (f < 1 ? 1 + 0.05 * Math.sin(k * 2.3 + r.i * 1.7) : 1);
+      return { ...r, dps, dmg: dps * dur, deaths: result === "WIPE" ? Math.max(1, r.deaths) : r.deaths };
+    }),
+  );
+}
+
 /** Party over a chart window: each player's damage is the share of their chart curve inside it. */
-function inWindow(rows: Row[], w: [number, number]) {
-  const secs = (w[1] - w[0]) * DURATION;
+function inWindow(rows: Row[], w: [number, number], dur: number) {
+  const secs = (w[1] - w[0]) * dur;
   return rank(
     rows.map((r) => {
       const dmg = r.dmg * portion(samplePoints(r), w);
       return { key: r.key, n: r.n, cls: r.cls, cp: r.cp, me: r.me, i: r.i, dps: dmg / secs, dmg, deaths: r.n === DEATH.name && inside(w, DEATH.at) ? r.deaths : 0 };
     }),
+  );
+}
+
+/** This attempt (a) against another (b), whole fights: duration, party and per-player DPS, delta. */
+function Compare({ t, lang, a, b, options, onPick }: { t: PageProps["t"]; lang: string; a: number; b: number; options: [number, string][]; onPick: (k: number) => void }) {
+  const [pa, pb] = [attemptParty(a), attemptParty(b)];
+  const sum = (rs: Row[]) => rs.reduce((x, r) => x + r.dps, 0);
+  const delta = (x: number, y: number) => {
+    const d = ((x - y) / y) * 100;
+    return <span style={{ color: Math.abs(d) < 0.05 ? "var(--pm-t3)" : d > 0 ? "#5FD99A" : "var(--pm-redt)" }}>{`${d > 0 ? "+" : ""}${pc(d, lang)}`}</span>;
+  };
+  const rows: [string, string, string, ReactNode][] = [
+    [t("combat.col.result"), ATTEMPTS[a][0], ATTEMPTS[b][0], null],
+    [t("combat.duration"), clock(ATTEMPTS[a][1]), clock(ATTEMPTS[b][1]), <span style={{ color: "var(--pm-t2)" }}>{`${ATTEMPTS[a][1] >= ATTEMPTS[b][1] ? "+" : "-"}${clock(Math.abs(ATTEMPTS[a][1] - ATTEMPTS[b][1]))}`}</span>],
+    [t("combat.partyDps"), fmt(sum(pa), lang), fmt(sum(pb), lang), delta(sum(pa), sum(pb))],
+    ...pa.map((r): [string, string, string, ReactNode] => {
+      const o = pb.find((q) => q.i === r.i)!;
+      return [`${r.n}${r.me ? ` ${t("combat.you")}` : ""}`, fmt(r.dps, lang), fmt(o.dps, lang), delta(r.dps, o.dps)];
+    }),
+  ];
+  const cols = "minmax(160px,1fr) 110px 110px 90px";
+  return (
+    <section className="card" style={{ padding: "12px 16px", marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+        <h2 className="kicker">{t("combat.compare")}</h2>
+        <select className="cbSelect" aria-label={t("combat.compareWith")} value={b} onChange={(e) => onPick(Number(e.target.value))}>
+          {options.map(([k, l]) => (
+            <option key={k} value={k}>
+              {l}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: cols, gap: 10, padding: "6px 0", fontSize: 11, color: "var(--pm-t3)", borderBottom: "1px solid var(--pm-line)" }}>
+        <span />
+        <span style={{ textAlign: "right" }}>{t("shell.attempt", { n: a + 1 })}</span>
+        <span style={{ textAlign: "right" }}>{t("shell.attempt", { n: b + 1 })}</span>
+        <span style={{ textAlign: "right" }}>Δ</span>
+      </div>
+      {rows.map(([l, x, y, d]) => (
+        <div key={l} style={{ display: "grid", gridTemplateColumns: cols, gap: 10, alignItems: "center", minHeight: 30, fontSize: 12, borderBottom: "1px solid var(--pm-line)" }}>
+          <span style={{ color: "var(--pm-t2)" }}>{l}</span>
+          <span className="num">{x}</span>
+          <span className="num" style={{ color: "var(--pm-t2)" }}>
+            {y}
+          </span>
+          <span className="num">{d}</span>
+        </div>
+      ))}
+    </section>
   );
 }
 
