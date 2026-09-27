@@ -97,6 +97,35 @@ pub fn start_click_through_hotkey(app: &tauri::AppHandle) {
     );
 }
 
+/// Packet capture needs admin rights. The manifest is `asInvoker` because the
+/// MSI's "Launch" checkbox and the updater restart start us via CreateProcess,
+/// which can't show UAC. So we relaunch through ShellExecute "runas", which
+/// does. If the user declines, we keep running un-elevated and onboarding
+/// explains why admin is needed. Returns true when this process should exit.
+#[cfg(all(windows, not(debug_assertions)))]
+pub fn relaunch_elevated() -> bool {
+    use windows::core::{w, HSTRING, PCWSTR};
+    use windows::Win32::UI::Shell::ShellExecuteW;
+    use windows::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
+
+    const FLAG: &str = "--pm-elevated"; // never loop if elevation isn't granted
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    if crate::platform::admin::is_admin() || args.iter().any(|a| a == FLAG) {
+        return false;
+    }
+    let Ok(exe) = std::env::current_exe() else { return false };
+    let params = args.iter().map(|a| format!("\"{a}\"")).chain([FLAG.to_string()]).collect::<Vec<_>>().join(" ");
+    let result = unsafe {
+        ShellExecuteW(None, w!("runas"), &HSTRING::from(exe.as_os_str()), &HSTRING::from(params), PCWSTR::null(), SW_SHOWNORMAL)
+    };
+    result.0 as usize > 32
+}
+
+#[cfg(not(all(windows, not(debug_assertions))))]
+pub fn relaunch_elevated() -> bool {
+    false
+}
+
 /// Same probe the capture engine uses (`PcapLib::load`): Npcap in WinPcap
 /// API-compatible mode puts `wpcap.dll` on the default DLL search path.
 #[tauri::command]

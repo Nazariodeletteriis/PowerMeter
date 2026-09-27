@@ -1383,6 +1383,9 @@ fn decode_replay_hex(hex: &str) -> Option<Vec<u8>> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    if powermeter::relaunch_elevated() {
+        return;
+    }
     powermeter::add_npcap_to_dll_path();
     logging::logger::init_logging();
 
