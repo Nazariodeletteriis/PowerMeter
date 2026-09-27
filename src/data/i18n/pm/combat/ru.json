@@ -148,5 +148,16 @@
   "combat.noFights": "Бои ещё не записаны",
   "combat.noData": "Для этого боя нет записанных данных.",
   "combat.shareNoLink": "Ссылки пока нет: загрузите этот бой из Истории боёв (Загрузить, вход через Discord), чтобы поделиться им.",
-  "combat.shareSoon": "Онлайн-публикация пока недоступна."
+  "combat.shareSoon": "Онлайн-публикация пока недоступна.",
+  "combat.recording": "Запись:",
+  "combat.healsReceived": "Полученное исцеление",
+  "combat.healsOff": "Выкл. — никого ещё не лечили",
+  "combat.healSelf": "свои",
+  "combat.healOthers": "от других",
+  "combat.aggro": "Агро",
+  "combat.aggroObserved": "Доля полученных ударов мобов (из пакетов)",
+  "combat.aggroEstimated": "Оценка: урон ×2 для Стража/Гладиатора",
+  "combat.aggroEmpty": "В этом режиме пока нет урона",
+  "combat.modeLabel": "Режим",
+  "combat.allModes": "Все режимы"
 }

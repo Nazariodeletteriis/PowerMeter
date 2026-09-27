@@ -330,7 +330,10 @@
     "all": "所有目标",
     "identifying": "正在识别你...",
     "train": "训练用稻草人",
-    "boss": "首领目标"
+    "boss": "首领目标",
+    "pve": "所有怪物（PVE）",
+    "pvp": "玩家（PvP）",
+    "recording": "记录中"
   },
   "classes": {
     "GLADIATOR": "剑圣",
@@ -382,8 +385,9 @@
       "yourDps": "你的 DPS",
       "position": "排名",
       "upload": "上传日志",
-      "uploadUnavailable": "无法上传",
-      "signIn": "请在控制面板中使用 Discord 登录",
+      "failed": "上传失败：{error}",
+      "training": "训练战斗不会上传",
+      "signIn": "使用 Discord 登录",
       "openReport": "打开报告",
       "uploaded": "已上传 ✓",
       "copyLink": "复制链接",

@@ -18,6 +18,10 @@ pub struct PersonalData {
     /// Combat power from the party roster packet, or 0 when this player isn't in
     /// your party (the roster is the only source, so non-party players have none).
     pub combat_power: i64,
+    /// Hits and damage this player took from the mobs of the viewed mode. Mobs
+    /// attack whoever holds their aggro, so this is the observed aggro signal.
+    pub hits_taken: i32,
+    pub damage_taken: i64,
 }
 
 impl PersonalData {
@@ -30,6 +34,8 @@ impl PersonalData {
             analyzed_data: HashMap::new(),
             nickname,
             combat_power: 0,
+            hits_taken: 0,
+            damage_taken: 0,
         }
     }
 
@@ -42,6 +48,8 @@ impl PersonalData {
             analyzed_data: HashMap::new(),
             nickname,
             combat_power: 0,
+            hits_taken: 0,
+            damage_taken: 0,
         }
     }
 

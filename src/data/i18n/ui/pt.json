@@ -330,7 +330,10 @@
     "all": "Todos os alvos",
     "identifying": "Identificando você...",
     "train": "Boneco de treino",
-    "boss": "Alvos chefe"
+    "boss": "Alvos chefe",
+    "pve": "Todos os mobs (PVE)",
+    "pvp": "Jogadores (PvP)",
+    "recording": "Registrando"
   },
   "classes": {
     "GLADIATOR": "Gladiador",
@@ -382,8 +385,9 @@
       "yourDps": "Seu DPS",
       "position": "Posição",
       "upload": "Enviar log",
-      "uploadUnavailable": "Envio indisponível",
-      "signIn": "Entre com o Discord pelo painel",
+      "failed": "Falha no envio: {error}",
+      "training": "Combates de treino não são enviados",
+      "signIn": "Entrar com o Discord",
       "openReport": "Abrir relatório",
       "uploaded": "Enviado ✓",
       "copyLink": "Copiar link",

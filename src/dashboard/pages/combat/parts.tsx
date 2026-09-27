@@ -4,11 +4,9 @@ import { art, CLASSES } from "../../ui";
 import { findSkill, type GameSkill } from "../../skills";
 import "./combat.css";
 
-// ---------- formatting (prototype ab / pc) ----------
+// ---------- formatting (prototype pc) ----------
+// Damage is always shown exact (ui.tsx fmt), never abbreviated.
 const dec = (n: number, lang: string) => n.toLocaleString(lang, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-/** 1,2 M · 85 K · 640 */
-export const ab = (n: number, lang: string) =>
-  n >= 1e6 ? `${dec(n / 1e6, lang)} M` : n >= 1e3 ? `${Math.round(n / 1e3)} K` : String(Math.round(n));
 /** 38,4% */
 export const pc = (n: number, lang: string) => `${dec(n, lang)}%`;
 /** m:ss */

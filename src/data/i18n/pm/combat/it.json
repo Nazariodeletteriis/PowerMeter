@@ -148,5 +148,16 @@
   "combat.noFights": "Nessun combattimento registrato",
   "combat.noData": "Nessun dato registrato per questo combattimento.",
   "combat.shareNoLink": "Nessun link: carica questo combattimento dallo Storico (Carica, con accesso Discord) per condividerlo.",
-  "combat.shareSoon": "La condivisione online non è ancora disponibile."
+  "combat.shareSoon": "La condivisione online non è ancora disponibile.",
+  "combat.recording": "In registrazione:",
+  "combat.healsReceived": "Cure ricevute",
+  "combat.healsOff": "Off — nessuno è stato ancora curato",
+  "combat.healSelf": "proprie",
+  "combat.healOthers": "da altri",
+  "combat.aggro": "Aggro",
+  "combat.aggroObserved": "Quota di colpi dei mob subiti (dai pacchetti)",
+  "combat.aggroEstimated": "Stimata: danno ×2 per Templare/Gladiatore",
+  "combat.aggroEmpty": "Ancora nessun danno in questa vista",
+  "combat.modeLabel": "Modalità",
+  "combat.allModes": "Tutte le modalità"
 }

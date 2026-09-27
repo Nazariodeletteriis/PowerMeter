@@ -36,12 +36,9 @@ const createMeterUI = ({
       maximumFractionDigits: 1,
       useGrouping: "always",
     });
-  // PowerMeter: total damage abbreviated the way the design does it: "3,5 M", "912 K".
-  const formatDamageShort = (n) => {
-    if (n >= 1e6) return `${formatOneDecimal(n / 1e6)} M`;
-    if (n >= 1e3) return `${dpsFormatter.format(Math.round(n / 1e3))} K`;
-    return dpsFormatter.format(Math.round(n));
-  };
+  // Total damage as the exact figure the character dealt, with the UI
+  // language's thousands separators ("12.345.678").
+  const formatDamage = (n) => dpsFormatter.format(Math.round(n));
 
   const rowViewById = new Map();
   let lastVisibleIds = new Set();
@@ -389,7 +386,7 @@ const createMeterUI = ({
         view.lastContributionText = contributionText;
       }
 
-      const totalText = formatDamageShort(Number(row.totalDamage) || 0);
+      const totalText = formatDamage(Number(row.totalDamage) || 0);
       if (view.lastTotalText !== totalText) {
         view.dpsTotal.textContent = totalText;
         view.lastTotalText = totalText;

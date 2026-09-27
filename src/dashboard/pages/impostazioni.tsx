@@ -48,6 +48,7 @@ const TABS = [
 const LANG_ORDER = ["it", "en", "de", "fr", "es", "pt", "ru", "ja", "ko", "zh-Hans", "zh-Hant"];
 const TARGET_MODES = [
   ["bossTargets", "Boss"],
+  ["pveTargets", "PVE"],
   ["trainTargets", "Train"],
   ["pvpTargets", "PvP"],
 ] as const;

@@ -17,7 +17,6 @@ const createPmWidget = (app) => {
     (Number(n) || 0).toLocaleString(window.i18n?.getLanguage?.() || "en", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const pct = (n) => `${oneDec(n)}%`;
   // "3,5 M" / "912 K", as meter.js does for the total-damage column.
-  const short = (n) => (n >= 1e6 ? `${oneDec(n / 1e6)} M` : n >= 1e3 ? `${num(n / 1e3)} K` : num(n));
   const esc = (s) =>
     String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
@@ -186,7 +185,7 @@ const createPmWidget = (app) => {
       .map((s) => {
         // Heal ticks carry no crit data from the engine.
         const crit = heal || !s.time ? "-" : pct((s.crit / s.time) * 100);
-        return `<div class="pmSkillGrid pmSkill"><div class="pmSkillBar" style="width:${((s.dmg / top) * 100).toFixed(1)}%"></div><span>${esc(s.name)}</span><span>${short(s.dmg)}</span><span>${pct(total ? (s.dmg / total) * 100 : 0)}</span><span>${num(s.time)}</span><span>${crit}</span></div>`;
+        return `<div class="pmSkillGrid pmSkill"><div class="pmSkillBar" style="width:${((s.dmg / top) * 100).toFixed(1)}%"></div><span>${esc(s.name)}</span><span>${num(s.dmg)}</span><span>${pct(total ? (s.dmg / total) * 100 : 0)}</span><span>${num(s.time)}</span><span>${crit}</span></div>`;
       })
       .join("");
   };
@@ -232,7 +231,8 @@ const createPmWidget = (app) => {
   const BUILD_KEY = "pm.widgetBuild";
   const buildData = () => {
     try {
-      return JSON.parse(app.safeGetStorage(BUILD_KEY));
+      const b = JSON.parse(app.safeGetStorage(BUILD_KEY));
+      return b?.key ? b : null; // no key = a pre-0.2.10 handover (no icons, never refreshed): ask for a new one
     } catch {
       return null; // unreadable handover: the next Widget click rewrites it
     }
@@ -334,20 +334,37 @@ const createPmWidget = (app) => {
   };
   const outcome = (f) => (f.kill ? "Kill" : "Wipe"); // game terms, not translated; the badge is uppercased in CSS
   const uploadBtn = $(".pmUploadBtn");
+  // Signed out: the button turns into "Sign in with Discord", which logs in (browser) and then uploads.
+  let needLogin = false;
   uploadBtn?.addEventListener("click", () => {
     uploadBtn.disabled = true;
-    invoke("upload_combat_log")
+    (needLogin ? invoke("pm_login") : Promise.resolve())
+      .then(() => invoke("upload_combat_log")) // no id: the backend saves and uploads the fight that just ended
       .then((result) => {
+        needLogin = false;
         upload = { url: String(result?.url || "") };
+        // Same record as Fight history (storico.tsx), so the fight shows as uploaded there too.
+        if (result?.fightId) {
+          let done = {};
+          try {
+            done = JSON.parse(localStorage.getItem("pm.uploadedFights") || "{}") || {};
+          } catch {
+            // unreadable: start over, as storico does
+          }
+          localStorage.setItem("pm.uploadedFights", JSON.stringify({ ...done, [result.fightId]: upload.url }));
+        }
         render();
       })
       .catch((err) => {
-        console.warn("[PowerMeter] upload_combat_log failed", err);
-        const signedOut = err === "not signed in" || err === "unauthorized";
-        $(".pmUploadLabel").textContent = signedOut
-          ? t("pmWidget.end.signIn", "Sign in with Discord from the dashboard")
-          : t("pmWidget.end.uploadUnavailable", "Upload unavailable");
-        uploadBtn.disabled = false;
+        console.warn("[PowerMeter] upload failed", err);
+        needLogin = err === "not signed in" || err === "unauthorized";
+        const training = err === "training fights are not uploaded";
+        $(".pmUploadLabel").textContent = needLogin
+          ? t("pmWidget.end.signIn", "Sign in with Discord")
+          : training
+            ? t("pmWidget.end.training", "Training fights are not uploaded")
+            : tf("pmWidget.end.failed", { error: String(err) }, `Upload failed: ${err}`);
+        uploadBtn.disabled = training; // nothing to retry for a training fight
       });
   });
   const copyBtn = $(".pmCopyLinkBtn");
@@ -446,6 +463,7 @@ const createPmWidget = (app) => {
       const label = $(".pmUploadLabel");
       if (label) label.textContent = t("pmWidget.end.upload", "Upload log");
       if (uploadBtn) uploadBtn.disabled = false;
+      needLogin = false;
     }
     if (!fighting && wasFighting && (state === "state-ended" || state === "state-idle")) {
       lastFight = summarize() || lastFight;

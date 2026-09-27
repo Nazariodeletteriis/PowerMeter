@@ -4,7 +4,7 @@ use std::sync::Arc;
 use crate::combat::data_storage::{DataStorage, TargetCombatData};
 use crate::combat::ping_tracker::PingTracker;
 use crate::entity::details_context::*;
-use crate::entity::dps_data::DpsData;
+use crate::entity::dps_data::{DpsData, HealTaken};
 use crate::entity::fight_record::FightRecord;
 use crate::entity::job_class::JobClass;
 use crate::entity::personal_data::PersonalData;
@@ -17,6 +17,10 @@ const TRAIN_MOB_CODES: &[i32] = &[
     2400032, 2400392, 2500075, 2500076, 2701376,
 ];
 
+/// A PVE session keeps accumulating across mob kills until nobody has hit a
+/// normal mob for this long; the next hit then starts a fresh session.
+pub const PVE_SESSION_IDLE_MS: i64 = 5 * 60_000;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TargetSelectionMode {
     BossTargets,
@@ -26,6 +30,7 @@ pub enum TargetSelectionMode {
     AllTargets,
     TrainTargets,
     PvpTargets,
+    PveTargets,
 }
 
 impl TargetSelectionMode {
@@ -38,6 +43,7 @@ impl TargetSelectionMode {
             "allTargets" => Self::AllTargets,
             "trainTargets" => Self::TrainTargets,
             "pvpTargets" => Self::PvpTargets,
+            "pveTargets" => Self::PveTargets,
             _ => Self::LastHitByMe,
         }
     }
@@ -51,6 +57,19 @@ impl TargetSelectionMode {
             Self::AllTargets => "allTargets",
             Self::TrainTargets => "trainTargets",
             Self::PvpTargets => "pvpTargets",
+            Self::PveTargets => "pveTargets",
+        }
+    }
+
+    /// The target kind an exclusive mode shows (see `DpsCalculator::target_kind`);
+    /// None for the legacy views (Target / All / Most damage / Most recent).
+    fn kind(&self) -> Option<&'static str> {
+        match self {
+            Self::BossTargets => Some("boss"),
+            Self::TrainTargets => Some("train"),
+            Self::PvpTargets => Some("pvp"),
+            Self::PveTargets => Some("pve"),
+            _ => None,
         }
     }
 }
@@ -68,6 +87,8 @@ pub struct DpsCalculator {
     all_targets_window_ms: i64,
     nickname_job_cache: HashMap<String, String>,
     saved_boss_targets: HashSet<i32>,
+    /// Targets behind the last get_dps, for the merged multi-target details.
+    current_target_ids: HashSet<i32>,
 }
 
 impl DpsCalculator {
@@ -90,6 +111,7 @@ impl DpsCalculator {
             all_targets_window_ms: 120_000,
             nickname_job_cache: HashMap::new(),
             saved_boss_targets: HashSet::new(),
+            current_target_ids: HashSet::new(),
         }
     }
 
@@ -97,7 +119,9 @@ impl DpsCalculator {
         self.target_selection_mode = TargetSelectionMode::from_id(id);
         // Recompute on the next tick: the cached snapshot still carries the old
         // mode and target, and would be re-emitted until new damage arrives.
+        // Drop it too, or an empty mode would keep showing the previous mode's rows.
         self.last_damage_gen = -1;
+        self.last_dps_snapshot = None;
     }
 
     pub fn set_all_targets_window_ms(&mut self, ms: i64) {
@@ -153,22 +177,43 @@ impl DpsCalculator {
         // Get pre-computed aggregates (cheap — small map, not 17K packets).
         // Light snapshot: skips per-hit timestamps (unused here, grows unbounded).
         let mut combat_data = self.data_storage.get_combat_snapshot_light();
-        // PvP targets live only in the PvP mode; every other mode sees exactly
-        // what it saw before player-vs-player damage was recorded.
         let pvp_ids = self.data_storage.get_pvp_target_ids();
-        let pvp_mode = self.target_selection_mode == TargetSelectionMode::PvpTargets;
-        combat_data.retain(|id, _| pvp_ids.contains(id) == pvp_mode);
+        let mob_data = self.data_storage.get_mob_data();
         let nickname_data = self.data_storage.get_nicknames();
         let summon_data = self.data_storage.get_summon_data();
 
         let mut dps_data = DpsData::new();
         dps_data.local_player_id = current_local_id;
 
+        // What the engine is recording right now: the last target anyone hit,
+        // whichever mode is on screen.
+        if let Some((&rid, _)) = combat_data.iter().max_by_key(|(_, td)| td.last_damage_time) {
+            let kind = self.target_kind(rid, &mob_data, &pvp_ids);
+            dps_data.recording_kind = kind.to_string();
+            dps_data.recording_name = if kind == "pvp" {
+                resolve_nickname(rid, &nickname_data, &summon_data)
+            } else {
+                self.resolve_target_name(rid)
+            };
+        }
+        dps_data.heals = self.heal_rows(&nickname_data, &summon_data);
+
+        // Each target belongs to exactly one exclusive mode. The legacy views
+        // keep seeing everything but PvP, as before.
+        match self.target_selection_mode.kind() {
+            Some(kind) => combat_data.retain(|&id, _| self.target_kind(id, &mob_data, &pvp_ids) == kind),
+            None => combat_data.retain(|id, _| !pvp_ids.contains(id)),
+        }
+        if self.target_selection_mode == TargetSelectionMode::PveTargets {
+            keep_last_session(&mut combat_data);
+        }
+
         // Decide target
         let (target_ids, target_name, tracking_id) = self.decide_target(&combat_data, &nickname_data, &summon_data);
         dps_data.target_name = target_name;
         dps_data.target_mode = self.target_selection_mode.id().to_string();
         self.current_target = tracking_id;
+        self.current_target_ids = target_ids.clone();
         dps_data.target_id = self.current_target;
         self.data_storage.set_current_target(self.current_target);
 
@@ -214,12 +259,10 @@ impl DpsCalculator {
                 .map(|td| (td.last_damage_time - td.first_damage_time).max(0))
                 .unwrap_or(0)
         } else if !target_ids.is_empty() {
-            // Multi-target: use max battle time across selected targets
-            target_ids.iter()
-                .filter_map(|tid| combat_data.get(tid))
-                .map(|td| (td.last_damage_time - td.first_damage_time).max(0))
-                .max()
-                .unwrap_or(0)
+            // Multi-target: time with any selected target under attack. (The max
+            // of the per-target spans froze once a long fight ended, and the
+            // overlay then treated the still-running fight as over.)
+            active_time(target_ids.iter().filter_map(|tid| combat_data.get(tid)))
         } else {
             0
         };
@@ -232,6 +275,9 @@ impl DpsCalculator {
                 snapshot.target_max_hp = target_max_hp;
                 snapshot.target_total_damage = 0;
                 snapshot.target_current_hp = target_current_hp;
+                snapshot.recording_kind = dps_data.recording_kind.clone();
+                snapshot.recording_name = dps_data.recording_name.clone();
+                snapshot.heals = dps_data.heals.clone();
                 return snapshot.clone();
             }
             self.last_dps_snapshot = Some(dps_data.clone());
@@ -395,6 +441,22 @@ impl DpsCalculator {
             dps_data.map.remove(&uid);
         }
 
+        // Aggro: the hits the mobs of this view landed on each player.
+        let mob_hits = self.data_storage.get_mob_hits();
+        for tid in &target_ids {
+            for (pid, &(dmg, hits)) in mob_hits.get(tid).into_iter().flatten() {
+                if let Some(p) = dps_data.map.get_mut(pid) {
+                    p.hits_taken += hits;
+                    p.damage_taken += dmg;
+                }
+            }
+        }
+        for h in &mut dps_data.heals {
+            if let Some(p) = dps_data.map.get(&h.id) {
+                h.job = p.job.clone();
+            }
+        }
+
         dps_data.battle_time = battle_time;
         // total_damage here is the cumulative damage to the selected target(s).
         // Paired with target_max_hp it yields remaining = max(0, max_hp - dealt).
@@ -456,41 +518,27 @@ impl DpsCalculator {
                     .cloned()
                     .collect();
 
-                if let Some(&best) = boss_targets.iter()
+                // No fallback to other targets: a mob that isn't a boss belongs
+                // to PVE. (Falling back to the most-damaged target kept showing an
+                // old mob while the new one's damage never appeared.)
+                match boss_targets.iter()
                     .max_by_key(|&&tid| combat_data.get(&tid).map(|td| td.last_damage_time).unwrap_or(0))
                 {
-                    let name = self.resolve_target_name(best);
-                    (HashSet::from([best]), name, best)
-                } else {
-                    // Fall back to most damage
-                    let best = combat_data.iter()
-                        .max_by_key(|(_, td)| td.total_damage);
-                    match best {
-                        Some((&id, _)) => {
-                            let name = self.resolve_target_name(id);
-                            (HashSet::from([id]), name, id)
-                        }
-                        None => (HashSet::new(), String::new(), 0),
+                    Some(&best) => {
+                        let name = self.resolve_target_name(best);
+                        (HashSet::from([best]), name, best)
                     }
+                    None => (HashSet::new(), String::new(), 0),
                 }
             }
             TargetSelectionMode::AllTargets => {
                 let all: HashSet<i32> = combat_data.keys().cloned().collect();
                 (all, "All Targets".to_string(), 0)
             }
-            TargetSelectionMode::TrainTargets => {
-                let trains: HashSet<i32> = combat_data.keys()
-                    .filter(|&&tid| {
-                        mob_data.get(&tid).is_some_and(|code| TRAIN_MOB_CODES.contains(code))
-                    })
-                    .cloned()
-                    .collect();
-                (trains, "Train".to_string(), 0)
-            }
-            TargetSelectionMode::PvpTargets => {
-                // get_dps already narrowed combat_data to the PvP targets.
-                (combat_data.keys().cloned().collect(), "PvP".to_string(), 0)
-            }
+            // get_dps already narrowed combat_data to the mode's targets.
+            TargetSelectionMode::TrainTargets => (combat_data.keys().cloned().collect(), "Train".to_string(), 0),
+            TargetSelectionMode::PvpTargets => (combat_data.keys().cloned().collect(), "PvP".to_string(), 0),
+            TargetSelectionMode::PveTargets => (combat_data.keys().cloned().collect(), "PVE".to_string(), 0),
             TargetSelectionMode::LastHitByMe => {
                 let local_ids = self.resolve_local_ids(summon_data);
                 if let Some(ref ids) = local_ids {
@@ -528,6 +576,34 @@ impl DpsCalculator {
                 }
             }
         }
+    }
+
+    /// The one meter mode a target's damage belongs to: "pvp" for a player,
+    /// "train" for a training dummy, "boss" for an NPC flagged boss in the NPC
+    /// data, "pve" for every other mob (including one whose spawn we never saw).
+    pub fn target_kind(&self, target_id: i32, mob_data: &HashMap<i32, i32>, pvp_ids: &HashSet<i32>) -> &'static str {
+        if pvp_ids.contains(&target_id) {
+            return "pvp";
+        }
+        match mob_data.get(&target_id) {
+            Some(&code) if self.npc_lookup.is_dummy(code) || TRAIN_MOB_CODES.contains(&code) => "train",
+            Some(&code) if self.npc_lookup.is_boss(code) => "boss",
+            _ => "pve",
+        }
+    }
+
+    /// Healing received per player since the last reset. Only players are
+    /// listed (a mob healing itself is not a heal anyone cares about).
+    fn heal_rows(&self, nickname_data: &HashMap<i32, String>, summon_data: &HashMap<i32, i32>) -> Vec<HealTaken> {
+        let players = self.data_storage.get_known_player_ids();
+        self.data_storage.get_heals_received().into_iter()
+            .filter(|(id, _)| players.contains(id) || nickname_data.contains_key(id))
+            .map(|(id, (from_self, from_others))| {
+                let nickname = resolve_nickname(id, nickname_data, summon_data);
+                let job = self.cached_job(&nickname).unwrap_or_default();
+                HealTaken { id, nickname, job, from_self, from_others }
+            })
+            .collect()
     }
 
     fn resolve_target_name(&self, target_id: i32) -> String {
@@ -578,9 +654,9 @@ impl DpsCalculator {
 
     fn snapshot_boss_fights_inner(&mut self, force: bool) -> Vec<FightRecord> {
         let mob_data = self.data_storage.get_mob_data();
-        // Light snapshot: only used for target filtering + per-actor aggregate
-        // stats here; the saved record's timestamps come from get_target_details.
-        let combat_data = self.data_storage.get_combat_snapshot_light();
+        let pvp_ids = self.data_storage.get_pvp_target_ids();
+        // Full snapshot once: the saved records need the per-hit timestamps.
+        let combat_data = self.data_storage.get_combat_snapshot();
         let now_ms = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_millis() as i64)
@@ -588,30 +664,17 @@ impl DpsCalculator {
 
         let mut records = Vec::new();
 
+        // Boss and training fights: one record per target, as before.
         let boss_target_ids: Vec<i32> = combat_data.keys()
             .filter(|&&tid| {
-                if self.saved_boss_targets.contains(&tid) {
-                    return false;
-                }
-                if let Some(&code) = mob_data.get(&tid) {
-                    self.npc_lookup.is_boss(code) || TRAIN_MOB_CODES.contains(&code)
-                } else {
-                    false
-                }
+                !self.saved_boss_targets.contains(&tid)
+                    && matches!(self.target_kind(tid, &mob_data, &pvp_ids), "boss" | "train")
             })
             .cloned()
             .collect();
 
-        if !boss_target_ids.is_empty() {
-            tracing::trace!("snapshot_boss_fights: {} candidate targets", boss_target_ids.len());
-        }
-
         for target_id in boss_target_ids {
-            let target_data = match combat_data.get(&target_id) {
-                Some(td) => td,
-                None => continue,
-            };
-
+            let target_data = &combat_data[&target_id];
             let battle_time = (target_data.last_damage_time - target_data.first_damage_time).max(0);
             if battle_time < 5_000 || target_data.total_damage <= 0 {
                 continue;
@@ -624,105 +687,171 @@ impl DpsCalculator {
                 continue;
             }
 
-            // Generate fight record
-            let details = self.get_target_details(target_id, None);
-            let nickname_data = self.data_storage.get_nicknames();
-            let summon_data_snap = self.data_storage.get_summon_data();
-
-            let mut record_actors: HashMap<i32, (String, String)> = HashMap::new();
-            for skill in &details.skills {
-                let uid = skill.actor_id;
-                record_actors.entry(uid).or_insert_with(|| {
-                    let nick = resolve_nickname(uid, &nickname_data, &summon_data_snap);
-                    let job = if !skill.job.is_empty() { skill.job.clone() }
-                        else { JobClass::convert_from_skill(skill.code).map(|j| j.class_name().to_string()).unwrap_or_default() };
-                    (nick, job)
-                });
-                let entry = record_actors.get_mut(&uid).unwrap();
-                if entry.1.is_empty() && !skill.job.is_empty() {
-                    entry.1 = skill.job.clone();
-                }
-            }
-
-            let local_id = self.data_storage.local_player_id().unwrap_or(-1) as i32;
-            let actors: Vec<DetailsActorSummary> = record_actors.iter()
-                .map(|(&id, (nick, job))| {
-                    let display_nick = if id == local_id {
-                        nick.clone()
-                    } else {
-                        crate::entity::fight_record::obscure_nickname(nick)
-                    };
-                    let job_class = JobClass::convert_from_skill(
-                        details.skills.iter()
-                            .find(|s| s.actor_id == id && !s.job.is_empty())
-                            .map(|s| s.code)
-                            .unwrap_or(0)
-                    );
-                    // Aggregate per-actor stats across all targets
-                    let (mut party_heal, mut regen, mut dmg_recv, mut hits_recv) = (0i64, 0i64, 0i64, 0i32);
-                    for td in combat_data.values() {
-                        if let Some(ad) = td.actors.get(&id) {
-                            party_heal += ad.party_heal;
-                            regen += ad.regen;
-                            dmg_recv += ad.damage_received;
-                            hits_recv += ad.hits_received;
-                        }
-                    }
-                    DetailsActorSummary {
-                        actor_id: id,
-                        nickname: display_nick,
-                        job: job.clone(),
-                        job_id: job_class.map(|j| j.class_prefix()).unwrap_or(0),
-                        party_heal,
-                        regen,
-                        damage_received: dmg_recv,
-                        hits_received: hits_recv,
-                    }
-                })
-                .collect();
-
             let mob_code = mob_data.get(&target_id).copied().unwrap_or(0);
-            let boss_name = self.resolve_target_name(target_id);
-
-            let job_ids: Vec<i32> = actors.iter()
-                .filter(|a| a.job_id > 0)
-                .map(|a| a.job_id)
-                .collect::<HashSet<_>>()
-                .into_iter()
-                .collect();
-            let jobs: Vec<String> = actors.iter()
-                .filter(|a| !a.job.is_empty() && a.job != "Unknown")
-                .map(|a| a.job.clone())
-                .collect::<HashSet<_>>()
-                .into_iter()
-                .collect();
-
-            let id = format!("auto_{}_{}", target_id, target_data.first_damage_time);
-
-            let is_train = TRAIN_MOB_CODES.contains(&mob_code);
-            let record = FightRecord {
-                id,
-                boss_name,
+            let mode = self.target_kind(target_id, &mob_data, &pvp_ids);
+            let details = self.details_of(&combat_data, target_id, None);
+            records.push(self.build_record(
+                format!("auto_{}_{}", target_id, target_data.first_damage_time),
+                self.resolve_target_name(target_id),
                 target_id,
-                start_time_ms: target_data.first_damage_time,
-                duration_ms: battle_time,
-                total_damage: target_data.total_damage as i32,
-                jobs,
-                job_ids,
-                details,
-                actors,
-                is_train,
-                app_version: crate::entity::fight_record::APP_VERSION.to_string(),
                 mob_code,
-            };
-
+                mode,
+                target_data.first_damage_time,
+                battle_time,
+                target_data.total_damage,
+                details,
+                &combat_data,
+            ));
             if is_ended {
                 self.saved_boss_targets.insert(target_id);
             }
-            records.push(record);
+        }
+
+        // PVE and PvP: one record per session (all targets of that kind since the
+        // last long idle), rewritten under the same id while the session grows.
+        for kind in ["pve", "pvp"] {
+            let mut session: HashMap<i32, TargetCombatData> = combat_data.iter()
+                .filter(|(id, _)| self.target_kind(**id, &mob_data, &pvp_ids) == kind)
+                .map(|(&id, td)| (id, td.clone()))
+                .collect();
+            keep_last_session(&mut session);
+            let Some((&first_id, first)) = session.iter().min_by_key(|(_, td)| td.first_damage_time) else {
+                continue;
+            };
+            let start = first.first_damage_time;
+            if self.saved_boss_targets.contains(&first_id) {
+                continue;
+            }
+            let battle_time = active_time(session.values());
+            let total: i64 = session.values().map(|td| td.total_damage).sum();
+            if battle_time < 5_000 || total <= 0 {
+                continue;
+            }
+            let last = session.values().map(|td| td.last_damage_time).max().unwrap_or(start);
+            let is_ended = now_ms - last >= PVE_SESSION_IDLE_MS;
+            if !force && !is_ended && battle_time < 15_000 {
+                continue;
+            }
+            let ids: Vec<i32> = session.keys().copied().collect();
+            let details = self.merged_details(&combat_data, &ids, None);
+            records.push(self.build_record(
+                format!("auto_{}_{}", kind, start),
+                kind.to_uppercase(),
+                0,
+                0,
+                kind,
+                start,
+                battle_time,
+                total,
+                details,
+                &combat_data,
+            ));
+            if is_ended {
+                self.saved_boss_targets.insert(first_id);
+            }
         }
 
         records
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn build_record(
+        &self,
+        id: String,
+        boss_name: String,
+        target_id: i32,
+        mob_code: i32,
+        mode: &str,
+        start_time_ms: i64,
+        duration_ms: i64,
+        total_damage: i64,
+        details: TargetDetailsResponse,
+        combat_data: &HashMap<i32, TargetCombatData>,
+    ) -> FightRecord {
+        let nickname_data = self.data_storage.get_nicknames();
+        let summon_data_snap = self.data_storage.get_summon_data();
+
+        let mut record_actors: HashMap<i32, (String, String)> = HashMap::new();
+        for skill in &details.skills {
+            let uid = skill.actor_id;
+            record_actors.entry(uid).or_insert_with(|| {
+                let nick = resolve_nickname(uid, &nickname_data, &summon_data_snap);
+                let job = if !skill.job.is_empty() { skill.job.clone() }
+                    else { JobClass::convert_from_skill(skill.code).map(|j| j.class_name().to_string()).unwrap_or_default() };
+                (nick, job)
+            });
+            let entry = record_actors.get_mut(&uid).unwrap();
+            if entry.1.is_empty() && !skill.job.is_empty() {
+                entry.1 = skill.job.clone();
+            }
+        }
+
+        let local_id = self.data_storage.local_player_id().unwrap_or(-1) as i32;
+        let actors: Vec<DetailsActorSummary> = record_actors.iter()
+            .map(|(&id, (nick, job))| {
+                let display_nick = if id == local_id {
+                    nick.clone()
+                } else {
+                    crate::entity::fight_record::obscure_nickname(nick)
+                };
+                let job_class = JobClass::convert_from_skill(
+                    details.skills.iter()
+                        .find(|s| s.actor_id == id && !s.job.is_empty())
+                        .map(|s| s.code)
+                        .unwrap_or(0)
+                );
+                // Aggregate per-actor stats across all targets
+                let (mut party_heal, mut regen, mut dmg_recv, mut hits_recv) = (0i64, 0i64, 0i64, 0i32);
+                for td in combat_data.values() {
+                    if let Some(ad) = td.actors.get(&id) {
+                        party_heal += ad.party_heal;
+                        regen += ad.regen;
+                        dmg_recv += ad.damage_received;
+                        hits_recv += ad.hits_received;
+                    }
+                }
+                DetailsActorSummary {
+                    actor_id: id,
+                    nickname: display_nick,
+                    job: job.clone(),
+                    job_id: job_class.map(|j| j.class_prefix()).unwrap_or(0),
+                    party_heal,
+                    regen,
+                    damage_received: dmg_recv,
+                    hits_received: hits_recv,
+                }
+            })
+            .collect();
+
+        let job_ids: Vec<i32> = actors.iter()
+            .filter(|a| a.job_id > 0)
+            .map(|a| a.job_id)
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+        let jobs: Vec<String> = actors.iter()
+            .filter(|a| !a.job.is_empty() && a.job != "Unknown")
+            .map(|a| a.job.clone())
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+
+        FightRecord {
+            id,
+            boss_name,
+            target_id,
+            start_time_ms,
+            duration_ms,
+            total_damage: total_damage.min(i32::MAX as i64) as i32,
+            jobs,
+            job_ids,
+            details,
+            actors,
+            is_train: mode == "train",
+            app_version: crate::entity::fight_record::APP_VERSION.to_string(),
+            mob_code,
+            mode: mode.to_string(),
+        }
     }
 
     pub fn get_details_context(&self) -> DetailsContext {
@@ -861,8 +990,93 @@ impl DpsCalculator {
         }
     }
 
+    /// Skill details of one target, or — with `target_id` 0 — of every target
+    /// the current multi-target mode (Train / PVE / PvP) is showing, merged.
     pub fn get_target_details(&self, target_id: i32, actor_ids: Option<&[i32]>) -> TargetDetailsResponse {
         let combat_data = self.data_storage.get_combat_snapshot();
+        if target_id == 0 {
+            let ids: Vec<i32> = self.current_target_ids.iter().copied().collect();
+            return self.merged_details(&combat_data, &ids, actor_ids);
+        }
+        self.details_of(&combat_data, target_id, actor_ids)
+    }
+
+    /// Details of several targets summed per (player, skill, dot); hit times are
+    /// relative to the earliest target's first hit.
+    fn merged_details(
+        &self,
+        combat_data: &HashMap<i32, TargetCombatData>,
+        ids: &[i32],
+        actor_ids: Option<&[i32]>,
+    ) -> TargetDetailsResponse {
+        let targets: Vec<&TargetCombatData> = ids.iter().filter_map(|id| combat_data.get(id)).collect();
+        let start = targets.iter().map(|td| td.first_damage_time).min().unwrap_or(0);
+        let end = targets.iter().map(|td| td.last_damage_time).max().unwrap_or(0);
+        let mut total: i32 = 0;
+        let mut heal_skills = Vec::new();
+        let mut merged: HashMap<(i32, i32, bool), DetailSkillEntry> = HashMap::new();
+        for &id in ids {
+            let d = self.details_of(combat_data, id, actor_ids);
+            total = total.saturating_add(d.total_target_damage);
+            // Healing is not per target: every call returns the same list.
+            heal_skills = d.heal_skills;
+            let shift = d.start_time - start;
+            for mut s in d.skills {
+                for ts in &mut s.hit_timestamps {
+                    *ts += shift;
+                }
+                match merged.entry((s.actor_id, s.code, s.is_dot)) {
+                    std::collections::hash_map::Entry::Vacant(v) => {
+                        v.insert(s);
+                    }
+                    std::collections::hash_map::Entry::Occupied(mut o) => {
+                        let e = o.get_mut();
+                        e.time += s.time;
+                        e.dmg = e.dmg.saturating_add(s.dmg);
+                        e.multi_hit_count += s.multi_hit_count;
+                        e.multi_hit_damage = e.multi_hit_damage.saturating_add(s.multi_hit_damage);
+                        e.multi_hit_hits += s.multi_hit_hits;
+                        e.min_dmg = e.min_dmg.min(s.min_dmg);
+                        e.max_dmg = e.max_dmg.max(s.max_dmg);
+                        e.crit += s.crit;
+                        e.parry += s.parry;
+                        e.back += s.back;
+                        e.frontal += s.frontal;
+                        e.perfect += s.perfect;
+                        e.double += s.double;
+                        e.smite += s.smite;
+                        e.powershard += s.powershard;
+                        e.regen = e.regen.saturating_add(s.regen);
+                        e.hit_timestamps.extend(s.hit_timestamps);
+                        for (k, f) in s.specs.iter().enumerate() {
+                            if *f && k < e.specs.len() {
+                                e.specs[k] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        TargetDetailsResponse {
+            target_id: 0,
+            max_hp: 0,
+            total_target_damage: total,
+            battle_time: active_time(targets.iter().copied()),
+            start_time: start,
+            skills: merged.into_values().collect(),
+            ping_history: self.ping_tracker.get_ping_history(start, end).into_iter()
+                .map(|(ts, ping)| PingPoint { ts_ms: ts - start, ping_ms: ping })
+                .collect(),
+            heal_skills,
+        }
+    }
+
+    fn details_of(
+        &self,
+        combat_data: &HashMap<i32, TargetCombatData>,
+        target_id: i32,
+        actor_ids: Option<&[i32]>,
+    ) -> TargetDetailsResponse {
         let target_data = match combat_data.get(&target_id) {
             Some(td) => td,
             None => return TargetDetailsResponse {
@@ -1126,6 +1340,45 @@ impl DpsCalculator {
     }
 }
 
+/// Drop every target before the last gap of PVE_SESSION_IDLE_MS without any hit,
+/// leaving the current session (farming across many mobs counts as one).
+fn keep_last_session(combat: &mut HashMap<i32, TargetCombatData>) {
+    let mut spans: Vec<(i64, i64, i32)> = combat.iter()
+        .map(|(&id, td)| (td.first_damage_time, td.last_damage_time, id))
+        .collect();
+    spans.sort();
+    let mut from = 0;
+    let mut end = i64::MIN;
+    for (k, &(first, last, _)) in spans.iter().enumerate() {
+        if k > 0 && first - end > PVE_SESSION_IDLE_MS {
+            from = k;
+        }
+        end = end.max(last);
+    }
+    let keep: HashSet<i32> = spans[from..].iter().map(|s| s.2).collect();
+    combat.retain(|id, _| keep.contains(id));
+}
+
+/// Time with at least one target under attack: the union of the targets'
+/// first-to-last-hit spans, so walking between mobs doesn't dilute DPS.
+fn active_time<'a>(targets: impl Iterator<Item = &'a TargetCombatData>) -> i64 {
+    let mut spans: Vec<(i64, i64)> = targets.map(|td| (td.first_damage_time, td.last_damage_time)).collect();
+    spans.sort();
+    let mut total = 0;
+    let mut cur: Option<(i64, i64)> = None;
+    for (first, last) in spans {
+        cur = match cur {
+            Some((cf, cl)) if first <= cl => Some((cf, cl.max(last))),
+            Some((cf, cl)) => {
+                total += cl - cf;
+                Some((first, last))
+            }
+            None => Some((first, last)),
+        };
+    }
+    total + cur.map_or(0, |(cf, cl)| cl - cf)
+}
+
 fn resolve_nickname(uid: i32, nicknames: &HashMap<i32, String>, summon_data: &HashMap<i32, i32>) -> String {
     if let Some(name) = nicknames.get(&uid) {
         return name.clone();
@@ -1171,4 +1424,216 @@ fn build_nickname_canonical_map_from_aggregates(
         }
     }
     result
+}
+
+#[cfg(test)]
+mod mode_tests {
+    use super::*;
+    use crate::entity::damage_packet::ParsedDamagePacket;
+
+    const ME: i32 = 1000;
+    const MATE: i32 = 1001;
+    const WOLF_A: i32 = 5001;
+    const WOLF_B: i32 = 5002;
+    const BOSS: i32 = 6001;
+    const DUMMY: i32 = 7001;
+    const FOE: i32 = 8001;
+    const SKILL: i32 = 11_020_000; // player class band -> a job
+    const MOB_SKILL: i32 = 1_234_567; // 7-digit NPC skill
+
+    fn now() -> i64 {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as i64
+    }
+
+    fn setup() -> (Arc<DataStorage>, DpsCalculator) {
+        let storage = Arc::new(DataStorage::new());
+        let npc = Arc::new(NpcLookup::new());
+        npc.load_from_json(
+            r#"{"2000002":{"name":"Wolf","isBoss":false},
+                "2100001":{"name":"Big Boss","isBoss":true},
+                "2300229":{"name":"Training Scarecrow","isBoss":true,"isDummy":true}}"#,
+        );
+        storage.set_local_player_id(Some(ME as i64));
+        for (id, code) in [(WOLF_A, 2000002), (WOLF_B, 2000002), (BOSS, 2100001), (DUMMY, 2300229)] {
+            storage.append_mob(id, code);
+            if npc.is_boss(code) {
+                storage.register_boss(id);
+            }
+        }
+        let calc = DpsCalculator::new(
+            storage.clone(),
+            Arc::new(SkillLookup::new()),
+            npc,
+            Arc::new(PingTracker::new()),
+        );
+        (storage, calc)
+    }
+
+    fn hit_at(s: &DataStorage, actor: i32, target: i32, dmg: i32, ts: i64) {
+        let mut p = ParsedDamagePacket::new();
+        p.set_actor_id(actor);
+        p.set_target_id(target);
+        p.set_skill_code(SKILL);
+        p.set_damage(dmg);
+        p.set_timestamp(ts);
+        s.append_damage(p);
+    }
+
+    fn mine(calc: &mut DpsCalculator, mode: &str) -> f64 {
+        calc.set_target_selection_mode(mode);
+        calc.get_dps().map.get(&ME).map(|p| p.amount).unwrap_or(0.0)
+    }
+
+    #[test]
+    fn each_target_has_exactly_one_kind() {
+        let (s, calc) = setup();
+        hit_at(&s, ME, FOE, 1, now()); // FOE unknown yet
+        let mob = s.get_mob_data();
+        let pvp = HashSet::from([FOE]);
+        assert_eq!(calc.target_kind(WOLF_A, &mob, &pvp), "pve");
+        assert_eq!(calc.target_kind(BOSS, &mob, &pvp), "boss");
+        assert_eq!(calc.target_kind(DUMMY, &mob, &pvp), "train");
+        assert_eq!(calc.target_kind(FOE, &mob, &pvp), "pvp");
+    }
+
+    #[test]
+    fn modes_are_exclusive() {
+        let (s, mut calc) = setup();
+        let t = now() - 60_000;
+        hit_at(&s, ME, WOLF_A, 1000, t);
+        assert_eq!(mine(&mut calc, "bossTargets"), 0.0, "a normal mob must not show in Boss");
+        assert_eq!(mine(&mut calc, "trainTargets"), 0.0);
+        assert_eq!(mine(&mut calc, "pvpTargets"), 0.0);
+        assert_eq!(mine(&mut calc, "pveTargets"), 1000.0);
+        hit_at(&s, ME, DUMMY, 300, t + 1000);
+        assert_eq!(mine(&mut calc, "bossTargets"), 0.0, "a training dummy is not a boss");
+        assert_eq!(mine(&mut calc, "trainTargets"), 300.0);
+        assert_eq!(mine(&mut calc, "pveTargets"), 1000.0);
+    }
+
+    #[test]
+    fn pve_session_accumulates_across_mob_deaths() {
+        let (s, mut calc) = setup();
+        let t = now() - 60_000;
+        hit_at(&s, ME, WOLF_A, 1000, t);
+        s.mark_entity_dead(WOLF_A);
+        hit_at(&s, ME, WOLF_B, 500, t + 20_000);
+        assert_eq!(mine(&mut calc, "pveTargets"), 1500.0);
+    }
+
+    #[test]
+    fn hitting_a_boss_keeps_the_pve_session() {
+        let (s, mut calc) = setup();
+        let t = now() - 60_000;
+        hit_at(&s, ME, WOLF_A, 1000, t);
+        hit_at(&s, ME, BOSS, 7000, t + 1000);
+        assert_eq!(mine(&mut calc, "pveTargets"), 1000.0);
+        assert_eq!(mine(&mut calc, "bossTargets"), 7000.0);
+    }
+
+    #[test]
+    fn pve_session_restarts_after_long_idle() {
+        let (s, mut calc) = setup();
+        let t = now() - 20 * 60_000;
+        hit_at(&s, ME, WOLF_A, 1000, t);
+        hit_at(&s, ME, WOLF_B, 500, t + PVE_SESSION_IDLE_MS + 1);
+        assert_eq!(mine(&mut calc, "pveTargets"), 500.0);
+    }
+
+    #[test]
+    fn pve_battle_time_counts_only_active_combat() {
+        let (s, mut calc) = setup();
+        let t = now() - 5 * 60_000;
+        hit_at(&s, ME, WOLF_A, 100, t);
+        hit_at(&s, ME, WOLF_A, 100, t + 10_000);
+        hit_at(&s, ME, WOLF_B, 100, t + 60_000);
+        hit_at(&s, ME, WOLF_B, 100, t + 70_000);
+        calc.set_target_selection_mode("pveTargets");
+        assert_eq!(calc.get_dps().battle_time, 20_000);
+    }
+
+    #[test]
+    fn reports_the_kind_being_recorded() {
+        let (s, mut calc) = setup();
+        calc.set_target_selection_mode("bossTargets");
+        hit_at(&s, ME, WOLF_A, 100, now());
+        let d = calc.get_dps();
+        assert_eq!(d.recording_kind, "pve");
+        assert_eq!(d.recording_name, "Wolf");
+    }
+
+    #[test]
+    fn heals_received_split_self_and_others() {
+        let (s, mut calc) = setup();
+        s.append_nickname_authoritative(MATE, "Mate");
+        hit_at(&s, MATE, WOLF_A, 10, now()); // MATE known player
+        hit_at(&s, ME, WOLF_A, 10, now());
+        s.append_heal(MATE, ME, 17_000_000, 400, true); // HoT from a mate
+        s.append_heal(ME, ME, 17_000_000, 100, false); // self heal
+        let mut ls = ParsedDamagePacket::new(); // life steal on a hit
+        ls.set_actor_id(ME);
+        ls.set_target_id(WOLF_A);
+        ls.set_skill_code(SKILL);
+        ls.set_damage(10);
+        ls.set_heal_amount(50);
+        s.append_damage(ls);
+        calc.set_target_selection_mode("pveTargets");
+        let d = calc.get_dps();
+        let me = d.heals.iter().find(|h| h.id == ME).expect("heal row for me");
+        assert_eq!(me.from_self, 150);
+        assert_eq!(me.from_others, 400);
+    }
+
+    #[test]
+    fn mob_hits_taken_are_counted_per_player_for_aggro() {
+        let (s, mut calc) = setup();
+        s.append_nickname_authoritative(MATE, "Mate");
+        let t = now() - 30_000;
+        hit_at(&s, ME, WOLF_A, 100, t);
+        hit_at(&s, MATE, WOLF_A, 100, t);
+        for _ in 0..3 {
+            let mut p = ParsedDamagePacket::new();
+            p.set_actor_id(WOLF_A);
+            p.set_target_id(MATE);
+            p.set_skill_code(MOB_SKILL);
+            p.set_damage(250);
+            s.append_damage(p);
+        }
+        calc.set_target_selection_mode("pveTargets");
+        let d = calc.get_dps();
+        assert_eq!(d.map[&MATE].hits_taken, 3);
+        assert_eq!(d.map[&MATE].damage_taken, 750);
+        assert_eq!(d.map[&ME].hits_taken, 0);
+    }
+
+    #[test]
+    fn saved_fights_carry_their_mode() {
+        let (s, mut calc) = setup();
+        let t = now() - 60_000;
+        for k in 0..7 {
+            hit_at(&s, ME, BOSS, 100, t + k * 1000);
+            hit_at(&s, ME, WOLF_A, 10, t + k * 1000);
+            hit_at(&s, ME, DUMMY, 5, t + k * 1000);
+        }
+        let recs = calc.snapshot_boss_fights_force();
+        let mode_of = |m: &str| recs.iter().find(|r| r.mode == m).map(|r| r.total_damage);
+        assert_eq!(mode_of("boss"), Some(700));
+        assert_eq!(mode_of("train"), Some(35));
+        assert_eq!(mode_of("pve"), Some(70));
+    }
+
+    #[test]
+    fn multi_target_details_merge_the_mode_targets() {
+        let (s, mut calc) = setup();
+        let t = now() - 60_000;
+        hit_at(&s, ME, WOLF_A, 1000, t);
+        hit_at(&s, ME, WOLF_B, 500, t + 1000);
+        calc.set_target_selection_mode("pveTargets");
+        calc.get_dps();
+        let d = calc.get_target_details(0, Some(&[ME]));
+        assert_eq!(d.skills.iter().map(|s| s.dmg).sum::<i32>(), 1500);
+    }
 }

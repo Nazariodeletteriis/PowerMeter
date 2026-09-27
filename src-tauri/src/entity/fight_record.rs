@@ -28,6 +28,10 @@ pub struct FightRecord {
     /// NPC mob type code for i18n boss name resolution (new field).
     #[serde(default)]
     pub mob_code: i32,
+    /// Meter mode the fight belongs to: "boss" / "train" / "pve" / "pvp".
+    /// Empty on records saved before modes existed (boss, or train if is_train).
+    #[serde(default)]
+    pub mode: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -50,6 +54,10 @@ pub struct FightSummary {
     pub app_version: String,
     #[serde(default)]
     pub mob_code: i32,
+    /// Meter mode the fight belongs to: "boss" / "train" / "pve" / "pvp".
+    /// Empty on records saved before modes existed (boss, or train if is_train).
+    #[serde(default)]
+    pub mode: String,
 }
 
 /// Obscure a nickname for privacy: keep first char and last char, mask the middle.

@@ -12,7 +12,7 @@ import {
 import { fmt } from "../ui";
 import { invoke } from "@tauri-apps/api/core";
 import { usePoll } from "../usePoll";
-import { ab, Av, Chart, classColor, clock, fightParty, fightSeries, getFights, pc, REPORT_FIGHT_KEY, uploadedUrl, useFight, type FightRecord, type FightRow, type FightSummary, type Skill } from "./combat/parts";
+import { Av, Chart, classColor, clock, fightParty, fightSeries, getFights, pc, REPORT_FIGHT_KEY, uploadedUrl, useFight, type FightRecord, type FightRow, type FightSummary, type Skill } from "./combat/parts";
 import { SkillIcon } from "../skills";
 import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
@@ -299,8 +299,8 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: 
                 <div className="cbTrack" style={{ flex: 1, height: 14, borderRadius: 3, overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${(q.dmg / dmgMax) * 100}%`, background: classColor(q.cls), opacity: 0.85 }} />
                 </div>
-                <span className="num" style={{ fontSize: 12, width: 64 }}>
-                  {ab(q.dmg, lang)}
+                <span className="num" style={{ fontSize: 12, minWidth: 64, whiteSpace: "nowrap" }}>
+                  {fmt(q.dmg, lang)}
                 </span>
               </div>
               <span className="num" style={{ color: "var(--pm-t2)" }}>
@@ -453,7 +453,7 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: 
               key={a}
               style={{
                 display: "grid",
-                gridTemplateColumns: "220px minmax(0,1fr) 80px 110px",
+                gridTemplateColumns: "220px minmax(0,1fr) 110px 110px",
                 gap: 12,
                 alignItems: "center",
                 minHeight: 40,
@@ -471,7 +471,7 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: 
               <div className="cbTrack" style={{ height: 8, borderRadius: 4 }}>
                 <div style={{ height: "100%", width: `${(v / rows[0].v) * 100}%`, background: "var(--pm-red)", borderRadius: 4 }} />
               </div>
-              <span className="num">{ab(v, lang)}</span>
+              <span className="num">{fmt(v, lang)}</span>
               <span className="num" style={{ color: "var(--pm-t2)", fontSize: 12 }}>
                 {fmt(v / Math.max(1, dur), lang)}
                 {tab === "heal" ? " HPS" : "/s"}

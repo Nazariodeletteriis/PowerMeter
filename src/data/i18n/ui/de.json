@@ -330,7 +330,10 @@
     "all": "Alle Ziele",
     "identifying": "Identifiziere dich...",
     "train": "Trainingspuppe",
-    "boss": "Boss-Ziele"
+    "boss": "Boss-Ziele",
+    "pve": "Alle Mobs (PVE)",
+    "pvp": "Spieler (PvP)",
+    "recording": "Erfasst"
   },
   "classes": {
     "GLADIATOR": "Gladiator",
@@ -382,8 +385,9 @@
       "yourDps": "Dein DPS",
       "position": "Position",
       "upload": "Log hochladen",
-      "uploadUnavailable": "Upload nicht verfügbar",
-      "signIn": "Melde dich im Dashboard mit Discord an",
+      "failed": "Upload fehlgeschlagen: {error}",
+      "training": "Trainingskämpfe werden nicht hochgeladen",
+      "signIn": "Mit Discord anmelden",
       "openReport": "Bericht öffnen",
       "uploaded": "Hochgeladen ✓",
       "copyLink": "Link kopieren",

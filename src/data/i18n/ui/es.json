@@ -330,7 +330,10 @@
     "all": "Todos los objetivos",
     "identifying": "Identificándote...",
     "train": "Muñeco de entrenamiento",
-    "boss": "Objetivos jefe"
+    "boss": "Objetivos jefe",
+    "pve": "Todos los mobs (PVE)",
+    "pvp": "Jugadores (PvP)",
+    "recording": "Registrando"
   },
   "classes": {
     "GLADIATOR": "Gladiador",
@@ -382,8 +385,9 @@
       "yourDps": "Tu DPS",
       "position": "Posición",
       "upload": "Subir registro",
-      "uploadUnavailable": "Subida no disponible",
-      "signIn": "Inicia sesión con Discord desde el panel",
+      "failed": "Error al subir: {error}",
+      "training": "Los combates de entrenamiento no se suben",
+      "signIn": "Inicia sesión con Discord",
       "openReport": "Abrir informe",
       "uploaded": "Subido ✓",
       "copyLink": "Copiar enlace",

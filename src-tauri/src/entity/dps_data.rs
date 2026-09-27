@@ -21,6 +21,25 @@ pub struct DpsData {
     /// Live current HP of the current target from the in-place HP feed, or -1 if
     /// none has been observed. When >= 0 the bar uses this real value directly.
     pub target_current_hp: i64,
+    /// Kind of the target hit most recently by anyone ("boss" / "train" / "pve" /
+    /// "pvp", "" before the first hit) — what the engine is recording right now,
+    /// whatever mode is being viewed.
+    pub recording_kind: String,
+    pub recording_name: String,
+    /// Healing received per player since the last reset (any healer, any class).
+    pub heals: Vec<HealTaken>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HealTaken {
+    pub id: i32,
+    pub nickname: String,
+    pub job: String,
+    /// Own heals and life steal.
+    pub from_self: i64,
+    /// Heals cast by other players (or their summons).
+    pub from_others: i64,
 }
 
 impl DpsData {
@@ -35,6 +54,9 @@ impl DpsData {
             target_max_hp: 0,
             target_total_damage: 0,
             target_current_hp: -1,
+            recording_kind: String::new(),
+            recording_name: String::new(),
+            heals: Vec::new(),
         }
     }
 }

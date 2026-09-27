@@ -330,7 +330,10 @@
     "all": "All Targets",
     "identifying": "Identifying you...",
     "train": "Training Scarecrow",
-    "boss": "Boss Targets"
+    "boss": "Boss Targets",
+    "pve": "All mobs (PVE)",
+    "pvp": "Players (PvP)",
+    "recording": "Recording"
   },
   "classes": {
     "GLADIATOR": "Gladiator",
@@ -382,8 +385,9 @@
       "yourDps": "Your DPS",
       "position": "Position",
       "upload": "Upload log",
-      "uploadUnavailable": "Upload unavailable",
-      "signIn": "Sign in with Discord from the dashboard",
+      "failed": "Upload failed: {error}",
+      "training": "Training fights are not uploaded",
+      "signIn": "Sign in with Discord",
       "openReport": "Open report",
       "uploaded": "Uploaded ✓",
       "copyLink": "Copy link",

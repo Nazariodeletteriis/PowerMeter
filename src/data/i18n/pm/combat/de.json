@@ -148,5 +148,16 @@
   "combat.noFights": "Noch keine Kämpfe aufgezeichnet",
   "combat.noData": "Für diesen Kampf wurden keine Daten aufgezeichnet.",
   "combat.shareNoLink": "Noch kein Link: Lade diesen Kampf im Kampfverlauf hoch (Hochladen, mit Discord angemeldet), um ihn zu teilen.",
-  "combat.shareSoon": "Online-Teilen ist noch nicht verfügbar."
+  "combat.shareSoon": "Online-Teilen ist noch nicht verfügbar.",
+  "combat.recording": "Erfasst:",
+  "combat.healsReceived": "Erhaltene Heilung",
+  "combat.healsOff": "Aus — noch niemand wurde geheilt",
+  "combat.healSelf": "selbst",
+  "combat.healOthers": "von anderen",
+  "combat.aggro": "Aggro",
+  "combat.aggroObserved": "Anteil erhaltener Mob-Treffer (aus Paketen)",
+  "combat.aggroEstimated": "Geschätzt: Schaden ×2 für Templer/Gladiator",
+  "combat.aggroEmpty": "Noch kein Schaden in dieser Ansicht",
+  "combat.modeLabel": "Modus",
+  "combat.allModes": "Alle Modi"
 }

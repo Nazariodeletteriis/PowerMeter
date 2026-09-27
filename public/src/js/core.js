@@ -10,6 +10,10 @@ const REMOTE_APPLIED_SETTING_CONTROLS = {
   "dpsMeter.bossNameSize": ".bossNameSizeInput",
 };
 
+// Target modes the meter accepts. The first four are exclusive (each hit counts
+// in exactly one); Target and All are the older cross-mode views.
+const TARGET_MODES = ["bossTargets", "pveTargets", "trainTargets", "pvpTargets", "lastHitByMe", "allTargets"];
+
 class DpsApp {
   constructor() {
     if (DpsApp.instance) return DpsApp.instance;
@@ -940,6 +944,8 @@ class DpsApp {
       targetCurrentHp,
       targetBerserkMs,
       targetPhase,
+      recordingKind,
+      recordingName,
     } = this.buildRowsFromPayload(raw);
     if (this.refreshPending) {
       const pendingAgeMs = Math.max(0, now - (Number(this.refreshPendingStartedAt) || 0));
@@ -1008,6 +1014,11 @@ class DpsApp {
     // 빈값은 ui 안덮어씀
     let rowsToRender = rows;
     const listReasons = [];
+    // Modes are exclusive: an empty new mode (picked here or in the dashboard)
+    // must not keep showing the previous mode's rows.
+    if (rows.length === 0 && previousTargetMode && targetMode !== previousTargetMode) {
+      this.lastSnapshot = [];
+    }
     if (rows.length === 0) {
       if (this.lastSnapshot) rowsToRender = this.lastSnapshot;
       else {
@@ -1066,6 +1077,7 @@ class DpsApp {
       this.elBossName.classList.toggle("isAllTargets", targetMode === "allTargets");
     }
     this.updateBossHpBar(targetMaxHp, targetTotalDamage, targetCurrentHp);
+    this.updateRecordingBadge(recordingKind, recordingName);
     if (
       nextTargetLabel !== this._lastRenderedTargetLabel ||
       previousTargetName !== targetName ||
@@ -1151,6 +1163,8 @@ class DpsApp {
       // target header. The engine does not send them yet; absent = hidden.
       targetBerserkMs: payload?.targetBerserkMs ?? null,
       targetPhase: payload?.targetPhase ?? null,
+      recordingKind: typeof payload?.recordingKind === "string" ? payload.recordingKind : "",
+      recordingName: typeof payload?.recordingName === "string" ? payload.recordingName : "",
     };
   }
 
@@ -1868,7 +1882,8 @@ class DpsApp {
       this._setCaptureSuspended(!this._captureSuspended);
     });
     this.targetModeBtn?.addEventListener("click", () => {
-      const modes = ["lastHitByMe", "bossTargets", "trainTargets", "allTargets"];
+      // The four exclusive modes: each hit counts in exactly one of them.
+      const modes = ["bossTargets", "pveTargets", "trainTargets", "pvpTargets"];
       const currentIndex = modes.indexOf(this.targetSelection);
       const nextMode = modes[(currentIndex + 1) % modes.length];
       console.log("[Target Mode Toggle]", {
@@ -2033,7 +2048,7 @@ class DpsApp {
     if (mainPlayerDpsBoldSetting === null || mainPlayerDpsBoldSetting === undefined || mainPlayerDpsBoldSetting === "") {
       this.safeSetSetting(this.storageKeys.mainPlayerDpsBold, "true");
     }
-    const validModes = ["bossTargets", "lastHitByMe", "allTargets", "trainTargets"];
+    const validModes = TARGET_MODES;
     const normalizedDefaultMode = validModes.includes(storedDefaultMeterMode)
       ? storedDefaultMeterMode : "bossTargets";
     this.settingsSelections.defaultMeterMode = normalizedDefaultMode;
@@ -2672,6 +2687,8 @@ class DpsApp {
       { value: "bossTargets", label: "BOSS" },
       { value: "allTargets", label: "ALL" },
       { value: "trainTargets", label: "TRAIN" },
+      { value: "pveTargets", label: "PVE" },
+      { value: "pvpTargets", label: "PVP" },
     ];
 
     const trainModeOptions = [
@@ -3803,9 +3820,7 @@ class DpsApp {
 
   setTargetSelection(mode, { persist = false, syncBackend = false, reason = "update" } = {}) {
     const previousSelection = this.targetSelection;
-    this.targetSelection = ["bossTargets", "lastHitByMe", "allTargets", "trainTargets"].includes(mode)
-      ? mode
-       : "lastHitByMe";
+    this.targetSelection = TARGET_MODES.includes(mode) ? mode : "lastHitByMe";
     if (persist) {
       this.safeSetStorage(this.storageKeys.targetSelection, String(this.targetSelection));
     }
@@ -4437,6 +4452,12 @@ class DpsApp {
       }
       return this.i18n?.t("target.train", "Training Scarecrow") ?? "Training Scarecrow";
     }
+    if (targetMode === "pveTargets") {
+      return this.i18n?.t("target.pve", "All mobs (PVE)") ?? "All mobs (PVE)";
+    }
+    if (targetMode === "pvpTargets") {
+      return this.i18n?.t("target.pvp", "Players (PvP)") ?? "Players (PvP)";
+    }
     return this.i18n?.t("header.title", "PowerMeter") ?? "PowerMeter";
   }
 
@@ -4444,7 +4465,7 @@ class DpsApp {
     if (targetMode === "trainTargets" && !this.isLocalUserIdentified()) {
       return this.i18n?.t("target.identifying", "Identifying you...") ?? "Identifying you...";
     }
-    if (targetMode === "allTargets" || targetMode === "trainTargets") {
+    if (["allTargets", "trainTargets", "pveTargets", "pvpTargets"].includes(targetMode)) {
       return this.getDefaultTargetLabel(targetMode);
     }
     if (targetMode === "bossTargets" && (!Number(targetId) || Number(targetId) <= 0) && !targetName) {
@@ -4471,22 +4492,30 @@ class DpsApp {
     return this.getDefaultTargetLabel(targetMode);
   }
 
+  // What the engine is counting right now (the last target hit, any mode), so a
+  // widget-only user sees e.g. "PVE Wolf" while the Boss tab is on screen.
+  updateRecordingBadge(kind, name) {
+    const badge = document.querySelector(".recBadge");
+    if (!badge) return;
+    badge.hidden = !kind;
+    if (!kind) return;
+    const kindEl = badge.querySelector(".recKind");
+    const nameEl = badge.querySelector(".recName");
+    const kindText = kind === "pvp" ? "PVP" : kind.toUpperCase();
+    if (kindEl.textContent !== kindText) kindEl.textContent = kindText;
+    badge.dataset.kind = kind;
+    if (nameEl.textContent !== name) nameEl.textContent = name;
+    badge.title = `${this.i18n?.t("target.recording", "Recording") ?? "Recording"}: ${kindText}${name ? ` · ${name}` : ""}`;
+  }
+
   updateTargetModeButton() {
     if (!this.targetModeBtn) return;
-    const isBossTargets = this.targetSelection === "bossTargets";
-    const isAllTargets = this.targetSelection === "allTargets";
-    const isTrainTargets = this.targetSelection === "trainTargets";
-    this.targetModeBtn.classList.toggle("isAllTargets", isAllTargets);
-    this.targetModeBtn.classList.toggle("isTrainTargets", isTrainTargets);
-    this.targetModeBtn.textContent = isBossTargets ? "BOSS" : isAllTargets ? "ALL" : isTrainTargets ? "TRAIN" : "TARGET";
-    const ariaLabel = isBossTargets
-      ? "Boss targets mode"
-      : isAllTargets
-        ? "All targets mode"
-        : isTrainTargets
-          ? "Train targets mode"
-          : "Target mode";
-    this.targetModeBtn.setAttribute("aria-label", ariaLabel);
+    const mode = this.targetSelection;
+    this.targetModeBtn.classList.toggle("isAllTargets", mode === "allTargets");
+    this.targetModeBtn.classList.toggle("isTrainTargets", mode === "trainTargets");
+    const label = { bossTargets: "BOSS", allTargets: "ALL", trainTargets: "TRAIN", pveTargets: "PVE", pvpTargets: "PVP" }[mode] || "TARGET";
+    this.targetModeBtn.textContent = label;
+    this.targetModeBtn.setAttribute("aria-label", `${label} mode`);
   }
 
   refreshBossLabel() {

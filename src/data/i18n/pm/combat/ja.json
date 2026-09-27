@@ -148,5 +148,16 @@
   "combat.noFights": "記録された戦闘はまだありません",
   "combat.noData": "この戦闘のデータは記録されていません。",
   "combat.shareNoLink": "リンクはまだありません：共有するには戦闘履歴からこの戦闘をアップロードしてください（アップロード、Discordでログイン）。",
-  "combat.shareSoon": "オンライン共有はまだ利用できません。"
+  "combat.shareSoon": "オンライン共有はまだ利用できません。",
+  "combat.recording": "記録中:",
+  "combat.healsReceived": "受けた回復",
+  "combat.healsOff": "オフ — まだ誰も回復されていません",
+  "combat.healSelf": "自己",
+  "combat.healOthers": "他者から",
+  "combat.aggro": "ヘイト",
+  "combat.aggroObserved": "モブから受けた攻撃の割合（パケット）",
+  "combat.aggroEstimated": "推定：守護星・剣星はダメージ×2",
+  "combat.aggroEmpty": "この表示にはまだダメージがありません",
+  "combat.modeLabel": "モード",
+  "combat.allModes": "全モード"
 }

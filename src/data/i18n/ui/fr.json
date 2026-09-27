@@ -330,7 +330,10 @@
     "all": "Toutes les cibles",
     "identifying": "Identification en cours...",
     "train": "Mannequin d'entraînement",
-    "boss": "Cibles boss"
+    "boss": "Cibles boss",
+    "pve": "Tous les monstres (PVE)",
+    "pvp": "Joueurs (PvP)",
+    "recording": "Enregistrement"
   },
   "classes": {
     "GLADIATOR": "Gladiateur",
@@ -382,8 +385,9 @@
       "yourDps": "Ton DPS",
       "position": "Position",
       "upload": "Envoyer le journal",
-      "uploadUnavailable": "Envoi indisponible",
-      "signIn": "Connecte-toi avec Discord depuis le tableau de bord",
+      "failed": "Échec de l'envoi : {error}",
+      "training": "Les combats d'entraînement ne sont pas envoyés",
+      "signIn": "Se connecter avec Discord",
       "openReport": "Ouvrir le rapport",
       "uploaded": "Envoyé ✓",
       "copyLink": "Copier le lien",

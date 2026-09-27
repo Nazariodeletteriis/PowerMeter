@@ -148,5 +148,16 @@
   "combat.noFights": "尚未記錄任何戰鬥",
   "combat.noData": "此戰鬥沒有記錄資料。",
   "combat.shareNoLink": "尚無連結：請在戰鬥紀錄中上傳此戰鬥（上傳，需登入 Discord）後再分享。",
-  "combat.shareSoon": "線上分享尚未開放。"
+  "combat.shareSoon": "線上分享尚未開放。",
+  "combat.recording": "記錄中：",
+  "combat.healsReceived": "受到的治療",
+  "combat.healsOff": "關閉 — 尚無人受到治療",
+  "combat.healSelf": "自身",
+  "combat.healOthers": "來自他人",
+  "combat.aggro": "仇恨",
+  "combat.aggroObserved": "承受怪物攻擊占比（來自封包）",
+  "combat.aggroEstimated": "估算：守護星/劍星傷害×2",
+  "combat.aggroEmpty": "此檢視中尚無傷害",
+  "combat.modeLabel": "模式",
+  "combat.allModes": "全部模式"
 }

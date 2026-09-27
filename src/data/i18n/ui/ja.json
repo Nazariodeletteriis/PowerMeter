@@ -330,7 +330,10 @@
     "all": "全ターゲット",
     "identifying": "あなたを識別中...",
     "train": "訓練用かかし",
-    "boss": "ボスターゲット"
+    "boss": "ボスターゲット",
+    "pve": "全モブ（PVE）",
+    "pvp": "プレイヤー（PvP）",
+    "recording": "記録中"
   },
   "classes": {
     "GLADIATOR": "グラディエーター",
@@ -382,8 +385,9 @@
       "yourDps": "あなたのDPS",
       "position": "順位",
       "upload": "ログをアップロード",
-      "uploadUnavailable": "アップロード不可",
-      "signIn": "ダッシュボードからDiscordでログインしてください",
+      "failed": "アップロード失敗: {error}",
+      "training": "トレーニング戦闘はアップロードされません",
+      "signIn": "Discordでログイン",
       "openReport": "レポートを開く",
       "uploaded": "アップロード済み ✓",
       "copyLink": "リンクをコピー",

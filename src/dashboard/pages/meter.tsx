@@ -3,17 +3,22 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { ArrowCounterClockwiseIcon, ArrowSquareOutIcon, FirstAidIcon, FloppyDiskIcon, ShieldWarningIcon, SwordIcon } from "@phosphor-icons/react";
 import { EmptyState, fmt } from "../ui";
-import { ab, Av, Chart, classColor, clock, pc, path, rank } from "./combat/parts";
+import { Av, Chart, classColor, clock, pc, path, rank } from "./combat/parts";
 import type { PageProps } from "./types";
 
 /** dps-update payload (src-tauri/src/entity/dps_data.rs), the fields shown here. */
 type Dps = {
-  map: Record<string, { job: string; dps: number; amount: number; nickname: string; combatPower: number }>;
+  map: Record<string, { job: string; dps: number; amount: number; nickname: string; combatPower: number; hitsTaken: number; damageTaken: number }>;
   targetName: string;
   targetMode: string;
   targetId: number;
   battleTime: number;
   localPlayerId: number | null;
+  /** Kind and name of the last target anyone hit, whatever mode is shown. */
+  recordingKind: string;
+  recordingName: string;
+  /** Healing received per player since the last reset. */
+  heals: { id: number; nickname: string; job: string; fromSelf: number; fromOthers: number }[];
 };
 /** get_skill_details entries (details_context.rs DetailSkillEntry); `time` is the hit count. */
 type SkillEntry = { name: string; dmg: number; time: number; crit: number; back: number; parry: number; perfect: number; double: number };
@@ -30,11 +35,16 @@ const JOB: Record<string, string> = {
   호법성: "Chanter",
 };
 // Tab labels → set_target_mode ids (dps_calculator.rs).
+// Exclusive: every hit counts in exactly one of them.
 const MODES = [
   ["Boss", "bossTargets"],
+  ["PVE", "pveTargets"],
   ["Train", "trainTargets"],
   ["PvP", "pvpTargets"],
 ] as const;
+const KIND_LABEL: Record<string, string> = { boss: "Boss", pve: "PVE", train: "Train", pvp: "PvP" };
+// Classes marked TANK on the aggro card.
+const TANKS = new Set(["Templar", "Gladiator"]);
 /** Chart window: 60 dps-update samples (500 ms each). */
 const HISTORY = 60;
 
@@ -134,6 +144,13 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
           <span className="mono" style={{ color: "var(--pm-redt)" }}>
             {live ? clock(data!.battleTime / 1000) : "—"}
           </span>
+          {data?.recordingKind && (
+            <>
+              {" · "}
+              {t("combat.recording")} <span style={{ color: "var(--pm-t1)" }}>{KIND_LABEL[data.recordingKind] ?? data.recordingKind}</span>
+              {data.recordingName && ` · ${data.recordingName}`}
+            </>
+          )}
         </div>
         <div style={{ flex: 1 }} />
         <button
@@ -183,7 +200,7 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
                       "--bg": p.key === selKey ? "var(--pm-s3)" : p.me ? "var(--pm-tint)" : "transparent",
                       position: "relative",
                       display: "grid",
-                      gridTemplateColumns: "24px 30px minmax(0,1fr) 90px 64px 70px",
+                      gridTemplateColumns: "24px 30px minmax(0,1fr) 90px 64px 104px",
                       gap: 10,
                       alignItems: "center",
                       height: 44,
@@ -213,7 +230,7 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
                     {pc(p.pct, lang)}
                   </span>
                   <span className="num" style={{ color: "var(--pm-t3)" }}>
-                    {ab(p.dmg, lang)}
+                    {fmt(p.dmg, lang)}
                   </span>
                 </button>
               ))}
@@ -292,8 +309,8 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
       )}
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: 12, marginTop: 12 }}>
-        <NotTracked t={t} icon={<FirstAidIcon aria-hidden="true" style={{ color: "var(--pm-okt)" }} />} title={t("combat.heals")} />
-        <NotTracked t={t} icon={<ShieldWarningIcon aria-hidden="true" style={{ color: "var(--pm-warn)" }} />} title="Aggro" />
+        <HealsCard t={t} lang={lang} heals={data?.heals ?? []} />
+        <AggroCard t={t} lang={lang} rows={rows.map((r) => ({ ...r, hitsTaken: data?.map[String(r.key)]?.hitsTaken ?? 0 }))} />
       </div>
     </>
   );
@@ -328,17 +345,106 @@ function liveSkills(entries?: SkillEntry[]) {
   return { list, badges };
 }
 
-/** Heals and aggro: same card head, no engine source for them yet. */
-function NotTracked({ t, icon, title }: { t: PageProps["t"]; icon: ReactNode; title: string }) {
+/** Card head shared by heals and aggro. */
+function Card({ icon, title, hint, children }: { icon: ReactNode; title: string; hint?: string; children: ReactNode }) {
   return (
     <section className="card" style={{ padding: "14px 16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
         {icon}
         <h2 style={{ fontWeight: 500 }}>{title}</h2>
+        {hint && <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--pm-t3)" }}>{hint}</span>}
       </div>
-      <div style={{ color: "var(--pm-t2)", fontSize: 12 }}>
-        {t("shell.states.soonText")}
-      </div>
+      {children}
     </section>
+  );
+}
+
+/** A row: name, share bar, value. */
+function Bar({ name, cls, pct, value, tag }: { name: string; cls: string; pct: number; value: string; tag?: ReactNode }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 120px", gap: 10, alignItems: "center", minHeight: 30 }}>
+      <div style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
+        <span style={{ display: "flex", gap: 6, alignItems: "baseline", whiteSpace: "nowrap", overflow: "hidden" }}>
+          {name}
+          {tag}
+        </span>
+        <div className="cbTrack" style={{ height: 3, borderRadius: 2 }}>
+          <div style={{ height: "100%", width: `${pct}%`, background: classColor(cls), borderRadius: 2 }} />
+        </div>
+      </div>
+      <span className="num" style={{ fontSize: 12, textAlign: "right" }}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+/** Healing received per player (any healer, any class), split own heals / others'. Off when nobody was healed. */
+function HealsCard({ t, lang, heals }: { t: PageProps["t"]; lang: string; heals: Dps["heals"] }) {
+  const list = heals.map((h) => ({ ...h, cls: JOB[h.job] ?? h.job, tot: h.fromSelf + h.fromOthers })).filter((h) => h.tot > 0).sort((a, b) => b.tot - a.tot);
+  const max = list[0]?.tot || 1;
+  return (
+    <Card icon={<FirstAidIcon aria-hidden="true" style={{ color: "var(--pm-okt)" }} />} title={t("combat.healsReceived")}>
+      {!list.length ? (
+        <div style={{ color: "var(--pm-t3)", fontSize: 12 }}>{t("combat.healsOff")}</div>
+      ) : (
+        list.map((h) => (
+          <Bar
+            key={h.id}
+            name={h.nickname}
+            cls={h.cls}
+            pct={(h.tot / max) * 100}
+            value={fmt(h.tot, lang)}
+            tag={
+              <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>
+                {t("combat.healSelf")} {fmt(h.fromSelf, lang)} · {t("combat.healOthers")} {fmt(h.fromOthers, lang)}
+              </span>
+            }
+          />
+        ))
+      )}
+    </Card>
+  );
+}
+
+/**
+ * Aggro. Packets carry no threat value, so: when the mobs of this view have hit
+ * anyone, the share of those hits each player took (observed — mobs attack whoever
+ * holds their aggro); before that, an estimate = damage dealt × 2 for a Templar or
+ * Gladiator, × 1 for everyone else, labelled as estimated.
+ */
+function AggroCard({ t, lang, rows }: { t: PageProps["t"]; lang: string; rows: { key: string | number; n: string; cls: string; dmg: number; hitsTaken: number }[] }) {
+  const observed = rows.some((r) => r.hitsTaken > 0);
+  const list = rows
+    .map((r) => ({ ...r, v: observed ? r.hitsTaken : r.dmg * (TANKS.has(r.cls) ? 2 : 1) }))
+    .filter((r) => r.v > 0)
+    .sort((a, b) => b.v - a.v);
+  const tot = list.reduce((a, r) => a + r.v, 0) || 1;
+  const max = list[0]?.v || 1;
+  return (
+    <Card
+      icon={<ShieldWarningIcon aria-hidden="true" style={{ color: "var(--pm-warn)" }} />}
+      title={t("combat.aggro")}
+      hint={list.length ? t(observed ? "combat.aggroObserved" : "combat.aggroEstimated") : undefined}
+    >
+      {!list.length ? (
+        <div style={{ color: "var(--pm-t3)", fontSize: 12 }}>{t("combat.aggroEmpty")}</div>
+      ) : (
+        list.map((r) => (
+          <Bar
+            key={r.key}
+            name={r.n}
+            cls={r.cls}
+            pct={(r.v / max) * 100}
+            value={observed ? `${fmt(r.hitsTaken, lang)} ${t("combat.col.hits").toLowerCase()} · ${pc((r.v / tot) * 100, lang)}` : pc((r.v / tot) * 100, lang)}
+            tag={
+              TANKS.has(r.cls) && (
+                <span style={{ fontSize: 9, letterSpacing: ".1em", padding: "0 4px", borderRadius: 3, border: "1px solid var(--pm-warn)", color: "var(--pm-warn)" }}>TANK</span>
+              )
+            }
+          />
+        ))
+      )}
+    </Card>
   );
 }

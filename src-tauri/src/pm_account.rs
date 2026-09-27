@@ -151,17 +151,29 @@ pub async fn upload_combat_log(
         (Some(fight), _) => fight,
         (None, Some(id)) => serde_json::to_value(state.fight_history.load_fight(&id)?).map_err(|e| e.to_string())?,
         (None, None) => {
-            let id = state
+            // The meter's "fight over" card: the fight that just ended reaches disk only with
+            // the 30 s auto-save, so save it now (same id: the auto-save later overwrites it).
+            let records = state.dps_calculator.lock().snapshot_boss_fights_force();
+            for record in &records {
+                state.fight_history.save_fight(record)?;
+            }
+            let last = state
                 .fight_history
                 .list_fights()
                 .into_iter()
-                .filter(|f| !f.is_train && !f.is_live)
+                // The card is for boss/train fights; PVE and PvP sessions are saved too.
+                .filter(|f| !f.is_live && (f.mode == "boss" || f.mode == "train"))
                 .max_by_key(|f| f.start_time_ms)
-                .map(|f| f.id)
                 .ok_or("no saved fight to upload")?;
-            serde_json::to_value(state.fight_history.load_fight(&id)?).map_err(|e| e.to_string())?
+            // Not an older fight in its place: the one that ended is what the user means.
+            if last.is_train {
+                return Err("training fights are not uploaded".into());
+            }
+            serde_json::to_value(state.fight_history.load_fight(&last.id)?).map_err(|e| e.to_string())?
         }
     };
+    // Local history id, so the UI can mark the fight uploaded (pm.uploadedFights).
+    let fight_id = fight["id"].clone();
     let body = json!({ "fight": fight, "visibility": visibility.unwrap_or_else(|| "unlisted".into()) });
     let res = post_json(&format!("{}/api/logs", server_url(&state)), Some(&token), &body).await;
     if matches!(&res, Err(e) if e == "unauthorized") {
@@ -169,5 +181,8 @@ pub async fn upload_combat_log(
         state.settings.remove(TOKEN_KEY);
         state.settings.remove(USER_KEY);
     }
-    res
+    res.map(|mut v| {
+        v["fightId"] = fight_id;
+        v
+    })
 }

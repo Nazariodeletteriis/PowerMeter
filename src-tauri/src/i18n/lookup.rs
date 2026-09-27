@@ -54,6 +54,9 @@ pub struct NpcLookup {
 struct NpcInfo {
     name: String,
     is_boss: bool,
+    /// Training scarecrows / punching bags ("isDummy" in the NPC data). Most
+    /// scarecrows are also flagged isBoss, so this is what keeps them out of Boss.
+    is_dummy: bool,
 }
 
 impl NpcLookup {
@@ -78,9 +81,10 @@ impl NpcLookup {
                     let is_boss = obj.get("isBoss")
                         .and_then(|v| v.as_bool())
                         .unwrap_or(false);
-                    npcs.insert(code, NpcInfo { name, is_boss });
+                    let is_dummy = obj.get("isDummy").and_then(|v| v.as_bool()).unwrap_or(false);
+                    npcs.insert(code, NpcInfo { name, is_boss, is_dummy });
                 } else if let Some(name) = value.as_str() {
-                    npcs.insert(code, NpcInfo { name: name.to_string(), is_boss: false });
+                    npcs.insert(code, NpcInfo { name: name.to_string(), is_boss: false, is_dummy: false });
                 }
             }
         }
@@ -92,6 +96,10 @@ impl NpcLookup {
 
     pub fn is_boss(&self, code: i32) -> bool {
         self.npcs.read().get(&code).is_some_and(|n| n.is_boss)
+    }
+
+    pub fn is_dummy(&self, code: i32) -> bool {
+        self.npcs.read().get(&code).is_some_and(|n| n.is_dummy)
     }
 }
 

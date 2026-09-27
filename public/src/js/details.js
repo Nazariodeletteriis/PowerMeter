@@ -60,28 +60,10 @@ const createDetailsUI = ({
     const n = Number(v);
     return Number.isFinite(n) ? `${n.toFixed(1)}%` : "-";
   };
-  const formatCompactNumber = (v) => {
-    const n = Number(v);
-    if (!Number.isFinite(n)) return "-";
-    if (n >= 1_000_000) {
-      return `${(n / 1_000_000).toFixed(2)}m`;
-    }
-    if (n >= 1_000) {
-      return `${(n / 1_000).toFixed(1)}k`;
-    }
-    return `${Math.round(n)}`;
-  };
+  // Exact damage, with the locale's thousands separators (no k/m rounding).
   const formatDamageCompact = (v) => {
     const n = Number(v);
-    if (!Number.isFinite(n)) return "-";
-    const abs = Math.abs(n);
-    if (abs >= 1_000_000) {
-      return `${(n / 1_000_000).toFixed(2)}m`;
-    }
-    if (abs >= 1_000) {
-      return `${(n / 1_000).toFixed(2)}k`;
-    }
-    return `${Math.round(n)}`;
+    return Number.isFinite(n) ? Math.round(n).toLocaleString() : "-";
   };
   const formatMinutesSince = (timestampMs) => {
     const ts = Number(timestampMs);
@@ -236,7 +218,7 @@ const createDetailsUI = ({
     if (sortMode === "time") {
       return formatBattleTime(target.battleTime);
     }
-    return formatCompactNumber(getTargetDamageForSelection(target));
+    return formatDamageCompact(getTargetDamageForSelection(target));
   };
 
   const jobColorMap = {

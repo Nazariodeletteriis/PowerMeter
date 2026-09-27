@@ -342,6 +342,16 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
     addMine(mine);
     setSrc(mine);
   };
+  // A build handed to the meter and then created/renamed changes key: move the handover along,
+  // or the effect above stops refreshing it and the meter keeps the pre-save snapshot.
+  const rekeyWidget = (to: string) => {
+    try {
+      const w = JSON.parse(localStorage.getItem("pm.widgetBuild") ?? "null");
+      if (w?.key === gearKey) localStorage.setItem("pm.widgetBuild", JSON.stringify({ ...w, key: to }));
+    } catch {
+      // unreadable handover: the next Widget click rewrites it
+    }
+  };
   const save = () => {
     if (badName) return;
     showToast(
@@ -350,6 +360,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
         : { title: t("characters.builder.savedTitle"), text: t("characters.builder.savedText") },
     );
     if (isNew) {
+      rekeyWidget(keyOf(typed, src.cls));
       storeGear(keyOf(typed, src.cls), newGear);
       const mine = { t: typed, au: name, cls: src.cls, own: true, tags: newTags };
       addMine(mine);
@@ -357,6 +368,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
     } else if (isMine && typed !== src.t) {
       // Rename: same place in "Your builds", gear moved to the new title's key.
       const renamed = { ...src, t: typed };
+      rekeyWidget(keyOf(typed, src.cls));
       const { [gearKey]: moved, ...rest } = stored;
       const all = moved ? { ...rest, [keyOf(typed, src.cls)]: moved } : rest;
       setStored(all);
@@ -649,7 +661,9 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
                           {Object.values(stored[keyOf(mb.t, mb.cls)]?.owned ?? {})
                             .slice(0, 5)
                             .map((p, i) => (
-                              <span key={i} style={{ width: 16, height: 16, borderRadius: 3, border: `1.5px solid ${RARITY[rarityOf(itemById(p.id))] ?? "var(--pm-grey)"}` }} />
+                              <span key={i} style={{ width: 16, height: 16, borderRadius: 3, overflow: "hidden", border: `1.5px solid ${RARITY[rarityOf(itemById(p.id))] ?? "var(--pm-grey)"}` }}>
+                                <ItemIcon name={itemById(p.id)?.name ?? ""} />
+                              </span>
                             ))}
                         </span>
                       </button>

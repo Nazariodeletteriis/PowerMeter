@@ -432,6 +432,7 @@ impl StreamProcessor {
             // produced bogus multi-million single-tick "heals" in offline scans).
             self.data_storage.append_heal(
                 actor_info.value,
+                target_info.value,
                 skill_code,
                 amount_info.value as i64,
                 effect_type == 0x0B,
@@ -2105,7 +2106,7 @@ impl StreamProcessor {
                 // it as healing makes the HEAL view capture instant self-heals, not just
                 // HoTs. (The cast-marker variant breaks out earlier on its and_result.)
                 self.data_storage
-                    .append_heal(actor_value, resolved_skill_code, final_damage as i64, false);
+                    .append_heal(actor_value, actor_value, resolved_skill_code, final_damage as i64, false);
             }
 
             parsed_any = true;
@@ -2611,5 +2612,53 @@ fn unicode_script(ch: char) -> UnicodeScript {
         UnicodeScript::Hangul
     } else {
         UnicodeScript::Other
+    }
+}
+
+#[cfg(test)]
+mod moving_mob_tests {
+    use super::*;
+
+    const ME: i32 = 1000;
+    const MOB: i32 = 5001;
+
+    /// Taiwan report: "the meter stops counting when a normal mob moves". A
+    /// mob's position update is `23 36 <mob id> <coordinates…>`, and the loose
+    /// name scanners treat any `36 <id>` followed within 64 bytes by
+    /// `07 <len> <text>` as "this entity is called <text>". Coordinate bytes
+    /// that happen to spell `07 02 'A' 'b'` then named the mob, which made it a
+    /// "player" hit by us, so it left the PVE/boss views and was booked as
+    /// PvP damage (earlier: purged as friendly fire). A mob (spawned as an NPC)
+    /// must never take a fuzzy name.
+    #[test]
+    fn mob_position_bytes_never_turn_the_mob_into_a_player() {
+        let storage = Arc::new(DataStorage::new());
+        storage.set_local_player_id(Some(ME as i64));
+        storage.append_mob(MOB, 2000002);
+        let hit = |dmg: i32| {
+            let mut p = ParsedDamagePacket::new();
+            p.set_actor_id(ME);
+            p.set_target_id(MOB);
+            p.set_skill_code(11_020_000);
+            p.set_damage(dmg);
+            storage.append_damage(p);
+        };
+        hit(1000);
+
+        let mut sp = StreamProcessor::new(storage.clone(), Arc::new(SkillLookup::new()), Arc::new(NpcLookup::new()));
+        // `23 36 <MOB varint> <coordinates>`, the coordinates containing 07 02 'A' 'b'.
+        let mut body = vec![0x23, 0x36, 0x89, 0x27]; // 5001 = 0x1389 -> varint 89 27
+        body.extend_from_slice(&[0x10, 0x42, 0x07, 0x02, b'A', b'b', 0x00, 0x00, 0x11, 0x43]);
+        let total = body.len() + 1;
+        let mut packet = vec![(total + 3) as u8];
+        packet.extend_from_slice(&body);
+        sp.consume_stream(&packet);
+        hit(500);
+
+        // The visible symptom: a named mob counts as a player hit by us, so it
+        // leaves every PVE/boss view for the PvP one.
+        assert!(!storage.get_pvp_target_ids().contains(&MOB), "mob was reclassified as a PvP target");
+        assert!(storage.get_nickname(MOB).is_none(), "mob took a name from its own position bytes");
+        assert_eq!(storage.get_combat_snapshot_light()[&MOB].total_damage, 1500);
     }
 }

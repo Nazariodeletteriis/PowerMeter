@@ -148,5 +148,16 @@
   "combat.noFights": "No fights recorded yet",
   "combat.noData": "No data recorded for this fight.",
   "combat.shareNoLink": "No link yet: upload this fight from Fight history (Upload, signed in with Discord) to share it.",
-  "combat.shareSoon": "Online sharing is not available yet."
+  "combat.shareSoon": "Online sharing is not available yet.",
+  "combat.recording": "Recording:",
+  "combat.healsReceived": "Healing received",
+  "combat.healsOff": "Off — nobody has been healed yet",
+  "combat.healSelf": "self",
+  "combat.healOthers": "from others",
+  "combat.aggro": "Aggro",
+  "combat.aggroObserved": "Share of mob hits taken (from packets)",
+  "combat.aggroEstimated": "Estimated: damage ×2 for Templar/Gladiator",
+  "combat.aggroEmpty": "No damage in this view yet",
+  "combat.modeLabel": "Mode",
+  "combat.allModes": "All modes"
 }

@@ -330,7 +330,10 @@
     "all": "모든 대상",
     "identifying": "사용자를 식별하는 중...",
     "train": "훈련용 허수아비",
-    "boss": "보스 대상"
+    "boss": "보스 대상",
+    "pve": "모든 몹 (PVE)",
+    "pvp": "플레이어 (PvP)",
+    "recording": "기록 중"
   },
   "classes": {
     "GLADIATOR": "검성",
@@ -382,8 +385,9 @@
       "yourDps": "내 DPS",
       "position": "순위",
       "upload": "로그 업로드",
-      "uploadUnavailable": "업로드 불가",
-      "signIn": "대시보드에서 Discord로 로그인하세요",
+      "failed": "업로드 실패: {error}",
+      "training": "훈련 전투는 업로드되지 않습니다",
+      "signIn": "Discord로 로그인",
       "openReport": "리포트 열기",
       "uploaded": "업로드됨 ✓",
       "copyLink": "링크 복사",

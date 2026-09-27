@@ -148,5 +148,16 @@
   "combat.noFights": "기록된 전투가 없습니다",
   "combat.noData": "이 전투에 기록된 데이터가 없습니다.",
   "combat.shareNoLink": "아직 링크가 없습니다: 공유하려면 전투 기록에서 이 전투를 업로드하세요 (업로드, Discord 로그인 필요).",
-  "combat.shareSoon": "온라인 공유는 아직 사용할 수 없습니다."
+  "combat.shareSoon": "온라인 공유는 아직 사용할 수 없습니다.",
+  "combat.recording": "기록 중:",
+  "combat.healsReceived": "받은 치유",
+  "combat.healsOff": "꺼짐 — 아직 아무도 치유받지 않았습니다",
+  "combat.healSelf": "자신",
+  "combat.healOthers": "타인",
+  "combat.aggro": "어그로",
+  "combat.aggroObserved": "받은 몹 타격 비율 (패킷 기준)",
+  "combat.aggroEstimated": "추정: 수호성/검성은 피해 ×2",
+  "combat.aggroEmpty": "이 보기에는 아직 피해가 없습니다",
+  "combat.modeLabel": "모드",
+  "combat.allModes": "모든 모드"
 }

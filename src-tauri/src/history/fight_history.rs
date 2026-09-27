@@ -118,6 +118,12 @@ impl FightHistoryManager {
             if path.extension().is_some_and(|e| e == "json") {
                 if let Ok(json) = std::fs::read_to_string(&path) {
                     if let Ok(record) = serde_json::from_str::<FightRecord>(&json) {
+                        // Records from before the modes had only boss and train fights.
+                        let mode = match record.mode.as_str() {
+                            "" if record.is_train => "train".to_string(),
+                            "" => "boss".to_string(),
+                            m => m.to_string(),
+                        };
                         summaries.push(FightSummary {
                             id: record.id,
                             boss_name: record.boss_name,
@@ -131,6 +137,7 @@ impl FightHistoryManager {
                             is_live: false,
                             app_version: record.app_version,
                             mob_code: record.mob_code,
+                            mode,
                         });
                     }
                 }

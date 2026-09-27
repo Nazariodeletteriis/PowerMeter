@@ -331,6 +331,38 @@ body.legacyUi .pmOnly {
   .pmBerserk svg { width: 11px; height: 11px; }
   .pmBerserk.isUrgent { color: #ff4d4d; }
   .pmBerserk[hidden] { display: none; }
+  /* What the engine is counting now: kind chip + target name (core.js). */
+  .recBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 45%;
+    font-size: 10px;
+    line-height: 1.55;
+    color: var(--pm-t2);
+  }
+  .recBadge[hidden] { display: none; }
+  .recKind {
+    flex: none;
+    padding: 0 4px;
+    border-radius: 3px;
+    font-family: var(--pm-mono);
+    font-weight: 600;
+    color: #fff;
+    background: #6c6464;
+  }
+  .recBadge[data-kind="boss"] .recKind { background: var(--pm-red); }
+  .recBadge[data-kind="train"] .recKind { background: #a46a21; }
+  .recBadge[data-kind="pve"] .recKind { background: #076239; }
+  .recBadge[data-kind="pvp"] .recKind { background: #1c4587; }
+  .recName {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   /* Update notice under the header (checkRelease.js). */
   .pmUpdateStrip {
     display: flex;
@@ -597,7 +629,10 @@ body.legacyUi .pmOnly {
     color: #e8e1e1;
   }
   .list .item .dps .dpsTotal {
-    width: 44px;
+    /* Exact damage ("12.345.678"), so the column takes the width it needs. */
+    width: auto;
+    min-width: 44px;
+    white-space: nowrap;
     color: var(--pm-t2);
   }
 
@@ -1333,6 +1368,14 @@ body.legacyUi .pmOnly {
   }
   .meter.isPmLocked .list .item .name { font-weight: 400; }
   .meter.isPmLocked .list .item :is(.classIcon, .dpsContribution, .dpsTotal) { display: none; }
+  /* Locked hides every card but the list, while the waiting / fight-over /
+     error views (and an open player breakdown) hide the list in favour of
+     their card. Together that left a locked widget empty until the DPS tab
+     dismissed the fight-over card, so a locked widget always keeps its rows. */
+  .meter.isPmLocked.pmMode-dps:is(.pmView-waiting, .pmView-error, .pmView-ended, .isPmDetail) .list { display: grid; }
+  /* Same for the Build and Lobby cards: locked keeps the mode's own card. */
+  .meter.isPmLocked.pmMode-build .pmBuild { display: flex; }
+  .meter.isPmLocked.pmMode-lobby .pmLobby { display: block; }
 
   /* --- 8.1 pill: 160x32, your DPS and the timer; click to expand --- */
   .meter.isPmPill {

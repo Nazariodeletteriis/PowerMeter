@@ -7,7 +7,16 @@ import { Modal } from "./system/Modal";
 import type { PageProps } from "./types";
 
 /** FightSummary (src-tauri/src/entity/fight_record.rs), the fields used here. */
-type Fight = { id: string; bossName: string; startTimeMs: number; durationMs: number; jobs: string[]; isTrain: boolean };
+type Fight = { id: string; bossName: string; startTimeMs: number; durationMs: number; jobs: string[]; isTrain: boolean; mode: string };
+// Meter mode of a saved fight ("boss" / "pve" / "train" / "pvp"); PVE and PvP are whole sessions.
+const MODES = [
+  ["boss", "Boss"],
+  ["pve", "PVE"],
+  ["train", "Train"],
+  ["pvp", "PvP"],
+] as const;
+/** Only boss fights go online (the server takes boss logs). */
+const uploadable = (f?: { isTrain?: boolean; mode?: string }) => !f?.isTrain && (!f?.mode || f.mode === "boss");
 
 // Newest first (the backend sorts by start time); 10s like the meter's own refresh.
 const getFights = () => invoke<Fight[]>("get_fight_history");
@@ -25,7 +34,7 @@ function History({ t, lang, run, go, retry }: PageProps & { retry: () => void })
   const fights = usePoll(getFights, 10000);
   const [period, setPeriod] = useState("7");
   const [boss, setBoss] = useState("");
-  const [bossOnly, setBossOnly] = useState(false);
+  const [mode, setMode] = useState("");
   const [chk, setChk] = useState<Record<string, boolean>>({});
   const [deleted, setDeleted] = useState<Record<string, boolean>>({});
   // Fight id → share URL of the fights uploaded from this PC.
@@ -48,11 +57,11 @@ function History({ t, lang, run, go, retry }: PageProps & { retry: () => void })
 
   const all = (fights.data ?? []).filter((f) => !deleted[f.id]);
   const since = period === "all" ? 0 : Date.now() - Number(period) * DAY;
-  const list = all.filter((f) => f.startTimeMs >= since && (!boss || f.bossName === boss) && (!bossOnly || !f.isTrain));
+  const list = all.filter((f) => f.startTimeMs >= since && (!boss || f.bossName === boss) && (!mode || f.mode === mode));
   const bosses = [...new Set(all.map((f) => f.bossName).filter(Boolean))].sort();
   const picked = list.filter((f) => chk[f.id]);
-  // Training fights are not uploaded (the server refuses them).
-  const toUpload = picked.filter((f) => !f.isTrain && !uploaded[f.id]);
+  // Training fights and PVE/PvP sessions are not uploaded (the server takes boss fights).
+  const toUpload = picked.filter((f) => uploadable(f) && !uploaded[f.id]);
   const day = new Intl.DateTimeFormat(lang, { day: "2-digit", month: "2-digit" });
   const time = new Intl.DateTimeFormat(lang, { hour: "2-digit", minute: "2-digit" });
 
@@ -73,11 +82,11 @@ function History({ t, lang, run, go, retry }: PageProps & { retry: () => void })
   };
 
   // One upload per fight: by id from this PC's history, or a record from an exported file.
-  const upload = (items: { id?: string; fight?: { id?: string; isTrain?: boolean } }[]) => {
+  const upload = (items: { id?: string; fight?: { id?: string; isTrain?: boolean; mode?: string } }[]) => {
     setUploading(true);
     run(async () => {
       try {
-        for (const it of items.filter((x) => !x.fight?.isTrain)) {
+        for (const it of items.filter((x) => uploadable(x.fight))) {
           const res = await invoke<{ url?: string }>("upload_combat_log", it.fight ? { fight: it.fight } : { id: it.id }).catch((e) => {
             throw e === "not signed in" || e === "unauthorized" ? t("combat.upSignIn") : e;
           });
@@ -107,7 +116,7 @@ function History({ t, lang, run, go, retry }: PageProps & { retry: () => void })
         throw t("combat.upBadFile");
       }
       const records = (Array.isArray(data) ? data : [data])// Fight records only (Fight history's Export): the server needs bossName and the timings.
-        .filter((r): r is { id?: string; isTrain?: boolean } => !!r && typeof r === "object" && typeof r.bossName === "string" && typeof r.startTimeMs === "number");
+        .filter((r): r is { id?: string; isTrain?: boolean; mode?: string } => !!r && typeof r === "object" && typeof r.bossName === "string" && typeof r.startTimeMs === "number");
       if (!records.length) throw t("combat.upBadFile");
       upload(records.map((fight) => ({ fight })));
     });
@@ -143,10 +152,14 @@ function History({ t, lang, run, go, retry }: PageProps & { retry: () => void })
           <option>{t("combat.killOnly")}</option>
           <option>{t("combat.wipeOnly")}</option>
         </select>
-        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--pm-t2)", marginLeft: 4 }}>
-          <input type="checkbox" checked={bossOnly} onChange={(e) => setBossOnly(e.target.checked)} style={{ accentColor: "#DB0000" }} />
-          {t("combat.bossOnly")}
-        </label>
+        <select className="cbSelect" aria-label={t("combat.modeLabel")} value={mode} onChange={(e) => setMode(e.target.value)}>
+          <option value="">{t("combat.allModes")}</option>
+          {MODES.map(([id, label]) => (
+            <option key={id} value={id}>
+              {label}
+            </option>
+          ))}
+        </select>
         <div style={{ flex: 1 }} />
         {picked.length > 0 && <span style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("combat.nSelected", { n: picked.length })}</span>}
         <button type="button" className="btn fill" onClick={openUpload}>
@@ -232,6 +245,10 @@ function History({ t, lang, run, go, retry }: PageProps & { retry: () => void })
                       open(f);
                     }}
                   >
+                    {/* PVE / PvP sessions are already named after their mode. */}
+                    {f.mode === "train" && (
+                      <span style={{ fontSize: 10, color: "var(--pm-t3)", marginRight: 6 }}>{MODES.find(([id]) => id === f.mode)?.[1]}</span>
+                    )}
                     {f.bossName || "—"}
                   </button>
                   <span style={{ color: "var(--pm-t3)", fontWeight: 500 }}>—</span>

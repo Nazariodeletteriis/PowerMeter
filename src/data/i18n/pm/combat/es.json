@@ -148,5 +148,16 @@
   "combat.noFights": "Aún no hay combates registrados",
   "combat.noData": "No hay datos registrados para este combate.",
   "combat.shareNoLink": "Aún no hay enlace: sube este combate desde el Historial (Subir, con sesión de Discord) para compartirlo.",
-  "combat.shareSoon": "El uso compartido en línea aún no está disponible."
+  "combat.shareSoon": "El uso compartido en línea aún no está disponible.",
+  "combat.recording": "Registrando:",
+  "combat.healsReceived": "Curación recibida",
+  "combat.healsOff": "Desactivado — nadie ha recibido curación aún",
+  "combat.healSelf": "propia",
+  "combat.healOthers": "de otros",
+  "combat.aggro": "Aggro",
+  "combat.aggroObserved": "Parte de golpes de mobs recibidos (de paquetes)",
+  "combat.aggroEstimated": "Estimada: daño ×2 para Templario/Gladiador",
+  "combat.aggroEmpty": "Aún no hay daño en esta vista",
+  "combat.modeLabel": "Modo",
+  "combat.allModes": "Todos los modos"
 }

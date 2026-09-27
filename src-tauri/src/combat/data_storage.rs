@@ -257,8 +257,12 @@ struct Inner {
     dead_entity_ids: HashSet<i32>,
     /// Boss entity IDs identified from NPC DB boss flags
     boss_entity_ids: HashSet<i32>,
-    /// Whether the current combat segment has any boss damage
-    has_boss_in_segment: bool,
+    /// Healing received per player (summons resolved to their owner):
+    /// (from self incl. life steal, from other players).
+    heal_received: HashMap<i32, (i64, i64)>,
+    /// Hits each mob landed on each player: mob -> player -> (damage, hits).
+    /// A mob attacks whoever holds its aggro, so this is the real aggro signal.
+    mob_hits: HashMap<i32, HashMap<i32, (i64, i32)>>,
     current_target: i32,
 
     // Local player
@@ -291,7 +295,8 @@ impl DataStorage {
                 pvp_target_ids: HashSet::new(),
                 dead_entity_ids: HashSet::new(),
                 boss_entity_ids: HashSet::new(),
-                has_boss_in_segment: false,
+                heal_received: HashMap::new(),
+                mob_hits: HashMap::new(),
                 current_target: 0,
                 local_player_id: None,
                 local_character_name: None,
@@ -374,6 +379,15 @@ impl DataStorage {
             let resolved_target = summon_resolver::resolve(target_id, &inner.summon_storage);
             if inner.known_player_ids.contains(&resolved_target) {
                 let dmg = pdp.total_damage() as i64;
+                let e = inner
+                    .mob_hits
+                    .entry(actor_id)
+                    .or_default()
+                    .entry(resolved_target)
+                    .or_default();
+                e.0 += dmg;
+                e.1 += 1;
+                self.damage_generation.fetch_add(1, Ordering::Relaxed);
                 for target_data in inner.target_combat.values_mut() {
                     if let Some(actor_data) = target_data.actors.get_mut(&resolved_target) {
                         actor_data.damage_received += dmg;
@@ -421,8 +435,12 @@ impl DataStorage {
                     .or_default();
                 e.total_heal += heal_amount as i64;
                 e.tick_count += 1;
+                if !pvp {
+                    note_heal_received(&mut inner, actor_id, target_id, heal_amount as i64);
+                }
             }
             if !pvp {
+                self.damage_generation.fetch_add(1, Ordering::Relaxed);
                 return;
             }
             // Us/party hitting a non-party player: also book it as damage so the
@@ -442,17 +460,9 @@ impl DataStorage {
             inner.actor_jobs.entry(actor_id).or_insert(job);
         }
 
-        // Boss encounter auto-reset: if this target is a boss and the current
-        // segment has no boss yet, clear the trash segment so boss gets clean data.
-        let is_boss_target = inner.boss_entity_ids.contains(&target_id);
-        if is_boss_target && !inner.has_boss_in_segment && !inner.target_combat.is_empty() {
-            tracing::info!("Boss encounter auto-reset: boss entity {} hit, clearing trash segment", target_id);
-            inner.target_combat.clear();
-            inner.dead_entity_ids.clear();
-            inner.has_boss_in_segment = true;
-        } else if is_boss_target {
-            inner.has_boss_in_segment = true;
-        }
+        // No boss auto-reset here any more: the meter modes are exclusive (a boss
+        // view never includes trash), and clearing on the first boss hit wiped
+        // the PVE session that keeps counting in the background.
 
         let timestamp = pdp.timestamp();
         let packet_id = pdp.id();
@@ -520,8 +530,9 @@ impl DataStorage {
         }
         skill_data.heal_amount = skill_data.heal_amount.saturating_add(pdp.heal_amount());
         // Track regen (life-steal) on the actor aggregate
-        if pdp.heal_amount() > 0 {
-            actor_data.regen += pdp.heal_amount() as i64;
+        let life_steal = pdp.heal_amount() as i64;
+        if life_steal > 0 {
+            actor_data.regen += life_steal;
         }
         skill_data.hit_timestamps.push(timestamp);
         for (i, &flag) in pdp.spec_flags().iter().enumerate() {
@@ -530,6 +541,10 @@ impl DataStorage {
 
         self.damage_generation.fetch_add(1, Ordering::Relaxed);
         self.last_damage_ms.store(now_ms(), Ordering::Relaxed);
+
+        if life_steal > 0 {
+            note_heal_received(&mut inner, actor_id, actor_id, life_steal);
+        }
 
         // Apply pending nickname
         apply_pending_nickname(&mut inner, actor_id);
@@ -829,10 +844,11 @@ impl DataStorage {
 
     /// Record a heal tick done by `actor_id` with `skill_code` (is_hot marks a HoT).
     /// Keyed by the healer so "healing done" can be shown per player. Self-heals count.
-    pub fn append_heal(&self, actor_id: i32, skill_code: i32, amount: i64, is_hot: bool) {
+    pub fn append_heal(&self, actor_id: i32, target_id: i32, skill_code: i32, amount: i64, is_hot: bool) {
         if amount <= 0 || !self.is_plausible_entity_id(actor_id) {
             return;
         }
+        let receiver_ok = target_id == actor_id || self.is_plausible_entity_id(target_id);
         let mut inner = self.inner.write();
         let e = inner
             .heal_storage
@@ -842,6 +858,20 @@ impl DataStorage {
             .or_default();
         e.total_heal += amount;
         e.tick_count += 1;
+        if receiver_ok {
+            note_heal_received(&mut inner, actor_id, target_id, amount);
+        }
+        self.damage_generation.fetch_add(1, Ordering::Relaxed);
+    }
+
+    /// Healing received per player: (from self incl. life steal, from others).
+    pub fn get_heals_received(&self) -> HashMap<i32, (i64, i64)> {
+        self.inner.read().heal_received.clone()
+    }
+
+    /// Hits landed by each mob on each player: mob -> player -> (damage, hits).
+    pub fn get_mob_hits(&self) -> HashMap<i32, HashMap<i32, (i64, i32)>> {
+        self.inner.read().mob_hits.clone()
     }
 
     pub fn get_heal_snapshot(&self) -> HashMap<i32, HashMap<(i32, bool), HealSkillData>> {
@@ -929,10 +959,11 @@ impl DataStorage {
         inner.hostile_target_ids.clear();
         inner.pvp_target_ids.clear();
         inner.dead_entity_ids.clear();
-        inner.has_boss_in_segment = false;
         inner.mob_hp_data.clear();
         inner.mob_current_hp.clear();
         inner.heal_storage.clear();
+        inner.heal_received.clear();
+        inner.mob_hits.clear();
         inner.current_target = 0;
     }
 
@@ -946,10 +977,11 @@ impl DataStorage {
         inner.hostile_target_ids.clear();
         inner.pvp_target_ids.clear();
         inner.dead_entity_ids.clear();
-        inner.has_boss_in_segment = false;
         inner.mob_hp_data.clear();
         inner.mob_current_hp.clear();
         inner.heal_storage.clear();
+        inner.heal_received.clear();
+        inner.mob_hits.clear();
         inner.current_target = 0;
     }
 
@@ -981,6 +1013,16 @@ fn fuzzy_bind_allowed(inner: &Inner, uid: i32, nickname: &str) -> bool {
             .values()
             .any(|t| t.actors.contains_key(&uid));
     if !is_real_entity {
+        return false;
+    }
+    // (1b) Never name a mob. An entity that spawned as an NPC (`41 36` with a
+    // type code) is not a player, but a mob's position updates (`23 36 <id>
+    // <coordinates>`) are exactly the `36 <id> … 07 <len> <text>` shape the loose
+    // scanners anchor on; coordinate bytes spelling a "name" turned the mob into
+    // a player, and our hits on it moved out of the PVE/boss views (Taiwan
+    // report: the meter stopped counting when a mob moved). Summons are named
+    // through their owner, never via this path.
+    if inner.mob_storage.contains_key(&uid) && !inner.summon_storage.contains_key(&uid) {
         return false;
     }
     // (2) Don't let a fuzzy source steal a name an authoritative source already
@@ -1089,6 +1131,18 @@ fn append_nickname_inner_with_force(inner: &mut Inner, uid: i32, nickname: &str,
         if local_name.trim() == nickname.trim() {
             inner.local_player_id = Some(uid as i64);
         }
+    }
+}
+
+/// Book `amount` of healing on the receiver (summons resolve to their owner).
+fn note_heal_received(inner: &mut Inner, healer: i32, receiver: i32, amount: i64) {
+    let healer = summon_resolver::resolve(healer, &inner.summon_storage);
+    let receiver = summon_resolver::resolve(receiver, &inner.summon_storage);
+    let e = inner.heal_received.entry(receiver).or_default();
+    if healer == receiver {
+        e.0 += amount;
+    } else {
+        e.1 += amount;
     }
 }
 
