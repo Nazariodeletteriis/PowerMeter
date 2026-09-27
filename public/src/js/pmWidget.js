@@ -51,13 +51,11 @@ const createPmWidget = (app) => {
   let detectingSince = 0;
 
   const isActive = () =>
-    window.A2_VIEW === "main" &&
-    document.documentElement.dataset.theme === "powermeter" &&
-    !document.body.classList.contains("legacyUi");
+    window.A2_VIEW === "main" && !document.body.classList.contains("legacyUi"); // every theme, Classic UI excluded
 
-  // --- theme: lift the fight timer into the bar and the target-mode pill into the
+  // --- widget layout: lift the fight timer into the bar and the target-mode pill into the
   // target row. Moved rather than duplicated so core.js keeps driving them; put
-  // back where A2Tools had them for every other theme.
+  // back where A2Tools had them for the Classic UI layout.
   const moves = [
     [document.querySelector(".battleTime"), $(".pmBarTitle"), "before"],
     [document.querySelector(".targetModeBtn"), $(".pmBerserk"), "after"],
@@ -385,6 +383,7 @@ const createPmWidget = (app) => {
     }
     setText(".pmBarTitle", title);
     setText(".pmBarRight", right);
+    $(".pmBarRight").title = right; // the bar cuts it short on narrow widgets
     meter.classList.toggle("isPmUploaded", !!upload);
     if (lastFight) {
       const label = $(".pmOutcome");

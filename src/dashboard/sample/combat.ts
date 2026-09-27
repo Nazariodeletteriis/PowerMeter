@@ -22,22 +22,22 @@ export const DURATION = 312;
 /** 26 set 2026, 21:14 (local time). */
 export const FIGHT_DATE = new Date(2026, 8, 26, 21, 14);
 
-// pReport: skills per class
+// pReport: skills per class (real skill names, src/data/skills.json; "Auto Attack" is not a skill there)
 export const CLASS_SKILLS: Record<string, string[]> = {
-  Sorcerer: ["Flame Cage", "Cyclone of Wrath", "Ice Chain", "Blaze of Aether", "Summon Wind Spirit", "Burning Wave", "Soul Freeze", "Auto Attack"],
-  Assassin: ["Shadowfall", "Ambush", "Rune Carve", "Venom Edge", "Whirlwind Slash", "Fang Strike", "Soul Slash", "Auto Attack"],
-  Gladiator: ["Ferocious Strike", "Seismic Wave", "Body Smash", "Cleave", "Rage Burst", "Wrath Strike", "Dauntless Spirit", "Auto Attack"],
-  Templar: ["Shield Bash", "Holy Punishment", "Righteous Cleave", "Divine Fury", "Judgement", "Punishing Strike", "Doom Lure", "Auto Attack"],
-  Chanter: ["Meteor Strike", "Wind Cut Down", "Resonance Haze", "Parrying Strike", "Soul Crush", "Incandescent Blow", "Word of Wind", "Auto Attack"],
-  Cleric: ["Thunderbolt", "Chastise", "Divine Spark", "Smite", "Holy Light", "Earth Prison", "Slashing Wind", "Auto Attack"],
+  Sorcerer: ["Flame Arrow", "Hellfire", "Ice Chain", "Blaze", "Flame Harpoon", "Frost Burst", "Soul Freeze", "Auto Attack"],
+  Assassin: ["Shadow Fall", "Ambush", "Heart Gore", "Surprise Attack", "Whirlwind Slash", "Quick Slash", "Storm Slash", "Auto Attack"],
+  Gladiator: ["Devastating Sword", "Crushing Wave", "Overhead Slam", "Rending Blow", "Rage Burst", "Wrathful Strike", "Keen Strike", "Auto Attack"],
+  Templar: ["Shield Smite", "Judgment", "Punishment", "Annihilation", "Fierce Strike", "Punishing Strike", "Continuous Flurry", "Auto Attack"],
+  Chanter: ["Incandescent Blow", "Windrage Fury", "Scorch Strike", "Dark Crush", "Wave Blow", "Thunderbolt Strike", "Spin Strike", "Auto Attack"],
+  Cleric: ["Judgment Lightning", "Earth's Retribution", "Thunderclap", "Chain of Pain", "Lightning Barrage", "Divine Punishment", "Condemnation", "Auto Attack"],
 };
 /** Share of damage and base hits per skill slot. */
 export const SKILL_SHARE = [0.24, 0.18, 0.14, 0.12, 0.11, 0.09, 0.07, 0.05];
 export const SKILL_HITS = [28, 34, 52, 20, 96, 140, 18, 160];
-/** Sub-rows of skill slots 4 and 5; "{hit}" is combat.hit. */
+/** Sub-rows of skill slots 4 and 5; "{skill}" is the slot's skill, "{hit}" is combat.hit. */
 export const SKILL_KIDS: Record<number, string[]> = {
-  4: ["Wind Spirit · Gust", "Wind Spirit · Tempest"],
-  5: ["Burning Wave · {hit}", "Burning Wave · DOT"],
+  4: ["{skill} · {hit}", "{skill} · DOT"],
+  5: ["{skill} · {hit}", "{skill} · DOT"],
 };
 export const BADGES: [string, number][] = [["CRIT", 38.4], ["BACK", 14.2], ["PARRY", 3.1], ["PERFECT", 9.6], ["DOUBLE", 7.8]];
 /** Skill tab side cards: cast, damage taken, healing of the selected player; boss damage/cast/hits. */
@@ -58,7 +58,7 @@ export const BUFFS: [string, "buff" | "debuff", [number, number][]][] = [
 /** Damage taken / healing / targets tabs: [who, what, amount]; target kinds are combat.* keys. */
 export const REPORT_LISTS: Record<"taken" | "heal" | "targets", [string, string, number][]> = {
   taken: [["Ironveil", "Molten Slam · Vorathis", 1840000], ["Vharok", "Ashfall Cleave", 1210000], ["Kaelthas", "Cinder Rain", 540000], ["Nyxara", "Cinder Rain", 498000], ["Elowyn", "Ember Orb", 430000], ["Solenne", "Ember Orb", 312000]],
-  heal: [["Solenne", "Healing Light · Radiant Cure", 2210000], ["Elowyn", "Word of Revival · Mantra", 840000], ["Ironveil", "Empyrean Guard (auto)", 210000], ["Kaelthas", "Aether Siphon", 64000]],
+  heal: [["Solenne", "Light of Healing · Radiance of Recovery", 2210000], ["Elowyn", "Recuperation · Hand of Grace", 840000], ["Ironveil", "Shield of Protection", 210000], ["Kaelthas", "Contract of Revival", 64000]],
   targets: [["Vorathis the Ashbound", "combat.kindBoss", 15200000], ["Cinderspawn ×6", "combat.kindAdd", 3100000], ["Ashbound Totem", "combat.kindObject", 1150000]],
 };
 export const SHARE_URL = "powermeter.letrionlabs.it/e/9Uiga7pj";
@@ -71,10 +71,10 @@ export const HEALS: [string, string, number, number][] = [
   ["Kaelthas", "Sorcerer", 205, 4],
 ];
 export const HEAL_SKILLS: Record<string, string[]> = {
-  Solenne: ["Healing Light", "Radiant Cure", "Word of Revival", "Healing Wind"],
-  Elowyn: ["Word of Revival", "Mantra of Recovery", "Healing Conduit", "Blessing of Wind"],
-  Ironveil: ["Empyrean Guard", "Divine Recovery", "Holy Shield", "Regeneration"],
-  Kaelthas: ["Aether Siphon", "Soul Absorption", "Mana Flow", "Regeneration"],
+  Solenne: ["Light of Healing", "Radiance of Recovery", "Light of Regeneration", "Salvation"],
+  Elowyn: ["Recuperation", "Hand of Grace", "Blessing of Guardian", "Sprint Mantra"],
+  Ironveil: ["Protective Strike", "Noble Armor", "Shield of Protection", "HP Boost"],
+  Kaelthas: ["Contract of Revival", "Hibernation", "Flame Arrow", "Frost"],
 };
 export const HEAL_SHARE = [0.42, 0.28, 0.18, 0.12];
 export const AGGRO: [string, string, number, boolean?][] = [
@@ -123,12 +123,12 @@ export const PT_MEMBERS: [string, string, string, string, string, string][] = [
   ["Solenne", "Cleric", "Healer", "46.650", "2.505", "104/134"],
 ];
 export const PT_SKILLS: Record<string, string[]> = {
-  Sorcerer: ["Flame Bolt", "Flame Cage", "Ice Chain", "Cyclone of Wrath", "Blaze of Aether", "Frost Lance", "Soul Freeze", "Burning Wave"],
-  Assassin: ["Shadowfall", "Ambush", "Rune Carve", "Venom Edge", "Whirlwind Slash", "Fang Strike", "Soul Slash", "Shadowstep"],
-  Gladiator: ["Ferocious Strike", "Seismic Wave", "Body Smash", "Cleave", "Rage Burst", "Wrath Strike", "Dauntless Spirit", "Crushing Charge"],
-  Templar: ["Shield Bash", "Holy Punishment", "Righteous Cleave", "Divine Fury", "Judgement", "Punishing Strike", "Doom Lure", "Battlefield Banner"],
-  Chanter: ["Mantra of Fury", "Meteor Strike", "Wind Cut Down", "Resonance Haze", "Parrying Strike", "Soul Crush", "Word of Wind", "Barrier Spell"],
-  Cleric: ["Healing Light", "Radiant Cure", "Thunderbolt", "Chastise", "Divine Spark", "Word of Revival", "Holy Light", "Touch of Rebirth"],
+  Sorcerer: ["Flame Arrow", "Hellfire", "Ice Chain", "Blaze", "Flame Harpoon", "Frost Burst", "Soul Freeze", "Wish of Concentration"],
+  Assassin: ["Shadow Fall", "Ambush", "Heart Gore", "Surprise Attack", "Whirlwind Slash", "Quick Slash", "Storm Slash", "Shadow Step"],
+  Gladiator: ["Devastating Sword", "Crushing Wave", "Overhead Slam", "Rending Blow", "Rage Burst", "Wrathful Strike", "Keen Strike", "Crushing Charge"],
+  Templar: ["Shield Smite", "Judgment", "Punishment", "Annihilation", "Fierce Strike", "Punishing Strike", "Continuous Flurry", "Banner of the Battlefield"],
+  Chanter: ["Undefeated Mantra", "Incandescent Blow", "Windrage Fury", "Scorch Strike", "Dark Crush", "Wave Blow", "Thunderbolt Strike", "Barrier Spell"],
+  Cleric: ["Light of Healing", "Radiance of Recovery", "Judgment Lightning", "Earth's Retribution", "Thunderclap", "Salvation", "Chain of Pain", "Summon Revive"],
 };
 export const PT_HUES = ["#4F93EA", "#B377E8", "#E8743B", "#3FC9C1", "#F0A63A", "#E79AC9", "#6CC46A", "#D8B64A"];
 /** Opener: skill slot of each of the first 10 casts. */

@@ -16,7 +16,8 @@ import {
 } from "@phosphor-icons/react";
 import { RARITY } from "../ui";
 import { BOSS, PT_BANDS, PT_BUFFS, PT_HUES, PT_MEMBERS, PT_OPENER, PT_SKILLS, ptGear, ptScrolls } from "../sample/combat";
-import { Av, classColor, initials } from "./combat/parts";
+import { Av, classColor } from "./combat/parts";
+import { findSkill, SkillIcon } from "../skills";
 import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
 
@@ -108,7 +109,7 @@ export default function Party({ t, lang, onError }: PageProps) {
                       fontWeight: 600,
                     }}
                   >
-                    {initials(n)}
+                    <SkillIcon skill={findSkill(n, cls)} name={n} />
                     <span
                       style={{
                         position: "absolute",

@@ -43,9 +43,9 @@ import {
   SAMPLE_SOURCES,
   SAMPLE_STATS,
   SAMPLE_SUBS,
-  SKILLS_ACTIVE,
   SLOT_GROUPS,
 } from "../sample/characters";
+import { classSkills, SkillIcon } from "../skills";
 import { art, ClassAvatar, CLASSES, fmt, RARITY } from "../ui";
 import { ago, SectionHead, useMem, useToast, type BuildSrc } from "./characters/shared";
 import { ShareModal } from "./shared/ShareModal";
@@ -631,11 +631,13 @@ export default function Builder({ t, lang, go, onError, setHeader }: PageProps) 
                   <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                     <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("characters.builder.linkedSkills")}</div>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {SKILLS_ACTIVE.map((sk) => (
-                        <span key={sk.id} title={sk.n} style={{ width: 40, height: 40, borderRadius: 6, background: sk.bg, boxShadow: "0 0 0 1px var(--pm-line)", display: "grid", placeItems: "center", fontSize: 10, fontWeight: 600 }}>
-                          {sk.init}
-                        </span>
-                      ))}
+                      {classSkills(src.cls)
+                        .filter((sk) => sk.type === "Active")
+                        .map((sk) => (
+                          <span key={sk.id} title={sk.name} style={{ width: 40, height: 40, borderRadius: 6, background: "var(--pm-s2)", boxShadow: "0 0 0 1px var(--pm-line)", display: "grid", placeItems: "center", fontSize: 10, fontWeight: 600 }}>
+                            <SkillIcon skill={sk} name={sk.name} />
+                          </span>
+                        ))}
                     </div>
                     <div>
                       <button type="button" className="btn sm" onClick={() => go("skillplan")}>

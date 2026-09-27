@@ -13,8 +13,9 @@ import {
   TrashIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import { SKILL_BUILDS, SKILL_START, skillDetail, SKILLS, SKILLS_STIGMA, type Skill } from "../sample/characters";
-import { fmt } from "../ui";
+import { SKILL_BUILDS } from "../sample/characters";
+import { classSkills, SkillIcon, type GameSkill } from "../skills";
+import { CLASSES } from "../ui";
 import { SectionHead, useMem } from "./characters/shared";
 import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
@@ -26,17 +27,39 @@ const ROWS = [
   ["p", "PASSIVE"],
 ] as const;
 const MAX_STIGMA = 6;
+/** Skill level cap, from the tooltip source (meta.max_level). */
+const MAX_LEVEL = 20;
+/** Library tab / rotation row of a skill: Chain skills sit with the actives. */
+const letter = (sk: GameSkill) => (sk.type === "Stigma" ? "s" : sk.type === "Passive" ? "p" : "a");
+
+/** Starting planner for a class: two Stigmas on, the first actives on the bar and in the rotation. */
+function startOf(list: GameSkill[]) {
+  const a = list.filter((x) => letter(x) === "a").map((x) => x.id);
+  const s = list.filter((x) => x.type === "Stigma").map((x) => x.id);
+  return {
+    stig: { [s[0]]: true, [s[1]]: true } as Record<string, boolean>,
+    bar: { "0,0": a[0], "0,1": a[1], "0,2": a[2], "0,3": a[3], "1,0": s[0], "1,1": s[1] } as Record<string, string>,
+    rotation: { a: a.slice(0, 2), s: s.slice(0, 1), p: [] } as Record<string, string[]>,
+  };
+}
 const CARD = { background: "var(--pm-s1)", border: "1px solid var(--pm-line)", borderRadius: 8 } as const;
 
 // Prototype pg.skillplan (pSkill + pX).
-export default function SkillPlan({ t, lang, name, onError, setHeader }: PageProps) {
+export default function SkillPlan({ t, lang, name, settings, onError, setHeader }: PageProps) {
   const title = `${t("nav.skillPlanner")} · ${name}`;
   useEffect(() => setHeader({ title }), [setHeader, title]);
-  const [selId, setSel] = useMem("skSel", "a1");
-  const [stig, setStig] = useMem("stig", SKILL_START.stig);
-  const [lvl, setLvl] = useMem<Record<string, number>>("skLv", {});
-  const [bar, setBar] = useMem("skBar", SKILL_START.bar);
-  const [rot, setRot] = useMem("skPr", SKILL_START.rotation);
+  // The active character's class (onboarding); Sorcerer when unset or without skill data (Brawler).
+  const mine = classSkills(settings["pm.class"] ?? "");
+  const cls = mine.length ? settings["pm.class"]! : "Sorcerer";
+  const SKILLS = mine.length ? mine : classSkills(cls);
+  const col = CLASSES[cls]?.[1] ?? "var(--pm-grey)";
+  const start = startOf(SKILLS);
+  // Planner state is per class, so switching class does not mix skill ids.
+  const [selId, setSel] = useMem(`skSel:${cls}`, SKILLS[0].id);
+  const [stig, setStig] = useMem(`stig:${cls}`, start.stig);
+  const [lvl, setLvl] = useMem<Record<string, number>>(`skLv:${cls}`, {});
+  const [bar, setBar] = useMem(`skBar:${cls}`, start.bar);
+  const [rot, setRot] = useMem(`skPr:${cls}`, start.rotation);
   const [macros, setMacros] = useMem<string[]>("macros", []);
   const [filter, setFilter] = useMem("skF", "all");
   const [q, setQ] = useMem("skQ", "");
@@ -46,17 +69,18 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
   const byId = (id: string) => SKILLS.find((x) => x.id === id);
   const cur = byId(selId) ?? SKILLS[0];
   const curLv = lvl[cur.id] ?? 1;
-  const detail = skillDetail(cur, curLv, (x) => fmt(x, lang));
-  const kind = (sk: Skill) => t(`characters.skill.kind.${sk.id[0]}`);
+  const kind = (sk: GameSkill) => t(`characters.skill.kind.${sk.type === "Chain" ? "c" : letter(sk)}`);
   const stigN = Object.values(stig).filter(Boolean).length;
-  const equipped = SKILLS_STIGMA.filter((x) => stig[x.id]);
+  const equipped = SKILLS.filter((x) => x.type === "Stigma" && stig[x.id]);
+  // Only what the source has; "instant" is its word for no cooldown / cast time.
+  const val = (v?: string) => (!v ? "—" : v === "instant" ? t("characters.skill.instant") : v);
 
   // Clicking a Stigma also equips/unequips it, up to 6.
-  const pick = (sk: Skill) => {
+  const pick = (sk: GameSkill) => {
     setSel(sk.id);
-    if (sk.id[0] === "s" && (stig[sk.id] || stigN < MAX_STIGMA)) setStig({ ...stig, [sk.id]: !stig[sk.id] });
+    if (sk.type === "Stigma" && (stig[sk.id] || stigN < MAX_STIGMA)) setStig({ ...stig, [sk.id]: !stig[sk.id] });
   };
-  const lib = SKILLS.filter((x) => (filter === "all" || x.id[0] === filter) && x.n.toLowerCase().includes(q.toLowerCase()));
+  const lib = SKILLS.filter((x) => (filter === "all" || letter(x) === filter) && x.name.toLowerCase().includes(q.toLowerCase()));
 
   return (
     <>
@@ -110,26 +134,26 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
           <div style={{ flex: 1, overflow: "auto", padding: 6 }}>
             {lib.map((sk) => {
               const L = lvl[sk.id] ?? 1;
-              const on = sk.id[0] === "s" && !!stig[sk.id];
+              const on = sk.type === "Stigma" && !!stig[sk.id];
               return (
                 <button
                   key={sk.id}
                   type="button"
                   className="chBtnReset chSkillRow"
                   aria-pressed={sk.id === cur.id}
-                  style={{ opacity: sk.id[0] === "s" && !on ? 0.45 : 1 }}
+                  style={{ opacity: sk.type === "Stigma" && !on ? 0.45 : 1 }}
                   onClick={() => pick(sk)}
                 >
-                  <span style={{ width: 34, height: 34, flex: "none", borderRadius: "50%", background: sk.bg, boxShadow: `0 0 0 1px ${sk.c}`, display: "grid", placeItems: "center", fontSize: 10, fontWeight: 600 }}>
-                    {sk.init}
+                  <span style={{ width: 34, height: 34, flex: "none", borderRadius: "50%", background: "var(--pm-s2)", boxShadow: "0 0 0 1px var(--pm-line)", display: "grid", placeItems: "center", fontSize: 10, fontWeight: 600 }}>
+                    <SkillIcon skill={sk} name={sk.name} />
                   </span>
                   <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
                     <span style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                      <span style={{ flex: 1, fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{sk.n}</span>
+                      <span style={{ flex: 1, fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{sk.name}</span>
                       <span style={{ fontSize: 9, color: "var(--pm-t3)" }}>{kind(sk)}</span>
                     </span>
                     <span style={{ display: "flex", gap: 2 }} aria-label={t("characters.skill.level", { n: L })}>
-                      {Array.from({ length: 10 }, (_, i) => (
+                      {Array.from({ length: MAX_LEVEL }, (_, i) => (
                         <span key={i} style={{ flex: 1, height: 3, borderRadius: 1, background: i < L ? "var(--pm-red)" : "var(--pm-s3)" }} />
                       ))}
                     </span>
@@ -153,9 +177,12 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
               {Array.from({ length: MAX_STIGMA }, (_, i) => {
                 const sk = equipped[i];
                 return (
-                  <div key={i} title={sk ? sk.n : t("characters.skill.freeSocket")} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 48, height: 48, transform: "rotate(45deg)", borderRadius: 8, background: sk ? sk.bg : "var(--pm-s2)", border: "1px solid var(--pm-grey)", display: "grid", placeItems: "center" }}>
-                      <span style={{ transform: "rotate(-45deg)", fontSize: 11, fontWeight: 600 }}>{sk?.init}</span>
+                  <div key={i} title={sk ? sk.name : t("characters.skill.freeSocket")} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 48, height: 48, transform: "rotate(45deg)", borderRadius: 8, background: "var(--pm-s2)", border: `1px solid ${sk ? col : "var(--pm-grey)"}`, display: "grid", placeItems: "center", overflow: "hidden" }}>
+                      {/* The icon is turned back upright and scaled so it fills the diamond. */}
+                      <span style={{ transform: "rotate(-45deg) scale(1.42)", width: "100%", height: "100%", display: "grid", placeItems: "center", fontSize: 8, fontWeight: 600 }}>
+                        {sk && <SkillIcon skill={sk} name={sk.name} />}
+                      </span>
                     </div>
                     <span className="mono" style={{ fontSize: 10, color: "var(--pm-t3)" }}>
                       {i + 1}
@@ -177,7 +204,7 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
                     const pos = `${r},${c}`;
                     const v = bar[pos];
                     const sk = v ? byId(v) : undefined;
-                    const tip = sk ? sk.n : t("characters.skill.assignHint");
+                    const tip = sk ? sk.name : t("characters.skill.assignHint");
                     return (
                       <button
                         key={pos}
@@ -185,7 +212,7 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
                         className="chBarCell"
                         title={tip}
                         aria-label={`${r + 1}·${k} ${tip}`}
-                        style={sk ? { border: `1px solid ${sk.c}`, background: sk.bg } : undefined}
+                        style={sk ? { border: `1px solid ${col}`, padding: 0, overflow: "hidden" } : undefined}
                         onClick={() => {
                           const next = { ...bar };
                           if (v === cur.id) delete next[pos];
@@ -193,7 +220,7 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
                           setBar(next);
                         }}
                       >
-                        {sk?.init}
+                        {sk && <SkillIcon skill={sk} name={sk.name} />}
                       </button>
                     );
                   })}
@@ -216,18 +243,20 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
                 <span style={{ width: 74, fontSize: 10, letterSpacing: ".08em", color: "var(--pm-t3)" }}>{label}</span>
                 <div style={{ flex: 1, display: "flex", alignItems: "center", position: "relative", minWidth: 0, overflowX: "auto" }}>
                   <div style={{ position: "absolute", left: 0, right: 0, top: "50%", height: 1, background: "var(--pm-line)" }} />
-                  {rot[type].map((id, k) => {
-                    const sk = byId(id)!;
+                  {rot[type].flatMap((id) => byId(id) ?? []).map((sk, k) => {
+                    const id = sk.id;
                     return (
                       <div key={id} style={{ position: "relative", display: "flex", alignItems: "center", gap: 6, padding: "4px 10px 4px 4px", marginRight: 14, borderRadius: 20, background: "var(--pm-s2)", border: "1px solid var(--pm-line)", flex: "none" }}>
-                        <span style={{ width: 28, height: 28, borderRadius: "50%", background: sk.bg, display: "grid", placeItems: "center", fontSize: 9, fontWeight: 600 }}>{sk.init}</span>
+                        <span style={{ width: 28, height: 28, flex: "none", borderRadius: "50%", background: "var(--pm-s3)", display: "grid", placeItems: "center", fontSize: 9, fontWeight: 600 }}>
+                          <SkillIcon skill={sk} name={sk.name} />
+                        </span>
                         <span style={{ fontSize: 11, whiteSpace: "nowrap" }}>
                           <span className="mono" style={{ color: "var(--pm-redt)" }}>
                             {k + 1}
                           </span>{" "}
-                          {sk.n}
+                          {sk.name}
                         </span>
-                        <button type="button" className="chX" aria-label={t("characters.skill.removeNamed", { n: sk.n })} onClick={() => setRot({ ...rot, [type]: rot[type].filter((x) => x !== id) })}>
+                        <button type="button" className="chX" aria-label={t("characters.skill.removeNamed", { n: sk.name })} onClick={() => setRot({ ...rot, [type]: rot[type].filter((x) => x !== id) })}>
                           <XIcon aria-hidden="true" />
                         </button>
                       </div>
@@ -237,7 +266,7 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
                     type="button"
                     title={t("characters.skill.addSelected")}
                     aria-label={t("characters.skill.addSelected")}
-                    onClick={() => cur.id[0] === type && !rot[type].includes(cur.id) && setRot({ ...rot, [type]: [...rot[type], cur.id] })}
+                    onClick={() => letter(cur) === type && !rot[type].includes(cur.id) && setRot({ ...rot, [type]: [...rot[type], cur.id] })}
                     style={{ position: "relative", width: 30, height: 30, padding: 0, borderRadius: "50%", border: "1px dashed var(--pm-grey)", background: "var(--pm-s1)", color: "var(--pm-t2)", cursor: "pointer", flex: "none" }}
                   >
                     <PlusIcon aria-hidden="true" />
@@ -249,15 +278,17 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12, position: "sticky", top: 0 }}>
-          <section aria-label={cur.n} style={{ ...CARD, padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", overflow: "hidden" }}>
-            <div style={{ position: "absolute", right: -40, top: -40, width: 160, height: 160, background: `radial-gradient(circle,${cur.c}33,transparent 70%)` }} />
+          <section aria-label={cur.name} style={{ ...CARD, padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", right: -40, top: -40, width: 160, height: 160, background: `radial-gradient(circle,${col}33,transparent 70%)` }} />
             <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, textAlign: "center" }}>
-              <div style={{ width: 72, height: 72, borderRadius: "50%", background: cur.bg, boxShadow: `0 0 0 2px ${cur.c},0 0 24px ${cur.c}55`, display: "grid", placeItems: "center", fontSize: 18, fontWeight: 600 }}>
-                {cur.init}
+              <div style={{ width: 72, height: 72, borderRadius: "50%", background: "var(--pm-s2)", boxShadow: `0 0 0 2px ${col},0 0 24px ${col}55`, display: "grid", placeItems: "center", fontSize: 18, fontWeight: 600 }}>
+                <SkillIcon skill={cur} name={cur.name} />
               </div>
               <div>
-                <div style={{ fontSize: 16, fontWeight: 500 }}>{cur.n}</div>
-                <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>{kind(cur)} · Sorcerer · Lv 20</div>
+                <div style={{ fontSize: 16, fontWeight: 500 }}>{cur.name}</div>
+                <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>
+                  {kind(cur)} · {cls}
+                </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <button type="button" className="chRound" aria-label={t("characters.skill.levelDown")} onClick={() => setLvl({ ...lvl, [cur.id]: Math.max(1, curLv - 1) })}>
@@ -265,19 +296,20 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
                 </button>
                 <span className="mono" style={{ fontSize: 20, minWidth: 62 }} aria-live="polite">
                   {curLv}
-                  <span style={{ fontSize: 12, color: "var(--pm-t3)" }}>/10</span>
+                  <span style={{ fontSize: 12, color: "var(--pm-t3)" }}>/{MAX_LEVEL}</span>
                 </span>
-                <button type="button" className="chRound" aria-label={t("characters.skill.levelUp")} onClick={() => setLvl({ ...lvl, [cur.id]: Math.min(10, curLv + 1) })}>
+                <button type="button" className="chRound" aria-label={t("characters.skill.levelUp")} onClick={() => setLvl({ ...lvl, [cur.id]: Math.min(MAX_LEVEL, curLv + 1) })}>
                   +
                 </button>
               </div>
             </div>
-            <div style={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 1, background: "var(--pm-line)", borderRadius: 6, overflow: "hidden", fontSize: 10, color: "var(--pm-t3)", textAlign: "center" }}>
+            <div style={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 1, background: "var(--pm-line)", borderRadius: 6, overflow: "hidden", fontSize: 10, color: "var(--pm-t3)", textAlign: "center" }}>
               {(
                 [
-                  ["cooldown", detail.cd],
-                  ["cost", detail.cost],
-                  ["range", detail.range],
+                  ["cooldown", val(cur.cd)],
+                  ["cast", val(cur.cast)],
+                  ["cost", cur.cost ? `${cur.cost} MP` : "—"],
+                  ["range", val(cur.range)],
                 ] as const
               ).map(([key, v]) => (
                 <div key={key} style={{ background: "var(--pm-s2)", padding: 6 }}>
@@ -288,7 +320,7 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
                 </div>
               ))}
             </div>
-            <div style={{ position: "relative", fontSize: 12, lineHeight: 1.6, color: "var(--pm-t2)" }}>{detail.desc}</div>
+            {cur.desc && <div style={{ position: "relative", fontSize: 12, lineHeight: 1.6, color: "var(--pm-t2)" }}>{cur.desc}</div>}
           </section>
 
           <section style={{ ...CARD, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 6 }}>
@@ -305,7 +337,7 @@ export default function SkillPlan({ t, lang, name, onError, setHeader }: PagePro
             ))}
             <button
               type="button"
-              onClick={() => setMacros([...macros, t("characters.skill.macroText", { n: macros.length + 1, skill: cur.n })])}
+              onClick={() => setMacros([...macros, t("characters.skill.macroText", { n: macros.length + 1, skill: cur.name })])}
               style={{ height: 34, borderRadius: 6, border: "1px dashed var(--pm-line)", background: "transparent", color: "var(--pm-t2)", cursor: "pointer", fontSize: 12 }}
             >
               <PlusIcon aria-hidden="true" style={{ verticalAlign: "-1px" }} /> {t("characters.skill.addMacro")}

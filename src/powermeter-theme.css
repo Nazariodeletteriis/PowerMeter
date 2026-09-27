@@ -22,8 +22,7 @@
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/600.css";
 
-/* Elements added for this theme. Every other theme keeps its old layout. */
-:root:not([data-theme="powermeter"]) .pmOnly,
+/* Elements added for the widget. The tool windows and the Classic UI layout keep the old one. */
 :root:is(.detailsWindow, .historyWindow, .settingsWindow) .pmOnly,
 body.legacyUi .pmOnly {
   display: none !important;
@@ -37,8 +36,9 @@ body.legacyUi .pmOnly {
 
 /* ---------- 1. tokens ---------- */
 
-:root[data-theme="powermeter"] {
-  /* Design tokens, brace palette */
+/* Neutral widget tokens, shared by every theme: the widget layout is the same
+   for all of them and each theme only swaps the accent and the surface tint. */
+:root {
   --pm-bg: #0a0909;
   --pm-s1: #141111;
   --pm-s2: #1d1919;
@@ -47,19 +47,38 @@ body.legacyUi .pmOnly {
   --pm-t1: #faf7f7;
   --pm-t2: #d2c9c9;
   --pm-t3: #a89e9e;
-  --pm-red: #db0000;
-  --pm-redt: #ff6b6b;
-  --pm-deep: #7f1112;
   --pm-grey: #564f4f;
-  --pm-fill: #7f1112;
   --pm-filltext: #faf7f7;
-  /* Widget surfaces (design THEMES.b) */
-  --pm-wrgb: 12 10 10;
-  --pm-wbar: rgba(127, 17, 18, 0.85);
   --pm-widget-text: #f5f2f2;
   --pm-widget-muted: #b3abab;
   --pm-sans: "Inter", var(--cjk-font-stack);
   --pm-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* The other themes: the widget's accent and surface tint come from the
+   theme's own palette in styles.css (--isUser-fill is each theme's accent). */
+:root[data-theme]:not([data-theme="powermeter"]) {
+  --pm-red: var(--isUser-fill);
+  --pm-redt: color-mix(in srgb, var(--isUser-fill) 75%, #fff);
+  --pm-hot: var(--isUser-fill);
+  --pm-link: color-mix(in srgb, var(--isUser-fill) 60%, #fff);
+  --pm-deep: color-mix(in srgb, var(--isUser-fill) 42%, #0b0b0e);
+  --pm-fill: var(--pm-deep);
+  --pm-wsurf: color-mix(in srgb, var(--isUser-fill) 7%, #0b0b0d);
+  --pm-wbar: color-mix(in srgb, var(--pm-deep) 85%, transparent);
+}
+
+:root[data-theme="powermeter"] {
+  /* Accent and surfaces, brace palette */
+  --pm-red: #db0000;
+  --pm-redt: #ff6b6b;
+  --pm-hot: #ff4d4d;
+  --pm-link: #ff8a8a;
+  --pm-deep: #7f1112;
+  --pm-fill: #7f1112;
+  /* Widget surfaces (design THEMES.b) */
+  --pm-wsurf: rgb(12 10 10);
+  --pm-wbar: rgba(127, 17, 18, 0.85);
 
   /* The app's own variables, re-pointed at the palette */
   --row-fill: var(--pm-deep);
@@ -102,13 +121,13 @@ body.legacyUi .pmOnly {
 
 /* Main overlay window only, beta layout only: the tool windows reuse this
    document with the meter hidden, and the classic layout has its own skin. */
-:root[data-theme="powermeter"]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
+:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
   /* Widget shell: 400 wide, radius 8, tinted glass at the user's opacity. */
   .meter {
     width: 400px;
     border: 0;
     border-radius: 8px;
-    background: rgb(var(--pm-wrgb) / var(--window-opacity));
+    background: color-mix(in srgb, var(--pm-wsurf) calc(var(--window-opacity) * 100%), transparent);
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 24px rgba(0, 0, 0, 0.35);
     color: var(--pm-widget-text);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
@@ -118,7 +137,7 @@ body.legacyUi .pmOnly {
   }
   /* 8.1: on hover the frame is ringed in red and the resize grip shows. */
   .meter:hover {
-    box-shadow: 0 0 0 1px rgba(255, 77, 77, 0.7), 0 8px 24px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--pm-hot) 70%, transparent), 0 8px 24px rgba(0, 0, 0, 0.35);
   }
   .resizeHandle {
     right: -4px;
@@ -185,6 +204,16 @@ body.legacyUi .pmOnly {
   .meter:not(:hover, :has(:focus-visible)) :is(.bossIcon, .suspendBtn, .historyBtn, .resetBtn, .settingsBtn, .pmSep) {
     display: none;
   }
+  /* The bar is one row in every mode: revealing the actions on hover must not
+     push anything onto a second line. Build and Lobby have no target row, so
+     their header never wraps, and the fight-only actions (screenshot, suspend,
+     history, reset) stay out of them. Narrow DPS widgets drop those same four,
+     as the slim layout does. */
+  .meter:is(.pmMode-build, .pmMode-lobby) .header { flex-wrap: nowrap; }
+  .meter:is(.pmMode-build, .pmMode-lobby) :is(.bossIcon, .suspendBtn, .historyBtn, .resetBtn) { display: none; }
+  @container pmMeter (max-width: 359px) {
+    .header :is(.bossIcon, .suspendBtn, .historyBtn, .resetBtn) { display: none; }
+  }
   .pmTabs {
     order: 10;
     display: flex;
@@ -207,7 +236,7 @@ body.legacyUi .pmOnly {
   }
   .pmTab:hover { color: var(--pm-widget-text); }
   .pmTab.isActive {
-    background: rgba(219, 0, 0, 0.35);
+    background: color-mix(in srgb, var(--pm-red) 35%, transparent);
     color: var(--pm-widget-text);
   }
   .pmTab[hidden] { display: none; }
@@ -241,7 +270,11 @@ body.legacyUi .pmOnly {
   .pmBarRight {
     order: 45;
     display: block;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
     font-size: 11px;
+    text-overflow: ellipsis;
     white-space: nowrap;
   }
   .header .bossIconOverlay svg,
@@ -301,19 +334,19 @@ body.legacyUi .pmOnly {
     width: 100%;
     padding: 4px 10px;
     border: 0;
-    border-bottom: 1px solid rgba(219, 0, 0, 0.35);
-    background: rgba(219, 0, 0, 0.14);
+    border-bottom: 1px solid color-mix(in srgb, var(--pm-red) 35%, transparent);
+    background: color-mix(in srgb, var(--pm-red) 14%, transparent);
     color: var(--pm-widget-text);
     font: 600 11px/1.4 var(--pm-sans, inherit);
     text-align: left;
     cursor: pointer;
   }
   .pmUpdateStrip[hidden] { display: none; }
-  .pmUpdateStrip svg { width: 13px; height: 13px; flex: none; color: #ff4d4d; }
+  .pmUpdateStrip svg { width: 13px; height: 13px; flex: none; color: var(--pm-hot); }
   .pmUpdateStrip .pmUpdateVersion { font-family: var(--pm-mono); opacity: 0.7; }
-  .pmUpdateStrip .pmUpdateNotes { margin-left: auto; color: #ff6b6b; text-decoration: underline; text-underline-offset: 2px; }
-  .pmUpdateStrip:hover { background: rgba(219, 0, 0, 0.22); }
-  .pmUpdateStrip:focus-visible { outline: 2px solid #ff4d4d; outline-offset: -2px; }
+  .pmUpdateStrip .pmUpdateNotes { margin-left: auto; color: var(--pm-redt); text-decoration: underline; text-underline-offset: 2px; }
+  .pmUpdateStrip:hover { background: color-mix(in srgb, var(--pm-red) 22%, transparent); }
+  .pmUpdateStrip:focus-visible { outline: 2px solid var(--pm-hot); outline-offset: -2px; }
   .header .bossNames .bossName,
   .header .bossNames .bossName:lang(ko),
   .header .bossNames .bossName:lang(zh-CN),
@@ -472,7 +505,7 @@ body.legacyUi .pmOnly {
     background: rgba(255, 255, 255, 0.05);
   }
   .list .item:hover { background: rgba(255, 255, 255, 0.08); }
-  .list .item.isUser { outline: 1px solid rgba(255, 77, 77, 0.9); }
+  .list .item.isUser { outline: 1px solid color-mix(in srgb, var(--pm-hot) 90%, transparent); }
   .list .item.isUser::before { content: none; }
 
   /* Class-coloured bar at .42 (the design's value at the default 80% "Meter
@@ -640,7 +673,7 @@ body.legacyUi .pmOnly {
    pmWidget.js sets the state classes on .meter:
    pmMode-dps|build|lobby, pmView-live|waiting|ended|error, isPmDetail,
    isPmPill, isPmLocked, isPmIdle, isPmUploaded, hasPmLast, hasPmSpark. */
-:root[data-theme="powermeter"]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
+:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
   /* Standard size 400x300 (design 8.7); the list fills the space above the footer. */
   .meter {
     display: flex;
@@ -831,7 +864,7 @@ body.legacyUi .pmOnly {
     text-transform: uppercase;
   }
   .pmOutcome.isWipe {
-    background: rgba(219, 0, 0, 0.2);
+    background: color-mix(in srgb, var(--pm-red) 20%, transparent);
     color: var(--pm-redt);
   }
   .pmEndStats {
@@ -887,7 +920,7 @@ body.legacyUi .pmOnly {
   :is(.pmError, .pmUploaded) button { height: 30px; flex: none; }
   .pmFillBtn:disabled { cursor: default; opacity: 0.6; }
   @media (hover: hover) and (pointer: fine) {
-    .pmFillBtn:not(:disabled):hover { background: #9a1516; }
+    .pmFillBtn:not(:disabled):hover { filter: brightness(1.2); } /* #7f1112 -> ~#9a1516 */
     .pmGhostBtn:hover { border-color: rgba(255, 255, 255, 0.35); }
   }
 
@@ -1060,7 +1093,7 @@ body.legacyUi .pmOnly {
     color: var(--pm-widget-muted);
   }
   button.pmLinkBtn {
-    color: #ff8a8a;
+    color: var(--pm-link);
     transition: color 120ms ease;
   }
   button.pmLinkBtn:hover { color: var(--pm-widget-text); }
@@ -1147,7 +1180,7 @@ body.legacyUi .pmOnly {
   }
   .pmDetailName { font-weight: 600; }
   button.pmDetailReportBtn { transition: color 120ms ease; }
-  button.pmDetailReportBtn:hover { color: #ff8a8a; }
+  button.pmDetailReportBtn:hover { color: var(--pm-link); }
   .pmDetailTotal {
     font-family: var(--pm-mono);
     font-weight: 600;
@@ -1269,7 +1302,7 @@ body.legacyUi .pmOnly {
     padding: 4px 6px 8px 14px;
     cursor: pointer;
   }
-  .meter.isPmLocked.isPmLockHot .pmLockBadge { color: #ff4d4d; }
+  .meter.isPmLocked.isPmLockHot .pmLockBadge { color: var(--pm-hot); }
   .meter.isPmLocked.isPmLockHot .pmLockBadge svg { transform: scale(1.3); }
   .pmLockBadge svg { transition: transform 120ms ease-out; }
   .meter.isPmLocked .list,
@@ -1291,7 +1324,7 @@ body.legacyUi .pmOnly {
     min-height: 0 !important;
     padding: 0;
     border-radius: 16px;
-    background: rgb(var(--pm-wrgb) / 0.8);
+    background: color-mix(in srgb, var(--pm-wsurf) 80%, transparent);
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
     text-shadow: none;
   }
@@ -1352,7 +1385,8 @@ body.legacyUi .pmOnly {
 /* No Brawler icon in the handoff: the design prints its initials instead. */
 [data-cls="brawler"] { --cls: #c58b55; }
 :root[data-theme="powermeter"] [data-cls="brawler"] :is(.classIcon, .pmCls)::before,
-:root[data-theme="powermeter"] .pmCls[data-cls="brawler"]::before { content: "BR"; }
+body:not(.legacyUi) [data-cls="brawler"] :is(.classIcon, .pmCls)::before,
+.pmCls[data-cls="brawler"]::before { content: "BR"; }
 
 /* ---------- 3. panels: hard-coded colours in styles.css ---------- */
 

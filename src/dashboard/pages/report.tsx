@@ -13,6 +13,7 @@ import {
 import { fmt } from "../ui";
 import { BOSS, DUNGEON, BOSS_STATS, BUFFS, CLASS_SKILLS, DEATH, DURATION, FIGHT_DATE, PHASE, PLAYER_EXTRA, REPORT_LISTS, TL_PERIOD } from "../sample/combat";
 import { ab, Av, Chart, classColor, clock, pc, sampleBadges, sampleParty, sampleSeries, sampleSkills, type Skill } from "./combat/parts";
+import { SkillIcon } from "../skills";
 import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
 
@@ -353,7 +354,7 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
                       key={k}
                       lang={lang}
                       kid
-                      s={{ ...s, n: k.replace("{hit}", t("combat.hit")), init: "↳", dmg: s.dmg * f, pct: s.pct * f, hits: Math.round(s.hits * f) }}
+                      s={{ ...s, n: k.replace("{skill}", s.n).replace("{hit}", t("combat.hit")), init: "↳", dmg: s.dmg * f, pct: s.pct * f, hits: Math.round(s.hits * f) }}
                     />
                   );
                 }),
@@ -527,7 +528,7 @@ function SkillRow({ s, lang, kid, isOpen, onToggle }: { s: Skill; lang: string; 
           )}
         </span>
         <span style={{ width: 22, height: 22, borderRadius: 4, background: "var(--pm-s3)", display: "grid", placeItems: "center", fontSize: 9, color: "var(--pm-t2)", flex: "none" }}>
-          {s.init}
+          {kid ? s.init : <SkillIcon skill={s.sk} name={s.n} />}
         </span>
         <span style={{ color: kid ? "var(--pm-t2)" : "var(--pm-t1)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.n}</span>
       </div>

@@ -146,40 +146,8 @@ export const SAMPLE_COMMENTS: [string, Ago, string][] = [
   ["ysolde", [1, "day"], "Per il PvP meglio Frost Lance al posto di Blaze of Aether?"],
 ];
 
-// pSkill — Sorcerer skills. id = type letter (a active, s stigma, p passive) + index.
-export type Skill = { id: string; n: string; init: string; c: string; bg: string };
-const HUES = ["#4F93EA", "#B377E8", "#E8743B", "#3FC9C1", "#F0A63A", "#E79AC9", "#6CC46A"];
-const skills = (t: "a" | "s" | "p", names: string[]): Skill[] =>
-  names.map((n, i) => {
-    const c = HUES[(i * 3 + (t === "s" ? 2 : t === "p" ? 4 : 0)) % HUES.length];
-    const init = n.replace(/[^A-Z]/g, "").slice(0, 2) || n.slice(0, 2);
-    return { id: t + i, n, init, c, bg: `linear-gradient(135deg,${c}66 0%,${c}22 55%,var(--pm-s2) 100%)` };
-  });
-export const SKILLS_ACTIVE = skills("a", ["Flame Bolt", "Flame Cage", "Ice Chain", "Cyclone of Wrath", "Blaze of Aether", "Winter Binding", "Frost Lance", "Soul Freeze", "Burning Wave", "Aether Flare", "Blind Leap", "Arcane Thunderbolt"]);
-export const SKILLS_STIGMA = skills("s", ["Summon Wind Spirit", "Lumiel's Wrath", "Glacial Shard", "Infernal Blaze", "Vaizel's Arcana", "Delayed Blast", "Gust of Aether", "Storm Veil", "Tempest Rune", "Void Lance", "Stamina Recovery", "Magic Absorption", "Zikel's Wisdom"]);
-export const SKILLS_PASSIVE = skills("p", ["Aether Mastery", "Frost Affinity", "Flame Affinity", "Mana Flow", "Arcane Focus", "Spell Echo", "Wind Barrier", "Deep Concentration", "Elemental Harmony", "Soul Armor"]);
-export const SKILLS = [...SKILLS_ACTIVE, ...SKILLS_STIGMA, ...SKILLS_PASSIVE];
+// pSkill — the skills themselves are the real ones (src/dashboard/skills.tsx).
 export const SKILL_BUILDS = ["Frost Control · Sorcerer", "Burst PvE · Sorcerer", "Guardian Wall · Templar"];
-// Starting state of the planner.
-export const SKILL_START = {
-  stig: { s0: true, s4: true } as Record<string, boolean>,
-  bar: { "0,0": "a1", "0,1": "a2", "0,2": "a3", "0,3": "a0", "1,0": "s0", "1,1": "s4" } as Record<string, string>,
-  rotation: { a: ["a1", "a2"], s: ["s0"], p: [] } as Record<string, string[]>,
-};
-/** Fake skill numbers (pSkill.skCur); `fmt` formats the damage. */
-export function skillDetail(sk: Skill, lv: number, fmt: (n: number) => string) {
-  const kind = sk.id[0];
-  const len = sk.n.length;
-  return {
-    cd: `${6 + (len % 9)} s`,
-    cost: `${40 + len * 7} MP`,
-    range: `${len % 3 ? 20 : 25} m`,
-    desc:
-      kind === "p"
-        ? `Permanently increases ${sk.n.split(" ")[0]} related stats by ${2 + lv}%.`
-        : `Deals ${fmt(820 + lv * 146)} magic damage to the target${kind === "s" ? " and nearby enemies" : ""}. Cooldown reduced by ${lv}% at max level.`,
-  };
-}
 
 // pDaev — a fake 11×11 board; the real one comes from the game data.
 export const DV_N = 11;
@@ -197,7 +165,7 @@ export function dvType(x: number, y: number): DvType | null {
   return "stat";
 }
 const DV_STATS = ["Attack +12", "HP +180", "Accuracy +15", "Critical Hit +14", "Defense +20", "Magic Boost +10", "Evasion +12", "PvE Attack +8"];
-const DV_SKILLS = ["Flame Cage Lv +1", "Ice Chain Lv +1", "Cyclone of Wrath Lv +1", "Soul Freeze Lv +1", "Blaze of Aether Lv +1"];
+const DV_SKILLS = ["Flame Arrow Lv +1", "Ice Chain Lv +1", "Hellfire Lv +1", "Soul Freeze Lv +1", "Frost Burst Lv +1"];
 /** Node label; null for the start node (translated by the page). */
 export function dvLabel(t: DvType, x: number, y: number): string | null {
   if (t === "skill") return DV_SKILLS[(x + y) % DV_SKILLS.length];

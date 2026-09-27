@@ -3,6 +3,15 @@
 Every release needs a `## <version>` section here: CI copies its bullet points into the
 GitHub release and into the in-app update window, and refuses to publish without it.
 
+## 0.2.5
+
+- Fixed: clicking the lock of a locked meter now really unlocks it (it turns red when you hover it).
+- Fixed: in Build and Lobby mode the meter header no longer wraps to two lines when you hover it.
+- Fixed: changing the meter theme applies right away.
+- New: every meter theme is now a colour variant of the PowerMeter widget, with all its features (DPS/Build/Lobby, lock, update notice).
+- New: real skill icons and names across the dashboard (report, party, builder).
+- New: the Skill Planner lists the real skills of your class, with cooldown, cast time, cost, range and description where available.
+
 ## 0.2.4
 
 - Fixed: changing "Meter layout" in the meter settings now applies right away instead of after a restart.

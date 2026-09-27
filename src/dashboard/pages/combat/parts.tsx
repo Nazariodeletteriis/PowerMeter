@@ -1,5 +1,6 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 import { art, CLASSES } from "../../ui";
+import { findSkill, type GameSkill } from "../../skills";
 import { BADGES, CLASS_SKILLS, DURATION, PARTY, SKILL_HITS, SKILL_KIDS, SKILL_SHARE } from "../../sample/combat";
 import "./combat.css";
 
@@ -141,6 +142,8 @@ export type Skill = {
   double: number;
   multi: number;
   init: string;
+  /** The game skill of that name, for its icon (none for "Auto Attack"). */
+  sk?: GameSkill;
   kids?: string[];
 };
 export const initials = (n: string) =>
@@ -173,6 +176,7 @@ export function sampleSkills(p: Row, key: keyof Skill = "dmg", dir = -1): Skill[
         double: (j * 4) % 12,
         multi: j === 1 || j === 4 ? 18 + j : 0,
         init: initials(n),
+        sk: findSkill(n, p.cls),
         kids: SKILL_KIDS[j],
       };
     })

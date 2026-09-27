@@ -4019,9 +4019,9 @@ class DpsApp {
   }
 
   getMetricForRow(row) {
-    // PowerMeter: the theme shows DPS and total damage side by side and has no
-    // DPS/DMG toggle, so the metric column always reads DPS there.
-    if (this.displayMode === "totalDamage" && this.theme !== "powermeter") {
+    // PowerMeter: the widget (every theme) and the PowerMeter theme show DPS and total
+    // damage side by side and have no DPS/DMG toggle, so the metric column always reads DPS.
+    if (this.displayMode === "totalDamage" && this.theme !== "powermeter" && !this.betaUi) {
       const totalDamage = Number(row?.totalDamage) || 0;
       return {
         value: totalDamage,
@@ -4035,9 +4035,9 @@ class DpsApp {
     };
   }
 
-  // PowerMeter: the design prints DPS as a bare number, so its theme drops the "/s".
+  // PowerMeter: the design prints DPS as a bare number, so the widget drops the "/s".
   getDpsSuffix() {
-    if (this.theme === "powermeter") return "";
+    if (this.theme === "powermeter" || this.betaUi) return "";
     return this.i18n?.t("meter.dpsSuffix", "/s") ?? "/s";
   }
 
