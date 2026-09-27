@@ -418,6 +418,7 @@
       "gsTip": "裝備評分"
     },
     "updateAvailable": "有可用更新",
-    "updateNotes": "版本資訊"
+    "updateNotes": "版本資訊",
+    "unlockHint": "已鎖定：點擊鎖圖示或按 {key} 解鎖"
   }
 }

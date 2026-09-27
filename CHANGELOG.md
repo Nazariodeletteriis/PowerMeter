@@ -3,6 +3,11 @@
 Every release needs a `## <version>` section here: CI copies its bullet points into the
 GitHub release and into the in-app update window, and refuses to publish without it.
 
+## 0.2.4
+
+- Fixed: a locked meter can be unlocked with the mouse: hover the lock in its top-right corner and click it.
+- New: locking the meter shows for a few seconds how to unlock it; "Open widget" in the dashboard also unlocks it.
+
 ## 0.2.3
 
 - New: the meter shows an "Update available" strip; click it to see the release notes and update in one click.

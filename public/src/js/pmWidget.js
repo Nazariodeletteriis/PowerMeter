@@ -75,11 +75,34 @@ const createPmWidget = (app) => {
 
   // --- lock (click-through). Also toggled by the global hotkey, hence the event.
   const lockBtn = $(".pmLockBtn");
+  // A locked meter ignores the mouse, so say how to unlock it for a few seconds.
+  const lockHint = $(".pmLockHint");
+  let lockHintTimer;
   const setLocked = (on) => {
+    const wasLocked = locked;
     locked = !!on;
     meter.classList.toggle("isPmLocked", locked);
     lockBtn?.setAttribute("aria-pressed", String(locked));
+    clearTimeout(lockHintTimer);
+    if (!lockHint || !locked || wasLocked) {
+      if (lockHint && !locked) lockHint.hidden = true;
+      return;
+    }
+    invoke("get_settings")
+      .then((all) => all?.["pm.clickThroughHotkey"] || "Ctrl+Alt+L")
+      .catch(() => "Ctrl+Alt+L")
+      .then((key) => {
+        lockHint.textContent = t("pmWidget.unlockHint", "Locked. Click the lock or press {key} to unlock").replace("{key}", key);
+        lockHint.hidden = false;
+        lockHintTimer = setTimeout(() => (lockHint.hidden = true), 5000);
+      });
   };
+  // Locked: the badge is the only clickable spot (see watch_lock_corner in powermeter.rs).
+  $(".pmLockBadge")?.addEventListener("click", () => {
+    invoke("set_click_through", { enabled: false })
+      .then(() => setLocked(false))
+      .catch((err) => console.error("[PowerMeter] set_click_through failed", err));
+  });
   lockBtn?.addEventListener("click", () => {
     const next = !locked;
     invoke("set_click_through", { enabled: next })

@@ -418,6 +418,7 @@
       "gsTip": "装备评分"
     },
     "updateAvailable": "有可用更新",
-    "updateNotes": "发行说明"
+    "updateNotes": "发行说明",
+    "unlockHint": "已锁定：点击锁图标或按 {key} 解锁"
   }
 }

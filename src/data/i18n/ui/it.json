@@ -418,6 +418,7 @@
       "gsTip": "Gear score"
     },
     "updateAvailable": "Aggiornamento disponibile",
-    "updateNotes": "Note di rilascio"
+    "updateNotes": "Note di rilascio",
+    "unlockHint": "Bloccato: clicca il lucchetto o premi {key} per sbloccare"
   }
 }

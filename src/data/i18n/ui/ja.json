@@ -418,6 +418,7 @@
       "gsTip": "Gear score"
     },
     "updateAvailable": "アップデートがあります",
-    "updateNotes": "リリースノート"
+    "updateNotes": "リリースノート",
+    "unlockHint": "ロック中：鍵をクリックするか {key} で解除"
   }
 }

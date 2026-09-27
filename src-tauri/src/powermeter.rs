@@ -26,6 +26,44 @@ fn apply_click_through(app: &tauri::AppHandle, enabled: bool) -> Result<(), Stri
     Ok(())
 }
 
+/// While locked, the whole window ignores the mouse, so the lock badge in the
+/// top-right corner couldn't be clicked. This loop polls the cursor and makes
+/// the window clickable again only while the cursor is over that corner; the
+/// badge's click handler (pmWidget.js) then unlocks. Started once at setup.
+fn watch_lock_corner(app: tauri::AppHandle) {
+    const CORNER_W: f64 = 40.0; // CSS px, covers the 10 px badge at top 4 / right 6
+    const CORNER_H: f64 = 26.0;
+    std::thread::spawn(move || {
+        let mut hot = false;
+        loop {
+            std::thread::sleep(std::time::Duration::from_millis(60));
+            let Some(window) = app.get_webview_window("main") else { continue };
+            if !CLICK_THROUGH.load(Ordering::SeqCst) {
+                hot = false;
+                continue;
+            }
+            let over = (|| {
+                let cursor = window.cursor_position().ok()?;
+                let pos = window.outer_position().ok()?;
+                let size = window.outer_size().ok()?;
+                let scale = window.scale_factor().ok()?;
+                let right = pos.x as f64 + size.width as f64;
+                Some(
+                    cursor.x <= right
+                        && cursor.x >= right - CORNER_W * scale
+                        && cursor.y >= pos.y as f64
+                        && cursor.y <= pos.y as f64 + CORNER_H * scale,
+                )
+            })()
+            .unwrap_or(false);
+            if over != hot {
+                hot = over;
+                let _ = window.set_ignore_cursor_events(!over);
+            }
+        }
+    });
+}
+
 /// The overlay's lock button (design: widget header).
 #[tauri::command]
 pub fn set_click_through(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
@@ -62,6 +100,8 @@ pub fn hide_overlay(app: tauri::AppHandle) -> Result<(), String> {
 pub fn show_overlay(app: tauri::AppHandle) -> Result<(), String> {
     let window = app.get_webview_window("main").ok_or("overlay window not found")?;
     set_user_hidden(false);
+    // "Open widget" is also the mouse way out of a locked (click-through) meter.
+    apply_click_through(&app, false)?;
     window.show().map_err(|e| e.to_string())?;
     let _ = window.unminimize();
     let _ = window.set_always_on_top(true);
@@ -77,6 +117,7 @@ pub fn start_click_through_hotkey(app: &tauri::AppHandle) {
         .and_then(|state| state.settings.get(CLICK_THROUGH_HOTKEY_KEY))
         .unwrap_or_default();
     let (mods, vk) = parse_hotkey_label(&label).unwrap_or((0x0002 | 0x0001, 0x4C)); // Ctrl+Alt+L
+    watch_lock_corner(app.clone());
     let app = app.clone();
     // The listener thread keeps running after the manager is dropped, as the
     // engine's own manager in lib.rs does.

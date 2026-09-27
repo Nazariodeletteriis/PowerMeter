@@ -418,6 +418,7 @@
       "gsTip": "Gear score"
     },
     "updateAvailable": "Atualização disponível",
-    "updateNotes": "Notas da versão"
+    "updateNotes": "Notas da versão",
+    "unlockHint": "Bloqueado: clique no cadeado ou pressione {key} para desbloquear"
   }
 }

@@ -1232,7 +1232,16 @@ body.legacyUi .pmOnly {
     padding: 4px 6px 6px;
     box-shadow: none;
   }
-  .meter.isPmLocked > :not(.list, .pmGrabber, .pmLockBadge) { display: none; }
+  .meter.isPmLocked > :not(.list, .pmGrabber, .pmLockBadge, .pmLockHint) { display: none; }
+  .pmLockHint {
+    display: block;
+    margin: 0 18px 5px;
+    font-size: 11px;
+    line-height: 1.4;
+    text-align: center;
+    color: var(--pm-widget-text);
+  }
+  .pmLockHint[hidden] { display: none; }
   .meter.isPmLocked .pmGrabber {
     display: block;
     width: 40px;
@@ -1253,6 +1262,16 @@ body.legacyUi .pmOnly {
     width: 10px;
     height: 10px;
   }
+  /* Clickable while locked: padding widens the hit area, hover shows it's live. */
+  .meter.isPmLocked .pmLockBadge {
+    top: 0;
+    right: 0;
+    padding: 4px 6px 8px 14px;
+    cursor: pointer;
+  }
+  .meter.isPmLocked .pmLockBadge:hover { color: #ff4d4d; }
+  .meter.isPmLocked .pmLockBadge:hover svg { transform: scale(1.3); }
+  .pmLockBadge svg { transition: transform 120ms ease-out; }
   .meter.isPmLocked .list,
   .meter.isPmLocked .list.hasRows {
     gap: 2px;

@@ -418,6 +418,7 @@
       "gsTip": "장비 점수"
     },
     "updateAvailable": "업데이트 가능",
-    "updateNotes": "릴리스 노트"
+    "updateNotes": "릴리스 노트",
+    "unlockHint": "잠김: 자물쇠를 클릭하거나 {key}를 눌러 잠금 해제"
   }
 }

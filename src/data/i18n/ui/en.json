@@ -418,6 +418,7 @@
       "gsTip": "Gear score"
     },
     "updateAvailable": "Update available",
-    "updateNotes": "Release notes"
+    "updateNotes": "Release notes",
+    "unlockHint": "Locked. Click the lock or press {key} to unlock"
   }
 }
