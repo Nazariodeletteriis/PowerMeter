@@ -5,6 +5,7 @@ import {
   CheckIcon,
   HeartIcon,
   MagnifyingGlassIcon,
+  PencilSimpleIcon,
   PlusIcon,
   SquaresFourIcon,
   StackIcon,
@@ -16,7 +17,7 @@ import { BUILD_REGIONS, BUILD_TAGS, SAMPLE_BUILDS, SAMPLE_ME, type Ago } from ".
 import { planClass } from "../skills";
 import { ClassAvatar, CLASSES, RELEASED_CLASSES } from "../ui";
 import { GEAR_KEY, gearKey, readGear, type BuildGear } from "./characters/gear";
-import { ago, closeBuild, MY_BUILDS_KEY, openBuild, readMyBuilds, useMem } from "./characters/shared";
+import { ago, closeBuild, DANGER, DeleteBuildModal, MY_BUILDS_KEY, openBuild, readMyBuilds, useMem } from "./characters/shared";
 import type { PageProps } from "./types";
 
 // Standard class portraits, hotlinked at runtime (never bundled): NCSoft's game
@@ -45,7 +46,7 @@ const TABS = [
 ] as const;
 
 // Prototype pg.builds (pBuilds).
-export default function Builds({ t, lang, go, settings, save, onError }: PageProps) {
+export default function Builds({ t, lang, name, go, settings, save, onError }: PageProps) {
   const [f, setF] = useMem("bf", { reg: ALL, cls: ALL, tag: ALL, q: "", tab: "all", page: 1 });
   const [broken, setBroken] = useState<Record<string, boolean>>({});
   // Same like state as the Character Builder, keyed by build title.
@@ -54,9 +55,11 @@ export default function Builds({ t, lang, go, settings, save, onError }: PagePro
   const myBuilds = readMyBuilds(settings[MY_BUILDS_KEY]);
   // The builder's saved gear (same module memory as builder.tsx and item.tsx).
   const [stored, setStored] = useMem<Record<string, BuildGear>>("gear", readGear(settings[GEAR_KEY]));
+  // The build waiting for "Delete?" in the modal.
+  const [del, setDel] = useState<{ t: string; cls: string } | null>(null);
   /** Delete one of your builds, with its gear. */
   const remove = (b: { t: string; cls: string }) => {
-    if (!window.confirm(t("characters.builds.deleteConfirm", { build: b.t }))) return;
+    setDel(null);
     closeBuild(b.t);
     save(MY_BUILDS_KEY, JSON.stringify(myBuilds.filter((x) => x.t !== b.t))).catch(onError);
     const { [gearKey(b.t, b.cls)]: _gone, ...rest } = stored;
@@ -81,7 +84,8 @@ export default function Builds({ t, lang, go, settings, save, onError }: PagePro
       (!f.tag || x.tags.includes(f.tag)) &&
       (x.t.toLowerCase().includes(q) || x.au.toLowerCase().includes(q)),
   );
-  if (f.tab === "mine") list = list.filter((x) => x.au === SAMPLE_ME);
+  // Yours = created or cloned here; the sample builds signed by SAMPLE_ME are examples.
+  if (f.tab === "mine") list = list.filter((x) => "mine" in x);
   if (f.tab === "liked") list = list.filter((x) => liked[x.t]);
   const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
   const page = Math.min(f.page, pages);
@@ -218,20 +222,6 @@ export default function Builds({ t, lang, go, settings, save, onError }: PagePro
                       <HeartIcon weight={L ? "fill" : "regular"} aria-hidden="true" />
                       {x.likes + (L ? 1 : 0)}
                     </button>
-                    {"mine" in x && (
-                      <button
-                        type="button"
-                        title={t("characters.delete")}
-                        aria-label={`${t("characters.delete")} ${x.t}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          remove(x);
-                        }}
-                        style={{ height: 24, padding: "0 7px", borderRadius: 5, border: "1px solid var(--pm-line)", background: "transparent", color: "var(--pm-t2)", cursor: "pointer", display: "flex", alignItems: "center", fontSize: 11, flex: "none" }}
-                      >
-                        <TrashIcon aria-hidden="true" />
-                      </button>
-                    )}
                   </div>
                   <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                     <span className="chPill" style={{ background: "var(--pm-s3)", display: "flex", gap: 4, alignItems: "center" }}>
@@ -253,13 +243,32 @@ export default function Builds({ t, lang, go, settings, save, onError }: PagePro
                   <div style={{ display: "flex", gap: 5, alignItems: "center", minWidth: 0 }}>
                     <span style={{ fontSize: 10, color: "var(--pm-t3)", whiteSpace: "nowrap" }}>{ago(lang, x.ago)}</span>
                     <div style={{ flex: 1 }} />
-                    <span style={{ fontSize: 11, color: "var(--pm-t2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{x.au}</span>
-                    {x.au === SAMPLE_ME && (
+                    <span style={{ fontSize: 11, color: "var(--pm-t2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{"mine" in x ? name : x.au}</span>
+                    {"mine" in x && (
                       <span style={{ fontSize: 9, padding: "1px 5px", borderRadius: 3, border: "1px solid var(--pm-red)", color: "var(--pm-redt)" }}>
                         {t("characters.builds.yours")}
                       </span>
                     )}
                   </div>
+                  {/* Your own builds (created or cloned): edit and delete, spelled out. */}
+                  {"mine" in x && (
+                    <div style={{ display: "flex", gap: 6, paddingTop: 8, borderTop: "1px solid var(--pm-line)" }}>
+                      <button type="button" className="btn sm" style={{ flex: 1 }} onClick={(e) => (e.stopPropagation(), open())}>
+                        <PencilSimpleIcon aria-hidden="true" />
+                        {t("characters.builds.edit")}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn sm"
+                        style={{ flex: 1, ...DANGER }}
+                        aria-label={`${t("characters.delete")} ${x.t}`}
+                        onClick={(e) => (e.stopPropagation(), setDel(x))}
+                      >
+                        <TrashIcon aria-hidden="true" />
+                        {t("characters.delete")}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -281,6 +290,7 @@ export default function Builds({ t, lang, go, settings, save, onError }: PagePro
           </nav>
         )}
       </div>
+      {del && <DeleteBuildModal t={t} build={del.t} onDelete={() => remove(del)} onClose={() => setDel(null)} />}
     </div>
   );
 }

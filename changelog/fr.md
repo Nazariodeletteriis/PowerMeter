@@ -2,6 +2,15 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.12
+
+- Nouveau : Envoyer dans l'historique des combats ouvre une fenêtre pour envoyer les combats sélectionnés ou un fichier enregistré avec Exporter, et permet de se connecter avec Discord depuis là.
+- Nouveau : renommez une build que vous avez créée ou clonée et enregistrez-la ; boutons Modifier et Supprimer sur vos builds, avec une fenêtre de confirmation.
+- Nouveau : les stats des ailes affichent les bonus de l'aile équipée en plus de ceux de la collection.
+- Modifié : les ailes, titres et familiers qui ne donnent aucune stat sont de nouveau listés, après les autres, marqués "Aucune stat".
+- Modifié : Vos builds ne liste que les builds que vous avez créées ou clonées.
+- Corrigé : Télécharger Npcap relance l'installateur (il demande maintenant les droits administrateur au lieu d'échouer silencieusement).
+
 ## 0.2.11
 
 - Nouveau : les stats du Character Builder sont réelles et en direct : stats de base de la classe, équipement (pierres de mana et tous les autres emplacements), Daevanion, collections et titres, calculées comme le fait questlog. La vue Cible affiche le changement sur chaque stat.

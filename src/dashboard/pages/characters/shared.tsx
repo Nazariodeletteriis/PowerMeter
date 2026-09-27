@@ -1,6 +1,8 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { CheckCircleIcon } from "@phosphor-icons/react";
+import { CheckCircleIcon, TrashIcon } from "@phosphor-icons/react";
+import type { T } from "../../i18n";
 import type { Ago } from "../../sample/characters";
+import { Modal } from "../system/Modal";
 import "./characters.css";
 
 // Page state that survives switching page, like the prototype's single state
@@ -59,6 +61,27 @@ export function SectionHead({ title, children, style }: { title: string; childre
       <h2 className="kicker">{title}</h2>
       {children}
     </div>
+  );
+}
+
+/** Red outline for destructive buttons ("Elimina"): no such variant in the prototype's .btn. */
+export const DANGER: CSSProperties = { color: "var(--pm-redt)", borderColor: "var(--pm-red)" };
+
+/** "Delete this build?" with Cancel / Delete: an in-app modal, not window.confirm. */
+export function DeleteBuildModal({ t, build, onDelete, onClose }: { t: T; build: string; onDelete: () => void; onClose: () => void }) {
+  return (
+    <Modal width={420} onClose={onClose} title={(id) => <h2 id={id} style={{ fontSize: 17, fontWeight: 500 }}>{t("characters.builds.deleteTitle")}</h2>}>
+      <div style={{ color: "var(--pm-t2)" }}>{t("characters.builds.deleteConfirm", { build })}</div>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+        <button type="button" className="btn" autoFocus onClick={onClose}>
+          {t("roster.cancel")}
+        </button>
+        <button type="button" className="btn fill" onClick={onDelete}>
+          <TrashIcon aria-hidden="true" />
+          {t("characters.delete")}
+        </button>
+      </div>
+    </Modal>
   );
 }
 

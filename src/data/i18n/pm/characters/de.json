@@ -175,5 +175,10 @@
   "characters.builder.notFused": "Nicht verschmolzen",
   "characters.builder.philosopherHint": "Eine zusätzliche Soul-Imprint-Zeile aus dem Pool dieses Gegenstands.",
   "characters.builder.theostoneHint": "Effekt mit Chance bei Treffer: gibt keine Werte.",
-  "characters.builds.deleteConfirm": "Build „{build}“ löschen? Das lässt sich nicht rückgängig machen."
+  "characters.builds.deleteConfirm": "Build „{build}“ löschen? Das lässt sich nicht rückgängig machen.",
+  "characters.builds.deleteTitle": "Build löschen?",
+  "characters.builds.edit": "Bearbeiten",
+  "characters.builder.editTitle": "Deine Build",
+  "characters.builder.editText": "Umbenennen und Speichern drücken. Änderungen an der Ausrüstung werden sofort gespeichert.",
+  "characters.builder.nameTaken": "Es gibt bereits eine Build mit diesem Namen."
 }

@@ -175,5 +175,10 @@
   "characters.builder.notFused": "未融合",
   "characters.builder.philosopherHint": "从该物品的属性池额外增加一条灵魂刻印。",
   "characters.builder.theostoneHint": "攻击时概率触发的效果：不增加属性。",
-  "characters.builds.deleteConfirm": "删除配装“{build}”？此操作无法撤销。"
+  "characters.builds.deleteConfirm": "删除配装“{build}”？此操作无法撤销。",
+  "characters.builds.deleteTitle": "删除这个配装？",
+  "characters.builds.edit": "编辑",
+  "characters.builder.editTitle": "你的配装",
+  "characters.builder.editText": "改名后点击保存。装备的改动会立即保存。",
+  "characters.builder.nameTaken": "已有同名配装。"
 }

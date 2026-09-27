@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { CheckIcon, CloudArrowUpIcon, ExportIcon, SwordIcon, TrashIcon, WarningOctagonIcon } from "@phosphor-icons/react";
+import { CheckIcon, CloudArrowUpIcon, ExportIcon, FileArrowUpIcon, SwordIcon, TrashIcon, WarningOctagonIcon } from "@phosphor-icons/react";
 import { usePoll } from "../usePoll";
 import { clock } from "./combat/parts";
+import { Modal } from "./system/Modal";
 import type { PageProps } from "./types";
 
 /** FightSummary (src-tauri/src/entity/fight_record.rs), the fields used here. */
@@ -36,6 +37,13 @@ function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
     }
   });
   const [uploading, setUploading] = useState(false);
+  const [upOpen, setUpOpen] = useState(false);
+  const [account, setAccount] = useState<{ name?: string } | null>();
+  const openUpload = () => {
+    setUpOpen(true);
+    run(() => invoke<{ name?: string } | null>("pm_account").then(setAccount, (e) => (setAccount(null), Promise.reject(e))));
+  };
+  const signIn = () => run(() => invoke<{ name?: string }>("pm_login").then(setAccount));
   const [copied, setCopied] = useState("");
 
   const all = (fights.data ?? []).filter((f) => !deleted[f.id]);
@@ -60,26 +68,45 @@ function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
     });
   };
 
-  const upload = () => {
+  // One upload per fight: by id from this PC's history, or a record from an exported file.
+  const upload = (items: { id?: string; fight?: { id?: string; isTrain?: boolean } }[]) => {
     setUploading(true);
     run(async () => {
       try {
-        for (const f of toUpload) {
-          const res = await invoke<{ url?: string }>("upload_combat_log", { id: f.id }).catch((e) => {
+        for (const it of items.filter((x) => !x.fight?.isTrain)) {
+          const res = await invoke<{ url?: string }>("upload_combat_log", it.fight ? { fight: it.fight } : { id: it.id }).catch((e) => {
             throw e === "not signed in" || e === "unauthorized" ? t("combat.upSignIn") : e;
           });
-          setUploaded((u) => {
-            const next = { ...u, [f.id]: String(res?.url ?? "") };
-            localStorage.setItem(UPLOADED, JSON.stringify(next));
-            return next;
-          });
+          const key = it.id ?? it.fight?.id;
+          if (key)
+            setUploaded((u) => {
+              const next = { ...u, [key]: String(res?.url ?? "") };
+              localStorage.setItem(UPLOADED, JSON.stringify(next));
+              return next;
+            });
         }
         setChk({});
+        setUpOpen(false);
       } finally {
         setUploading(false);
       }
     });
   };
+  // An exported file: Export writes an array of fight records; a single record works too.
+  const uploadFile = (file?: File) =>
+    file &&
+    run(async () => {
+      let data: unknown;
+      try {
+        data = JSON.parse(await file.text());
+      } catch {
+        throw t("combat.upBadFile");
+      }
+      const records = (Array.isArray(data) ? data : [data])// Fight records only (Fight history's Export): the server needs bossName and the timings.
+        .filter((r): r is { id?: string; isTrain?: boolean } => !!r && typeof r === "object" && typeof r.bossName === "string" && typeof r.startTimeMs === "number");
+      if (!records.length) throw t("combat.upBadFile");
+      upload(records.map((fight) => ({ fight })));
+    });
 
   // The picked fights, else the filtered list; saved to Downloads by the backend.
   const exportFights = () =>
@@ -118,7 +145,7 @@ function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
         </label>
         <div style={{ flex: 1 }} />
         {picked.length > 0 && <span style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("combat.nSelected", { n: picked.length })}</span>}
-        <button type="button" className="btn fill" disabled={!toUpload.length || uploading} title={toUpload.length ? undefined : t("combat.upPick")} onClick={upload}>
+        <button type="button" className="btn fill" onClick={openUpload}>
           <CloudArrowUpIcon aria-hidden="true" />
           {t("combat.upload")}
         </button>
@@ -236,6 +263,59 @@ function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
                 </div>
               ))}
         </div>
+      )}
+      {upOpen && (
+        <Modal
+          width={520}
+          onClose={() => setUpOpen(false)}
+          title={(id) => (
+            <h2 id={id} style={{ margin: 0, fontSize: 16, fontWeight: 500 }}>
+              {t("combat.upTitle")}
+            </h2>
+          )}
+        >
+          {/* Online logs belong to a PowerMeter account (Discord): without it there is no one to upload for. */}
+          {account === null && (
+            <div className="card" style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8, background: "var(--pm-s2)" }}>
+              <span style={{ color: "var(--pm-t2)" }}>{t("combat.upNeedAccount")}</span>
+              <div>
+                <button type="button" className="btn fill" onClick={signIn}>
+                  {t("combat.upSignInBtn")}
+                </button>
+              </div>
+            </div>
+          )}
+          <div className="card" style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+            <strong style={{ fontWeight: 500 }}>{t("combat.upFromHistory")}</strong>
+            <span style={{ color: "var(--pm-t3)", fontSize: 12 }}>{toUpload.length ? t("combat.nSelected", { n: toUpload.length }) : t("combat.upPick")}</span>
+            <div>
+              <button type="button" className="btn" disabled={!account || !toUpload.length || uploading} onClick={() => upload(toUpload.map((f) => ({ id: f.id })))}>
+                <CloudArrowUpIcon aria-hidden="true" />
+                {t("combat.upload")}
+              </button>
+            </div>
+          </div>
+          <div className="card" style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+            <strong style={{ fontWeight: 500 }}>{t("combat.upFromFile")}</strong>
+            <span style={{ color: "var(--pm-t3)", fontSize: 12 }}>{t("combat.upFromFileHint")}</span>
+            <div>
+              <label className="btn" aria-disabled={!account || uploading} style={!account || uploading ? { opacity: 0.5, pointerEvents: "none" } : { cursor: "pointer" }}>
+                <FileArrowUpIcon aria-hidden="true" />
+                {t("combat.upPickFile")}
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  className="srOnly"
+                  disabled={!account || uploading}
+                  onChange={(e) => {
+                    uploadFile(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+        </Modal>
       )}
     </>
   );

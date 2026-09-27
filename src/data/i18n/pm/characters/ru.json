@@ -175,5 +175,10 @@
   "characters.builder.notFused": "Не слито",
   "characters.builder.philosopherHint": "Одна дополнительная строка soul imprint из пула этого предмета.",
   "characters.builder.theostoneHint": "Эффект с шансом при ударе: характеристик не добавляет.",
-  "characters.builds.deleteConfirm": "Удалить билд «{build}»? Это действие нельзя отменить."
+  "characters.builds.deleteConfirm": "Удалить билд «{build}»? Это действие нельзя отменить.",
+  "characters.builds.deleteTitle": "Удалить этот билд?",
+  "characters.builds.edit": "Изменить",
+  "characters.builder.editTitle": "Ваш билд",
+  "characters.builder.editText": "Переименуйте и нажмите «Сохранить». Изменения снаряжения сохраняются сразу.",
+  "characters.builder.nameTaken": "Билд с таким названием уже есть."
 }

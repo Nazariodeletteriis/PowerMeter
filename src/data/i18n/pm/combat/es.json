@@ -134,6 +134,14 @@
   "combat.you": "(tú)",
   "combat.up.online": "En línea",
   "combat.upSignIn": "Inicia sesión con Discord en Ajustes → Cuenta para subir combates.",
-  "combat.upPick": "Selecciona los combates que quieres subir",
-  "combat.linkCopied": "Enlace copiado"
+  "combat.upPick": "Primero selecciona combates en la lista (los de entrenamiento no se suben).",
+  "combat.linkCopied": "Enlace copiado",
+  "combat.upTitle": "Subir combates",
+  "combat.upNeedAccount": "Los registros en línea se guardan en tu cuenta de PowerMeter: inicia sesión con Discord para subirlos.",
+  "combat.upSignInBtn": "Iniciar sesión con Discord",
+  "combat.upFromHistory": "Desde el historial de combates",
+  "combat.upFromFile": "Desde un archivo exportado",
+  "combat.upFromFileHint": "Un archivo .json guardado con Exportar (desde el historial o el informe de combate).",
+  "combat.upPickFile": "Elegir archivo…",
+  "combat.upBadFile": "Este archivo no es una exportación de combates de PowerMeter."
 }

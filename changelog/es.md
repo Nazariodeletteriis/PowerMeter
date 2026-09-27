@@ -2,6 +2,15 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.12
+
+- Nuevo: Subir en el Historial de combates abre una ventana para subir los combates seleccionados o un archivo guardado con Exportar, y te permite iniciar sesión con Discord desde ahí.
+- Nuevo: renombra una build que creaste o clonaste y guárdala; botones Editar y Eliminar en tus builds, con una ventana de confirmación.
+- Nuevo: las estadísticas de las alas muestran las bonificaciones del ala equipada además de las de la colección.
+- Cambiado: las alas, títulos y mascotas que no dan estadísticas vuelven a aparecer en la lista, después de las demás, marcadas como "Sin estadísticas".
+- Cambiado: Tus builds solo lista las builds que creaste o clonaste.
+- Corregido: Descargar Npcap vuelve a iniciar el instalador (ahora pide permisos de administrador en lugar de fallar en silencio).
+
 ## 0.2.11
 
 - Nuevo: las estadísticas del Character Builder son reales y en vivo: estadísticas base de la clase, equipo (Magicstones y el resto de ranuras), Daevanion, colecciones y títulos, calculadas como lo hace questlog. La vista Objetivo muestra el cambio en cada estadística.

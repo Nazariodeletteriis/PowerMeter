@@ -32,5 +32,9 @@
   "collections.pantheon.colossus": "거상",
   "collections.arcana.level": "카드 레벨",
   "collections.arcana.sub": "보조 스킬",
-  "collections.arcana.set": "세트 효과"
+  "collections.arcana.set": "세트 효과",
+  "collections.noStat": "스탯 없음",
+  "collections.wingEquipped": "장착한 날개",
+  "collections.wingCollection": "날개 컬렉션(레벨)",
+  "collections.wingNoEq": "장착한 날개가 없습니다. 날개에서 장착을 누르세요."
 }

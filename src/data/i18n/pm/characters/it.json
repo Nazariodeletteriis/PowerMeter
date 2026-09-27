@@ -175,5 +175,10 @@
   "characters.builder.notFused": "Non fusa",
   "characters.builder.philosopherHint": "Una riga di soul imprint in più, dal pool di questo oggetto.",
   "characters.builder.theostoneHint": "Effetto con probabilità sul colpo: non aggiunge statistiche.",
-  "characters.builds.deleteConfirm": "Eliminare la build \"{build}\"? L'operazione non si può annullare."
+  "characters.builds.deleteConfirm": "Eliminare la build \"{build}\"? L'operazione non si può annullare.",
+  "characters.builds.deleteTitle": "Eliminare la build?",
+  "characters.builds.edit": "Modifica",
+  "characters.builder.editTitle": "La tua build",
+  "characters.builder.editText": "Rinominala e premi Salva. Le modifiche all'equipaggiamento si salvano subito.",
+  "characters.builder.nameTaken": "Esiste già una build con questo nome."
 }

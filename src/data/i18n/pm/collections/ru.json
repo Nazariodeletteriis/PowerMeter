@@ -32,5 +32,9 @@
   "collections.pantheon.colossus": "Колосс",
   "collections.arcana.level": "Уровень карты",
   "collections.arcana.sub": "Доп. навыки",
-  "collections.arcana.set": "Бонус комплекта"
+  "collections.arcana.set": "Бонус комплекта",
+  "collections.noStat": "Нет характеристик",
+  "collections.wingEquipped": "Надетые крылья",
+  "collections.wingCollection": "Коллекция крыльев (уровни)",
+  "collections.wingNoEq": "Крылья не надеты: нажмите «Надеть» у крыльев."
 }

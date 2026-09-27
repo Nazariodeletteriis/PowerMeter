@@ -2,6 +2,15 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.12
+
+- Neu: Hochladen im Kampfverlauf öffnet ein Fenster, um die ausgewählten Kämpfe oder eine mit Exportieren gespeicherte Datei hochzuladen, und lässt dich von dort aus mit Discord anmelden.
+- Neu: benenne einen von dir erstellten oder geklonten Build um und speichere ihn; Bearbeiten- und Löschen-Buttons bei deinen Builds, mit einem Bestätigungsfenster.
+- Neu: die Flügelwerte zeigen die Boni des ausgerüsteten Flügels zusätzlich zu denen der Sammlung.
+- Geändert: Flügel, Titel und Begleiter ohne Werte werden wieder aufgelistet, nach den anderen, markiert mit "Keine Werte".
+- Geändert: Deine Builds zeigt nur die Builds, die du erstellt oder geklont hast.
+- Behoben: Npcap herunterladen startet den Installer erneut (er fragt jetzt nach Administratorrechten, statt stillschweigend zu scheitern).
+
 ## 0.2.11
 
 - Neu: die Werte im Character Builder sind echt und live: Klassen-Basiswerte, Ausrüstung (Magiesteine und jeder andere Slot), Daevanion, Sammlungen und Titel, berechnet so wie questlog es macht. Die Ziel-Ansicht zeigt die Änderung bei jedem Wert.

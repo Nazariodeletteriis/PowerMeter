@@ -32,5 +32,9 @@
   "collections.pantheon.colossus": "Colosso",
   "collections.arcana.level": "Nível da carta",
   "collections.arcana.sub": "Habilidades secundárias",
-  "collections.arcana.set": "Bônus de conjunto"
+  "collections.arcana.set": "Bônus de conjunto",
+  "collections.noStat": "Sem atributos",
+  "collections.wingEquipped": "Asas equipadas",
+  "collections.wingCollection": "Coleção de asas (níveis)",
+  "collections.wingNoEq": "Sem asas equipadas: carrega em Equipar numas asas."
 }

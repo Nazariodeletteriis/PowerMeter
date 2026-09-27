@@ -175,5 +175,10 @@
   "characters.builder.notFused": "Sin fusionar",
   "characters.builder.philosopherHint": "Una línea de soul imprint adicional del grupo de este objeto.",
   "characters.builder.theostoneHint": "Efecto con probabilidad al golpear: no añade estadísticas.",
-  "characters.builds.deleteConfirm": "¿Eliminar el build «{build}»? No se puede deshacer."
+  "characters.builds.deleteConfirm": "¿Eliminar el build «{build}»? No se puede deshacer.",
+  "characters.builds.deleteTitle": "¿Eliminar este build?",
+  "characters.builds.edit": "Editar",
+  "characters.builder.editTitle": "Tu build",
+  "characters.builder.editText": "Cámbiale el nombre y pulsa Guardar. Los cambios de equipo se guardan al momento.",
+  "characters.builder.nameTaken": "Ya existe un build con este nombre."
 }

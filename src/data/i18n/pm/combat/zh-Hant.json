@@ -134,6 +134,14 @@
   "combat.you": "（你）",
   "combat.up.online": "線上",
   "combat.upSignIn": "請在 設定 → 帳戶 中以 Discord 登入後再上傳戰鬥。",
-  "combat.upPick": "選擇要上傳的戰鬥",
-  "combat.linkCopied": "連結已複製"
+  "combat.upPick": "請先在清單中選擇戰鬥（訓練戰鬥不會上傳）。",
+  "combat.linkCopied": "連結已複製",
+  "combat.upTitle": "上傳戰鬥",
+  "combat.upNeedAccount": "線上紀錄儲存在你的 PowerMeter 帳戶中：請以 Discord 登入後上傳。",
+  "combat.upSignInBtn": "以 Discord 登入",
+  "combat.upFromHistory": "從戰鬥紀錄",
+  "combat.upFromFile": "從匯出的檔案",
+  "combat.upFromFileHint": "以「匯出」儲存的 .json 檔案（來自戰鬥紀錄或戰鬥報告）。",
+  "combat.upPickFile": "選擇檔案…",
+  "combat.upBadFile": "此檔案不是 PowerMeter 戰鬥匯出檔。"
 }

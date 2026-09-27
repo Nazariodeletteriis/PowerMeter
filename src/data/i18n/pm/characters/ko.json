@@ -175,5 +175,10 @@
   "characters.builder.notFused": "융합 안 됨",
   "characters.builder.philosopherHint": "이 아이템의 풀에서 영혼 각인 한 줄을 추가합니다.",
   "characters.builder.theostoneHint": "공격 시 확률로 발동하는 효과: 능력치는 오르지 않습니다.",
-  "characters.builds.deleteConfirm": "빌드 \"{build}\"을(를) 삭제할까요? 되돌릴 수 없습니다."
+  "characters.builds.deleteConfirm": "빌드 \"{build}\"을(를) 삭제할까요? 되돌릴 수 없습니다.",
+  "characters.builds.deleteTitle": "이 빌드를 삭제할까요?",
+  "characters.builds.edit": "편집",
+  "characters.builder.editTitle": "내 빌드",
+  "characters.builder.editText": "이름을 바꾸고 저장을 누르세요. 장비 변경은 바로 저장됩니다.",
+  "characters.builder.nameTaken": "같은 이름의 빌드가 이미 있습니다."
 }

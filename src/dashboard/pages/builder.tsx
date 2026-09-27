@@ -14,6 +14,7 @@ import {
   LightningIcon,
   LockSimpleIcon,
   MagnifyingGlassIcon,
+  PencilSimpleIcon,
   PictureInPictureIcon,
   PlusCircleIcon,
   PlusIcon,
@@ -22,10 +23,12 @@ import {
   TargetIcon,
   TextAlignLeftIcon,
   TShirtIcon,
+  TrashIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import {
   MY_BUILD_ICONS,
+  SAMPLE_BUILDS,
   SAMPLE_COMMENTS,
   SAMPLE_ME,
   SAMPLE_MY_BUILDS,
@@ -40,7 +43,7 @@ import { dvSummary, readDv } from "./daevanion";
 import { REGIONS } from "../Onboarding";
 import { classSkills, planClass, SkillIcon } from "../skills";
 import { art, ClassAvatar, CLASSES, fmt, RARITY } from "../ui";
-import { ago, MY_BUILDS_KEY, readMyBuilds, SectionHead, useMem, useToast, type BuildSrc } from "./characters/shared";
+import { ago, closeBuild, DANGER, DeleteBuildModal, MY_BUILDS_KEY, readMyBuilds, SectionHead, useMem, useToast, type BuildSrc } from "./characters/shared";
 import {
   arcanaScore,
   baseStats,
@@ -118,11 +121,21 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   const [share, setShare] = useState(false);
   const [compare, setCompare] = useState(false);
   const [noClone, setNoClone] = useState(false);
+  const [del, setDel] = useState(false);
+  // Rename field of a build of yours, tied to the title it was typed for (any other build shows its own title).
+  const [draft, setDraft] = useState({ of: "", v: "" });
+  const nameField = draft.of === src.t ? draft.v : src.t;
   const [toast, showToast] = useToast();
 
   const n = (x: number) => fmt(x, lang);
   const ro = !src.own;
   const isNew = !!src.isNew;
+  // Created or cloned here: renamable and deletable (the default own build is neither).
+  const isMine = src.own && !isNew && myBuilds.some((x) => x.t === src.t);
+  // The name Save would give it; titles are keys (gear, likes), so no two builds share one.
+  const typed = (isNew ? newName || t("characters.builder.newBuild") : nameField).trim();
+  const nameTaken = typed !== src.t && (typed === OWN_BUILD || SAMPLE_BUILDS.some((x) => x.t === typed) || myBuilds.some((x) => x.t === typed));
+  const badName = (isNew || isMine) && (!typed || nameTaken);
   const tgt = view === "target";
   const [, clsCol] = CLASSES[src.cls];
   const title = isNew ? newName || t("characters.builder.newBuild") : src.t;
@@ -331,17 +344,36 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
     setSrc(mine);
   };
   const save = () => {
+    if (badName) return;
     showToast(
       isNew
         ? { title: t("characters.builder.createdTitle"), text: t("characters.builder.createdText") }
         : { title: t("characters.builder.savedTitle"), text: t("characters.builder.savedText") },
     );
-    if (!isNew) return;
-    const nt = newName || t("characters.builder.newBuild");
-    storeGear(`${nt}|${src.cls}`, newGear);
-    const mine = { t: nt, au: SAMPLE_ME, cls: src.cls, own: true, tags: newTags };
-    addMine(mine);
-    setSrc(mine);
+    if (isNew) {
+      storeGear(keyOf(typed, src.cls), newGear);
+      const mine = { t: typed, au: SAMPLE_ME, cls: src.cls, own: true, tags: newTags };
+      addMine(mine);
+      setSrc(mine);
+    } else if (isMine && typed !== src.t) {
+      // Rename: same place in "Your builds", gear moved to the new title's key.
+      const renamed = { ...src, t: typed };
+      const { [gearKey]: moved, ...rest } = stored;
+      const all = moved ? { ...rest, [keyOf(typed, src.cls)]: moved } : rest;
+      setStored(all);
+      saveSetting(GEAR_KEY, JSON.stringify(all)).catch(onError);
+      saveSetting(MY_BUILDS_KEY, JSON.stringify(myBuilds.map((x) => (x.t === src.t ? renamed : x)))).catch(onError);
+      setSrc(renamed);
+    }
+  };
+  /** Delete this build of yours (after the modal), with its gear, and go back to the list. */
+  const remove = () => {
+    closeBuild(src.t);
+    const { [gearKey]: _gone, ...rest } = stored;
+    setStored(rest);
+    saveSetting(GEAR_KEY, JSON.stringify(rest)).catch(onError);
+    saveSetting(MY_BUILDS_KEY, JSON.stringify(myBuilds.filter((x) => x.t !== src.t))).catch(onError);
+    go("builds");
   };
   const L = !!liked[src.t];
   const likeBuild = () => setLiked({ ...liked, [src.t]: !L });
@@ -450,7 +482,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
           {t("characters.share.button")}
         </button>
         {!ro && (
-          <button type="button" className="btn sm fill" style={{ padding: "0 12px" }} onClick={save}>
+          <button type="button" className="btn sm fill" style={{ padding: "0 12px" }} disabled={badName} onClick={save}>
             <FloppyDiskIcon aria-hidden="true" />
             {isNew ? t("characters.builds.create") : t("characters.save")}
           </button>
@@ -486,6 +518,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
             aria-label={t("characters.builder.namePlaceholder")}
             style={{ height: 32, width: 220 }}
           />
+          {nameTaken && <NameTaken t={t} />}
           <div role="group" aria-label={t("characters.builds.tag")} style={{ flexBasis: "100%", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 5, paddingLeft: 30 }}>
             <span className="kicker" style={{ marginRight: 4 }}>{t("characters.builds.tag")}</span>
             {BUILD_TAGS.map((tag) => (
@@ -500,6 +533,31 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
               </button>
             ))}
           </div>
+        </div>
+      )}
+      {isMine && (
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, padding: "10px 14px", margin: "-4px 0 12px", borderRadius: 8, background: "var(--pm-s1)", border: "1px solid var(--pm-line)", boxShadow: "inset 3px 0 0 var(--pm-red)" }}>
+          <PencilSimpleIcon aria-hidden="true" style={{ fontSize: 18, color: "var(--pm-redt)", flex: "none" }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 500 }}>{t("characters.builder.editTitle")}</div>
+            <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("characters.builder.editText")}</div>
+          </div>
+          <input
+            className="input"
+            value={nameField}
+            onChange={(e) => setDraft({ of: src.t, v: e.target.value })}
+            onKeyDown={(e) => e.key === "Enter" && save()}
+            placeholder={t("characters.builder.namePlaceholder")}
+            aria-label={t("characters.builder.namePlaceholder")}
+            aria-invalid={badName}
+            style={{ height: 32, width: 260 }}
+          />
+          {/* Here, not in the toolbar: one more button there wraps it onto two rows. */}
+          <button type="button" className="btn" style={DANGER} onClick={() => setDel(true)}>
+            <TrashIcon aria-hidden="true" />
+            {t("characters.delete")}
+          </button>
+          {nameTaken && <NameTaken t={t} />}
         </div>
       )}
       {toast}
@@ -1039,6 +1097,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
           <div style={{ color: "var(--pm-t2)" }}>{t("characters.builder.noCloneText", { cls: src.cls, mine: myCls })}</div>
         </Modal>
       )}
+      {del && <DeleteBuildModal t={t} build={src.t} onDelete={remove} onClose={() => setDel(false)} />}
       {share && <ShareModal t={t} lang={lang} kind="build" text={shareText} onClose={() => setShare(false)} onError={onError} />}
       {compare && (
         <Modal
@@ -1092,5 +1151,14 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
         </Modal>
       )}
     </>
+  );
+}
+
+/** Under the build name field: the title is already used by another build. */
+function NameTaken({ t }: { t: PageProps["t"] }) {
+  return (
+    <div role="alert" style={{ flexBasis: "100%", paddingLeft: 30, fontSize: 12, color: "var(--pm-redt)" }}>
+      {t("characters.builder.nameTaken")}
+    </div>
   );
 }

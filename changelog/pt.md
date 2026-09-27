@@ -2,6 +2,15 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.12
+
+- Novo: Enviar no Histórico de combates abre uma janela para enviar os combates selecionados ou um arquivo salvo com Exportar, e permite entrar com o Discord a partir dali.
+- Novo: renomeie uma build que você criou ou clonou e salve-a; botões Editar e Excluir nas suas builds, com uma janela de confirmação.
+- Novo: os atributos das asas mostram os bônus da asa equipada além dos da coleção.
+- Alterado: asas, títulos e mascotes sem atributos voltam a aparecer na lista, depois dos demais, marcados como "Sem atributos".
+- Alterado: Suas builds só lista as builds que você criou ou clonou.
+- Corrigido: Baixar Npcap inicia o instalador novamente (agora ele pede permissões de administrador em vez de falhar silenciosamente).
+
 ## 0.2.11
 
 - Novo: os atributos do Character Builder são reais e em tempo real: atributos base da classe, equipamento (Magicstones e todos os outros slots), Daevanion, coleções e títulos, calculados da mesma forma que o questlog. A vista Alvo mostra a mudança em cada atributo.

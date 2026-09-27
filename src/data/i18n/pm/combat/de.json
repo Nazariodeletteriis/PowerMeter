@@ -134,6 +134,14 @@
   "combat.you": "(du)",
   "combat.up.online": "Online",
   "combat.upSignIn": "Melde dich unter Einstellungen → Konto mit Discord an, um Kämpfe hochzuladen.",
-  "combat.upPick": "Wähle die Kämpfe zum Hochladen aus",
-  "combat.linkCopied": "Link kopiert"
+  "combat.upPick": "Wähle zuerst Kämpfe in der Liste aus (Trainingskämpfe werden nicht hochgeladen).",
+  "combat.linkCopied": "Link kopiert",
+  "combat.upTitle": "Kämpfe hochladen",
+  "combat.upNeedAccount": "Online-Logs werden in deinem PowerMeter-Konto gespeichert: melde dich mit Discord an, um sie hochzuladen.",
+  "combat.upSignInBtn": "Mit Discord anmelden",
+  "combat.upFromHistory": "Aus dem Kampfverlauf",
+  "combat.upFromFile": "Aus einer exportierten Datei",
+  "combat.upFromFileHint": "Eine mit Exportieren gespeicherte .json-Datei (aus dem Kampfverlauf oder dem Kampfbericht).",
+  "combat.upPickFile": "Datei wählen…",
+  "combat.upBadFile": "Diese Datei ist kein PowerMeter-Kampfexport."
 }

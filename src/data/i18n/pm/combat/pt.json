@@ -134,6 +134,14 @@
   "combat.you": "(você)",
   "combat.up.online": "Online",
   "combat.upSignIn": "Entre com o Discord em Configurações → Conta para enviar combates.",
-  "combat.upPick": "Selecione os combates para enviar",
-  "combat.linkCopied": "Link copiado"
+  "combat.upPick": "Primeiro selecione combates na lista (combates de treino não são enviados).",
+  "combat.linkCopied": "Link copiado",
+  "combat.upTitle": "Enviar combates",
+  "combat.upNeedAccount": "Os logs online são salvos na sua conta PowerMeter: entre com o Discord para enviá-los.",
+  "combat.upSignInBtn": "Entrar com o Discord",
+  "combat.upFromHistory": "Do histórico de combates",
+  "combat.upFromFile": "De um arquivo exportado",
+  "combat.upFromFileHint": "Um arquivo .json salvo com Exportar (do histórico ou do relatório de combate).",
+  "combat.upPickFile": "Escolher arquivo…",
+  "combat.upBadFile": "Este arquivo não é uma exportação de combates do PowerMeter."
 }

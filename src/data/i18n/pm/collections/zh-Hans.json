@@ -32,5 +32,9 @@
   "collections.pantheon.colossus": "巨像",
   "collections.arcana.level": "卡牌等级",
   "collections.arcana.sub": "副技能",
-  "collections.arcana.set": "套装效果"
+  "collections.arcana.set": "套装效果",
+  "collections.noStat": "无属性",
+  "collections.wingEquipped": "已装备的翅膀",
+  "collections.wingCollection": "翅膀收藏（等级）",
+  "collections.wingNoEq": "未装备翅膀：在翅膀上点击装备。"
 }

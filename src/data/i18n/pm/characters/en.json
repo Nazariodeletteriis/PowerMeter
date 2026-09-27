@@ -175,5 +175,10 @@
   "characters.builder.notFused": "Not fused",
   "characters.builder.philosopherHint": "One extra soul imprint line from this item's pool.",
   "characters.builder.theostoneHint": "An effect with a chance on hit: it adds no stat.",
-  "characters.builds.deleteConfirm": "Delete the build \"{build}\"? This can't be undone."
+  "characters.builds.deleteConfirm": "Delete the build \"{build}\"? This can't be undone.",
+  "characters.builds.deleteTitle": "Delete this build?",
+  "characters.builds.edit": "Edit",
+  "characters.builder.editTitle": "Your build",
+  "characters.builder.editText": "Rename it and press Save. Gear changes are saved as you make them.",
+  "characters.builder.nameTaken": "A build with this name already exists."
 }

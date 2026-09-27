@@ -175,5 +175,10 @@
   "characters.builder.notFused": "未融合",
   "characters.builder.philosopherHint": "このアイテムのプールからソウル刻印を1行追加します。",
   "characters.builder.theostoneHint": "攻撃時に一定確率で発動する効果：ステータスは増えません。",
-  "characters.builds.deleteConfirm": "ビルド「{build}」を削除しますか?元に戻せません。"
+  "characters.builds.deleteConfirm": "ビルド「{build}」を削除しますか?元に戻せません。",
+  "characters.builds.deleteTitle": "このビルドを削除しますか?",
+  "characters.builds.edit": "編集",
+  "characters.builder.editTitle": "あなたのビルド",
+  "characters.builder.editText": "名前を変更して保存を押してください。装備の変更はすぐに保存されます。",
+  "characters.builder.nameTaken": "同じ名前のビルドがすでにあります。"
 }

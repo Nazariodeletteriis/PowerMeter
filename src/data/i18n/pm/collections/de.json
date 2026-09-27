@@ -32,5 +32,9 @@
   "collections.pantheon.colossus": "Koloss",
   "collections.arcana.level": "Kartenstufe",
   "collections.arcana.sub": "Nebenfertigkeiten",
-  "collections.arcana.set": "Setbonus"
+  "collections.arcana.set": "Setbonus",
+  "collections.noStat": "Keine Werte",
+  "collections.wingEquipped": "Ausgerüstete Flügel",
+  "collections.wingCollection": "Flügelsammlung (Stufen)",
+  "collections.wingNoEq": "Keine Flügel ausgerüstet: bei einem Flügel auf Ausrüsten klicken."
 }

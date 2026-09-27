@@ -4,6 +4,15 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.2.12
+
+- New: Upload in Fight history opens a window to upload the selected fights or a file saved with Export, and lets you sign in with Discord from there.
+- New: rename a build you created or cloned and save it; Edit and Delete buttons on your builds, with a confirmation window.
+- New: the wings stats show the equipped wing's bonuses apart from the collection's.
+- Changed: wings, titles and pets that give no stats are listed again, after the others, marked "No stats".
+- Changed: Your builds only lists the builds you created or cloned.
+- Fixed: Download Npcap starts the installer again (it now asks for administrator rights instead of failing silently).
+
 ## 0.2.11
 
 - New: the Character Builder stats are real and live: class base stats, gear (Magicstones and every other socket), Daevanion, collections and titles, computed the way questlog does. The Target view shows the change on each stat.

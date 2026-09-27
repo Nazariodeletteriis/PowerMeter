@@ -143,20 +143,25 @@ pub async fn upload_combat_log(
     state: tauri::State<'_, AppState>,
     id: Option<String>,
     visibility: Option<String>,
+    // A fight record from a file exported by Fight history, uploaded as is.
+    fight: Option<Value>,
 ) -> Result<Value, String> {
     let token = state.settings.get(TOKEN_KEY).ok_or("not signed in")?;
-    let id = match id {
-        Some(id) => id,
-        None => state
-            .fight_history
-            .list_fights()
-            .into_iter()
-            .filter(|f| !f.is_train && !f.is_live)
-            .max_by_key(|f| f.start_time_ms)
-            .map(|f| f.id)
-            .ok_or("no saved fight to upload")?,
+    let fight = match (fight, id) {
+        (Some(fight), _) => fight,
+        (None, Some(id)) => serde_json::to_value(state.fight_history.load_fight(&id)?).map_err(|e| e.to_string())?,
+        (None, None) => {
+            let id = state
+                .fight_history
+                .list_fights()
+                .into_iter()
+                .filter(|f| !f.is_train && !f.is_live)
+                .max_by_key(|f| f.start_time_ms)
+                .map(|f| f.id)
+                .ok_or("no saved fight to upload")?;
+            serde_json::to_value(state.fight_history.load_fight(&id)?).map_err(|e| e.to_string())?
+        }
     };
-    let fight = state.fight_history.load_fight(&id)?;
     let body = json!({ "fight": fight, "visibility": visibility.unwrap_or_else(|| "unlisted".into()) });
     let res = post_json(&format!("{}/api/logs", server_url(&state)), Some(&token), &body).await;
     if matches!(&res, Err(e) if e == "unauthorized") {

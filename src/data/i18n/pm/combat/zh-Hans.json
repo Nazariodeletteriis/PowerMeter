@@ -134,6 +134,14 @@
   "combat.you": "（你）",
   "combat.up.online": "在线",
   "combat.upSignIn": "请在 设置 → 账户 中用 Discord 登录后再上传战斗。",
-  "combat.upPick": "选择要上传的战斗",
-  "combat.linkCopied": "链接已复制"
+  "combat.upPick": "请先在列表中选择战斗（训练战斗不会上传）。",
+  "combat.linkCopied": "链接已复制",
+  "combat.upTitle": "上传战斗",
+  "combat.upNeedAccount": "在线日志保存在你的 PowerMeter 账户中：请用 Discord 登录后上传。",
+  "combat.upSignInBtn": "用 Discord 登录",
+  "combat.upFromHistory": "从战斗记录",
+  "combat.upFromFile": "从导出的文件",
+  "combat.upFromFileHint": "用“导出”保存的 .json 文件（来自战斗记录或战斗报告）。",
+  "combat.upPickFile": "选择文件…",
+  "combat.upBadFile": "此文件不是 PowerMeter 战斗导出文件。"
 }

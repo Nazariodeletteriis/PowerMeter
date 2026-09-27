@@ -2,6 +2,15 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.12
+
+- Nuovo: Carica in Storico combattimenti apre una finestra per caricare i combattimenti selezionati o un file salvato con Esporta, e da lì permette di accedere con Discord.
+- Nuovo: rinomina una build che hai creato o clonato e salvala; pulsanti Modifica ed Elimina sulle tue build, con una finestra di conferma.
+- Nuovo: le statistiche delle ali mostrano i bonus dell'ala equipaggiata oltre a quelli della collezione.
+- Cambiato: ali, titoli e pet che non danno statistiche sono di nuovo elencati, dopo gli altri, contrassegnati "Nessuna stat".
+- Cambiato: Le tue build elenca solo le build che hai creato o clonato.
+- Corretto: Scarica Npcap avvia di nuovo l'installer (ora chiede i diritti di amministratore invece di fallire in silenzio).
+
 ## 0.2.11
 
 - Nuovo: le statistiche del Character Builder sono reali e live: statistiche base della classe, equip (Magicstone e ogni altro slot), Daevanion, collezioni e titoli, calcolate come fa questlog. La vista Obiettivo mostra la variazione su ogni statistica.

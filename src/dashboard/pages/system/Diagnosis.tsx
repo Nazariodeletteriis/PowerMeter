@@ -40,7 +40,7 @@ export function Diagnosis({ t, onClose, onError }: { t: T; onClose: () => void; 
       ok: npcap.data === true,
       text: npcap.error ?? t(npcap.data ? "organizer.diag.npcapOk" : "organizer.diag.npcapMissing"),
       // Same as onboarding: official installer, else the download page.
-      fix: () => invoke<boolean>("install_npcap").then((ok) => ok || invoke("open_url", { url: NPCAP_URL })),
+      fix: () => invoke("install_npcap").catch(() => invoke("open_url", { url: NPCAP_URL })),
     },
     {
       label: t("organizer.diag.admin"),

@@ -134,6 +134,14 @@
   "combat.you": "(tu)",
   "combat.up.online": "Online",
   "combat.upSignIn": "Accedi con Discord in Impostazioni → Account per caricare i combattimenti.",
-  "combat.upPick": "Seleziona i combattimenti da caricare",
-  "combat.linkCopied": "Link copiato"
+  "combat.upPick": "Prima seleziona i combattimenti nella lista (quelli di allenamento non si caricano).",
+  "combat.linkCopied": "Link copiato",
+  "combat.upTitle": "Carica combattimenti",
+  "combat.upNeedAccount": "I log online vengono salvati sul tuo account PowerMeter: accedi con Discord per caricarli.",
+  "combat.upSignInBtn": "Accedi con Discord",
+  "combat.upFromHistory": "Dallo Storico combattimenti",
+  "combat.upFromFile": "Da un file esportato",
+  "combat.upFromFileHint": "Un file .json salvato con Esporta (dallo Storico o dal report di combattimento).",
+  "combat.upPickFile": "Scegli file…",
+  "combat.upBadFile": "Questo file non è un export di combattimenti PowerMeter."
 }

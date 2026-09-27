@@ -32,5 +32,9 @@
   "collections.pantheon.colossus": "Colosse",
   "collections.arcana.level": "Niveau de carte",
   "collections.arcana.sub": "Compétences secondaires",
-  "collections.arcana.set": "Bonus d'ensemble"
+  "collections.arcana.set": "Bonus d'ensemble",
+  "collections.noStat": "Aucune stat",
+  "collections.wingEquipped": "Ailes équipées",
+  "collections.wingCollection": "Collection d'ailes (niveaux)",
+  "collections.wingNoEq": "Aucune aile équipée : clique sur Équiper sur une aile."
 }

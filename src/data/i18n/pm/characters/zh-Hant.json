@@ -175,5 +175,10 @@
   "characters.builder.notFused": "未融合",
   "characters.builder.philosopherHint": "從該物品的屬性池額外增加一條靈魂刻印。",
   "characters.builder.theostoneHint": "攻擊時機率觸發的效果：不增加屬性。",
-  "characters.builds.deleteConfirm": "刪除配置「{build}」？此操作無法復原。"
+  "characters.builds.deleteConfirm": "刪除配置「{build}」？此操作無法復原。",
+  "characters.builds.deleteTitle": "刪除這個配置？",
+  "characters.builds.edit": "編輯",
+  "characters.builder.editTitle": "你的配置",
+  "characters.builder.editText": "改名後點擊儲存。裝備的變更會立即儲存。",
+  "characters.builder.nameTaken": "已有同名配置。"
 }

@@ -134,6 +134,14 @@
   "combat.you": "(自分)",
   "combat.up.online": "オンライン",
   "combat.upSignIn": "戦闘をアップロードするには、設定 → アカウントで Discord にサインインしてください。",
-  "combat.upPick": "アップロードする戦闘を選択してください",
-  "combat.linkCopied": "リンクをコピーしました"
+  "combat.upPick": "先にリストで戦闘を選択してください（トレーニング戦闘はアップロードされません）。",
+  "combat.linkCopied": "リンクをコピーしました",
+  "combat.upTitle": "戦闘をアップロード",
+  "combat.upNeedAccount": "オンラインログは PowerMeter アカウントに保存されます。アップロードするには Discord でサインインしてください。",
+  "combat.upSignInBtn": "Discord でサインイン",
+  "combat.upFromHistory": "戦闘履歴から",
+  "combat.upFromFile": "エクスポートしたファイルから",
+  "combat.upFromFileHint": "エクスポートで保存した .json ファイル（戦闘履歴または戦闘レポートから）。",
+  "combat.upPickFile": "ファイルを選択…",
+  "combat.upBadFile": "このファイルは PowerMeter の戦闘エクスポートではありません。"
 }

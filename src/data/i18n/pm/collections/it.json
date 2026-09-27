@@ -32,5 +32,9 @@
   "collections.pantheon.colossus": "Colosso",
   "collections.arcana.level": "Livello carta",
   "collections.arcana.sub": "Sub skill",
-  "collections.arcana.set": "Bonus set"
+  "collections.arcana.set": "Bonus set",
+  "collections.noStat": "Nessuna stat",
+  "collections.wingEquipped": "Ala equipaggiata",
+  "collections.wingCollection": "Collezione ali (livelli)",
+  "collections.wingNoEq": "Nessuna ala equipaggiata: premi Equipaggia su un'ala."
 }

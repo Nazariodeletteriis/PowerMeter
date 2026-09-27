@@ -32,5 +32,9 @@
   "collections.pantheon.colossus": "Colossus",
   "collections.arcana.level": "Card level",
   "collections.arcana.sub": "Sub skills",
-  "collections.arcana.set": "Set bonus"
+  "collections.arcana.set": "Set bonus",
+  "collections.noStat": "No stats",
+  "collections.wingEquipped": "Equipped wings",
+  "collections.wingCollection": "Wing collection (levels)",
+  "collections.wingNoEq": "No wings equipped: press Equip on a wing."
 }

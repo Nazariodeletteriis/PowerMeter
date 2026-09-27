@@ -175,5 +175,10 @@
   "characters.builder.notFused": "Non fusionnée",
   "characters.builder.philosopherHint": "Une ligne de soul imprint supplémentaire, tirée du pool de cet objet.",
   "characters.builder.theostoneHint": "Effet avec une chance au coup : n'ajoute aucune statistique.",
-  "characters.builds.deleteConfirm": "Supprimer le build « {build} » ? Action irréversible."
+  "characters.builds.deleteConfirm": "Supprimer le build « {build} » ? Action irréversible.",
+  "characters.builds.deleteTitle": "Supprimer ce build ?",
+  "characters.builds.edit": "Modifier",
+  "characters.builder.editTitle": "Ton build",
+  "characters.builder.editText": "Renomme-le puis clique sur Enregistrer. Les changements d'équipement sont enregistrés aussitôt.",
+  "characters.builder.nameTaken": "Un build porte déjà ce nom."
 }

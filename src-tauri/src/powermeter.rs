@@ -230,8 +230,28 @@ pub async fn install_npcap() -> Result<(), String> {
         .map_err(|e| e.to_string())?;
     let installer = std::env::temp_dir().join(file.trim_start_matches("dist/"));
     std::fs::write(&installer, &bytes).map_err(|e| e.to_string())?;
-    std::process::Command::new(&installer).spawn().map_err(|e| e.to_string())?;
-    Ok(())
+    run_installer(&installer)
+}
+
+/// The Npcap installer needs admin: CreateProcess (Command::spawn) fails with
+/// ERROR_ELEVATION_REQUIRED when the app itself isn't elevated, so start it
+/// through ShellExecute "runas", which shows UAC when needed.
+#[cfg(windows)]
+fn run_installer(path: &std::path::Path) -> Result<(), String> {
+    use windows::core::{w, HSTRING, PCWSTR};
+    use windows::Win32::UI::Shell::ShellExecuteW;
+    use windows::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
+    let result = unsafe { ShellExecuteW(None, w!("runas"), &HSTRING::from(path.as_os_str()), PCWSTR::null(), PCWSTR::null(), SW_SHOWNORMAL) };
+    if result.0 as usize > 32 {
+        Ok(())
+    } else {
+        Err(format!("could not start the Npcap installer (code {})", result.0 as usize))
+    }
+}
+
+#[cfg(not(windows))]
+fn run_installer(path: &std::path::Path) -> Result<(), String> {
+    std::process::Command::new(path).spawn().map(|_| ()).map_err(|e| e.to_string())
 }
 
 /// Async for the same reason as `open_settings_window`: building a window from

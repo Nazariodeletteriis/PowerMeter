@@ -134,6 +134,14 @@
   "combat.you": "(ты)",
   "combat.up.online": "Онлайн",
   "combat.upSignIn": "Войдите через Discord в Настройки → Аккаунт, чтобы загружать бои.",
-  "combat.upPick": "Выберите бои для загрузки",
-  "combat.linkCopied": "Ссылка скопирована"
+  "combat.upPick": "Сначала выберите бои в списке (тренировочные бои не загружаются).",
+  "combat.linkCopied": "Ссылка скопирована",
+  "combat.upTitle": "Загрузить бои",
+  "combat.upNeedAccount": "Онлайн-логи сохраняются в вашем аккаунте PowerMeter: войдите через Discord, чтобы загружать их.",
+  "combat.upSignInBtn": "Войти через Discord",
+  "combat.upFromHistory": "Из истории боёв",
+  "combat.upFromFile": "Из экспортированного файла",
+  "combat.upFromFileHint": "Файл .json, сохранённый кнопкой «Экспорт» (из истории или отчёта о бое).",
+  "combat.upPickFile": "Выбрать файл…",
+  "combat.upBadFile": "Этот файл не является экспортом боёв PowerMeter."
 }

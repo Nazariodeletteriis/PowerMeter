@@ -134,6 +134,14 @@
   "combat.you": "(you)",
   "combat.up.online": "Online",
   "combat.upSignIn": "Sign in with Discord in Settings → Account to upload fights.",
-  "combat.upPick": "Select the fights to upload",
-  "combat.linkCopied": "Link copied"
+  "combat.upPick": "Select fights in the list first (training fights are not uploaded).",
+  "combat.linkCopied": "Link copied",
+  "combat.upTitle": "Upload fights",
+  "combat.upNeedAccount": "Online logs are saved to your PowerMeter account: sign in with Discord to upload them.",
+  "combat.upSignInBtn": "Sign in with Discord",
+  "combat.upFromHistory": "From Fight history",
+  "combat.upFromFile": "From an exported file",
+  "combat.upFromFileHint": "A .json file saved with Export (from Fight history or the fight report).",
+  "combat.upPickFile": "Choose file…",
+  "combat.upBadFile": "This file is not a PowerMeter fight export."
 }
