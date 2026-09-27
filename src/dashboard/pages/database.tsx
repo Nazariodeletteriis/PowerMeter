@@ -18,6 +18,7 @@ import {
   TrophyIcon,
   type Icon,
 } from "@phosphor-icons/react";
+import { CollectionBonus } from "./characters/collections";
 import type { PageProps } from "./types";
 import { DB_TYPES, dbCount, DbList, EntryCard, matches, openEntry, PAGE_OF, selKey, useDb, type DbRow, type DbType } from "./world/db";
 import "./world/world.css";
@@ -43,7 +44,7 @@ const ICONS: Record<DbType, Icon> = {
   daevanionNodes: LightningIcon,
 };
 
-export default function Database({ t, go, setHeader }: PageProps) {
+export default function Database({ t, lang, go, setHeader }: PageProps) {
   const title = t("shell.databaseTitle");
   useEffect(() => setHeader({ title }), [setHeader, title]);
   const [q, setQ] = useState("");
@@ -78,7 +79,14 @@ export default function Database({ t, go, setHeader }: PageProps) {
           <ArrowLeftIcon aria-hidden="true" />
           {t("db.back")}
         </button>
-        {entry ? <EntryCard t={t} row={entry} open={pick} /> : <div style={{ color: "var(--pm-t2)" }}>{t("db.loading")}</div>}
+        {entry ? (
+          <EntryCard
+            t={t}
+            row={entry}
+            open={pick}
+            extra={(entry.type === "wings" || entry.type === "titles" || entry.type === "pets") && <CollectionBonus t={t} lang={lang} kind={entry.type} id={entry.id} />}
+          />
+        ) : <div style={{ color: "var(--pm-t2)" }}>{t("db.loading")}</div>}
       </div>
     );
   }

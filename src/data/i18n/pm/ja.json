@@ -69,8 +69,6 @@
   "nav.organizer": "オーガナイザー",
   "nav.tasks": "タスク",
   "nav.timers": "タイマー",
-  "nav.shopping": "買い物リスト",
-  "nav.flowMap": "Flow Map",
   "nav.supporter": "サポーター",
   "nav.settings": "設定",
   "nav.collapse": "折りたたむ",
@@ -138,5 +136,9 @@
   "about.a2tools": "キャプチャエンジンはtaenguによる{link}(GPL-3.0)をベースにしています。ありがとうございます!",
   "home.noCharacterTitle": "アクティブなキャラクターがいません",
   "home.noCharacterText": "キャラクターを追加すると、クラス・地域・ビルドがここに表示されます。",
-  "home.noBuildText": "Character Builder で目標装備を設定すると、足りない装備を追跡できます。"
+  "home.noBuildText": "Character Builder で目標装備を設定すると、足りない装備を追跡できます。",
+  "nav.marketplace": "マーケット",
+  "nav.shugoFestival": "シュゴフェスティバル",
+  "nav.spacetimeRift": "時空の裂け目",
+  "nav.gearViewer": "装備ビューア"
 }

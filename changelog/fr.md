@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.0
+
+- Nouveau : Logs en ligne : les combats que vous avez envoyés, avec lien, visibilité modifiable (public, non répertorié, privé), vues, position au classement et suppression.
+- Nouveau : Statistiques de classes : DPS moyen par classe sur chaque boss, classes les plus jouées et tendance hebdomadaire, à partir des logs publics de la communauté. Un même combat envoyé par plusieurs membres du groupe ne compte qu'une fois.
+- Nouveau : Visionneuse d'équipement : toutes les pièces d'équipement avec filtres, recherche et statistiques triables. Sélectionnez des objets pour les épingler en haut ou les comparer, avec une flèche verte sur la meilleure valeur et une rouge sur la pire.
+- Nouveau : Armurerie : recherchez des personnages par région, faction, serveur et classe, consultez les profils populaires, les classements et la fiche complète d'un personnage (EU/NA dès qu'ils seront disponibles).
+- Nouveau : Festival Shugo : compte à rebours en direct jusqu'à la prochaine manche, ses mini-jeux, les manches suivantes et un planificateur de la boutique du festival avec les jetons qu'il vous manque.
+- Nouveau : Faille spatio-temporelle : comptes à rebours du portail et de la faille, le planning sur 24 heures et l'itinéraire de votre faction.
+- Nouveau : Calculateurs : statistiques et Gear Score d'une pièce entre deux niveaux d'amélioration avec la qualité du soul imprint, bonus des statistiques primaires et chances de Splendent d'une recette.
+- Nouveau : Marché (remplace la Liste de courses) : recherche d'objets et liste de suivi ; prix, tendances et statistiques apparaîtront dès qu'une source de données de marché existera pour EU/NA.
+- Nouveau : Artisanat étape par étape : chaque étape montre l'objet exact utilisé, les résultats Normal et Splendent et celui dont l'étape suivante a besoin ; au dernier palier, choisissez entre améliorer la pièce normale et fabriquer jusqu'à obtenir Splendent.
+- Modifié : Flow Map est remplacée par le Festival Shugo ; Logs en ligne et Statistiques de classes expliquent à quoi elles servent.
+- Corrigé : les ailes, titres et familiers de la base de données affichent leurs bonus.
+
 ## 0.2.14
 
 - Nouveau : onglet PvE dans le meter pour le farm de mobs. Les dégâts s'additionnent sur tous les mobs touchés, même après leur mort, et se remettent à zéro après 5 minutes sans toucher de mob, au changement de zone ou avec Réinitialiser.

@@ -44,15 +44,39 @@ async fn read_json(res: reqwest::Response) -> Result<Value, String> {
     Err(if status == reqwest::StatusCode::UNAUTHORIZED { "unauthorized".into() } else { msg })
 }
 
-async fn post_json(url: &str, token: Option<&str>, body: &Value) -> Result<Value, String> {
-    let mut req = reqwest::Client::new()
-        .post(url)
-        .header("Content-Type", "application/json")
-        .body(body.to_string());
+async fn call(method: reqwest::Method, url: &str, token: Option<&str>, body: Option<&Value>) -> Result<Value, String> {
+    let mut req = reqwest::Client::new().request(method, url);
+    if let Some(body) = body {
+        req = req.header("Content-Type", "application/json").body(body.to_string());
+    }
     if let Some(token) = token {
         req = req.bearer_auth(token);
     }
     read_json(req.send().await.map_err(|e| e.to_string())?).await
+}
+
+async fn post_json(url: &str, token: Option<&str>, body: &Value) -> Result<Value, String> {
+    call(reqwest::Method::POST, url, token, Some(body)).await
+}
+
+/// A request with the saved session. A revoked session is dropped so the UI offers login again.
+async fn authed(state: &AppState, method: reqwest::Method, path: &str, body: Option<&Value>) -> Result<Value, String> {
+    let token = state.settings.get(TOKEN_KEY).ok_or("not signed in")?;
+    let res = call(method, &format!("{}{path}", server_url(state)), Some(&token), body).await;
+    if matches!(&res, Err(e) if e == "unauthorized") {
+        state.settings.remove(TOKEN_KEY);
+        state.settings.remove(USER_KEY);
+    }
+    res
+}
+
+/// Log ids are 10 base62 characters; checked here so an id can never change the request path.
+fn log_path(id: &str) -> Result<String, String> {
+    if id.len() == 10 && id.chars().all(|c| c.is_ascii_alphanumeric()) {
+        Ok(format!("/api/logs/{id}"))
+    } else {
+        Err("invalid log id".into())
+    }
 }
 
 /// Waits for the browser to hit `/callback?code=…` (or `?error=…`) and answers
@@ -146,7 +170,8 @@ pub async fn upload_combat_log(
     // A fight record from a file exported by Fight history, uploaded as is.
     fight: Option<Value>,
 ) -> Result<Value, String> {
-    let token = state.settings.get(TOKEN_KEY).ok_or("not signed in")?;
+    // Checked first: no point saving or loading a fight for a signed-out user.
+    state.settings.get(TOKEN_KEY).ok_or("not signed in")?;
     let fight = match (fight, id) {
         (Some(fight), _) => fight,
         (None, Some(id)) => serde_json::to_value(state.fight_history.load_fight(&id)?).map_err(|e| e.to_string())?,
@@ -174,15 +199,57 @@ pub async fn upload_combat_log(
     };
     // Local history id, so the UI can mark the fight uploaded (pm.uploadedFights).
     let fight_id = fight["id"].clone();
-    let body = json!({ "fight": fight, "visibility": visibility.unwrap_or_else(|| "unlisted".into()) });
-    let res = post_json(&format!("{}/api/logs", server_url(&state)), Some(&token), &body).await;
-    if matches!(&res, Err(e) if e == "unauthorized") {
-        // The session was revoked server-side: drop it so the UI offers login again.
-        state.settings.remove(TOKEN_KEY);
-        state.settings.remove(USER_KEY);
-    }
-    res.map(|mut v| {
+    // Onboarding's region (pm.region) feeds the class stats' region filter.
+    let region = match state.settings.get("pm.region").as_deref() {
+        Some("global-eu") => json!("EU"),
+        Some("us-na") => json!("NA"),
+        _ => Value::Null,
+    };
+    let body = json!({ "fight": fight, "visibility": visibility.unwrap_or_else(|| "unlisted".into()), "region": region });
+    authed(&state, reqwest::Method::POST, "/api/logs", Some(&body)).await.map(|mut v| {
         v["fightId"] = fight_id;
         v
     })
+}
+
+/// The signed-in user's uploaded logs (`{logs:[…]}`, newest first).
+#[tauri::command]
+pub async fn pm_my_logs(state: tauri::State<'_, AppState>) -> Result<Value, String> {
+    authed(&state, reqwest::Method::GET, "/api/logs/mine", None).await
+}
+
+/// Changes one of the user's logs to public / unlisted / private.
+#[tauri::command]
+pub async fn pm_set_log_visibility(state: tauri::State<'_, AppState>, id: String, visibility: String) -> Result<Value, String> {
+    authed(&state, reqwest::Method::PATCH, &log_path(&id)?, Some(&json!({ "visibility": visibility }))).await
+}
+
+/// Deletes one of the user's logs from the server.
+#[tauri::command]
+pub async fn pm_delete_log(state: tauri::State<'_, AppState>, id: String) -> Result<(), String> {
+    authed(&state, reqwest::Method::DELETE, &log_path(&id)?, None).await.map(|_| ())
+}
+
+/// Class stats over the community's public logs; no account needed.
+#[tauri::command]
+pub async fn pm_class_stats(
+    state: tauri::State<'_, AppState>,
+    boss: Option<i64>,
+    region: Option<String>,
+    period: Option<String>,
+) -> Result<Value, String> {
+    let mut url = reqwest::Url::parse(&format!("{}/api/stats/classes", server_url(&state))).map_err(|e| e.to_string())?;
+    {
+        let mut qs = url.query_pairs_mut();
+        if let Some(boss) = boss {
+            qs.append_pair("boss", &boss.to_string());
+        }
+        if let Some(region) = region.filter(|r| !r.is_empty()) {
+            qs.append_pair("region", &region);
+        }
+        if let Some(period) = period {
+            qs.append_pair("period", &period);
+        }
+    }
+    call(reqwest::Method::GET, url.as_str(), None, None).await
 }

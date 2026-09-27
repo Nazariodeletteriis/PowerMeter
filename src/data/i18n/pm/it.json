@@ -69,8 +69,6 @@
   "nav.organizer": "Organizer",
   "nav.tasks": "Attività",
   "nav.timers": "Timer",
-  "nav.shopping": "Lista della spesa",
-  "nav.flowMap": "Flow Map",
   "nav.supporter": "Supporter",
   "nav.settings": "Impostazioni",
   "nav.collapse": "Comprimi",
@@ -138,5 +136,9 @@
   "about.a2tools": "Il motore di cattura si basa su {link} di taengu (GPL-3.0). Grazie!",
   "home.noCharacterTitle": "Nessun personaggio attivo",
   "home.noCharacterText": "Aggiungi il tuo personaggio per vedere qui classe, regione e build.",
-  "home.noBuildText": "Imposta l'equipaggiamento obiettivo nel Character Builder per seguire cosa ti manca."
+  "home.noBuildText": "Imposta l'equipaggiamento obiettivo nel Character Builder per seguire cosa ti manca.",
+  "nav.marketplace": "Marketplace",
+  "nav.shugoFestival": "Festival Shugo",
+  "nav.spacetimeRift": "Faglia Spaziotemporale",
+  "nav.gearViewer": "Gear Viewer"
 }

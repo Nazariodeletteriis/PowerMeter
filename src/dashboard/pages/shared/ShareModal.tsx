@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { CheckIcon, CopyIcon, DiscordLogoIcon, XIcon } from "@phosphor-icons/react";
 import type { T } from "../../i18n";
 import { Modal } from "../system/Modal";
@@ -36,6 +37,10 @@ export function ShareModal({
   const [copied, setCopied] = useState(false);
   const [vis, setVis] = useState<(typeof VISIBILITY)[number]>("unlisted");
   const link = text ?? url;
+  // An uploaded log (PUBLIC_URL/e/<id>): the choice is saved on the server. Uploads start unlisted.
+  const logId = !text && url ? /\/e\/([A-Za-z0-9]{10})$/.exec(url)?.[1] : undefined;
+  const pick = (v: (typeof VISIBILITY)[number]) =>
+    logId ? invoke("pm_set_log_visibility", { id: logId, visibility: v }).then(() => setVis(v), onError) : setVis(v);
   const copy = () => link && navigator.clipboard.writeText(link).then(() => setCopied(true), onError);
   const [head, ...lines] = text ? text.split("\n") : (preview ?? []);
   // Uploading needs a fight and an account: Storico → Upload. Other kinds have no online page yet.
@@ -78,7 +83,7 @@ export function ShareModal({
           {t("shell.share.visibility")}
         </div>
         {VISIBILITY.map((v) => (
-          <button key={v} type="button" role="radio" aria-checked={v === vis} className="shareVis" onClick={() => setVis(v)}>
+          <button key={v} type="button" role="radio" aria-checked={v === vis} className="shareVis" onClick={() => pick(v)}>
             <span className="shareRadio">
               <span />
             </span>

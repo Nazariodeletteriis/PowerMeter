@@ -1,0 +1,340 @@
+/* Shugo Festival and Spacetime Rift pages. Our own language on the dashboard
+   tokens: a time rail with a "now" needle is the centrepiece of both pages. */
+
+.evGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.evStack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Hero: state, the big countdown, the window. */
+.evHero {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.evState {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--pm-t2);
+}
+.evState[data-live="true"] {
+  color: var(--pm-okt);
+}
+.evState[data-live="true"] .dot {
+  background: var(--pm-ok);
+  animation: pmpulse 1.6s ease-in-out infinite;
+}
+.evCount {
+  font-family: var(--pm-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 40px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+.evMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  font-size: 13px;
+  color: var(--pm-t3);
+}
+.evMeta strong {
+  font-family: var(--pm-mono);
+  font-weight: 500;
+  color: var(--pm-t1);
+}
+
+/* Time rail: segments placed by % of the span, a needle for now. */
+.evRail {
+  position: relative;
+  height: 30px;
+  border-radius: 6px;
+  background: var(--pm-s2);
+  border: 1px solid var(--pm-line);
+  overflow: hidden;
+}
+.evSeg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--pm-s3);
+  border-left: 2px solid var(--pm-grey);
+}
+.evSeg[data-past="true"] {
+  opacity: 0.45;
+}
+.evSeg[data-next="true"],
+.evSeg[data-live="true"] {
+  background: var(--pm-tint);
+  border-left-color: var(--pm-red);
+}
+/* Rift portal: the first 5 minutes of a window, brighter. */
+.evSeg i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--pm-red);
+  opacity: 0.55;
+}
+.evNow {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--pm-t1);
+  box-shadow: 0 0 0 2px var(--pm-bg);
+}
+.evTicks {
+  position: relative;
+  height: 16px;
+  margin-top: 4px;
+  font-family: var(--pm-mono);
+  font-size: 10px;
+  color: var(--pm-t3);
+}
+.evTicks span {
+  position: absolute;
+  translate: -50% 0;
+}
+.evTicks span:first-child {
+  translate: 0 0;
+}
+.evTicks span:last-child {
+  translate: -100% 0;
+}
+
+/* Upcoming list. */
+.evList {
+  display: flex;
+  flex-direction: column;
+}
+.evRow {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 40px;
+  padding: 4px 0;
+  border-top: 1px solid var(--pm-line);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.evRow:first-child {
+  border-top: 0;
+}
+.evRow small {
+  display: block;
+  font-size: 11px;
+  color: var(--pm-t3);
+}
+.evRow[data-first="true"] .evLeft {
+  color: var(--pm-redt);
+}
+.evLeft {
+  font-family: var(--pm-mono);
+  color: var(--pm-t3);
+}
+
+/* Minigame pool chips. */
+.evChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.evChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 12px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+  font-size: 12px;
+  color: var(--pm-t2);
+}
+.evChip[data-fav="true"] {
+  border-color: var(--pm-red);
+  color: var(--pm-t1);
+}
+.evChip svg {
+  color: var(--pm-redt);
+}
+
+/* Minigame catalogue: two pools side by side. */
+.evPools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.evGame {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 10px 0;
+  border-top: 1px solid var(--pm-line);
+}
+.evGame p {
+  font-size: 12px;
+  color: var(--pm-t3);
+  line-height: 1.45;
+}
+.evStar {
+  width: 30px;
+  height: 30px;
+  margin-top: -4px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--pm-grey);
+  cursor: pointer;
+  font-size: 16px;
+  transition:
+    color 150ms ease,
+    transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.evStar[aria-pressed="true"] {
+  color: var(--pm-redt);
+}
+.evStar:active {
+  transform: scale(0.95);
+}
+@media (hover: hover) and (pointer: fine) {
+  .evStar:hover {
+    background: var(--pm-s2);
+    color: var(--pm-t2);
+  }
+  .evStar[aria-pressed="true"]:hover {
+    color: var(--pm-redt);
+  }
+}
+
+/* Festival Shop planner. */
+.evShop {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 18px;
+}
+.evItem {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 34px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.evItem input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #db0000;
+}
+.evItem .mono {
+  font-variant-numeric: tabular-nums;
+  color: var(--pm-t3);
+}
+.evCat {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+}
+.evTotals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 28px;
+  padding-bottom: 14px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--pm-line);
+}
+.evTotals .num {
+  font-family: var(--pm-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  line-height: 1.1;
+}
+.evBar {
+  flex: 1;
+  min-width: 160px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--pm-s3);
+  align-self: center;
+}
+.evBar div {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--pm-red);
+}
+
+/* Segmented toggle (Rift faction). */
+.evToggle {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 7px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+}
+.evToggle button {
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--pm-t3);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+.evToggle button[aria-pressed="true"] {
+  background: var(--pm-s3);
+  color: var(--pm-t1);
+}
+
+.evFacts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--pm-t2);
+}
+.evFacts li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+}
+.evFacts svg {
+  margin-top: 3px;
+  color: var(--pm-t3);
+}
+.evNote {
+  font-size: 11px;
+  color: var(--pm-t3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .evState[data-live="true"] .dot {
+    animation: none;
+  }
+  .evStar:active {
+    transform: none;
+  }
+}

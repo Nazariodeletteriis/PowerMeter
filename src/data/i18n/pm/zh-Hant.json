@@ -69,8 +69,6 @@
   "nav.organizer": "整理工具",
   "nav.tasks": "待辦事項",
   "nav.timers": "計時器",
-  "nav.shopping": "購物清單",
-  "nav.flowMap": "Flow Map",
   "nav.supporter": "贊助者",
   "nav.settings": "設定",
   "nav.collapse": "收合",
@@ -138,5 +136,9 @@
   "about.a2tools": "擷取引擎基於 taengu 的 {link}（GPL-3.0）打造，謝謝！",
   "home.noCharacterTitle": "沒有目前角色",
   "home.noCharacterText": "新增角色後，這裡會顯示職業、地區和配裝。",
-  "home.noBuildText": "在 Character Builder 中設定目標裝備，即可追蹤還缺什麼。"
+  "home.noBuildText": "在 Character Builder 中設定目標裝備，即可追蹤還缺什麼。",
+  "nav.marketplace": "市場",
+  "nav.shugoFestival": "修果節",
+  "nav.spacetimeRift": "時空裂隙",
+  "nav.gearViewer": "裝備檢視器"
 }

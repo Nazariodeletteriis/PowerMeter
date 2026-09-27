@@ -69,8 +69,6 @@
   "nav.organizer": "정리함",
   "nav.tasks": "작업",
   "nav.timers": "타이머",
-  "nav.shopping": "쇼핑 목록",
-  "nav.flowMap": "Flow Map",
   "nav.supporter": "후원자",
   "nav.settings": "설정",
   "nav.collapse": "접기",
@@ -138,5 +136,9 @@
   "about.a2tools": "캡처 엔진은 taengu의 {link}(GPL-3.0)를 기반으로 합니다. 감사합니다!",
   "home.noCharacterTitle": "활성 캐릭터가 없습니다",
   "home.noCharacterText": "캐릭터를 추가하면 여기에서 클래스, 지역, 빌드를 볼 수 있습니다.",
-  "home.noBuildText": "Character Builder에서 목표 장비를 설정하면 부족한 장비를 추적할 수 있습니다."
+  "home.noBuildText": "Character Builder에서 목표 장비를 설정하면 부족한 장비를 추적할 수 있습니다.",
+  "nav.marketplace": "거래소",
+  "nav.shugoFestival": "슈고 페스티벌",
+  "nav.spacetimeRift": "시공의 균열",
+  "nav.gearViewer": "장비 뷰어"
 }

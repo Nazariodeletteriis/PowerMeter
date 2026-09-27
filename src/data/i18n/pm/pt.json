@@ -69,8 +69,6 @@
   "nav.organizer": "Organizador",
   "nav.tasks": "Tarefas",
   "nav.timers": "Temporizadores",
-  "nav.shopping": "Lista de compras",
-  "nav.flowMap": "Flow Map",
   "nav.supporter": "Apoiador",
   "nav.settings": "Configurações",
   "nav.collapse": "Recolher",
@@ -138,5 +136,9 @@
   "about.a2tools": "O motor de captura é baseado no {link} de taengu (GPL-3.0). Obrigado!",
   "home.noCharacterTitle": "Nenhum personagem ativo",
   "home.noCharacterText": "Adicione seu personagem para ver aqui classe, região e build.",
-  "home.noBuildText": "Defina o equipamento-alvo no Character Builder para acompanhar o que falta."
+  "home.noBuildText": "Defina o equipamento-alvo no Character Builder para acompanhar o que falta.",
+  "nav.marketplace": "Mercado",
+  "nav.shugoFestival": "Festival Shugo",
+  "nav.spacetimeRift": "Fenda Espaço-Temporal",
+  "nav.gearViewer": "Visualizador de equipamento"
 }

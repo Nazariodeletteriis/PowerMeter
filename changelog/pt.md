@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.0
+
+- Novo: Registos online: os combates que enviou, com link, visibilidade alterável (público, não listado, privado), visualizações, posição na classificação e eliminação.
+- Novo: Estatísticas de classes: DPS médio por classe em cada chefe, classes mais jogadas e tendência semanal, a partir dos registos públicos da comunidade. O mesmo combate enviado por vários membros do grupo conta só uma vez.
+- Novo: Visualizador de equipamento: todas as peças de equipamento com filtros, pesquisa e estatísticas ordenáveis. Selecione itens para os fixar no topo ou compará-los, com seta verde no melhor valor e vermelha no pior.
+- Novo: Armaria: pesquise personagens por região, facção, servidor e classe, veja os perfis populares, as classificações e a ficha completa de um personagem (EU/NA assim que estiverem disponíveis).
+- Novo: Festival Shugo: contagem decrescente ao vivo para a próxima ronda, os seus minijogos, as rondas seguintes e um planeador da loja do festival com as fichas que lhe faltam.
+- Novo: Fenda Espaço-Temporal: contagens decrescentes do portal e da fenda, o horário de 24 horas e a rota da sua facção.
+- Novo: Calculadoras: estatísticas e Gear Score de uma peça entre dois níveis de melhoria com a qualidade do soul imprint, bónus das estatísticas primárias e probabilidade Splendent de uma receita.
+- Novo: Mercado (substitui a Lista de compras): pesquisa de itens e lista de seguimento; preços, tendências e estatísticas aparecerão quando existir uma fonte de dados de mercado para EU/NA.
+- Novo: Criação passo a passo: cada passo mostra o item exato que usa, os resultados Normal e Splendent e qual o passo seguinte precisa; no último nível escolha entre melhorar a peça normal e criar até obter Splendent.
+- Alterado: o Flow Map é substituído pelo Festival Shugo; Registos online e Estatísticas de classes explicam para que servem.
+- Corrigido: asas, títulos e mascotes na base de dados mostram os bónus que dão.
+
 ## 0.2.14
 
 - Novo: separador PvE no medidor para farm de mobs. O dano soma-se em todos os mobs que atinge, mesmo depois de morrerem, e reinicia após 5 minutos sem atingir mobs, ao mudar de zona ou com Repor.

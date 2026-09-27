@@ -69,8 +69,6 @@
   "nav.organizer": "Организатор",
   "nav.tasks": "Задачи",
   "nav.timers": "Таймеры",
-  "nav.shopping": "Список покупок",
-  "nav.flowMap": "Flow Map",
   "nav.supporter": "Спонсор",
   "nav.settings": "Настройки",
   "nav.collapse": "Свернуть",
@@ -138,5 +136,9 @@
   "about.a2tools": "Движок захвата основан на {link} от taengu (GPL-3.0). Спасибо!",
   "home.noCharacterTitle": "Нет активного персонажа",
   "home.noCharacterText": "Добавь персонажа, чтобы видеть здесь класс, регион и билд.",
-  "home.noBuildText": "Задай целевую экипировку в Character Builder, чтобы видеть, чего не хватает."
+  "home.noBuildText": "Задай целевую экипировку в Character Builder, чтобы видеть, чего не хватает.",
+  "nav.marketplace": "Рынок",
+  "nav.shugoFestival": "Фестиваль Шуго",
+  "nav.spacetimeRift": "Пространственно-временной разлом",
+  "nav.gearViewer": "Просмотр снаряжения"
 }

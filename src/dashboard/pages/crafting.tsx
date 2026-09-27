@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { CaretRightIcon, HammerIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
+import { ArrowBendDownRightIcon, HammerIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import CHANCE from "../../data/crafting.json";
 import { readCharacters, activeId } from "../characters";
 import { Card, EmptyState, RARITY, fmt } from "../ui";
@@ -13,7 +13,8 @@ import "./world/world.css";
 // user has. Chains and totals: ./crafting/tree.ts.
 
 const KEY = "pm.crafting";
-type Saved = { race?: string; sel?: string; n?: number; exp?: boolean; have?: Record<string, number> };
+/** `luck`: an upgrade recipe's Splendent piece comes from combo luck, not from upgrading the normal one. */
+type Saved = { race?: string; sel?: string; n?: number; exp?: boolean; luck?: boolean; have?: Record<string, number> };
 /** Product item categories, in list order: weapons first. */
 const TYPES = ["weapon", "armor", "accessory", "usable", "misc"];
 const GRADES = [11, 21, 31, 41];
@@ -83,11 +84,14 @@ export default function Crafting({ t, lang, settings, save, go, onError, setHead
   // A recipe of the other faction (saved before switching) → its twin by name.
   const pick = recipes?.find((r) => r.id === saved.sel);
   const sel = pick && (pick.race === race ? pick : list.find((r) => r.name === pick.name));
-  const tree = sel && ix && buildTree(sel, count, ix, chances, have, !!saved.exp);
+  const upBase = sel && ix?.upBase.get(sel.id);
+  const luck = !!upBase && !!saved.luck;
+  const tree = sel && ix && buildTree(sel, count, ix, chances, have, !!saved.exp, luck);
   const sum = tree && ix && totals(tree, ix);
   // From the tree without owned parts: an owned tier must not cut the chain.
+  const isGear = (k: Node) => !!k.recipe && GEAR.includes(itemById.get(k.id)?.cat ?? "");
   const chain: Node[] = [];
-  for (let n = sel && ix && buildTree(sel, 1, ix, chances, {}, false); n; n = n.kids.find((k) => k.recipe && GEAR.includes(itemById.get(k.id)?.cat ?? ""))) chain.unshift(n);
+  for (let n = sel && ix && buildTree(sel, 1, ix, chances, {}, false, luck); n; n = n.kids.find(isGear)) chain.unshift(n);
 
   const setHave = (id: string, v: string) => {
     const next = { ...have };
@@ -122,6 +126,89 @@ export default function Crafting({ t, lang, settings, save, go, onError, setHead
           <summary style={{ cursor: "pointer" }}>{line}</summary>
           <ul style={{ listStyle: "none", margin: 0, padding: "0 0 0 14px", marginLeft: 10, borderLeft: "1px solid var(--pm-line)" }}>{n.kids.map((k) => renderNode(k))}</ul>
         </details>
+      </li>
+    );
+  };
+
+  /** An item as a small bordered chip: icon, name, ×qty. `hi` marks the piece the plan needs. */
+  const chip = (id: string, qty?: number, hi?: boolean) => {
+    const row = itemRow(id);
+    return (
+      <span key={id} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 8px 3px 3px", borderRadius: 6, border: `1px solid ${hi ? "var(--pm-red)" : "var(--pm-line)"}`, background: hi ? "var(--pm-tint)" : undefined, fontSize: 12 }}>
+        <Icon row={row} size={22} />
+        <ItemName row={row} go={go} />
+        {qty !== undefined && <span className="mono" style={{ color: "var(--pm-t2)" }}>×{fmt(qty, lang)}</span>}
+      </span>
+    );
+  };
+  /** One outcome of a craft: the item, its chance, and whether the plan needs it. */
+  const outcome = (label: string, id: string, pct: number, tag?: string) => (
+    <div style={{ flex: "1 1 220px", display: "flex", flexDirection: "column", gap: 6, padding: 10, borderRadius: 6, border: `1px solid ${tag ? "var(--pm-red)" : "var(--pm-line)"}`, background: tag ? "var(--pm-tint)" : undefined }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 11 }}>
+        <span className="kicker" style={{ color: tag ? "var(--pm-redt)" : undefined }}>{label}</span>
+        <span className="mono" style={{ color: "var(--pm-t2)" }}>{pct}%</span>
+      </div>
+      <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <Icon row={itemRow(id)} size={32} />
+        <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <ItemName row={itemRow(id)} go={go} />
+          <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>{rarity(itemRow(id))}</span>
+        </span>
+      </span>
+      {tag && <span style={{ fontSize: 11, color: "var(--pm-redt)" }}>{tag}</span>}
+    </div>
+  );
+  const renderStep = (n: Node, i: number) => {
+    const r = n.recipe!;
+    const next: Node | undefined = chain[i + 1];
+    const gear = n.kids.find(isGear);
+    const mats = n.kids.filter((k) => k !== gear);
+    const upgrade = ix!.upBase.has(r.id);
+    const split = !upgrade && r.combo && r.combo !== r.out![0];
+    const p = (chances[r.id] ?? 0) / 10000;
+    // What this step must yield: the next step's input, else the plan's goal.
+    const want = next ? next.kids.find(isGear)?.id : chain[chain.length - 1].id;
+    const tagOf = (id: string) => (id !== want ? undefined : next ? t("crafting.neededFor", { n: i + 2 }) : t("crafting.goal"));
+    const up = next || upgrade || upBase ? undefined : ix!.upOf.get(r.id);
+    return (
+      <li key={n.id} style={{ display: "grid", gridTemplateColumns: "28px minmax(0,1fr)", gap: 12 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <span className="mono" style={{ width: 28, height: 28, flex: "none", display: "grid", placeItems: "center", borderRadius: "50%", border: "1px solid var(--pm-line)", fontSize: 12, color: "var(--pm-t1)" }}>{i + 1}</span>
+          {next && <span aria-hidden="true" style={{ flex: 1, width: 1, background: "var(--pm-line)", marginTop: 4 }} />}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingBottom: next ? 20 : 0, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+            <button type="button" className="linkBtn" aria-current={r === sel || undefined} style={{ fontSize: 14, fontWeight: 500, color: "var(--pm-t1)", textAlign: "left" }} onClick={() => set({ sel: r.id })}>
+              {t(upgrade ? "crafting.stepUpgrade" : "crafting.stepCraft", { name: r.name })}
+            </button>
+            <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>{[term(r.cat), r.lv && `Lv ${r.lv}`, split && p > 0 && p < 1 && t("crafting.avgCrafts", { n: fmt(Math.round(1 / p), lang) })].filter(Boolean).join(" · ")}</span>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+            <span style={{ fontSize: 11, color: "var(--pm-t3)", width: "100%" }}>{t("crafting.uses")}</span>
+            {gear && chip(gear.id, gear.qty, true)}
+            {mats.map((k) => chip(k.id, k.qty))}
+          </div>
+          {upgrade && <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>{t("crafting.kinaUnknown")}</div>}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {split ? (
+              <>
+                {outcome(t("crafting.normal"), r.out![0], Math.round((1 - p) * 100), tagOf(r.out![0]))}
+                {outcome(t("crafting.splendent"), r.combo!, Math.round(p * 100), tagOf(r.combo!))}
+              </>
+            ) : (
+              outcome(t("crafting.result"), r.out![0], 100, tagOf(r.out![0]))
+            )}
+          </div>
+          {up && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", fontSize: 12, color: "var(--pm-t2)" }}>
+              <ArrowBendDownRightIcon aria-hidden="true" style={{ color: "var(--pm-t3)" }} />
+              {t("crafting.upgradeHint")}
+              <button type="button" className="btn sm" onClick={() => set({ sel: up.id, luck: false })}>
+                {t("crafting.upgradePlan")}
+              </button>
+            </div>
+          )}
+        </div>
       </li>
     );
   };
@@ -265,37 +352,22 @@ export default function Crafting({ t, lang, settings, save, go, onError, setHead
                 <input type="checkbox" checked={!!saved.exp} onChange={(e) => set({ exp: e.target.checked })} />
                 {t("crafting.expected")}
               </label>
+              {upBase && (
+                <div style={{ display: "flex", gap: 6 }} role="group" aria-label={t("crafting.route")}>
+                  <button type="button" className="wChip" aria-pressed={!luck} onClick={() => set({ luck: false })}>
+                    {t("crafting.routeUpgrade")}
+                  </button>
+                  <button type="button" className="wChip" aria-pressed={luck} onClick={() => set({ luck: true })}>
+                    {t("crafting.routeLuck", { p: Math.round((chances[upBase.id] ?? 0) / 100) })}
+                  </button>
+                </div>
+              )}
             </div>
           </section>
 
           {chain.length > 1 && (
-            <Card title={t("crafting.chain")}>
-              <ol style={{ listStyle: "none", margin: "12px 0 0", padding: 0, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                {chain.map((n, i) => {
-                  const row = itemRow(n.id);
-                  const rar = rarity(row);
-                  return (
-                    <li key={n.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      {i > 0 && <CaretRightIcon aria-hidden="true" style={{ color: "var(--pm-t3)" }} />}
-                      <button
-                        type="button"
-                        className="wBtn"
-                        aria-current={n.recipe === sel || undefined}
-                        style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 6, border: `1px solid ${n.recipe === sel ? "var(--pm-red)" : "var(--pm-line)"}`, maxWidth: 240 }}
-                        onClick={() => n.recipe && set({ sel: n.recipe.id })}
-                      >
-                        <Icon row={row} size={32} />
-                        <span style={{ minWidth: 0 }}>
-                          <span style={{ display: "block", fontSize: 12, color: rar ? RARITY[rar] : "var(--pm-t1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.name}</span>
-                          <span style={{ display: "block", fontSize: 11, color: "var(--pm-t3)" }}>
-                            {[n.recipe?.lv && `Lv ${n.recipe.lv}`, n.chance !== undefined && t("crafting.chance", { p: Math.round(n.chance * 100) })].filter(Boolean).join(" · ")}
-                          </span>
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ol>
+            <Card title={t("crafting.steps")}>
+              <ol style={{ listStyle: "none", margin: "14px 0 0", padding: 0 }}>{chain.map(renderStep)}</ol>
             </Card>
           )}
 

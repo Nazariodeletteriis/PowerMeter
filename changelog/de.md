@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.0
+
+- Neu: Online-Logs: deine hochgeladenen Kämpfe mit Link, änderbarer Sichtbarkeit (öffentlich, nicht gelistet, privat), Aufrufen, Ranglistenplatz und Löschen.
+- Neu: Klassenstatistiken: durchschnittlicher DPS pro Klasse an jedem Boss, meistgespielte Klassen und wöchentlicher Verlauf, aus den öffentlichen Logs der Community. Derselbe Kampf, von mehreren Gruppenmitgliedern hochgeladen, zählt nur einmal.
+- Neu: Ausrüstungsansicht: alle Ausrüstungsteile mit Filtern, Suche und sortierbaren Werten. Wähle Gegenstände aus, um sie oben anzuheften oder nebeneinander zu vergleichen, mit grünem Pfeil beim besten und rotem beim schlechtesten Wert.
+- Neu: Armory: Charaktere nach Region, Fraktion, Server und Klasse suchen, beliebte Profile, Ranglisten und das vollständige Charakterblatt sehen (EU/NA, sobald verfügbar).
+- Neu: Shugo-Festival: Live-Countdown bis zur nächsten Runde, ihre Minispiele, kommende Runden und ein Festival-Shop-Planer mit den noch fehlenden Marken.
+- Neu: Raumzeit-Riss: Countdowns für Portal und Riss, der 24-Stunden-Plan und die Route für deine Fraktion.
+- Neu: Rechner: Werte und Gear Score eines Teils zwischen zwei Verbesserungsstufen mit Seelenprägungs-Qualität, Boni der Primärwerte und Splendent-Chancen eines Rezepts.
+- Neu: Marktplatz (ersetzt die Einkaufsliste): Gegenstandssuche und Beobachtungsliste; Preise, Verläufe und Marktstatistiken erscheinen, sobald es eine Marktdatenquelle für EU/NA gibt.
+- Neu: Handwerk Schritt für Schritt: jeder Schritt zeigt den genauen verwendeten Gegenstand, die Ergebnisse Normal und Splendent und welches der nächste Schritt braucht; auf der letzten Stufe wählst du zwischen Aufwerten des normalen Teils und Herstellen bis Splendent.
+- Geändert: Flow Map wird durch das Shugo-Festival ersetzt; Online-Logs und Klassenstatistiken erklären, wofür sie da sind.
+- Behoben: Flügel, Titel und Begleiter in der Datenbank zeigen ihre Boni.
+
 ## 0.2.14
 
 - Neu: PvE-Tab im Meter für das Farmen von Mobs. Der Schaden summiert sich über alle getroffenen Mobs, auch nach ihrem Tod, und wird nach 5 Minuten ohne Mob-Treffer, beim Zonenwechsel oder mit Zurücksetzen gelöscht.

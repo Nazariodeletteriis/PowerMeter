@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.0
+
+- Nuevo: Registros en línea: los combates que subiste, con enlace, visibilidad modificable (público, no listado, privado), visitas, posición en la clasificación y borrado.
+- Nuevo: Estadísticas de clases: DPS medio por clase en cada jefe, clases más jugadas y evolución semanal, a partir de los registros públicos de la comunidad. El mismo combate subido por varios miembros del grupo cuenta una sola vez.
+- Nuevo: Visor de equipo: todas las piezas de equipo con filtros, búsqueda y estadísticas ordenables. Selecciona objetos para fijarlos arriba o compararlos, con flecha verde en el mejor valor y roja en el peor.
+- Nuevo: Armería: busca personajes por región, facción, servidor y clase, mira los perfiles populares, las clasificaciones y la ficha completa de un personaje (EU/NA en cuanto estén disponibles).
+- Nuevo: Festival Shugo: cuenta atrás en vivo para la próxima ronda, sus minijuegos, las rondas siguientes y un planificador de la tienda del festival con las fichas que te faltan.
+- Nuevo: Grieta Espaciotemporal: cuentas atrás del portal y de la grieta, el horario de 24 horas y la ruta de tu facción.
+- Nuevo: Calculadoras: estadísticas y Gear Score de una pieza entre dos niveles de mejora con la calidad del soul imprint, bonificaciones de las estadísticas primarias y probabilidad Splendent de una receta.
+- Nuevo: Mercado (sustituye a la Lista de la compra): búsqueda de objetos y lista de seguimiento; precios, tendencias y estadísticas aparecerán cuando exista una fuente de datos de mercado para EU/NA.
+- Nuevo: Artesanía paso a paso: cada paso muestra el objeto exacto que usa, los resultados Normal y Splendent y cuál necesita el paso siguiente; en el último nivel eliges entre mejorar la pieza normal y fabricar hasta obtener Splendent.
+- Cambiado: Flow Map se sustituye por el Festival Shugo; Registros en línea y Estadísticas de clases explican para qué sirven.
+- Corregido: alas, títulos y mascotas en la base de datos muestran sus bonificaciones.
+
 ## 0.2.14
 
 - Nuevo: pestaña PvE en el medidor para farmear mobs. El daño se suma sobre todos los mobs que golpeas, incluso después de morir, y se reinicia tras 5 minutos sin golpear mobs, al cambiar de zona o con Reiniciar.

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { HammerIcon, ScrollIcon, ShareNetworkIcon, SwordIcon, TargetIcon } from "@phosphor-icons/react";
 import { planClass } from "../skills";
 import { fmt } from "../ui";
+import { CollectionBonus } from "./characters/collections";
 import { activeBuild, addToOwned, addToTarget, GEAR_KEY, itemSlots, OWN_BUILD, readGear, useGearData, type BuildGear } from "./characters/gear";
 import { useMem, useToast, type BuildSrc } from "./characters/shared";
 import { ShareModal } from "./shared/ShareModal";
@@ -98,6 +99,9 @@ function ItemCard({ t, lang, name, onError, settings, save, row, open }: PagePro
             </div>
           </div>
         )}
+        {/* Wing and title items grant a collection entry: show what it gives. */}
+        {row.sub === "getwing" && <CollectionBonus t={t} lang={lang} kind="wings" name={row.name.replace(/ \(Bound\)$/, "")} />}
+        {row.sub === "gettitle" && <CollectionBonus t={t} lang={lang} kind="titles" name={row.name.replace(/^Title: /, "")} />}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button type="button" className="btn fill" disabled={!!why} aria-describedby={why ? "itemWhy" : undefined} onClick={() => add("owned")}>
             <SwordIcon aria-hidden="true" />

@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.0
+
+- Nuovo: Log online: i combattimenti che hai caricato, con link, visibilità modificabile (pubblico, non in elenco, privato), visualizzazioni, posizione in classifica ed eliminazione.
+- Nuovo: Statistiche classi: DPS medio per classe su ogni boss, classi più giocate e andamento settimanale, dai log pubblici caricati dalla community. Lo stesso combattimento caricato da più membri del gruppo conta una volta sola.
+- Nuovo: Gear Viewer: tutti i pezzi di equipaggiamento con filtri, ricerca e statistiche ordinabili. Seleziona gli oggetti per fissarli in cima (Pin) o confrontarli (Compare), con freccia verde sul valore migliore e rossa sul peggiore.
+- Nuovo: Armory: cerca personaggi per regione, fazione, server e classe, vedi i profili più visti, le classifiche e la scheda completa di un personaggio (EU/NA appena disponibili).
+- Nuovo: Festival Shugo: conto alla rovescia al prossimo round, i suoi minigiochi, i round successivi e un pianificatore del Festival Shop con i token che ti mancano.
+- Nuovo: Faglia Spaziotemporale: conti alla rovescia del portale e della faglia, orario delle 24 ore e percorso per la tua fazione.
+- Nuovo: Calcolatori: statistiche e Gear Score di un pezzo tra due livelli di potenziamento con la qualità del soul imprint, bonus delle statistiche primarie e probabilità Splendent di una ricetta.
+- Nuovo: Marketplace (sostituisce la Lista della spesa): ricerca oggetti e lista degli oggetti seguiti; prezzi, andamenti e statistiche di mercato compariranno quando esisterà una fonte di dati di mercato per EU/NA.
+- Nuovo: Crafting passo dopo passo: ogni passo mostra l'oggetto esatto che usa, gli esiti Normale e Splendent e quale serve al passo successivo; sull'ultimo tier scegli tra potenziare il pezzo normale e craftare finché esce Splendent.
+- Cambiato: Flow Map è sostituita dal Festival Shugo; Log online e Statistiche classi spiegano a cosa servono.
+- Corretto: ali, titoli e pet nel database mostrano i bonus che danno.
+
 ## 0.2.14
 
 - Nuovo: tab PvE nel meter per il farming dei mob. Il danno si somma su tutti i mob che colpisci, anche dopo che muoiono, e si azzera dopo 5 minuti senza colpire mob, al cambio zona o con Reset.

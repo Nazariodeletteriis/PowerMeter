@@ -4,6 +4,20 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.3.0
+
+- New: Online logs: the fights you uploaded, with link, visibility (public, unlisted, private) you can change, views, ranking position and delete.
+- New: Class statistics: average DPS per class on each boss, most played classes and weekly trend, from the public logs uploaded by the community. The same fight uploaded by several party members counts once.
+- New: Gear Viewer: every equipment piece with filters, search and sortable stats. Select items to Pin them at the top or Compare them side by side, with a green arrow on the best value and a red one on the worst.
+- New: Armory: search characters by region, faction, server and class, see trending profiles, rankings and a character's full sheet (EU/NA as soon as they are available).
+- New: Shugo Festival: live countdown to the next round, its minigames, upcoming rounds and a Festival Shop planner with the tokens you still need.
+- New: Spacetime Rift: portal and rift countdowns, the 24-hour schedule and the route for your faction.
+- New: Calculators: gear stats and Gear Score between two enhancement levels with soul imprint quality, primary stat bonuses, and Splendent odds for a recipe.
+- New: Marketplace (replaces the Shopping list): item search and a watch list; prices, trends and market stats appear once a market data source for EU/NA exists.
+- New: Crafting step by step: each step shows the exact item it uses, the Normal and Splendent outcomes and which one the next step needs; on the last tier choose between upgrading the normal piece and crafting until Splendent.
+- Changed: Flow Map is replaced by Shugo Festival; Online logs and Class statistics explain what they are for.
+- Fixed: wings, titles and pets in the database show the bonuses they give.
+
 ## 0.2.14
 
 - New: PvE tab in the meter for mob farming. Damage adds up over every mob you hit, even after it dies, and resets after 5 minutes without hitting mobs, on a zone change or with Reset.

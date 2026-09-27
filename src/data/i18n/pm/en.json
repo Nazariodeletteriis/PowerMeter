@@ -69,8 +69,6 @@
   "nav.organizer": "Organizer",
   "nav.tasks": "Tasks",
   "nav.timers": "Timers",
-  "nav.shopping": "Shopping list",
-  "nav.flowMap": "Flow Map",
   "nav.supporter": "Supporter",
   "nav.settings": "Settings",
   "nav.collapse": "Collapse",
@@ -138,5 +136,9 @@
   "about.a2tools": "The capture engine is based on {link} by taengu (GPL-3.0). Thank you!",
   "home.noCharacterTitle": "No active character",
   "home.noCharacterText": "Add your character to see class, region and build here.",
-  "home.noBuildText": "Set your target gear in the Character Builder to track what is missing."
+  "home.noBuildText": "Set your target gear in the Character Builder to track what is missing.",
+  "nav.marketplace": "Marketplace",
+  "nav.shugoFestival": "Shugo Festival",
+  "nav.spacetimeRift": "Spacetime Rift",
+  "nav.gearViewer": "Gear Viewer"
 }

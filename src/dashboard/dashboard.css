@@ -483,6 +483,7 @@ button.gridRow:hover {
   width: 64px;
 }
 .navScroll {
+  position: relative; /* keeps absolutely placed sr-only labels inside the scroller */
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
