@@ -50,13 +50,34 @@ jobs:
         run: |
           name=$(basename src-tauri/target/release/bundle/msi/*.msi)
           base="https://github.com/${GITHUB_REPOSITORY}/releases"
-          printf '{"version":"%s","msiUrl":"%s","releaseNotesUrl":"%s"}\n' \
-            "${GITHUB_REF_NAME#v}" "$base/download/$GITHUB_REF_NAME/$name" "$base/tag/$GITHUB_REF_NAME" > latest.json
+          python - "$GITHUB_REF_NAME" "$name" "$base" <<'PY'
+          import json, os, re, sys, datetime
+          tag, name, base = sys.argv[1:]
+          version = tag[1:]
+          text = open("CHANGELOG.md", encoding="utf-8").read()
+          m = re.search(rf"^## {re.escape(version)}\s*$(.*?)(?=^## |\Z)", text, re.M | re.S)
+          if not m:
+              sys.exit(f"CHANGELOG.md has no '## {version}' section: add the release notes first")
+          notes = [l[2:].strip() for l in m.group(1).splitlines() if l.startswith("- ")]
+          if not notes:
+              sys.exit(f"CHANGELOG.md section {version} has no '- ' bullet points")
+          msi = f"src-tauri/target/release/bundle/msi/{name}"
+          json.dump({
+              "version": version,
+              "msiUrl": f"{base}/download/{tag}/{name}",
+              "releaseNotesUrl": f"{base}/tag/{tag}",
+              "date": datetime.date.today().isoformat(),
+              "sizeMb": round(os.path.getsize(msi) / 1048576, 1),
+              "notes": notes,
+          }, open("latest.json", "w", encoding="utf-8"), ensure_ascii=False)
+          open("release-notes.md", "w", encoding="utf-8").write("\n".join(f"- {n}" for n in notes) + "\n")
+          PY
           cat latest.json
 
       - if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          body_path: release-notes.md
           files: |
             src-tauri/target/release/bundle/msi/*.msi
             latest.json
