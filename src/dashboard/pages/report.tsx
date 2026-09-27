@@ -51,7 +51,9 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
   const df = p.dmg / full.find((r) => r.i === sel)!.dmg;
   // dmg already follows the window (p); hits scale with it, so avg/min/max stay put.
   const skills = sampleSkills(p, ...sort).map((s) => ({ ...s, hits: Math.round(s.hits * df) }));
-  const partyShare = party.reduce((a, r) => a + r.dmg, 0) / full.reduce((a, r) => a + r.dmg, 0);
+  // Timelines below zoom to the window: % position of second `s` in it, and its axis.
+  const px = (s: number) => ((s - t0) / secs) * 100;
+  const ticks = win ? [0, 1, 2, 3, 4, 5].map((k) => clock(t0 + (k * secs) / 5)) : X_TICKS;
   const date = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(FIGHT_DATE);
 
   const pos = (e: MouseEvent<HTMLDivElement>) => {
@@ -387,13 +389,13 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
             : party.map((q) => ({ n: q.n, col: classColor(q.cls), per: 4 + q.i, off: q.i }))
           ).map((r) => {
             const marks: number[] = [];
-            for (let x = r.off; x < DURATION; x += r.per) if (!(x > 150 && x < 170)) marks.push(x);
+            for (let x = r.off; x < t0 + secs; x += r.per) if (x >= t0 && !(x > 150 && x < 170)) marks.push(x);
             return (
               <div key={r.n} style={{ display: "grid", gridTemplateColumns: "180px minmax(0,1fr)", gap: 12, alignItems: "center", height: 30, borderBottom: "1px solid var(--pm-line)" }}>
                 <span style={{ fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.n}</span>
                 <div style={{ position: "relative", height: 16 }}>
                   {marks.map((x) => (
-                    <span key={x} style={{ position: "absolute", left: `${((x / DURATION) * 100).toFixed(2)}%`, top: 0, width: 3, height: 16, borderRadius: 1, background: r.col }} />
+                    <span key={x} style={{ position: "absolute", left: `${px(x).toFixed(2)}%`, top: 0, width: 3, height: 16, borderRadius: 1, background: r.col }} />
                   ))}
                 </div>
               </div>
@@ -402,7 +404,7 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
           <div style={{ display: "grid", gridTemplateColumns: "180px minmax(0,1fr)", gap: 12, marginTop: 6 }}>
             <span />
             <div className="cbTicks">
-              {X_TICKS.map((x) => (
+              {ticks.map((x) => (
                 <span key={x}>{x}</span>
               ))}
             </div>
@@ -423,15 +425,16 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
           </div>
           {BUFFS.map(([n, kind, segs]) => {
             const col = kind === "buff" ? "#3FBF7F" : "var(--pm-red)";
-            const up = (segs.reduce((a, [x, y]) => a + Math.max(0, Math.min(y, t0 + secs) - Math.max(x, t0)), 0) / secs) * 100;
+            const cut = segs.map(([x, y]) => [Math.max(x, t0), Math.min(y, t0 + secs)]).filter(([x, y]) => y > x);
+            const up = (cut.reduce((a, [x, y]) => a + y - x, 0) / secs) * 100;
             return (
               <div key={n} style={{ display: "grid", gridTemplateColumns: "200px minmax(0,1fr) 64px", gap: 12, alignItems: "center", height: 32, borderBottom: "1px solid var(--pm-line)" }}>
                 <span style={{ fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{n}</span>
                 <div className="cbTrack" style={{ position: "relative", height: 12, borderRadius: 2 }}>
-                  {segs.map(([x, y]) => (
+                  {cut.map(([x, y]) => (
                     <span
                       key={x}
-                      style={{ position: "absolute", left: `${(x / DURATION) * 100}%`, width: `${((y - x) / DURATION) * 100}%`, top: 0, bottom: 0, background: col, opacity: 0.8, borderRadius: 2 }}
+                      style={{ position: "absolute", left: `${px(x)}%`, width: `${(100 * (y - x)) / secs}%`, top: 0, bottom: 0, background: col, opacity: 0.8, borderRadius: 2 }}
                     />
                   ))}
                 </div>
@@ -447,7 +450,11 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
       {(tab === "taken" || tab === "heal" || tab === "targets") && (
         <>
           <div style={{ fontSize: 12, color: "var(--pm-t3)", marginBottom: 8 }}>{t(`combat.caption.${tab}`)}</div>
-          {REPORT_LISTS[tab].map(([a, b, v]) => [a, b, v * (tab === "targets" ? partyShare : tf)] as const).map(([a, b, v], _, list) => (
+          {REPORT_LISTS[tab]
+            // Each row follows its own sample curve (busy at a different time), so the window reshuffles the bars too.
+            .map(([a, b, v], i) => [a, b, win ? v * portion(samplePoints({ n: a, i, dps: 1 }).map((y, k) => y * (1.2 + Math.sin(k / 8 + i * 2))), win) : v] as const)
+            .sort((x, y) => y[2] - x[2])
+            .map(([a, b, v], _, list) => (
             <div
               key={a}
               style={{
@@ -485,17 +492,23 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
   );
 }
 
-/** Party over a chart window [a, b] (fractions of the fight): each DPS scales with the mean of its chart samples inside it. */
-function inWindow(rows: Row[], [a, b]: [number, number]) {
-  const secs = (b - a) * DURATION;
-  const inside = (k: number) => k / 59 >= a && k / 59 <= b;
-  const mean = (v: number[]) => v.reduce((x, y) => x + y, 0) / v.length;
+/** Is chart sample k (of 0..59) inside the window [a, b] (fractions of the fight)? */
+const inside = ([a, b]: [number, number], k: number) => k / 59 >= a && k / 59 <= b;
+const mean = (v: number[]) => v.reduce((x, y) => x + y, 0) / v.length;
+
+/** Fraction of a sample curve's total that falls inside the window. */
+function portion(pts: number[], w: [number, number]) {
+  const cut = pts.filter((_, k) => inside(w, k));
+  return (mean(cut.length ? cut : [pts[Math.round(((w[0] + w[1]) / 2) * 59)]]) / mean(pts)) * (w[1] - w[0]);
+}
+
+/** Party over a chart window: each player's damage is the share of their chart curve inside it. */
+function inWindow(rows: Row[], w: [number, number]) {
+  const secs = (w[1] - w[0]) * DURATION;
   return rank(
     rows.map((r) => {
-      const pts = samplePoints(r);
-      const cut = pts.filter((_, k) => inside(k));
-      const dps = (r.dps * mean(cut.length ? cut : [pts[Math.round(((a + b) / 2) * 59)]])) / mean(pts);
-      return { key: r.key, n: r.n, cls: r.cls, cp: r.cp, me: r.me, i: r.i, dps, dmg: dps * secs, deaths: r.n === DEATH.name && inside(DEATH.at) ? r.deaths : 0 };
+      const dmg = r.dmg * portion(samplePoints(r), w);
+      return { key: r.key, n: r.n, cls: r.cls, cp: r.cp, me: r.me, i: r.i, dps: dmg / secs, dmg, deaths: r.n === DEATH.name && inside(w, DEATH.at) ? r.deaths : 0 };
     }),
   );
 }

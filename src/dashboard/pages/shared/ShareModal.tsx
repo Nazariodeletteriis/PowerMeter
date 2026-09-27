@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckIcon, CopyIcon, DiscordLogoIcon, RedditLogoIcon, XIcon, XLogoIcon } from "@phosphor-icons/react";
+import { CheckIcon, CopyIcon, DiscordLogoIcon, XIcon } from "@phosphor-icons/react";
 import type { T } from "../../i18n";
 import { BOSS, DURATION, SHARE_URL } from "../../sample/combat";
 import { fmt } from "../../ui";
@@ -12,25 +12,29 @@ export type ShareKind = "log" | "party" | "build" | "skillPlan" | "daevanion" | 
 const VISIBILITY = ["public", "unlisted", "private"] as const;
 
 /**
- * Prototype md.share. Link and Discord preview are the prototype's sample log
- * for every kind until uploads exist (R2).
+ * Prototype md.share. Without `text`, link and Discord preview are the
+ * prototype's sample log until uploads exist (R2). With `text` (first line =
+ * title) that text is what gets copied and previewed.
  */
 export function ShareModal({
   t,
   lang,
   kind,
+  text,
   onClose,
   onError,
 }: {
   t: T;
   lang: string;
   kind: ShareKind;
+  text?: string;
   onClose: () => void;
   onError: (e: unknown) => void;
 }) {
   const [copied, setCopied] = useState(false);
   const [vis, setVis] = useState<(typeof VISIBILITY)[number]>("unlisted");
-  const copy = () => navigator.clipboard.writeText(`https://${SHARE_URL}`).then(() => setCopied(true), onError);
+  const copy = () => navigator.clipboard.writeText(text ?? `https://${SHARE_URL}`).then(() => setCopied(true), onError);
+  const [head, ...lines] = (text ?? "").split("\n");
   const top = sampleParty().slice(0, 3);
 
   return (
@@ -50,7 +54,7 @@ export function ShareModal({
       )}
     >
       <div style={{ display: "flex", gap: 8 }}>
-        <div className="shareUrl mono">{SHARE_URL}</div>
+        <div className="shareUrl mono">{text ? head : SHARE_URL}</div>
         {copied ? (
           <button type="button" className="btn lg shareCopied" aria-live="polite">
             <CheckIcon aria-hidden="true" />
@@ -83,27 +87,20 @@ export function ShareModal({
           <div style={{ flex: 1, minWidth: 0, fontFamily: "Inter,sans-serif" }}>
             <div style={{ fontSize: 11, color: "#B5BAC1" }}>PowerMeter</div>
             <div style={{ fontSize: 14, color: "#00A8FC", fontWeight: 600, margin: "2px 0" }}>
-              {BOSS} · {t("shell.share.killIn", { d: clock(DURATION) })}
+              {text ? head : `${BOSS} · ${t("shell.share.killIn", { d: clock(DURATION) })}`}
             </div>
             <div style={{ fontSize: 12, color: "#DBDEE1" }}>
-              {top.map((p, k) => `${k + 1}. ${p.n} (${p.cls}) ${fmt(p.dps, lang)}`).join(" · ")}
+              {text ? lines.slice(0, 3).join(" · ") : top.map((p, k) => `${k + 1}. ${p.n} (${p.cls}) ${fmt(p.dps, lang)}`).join(" · ")}
             </div>
             <div className="shareOg">{t("shell.share.ogImage")}</div>
           </div>
         </div>
       </div>
-      {/* ponytail: the share targets wait for the real upload (R2); the link above is a sample. */}
+      {/* Discord has no share URL: the button copies what gets pasted there. */}
       <div style={{ display: "flex", gap: 8 }}>
-        <button type="button" className="btn">
+        <button type="button" className="btn" onClick={copy}>
           <DiscordLogoIcon aria-hidden="true" />
           Discord
-        </button>
-        <button type="button" className="btn">
-          <RedditLogoIcon aria-hidden="true" />
-          Reddit
-        </button>
-        <button type="button" className="btn">
-          <XLogoIcon aria-hidden="true" />X
         </button>
       </div>
     </Modal>

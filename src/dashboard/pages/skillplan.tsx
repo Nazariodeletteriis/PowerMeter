@@ -78,18 +78,19 @@ export default function SkillPlan({ t, lang, name, settings, onError, setHeader 
     setSel(sk.id);
     if (sk.type === "Stigma" && (stig[sk.id] || stigN < MAX_STIGMA)) setStig({ ...stig, [sk.id]: !stig[sk.id] });
   };
+  const builds = SKILL_BUILDS.filter((b) => b[1] === cls);
   const lib = SKILLS.filter((x) => (filter === "all" || letter(x) === filter) && x.name.toLowerCase().includes(q.toLowerCase()));
 
   return (
     <>
       <div className="chToolbar">
         <select className="chSelect" aria-label={t("characters.skill.build")}>
-          {SKILL_BUILDS.map((b) => (
+          {builds.map(([b]) => (
             <option key={b}>{b}</option>
           ))}
           <option>{t("characters.newBuildOption")}</option>
         </select>
-        <input className="chSelect" defaultValue="Frost Control" aria-label={t("characters.builder.namePlaceholder")} style={{ width: 220 }} />
+        <input key={cls} className="chSelect" defaultValue={builds[0]?.[0] ?? ""} aria-label={t("characters.builder.namePlaceholder")} style={{ width: 220 }} />
         <span className="chRegion">Global</span>
         <div style={{ flex: 1 }} />
         {(

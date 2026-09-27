@@ -152,7 +152,12 @@ impl DpsCalculator {
 
         // Get pre-computed aggregates (cheap — small map, not 17K packets).
         // Light snapshot: skips per-hit timestamps (unused here, grows unbounded).
-        let combat_data = self.data_storage.get_combat_snapshot_light();
+        let mut combat_data = self.data_storage.get_combat_snapshot_light();
+        // PvP targets live only in the PvP mode; every other mode sees exactly
+        // what it saw before player-vs-player damage was recorded.
+        let pvp_ids = self.data_storage.get_pvp_target_ids();
+        let pvp_mode = self.target_selection_mode == TargetSelectionMode::PvpTargets;
+        combat_data.retain(|id, _| pvp_ids.contains(id) == pvp_mode);
         let nickname_data = self.data_storage.get_nicknames();
         let summon_data = self.data_storage.get_summon_data();
 
@@ -483,14 +488,8 @@ impl DpsCalculator {
                 (trains, "Train".to_string(), 0)
             }
             TargetSelectionMode::PvpTargets => {
-                // Players have no mob spawn code. Caveat: data_storage still books
-                // player-on-player damage as friendly (is_friendly_action), so this
-                // stays empty until the engine can tell allies from enemies.
-                let players: HashSet<i32> = combat_data.keys()
-                    .filter(|&&tid| !mob_data.contains_key(&tid))
-                    .cloned()
-                    .collect();
-                (players, "PvP".to_string(), 0)
+                // get_dps already narrowed combat_data to the PvP targets.
+                (combat_data.keys().cloned().collect(), "PvP".to_string(), 0)
             }
             TargetSelectionMode::LastHitByMe => {
                 let local_ids = self.resolve_local_ids(summon_data);

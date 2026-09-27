@@ -17,11 +17,11 @@ export function useMem<V>(key: string, init: V) {
 }
 
 /** The build the Character Builder shows (prototype bSrc). */
-export type BuildSrc = { t: string; au: string; cls: string; own: boolean; isNew?: boolean; likes?: number };
+export type BuildSrc = { t: string; au: string; cls: string; own: boolean; isNew?: boolean; likes?: number; tags?: string[] };
 /** Open a build in the builder, resetting the view like the prototype. */
 export function openBuild(src: BuildSrc, go: (page: string) => void) {
   Object.assign(mem, { bSrc: src, bmode: "dummy", slot: "mh" });
-  if (src.isNew) Object.assign(mem, { bview: "owned", itemOv: {}, newName: "", newTags: [] });
+  if (src.isNew) Object.assign(mem, { bview: "owned", newGear: { owned: {}, target: {} }, newName: "", newTags: [] });
   go("builder");
 }
 

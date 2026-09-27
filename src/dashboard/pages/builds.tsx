@@ -10,10 +10,11 @@ import {
   StackIcon,
   UserIcon,
 } from "@phosphor-icons/react";
-import { BUILD_REGIONS, BUILD_TAGS, SAMPLE_BUILDS, SAMPLE_ME } from "../sample/characters";
+import { REGIONS } from "../Onboarding";
+import { BUILD_REGIONS, BUILD_TAGS, SAMPLE_BUILDS, SAMPLE_ME, type Ago } from "../sample/characters";
 import { planClass } from "../skills";
 import { ClassAvatar, CLASSES, RELEASED_CLASSES } from "../ui";
-import { ago, openBuild, useMem } from "./characters/shared";
+import { ago, openBuild, useMem, type BuildSrc } from "./characters/shared";
 import type { PageProps } from "./types";
 
 // Standard class portraits, hotlinked at runtime (never bundled): NCSoft's game
@@ -34,7 +35,7 @@ const PORTRAIT: Record<string, string> = {
 };
 
 const ALL = "";
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 12; // three rows of four (four rows of three on a narrow window)
 const TABS = [
   ["all", "characters.builds.all", SquaresFourIcon],
   ["mine", "characters.builds.mine", UserIcon],
@@ -45,20 +46,31 @@ const TABS = [
 export default function Builds({ t, lang, go, settings }: PageProps) {
   const [f, setF] = useMem("bf", { reg: ALL, cls: ALL, tag: ALL, q: "", tab: "all", page: 1 });
   const [broken, setBroken] = useState<Record<string, boolean>>({});
+  // Same like state as the Character Builder, keyed by build title.
   const [liked, setLiked] = useMem<Record<string, boolean>>("liked", {});
+  // Builds created or cloned in the Character Builder (newest first).
+  // ponytail: module memory until builds are stored per account (R2).
+  const [myBuilds] = useMem<BuildSrc[]>("myBuilds", []);
   // Any filter change goes back to the first page.
   const upd = (o: Partial<typeof f>) => setF({ ...f, page: 1, ...o });
 
-  let list = SAMPLE_BUILDS.filter(
+  const reg = REGIONS.find((r) => r.value === settings["pm.region"])?.label ?? BUILD_REGIONS[0];
+  const all = [
+    ...myBuilds
+      .filter((m) => !SAMPLE_BUILDS.some((x) => x.t === m.t))
+      .map((m) => ({ t: m.t, cls: m.cls, sub: "", n: 1, reg, tags: m.tags ?? [], ago: [0, "minute"] as Ago, au: SAMPLE_ME, likes: 0 })),
+    ...SAMPLE_BUILDS,
+  ];
+  const q = f.q.trim().toLowerCase();
+  let list = all.filter(
     (x) =>
       (!f.reg || x.reg === f.reg) &&
       (!f.cls || x.cls === f.cls) &&
       (!f.tag || x.tags.includes(f.tag)) &&
-      x.t.toLowerCase().includes(f.q.toLowerCase()),
+      (x.t.toLowerCase().includes(q) || x.au.toLowerCase().includes(q)),
   );
   if (f.tab === "mine") list = list.filter((x) => x.au === SAMPLE_ME);
-  // ponytail: the prototype fakes "liked" as every third build; real likes come with accounts.
-  if (f.tab === "liked") list = list.filter((_, i) => i % 3 === 0);
+  if (f.tab === "liked") list = list.filter((x) => liked[x.t]);
   const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
   const page = Math.min(f.page, pages);
   const shown = list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -151,25 +163,18 @@ export default function Builds({ t, lang, go, settings }: PageProps) {
             {t("characters.builds.emptyText")}
           </div>
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(330px,1fr))", gap: 10 }}>
+        <div className="chBuildGrid">
           {shown.map((x) => {
             const L = !!liked[x.t];
             const col = CLASSES[x.cls][1];
             const global = x.reg === "EU";
-            const open = () => openBuild({ t: x.t, au: x.au, cls: x.cls, own: x.au === SAMPLE_ME, likes: x.likes }, go);
+            const open = () => openBuild({ t: x.t, au: x.au, cls: x.cls, own: x.au === SAMPLE_ME, likes: x.likes, tags: x.tags }, go);
             return (
               // The whole card opens the build on click; the title button is the keyboard path.
               <div key={x.t} className="chBuildCard" onClick={open}>
-                <div style={{ width: 84, flex: "none", position: "relative", background: `linear-gradient(160deg,${col}55 0%,var(--pm-s2) 70%)` }}>
+                <div className="chBuildArt" style={{ background: `linear-gradient(160deg,${col}55 0%,var(--pm-s2) 70%)` }}>
                   {PORTRAIT[x.cls] && !broken[x.cls] ? (
-                    <img
-                      src={PORTRAIT_BASE + PORTRAIT[x.cls]}
-                      alt=""
-                      loading="lazy"
-                      draggable={false}
-                      onError={() => setBroken({ ...broken, [x.cls]: true })}
-                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 12%" }}
-                    />
+                    <img src={PORTRAIT_BASE + PORTRAIT[x.cls]} alt="" loading="lazy" draggable={false} onError={() => setBroken({ ...broken, [x.cls]: true })} />
                   ) : (
                     <span style={{ position: "absolute", left: "50%", top: "44%", transform: "translate(-50%,-50%)", fontSize: 9, color: "var(--pm-t3)" }}>
                       {t("characters.builds.portrait")}
@@ -211,16 +216,18 @@ export default function Builds({ t, lang, go, settings }: PageProps) {
                       {x.reg}
                     </span>
                   </div>
-                  <div style={{ flex: 1 }} />
-                  <div style={{ display: "flex", gap: 5, alignItems: "center", minWidth: 0 }}>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                     {x.tags.map((tag) => (
                       <span key={tag} className="chPill" style={{ border: "1px solid var(--pm-line)", color: "var(--pm-t2)" }}>
                         {tag}
                       </span>
                     ))}
+                  </div>
+                  <div style={{ flex: 1 }} />
+                  <div style={{ display: "flex", gap: 5, alignItems: "center", minWidth: 0 }}>
                     <span style={{ fontSize: 10, color: "var(--pm-t3)", whiteSpace: "nowrap" }}>{ago(lang, x.ago)}</span>
                     <div style={{ flex: 1 }} />
-                    <span style={{ fontSize: 11, color: "var(--pm-t2)", whiteSpace: "nowrap" }}>{x.au}</span>
+                    <span style={{ fontSize: 11, color: "var(--pm-t2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{x.au}</span>
                     {x.au === SAMPLE_ME && (
                       <span style={{ fontSize: 9, padding: "1px 5px", borderRadius: 3, border: "1px solid var(--pm-red)", color: "var(--pm-redt)" }}>
                         {t("characters.builds.yours")}

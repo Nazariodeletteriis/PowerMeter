@@ -4,6 +4,18 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.2.9
+
+- New: the whole game database is in the app (items, NPCs, quests, dungeons, skills, recipes, titles, achievements, pets, wings and more) with real details, links between entries and Ctrl+K search.
+- New: PvP tab in the DPS Meter: damage dealt by you and your party to other players.
+- New: Character Builder rebuilt: each slot only offers items of its type, working sliders and stat menus, real owned/target gear, missing pieces, Compare, Widget and Share (Discord).
+- New: Build community shows 12 builds per page; Your builds and Liked work.
+- Changed: the program file is now PowerMeter.exe.
+- Changed: the character chip at the top is a plain button that opens My characters.
+- Fixed: exporting characters saves the file to Downloads.
+- Fixed: every Fight report tab (skill and buff timeline, damage taken, healing, targets) follows the selected range.
+- Fixed: default gear and build lists follow your character's class.
+
 ## 0.2.8
 
 - New: My characters works: add, import, export, duplicate and delete characters, and set the active one. Switching character updates the whole dashboard (builder, Skill Planner, Daevanion).

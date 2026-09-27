@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { CopyIcon, DownloadSimpleIcon, PlusIcon, TrashIcon, UploadSimpleIcon } from "@phosphor-icons/react";
 import { activate, activeId, newId, readCharacters, saveCharacters, type Character } from "../characters";
 import { REGIONS } from "../Onboarding";
@@ -54,14 +55,9 @@ export default function Personaggi({ t, lang, settings, save, run }: PageProps) 
     });
   };
 
-  const exportList = () => {
-    const blob = new Blob([JSON.stringify(list.map(({ id: _, ...c }) => c), null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "powermeter-characters.json";
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
+  // WebView2 ignores <a download>: the backend writes it to Downloads and shows it.
+  const exportList = () =>
+    run(() => invoke("save_to_downloads", { name: "powermeter-characters.json", contents: JSON.stringify(list.map(({ id: _, ...c }) => c), null, 2) }));
 
   const importList = async (f: File) => {
     let data: unknown;

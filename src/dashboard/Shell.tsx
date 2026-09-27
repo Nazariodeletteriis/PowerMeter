@@ -221,7 +221,6 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
                 <span className="mono">CP {activeChar?.cp ? fmt(activeChar.cp, lang) : "—"}</span>
               </div>
             </div>
-            <CaretDownIcon aria-hidden="true" />
           </button>
           <button type="button" className="btn fill" onClick={openWidget}>
             <PictureInPictureIcon aria-hidden="true" />

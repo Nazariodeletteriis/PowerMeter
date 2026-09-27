@@ -115,6 +115,17 @@ fn export_fight_json(state: tauri::State<'_, AppState>, record: FightRecord) -> 
     state.fight_history.export_fight_json(&record)
 }
 
+/// Write a user export (e.g. the character list) to Downloads and show it in
+/// Explorer. WebView2 ignores `<a download>` clicks, so the page can't save it.
+#[tauri::command]
+fn save_to_downloads(app: tauri::AppHandle, name: String, contents: String) -> Result<String, String> {
+    let file = std::path::Path::new(&name).file_name().ok_or("invalid file name")?;
+    let path = app.path().download_dir().map_err(|e| e.to_string())?.join(file);
+    std::fs::write(&path, contents).map_err(|e| e.to_string())?;
+    let _ = tauri_plugin_opener::reveal_item_in_dir(&path);
+    Ok(path.to_string_lossy().into_owned())
+}
+
 #[tauri::command]
 fn get_settings(state: tauri::State<'_, AppState>) -> std::collections::HashMap<String, String> {
     state.settings.get_all()
@@ -1781,6 +1792,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_app_version,
+            save_to_downloads,
             get_dps_snapshot,
             get_skill_details,
             get_details_context,

@@ -1,18 +1,43 @@
-import { useState, type KeyboardEvent } from "react";
+import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import type { T } from "./i18n";
 import { ALL_PAGES } from "./nav";
+import { DB_TYPES, DbIcon, matches, openEntry, useDb } from "./pages/world/db";
+
+// Database hits shown under the pages (the database page has them all).
+const DB_HITS = 8;
 
 /**
- * Ctrl K palette (prototype md.palette). Searches the dashboard pages; items,
- * skills and NPCs join the list when the R3 database exists.
+ * Ctrl K palette (prototype md.palette). Searches the dashboard pages and,
+ * from 3 characters, the game database.
  * No open/close animation on purpose: it is keyboard-driven.
  */
 export function Palette({ t, onClose, onPick }: { t: T; onClose: () => void; onPick: (id: string) => void }) {
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState(0);
   const q = query.trim().toLowerCase();
-  const found = ALL_PAGES.filter((p) => t(p.label).toLowerCase().includes(q));
+  const db = useDb(q.length >= 3 ? DB_TYPES : []);
+  type Option = { key: string; group: string; label: string; icon: ReactNode; pick: () => void };
+  const found: Option[] = [
+    ...ALL_PAGES.filter((p) => t(p.label).toLowerCase().includes(q)).map((p) => ({
+      key: p.id,
+      group: t("search.pages"),
+      label: t(p.label),
+      icon: <p.icon aria-hidden="true" />,
+      pick: () => onPick(p.id),
+    })),
+    ...(q.length >= 3 && db ? matches(db, q).slice(0, DB_HITS) : []).map((r) => ({
+      key: r.type + r.id,
+      group: t("nav.database"),
+      label: r.name,
+      icon: (
+        <span style={{ width: 20, height: 20, flex: "none", borderRadius: 4, overflow: "hidden", display: "grid", placeItems: "center" }}>
+          <DbIcon row={r} />
+        </span>
+      ),
+      pick: () => openEntry(onPick, r.type, r.id),
+    })),
+  ];
   const sel = Math.min(index, Math.max(0, found.length - 1));
   const cur = found[sel];
 
@@ -21,7 +46,7 @@ export function Palette({ t, onClose, onPick }: { t: T; onClose: () => void; onP
       e.preventDefault();
       setIndex(Math.max(0, Math.min(found.length - 1, sel + (e.key === "ArrowDown" ? 1 : -1))));
     } else if (e.key === "Enter" && cur) {
-      onPick(cur.id);
+      cur.pick();
     } else if (e.key === "Escape") {
       onClose();
     }
@@ -46,7 +71,7 @@ export function Palette({ t, onClose, onPick }: { t: T; onClose: () => void; onP
             role="combobox"
             aria-expanded="true"
             aria-controls="paletteList"
-            aria-activedescendant={cur ? `pal-${cur.id}` : undefined}
+            aria-activedescendant={cur ? `pal-${cur.key}` : undefined}
             onChange={(e) => {
               setQuery(e.target.value);
               setIndex(0);
@@ -60,33 +85,24 @@ export function Palette({ t, onClose, onPick }: { t: T; onClose: () => void; onP
             {found.length === 0 ? (
               <div style={{ padding: "24px 10px", color: "var(--pm-t2)" }}>{t("search.empty")}</div>
             ) : (
-              <>
-                <div className="paletteGroup">{t("search.pages")}</div>
-                {found.map((p, k) => (
-                  <div
-                    key={p.id}
-                    id={`pal-${p.id}`}
-                    className="paletteItem"
-                    role="option"
-                    aria-selected={k === sel}
-                    onClick={() => onPick(p.id)}
-                  >
-                    <p.icon aria-hidden="true" />
-                    {t(p.label)}
+              found.map((o, k) => (
+                <div key={o.key} role="presentation">
+                  {o.group !== found[k - 1]?.group && <div className="paletteGroup">{o.group}</div>}
+                  <div id={`pal-${o.key}`} className="paletteItem" role="option" aria-selected={k === sel} onClick={o.pick}>
+                    {o.icon}
+                    {o.label}
                   </div>
-                ))}
-              </>
+                </div>
+              ))
             )}
           </div>
           {cur && (
             <div className="palettePreview">
               <div className="paletteGroup" style={{ padding: 0 }}>
-                {t("search.preview")} · {t("search.pages")}
+                {t("search.preview")} · {cur.group}
               </div>
-              <div className="icon">
-                <cur.icon aria-hidden="true" />
-              </div>
-              <div style={{ fontSize: 16, fontWeight: 500 }}>{t(cur.label)}</div>
+              <div className="icon">{cur.icon}</div>
+              <div style={{ fontSize: 16, fontWeight: 500 }}>{cur.label}</div>
               <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("search.enter")}</div>
             </div>
           )}

@@ -628,16 +628,19 @@ button.gridRow:hover {
   gap: 8px;
   height: 36px;
   padding: 0 10px 0 4px;
+  padding-right: 12px;
   border-radius: 6px;
-  border: 0;
-  background: none;
+  border: 1px solid var(--pm-line);
+  background: transparent;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
+  transition: background-color 150ms ease-out, border-color 150ms ease-out;
 }
 .charChip:hover {
   background: var(--pm-s2);
+  border-color: var(--pm-t3);
 }
 .charChip .who {
   line-height: 1.15;

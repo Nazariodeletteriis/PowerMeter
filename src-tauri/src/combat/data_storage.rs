@@ -250,6 +250,10 @@ struct Inner {
     /// are not always in the same buff state at the same instant.
     actor_power_scalars: HashMap<i32, HashSet<i32>>,
     hostile_target_ids: HashSet<i32>,
+    /// Targets hit by the local player or a party member while being another
+    /// player (see `is_pvp_hit`). Only the PvP target mode reads these; the
+    /// other modes skip them, so PvE numbers are unchanged.
+    pvp_target_ids: HashSet<i32>,
     dead_entity_ids: HashSet<i32>,
     /// Boss entity IDs identified from NPC DB boss flags
     boss_entity_ids: HashSet<i32>,
@@ -284,6 +288,7 @@ impl DataStorage {
                 party_members: HashMap::new(),
                 actor_power_scalars: HashMap::new(),
                 hostile_target_ids: HashSet::new(),
+                pvp_target_ids: HashSet::new(),
                 dead_entity_ids: HashSet::new(),
                 boss_entity_ids: HashSet::new(),
                 has_boss_in_segment: false,
@@ -396,6 +401,7 @@ impl DataStorage {
 
         // Party healing: player-on-player damage is actually healing/buffs
         if is_friendly_action(&inner, actor_id, target_id) {
+            let pvp = is_pvp_hit(&inner, actor_id, target_id);
             let heal_amount = pdp.total_damage();
             if heal_amount > 0 {
                 // Record party heal on the actor's data in all targets they appear in
@@ -416,7 +422,13 @@ impl DataStorage {
                 e.total_heal += heal_amount as i64;
                 e.tick_count += 1;
             }
-            return;
+            if !pvp {
+                return;
+            }
+            // Us/party hitting a non-party player: also book it as damage so the
+            // PvP target mode has something to show. Heal bookkeeping above is
+            // deliberately left as it was.
+            inner.pvp_target_ids.insert(target_id);
         }
 
         // Track hostile targets
@@ -783,6 +795,10 @@ impl DataStorage {
         self.inner.read().known_player_ids.contains(&id)
     }
 
+    pub fn get_pvp_target_ids(&self) -> HashSet<i32> {
+        self.inner.read().pvp_target_ids.clone()
+    }
+
     pub fn get_mob_hp_data(&self) -> HashMap<i32, i32> {
         self.inner.read().mob_hp_data.clone()
     }
@@ -911,6 +927,7 @@ impl DataStorage {
         inner.summon_spawn_ids.clear();
         inner.actor_power_scalars.clear();
         inner.hostile_target_ids.clear();
+        inner.pvp_target_ids.clear();
         inner.dead_entity_ids.clear();
         inner.has_boss_in_segment = false;
         inner.mob_hp_data.clear();
@@ -927,6 +944,7 @@ impl DataStorage {
         let mut inner = self.inner.write();
         inner.target_combat.clear();
         inner.hostile_target_ids.clear();
+        inner.pvp_target_ids.clear();
         inner.dead_entity_ids.clear();
         inner.has_boss_in_segment = false;
         inner.mob_hp_data.clear();
@@ -1087,14 +1105,39 @@ fn is_friendly_action(inner: &Inner, actor_id: i32, target_id: i32) -> bool {
     inner.known_player_ids.contains(&resolved_actor) && inner.known_player_ids.contains(&resolved_target)
 }
 
+/// The local player or a party member (by roster name). Party membership is the
+/// only friend/foe signal the packets are known to carry — there is no faction
+/// field decoded — so any other player counts as a potential PvP target.
+fn is_ally(inner: &Inner, id: i32) -> bool {
+    inner.local_player_id == Some(id as i64)
+        || inner
+            .nickname_storage
+            .get(&id)
+            .is_some_and(|name| inner.party_members.contains_key(name))
+}
+
+/// Player-on-player record from us/our party onto a player outside the party.
+/// The `04 38` record carries no heal/damage flag, so a heal cast on a
+/// non-party ally also matches this; that is why it only feeds the PvP mode.
+fn is_pvp_hit(inner: &Inner, actor_id: i32, target_id: i32) -> bool {
+    let actor = summon_resolver::resolve(actor_id, &inner.summon_storage);
+    let target = summon_resolver::resolve(target_id, &inner.summon_storage);
+    is_ally(inner, actor) && !is_ally(inner, target)
+}
+
 /// Remove friendly-fire damage from aggregates when a new player is identified.
 fn purge_friendly_damage(inner: &mut Inner, _uid: i32) {
     let mut to_remove: Vec<(i32, Vec<i32>)> = Vec::new();
+    let mut pvp_targets = Vec::new();
 
     for (&target_id, target_data) in &inner.target_combat {
         let mut actors_to_remove = Vec::new();
         for &actor_id in target_data.actors.keys() {
             if is_friendly_action(inner, actor_id, target_id) {
+                if is_pvp_hit(inner, actor_id, target_id) {
+                    pvp_targets.push(target_id);
+                    continue;
+                }
                 actors_to_remove.push(actor_id);
             }
         }
@@ -1102,6 +1145,7 @@ fn purge_friendly_damage(inner: &mut Inner, _uid: i32) {
             to_remove.push((target_id, actors_to_remove));
         }
     }
+    inner.pvp_target_ids.extend(pvp_targets);
 
     for (target_id, actor_ids) in to_remove {
         if let Some(target_data) = inner.target_combat.get_mut(&target_id) {
@@ -1124,4 +1168,85 @@ pub fn is_player_skill(skill_code: i32) -> bool {
     (11_000_000..=19_999_999).contains(&skill_code)
         || (3_000_000..=3_999_999).contains(&skill_code)
         || (100_000..=199_999).contains(&skill_code)
+}
+
+#[cfg(test)]
+mod pvp_tests {
+    use super::*;
+
+    const ME: i32 = 100;
+    const MATE: i32 = 300;
+    const FOE: i32 = 200;
+    const OTHER: i32 = 400;
+    const MOB: i32 = 900;
+    const SKILL: i32 = 11_020_000; // player class band
+
+    fn hit(s: &DataStorage, actor: i32, target: i32, dmg: i32) {
+        let mut p = ParsedDamagePacket::new();
+        p.set_actor_id(actor);
+        p.set_target_id(target);
+        p.set_skill_code(SKILL);
+        p.set_damage(dmg);
+        s.append_damage(p);
+    }
+
+    /// Local player 100, party mate 300 ("Mate"); 200 and 400 are strangers.
+    /// Every player hits a mob first so all four are known players.
+    fn setup() -> DataStorage {
+        let s = DataStorage::new();
+        s.set_local_player_id(Some(ME as i64));
+        s.append_nickname_authoritative(MATE, "Mate");
+        s.set_party_roster(vec![("Mate".to_string(), PartyMember::default())], true);
+        for id in [ME, MATE, FOE, OTHER] {
+            hit(&s, id, MOB, 10);
+        }
+        s
+    }
+
+    #[test]
+    fn my_hit_on_stranger_is_pvp_damage_and_heal_book_unchanged() {
+        let s = setup();
+        hit(&s, ME, FOE, 500);
+        hit(&s, MATE, FOE, 300);
+        assert!(s.get_pvp_target_ids().contains(&FOE));
+        let combat = s.get_combat_snapshot_light();
+        let foe = combat.get(&FOE).expect("PvP target recorded");
+        assert_eq!(foe.total_damage, 800);
+        assert_eq!(foe.actors[&ME].total_damage, 500);
+        assert_eq!(foe.actors[&MATE].total_damage, 300);
+        // Heal bookkeeping is exactly what it was before PvP existed.
+        assert_eq!(s.get_heal_snapshot()[&ME][&(SKILL, false)].total_heal, 500);
+    }
+
+    #[test]
+    fn hits_between_allies_or_strangers_stay_out_of_combat() {
+        let s = setup();
+        hit(&s, ME, MATE, 500); // heal/buff on party mate
+        hit(&s, MATE, ME, 500);
+        hit(&s, FOE, OTHER, 500); // two strangers fighting
+        hit(&s, FOE, ME, 500); // stranger on me: not booked as our damage
+        assert!(s.get_pvp_target_ids().is_empty());
+        let combat = s.get_combat_snapshot_light();
+        assert_eq!(combat.keys().copied().collect::<Vec<_>>(), vec![MOB]);
+    }
+
+    #[test]
+    fn early_hit_on_unknown_player_survives_purge_as_pvp() {
+        let s = DataStorage::new();
+        s.set_local_player_id(Some(ME as i64));
+        hit(&s, ME, MOB, 10);
+        hit(&s, ME, FOE, 700); // FOE not yet known as a player
+        assert!(s.get_pvp_target_ids().is_empty());
+        hit(&s, FOE, MOB, 10); // FOE identified -> purge runs
+        assert!(s.get_pvp_target_ids().contains(&FOE));
+        assert_eq!(s.get_combat_snapshot_light()[&FOE].total_damage, 700);
+    }
+
+    #[test]
+    fn flush_clears_pvp_targets() {
+        let s = setup();
+        hit(&s, ME, FOE, 500);
+        s.flush_combat_only();
+        assert!(s.get_pvp_target_ids().is_empty());
+    }
 }

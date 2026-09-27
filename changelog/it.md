@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.9
+
+- Nuovo: tutto il database del gioco è nell'app (oggetti, NPC, missioni, dungeon, abilità, ricette, titoli, obiettivi, pet, ali e altro) con dettagli reali, collegamenti tra le voci e ricerca con Ctrl+K.
+- Nuovo: tab PvP nel DPS Meter: il danno fatto da te e dal tuo party ad altri giocatori.
+- Nuovo: Character Builder rifatto: ogni slot propone solo oggetti del suo tipo, slider e menu delle statistiche funzionanti, equip posseduto e obiettivo reali, pezzi mancanti, Confronta, Widget e Condividi (Discord).
+- Nuovo: Build community mostra 12 build per pagina; Le tue build e Piaciute funzionano.
+- Cambiato: il file del programma ora si chiama PowerMeter.exe.
+- Cambiato: il chip del personaggio in alto è un semplice bottone che apre I miei personaggi.
+- Corretto: esportare i personaggi salva il file nella cartella Download.
+- Corretto: ogni tab del Report combattimento (timeline skill e buff, danno ricevuto, cure, bersagli) segue l'intervallo selezionato.
+- Corretto: equipaggiamento di default ed elenchi build seguono la classe del tuo personaggio.
+
 ## 0.2.8
 
 - Nuovo: I miei personaggi funziona: aggiungi, importa, esporta, duplica ed elimina personaggi, e scegli quello attivo. Cambiando personaggio si aggiorna tutta la dashboard (builder, Skill Planner, Daevanion).

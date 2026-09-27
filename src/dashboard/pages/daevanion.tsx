@@ -176,7 +176,7 @@ export default function Daevanion({ t, lang, name, settings, onError, setHeader 
     <>
       <div className="chToolbar">
         <select className="chSelect" aria-label={t("characters.skill.build")}>
-          {DV_BUILDS.map((b) => (
+          {DV_BUILDS.filter((b) => b[1] === cls).map(([b]) => (
             <option key={b}>{b}</option>
           ))}
           <option>{t("characters.newBuildOption")}</option>

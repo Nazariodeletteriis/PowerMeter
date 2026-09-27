@@ -228,10 +228,23 @@ const createPmWidget = (app) => {
   $(".pmDetailReportBtn")?.addEventListener("click", () => detailRow && app.openRowDetailsWindow(detailRow));
 
   // --- Build (8.5) and Lobby (8.6), from the sample data until real data exists
+  // The Character Builder's "Widget" button hands its build over here (same shape).
+  const BUILD_KEY = "pm.widgetBuild";
+  const buildData = () => {
+    try {
+      return JSON.parse(app.safeGetStorage(BUILD_KEY)) || window.PM_SAMPLE?.build;
+    } catch {
+      return window.PM_SAMPLE?.build;
+    }
+  };
+  window.addEventListener("storage", (event) => {
+    if (event.key === MODE_KEY && event.newValue === "build") setMode("build");
+    if (event.key === BUILD_KEY && mode === "build") render();
+  });
   const buildEl = $(".pmBuild");
   const lobbyEl = $(".pmLobby");
   const renderBuild = () => {
-    const b = window.PM_SAMPLE?.build;
+    const b = buildData();
     if (!b) return;
     const tabs = [
       ["slots", "Slots"],
@@ -368,7 +381,7 @@ const createPmWidget = (app) => {
     let right = "";
     if (mode === "dps" && view === "ended") title = t("pmWidget.end.title", "Fight over");
     if (mode === "build") {
-      const b = window.PM_SAMPLE?.build;
+      const b = buildData();
       if (b) right = `${b.character} · ${b.name} ▾`;
       renderBuild();
     }

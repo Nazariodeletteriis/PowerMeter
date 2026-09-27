@@ -95,20 +95,20 @@ export const SAMPLE_SOURCES: Record<string, string> = {
   ring1: "shop:1800",
   feet: "Ashen Sanctum · Grimtooth Warden",
 };
-// pBuilder.picker: [item, rarity, Magic Boost vs current]
-export const SAMPLE_PICKER: [string, string, string][] = [
-  ["Ludra's Grimoire", "Legendary", "+214"],
-  ["Courage Spellbook", "Legendary", "+168"],
-  ["Fantasy Spellbook", "Legendary", "+151"],
-  ["Elder Spellbook", "Rare", "−42"],
-  ["Rainy Forest Spellbook", "Uncommon", "−120"],
-];
-// pBuilder.subs: [stat, min, max, unit]
+// pBuilder.subs: [stat, min, max, unit] — the sub-stat pool; a piece rolls four
+// (the first four are the prototype's defaults).
 export const SAMPLE_SUBS: [string, number, number, string][] = [
   ["Double Chance", 1.75, 2.08, "%"],
   ["Magic Boost", 42, 58, ""],
   ["Critical Hit", 28, 36, ""],
   ["Attack Increase", 1.75, 2.08, "%"],
+  ["Attack", 14, 20, ""],
+  ["Accuracy", 28, 36, ""],
+  ["Penetration", 28, 36, ""],
+  ["Back Attack", 14, 20, ""],
+  ["Defense", 40, 56, ""],
+  ["HP", 180, 240, ""],
+  ["Critical Hit Resist", 28, 36, ""],
 ];
 // pBuilder.colls: [icon key, i18n key suffix, tooltip (i18n key suffix or game text), count]
 export const SAMPLE_COLLECTIONS: [string, string, string, string][] = [
@@ -147,7 +147,15 @@ export const SAMPLE_COMMENTS: [string, Ago, string][] = [
 ];
 
 // pSkill — the skills themselves are the real ones (src/dashboard/skills.tsx).
-export const SKILL_BUILDS = ["Frost Control · Sorcerer", "Burst PvE · Sorcerer", "Guardian Wall · Templar"];
+// [name, class]: the planner only lists the active class's builds.
+export const SKILL_BUILDS: [string, string][] = [
+  ["Frost Control", "Sorcerer"], ["Burst PvE", "Sorcerer"], ["Guardian Wall", "Templar"], ["Crimson Wrath", "Gladiator"],
+  ["Shadowstep PvP", "Assassin"], ["Storm Oath", "Ranger"], ["Tidecaller", "Spiritmaster"], ["Radiant Cure", "Cleric"], ["Mantra Support", "Chanter"],
+];
 
 // pDaev — the planner's build dropdown; the boards themselves are real (data/daevanion.json).
-export const DV_BUILDS = ["Burst Nezekan · Sorcerer", "Tank Zikel · Templar"];
+// [name, class], filtered by the active class like SKILL_BUILDS.
+export const DV_BUILDS: [string, string][] = [
+  ["Burst Nezekan", "Sorcerer"], ["Tank Zikel", "Templar"], ["Wrath Zikel", "Gladiator"], ["Shadow Triniel", "Assassin"],
+  ["Hunter Yustiel", "Ranger"], ["Summoner Kaisinel", "Spiritmaster"], ["Healer Yustiel", "Cleric"], ["Mantra Ariel", "Chanter"],
+];
