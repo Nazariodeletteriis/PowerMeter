@@ -1478,7 +1478,7 @@ pub fn run() {
             };
 
             app.manage(state);
-            powermeter::open_onboarding_if_needed(app.handle());
+            powermeter::open_dashboard_on_start(app.handle());
             powermeter::start_click_through_hotkey(app.handle());
 
             // Reopen the Details window if it was left enabled. Done here rather

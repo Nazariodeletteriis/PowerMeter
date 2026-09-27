@@ -10,8 +10,6 @@ use tauri::{Emitter, Manager};
 use crate::platform::hotkeys::{parse_hotkey_label, HotkeyManager};
 use crate::AppState;
 
-/// Settings key set once the user has finished onboarding.
-const ONBOARDED_KEY: &str = "pm.onboarded";
 const CLICK_THROUGH_HOTKEY_KEY: &str = "pm.clickThroughHotkey";
 
 /// Not persisted on purpose: the overlay always starts clickable, so a user
@@ -202,20 +200,14 @@ fn show_dashboard(app: &tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
-/// Opens the dashboard on first launch so the user goes through onboarding.
-/// Spawned rather than called inline, keeping window creation off the setup path.
-pub fn open_onboarding_if_needed(app: &tauri::AppHandle) {
-    let onboarded = app
-        .try_state::<AppState>()
-        .and_then(|state| state.settings.get(ONBOARDED_KEY))
-        .is_some_and(|v| v == "1");
-    if onboarded {
-        return;
-    }
+/// The dashboard is the main window: it opens on every launch next to the meter
+/// and shows onboarding itself until `pm.onboarded` is set. Spawned rather than
+/// called inline, keeping window creation off the setup path.
+pub fn open_dashboard_on_start(app: &tauri::AppHandle) {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
         if let Err(e) = show_dashboard(&app) {
-            tracing::error!("Failed to open onboarding: {}", e);
+            tracing::error!("Failed to open dashboard: {}", e);
         }
     });
 }
