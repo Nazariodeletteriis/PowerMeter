@@ -123,3 +123,13 @@ export function EmptyState({
 /** Integer with thousands separators even for 4 digits, like the prototype (it: 1.240). */
 export const fmt = (n: number, lang: string) =>
   Math.round(n).toLocaleString(lang, { useGrouping: "always" } as unknown as Intl.NumberFormatOptions);
+
+/** Elyos / Asmodian icon and name; `label` is the translated name (collections.<faction>). */
+export function FactionTag({ faction, label, size = 14 }: { faction: string; label: string; size?: number }) {
+  return (
+    <span style={{ color: faction === "asmodian" ? "#F4C77A" : "#8FD3FF", display: "inline-flex", alignItems: "center", gap: 3, verticalAlign: -3 }}>
+      <img src={art(faction)} alt="" style={{ width: size, height: size }} />
+      {label}
+    </span>
+  );
+}

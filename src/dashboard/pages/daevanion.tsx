@@ -3,7 +3,6 @@ import { ArrowCounterClockwiseIcon, CheckIcon, ChecksIcon, FloppyDiskIcon, PlusI
 import DV from "../../data/daevanion.json";
 import type { Settings } from "../App";
 import { activeId, readCharacters } from "../characters";
-import { DV_BUILDS } from "../sample/characters";
 import { GAME_SKILLS, planClass, SkillIcon, type GameSkill } from "../skills";
 import { useMem, useToast } from "./characters/shared";
 import { ShareModal } from "./shared/ShareModal";
@@ -192,9 +191,7 @@ export default function Daevanion({ t, lang, name, settings, save, onError, setH
     <>
       <div className="chToolbar">
         <select className="chSelect" aria-label={t("characters.skill.build")}>
-          {DV_BUILDS.filter((b) => b[1] === cls).map(([b]) => (
-            <option key={b}>{b}</option>
-          ))}
+          {/* No saved Daevanion builds yet: only "new build". */}
           <option>{t("characters.newBuildOption")}</option>
         </select>
         <div style={{ flex: 1 }} />

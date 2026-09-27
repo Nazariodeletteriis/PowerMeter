@@ -6,7 +6,9 @@ import { USER_NAME_KEY } from "./Shell";
 // same list. The active one is mirrored into the keys the rest of the app
 // already reads (pm.class, pm.region, the meter's name), so switching
 // character re-targets builder, skill planner, Daevanion etc. for free.
-export type Character = { id: string; name: string; cls: string; region: string; level?: number; cp?: number };
+export const FACTIONS = ["elyos", "asmodian"] as const;
+export type Faction = (typeof FACTIONS)[number];
+export type Character = { id: string; name: string; cls: string; region: string; faction?: Faction; level?: number; cp?: number };
 
 export const CHARACTERS_KEY = "pm.characters";
 export const ACTIVE_KEY = "pm.activeCharacter";

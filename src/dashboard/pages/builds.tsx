@@ -13,11 +13,10 @@ import {
   UserIcon,
 } from "@phosphor-icons/react";
 import { REGIONS } from "../Onboarding";
-import { BUILD_REGIONS, BUILD_TAGS, SAMPLE_BUILDS, SAMPLE_ME, type Ago } from "../sample/characters";
 import { planClass } from "../skills";
 import { ClassAvatar, CLASSES, RELEASED_CLASSES } from "../ui";
 import { GEAR_KEY, gearKey, readGear, type BuildGear } from "./characters/gear";
-import { ago, closeBuild, DANGER, DeleteBuildModal, MY_BUILDS_KEY, openBuild, readMyBuilds, useMem } from "./characters/shared";
+import { BUILD_REGIONS, BUILD_TAGS, closeBuild, DANGER, DeleteBuildModal, MY_BUILDS_KEY, openBuild, readMyBuilds, useMem } from "./characters/shared";
 import type { PageProps } from "./types";
 
 // Standard class portraits, hotlinked at runtime (never bundled): NCSoft's game
@@ -46,7 +45,7 @@ const TABS = [
 ] as const;
 
 // Prototype pg.builds (pBuilds).
-export default function Builds({ t, lang, name, go, settings, save, onError }: PageProps) {
+export default function Builds({ t, name, go, settings, save, onError }: PageProps) {
   const [f, setF] = useMem("bf", { reg: ALL, cls: ALL, tag: ALL, q: "", tab: "all", page: 1 });
   const [broken, setBroken] = useState<Record<string, boolean>>({});
   // Same like state as the Character Builder, keyed by build title.
@@ -70,22 +69,17 @@ export default function Builds({ t, lang, name, go, settings, save, onError }: P
   const upd = (o: Partial<typeof f>) => setF({ ...f, page: 1, ...o });
 
   const reg = REGIONS.find((r) => r.value === settings["pm.region"])?.label ?? BUILD_REGIONS[0];
-  const all = [
-    ...myBuilds
-      .filter((m) => !SAMPLE_BUILDS.some((x) => x.t === m.t))
-      .map((m) => ({ t: m.t, cls: m.cls, sub: "", n: 1, reg, tags: m.tags ?? [], ago: [0, "minute"] as Ago, au: SAMPLE_ME, likes: 0, mine: true })),
-    ...SAMPLE_BUILDS,
-  ];
+  // Only your builds (created or cloned here): community builds need the server, not there yet.
+  const all = myBuilds.map((m) => ({ t: m.t, cls: m.cls, n: 1, reg, tags: m.tags ?? [], likes: 0 }));
   const q = f.q.trim().toLowerCase();
+  const filtered = !!(f.reg || f.cls || f.tag || q);
   let list = all.filter(
     (x) =>
       (!f.reg || x.reg === f.reg) &&
       (!f.cls || x.cls === f.cls) &&
       (!f.tag || x.tags.includes(f.tag)) &&
-      (x.t.toLowerCase().includes(q) || x.au.toLowerCase().includes(q)),
+      (x.t.toLowerCase().includes(q) || name.toLowerCase().includes(q)),
   );
-  // Yours = created or cloned here; the sample builds signed by SAMPLE_ME are examples.
-  if (f.tab === "mine") list = list.filter((x) => "mine" in x);
   if (f.tab === "liked") list = list.filter((x) => liked[x.t]);
   const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
   const page = Math.min(f.page, pages);
@@ -167,7 +161,7 @@ export default function Builds({ t, lang, name, go, settings, save, onError }: P
             type="button"
             className="btn sm fill"
             style={{ padding: "0 12px", marginBottom: 5 }}
-            onClick={() => openBuild({ t: "", au: SAMPLE_ME, cls: planClass(settings["pm.class"]), own: true, isNew: true }, go)}
+            onClick={() => openBuild({ t: "", au: name, cls: planClass(settings["pm.class"]), own: true, isNew: true }, go)}
           >
             <PlusIcon aria-hidden="true" />
             {t("characters.builds.create")}
@@ -175,8 +169,8 @@ export default function Builds({ t, lang, name, go, settings, save, onError }: P
         </div>
         {list.length === 0 && (
           <div style={{ padding: "40px 0", color: "var(--pm-t2)" }}>
-            <div style={{ fontSize: 16, color: "var(--pm-t1)", marginBottom: 4 }}>{t("characters.builds.emptyTitle")}</div>
-            {t("characters.builds.emptyText")}
+            <div style={{ fontSize: 16, color: "var(--pm-t1)", marginBottom: 4 }}>{t(filtered || f.tab === "liked" ? "characters.builds.emptyTitle" : "characters.builds.noneTitle")}</div>
+            {t(filtered || f.tab === "liked" ? "characters.builds.emptyText" : "characters.builds.noneText")}
           </div>
         )}
         <div className="chBuildGrid">
@@ -184,7 +178,7 @@ export default function Builds({ t, lang, name, go, settings, save, onError }: P
             const L = !!liked[x.t];
             const col = CLASSES[x.cls][1];
             const global = x.reg === "EU";
-            const open = () => openBuild({ t: x.t, au: x.au, cls: x.cls, own: x.au === SAMPLE_ME, likes: x.likes, tags: x.tags }, go);
+            const open = () => openBuild({ t: x.t, au: name, cls: x.cls, own: true, likes: x.likes, tags: x.tags }, go);
             return (
               // The whole card opens the build on click; the title button is the keyboard path.
               <div key={x.t} className="chBuildCard" onClick={open}>
@@ -205,7 +199,7 @@ export default function Builds({ t, lang, name, go, settings, save, onError }: P
                         {x.t}
                       </button>
                       <div style={{ fontSize: 11, color: "var(--pm-t3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {x.cls} · {x.sub}
+                        {x.cls}
                       </div>
                     </div>
                     <button
@@ -241,34 +235,29 @@ export default function Builds({ t, lang, name, go, settings, save, onError }: P
                   </div>
                   <div style={{ flex: 1 }} />
                   <div style={{ display: "flex", gap: 5, alignItems: "center", minWidth: 0 }}>
-                    <span style={{ fontSize: 10, color: "var(--pm-t3)", whiteSpace: "nowrap" }}>{ago(lang, x.ago)}</span>
                     <div style={{ flex: 1 }} />
-                    <span style={{ fontSize: 11, color: "var(--pm-t2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{"mine" in x ? name : x.au}</span>
-                    {"mine" in x && (
-                      <span style={{ fontSize: 9, padding: "1px 5px", borderRadius: 3, border: "1px solid var(--pm-red)", color: "var(--pm-redt)" }}>
-                        {t("characters.builds.yours")}
-                      </span>
-                    )}
+                    <span style={{ fontSize: 11, color: "var(--pm-t2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</span>
+                    <span style={{ fontSize: 9, padding: "1px 5px", borderRadius: 3, border: "1px solid var(--pm-red)", color: "var(--pm-redt)" }}>
+                      {t("characters.builds.yours")}
+                    </span>
                   </div>
                   {/* Your own builds (created or cloned): edit and delete, spelled out. */}
-                  {"mine" in x && (
-                    <div style={{ display: "flex", gap: 6, paddingTop: 8, borderTop: "1px solid var(--pm-line)" }}>
-                      <button type="button" className="btn sm" style={{ flex: 1 }} onClick={(e) => (e.stopPropagation(), open())}>
-                        <PencilSimpleIcon aria-hidden="true" />
-                        {t("characters.builds.edit")}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn sm"
-                        style={{ flex: 1, ...DANGER }}
-                        aria-label={`${t("characters.delete")} ${x.t}`}
-                        onClick={(e) => (e.stopPropagation(), setDel(x))}
-                      >
-                        <TrashIcon aria-hidden="true" />
-                        {t("characters.delete")}
-                      </button>
-                    </div>
-                  )}
+                  <div style={{ display: "flex", gap: 6, paddingTop: 8, borderTop: "1px solid var(--pm-line)" }}>
+                    <button type="button" className="btn sm" style={{ flex: 1 }} onClick={(e) => (e.stopPropagation(), open())}>
+                      <PencilSimpleIcon aria-hidden="true" />
+                      {t("characters.builds.edit")}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn sm"
+                      style={{ flex: 1, ...DANGER }}
+                      aria-label={`${t("characters.delete")} ${x.t}`}
+                      onClick={(e) => (e.stopPropagation(), setDel(x))}
+                    >
+                      <TrashIcon aria-hidden="true" />
+                      {t("characters.delete")}
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -288,6 +277,13 @@ export default function Builds({ t, lang, name, go, settings, save, onError }: P
               <CaretRightIcon aria-hidden="true" />
             </button>
           </nav>
+        )}
+        {/* Community builds need the server (upload/browse): visible empty state until then. */}
+        {f.tab === "all" && (
+          <div style={{ marginTop: 16, padding: "24px 0", borderTop: "1px solid var(--pm-line)", color: "var(--pm-t2)" }}>
+            <div style={{ fontSize: 16, color: "var(--pm-t1)", marginBottom: 4 }}>{t("characters.builds.communityTitle")}</div>
+            {t("characters.builds.communityText")}
+          </div>
         )}
       </div>
       {del && <DeleteBuildModal t={t} build={del.t} onDelete={() => remove(del)} onClose={() => setDel(null)} />}

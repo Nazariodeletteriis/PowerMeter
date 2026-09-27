@@ -105,9 +105,6 @@
   "home.emptyText": "Lance Aion 2 et frappe une cible : PowerMeter reconnaît ton personnage et commence à enregistrer. Le widget s'ouvre automatiquement.",
   "home.checkRequirements": "Vérifier les prérequis",
   "home.notSet": "Non défini",
-  "home.portrait": "Portrait",
-  "home.cpVs7Days": "vs il y a 7 jours",
-  "home.activeBuild": "Build active :",
   "home.buildProgress": "Progression de la build",
   "home.buildOwned": "{owned} pièces sur {total} possédées · prochains upgrades recommandés :",
   "home.timers": "Minuteurs",
@@ -123,7 +120,6 @@
   "home.todayAt": "Aujourd'hui {time}",
   "home.yesterdayAt": "Hier {time}",
   "home.today": "Tâches du jour",
-  "home.todayLeft": "{n} ouvertes",
   "home.news": "Actus",
   "supporter.title": "Merci à celles et ceux qui font vivre PowerMeter",
   "supporter.text": "PowerMeter est gratuit et restera complet pour tout le monde. Les soutiens sur Patreon font vivre les serveurs qui hébergent logs, classements et builds partagées.",
@@ -139,6 +135,8 @@
   "supporter.notLinked": "Non lié",
   "supporter.link": "Lier Patreon",
   "supporter.badge": "Badge de soutien",
-  "supporter.inRankings": "Dans les classements :",
-  "about.a2tools": "Le moteur de capture est basé sur {link} de taengu (GPL-3.0). Merci !"
+  "about.a2tools": "Le moteur de capture est basé sur {link} de taengu (GPL-3.0). Merci !",
+  "home.noCharacterTitle": "Aucun personnage actif",
+  "home.noCharacterText": "Ajoute ton personnage pour voir ici classe, région et build.",
+  "home.noBuildText": "Définis ton équipement cible dans le Character Builder pour suivre ce qui manque."
 }

@@ -105,9 +105,6 @@
   "home.emptyText": "Aion 2を起動して対象に攻撃してください。PowerMeterがキャラクターを認識し、記録を開始します。ウィジェットは自動的に開きます。",
   "home.checkRequirements": "要件を確認",
   "home.notSet": "未設定",
-  "home.portrait": "ポートレート",
-  "home.cpVs7Days": "7日前と比較",
-  "home.activeBuild": "適用中のビルド:",
   "home.buildProgress": "ビルドの進捗",
   "home.buildOwned": "{total}個中{owned}個所持・次のおすすめアップグレード:",
   "home.timers": "タイマー",
@@ -123,7 +120,6 @@
   "home.todayAt": "今日 {time}",
   "home.yesterdayAt": "昨日 {time}",
   "home.today": "今日のタスク",
-  "home.todayLeft": "{n}件未完了",
   "home.news": "ニュース",
   "supporter.title": "PowerMeterを支えてくださる皆さんへ感謝",
   "supporter.text": "PowerMeterは無料で、すべての機能を誰でも利用できる状態を維持します。Patreonのサポーターが、ログ、ランキング、共有ビルドを保存するサーバーの維持を支えています。",
@@ -139,6 +135,8 @@
   "supporter.notLinked": "未連携",
   "supporter.link": "Patreonを連携",
   "supporter.badge": "サポーターバッジ",
-  "supporter.inRankings": "ランキングでの表示:",
-  "about.a2tools": "キャプチャエンジンはtaenguによる{link}(GPL-3.0)をベースにしています。ありがとうございます!"
+  "about.a2tools": "キャプチャエンジンはtaenguによる{link}(GPL-3.0)をベースにしています。ありがとうございます!",
+  "home.noCharacterTitle": "アクティブなキャラクターがいません",
+  "home.noCharacterText": "キャラクターを追加すると、クラス・地域・ビルドがここに表示されます。",
+  "home.noBuildText": "Character Builder で目標装備を設定すると、足りない装備を追跡できます。"
 }

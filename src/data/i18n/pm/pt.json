@@ -105,9 +105,6 @@
   "home.emptyText": "Inicie o Aion 2 e ataque qualquer alvo: o PowerMeter reconhece seu personagem e começa a gravar. O widget abre automaticamente.",
   "home.checkRequirements": "Verificar requisitos",
   "home.notSet": "Não definido",
-  "home.portrait": "Retrato",
-  "home.cpVs7Days": "vs 7 dias atrás",
-  "home.activeBuild": "Build ativa:",
   "home.buildProgress": "Progresso da build",
   "home.buildOwned": "{owned} de {total} peças possuídas · próximos upgrades recomendados:",
   "home.timers": "Temporizadores",
@@ -123,7 +120,6 @@
   "home.todayAt": "Hoje {time}",
   "home.yesterdayAt": "Ontem {time}",
   "home.today": "Tarefas de hoje",
-  "home.todayLeft": "{n} abertas",
   "home.news": "Novidades",
   "supporter.title": "Obrigado a todos que mantêm o PowerMeter vivo",
   "supporter.text": "O PowerMeter é gratuito e continuará completo para todos. Os apoiadores no Patreon mantêm vivos os servidores que hospedam logs, rankings e builds compartilhadas.",
@@ -139,6 +135,8 @@
   "supporter.notLinked": "Não vinculado",
   "supporter.link": "Vincular Patreon",
   "supporter.badge": "Emblema de apoiador",
-  "supporter.inRankings": "Nos rankings:",
-  "about.a2tools": "O motor de captura é baseado no {link} de taengu (GPL-3.0). Obrigado!"
+  "about.a2tools": "O motor de captura é baseado no {link} de taengu (GPL-3.0). Obrigado!",
+  "home.noCharacterTitle": "Nenhum personagem ativo",
+  "home.noCharacterText": "Adicione seu personagem para ver aqui classe, região e build.",
+  "home.noBuildText": "Defina o equipamento-alvo no Character Builder para acompanhar o que falta."
 }

@@ -408,14 +408,18 @@
         "drop": "掉落",
         "craft": "制作",
         "shop": "商店"
-      }
+      },
+      "emptyTitle": "未选择构筑",
+      "emptyHint": "请在仪表板的 Character Builder 中打开一个构筑并在小组件中显示。"
     },
     "lobby": {
       "ready": "{n}/{total} 已准备",
       "player": "玩家",
       "status": "状态",
       "notReady": "未准备",
-      "gsTip": "装备评分"
+      "gsTip": "装备评分",
+      "emptyTitle": "暂无队伍数据",
+      "emptyHint": "当计量器能够读取队伍成员后，会显示在这里。"
     },
     "updateAvailable": "有可用更新",
     "updateNotes": "发行说明",

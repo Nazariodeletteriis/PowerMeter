@@ -1,98 +1,111 @@
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import {
   ArrowsLeftRightIcon,
-  CaretDownIcon,
   CaretLeftIcon,
   CaretRightIcon,
   ColumnsIcon,
   ExportIcon,
-  GlobeSimpleIcon,
   ShareNetworkIcon,
-  SkullIcon,
+  SwordIcon,
+  WarningOctagonIcon,
 } from "@phosphor-icons/react";
 import { fmt } from "../ui";
 import { invoke } from "@tauri-apps/api/core";
-import { ATTEMPTS, BOSS, DUNGEON, BOSS_STATS, BUFFS, CLASS_SKILLS, DEATH, DURATION, FIGHT_DATE, PHASE, PLAYER_EXTRA, REPORT_LISTS, TL_PERIOD } from "../sample/combat";
-import { ab, Av, Chart, classColor, clock, pc, rank, sampleBadges, sampleParty, samplePoints, sampleSeries, sampleSkills, type Row, type Skill } from "./combat/parts";
+import { usePoll } from "../usePoll";
+import { ab, Av, Chart, classColor, clock, fightParty, fightSeries, getFights, pc, REPORT_FIGHT_KEY, uploadedUrl, useFight, type FightRecord, type FightRow, type FightSummary, type Skill } from "./combat/parts";
 import { SkillIcon } from "../skills";
 import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
 
-// Every number on this page is the prototype's sample fight until online logs
-// (R2) and the fight record viewer are wired to it.
-const TABS = ["overview", "skill", "tl", "buff", "taken", "heal", "targets"] as const;
+// The latest saved fight; its attempts are the saved fights on the same boss, oldest first.
+const TABS = ["overview", "skill", "tl", "taken", "heal"] as const;
 type Tab = (typeof TABS)[number];
-type ListTab = keyof typeof REPORT_LISTS;
-const OVERVIEW_COLS = "30px minmax(160px,1fr) 80px 90px minmax(200px,1.4fr) 70px 64px 56px";
+const OVERVIEW_COLS = "30px minmax(160px,1fr) 90px minmax(200px,1.4fr) 70px 64px";
 const SKILL_COLS = "minmax(220px,1.6fr) repeat(12,minmax(58px,1fr))";
 // Sort keys; labels are combat.col.<key>, tooltips combat.tip.<key>.
 const SKILL_HEAD: (keyof Skill)[] = ["n", "dmg", "pct", "hits", "crit", "min", "max", "avg", "back", "parry", "perfect", "double", "multi"];
 
-export default function Report({ t, lang, run, onError, setHeader }: PageProps) {
-  // ponytail: sample attempts; the fight record viewer will number the saved fights on a boss by start time.
-  const [att, setAtt] = useState(ATTEMPTS.length - 1);
-  const [result, dur, , ago] = ATTEMPTS[att];
-  const crumb = `${DUNGEON} → ${BOSS} → ${t("shell.attempt", { n: att + 1 })}`;
-  useEffect(() => setHeader({ title: BOSS, crumb }), [setHeader, crumb]);
-  const [cmp, setCmp] = useState<number | null>(null);
-  const [sel, setSel] = useState(0);
+export default function Report(props: PageProps) {
+  const { t, setHeader, onError } = props;
+  const fights = usePoll(getFights, 10000);
+  const [pick, setPick] = useState(() => {
+    const id = sessionStorage.getItem(REPORT_FIGHT_KEY) ?? undefined;
+    sessionStorage.removeItem(REPORT_FIGHT_KEY);
+    return id;
+  });
+  const all = fights.data ?? [];
+  const cur = all.find((f) => f.id === pick) ?? all[0];
+  const attempts = cur ? all.filter((f) => f.bossName === cur.bossName).reverse() : [];
+  const att = attempts.findIndex((f) => f.id === cur?.id);
+  const rec = useFight(cur?.id, onError);
+  const crumb = cur ? `${cur.bossName || "—"} → ${t("shell.attempt", { n: att + 1 })}` : undefined;
+  useEffect(() => setHeader(cur ? { title: cur.bossName || "—", crumb } : {}), [setHeader, cur?.bossName, crumb]);
+
+  if (fights.error)
+    return (
+      <section className="card cbState" style={{ maxWidth: 544 }} role="alert">
+        <WarningOctagonIcon aria-hidden="true" style={{ color: "var(--pm-err)" }} />
+        <div style={{ fontSize: 15 }}>{t("combat.states.errorTitle")}</div>
+        <div className="cbStateText">{fights.error}</div>
+      </section>
+    );
+  if (fights.data && !cur)
+    return (
+      <section className="card cbState" style={{ maxWidth: 544 }}>
+        <SwordIcon aria-hidden="true" style={{ color: "var(--pm-t3)" }} />
+        <div style={{ fontSize: 15 }}>{t("combat.noFights")}</div>
+        <div className="cbStateText">{t("home.emptyText")}</div>
+      </section>
+    );
+  if (!rec) return <div className="skeleton" style={{ height: 260 }} />;
+  return <FightView key={rec.id} {...props} rec={rec} attempts={attempts} att={att} onPick={setPick} />;
+}
+
+function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: PageProps & { rec: FightRecord; attempts: FightSummary[]; att: number; onPick: (id: string) => void }) {
+  const dur = rec.durationMs / 1000;
+  const [cmp, setCmp] = useState<string | null>(null);
+  const other = useFight(cmp ?? undefined, onError);
+  const [sel, setSel] = useState<number>();
   const [tab, setTab] = useState<Tab>("overview");
   const [range, setRange] = useState<[number, number] | null>(null);
   const drag = useRef<number | null>(null);
   const [sort, setSort] = useState<[keyof Skill, number]>(["dmg", -1]);
-  const [open, setOpen] = useState<Record<number, boolean>>({});
   const [mine, setMine] = useState(true);
   const [share, setShare] = useState(false);
 
-  const full = attemptParty(att);
+  const full = fightParty(rec, name);
   // Stats below the chart follow the dragged window; the whole fight when there is none.
   const win: [number, number] | null = range && Math.abs(range[1] - range[0]) >= 0.01 ? [Math.min(...range), Math.max(...range)] : null;
-  const party = win ? inWindow(full, win, dur) : full;
   const t0 = win ? win[0] * dur : 0;
   const secs = win ? (win[1] - win[0]) * dur : dur;
-  // The sample per-player/boss totals are the 5:12 kill's: scale them by time.
-  const tf = secs / DURATION;
-  // Bars are on the whole attempt's scale, so a short window near 0:00 reads almost empty.
-  const dmgMax = Math.max(...full.map((r) => r.dmg));
-  const list = (k: ListTab) =>
-    REPORT_LISTS[k]
-      .map(([a, b, v], i) => {
-        const all = (v * dur) / DURATION;
-        // Each row follows its own sample curve (busy at a different time), so the window reshuffles the bars too.
-        return { a, b, all, v: win ? all * portion(samplePoints({ n: a, i, dps: 1 }).map((y, j) => y * (1.2 + Math.sin(j / 8 + i * 2))), win) : all };
-      })
-      .sort((x, y) => y.v - x.v);
-  const p = party.find((r) => r.i === sel)!;
-  const df = p.dmg / full.find((r) => r.i === sel)!.dmg;
-  // dmg already follows the window (p); hits scale with it, so avg/min/max stay put.
-  const skills = sampleSkills(p, ...sort).map((s) => ({ ...s, hits: Math.round(s.hits * df) }));
+  const party = win ? fightParty(rec, name, [t0, t0 + secs]) : full;
+  // Bars are on the whole fight's scale, so a short window reads shorter.
+  const dmgMax = Math.max(1, ...full.map((r) => r.dmg));
+  const p = party.find((r) => r.key === sel) ?? party.find((r) => r.me) ?? party[0];
+  const skills = p ? [...p.skills].sort((a, b) => (a[sort[0]]! > b[sort[0]]! ? 1 : -1) * sort[1]) : [];
   // Timelines below zoom to the window: % position of second `s` in it, and its axis.
   const px = (s: number) => ((s - t0) / secs) * 100;
   const ticks = [0, 1, 2, 3, 4, 5].map((k) => clock(t0 + (k * secs) / 5));
-  const when = new Date(FIGHT_DATE.getTime() - ago * 6e4);
-  const date = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(when);
-  // Compare defaults to your best other attempt (your DPS).
-  const myDps = (k: number) => attemptParty(k).find((r) => r.me)!.dps;
-  const top = (ks: number[]) => ks.reduce((b, k) => (myDps(k) > myDps(b) ? k : b));
-  const others = ATTEMPTS.map((_, k) => k).filter((k) => k !== att);
-  const best = top([att, ...others]);
+  const date = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(rec.startTimeMs);
+  const others = attempts.filter((_, k) => k !== att);
+  const nOf = (id: string) => attempts.findIndex((f) => f.id === id) + 1;
 
+  // Taken and healing have no timestamps: they are always the whole fight.
+  const heals = new Map<number, { v: number; top: string; topV: number }>();
+  for (const s of rec.details.healSkills ?? []) {
+    const h = heals.get(s.actorId) ?? { v: 0, top: "", topV: 0 };
+    heals.set(s.actorId, { v: h.v + s.dmg, ...(s.dmg > h.topV ? { top: s.name, topV: s.dmg } : { top: h.top, topV: h.topV }) });
+  }
+  const list = (k: "taken" | "heal") =>
+    rec.actors
+      .map((a) => (k === "taken" ? { a: a.nickname, b: `${t("combat.col.hits")} ${fmt(a.hitsReceived, lang)}`, v: a.damageReceived } : { a: a.nickname, b: heals.get(a.actorId)?.top ?? "", v: heals.get(a.actorId)?.v ?? 0 }))
+      .filter((r) => r.v > 0)
+      .sort((x, y) => y.v - x.v);
+
+  // The same file Storico's Export writes (an array of fight records), so Storico → Upload → From file takes it.
   const exportJson = () => {
-    const report = {
-      sample: true,
-      dungeon: DUNGEON,
-      boss: BOSS,
-      attempt: att + 1,
-      attempts: ATTEMPTS.length,
-      result,
-      date: when.toISOString(),
-      durationS: dur,
-      window: win ? [Math.round(t0), Math.round(t0 + secs)] : null,
-      party: party.map((q) => ({ name: q.n, class: q.cls, cp: q.cp, dps: Math.round(q.dps), damage: Math.round(q.dmg), pct: +q.pct.toFixed(1), hits: q.hits, deaths: q.deaths })),
-      ...Object.fromEntries((Object.keys(REPORT_LISTS) as ListTab[]).map((k) => [k, list(k).map(({ a, b, v }) => ({ name: a, detail: b.startsWith("combat.") ? t(b) : b, amount: Math.round(v) }))])),
-    };
-    const name = `powermeter-${BOSS.toLowerCase().replace(/\W+/g, "-")}-attempt-${att + 1}.json`;
-    run(() => invoke("save_to_downloads", { name, contents: JSON.stringify(report, null, 2) }));
+    const file = `powermeter-${(rec.bossName || "fight").toLowerCase().replace(/\W+/g, "-")}-attempt-${att + 1}.json`;
+    run(() => invoke("save_to_downloads", { name: file, contents: JSON.stringify([rec], null, 2) }));
   };
 
   const pos = (e: MouseEvent<HTMLDivElement>) => {
@@ -105,6 +118,7 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
   };
   const at = (f: number) => clock(f * dur);
   const outline = { height: 30, padding: "0 12px" };
+  const noData = <div style={{ padding: "12px 8px", fontSize: 12, color: "var(--pm-t3)" }}>{t("combat.noData")}</div>;
 
   return (
     <>
@@ -113,39 +127,38 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
           if (!d)
             return (
               <span key={d} style={{ fontSize: 12, color: "var(--pm-t2)" }}>
-                {t("combat.attemptOf", { total: ATTEMPTS.length })
+                {t("combat.attemptOf", { total: attempts.length })
                   .split("{n}")
                   .flatMap((part, k) => (k ? [<b key={k} style={{ color: "var(--pm-t1)", fontWeight: 500 }}>{att + 1}</b>, part] : [part]))}
               </span>
             );
-          const off = !ATTEMPTS[att + d];
+          const next = attempts[att + d];
           const label = t(d < 0 ? "combat.prevAttempt" : "combat.nextAttempt");
           return (
             <button
               key={d}
               type="button"
               className="btn"
-              disabled={off}
+              disabled={!next}
               title={label}
               aria-label={label}
-              onClick={() => (setAtt(att + d), setRange(null), setCmp(null))}
-              style={{ width: 30, height: 30, padding: 0, ...(off ? { color: "var(--pm-t3)", opacity: 0.45, cursor: "default" } : {}) }}
+              onClick={() => next && onPick(next.id)}
+              style={{ width: 30, height: 30, padding: 0, ...(!next ? { color: "var(--pm-t3)", opacity: 0.45, cursor: "default" } : {}) }}
             >
               {d < 0 ? <CaretLeftIcon aria-hidden="true" /> : <CaretRightIcon aria-hidden="true" />}
             </button>
           );
         })}
-        <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 4, ...(result === "KILL" ? { background: "#3FBF7F22", color: "#5FD99A", border: "1px solid #3FBF7F55" } : { background: "#DB000022", color: "var(--pm-redt)", border: "1px solid #DB000055" }) }}>{result}</span>
         <span style={{ fontSize: 12, color: "var(--pm-t2)" }}>
           {t("combat.duration")}{" "}
           <span className="mono" style={{ color: "var(--pm-t1)" }}>
             {clock(dur)}
           </span>{" "}
-          · {date} · EU · <GlobeSimpleIcon aria-hidden="true" style={{ verticalAlign: "-2px" }} /> {t("combat.vis.public")}
+          · {date}
         </span>
         <div style={{ display: "flex", gap: 3, marginLeft: 4 }}>
-          {party.map((q) => (
-            <span key={q.n} title={`${q.n} · ${q.cls}`} style={{ display: "flex" }}>
+          {full.map((q) => (
+            <span key={q.key} title={`${q.n} · ${q.cls}`} style={{ display: "flex" }}>
               <Av cls={q.cls} size={22} radius={5} font={8} />
             </span>
           ))}
@@ -155,7 +168,14 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
           <ShareNetworkIcon aria-hidden="true" />
           {t("combat.share")}
         </button>
-        <button type="button" className="btn" style={outline} aria-pressed={cmp != null} onClick={() => setCmp(cmp == null ? top(others) : null)}>
+        <button
+          type="button"
+          className="btn"
+          style={outline}
+          disabled={!others.length}
+          aria-pressed={cmp != null}
+          onClick={() => setCmp(cmp == null ? (attempts[att - 1] ?? attempts[att + 1]).id : null)}
+        >
           <ColumnsIcon aria-hidden="true" />
           {t("combat.compare")}
         </button>
@@ -164,17 +184,9 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
           {t("combat.export")}
         </button>
       </div>
-      <p style={{ fontSize: 11, color: "var(--pm-t3)", margin: "-6px 0 12px" }}>{t("combat.sampleNote", { n: ATTEMPTS.length })}</p>
 
       {cmp != null && (
-        <Compare
-          t={t}
-          lang={lang}
-          a={att}
-          b={cmp}
-          options={others.map((k) => [k, `${t("shell.attempt", { n: k + 1 })} · ${ATTEMPTS[k][0]}${k === best ? ` · ${t("combat.bestAttempt")}` : ""}`])}
-          onPick={setCmp}
-        />
+        <Compare t={t} lang={lang} a={full} aDur={dur} aN={att + 1} b={other && fightParty(other, name)} bDur={other ? other.durationMs / 1000 : 0} bId={cmp} bN={nOf(cmp)} options={others.map((f) => [f.id, t("shell.attempt", { n: nOf(f.id) })])} onPick={setCmp} />
       )}
 
       <section className="card" style={{ padding: "14px 16px", marginBottom: 12 }}>
@@ -198,8 +210,8 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
           )}
         </div>
         <Chart
-          lines={sampleSeries(full)}
-          sel={sel}
+          lines={fightSeries(full, rec.durationMs)}
+          sel={p?.key ?? -1}
           label={t("combat.dpsOverTime")}
           style={{ cursor: "crosshair", userSelect: "none" }}
           onMouseDown={(e) => {
@@ -227,21 +239,10 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
               />
             )
           }
-        >
-          <div style={{ position: "absolute", top: 0, bottom: 0, left: `${(PHASE.from / 59) * 100}%`, width: `${((PHASE.to - PHASE.from) / 59) * 100}%`, background: "var(--pm-s3)" }}>
-            <span style={{ position: "absolute", top: 4, left: 4, fontSize: 10, color: "var(--pm-t2)", whiteSpace: "nowrap" }}>
-              {t("combat.phase", { n: 2 })} · {PHASE.name}
-            </span>
-          </div>
-          <div style={{ position: "absolute", top: 0, bottom: 0, left: `${(DEATH.at / 59) * 100}%`, borderLeft: "1px dashed var(--pm-red)" }}>
-            <span style={{ position: "absolute", top: 18, left: 4, fontSize: 10, color: "var(--pm-redt)", whiteSpace: "nowrap" }}>
-              <SkullIcon aria-hidden="true" style={{ verticalAlign: "-1px" }} /> {DEATH.name}
-            </span>
-          </div>
-        </Chart>
+        />
         <div className="cbTicks" style={{ marginTop: 6 }}>
-          {[0, 1, 2, 3, 4, 5].map((k) => clock((k * dur) / 5)).map((x) => (
-            <span key={x}>{x}</span>
+          {[0, 1, 2, 3, 4, 5].map((k) => clock((k * dur) / 5)).map((x, k) => (
+            <span key={k}>{x}</span>
           ))}
         </div>
       </section>
@@ -256,26 +257,25 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
 
       {tab === "overview" && (
         <div className="card" style={{ padding: "6px 8px", overflowX: "auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: OVERVIEW_COLS, gap: 10, padding: "8px 10px", fontSize: 11, color: "var(--pm-t3)", borderBottom: "1px solid var(--pm-line)", minWidth: 860 }}>
+          <div style={{ display: "grid", gridTemplateColumns: OVERVIEW_COLS, gap: 10, padding: "8px 10px", fontSize: 11, color: "var(--pm-t3)", borderBottom: "1px solid var(--pm-line)", minWidth: 720 }}>
             <span />
             <span>{t("combat.col.player")}</span>
-            <span style={{ textAlign: "right" }}>CP</span>
             <span style={{ textAlign: "right" }}>DPS</span>
             <span>{t("combat.col.totalDmg")}</span>
             <span style={{ textAlign: "right" }}>%</span>
             <span style={{ textAlign: "right" }}>{t("combat.col.hits")}</span>
-            <span style={{ textAlign: "right" }}>{t("combat.col.deaths")}</span>
           </div>
+          {!party.length && noData}
           {party.map((q) => (
             <button
-              key={q.n}
+              key={q.key}
               type="button"
-              aria-pressed={q.i === sel}
+              aria-pressed={q.key === p?.key}
               className="cbPlain cbHover"
-              onClick={() => setSel(q.i)}
+              onClick={() => setSel(q.key)}
               style={
                 {
-                  "--bg": q.i === sel ? "var(--pm-s3)" : q.me ? "var(--pm-tint)" : "transparent",
+                  "--bg": q.key === p?.key ? "var(--pm-s3)" : q.me ? "var(--pm-tint)" : "transparent",
                   display: "grid",
                   gridTemplateColumns: OVERVIEW_COLS,
                   gap: 10,
@@ -283,7 +283,7 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
                   minHeight: 40,
                   padding: "0 10px",
                   borderBottom: "1px solid var(--pm-line)",
-                  minWidth: 860,
+                  minWidth: 720,
                 } as CSSProperties
               }
             >
@@ -292,9 +292,6 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
                 <span style={{ fontWeight: 500, color: q.me ? "var(--pm-t1)" : "var(--pm-t2)" }}>{q.n}</span>{" "}
                 <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>{q.cls}</span>
               </div>
-              <span className="num" style={{ color: "var(--pm-t2)" }}>
-                {fmt(q.cp, lang)}
-              </span>
               <span className="num" style={{ fontWeight: 500 }}>
                 {fmt(q.dps, lang)}
               </span>
@@ -312,23 +309,20 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
               <span className="num" style={{ color: "var(--pm-t2)" }}>
                 {q.hits}
               </span>
-              <span className="num" style={{ color: "var(--pm-t2)" }}>
-                {q.deaths}
-              </span>
             </button>
           ))}
         </div>
       )}
 
-      {tab === "skill" && (
+      {tab === "skill" && p && (
         <>
           <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
             {party.map((q) => (
               <button
-                key={q.n}
+                key={q.key}
                 type="button"
-                aria-pressed={q.i === sel}
-                onClick={() => setSel(q.i)}
+                aria-pressed={q.key === p.key}
+                onClick={() => setSel(q.key)}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -337,7 +331,7 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
                   padding: "0 10px 0 4px",
                   borderRadius: 6,
                   border: "1px solid var(--pm-line)",
-                  background: q.i === sel ? "var(--pm-s3)" : q.me ? "var(--pm-tint)" : "transparent",
+                  background: q.key === p.key ? "var(--pm-s3)" : q.me ? "var(--pm-tint)" : "transparent",
                   color: "var(--pm-t1)",
                   cursor: "pointer",
                 }}
@@ -352,22 +346,25 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
               title={p.n}
               rows={[
                 [t("combat.col.dmg"), fmt(p.dmg, lang)],
-                ["Cast", fmt(PLAYER_EXTRA.casts * tf, lang)],
-                [t("combat.tab.taken"), fmt(PLAYER_EXTRA.taken * tf, lang)],
-                [t("combat.tab.heal"), fmt(PLAYER_EXTRA.heal * tf, lang)],
+                [t("combat.col.hits"), fmt(p.hits, lang)],
+                ...(win
+                  ? []
+                  : ([
+                      [t("combat.tab.taken"), fmt(p.actor.damageReceived, lang)],
+                      [t("combat.tab.heal"), fmt(heals.get(p.key)?.v ?? 0, lang)],
+                    ] as [string, string][])),
               ]}
             />
             <StatCard
-              title={BOSS}
+              title={rec.bossName || "—"}
               rows={[
-                [t("combat.col.dmg"), fmt(BOSS_STATS.damage * tf, lang)],
-                ["Cast", fmt(BOSS_STATS.casts * tf, lang)],
-                [t("combat.col.hits"), fmt(BOSS_STATS.hits * tf, lang)],
+                [t("combat.col.dmg"), fmt(party.reduce((x, r) => x + r.dmg, 0), lang)],
+                [t("combat.col.hits"), fmt(party.reduce((x, r) => x + r.hits, 0), lang)],
                 [t("combat.duration"), clock(secs)],
               ]}
             />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5,minmax(0,1fr))", gap: 8 }}>
-              {sampleBadges(p).map(([l, v]) => (
+              {p.rates.map(([l, v]) => (
                 <div
                   key={l}
                   className="card"
@@ -382,7 +379,7 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
             </div>
           </div>
           <div className="card" style={{ padding: "6px 8px", overflowX: "auto" }}>
-            <h2 style={{ padding: "8px 10px", fontWeight: 500 }}>{t("combat.skillVs", { target: BOSS })}</h2>
+            <h2 style={{ padding: "8px 10px", fontWeight: 500 }}>{t("combat.skillVs", { target: rec.bossName || "—" })}</h2>
             <div style={{ display: "grid", gridTemplateColumns: SKILL_COLS, gap: 8, padding: "6px 10px", borderBottom: "1px solid var(--pm-line)", minWidth: 1100 }}>
               {SKILL_HEAD.map((k) => {
                 const on = sort[0] === k;
@@ -402,38 +399,15 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
                 );
               })}
             </div>
-            {skills.flatMap((s) => {
-              const isOpen = !!open[s.j];
-              const main = (
-                <SkillRow
-                  key={s.n}
-                  lang={lang}
-                  s={s}
-                  onToggle={s.kids ? () => setOpen({ ...open, [s.j]: !isOpen }) : undefined}
-                  isOpen={isOpen}
-                />
-              );
-              if (!isOpen || !s.kids) return [main];
-              return [
-                main,
-                ...s.kids.map((k, q) => {
-                  const f = q ? 0.38 : 0.62;
-                  return (
-                    <SkillRow
-                      key={k}
-                      lang={lang}
-                      kid
-                      s={{ ...s, n: k.replace("{skill}", s.n).replace("{hit}", t("combat.hit")), init: "↳", dmg: s.dmg * f, pct: s.pct * f, hits: Math.round(s.hits * f) }}
-                    />
-                  );
-                }),
-              ];
-            })}
+            {!skills.length && noData}
+            {skills.map((s) => (
+              <SkillRow key={s.j} lang={lang} s={s} />
+            ))}
           </div>
         </>
       )}
 
-      {tab === "tl" && (
+      {tab === "tl" && p && (
         <section className="card" style={{ padding: "14px 16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <h2 style={{ fontWeight: 500 }}>{t("combat.tab.tl")}</h2>
@@ -443,17 +417,17 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
             </button>
           </div>
           {(mine
-            ? CLASS_SKILLS[p.cls].slice(0, 7).map((n, j) => ({ n, col: classColor(p.cls), per: TL_PERIOD[j], off: j * 1.7 }))
-            : party.map((q) => ({ n: q.n, col: classColor(q.cls), per: 4 + q.i, off: q.i }))
+            ? [...p.raw].sort((a, b) => b.dmg - a.dmg).slice(0, 7).map((s, j) => ({ id: `${j}`, n: s.name, col: classColor(p.cls), ts: s.hitTimestamps }))
+            : full.map((q) => ({ id: `${q.key}`, n: q.n, col: classColor(q.cls), ts: q.raw.flatMap((s) => s.hitTimestamps) }))
           ).map((r) => {
-            const marks: number[] = [];
-            for (let x = r.off; x < t0 + secs; x += r.per) if (x >= t0 && !(x > 150 && x < 170)) marks.push(x);
+            // One mark per 0.1% of the axis: a hit per mark would be thousands of nodes on a long fight.
+            const marks = [...new Set(r.ts.map((x) => x / 1000).filter((x) => x >= t0 && x <= t0 + secs).map((x) => px(x).toFixed(1)))];
             return (
-              <div key={r.n} style={{ display: "grid", gridTemplateColumns: "180px minmax(0,1fr)", gap: 12, alignItems: "center", height: 30, borderBottom: "1px solid var(--pm-line)" }}>
+              <div key={r.id} style={{ display: "grid", gridTemplateColumns: "180px minmax(0,1fr)", gap: 12, alignItems: "center", height: 30, borderBottom: "1px solid var(--pm-line)" }}>
                 <span style={{ fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.n}</span>
                 <div style={{ position: "relative", height: 16 }}>
                   {marks.map((x) => (
-                    <span key={x} style={{ position: "absolute", left: `${px(x).toFixed(2)}%`, top: 0, width: 3, height: 16, borderRadius: 1, background: r.col }} />
+                    <span key={x} style={{ position: "absolute", left: `${x}%`, top: 0, width: 3, height: 16, borderRadius: 1, background: r.col }} />
                   ))}
                 </div>
               </div>
@@ -462,52 +436,18 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
           <div style={{ display: "grid", gridTemplateColumns: "180px minmax(0,1fr)", gap: 12, marginTop: 6 }}>
             <span />
             <div className="cbTicks">
-              {ticks.map((x) => (
-                <span key={x}>{x}</span>
+              {ticks.map((x, k) => (
+                <span key={k}>{x}</span>
               ))}
             </div>
           </div>
         </section>
       )}
 
-      {tab === "buff" && (
-        <section className="card" style={{ padding: "14px 16px" }}>
-          <div style={{ display: "flex", gap: 16, marginBottom: 12, fontSize: 12, color: "var(--pm-t2)" }}>
-            <h2 style={{ fontWeight: 500, color: "var(--pm-t1)" }}>{t("combat.buffTimeline", { name: p.n })}</h2>
-            <span>
-              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 2, background: "#3FBF7F" }} /> Buff
-            </span>
-            <span>
-              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 2, background: "var(--pm-red)" }} /> {t("combat.debuffOnBoss")}
-            </span>
-          </div>
-          {BUFFS.map(([n, kind, segs]) => {
-            const col = kind === "buff" ? "#3FBF7F" : "var(--pm-red)";
-            const cut = segs.map(([x, y]) => [Math.max(x, t0), Math.min(y, t0 + secs)]).filter(([x, y]) => y > x);
-            const up = (cut.reduce((a, [x, y]) => a + y - x, 0) / secs) * 100;
-            return (
-              <div key={n} style={{ display: "grid", gridTemplateColumns: "200px minmax(0,1fr) 64px", gap: 12, alignItems: "center", height: 32, borderBottom: "1px solid var(--pm-line)" }}>
-                <span style={{ fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{n}</span>
-                <div className="cbTrack" style={{ position: "relative", height: 12, borderRadius: 2 }}>
-                  {cut.map(([x, y]) => (
-                    <span
-                      key={x}
-                      style={{ position: "absolute", left: `${px(x)}%`, width: `${(100 * (y - x)) / secs}%`, top: 0, bottom: 0, background: col, opacity: 0.8, borderRadius: 2 }}
-                    />
-                  ))}
-                </div>
-                <span className="num" title={t("combat.uptimeTip")} style={{ fontSize: 12 }}>
-                  {pc(up, lang)}
-                </span>
-              </div>
-            );
-          })}
-        </section>
-      )}
-
-      {(tab === "taken" || tab === "heal" || tab === "targets") && (
+      {(tab === "taken" || tab === "heal") && (
         <>
           <div style={{ fontSize: 12, color: "var(--pm-t3)", marginBottom: 8 }}>{t(`combat.caption.${tab}`)}</div>
+          {!list(tab).length && noData}
           {list(tab).map(({ a, b, v }, _, rows) => (
             <div
               key={a}
@@ -526,14 +466,14 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
             >
               <div>
                 <div style={{ fontWeight: 500 }}>{a}</div>
-                <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>{b.startsWith("combat.") ? t(b) : b}</div>
+                <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>{b}</div>
               </div>
               <div className="cbTrack" style={{ height: 8, borderRadius: 4 }}>
-                <div style={{ height: "100%", width: `${(v / Math.max(...rows.map((r) => r.all))) * 100}%`, background: "var(--pm-red)", borderRadius: 4 }} />
+                <div style={{ height: "100%", width: `${(v / rows[0].v) * 100}%`, background: "var(--pm-red)", borderRadius: 4 }} />
               </div>
               <span className="num">{ab(v, lang)}</span>
               <span className="num" style={{ color: "var(--pm-t2)", fontSize: 12 }}>
-                {fmt(v / secs, lang)}
+                {fmt(v / Math.max(1, dur), lang)}
                 {tab === "heal" ? " HPS" : "/s"}
               </span>
             </div>
@@ -541,67 +481,69 @@ export default function Report({ t, lang, run, onError, setHeader }: PageProps) 
         </>
       )}
 
-      {share && <ShareModal t={t} lang={lang} kind="log" onClose={() => setShare(false)} onError={onError} />}
+      {share && (
+        <ShareModal
+          t={t}
+          lang={lang}
+          kind="log"
+          url={uploadedUrl(rec.id)}
+          preview={[`${rec.bossName || "—"} · ${clock(dur)}`, ...full.slice(0, 3).map((q, k) => `${k + 1}. ${q.n} (${q.cls}) ${fmt(q.dps, lang)}`)]}
+          onClose={() => setShare(false)}
+          onError={onError}
+        />
+      )}
     </>
   );
 }
 
-/** Is chart sample k (of 0..59) inside the window [a, b] (fractions of the fight)? */
-const inside = ([a, b]: [number, number], k: number) => k / 59 >= a && k / 59 <= b;
-const mean = (v: number[]) => v.reduce((x, y) => x + y, 0) / v.length;
-
-/** Fraction of a sample curve's total that falls inside the window. */
-function portion(pts: number[], w: [number, number]) {
-  const cut = pts.filter((_, k) => inside(w, k));
-  return (mean(cut.length ? cut : [pts[Math.round(((w[0] + w[1]) / 2) * 59)]]) / mean(pts)) * (w[1] - w[0]);
-}
-
-/** Party of sample attempt k: the kill's party at that attempt's DPS and length; a wipe kills everyone. */
-function attemptParty(k: number) {
-  const [result, dur, f] = ATTEMPTS[k];
-  // Wipes wobble per player, so the compare deltas are not one flat percentage.
-  return rank(
-    sampleParty().map((r) => {
-      const dps = r.dps * f * (f < 1 ? 1 + 0.05 * Math.sin(k * 2.3 + r.i * 1.7) : 1);
-      return { ...r, dps, dmg: dps * dur, deaths: result === "WIPE" ? Math.max(1, r.deaths) : r.deaths };
-    }),
-  );
-}
-
-/** Party over a chart window: each player's damage is the share of their chart curve inside it. */
-function inWindow(rows: Row[], w: [number, number], dur: number) {
-  const secs = (w[1] - w[0]) * dur;
-  return rank(
-    rows.map((r) => {
-      const dmg = r.dmg * portion(samplePoints(r), w);
-      return { key: r.key, n: r.n, cls: r.cls, cp: r.cp, me: r.me, i: r.i, dps: dmg / secs, dmg, deaths: r.n === DEATH.name && inside(w, DEATH.at) ? r.deaths : 0 };
-    }),
-  );
-}
-
-/** This attempt (a) against another (b), whole fights: duration, party and per-player DPS, delta. */
-function Compare({ t, lang, a, b, options, onPick }: { t: PageProps["t"]; lang: string; a: number; b: number; options: [number, string][]; onPick: (k: number) => void }) {
-  const [pa, pb] = [attemptParty(a), attemptParty(b)];
-  const sum = (rs: Row[]) => rs.reduce((x, r) => x + r.dps, 0);
-  const delta = (x: number, y: number) => {
+/** This attempt (a) against another (b), whole fights: duration, party and per-player DPS (players matched by name), delta. */
+function Compare({
+  t,
+  lang,
+  a,
+  aDur,
+  aN,
+  b,
+  bDur,
+  bId,
+  bN,
+  options,
+  onPick,
+}: {
+  t: PageProps["t"];
+  lang: string;
+  a: FightRow[];
+  aDur: number;
+  aN: number;
+  b?: FightRow[];
+  bDur: number;
+  bId: string;
+  bN: number;
+  options: [string, string][];
+  onPick: (id: string) => void;
+}) {
+  const sum = (rs: FightRow[]) => rs.reduce((x, r) => x + r.dps, 0);
+  const delta = (x: number, y?: number) => {
+    if (!y) return <span style={{ color: "var(--pm-t3)" }}>—</span>;
     const d = ((x - y) / y) * 100;
     return <span style={{ color: Math.abs(d) < 0.05 ? "var(--pm-t3)" : d > 0 ? "#5FD99A" : "var(--pm-redt)" }}>{`${d > 0 ? "+" : ""}${pc(d, lang)}`}</span>;
   };
-  const rows: [string, string, string, ReactNode][] = [
-    [t("combat.col.result"), ATTEMPTS[a][0], ATTEMPTS[b][0], null],
-    [t("combat.duration"), clock(ATTEMPTS[a][1]), clock(ATTEMPTS[b][1]), <span style={{ color: "var(--pm-t2)" }}>{`${ATTEMPTS[a][1] >= ATTEMPTS[b][1] ? "+" : "-"}${clock(Math.abs(ATTEMPTS[a][1] - ATTEMPTS[b][1]))}`}</span>],
-    [t("combat.partyDps"), fmt(sum(pa), lang), fmt(sum(pb), lang), delta(sum(pa), sum(pb))],
-    ...pa.map((r): [string, string, string, ReactNode] => {
-      const o = pb.find((q) => q.i === r.i)!;
-      return [`${r.n}${r.me ? ` ${t("combat.you")}` : ""}`, fmt(r.dps, lang), fmt(o.dps, lang), delta(r.dps, o.dps)];
-    }),
-  ];
+  const rows: [string, string, string, ReactNode][] = b
+    ? [
+        [t("combat.duration"), clock(aDur), clock(bDur), <span style={{ color: "var(--pm-t2)" }}>{`${aDur >= bDur ? "+" : "-"}${clock(Math.abs(aDur - bDur))}`}</span>],
+        [t("combat.partyDps"), fmt(sum(a), lang), fmt(sum(b), lang), delta(sum(a), sum(b))],
+        ...a.map((r): [string, string, string, ReactNode] => {
+          const o = b.find((q) => q.n === r.n);
+          return [`${r.n}${r.me ? ` ${t("combat.you")}` : ""}`, fmt(r.dps, lang), o ? fmt(o.dps, lang) : "—", delta(r.dps, o?.dps)];
+        }),
+      ]
+    : [];
   const cols = "minmax(160px,1fr) 110px 110px 90px";
   return (
     <section className="card" style={{ padding: "12px 16px", marginBottom: 12 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
         <h2 className="kicker">{t("combat.compare")}</h2>
-        <select className="cbSelect" aria-label={t("combat.compareWith")} value={b} onChange={(e) => onPick(Number(e.target.value))}>
+        <select className="cbSelect" aria-label={t("combat.compareWith")} value={bId} onChange={(e) => onPick(e.target.value)}>
           {options.map(([k, l]) => (
             <option key={k} value={k}>
               {l}
@@ -611,10 +553,11 @@ function Compare({ t, lang, a, b, options, onPick }: { t: PageProps["t"]; lang: 
       </div>
       <div style={{ display: "grid", gridTemplateColumns: cols, gap: 10, padding: "6px 0", fontSize: 11, color: "var(--pm-t3)", borderBottom: "1px solid var(--pm-line)" }}>
         <span />
-        <span style={{ textAlign: "right" }}>{t("shell.attempt", { n: a + 1 })}</span>
-        <span style={{ textAlign: "right" }}>{t("shell.attempt", { n: b + 1 })}</span>
+        <span style={{ textAlign: "right" }}>{t("shell.attempt", { n: aN })}</span>
+        <span style={{ textAlign: "right" }}>{t("shell.attempt", { n: bN })}</span>
         <span style={{ textAlign: "right" }}>Δ</span>
       </div>
+      {!b && <div className="skeleton" style={{ height: 30, margin: "4px 0" }} />}
       {rows.map(([l, x, y, d]) => (
         <div key={l} style={{ display: "grid", gridTemplateColumns: cols, gap: 10, alignItems: "center", minHeight: 30, fontSize: 12, borderBottom: "1px solid var(--pm-line)" }}>
           <span style={{ color: "var(--pm-t2)" }}>{l}</span>
@@ -647,16 +590,14 @@ function StatCard({ title, rows }: { title: string; rows: [string, string][] }) 
   );
 }
 
-function SkillRow({ s, lang, kid, isOpen, onToggle }: { s: Skill; lang: string; kid?: boolean; isOpen?: boolean; onToggle?: () => void }) {
+function SkillRow({ s, lang }: { s: Skill; lang: string }) {
   const t2 = { color: "var(--pm-t2)" };
-  const dash = kid ? "—" : null;
   return (
     <div
       className="cbHover"
-      onClick={onToggle}
       style={
         {
-          "--bg": kid ? "var(--pm-s2)" : "transparent",
+          "--bg": "transparent",
           display: "grid",
           gridTemplateColumns: SKILL_COLS,
           gap: 8,
@@ -668,22 +609,14 @@ function SkillRow({ s, lang, kid, isOpen, onToggle }: { s: Skill; lang: string; 
           fontSize: 12,
           textAlign: "right",
           minWidth: 1100,
-          cursor: onToggle ? "pointer" : undefined,
         } as CSSProperties
       }
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Inter,sans-serif", fontSize: 13, textAlign: "left", paddingLeft: kid ? 18 : 0, minWidth: 0 }}>
-        <span style={{ width: 14, color: "var(--pm-t3)", display: "flex" }}>
-          {onToggle && (
-            <button type="button" className="cbPlain" aria-expanded={isOpen} aria-label={s.n} onClick={(e) => (e.stopPropagation(), onToggle())} style={{ display: "flex", color: "inherit" }}>
-              {isOpen ? <CaretDownIcon aria-hidden="true" /> : <CaretRightIcon aria-hidden="true" />}
-            </button>
-          )}
-        </span>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Inter,sans-serif", fontSize: 13, textAlign: "left", minWidth: 0 }}>
         <span style={{ width: 22, height: 22, borderRadius: 4, background: "var(--pm-s3)", display: "grid", placeItems: "center", fontSize: 9, color: "var(--pm-t2)", flex: "none" }}>
-          {kid ? s.init : <SkillIcon skill={s.sk} name={s.n} />}
+          <SkillIcon skill={s.sk} name={s.n} />
         </span>
-        <span style={{ color: kid ? "var(--pm-t2)" : "var(--pm-t1)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.n}</span>
+        <span style={{ color: "var(--pm-t1)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.n}</span>
       </div>
       <span>{fmt(s.dmg, lang)}</span>
       <span style={t2}>{pc(s.pct, lang)}</span>
@@ -693,10 +626,10 @@ function SkillRow({ s, lang, kid, isOpen, onToggle }: { s: Skill; lang: string; 
       <span style={t2}>{fmt(s.max, lang)}</span>
       <span>{fmt(s.avg, lang)}</span>
       <span style={t2}>{pc(s.back, lang)}</span>
-      <span style={t2}>{dash ?? pc(s.parry, lang)}</span>
+      <span style={t2}>{pc(s.parry, lang)}</span>
       <span style={t2}>{pc(s.perfect, lang)}</span>
-      <span style={t2}>{dash ?? pc(s.double, lang)}</span>
-      <span style={t2}>{dash ?? (s.multi ? pc(s.multi, lang) : "—")}</span>
+      <span style={t2}>{pc(s.double, lang)}</span>
+      <span style={t2}>{s.multi ? pc(s.multi, lang) : "—"}</span>
     </div>
   );
 }

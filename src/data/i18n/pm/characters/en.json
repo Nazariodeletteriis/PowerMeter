@@ -50,7 +50,6 @@
   "characters.builder.namePlaceholder": "Build name",
   "characters.builder.missingN": "Missing pieces: {n}",
   "characters.builder.goToSource": "Go to source",
-  "characters.builder.shopSrc": "Shop · {n} Abyss Points",
   "characters.builder.readOnly": "Read only",
   "characters.builder.by": "by {au}",
   "characters.builder.buildOf": "build {i} of {n}",
@@ -83,7 +82,6 @@
   "characters.builder.openSkillPlanner": "Open in the Skill Planner",
   "characters.builder.openDaevanion": "Open in the Daevanion Planner",
   "characters.builder.descPlaceholder": "Describe the build: rotation, stat priority, variants…",
-  "characters.builder.commentPlaceholder": "Write a comment…",
   "characters.builder.copySuffix": " (copy)",
   "characters.builder.clonedTitle": "Build cloned",
   "characters.builder.clonedText": "It is now in your builds: you can edit it.",
@@ -180,5 +178,12 @@
   "characters.builds.edit": "Edit",
   "characters.builder.editTitle": "Your build",
   "characters.builder.editText": "Rename it and press Save. Gear changes are saved as you make them.",
-  "characters.builder.nameTaken": "A build with this name already exists."
+  "characters.builder.nameTaken": "A build with this name already exists.",
+  "characters.builds.noneTitle": "No builds yet",
+  "characters.builds.noneText": "Create your first build, or clone one in the Character Builder.",
+  "characters.builds.communityTitle": "Community builds",
+  "characters.builds.communityText": "Builds shared by other players will appear here once online sharing is live. For now this page lists your own.",
+  "characters.builder.defaultBuild": "Main build",
+  "characters.builder.commentsEmptyTitle": "No comments yet",
+  "characters.builder.commentsEmptyText": "Comments will be available once online build sharing is live."
 }

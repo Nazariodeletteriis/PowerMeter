@@ -3,5 +3,7 @@
   "roster.cancel": "Отмена",
   "roster.empty": "Персонажей пока нет. Добавьте персонажа или импортируйте файл.",
   "roster.deleteConfirm": "Удалить {name}?",
-  "roster.importError": "В этом файле нет подходящих персонажей."
+  "roster.importError": "В этом файле нет подходящих персонажей.",
+  "roster.faction": "Фракция",
+  "roster.pickFaction": "Выберите фракцию"
 }

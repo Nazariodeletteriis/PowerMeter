@@ -227,16 +227,19 @@ const createPmWidget = (app) => {
   });
   $(".pmDetailReportBtn")?.addEventListener("click", () => detailRow && app.openRowDetailsWindow(detailRow));
 
-  // --- Build (8.5) and Lobby (8.6), from the sample data until real data exists
-  // The Character Builder's "Widget" button hands its build over here (same shape).
+  // --- Build (8.5) and Lobby (8.6)
+  // The Character Builder's "Widget" button hands its build over here; none yet = empty state.
   const BUILD_KEY = "pm.widgetBuild";
   const buildData = () => {
     try {
-      return JSON.parse(app.safeGetStorage(BUILD_KEY)) || window.PM_SAMPLE?.build;
+      return JSON.parse(app.safeGetStorage(BUILD_KEY));
     } catch {
-      return window.PM_SAMPLE?.build;
+      return null; // unreadable handover: the next Widget click rewrites it
     }
   };
+  /** Centered title + hint, like the waiting state (8.4). */
+  const emptyCard = (key, title, hintKey, hint) =>
+    `<div class="pmModeEmpty"><div class="pmEmptyTitle">${esc(t(key, title))}</div><div class="pmEmptyHint">${esc(t(hintKey, hint))}</div></div>`;
   window.addEventListener("storage", (event) => {
     if (event.key === MODE_KEY && event.newValue === "build") setMode("build");
     if (event.key === BUILD_KEY && mode === "build") render();
@@ -245,7 +248,10 @@ const createPmWidget = (app) => {
   const lobbyEl = $(".pmLobby");
   const renderBuild = () => {
     const b = buildData();
-    if (!b) return;
+    if (!b) {
+      buildEl.innerHTML = emptyCard("pmWidget.build.emptyTitle", "No build selected", "pmWidget.build.emptyHint", "Open a build in the dashboard's Character Builder and press Widget");
+      return;
+    }
     const tabs = [
       ["slots", "Slots"],
       ["missing", "Missing"],
@@ -273,7 +279,7 @@ const createPmWidget = (app) => {
       body = b.missing
         .map(
           (m) =>
-            `<div class="pmMissing" style="--rar:${RARITY[m.rarity]}"><span class="pmMissingIcon" style="position:relative">${icon(m.icon)}</span><div class="pmMissingText"><div class="pmMissingName">${esc(m.item)}</div><div class="pmMissingSrc">${esc(t(`pmWidget.build.source.${m.source.kind}`, m.source.kind))} · ${esc(m.source.text)}</div></div></div>`
+            `<div class="pmMissing" style="--rar:${RARITY[m.rarity]}"><span class="pmMissingIcon" style="position:relative">${icon(m.icon)}</span><div class="pmMissingText"><div class="pmMissingName">${esc(m.item)}</div><div class="pmMissingSrc">${m.source.kind ? `${esc(t(`pmWidget.build.source.${m.source.kind}`, m.source.kind))} · ` : ""}${esc(m.source.text)}</div></div></div>`
         )
         .join("");
     } else {
@@ -303,17 +309,10 @@ const createPmWidget = (app) => {
       invoke("open_dashboard_window").catch((err) => console.error("[PowerMeter] open_dashboard_window failed", err));
     }
   });
+  // ponytail: no party roster source yet (the engine doesn't report one): the Lobby is an
+  // empty state until it does; the grid rows (.pmLobbyGrid in the theme CSS) are kept for then.
   const renderLobby = () => {
-    const l = window.PM_SAMPLE?.lobby;
-    if (!l) return;
-    lobbyEl.innerHTML =
-      `<div class="pmLobbyGrid pmLobbyHead"><span>${esc(t("pmWidget.lobby.player", "Player"))}</span><span>CP</span><span title="${esc(t("pmWidget.lobby.gsTip", "Gear score"))}">GS</span><span>${esc(t("pmWidget.lobby.status", "Status"))}</span></div>` +
-      l.members
-        .map(
-          ([name, cls, cp, gs, ready]) =>
-            `<div class="pmLobbyGrid pmLobbyRow"><span class="pmLobbyName"><span class="pmCls" data-cls="${esc(cls)}"></span>${esc(name)}</span><span>${num(cp)}</span><span>${num(gs)}</span><span class="${ready ? "isReady" : "isNotReady"}">${esc(ready ? t("pmWidget.ready", "Ready") : t("pmWidget.lobby.notReady", "Not ready"))}</span></div>`
-        )
-        .join("");
+    lobbyEl.innerHTML = emptyCard("pmWidget.lobby.emptyTitle", "No party data yet", "pmWidget.lobby.emptyHint", "The party roster will appear here once the meter can read it");
   };
 
   // --- fight summary (8.4)
@@ -388,15 +387,7 @@ const createPmWidget = (app) => {
       if (b) right = `${b.character} · ${b.name} ▾`;
       renderBuild();
     }
-    if (mode === "lobby") {
-      const l = window.PM_SAMPLE?.lobby;
-      if (l) {
-        title = l.dungeon; // the active Lobby tab beside it stands for the design's "Lobby ·" prefix
-        const ready = l.members.filter((m) => m[4]).length;
-        right = tf("pmWidget.lobby.ready", { n: ready, total: l.members.length }, `${ready}/${l.members.length} ready`);
-      }
-      renderLobby();
-    }
+    if (mode === "lobby") renderLobby();
     setText(".pmBarTitle", title);
     setText(".pmBarRight", right);
     $(".pmBarRight").title = right; // the bar cuts it short on narrow widgets

@@ -81,6 +81,10 @@
 .switch[aria-checked="true"] span {
   transform: translateX(16px);
 }
+.switch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .setSelect,
 .setInput {

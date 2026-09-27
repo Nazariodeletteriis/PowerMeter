@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { HammerIcon, ScrollIcon, ShareNetworkIcon, SwordIcon, TargetIcon } from "@phosphor-icons/react";
-import { SAMPLE_ME } from "../sample/characters";
 import { planClass } from "../skills";
 import { fmt } from "../ui";
 import { activeBuild, addToOwned, addToTarget, GEAR_KEY, itemSlots, OWN_BUILD, readGear, useGearData, type BuildGear } from "./characters/gear";
@@ -34,11 +33,11 @@ export default function Item({ t, go, setHeader, ...rest }: PageProps) {
 }
 
 // Prototype pg.item layout, with the scraped data.
-function ItemCard({ t, lang, onError, settings, save, row, open }: PageProps & { row: DbRow; open: (r: DbRow) => void }) {
+function ItemCard({ t, lang, name, onError, settings, save, row, open }: PageProps & { row: DbRow; open: (r: DbRow) => void }) {
   const [share, setShare] = useState(false);
   const cls = planClass(settings["pm.class"]);
   // The build open in the builder when it is yours, else your default one.
-  const [src] = useMem<BuildSrc>("bSrc", { t: OWN_BUILD, au: SAMPLE_ME, cls, own: true });
+  const [src] = useMem<BuildSrc>("bSrc", { t: OWN_BUILD, au: name, cls, own: true });
   const build = activeBuild(src);
   const [stored, setStored] = useMem<Record<string, BuildGear>>("gear", readGear(settings[GEAR_KEY]));
   const [toast, showToast] = useToast();
@@ -52,7 +51,7 @@ function ItemCard({ t, lang, onError, settings, save, row, open }: PageProps & {
     if (!done) return;
     setStored(done.all);
     save(GEAR_KEY, JSON.stringify(done.all)).catch(onError);
-    showToast({ title: t(view === "owned" ? "db.item.addedOwned" : "db.item.addedTarget"), text: `${row.name} → ${done.label} · ${build}` });
+    showToast({ title: t(view === "owned" ? "db.item.addedOwned" : "db.item.addedTarget"), text: `${row.name} → ${done.label} · ${build === OWN_BUILD ? t("characters.builder.defaultBuild") : build}` });
   };
   const [data, setData] = useState<StatData>();
   useEffect(() => void loadStats().then(setData), []);

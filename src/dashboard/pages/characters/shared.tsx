@@ -1,7 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { CheckCircleIcon, TrashIcon } from "@phosphor-icons/react";
 import type { T } from "../../i18n";
-import type { Ago } from "../../sample/characters";
 import { Modal } from "../system/Modal";
 import "./characters.css";
 
@@ -21,6 +20,9 @@ export function useMem<V>(key: string, init: V) {
 
 /** The build the Character Builder shows (prototype bSrc). */
 export type BuildSrc = { t: string; au: string; cls: string; own: boolean; isNew?: boolean; likes?: number; tags?: string[] };
+/** Build filters: regions and tags (tags are game/community terms, not translated). */
+export const BUILD_REGIONS = ["EU", "NA"];
+export const BUILD_TAGS = ["PvE", "PvP", "Arena", "Dungeon", "Siege", "Large-Scale", "Beginner Friendly", "Budget Build", "Endgame Build", "Tank", "DPS", "Healer", "Support"];
 /** Builds created or cloned in the Character Builder, newest first: settings["pm.myBuilds"] = BuildSrc[]. */
 export const MY_BUILDS_KEY = "pm.myBuilds";
 export function readMyBuilds(json?: string): BuildSrc[] {
@@ -42,11 +44,6 @@ export function openBuild(src: BuildSrc, go: (page: string) => void) {
   go("builder");
 }
 
-/** "2 ore fa"; minutes and weeks use the short form like the prototype. */
-export function ago(lang: string, [n, unit]: Ago) {
-  const style = unit === "minute" || unit === "week" ? "short" : "long";
-  return new Intl.RelativeTimeFormat(lang, { numeric: "always", style }).format(-n, unit);
-}
 /** "Oggi" / "Ieri" / "3 giorni fa". */
 export function daysAgo(lang: string, days: number) {
   const s = new Intl.RelativeTimeFormat(lang, { numeric: "auto" }).format(-days, "day");

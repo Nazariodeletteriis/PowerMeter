@@ -105,9 +105,6 @@
   "home.emptyText": "Запусти Aion 2 и атакуй любую цель: PowerMeter распознает твоего персонажа и начнёт запись. Виджет откроется автоматически.",
   "home.checkRequirements": "Проверить требования",
   "home.notSet": "Не задано",
-  "home.portrait": "Портрет",
-  "home.cpVs7Days": "vs 7 дней назад",
-  "home.activeBuild": "Активная сборка:",
   "home.buildProgress": "Прогресс сборки",
   "home.buildOwned": "{owned} из {total} предметов получено · рекомендуемые улучшения:",
   "home.timers": "Таймеры",
@@ -123,7 +120,6 @@
   "home.todayAt": "Сегодня {time}",
   "home.yesterdayAt": "Вчера {time}",
   "home.today": "Задачи на сегодня",
-  "home.todayLeft": "{n} открыто",
   "home.news": "Новости",
   "supporter.title": "Спасибо всем, кто поддерживает PowerMeter",
   "supporter.text": "PowerMeter бесплатен и останется полнофункциональным для всех. Спонсоры на Patreon поддерживают серверы, которые хранят логи, рейтинги и общие сборки.",
@@ -139,6 +135,8 @@
   "supporter.notLinked": "Не привязано",
   "supporter.link": "Привязать Patreon",
   "supporter.badge": "Значок спонсора",
-  "supporter.inRankings": "В рейтинге:",
-  "about.a2tools": "Движок захвата основан на {link} от taengu (GPL-3.0). Спасибо!"
+  "about.a2tools": "Движок захвата основан на {link} от taengu (GPL-3.0). Спасибо!",
+  "home.noCharacterTitle": "Нет активного персонажа",
+  "home.noCharacterText": "Добавь персонажа, чтобы видеть здесь класс, регион и билд.",
+  "home.noBuildText": "Задай целевую экипировку в Character Builder, чтобы видеть, чего не хватает."
 }

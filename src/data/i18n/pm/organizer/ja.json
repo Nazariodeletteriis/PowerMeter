@@ -147,5 +147,7 @@
   "organizer.update.failed": "アップデートをインストールできませんでした",
   "organizer.update.failedHint": "接続を確認して再試行するか、GitHub からインストーラーをダウンロードしてください。",
   "organizer.update.retry": "再試行",
-  "organizer.update.manual": "手動でダウンロード"
+  "organizer.update.manual": "手動でダウンロード",
+  "organizer.set.alwaysOn": "常に有効",
+  "organizer.set.characterPh": "キャラクター名"
 }

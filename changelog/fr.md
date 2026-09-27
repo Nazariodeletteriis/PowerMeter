@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.13
+
+- Nouveau : les personnages ont une faction (Elyséen ou Asmodien). Choisissez-la en ajoutant un personnage, ou sur la carte d'un personnage existant ; elle apparaît sur l'Accueil et dans le Character Builder.
+- Nouveau : le rapport de combat affiche vos combats enregistrés : tentatives sur le même boss, vue d'ensemble, compétences, graphique DPS, chronologie, dégâts subis, soins et Comparer. Cliquer sur un combat dans l'Historique ou sur l'Accueil l'ouvre dans le rapport.
+- Nouveau : Exporter dans le rapport de combat enregistre le combat entier, qui peut être rechargé depuis Historique des combats → Envoyer → Depuis un fichier.
+- Nouveau : l'Analyse de groupe affiche les joueurs, les compétences et les rotations d'ouverture de votre dernier combat.
+- Modifié : toutes les données d'exemple ont été supprimées avant le lancement. Les pages qui n'ont encore rien à afficher (classements, builds de la communauté, commentaires, actualités, activités, soins et aggro du meter, lobby du widget) affichent un état vide.
+- Modifié : Partager ne donne qu'un vrai lien, une fois le combat envoyé depuis l'Historique.
+- Modifié : les réglages pas encore disponibles sont désactivés et marqués « Bientôt disponible ».
+- Corrigé : l'équipement de votre build principal enregistré dans les versions précédentes est conservé.
+
 ## 0.2.12
 
 - Nouveau : Envoyer dans l'historique des combats ouvre une fenêtre pour envoyer les combats sélectionnés ou un fichier enregistré avec Exporter, et permet de se connecter avec Discord depuis là.

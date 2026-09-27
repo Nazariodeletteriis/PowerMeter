@@ -50,7 +50,6 @@
   "characters.builder.namePlaceholder": "Название билда",
   "characters.builder.missingN": "Недостающие части: {n}",
   "characters.builder.goToSource": "Перейти к источнику",
-  "characters.builder.shopSrc": "Магазин · {n} Abyss Points",
   "characters.builder.readOnly": "Только просмотр",
   "characters.builder.by": "от {au}",
   "characters.builder.buildOf": "билд {i} из {n}",
@@ -83,7 +82,6 @@
   "characters.builder.openSkillPlanner": "Открыть в Skill Planner",
   "characters.builder.openDaevanion": "Открыть в Daevanion Planner",
   "characters.builder.descPlaceholder": "Опиши билд: ротация, приоритет характеристик, варианты…",
-  "characters.builder.commentPlaceholder": "Напиши комментарий…",
   "characters.builder.copySuffix": " (копия)",
   "characters.builder.clonedTitle": "Билд клонирован",
   "characters.builder.clonedText": "Теперь он в твоих билдах: ты можешь его редактировать.",
@@ -180,5 +178,12 @@
   "characters.builds.edit": "Изменить",
   "characters.builder.editTitle": "Ваш билд",
   "characters.builder.editText": "Переименуйте и нажмите «Сохранить». Изменения снаряжения сохраняются сразу.",
-  "characters.builder.nameTaken": "Билд с таким названием уже есть."
+  "characters.builder.nameTaken": "Билд с таким названием уже есть.",
+  "characters.builds.noneTitle": "Сборок пока нет",
+  "characters.builds.noneText": "Создайте первую сборку или клонируйте её в Character Builder.",
+  "characters.builds.communityTitle": "Сборки сообщества",
+  "characters.builds.communityText": "Сборки других игроков появятся здесь, когда заработает онлайн-обмен. Пока здесь только ваши.",
+  "characters.builder.defaultBuild": "Основная сборка",
+  "characters.builder.commentsEmptyTitle": "Комментариев пока нет",
+  "characters.builder.commentsEmptyText": "Комментарии станут доступны, когда заработает онлайн-обмен сборками."
 }

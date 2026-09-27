@@ -408,14 +408,18 @@
         "drop": "ドロップ",
         "craft": "クラフト",
         "shop": "ショップ"
-      }
+      },
+      "emptyTitle": "ビルドが選択されていません",
+      "emptyHint": "ダッシュボードのCharacter Builderでビルドを開き、ウィジェットに表示してください。"
     },
     "lobby": {
       "ready": "{n}/{total} 準備完了",
       "player": "プレイヤー",
       "status": "状態",
       "notReady": "未準備",
-      "gsTip": "Gear score"
+      "gsTip": "Gear score",
+      "emptyTitle": "パーティデータなし",
+      "emptyHint": "メーターが読み取れるようになると、ここにパーティ構成が表示されます。"
     },
     "updateAvailable": "アップデートがあります",
     "updateNotes": "リリースノート",

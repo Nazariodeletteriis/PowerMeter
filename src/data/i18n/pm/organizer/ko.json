@@ -147,5 +147,7 @@
   "organizer.update.failed": "업데이트를 설치하지 못했습니다",
   "organizer.update.failedHint": "연결을 확인하고 다시 시도하거나 GitHub에서 설치 프로그램을 다운로드하세요.",
   "organizer.update.retry": "다시 시도",
-  "organizer.update.manual": "직접 다운로드"
+  "organizer.update.manual": "직접 다운로드",
+  "organizer.set.alwaysOn": "항상 켜짐",
+  "organizer.set.characterPh": "캐릭터 이름"
 }

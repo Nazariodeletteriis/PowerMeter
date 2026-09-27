@@ -408,14 +408,18 @@
         "drop": "Drop",
         "craft": "Crafting",
         "shop": "Shop"
-      }
+      },
+      "emptyTitle": "No build selected",
+      "emptyHint": "In the dashboard, open a build in the Character Builder and show it in the widget."
     },
     "lobby": {
       "ready": "{n}/{total} ready",
       "player": "Player",
       "status": "Status",
       "notReady": "Not ready",
-      "gsTip": "Gear score"
+      "gsTip": "Gear score",
+      "emptyTitle": "No party data",
+      "emptyHint": "The party roster will appear here once the meter can read it."
     },
     "updateAvailable": "Update available",
     "updateNotes": "Release notes",

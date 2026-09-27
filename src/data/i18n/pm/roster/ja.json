@@ -3,5 +3,7 @@
   "roster.cancel": "キャンセル",
   "roster.empty": "キャラクターがいません。追加するかファイルをインポートしてください。",
   "roster.deleteConfirm": "{name} を削除しますか？",
-  "roster.importError": "このファイルに有効なキャラクターがありません。"
+  "roster.importError": "このファイルに有効なキャラクターがありません。",
+  "roster.faction": "種族",
+  "roster.pickFaction": "種族を選択"
 }

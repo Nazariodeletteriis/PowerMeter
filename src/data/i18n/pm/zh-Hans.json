@@ -105,9 +105,6 @@
   "home.emptyText": "启动 Aion 2 并攻击任意目标：PowerMeter 会识别你的角色并开始记录，小组件将自动打开。",
   "home.checkRequirements": "检查系统要求",
   "home.notSet": "未设置",
-  "home.portrait": "头像",
-  "home.cpVs7Days": "较 7 天前",
-  "home.activeBuild": "当前配装：",
   "home.buildProgress": "配装进度",
   "home.buildOwned": "已拥有 {owned}/{total} 件装备 · 推荐下一步升级：",
   "home.timers": "计时器",
@@ -123,7 +120,6 @@
   "home.todayAt": "今天 {time}",
   "home.yesterdayAt": "昨天 {time}",
   "home.today": "今日任务",
-  "home.todayLeft": "{n} 项未完成",
   "home.news": "新闻",
   "supporter.title": "感谢每一位支持 PowerMeter 的人",
   "supporter.text": "PowerMeter 完全免费，并将始终为所有人提供完整功能。Patreon 支持者维持着托管日志、排行榜和共享配装的服务器运行。",
@@ -139,6 +135,8 @@
   "supporter.notLinked": "未关联",
   "supporter.link": "关联 Patreon",
   "supporter.badge": "支持者徽章",
-  "supporter.inRankings": "排行榜中：",
-  "about.a2tools": "捕获引擎基于 taengu 的 {link}（GPL-3.0）构建，谢谢！"
+  "about.a2tools": "捕获引擎基于 taengu 的 {link}（GPL-3.0）构建，谢谢！",
+  "home.noCharacterTitle": "没有当前角色",
+  "home.noCharacterText": "添加角色后，这里会显示职业、地区和配装。",
+  "home.noBuildText": "在 Character Builder 中设置目标装备，即可追踪还缺什么。"
 }

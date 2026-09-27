@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.13
+
+- Neu: Charaktere haben eine Fraktion (Elyos oder Asmodier). Wähle sie beim Hinzufügen eines Charakters oder auf der Karte eines bestehenden; sie erscheint auf der Startseite und im Character Builder.
+- Neu: Der Kampfbericht zeigt deine gespeicherten Kämpfe: Versuche am selben Boss, Übersicht, Fertigkeiten, DPS-Diagramm, Zeitleiste, erlittener Schaden, Heilung und Vergleichen. Ein Klick auf einen Kampf im Kampfverlauf oder auf der Startseite öffnet ihn im Bericht.
+- Neu: Exportieren im Kampfbericht speichert den ganzen Kampf, sodass er über Kampfverlauf → Hochladen → Aus Datei wieder geladen werden kann.
+- Neu: Die Gruppenanalyse zeigt Spieler, Fertigkeiten und Eröffnungsrotationen deines letzten Kampfes.
+- Geändert: Alle Beispieldaten wurden vor dem Start entfernt. Seiten, die noch nichts anzuzeigen haben (Ranglisten, Community-Builds, Kommentare, News, Aktivitäten, Heilung und Aggro im Meter, Widget-Lobby), zeigen einen leeren Zustand.
+- Geändert: Teilen liefert nur noch einen echten Link, sobald der Kampf aus dem Kampfverlauf hochgeladen wurde.
+- Geändert: Noch nicht verfügbare Einstellungen werden deaktiviert und mit "Demnächst verfügbar" angezeigt.
+- Behoben: Die in früheren Versionen gespeicherte Ausrüstung deines Haupt-Builds bleibt erhalten.
+
 ## 0.2.12
 
 - Neu: Hochladen im Kampfverlauf öffnet ein Fenster, um die ausgewählten Kämpfe oder eine mit Exportieren gespeicherte Datei hochzuladen, und lässt dich von dort aus mit Discord anmelden.

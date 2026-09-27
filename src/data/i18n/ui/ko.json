@@ -408,14 +408,18 @@
         "drop": "드롭",
         "craft": "제작",
         "shop": "상점"
-      }
+      },
+      "emptyTitle": "선택된 빌드 없음",
+      "emptyHint": "대시보드의 Character Builder에서 빌드를 열고 위젯에 표시하세요."
     },
     "lobby": {
       "ready": "{n}/{total} 준비 완료",
       "player": "플레이어",
       "status": "상태",
       "notReady": "준비 안 됨",
-      "gsTip": "장비 점수"
+      "gsTip": "장비 점수",
+      "emptyTitle": "파티 데이터 없음",
+      "emptyHint": "미터가 파티 구성을 읽을 수 있게 되면 여기에 표시됩니다."
     },
     "updateAvailable": "업데이트 가능",
     "updateNotes": "릴리스 노트",

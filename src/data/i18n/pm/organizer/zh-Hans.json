@@ -147,5 +147,7 @@
   "organizer.update.failed": "无法安装更新",
   "organizer.update.failedHint": "请检查网络后重试，或从 GitHub 下载安装程序。",
   "organizer.update.retry": "重试",
-  "organizer.update.manual": "手动下载"
+  "organizer.update.manual": "手动下载",
+  "organizer.set.alwaysOn": "始终开启",
+  "organizer.set.characterPh": "你的角色名"
 }

@@ -50,7 +50,6 @@
   "characters.builder.namePlaceholder": "配装名称",
   "characters.builder.missingN": "缺失部件：{n}",
   "characters.builder.goToSource": "前往来源",
-  "characters.builder.shopSrc": "商店 · {n} Abyss Points",
   "characters.builder.readOnly": "只读",
   "characters.builder.by": "作者：{au}",
   "characters.builder.buildOf": "配装 {i} / {n}",
@@ -83,7 +82,6 @@
   "characters.builder.openSkillPlanner": "在 Skill Planner 中打开",
   "characters.builder.openDaevanion": "在 Daevanion Planner 中打开",
   "characters.builder.descPlaceholder": "描述配装：技能循环、属性优先级、变体…",
-  "characters.builder.commentPlaceholder": "写评论…",
   "characters.builder.copySuffix": " (副本)",
   "characters.builder.clonedTitle": "配装已克隆",
   "characters.builder.clonedText": "现已加入你的配装列表，可以编辑了。",
@@ -180,5 +178,12 @@
   "characters.builds.edit": "编辑",
   "characters.builder.editTitle": "你的配装",
   "characters.builder.editText": "改名后点击保存。装备的改动会立即保存。",
-  "characters.builder.nameTaken": "已有同名配装。"
+  "characters.builder.nameTaken": "已有同名配装。",
+  "characters.builds.noneTitle": "还没有构筑",
+  "characters.builds.noneText": "创建你的第一个构筑，或在 Character Builder 中克隆一个。",
+  "characters.builds.communityTitle": "社区构筑",
+  "characters.builds.communityText": "在线分享上线后，其他玩家分享的构筑会显示在这里。目前只显示你自己的。",
+  "characters.builder.defaultBuild": "主构筑",
+  "characters.builder.commentsEmptyTitle": "还没有评论",
+  "characters.builder.commentsEmptyText": "构筑在线分享上线后即可使用评论。"
 }

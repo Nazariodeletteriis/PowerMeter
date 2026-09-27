@@ -3,5 +3,7 @@
   "roster.cancel": "取消",
   "roster.empty": "還沒有角色。新增一個或匯入檔案。",
   "roster.deleteConfirm": "刪除 {name}？",
-  "roster.importError": "此檔案中沒有有效的角色。"
+  "roster.importError": "此檔案中沒有有效的角色。",
+  "roster.faction": "種族",
+  "roster.pickFaction": "選擇種族"
 }

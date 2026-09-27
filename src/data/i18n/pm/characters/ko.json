@@ -50,7 +50,6 @@
   "characters.builder.namePlaceholder": "빌드 이름",
   "characters.builder.missingN": "부족한 부위: {n}",
   "characters.builder.goToSource": "획득처로 이동",
-  "characters.builder.shopSrc": "상점 · Abyss Points {n}",
   "characters.builder.readOnly": "읽기 전용",
   "characters.builder.by": "{au}님 작성",
   "characters.builder.buildOf": "빌드 {i}/{n}",
@@ -83,7 +82,6 @@
   "characters.builder.openSkillPlanner": "Skill Planner에서 열기",
   "characters.builder.openDaevanion": "Daevanion Planner에서 열기",
   "characters.builder.descPlaceholder": "빌드를 설명하세요: 로테이션, 스탯 우선순위, 변형 등…",
-  "characters.builder.commentPlaceholder": "댓글을 입력하세요…",
   "characters.builder.copySuffix": " (복사본)",
   "characters.builder.clonedTitle": "빌드가 복제되었습니다",
   "characters.builder.clonedText": "이제 내 빌드에 추가되었습니다. 수정할 수 있습니다.",
@@ -180,5 +178,12 @@
   "characters.builds.edit": "편집",
   "characters.builder.editTitle": "내 빌드",
   "characters.builder.editText": "이름을 바꾸고 저장을 누르세요. 장비 변경은 바로 저장됩니다.",
-  "characters.builder.nameTaken": "같은 이름의 빌드가 이미 있습니다."
+  "characters.builder.nameTaken": "같은 이름의 빌드가 이미 있습니다.",
+  "characters.builds.noneTitle": "아직 빌드가 없습니다",
+  "characters.builds.noneText": "첫 빌드를 만들거나 Character Builder에서 복제하세요.",
+  "characters.builds.communityTitle": "커뮤니티 빌드",
+  "characters.builds.communityText": "온라인 공유가 시작되면 다른 플레이어의 빌드가 여기에 표시됩니다. 지금은 내 빌드만 표시됩니다.",
+  "characters.builder.defaultBuild": "메인 빌드",
+  "characters.builder.commentsEmptyTitle": "아직 댓글이 없습니다",
+  "characters.builder.commentsEmptyText": "빌드 온라인 공유가 시작되면 댓글을 사용할 수 있습니다."
 }

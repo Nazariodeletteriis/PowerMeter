@@ -4,6 +4,17 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.2.13
+
+- New: characters have a faction (Elyos or Asmodian). Choose it when you add a character, or on the card of an existing one; it shows on Home and in the Character Builder.
+- New: the fight report shows your saved fights: attempts on the same boss, overview, skills, DPS chart, timeline, damage taken, healing and Compare. Clicking a fight in Fight history or on Home opens it in the report.
+- New: Export in the fight report saves the whole fight, so it can be loaded back from Fight history → Upload → From file.
+- New: Party analysis shows the players, skills and opening rotations of your last fight.
+- Changed: all sample data is gone before launch. Pages with nothing to show yet (rankings, community builds, comments, news, activities, meter healing and aggro, widget lobby) show an empty state.
+- Changed: Share only gives a real link, once the fight is uploaded from Fight history.
+- Changed: settings that are not available yet are shown disabled and marked "Coming soon".
+- Fixed: the gear of your main build saved in earlier versions is kept.
+
 ## 0.2.12
 
 - New: Upload in Fight history opens a window to upload the selected fights or a file saved with Export, and lets you sign in with Discord from there.

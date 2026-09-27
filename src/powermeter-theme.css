@@ -1107,6 +1107,18 @@ body.legacyUi .pmOnly {
   .meter.pmMode-lobby { min-height: 0; }
   .pmMode-lobby .pmBarRight { color: #5fd99a; }
   .meter.pmMode-lobby .pmLobby { display: block; }
+  /* Build / Lobby with nothing to show yet: same look as the waiting state (8.4). */
+  .pmModeEmpty {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 24px 12px;
+    text-align: center;
+  }
+  .pmMode-build .pmBarRight:empty { display: none; }
   .pmLobbyGrid {
     display: grid;
     grid-template-columns: 1fr 56px 52px 74px;

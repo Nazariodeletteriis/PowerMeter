@@ -51,8 +51,6 @@ const TARGET_MODES = [
   ["trainTargets", "Train"],
   ["pvpTargets", "PvP"],
 ] as const;
-// Switches the engine has no setting for yet: sample state, prototype defaults.
-const SAMPLE_SWITCHES = { boot: true, tray: true, autosave: true, autoup: false, pos: true, n1: true, n2: true, n3: true, n4: true };
 
 const getCapture = () => invoke<CaptureStatus>("get_capture_status");
 
@@ -68,9 +66,9 @@ function Row({ label, desc, children }: { label: string; desc?: string; children
   );
 }
 
-function Switch({ label, on, set }: { label: string; on: boolean; set: (on: boolean) => void }) {
+function Switch({ label, on, set }: { label: string; on: boolean; set?: (on: boolean) => void }) {
   return (
-    <button type="button" role="switch" aria-checked={on} aria-label={label} className="switch" onClick={() => set(!on)}>
+    <button type="button" role="switch" aria-checked={on} aria-label={label} className="switch" disabled={!set} onClick={() => set?.(!on)}>
       <span />
     </button>
   );
@@ -104,7 +102,6 @@ const same = (xs: string[]) => xs.map((x) => [x, x] as const);
 /** Prototype pg.impostazioni. Options the engine handles use the real settings/commands. */
 export default function Impostazioni({ t, lang, settings, save, name, go, run }: PageProps) {
   const [tab, setTab] = useState<(typeof TABS)[number][0]>("widget"); // prototype default
-  const [sw, setSw] = useState<Record<string, boolean>>(SAMPLE_SWITCHES);
   const [scale, setScale] = useState(100);
   const [clickThrough, setClickThrough] = useState(false);
   const [devices, setDevices] = useState<string[]>([]);
@@ -133,8 +130,12 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
     run(() => invoke<string>("get_app_version").then(setVersion));
   }, []); // once per visit: `run` is a new function every render
 
-  const flag = (id: keyof typeof SAMPLE_SWITCHES, label: string) => (
-    <Switch label={label} on={sw[id]} set={(on) => setSw({ ...sw, [id]: on })} />
+  // Options the engine has no setting for: a disabled switch. `always` = what the engine
+  // already does unconditionally (autosave, window position); the rest is not built yet.
+  const fixed = (label: Key, always = false) => (
+    <Row label={t(label)} desc={t(always ? "organizer.set.alwaysOn" : "shell.states.soonTitle")}>
+      <Switch label={t(label)} on={always} />
+    </Row>
   );
   const setting = (key: string, value: string) => run(() => save(key, value));
   const open = (url: string) => run(() => invoke("open_url", { url }));
@@ -278,8 +279,8 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
             set={(p) => setting(PALETTE_SETTING, p)}
           />
         </Row>
-        <Row label={t("organizer.set.startWithWindows")}>{flag("boot", t("organizer.set.startWithWindows"))}</Row>
-        <Row label={t("organizer.set.trayOnClose")}>{flag("tray", t("organizer.set.trayOnClose"))}</Row>
+        {fixed("organizer.set.startWithWindows")}
+        {fixed("organizer.set.trayOnClose")}
       </>
     ),
     meter: (
@@ -303,8 +304,8 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
         <Row label={t("organizer.set.actor")} desc={t("organizer.set.actorHint")}>
           <Select label={t("organizer.set.actor")} options={same([`${capture?.characterName || name}${actor}`])} />
         </Row>
-        <Row label={t("organizer.set.autosave")}>{flag("autosave", t("organizer.set.autosave"))}</Row>
-        <Row label={t("organizer.set.autoUpload")}>{flag("autoup", t("organizer.set.autoUpload"))}</Row>
+        {fixed("organizer.set.autosave", true)}
+        {fixed("organizer.set.autoUpload")}
         <Row label={t("organizer.set.visibility")}>
           <Select
             label={t("organizer.set.visibility")}
@@ -351,7 +352,7 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
             options={["followApp", "highContrast", "minimal"].map((v) => [v, t(`organizer.set.${v}`)])}
           />
         </Row>
-        <Row label={t("organizer.set.rememberPosition")}>{flag("pos", t("organizer.set.rememberPosition"))}</Row>
+        {fixed("organizer.set.rememberPosition", true)}
       </>
     ),
     scorciatoie: (
@@ -458,7 +459,7 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
                 className="setInput"
                 value={draft.pg}
                 maxLength={NAME_MAX_LENGTH}
-                placeholder="Kaelthas"
+                placeholder={t("organizer.set.characterPh")}
                 aria-describedby="acct-pg-hint"
                 onChange={(e) => edit({ pg: e.target.value })}
               />
@@ -513,10 +514,10 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
         <Row label={t("organizer.set.import")} desc={t("organizer.set.importHint")}>
           {button(t("organizer.set.import"))}
         </Row>
-        <Row label={t("organizer.set.logsFolder")} desc="C:\Users\…\PowerMeter\logs · 412 MB">
+        <Row label={t("organizer.set.logsFolder")}>
           {button(t("organizer.set.openFolder"))}
         </Row>
-        <Row label={t("organizer.set.clearCache")} desc="84 MB">
+        <Row label={t("organizer.set.clearCache")}>
           {button(t("organizer.set.clear"))}
         </Row>
       </>
@@ -526,10 +527,10 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
         <Row label={t("organizer.set.webhook")} desc="https://discord.com/api/webhooks/…">
           {button(t("organizer.set.testNotification"))}
         </Row>
-        <Row label={t("organizer.set.notifyTimers")}>{flag("n1", t("organizer.set.notifyTimers"))}</Row>
-        <Row label={t("organizer.set.notifyResets")}>{flag("n2", t("organizer.set.notifyResets"))}</Row>
-        <Row label={t("organizer.set.notifyRecords")}>{flag("n3", t("organizer.set.notifyRecords"))}</Row>
-        <Row label={t("organizer.set.notifyWindows")}>{flag("n4", t("organizer.set.notifyWindows"))}</Row>
+        {fixed("organizer.set.notifyTimers")}
+        {fixed("organizer.set.notifyResets")}
+        {fixed("organizer.set.notifyRecords")}
+        {fixed("organizer.set.notifyWindows")}
       </>
     ),
     info: (

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { CheckIcon, GridFourIcon, PlusIcon } from "@phosphor-icons/react";
+import { CheckIcon, GridFourIcon, ListChecksIcon, PlusIcon } from "@phosphor-icons/react";
+import { readCharacters } from "../characters";
 import { REGIONS } from "../Onboarding";
-import { SAMPLE_ACTIVITIES, SAMPLE_ALTS, type Priority } from "../sample/organizer";
+import { EmptyState } from "../ui";
 import "./organizer/organizer.css";
 import type { PageProps } from "./types";
 
@@ -11,6 +12,7 @@ const TABS = [
   ["seasonal", "organizer.tabSeasonal"],
   ["custom", "organizer.tabCustom"],
 ] as const;
+type Priority = "high" | "medium" | "low";
 const PRIORITY: Record<Priority, [label: string, color: string]> = {
   high: ["organizer.priorityHigh", "#FF6B6B"],
   medium: ["organizer.priorityMedium", "#E8B03A"],
@@ -18,15 +20,18 @@ const PRIORITY: Record<Priority, [label: string, color: string]> = {
 };
 
 /**
- * Prototype pg.attivita. Ticks live in page state until R5 stores them (and
- * clears them at reset); the matrix starts from the prototype's pattern.
+ * Prototype pg.attivita. No activity source until R5 stores them (and clears
+ * ticks at reset): every tab shows the empty state; the matrix columns are the
+ * user's characters.
  */
 export default function Attivita({ t, settings }: PageProps) {
   const [tab, setTab] = useState<(typeof TABS)[number][0]>("daily");
   const [done, setDone] = useState<Record<string, boolean>>({});
   const [matrix, setMatrix] = useState(false);
   const [cells, setCells] = useState<Record<string, boolean>>({});
-  const list = SAMPLE_ACTIVITIES[tab];
+  // ponytail: empty until R5 storage; the list/matrix rendering below is what it will fill.
+  const list: [id: string, name: string, priority: Priority][] = [];
+  const alts = readCharacters(settings).map((c) => c.name);
   const region = (REGIONS.find((r) => r.value === settings["pm.region"]) ?? REGIONS[0]).label;
 
   return (
@@ -58,11 +63,15 @@ export default function Attivita({ t, settings }: PageProps) {
         </button>
       </div>
 
-      {matrix ? (
+      {!list.length ? (
+        <section className="card">
+          <EmptyState icon={<ListChecksIcon aria-hidden="true" />} title={t("shell.states.noData")} text={t("shell.states.soonText")} />
+        </section>
+      ) : matrix ? (
         <div className="orgMatrix" role="table">
           <div role="row">
             <span role="columnheader">{t("organizer.colTask")}</span>
-            {SAMPLE_ALTS.map((n) => (
+            {alts.map((n) => (
               <span key={n} role="columnheader" style={{ textAlign: "center" }}>
                 {n}
               </span>
@@ -71,9 +80,9 @@ export default function Attivita({ t, settings }: PageProps) {
           {list.map(([id, name]) => (
             <div key={id} role="row">
               <span role="rowheader">{name}</span>
-              {SAMPLE_ALTS.map((alt, k) => {
+              {alts.map((alt, k) => {
                 const key = id + k;
-                const on = cells[key] ?? (id.charCodeAt(1) + k) % 3 === 0;
+                const on = !!cells[key];
                 return (
                   <span key={alt} role="cell" style={{ display: "grid" }}>
                     <button

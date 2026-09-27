@@ -147,5 +147,7 @@
   "organizer.update.failed": "The update couldn't be installed",
   "organizer.update.failedHint": "Check your connection and try again, or download the installer from GitHub.",
   "organizer.update.retry": "Retry",
-  "organizer.update.manual": "Download manually"
+  "organizer.update.manual": "Download manually",
+  "organizer.set.alwaysOn": "Always on",
+  "organizer.set.characterPh": "Your character's name"
 }

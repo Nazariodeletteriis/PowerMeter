@@ -3,5 +3,7 @@
   "roster.cancel": "Abbrechen",
   "roster.empty": "Noch keine Charaktere. Füge einen hinzu oder importiere eine Datei.",
   "roster.deleteConfirm": "{name} löschen?",
-  "roster.importError": "Keine gültigen Charaktere in dieser Datei."
+  "roster.importError": "Keine gültigen Charaktere in dieser Datei.",
+  "roster.faction": "Fraktion",
+  "roster.pickFaction": "Fraktion wählen"
 }

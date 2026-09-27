@@ -147,5 +147,7 @@
   "organizer.update.failed": "Impossible d’installer la mise à jour",
   "organizer.update.failedHint": "Vérifie ta connexion et réessaie, ou télécharge l’installateur depuis GitHub.",
   "organizer.update.retry": "Réessayer",
-  "organizer.update.manual": "Télécharger manuellement"
+  "organizer.update.manual": "Télécharger manuellement",
+  "organizer.set.alwaysOn": "Toujours actif",
+  "organizer.set.characterPh": "Nom de ton personnage"
 }

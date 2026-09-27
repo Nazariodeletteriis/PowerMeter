@@ -147,5 +147,7 @@
   "organizer.update.failed": "Das Update konnte nicht installiert werden",
   "organizer.update.failedHint": "Prüfe deine Verbindung und versuche es erneut oder lade das Installationsprogramm von GitHub herunter.",
   "organizer.update.retry": "Erneut versuchen",
-  "organizer.update.manual": "Manuell herunterladen"
+  "organizer.update.manual": "Manuell herunterladen",
+  "organizer.set.alwaysOn": "Immer aktiv",
+  "organizer.set.characterPh": "Name deines Charakters"
 }

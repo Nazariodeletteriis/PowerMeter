@@ -408,14 +408,18 @@
         "drop": "掉落",
         "craft": "製作",
         "shop": "商店"
-      }
+      },
+      "emptyTitle": "未選擇配置",
+      "emptyHint": "請在儀表板的 Character Builder 中開啟一個配置並在小工具中顯示。"
     },
     "lobby": {
       "ready": "{n}/{total} 已準備",
       "player": "玩家",
       "status": "狀態",
       "notReady": "未準備",
-      "gsTip": "裝備評分"
+      "gsTip": "裝備評分",
+      "emptyTitle": "尚無隊伍資料",
+      "emptyHint": "當計量器能讀取隊伍成員後，會顯示在這裡。"
     },
     "updateAvailable": "有可用更新",
     "updateNotes": "版本資訊",

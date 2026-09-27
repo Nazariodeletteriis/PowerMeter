@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.13
+
+- Nuovo: i personaggi hanno una fazione (Elyos o Asmodian). Si sceglie quando aggiungi un personaggio, o sulla scheda di uno esistente; compare nella Home e nel Character Builder.
+- Nuovo: il report mostra i tuoi combattimenti salvati: tentativi sullo stesso boss, panoramica, abilità, grafico DPS, timeline, danno ricevuto, cure e Confronta. Cliccando un combattimento nello Storico o nella Home si apre nel report.
+- Nuovo: Esporta nel report salva l'intero combattimento, che si può ricaricare da Storico combattimenti → Carica → Da file.
+- Nuovo: Analisi party mostra giocatori, abilità e rotazioni di apertura del tuo ultimo combattimento.
+- Cambiato: tutti i dati di esempio sono stati rimossi prima del lancio. Le pagine che non hanno ancora niente da mostrare (classifiche, build della community, commenti, news, attività, cure e aggro nel meter, lobby del widget) mostrano uno stato vuoto.
+- Cambiato: Condividi dà solo un link reale, dopo aver caricato il combattimento dallo Storico.
+- Cambiato: le impostazioni non ancora disponibili sono disattivate e contrassegnate "Presto disponibile".
+- Corretto: l'equipaggiamento della tua build principale salvato nelle versioni precedenti viene mantenuto.
+
 ## 0.2.12
 
 - Nuovo: Carica in Storico combattimenti apre una finestra per caricare i combattimenti selezionati o un file salvato con Esporta, e da lì permette di accedere con Discord.

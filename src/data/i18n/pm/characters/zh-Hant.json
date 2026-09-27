@@ -50,7 +50,6 @@
   "characters.builder.namePlaceholder": "配置名稱",
   "characters.builder.missingN": "缺少部件：{n}",
   "characters.builder.goToSource": "前往來源",
-  "characters.builder.shopSrc": "商店 · {n} 深淵點數",
   "characters.builder.readOnly": "唯讀",
   "characters.builder.by": "由 {au}",
   "characters.builder.buildOf": "配置 {i}/{n}",
@@ -83,7 +82,6 @@
   "characters.builder.openSkillPlanner": "在 Skill Planner 中開啟",
   "characters.builder.openDaevanion": "在 Daevanion Planner 中開啟",
   "characters.builder.descPlaceholder": "描述此配置：技能循環、屬性優先順序、變體…",
-  "characters.builder.commentPlaceholder": "撰寫留言…",
   "characters.builder.copySuffix": " (複本)",
   "characters.builder.clonedTitle": "配置已複製",
   "characters.builder.clonedText": "現在已在您的配置中，可以進行編輯。",
@@ -180,5 +178,12 @@
   "characters.builds.edit": "編輯",
   "characters.builder.editTitle": "你的配置",
   "characters.builder.editText": "改名後點擊儲存。裝備的變更會立即儲存。",
-  "characters.builder.nameTaken": "已有同名配置。"
+  "characters.builder.nameTaken": "已有同名配置。",
+  "characters.builds.noneTitle": "還沒有配置",
+  "characters.builds.noneText": "建立你的第一個配置，或在 Character Builder 中複製一個。",
+  "characters.builds.communityTitle": "社群配置",
+  "characters.builds.communityText": "線上分享上線後，其他玩家分享的配置會顯示在這裡。目前只顯示你自己的。",
+  "characters.builder.defaultBuild": "主要配置",
+  "characters.builder.commentsEmptyTitle": "還沒有留言",
+  "characters.builder.commentsEmptyText": "配置線上分享上線後即可使用留言。"
 }

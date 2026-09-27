@@ -105,9 +105,6 @@
   "home.emptyText": "Start Aion 2 and hit any target: PowerMeter recognizes your character and starts recording. The widget opens automatically.",
   "home.checkRequirements": "Check requirements",
   "home.notSet": "Not set",
-  "home.portrait": "Portrait",
-  "home.cpVs7Days": "vs 7 days ago",
-  "home.activeBuild": "Active build:",
   "home.buildProgress": "Build progress",
   "home.buildOwned": "{owned} of {total} pieces owned · recommended next upgrades:",
   "home.timers": "Timers",
@@ -123,7 +120,6 @@
   "home.todayAt": "Today {time}",
   "home.yesterdayAt": "Yesterday {time}",
   "home.today": "Today's tasks",
-  "home.todayLeft": "{n} open",
   "home.news": "News",
   "supporter.title": "Thanks to everyone keeping PowerMeter alive",
   "supporter.text": "PowerMeter is free and will stay complete for everyone. Patreon supporters keep alive the servers that host logs, rankings and shared builds.",
@@ -139,6 +135,8 @@
   "supporter.notLinked": "Not linked",
   "supporter.link": "Link Patreon",
   "supporter.badge": "Supporter badge",
-  "supporter.inRankings": "In rankings:",
-  "about.a2tools": "The capture engine is based on {link} by taengu (GPL-3.0). Thank you!"
+  "about.a2tools": "The capture engine is based on {link} by taengu (GPL-3.0). Thank you!",
+  "home.noCharacterTitle": "No active character",
+  "home.noCharacterText": "Add your character to see class, region and build here.",
+  "home.noBuildText": "Set your target gear in the Character Builder to track what is missing."
 }

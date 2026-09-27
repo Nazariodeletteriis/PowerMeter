@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.13
+
+- Novo: os personagens têm uma facção (Elyos ou Asmodian). Escolha-a ao adicionar um personagem, ou no cartão de um existente; aparece no Início e no Character Builder.
+- Novo: o relatório de combate mostra os seus combates guardados: tentativas no mesmo chefe, visão geral, habilidades, gráfico de DPS, linha do tempo, dano recebido, cura e Comparar. Clicar num combate no Histórico ou no Início abre-o no relatório.
+- Novo: Exportar no relatório de combate guarda o combate inteiro, que pode ser carregado de novo em Histórico de combates → Enviar → De ficheiro.
+- Novo: a Análise de grupo mostra os jogadores, as habilidades e as rotações de abertura do seu último combate.
+- Alterado: todos os dados de exemplo foram removidos antes do lançamento. As páginas que ainda não têm nada para mostrar (classificações, builds da comunidade, comentários, notícias, atividades, cura e aggro no medidor, lobby do widget) mostram um estado vazio.
+- Alterado: Partilhar só dá um link real, depois de enviar o combate a partir do Histórico.
+- Alterado: as definições ainda não disponíveis aparecem desativadas e marcadas "Em breve".
+- Corrigido: o equipamento da sua build principal guardado em versões anteriores é mantido.
+
 ## 0.2.12
 
 - Novo: Enviar no Histórico de combates abre uma janela para enviar os combates selecionados ou um arquivo salvo com Exportar, e permite entrar com o Discord a partir dali.

@@ -91,11 +91,6 @@ export function Supporter({ t, name, onError }: { t: T; name: string; onError: (
                 Supporter
               </span>
             </div>
-            {/* Sample leaderboard name from the prototype until R2 rankings exist. */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--pm-t2)" }}>
-              {t("supporter.inRankings")} Varkhan
-              <HeartIcon weight="fill" style={{ color: "var(--pm-redt)", fontSize: 10 }} aria-hidden="true" />
-            </div>
           </section>
         </div>
       </div>

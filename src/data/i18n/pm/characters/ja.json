@@ -50,7 +50,6 @@
   "characters.builder.namePlaceholder": "ビルド名",
   "characters.builder.missingN": "不足パーツ：{n}",
   "characters.builder.goToSource": "入手元へ",
-  "characters.builder.shopSrc": "ショップ · {n} Abyss Points",
   "characters.builder.readOnly": "読み取り専用",
   "characters.builder.by": "{au} 作",
   "characters.builder.buildOf": "ビルド {i}/{n}",
@@ -83,7 +82,6 @@
   "characters.builder.openSkillPlanner": "Skill Planner で開く",
   "characters.builder.openDaevanion": "Daevanion Planner で開く",
   "characters.builder.descPlaceholder": "ビルドを説明してください：ローテーション、ステータス優先度、バリエーションなど…",
-  "characters.builder.commentPlaceholder": "コメントを入力…",
   "characters.builder.copySuffix": " （コピー）",
   "characters.builder.clonedTitle": "ビルドを複製しました",
   "characters.builder.clonedText": "マイビルドに追加されました。編集できます。",
@@ -180,5 +178,12 @@
   "characters.builds.edit": "編集",
   "characters.builder.editTitle": "あなたのビルド",
   "characters.builder.editText": "名前を変更して保存を押してください。装備の変更はすぐに保存されます。",
-  "characters.builder.nameTaken": "同じ名前のビルドがすでにあります。"
+  "characters.builder.nameTaken": "同じ名前のビルドがすでにあります。",
+  "characters.builds.noneTitle": "ビルドはまだありません",
+  "characters.builds.noneText": "最初のビルドを作成するか、Character Builderでクローンしてください。",
+  "characters.builds.communityTitle": "コミュニティのビルド",
+  "characters.builds.communityText": "オンライン共有が始まると、他のプレイヤーのビルドがここに表示されます。現在はあなたのビルドのみです。",
+  "characters.builder.defaultBuild": "メインビルド",
+  "characters.builder.commentsEmptyTitle": "コメントはまだありません",
+  "characters.builder.commentsEmptyText": "ビルドのオンライン共有が始まるとコメントを利用できます。"
 }

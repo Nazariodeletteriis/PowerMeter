@@ -2,7 +2,7 @@ import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { CheckIcon, CloudArrowUpIcon, ExportIcon, FileArrowUpIcon, SwordIcon, TrashIcon, WarningOctagonIcon } from "@phosphor-icons/react";
 import { usePoll } from "../usePoll";
-import { clock } from "./combat/parts";
+import { clock, REPORT_FIGHT_KEY } from "./combat/parts";
 import { Modal } from "./system/Modal";
 import type { PageProps } from "./types";
 
@@ -21,7 +21,7 @@ export default function Storico(props: PageProps) {
   return <History key={attempt} {...props} retry={() => setAttempt(attempt + 1)} />;
 }
 
-function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
+function History({ t, lang, run, go, retry }: PageProps & { retry: () => void }) {
   const fights = usePoll(getFights, 10000);
   const [period, setPeriod] = useState("7");
   const [boss, setBoss] = useState("");
@@ -56,7 +56,11 @@ function History({ t, lang, run, retry }: PageProps & { retry: () => void }) {
   const day = new Intl.DateTimeFormat(lang, { day: "2-digit", month: "2-digit" });
   const time = new Intl.DateTimeFormat(lang, { hour: "2-digit", minute: "2-digit" });
 
-  const open = (f: Fight) => run(() => invoke("request_details_view", { payload: { kind: "fight", fightId: f.id } }));
+  // The Report page reads the fight to show from REPORT_FIGHT_KEY.
+  const open = (f: Fight) => {
+    sessionStorage.setItem(REPORT_FIGHT_KEY, f.id);
+    go("report");
+  };
   const remove = () => {
     if (!picked.length || !confirm(t("combat.confirmDelete", { n: picked.length }))) return;
     run(async () => {

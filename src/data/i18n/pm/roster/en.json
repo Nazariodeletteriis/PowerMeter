@@ -3,5 +3,7 @@
   "roster.cancel": "Cancel",
   "roster.empty": "No characters yet. Add one or import a file.",
   "roster.deleteConfirm": "Delete {name}?",
-  "roster.importError": "No valid characters in this file."
+  "roster.importError": "No valid characters in this file.",
+  "roster.faction": "Faction",
+  "roster.pickFaction": "Choose faction"
 }

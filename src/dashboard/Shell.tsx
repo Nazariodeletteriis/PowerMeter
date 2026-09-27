@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
+import { REPORT_FIGHT_KEY } from "./pages/combat/parts";
 import { invoke } from "@tauri-apps/api/core";
 import {
   CaretDoubleLeftIcon,
@@ -247,10 +248,13 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
               t={t}
               lang={lang}
               settings={settings}
-              name={name}
               openWidget={openWidget}
               openHistory={() => go("storico")}
-              openFight={(fightId) => run(() => invoke("request_details_view", { payload: { kind: "fight", fightId } }))}
+              openCharacters={() => go("personaggi")}
+              openFight={(fightId) => {
+                sessionStorage.setItem(REPORT_FIGHT_KEY, fightId);
+                go("report");
+              }}
               reviewOnboarding={reviewOnboarding}
             />
           ) : page === "supporter" ? (

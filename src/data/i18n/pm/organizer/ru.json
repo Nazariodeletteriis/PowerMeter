@@ -147,5 +147,7 @@
   "organizer.update.failed": "Не удалось установить обновление",
   "organizer.update.failedHint": "Проверьте подключение и повторите попытку или скачайте установщик с GitHub.",
   "organizer.update.retry": "Повторить",
-  "organizer.update.manual": "Скачать вручную"
+  "organizer.update.manual": "Скачать вручную",
+  "organizer.set.alwaysOn": "Всегда включено",
+  "organizer.set.characterPh": "Имя твоего персонажа"
 }

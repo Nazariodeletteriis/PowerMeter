@@ -408,14 +408,18 @@
         "drop": "Drop",
         "craft": "Fabrication",
         "shop": "Boutique"
-      }
+      },
+      "emptyTitle": "Aucun build sélectionné",
+      "emptyHint": "Dans le tableau de bord, ouvre un build dans le Character Builder et affiche-le dans le widget."
     },
     "lobby": {
       "ready": "{n}/{total} prêts",
       "player": "Joueur",
       "status": "Statut",
       "notReady": "Pas prêt",
-      "gsTip": "Gear Score"
+      "gsTip": "Gear Score",
+      "emptyTitle": "Aucune donnée de groupe",
+      "emptyHint": "La composition du groupe apparaîtra ici dès que le meter pourra la lire."
     },
     "updateAvailable": "Mise à jour disponible",
     "updateNotes": "Notes de version",

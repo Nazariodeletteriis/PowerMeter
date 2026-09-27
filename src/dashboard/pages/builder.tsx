@@ -26,28 +26,18 @@ import {
   TrashIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import {
-  MY_BUILD_ICONS,
-  SAMPLE_BUILDS,
-  SAMPLE_COMMENTS,
-  SAMPLE_ME,
-  SAMPLE_MY_BUILDS,
-  SAMPLE_SLOTS,
-  SLOT_GROUPS,
-  BUILD_TAGS,
-} from "../sample/characters";
 import { iconUrl, ItemIcon } from "../items";
 import { Collections, equippedArcana, useCollectionStats } from "./characters/collections";
 import { dvStats, finalStats, STAT_GROUPS } from "./characters/charstats";
 import { dvSummary, readDv } from "./daevanion";
 import { REGIONS } from "../Onboarding";
 import { classSkills, planClass, SkillIcon } from "../skills";
-import { art, ClassAvatar, CLASSES, fmt, RARITY } from "../ui";
-import { ago, closeBuild, DANGER, DeleteBuildModal, MY_BUILDS_KEY, readMyBuilds, SectionHead, useMem, useToast, type BuildSrc } from "./characters/shared";
+import { art, ClassAvatar, CLASSES, FactionTag, fmt, RARITY } from "../ui";
+import { activeId, readCharacters } from "../characters";
+import { BUILD_TAGS, closeBuild, DANGER, DeleteBuildModal, MY_BUILDS_KEY, readMyBuilds, SectionHead, useMem, useToast, type BuildSrc } from "./characters/shared";
 import {
   arcanaScore,
   baseStats,
-  buildGear,
   GEAR_KEY,
   gearKey as keyOf,
   gearScore,
@@ -60,10 +50,11 @@ import {
   OWN_BUILD,
   rarityOf,
   readGear,
+  SLOT_GROUPS,
+  SLOTS,
   slotItems,
   sockets,
   soulPool,
-  sourceOf,
   statIsPct,
   statName,
   statValue,
@@ -75,6 +66,7 @@ import {
   type Piece,
 } from "./characters/gear";
 import { SELECTED_ITEM } from "./database";
+import { term, useDb } from "./world/db";
 import { ShareModal } from "./shared/ShareModal";
 import { Modal } from "./system/Modal";
 import type { PageProps } from "./types";
@@ -95,7 +87,9 @@ const EMPTY_GEAR: BuildGear = { owned: {}, target: {} };
 export default function Builder({ t, lang, name, go, run, onError, setHeader, settings, save: saveSetting }: PageProps) {
   // New and default builds use the active character's class (onboarding).
   const myCls = planClass(settings["pm.class"]);
-  const [src, setSrc] = useMem<BuildSrc>("bSrc", { t: OWN_BUILD, au: SAMPLE_ME, cls: myCls, own: true });
+  const chars = readCharacters(settings);
+  const faction = chars.find((c) => c.id === activeId(settings, chars))?.faction;
+  const [src, setSrc] = useMem<BuildSrc>("bSrc", { t: OWN_BUILD, au: name, cls: myCls, own: true });
   // Your own build follows the active character: switching character re-targets it.
   useEffect(() => {
     if (src.own && !src.isNew && src.cls !== myCls) setSrc({ ...src, cls: myCls });
@@ -134,21 +128,24 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   const isMine = src.own && !isNew && myBuilds.some((x) => x.t === src.t);
   // The name Save would give it; titles are keys (gear, likes), so no two builds share one.
   const typed = (isNew ? newName || t("characters.builder.newBuild") : nameField).trim();
-  const nameTaken = typed !== src.t && (typed === OWN_BUILD || SAMPLE_BUILDS.some((x) => x.t === typed) || myBuilds.some((x) => x.t === typed));
+  const nameTaken = typed !== src.t && (typed === OWN_BUILD || myBuilds.some((x) => x.t === typed));
   const badName = (isNew || isMine) && (!typed || nameTaken);
   const tgt = view === "target";
   const [, clsCol] = CLASSES[src.cls];
-  const title = isNew ? newName || t("characters.builder.newBuild") : src.t;
+  // Your builds of the active character's class, the default one first (the "my builds" menu).
+  const ownList: BuildSrc[] = [{ t: OWN_BUILD, au: name, cls: myCls, own: true }, ...myBuilds.filter((x) => x.cls === myCls)];
+  const ownIdx = src.own && !isNew ? ownList.findIndex((x) => x.t === src.t) : -1;
+  const titleOf = (b: string) => (b === OWN_BUILD ? t("characters.builder.defaultBuild") : b);
+  const title = isNew ? newName || t("characters.builder.newBuild") : titleOf(src.t);
   const crumb = t("shell.crumb.builder");
   useEffect(() => setHeader({ title, crumb }), [setHeader, title, crumb]);
 
   // Equipment: owned and target per build and class, saved in settings; a
-  // build never edited shows the class's default kit, a new one starts empty.
+  // build never edited (or new) starts empty.
   const ready = useGearData(); // equip.json: stats, sockets, enhancement levels
   const gearKey = keyOf(src.t, src.cls);
   const saved = stored[gearKey];
-  const defaults = useMemo(() => buildGear({}, src.t, src.cls), [src.cls, ready]); // eslint-disable-line react-hooks/exhaustive-deps
-  const g: BuildGear = isNew ? newGear : (saved ?? defaults);
+  const g: BuildGear = isNew ? newGear : (saved ?? EMPTY_GEAR);
   const storeGear = (key: string, next: BuildGear) => {
     const all = { ...stored, [key]: next };
     setStored(all);
@@ -169,7 +166,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   };
 
   // Slots (pBuilder.slots + pX.slotGroups): dashed in the target view = not owned yet.
-  const slots = SAMPLE_SLOTS.map(([id, label]) => {
+  const slots = SLOTS.map(([id, label]) => {
     const p = gear[id];
     const item = itemById(p?.id);
     const want = itemById(g.target[id]?.id);
@@ -259,19 +256,20 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
 
   // Every slot not covered by the owned gear: the target item not owned yet, or
   // an empty slot with no target (then there is no source to point to).
+  // Source: the crafting recipe that makes the item (db recipes); no drop/shop tables yet, so blank otherwise.
+  const recipes = useDb(["recipes"]);
   const missing = missingSlots(g).map((id) => {
-    const [, label] = SAMPLE_SLOTS.find((x) => x[0] === id)!;
+    const [, label] = SLOTS.find((x) => x[0] === id)!;
     const want = itemById(g.target[id]?.id);
-    const [kind, where] = sourceOf(id);
+    const recipe = want && recipes?.find((r) => r.out?.[0] === want.id);
     return {
       id,
       label,
       have: itemById(g.owned[id]?.id)?.name ?? "—",
       want,
       col: want ? RARITY[rarityOf(want)] : "var(--pm-t3)",
-      kind,
-      src: !want ? "" : kind === "shop" ? t("characters.builder.shopSrc", { n: n(Number(where)) }) : where || "Drop",
-      where,
+      kind: recipe ? ("craft" as const) : undefined,
+      src: recipe ? [term(recipe.cat), recipe.lv && `Lv ${recipe.lv}`].filter(Boolean).join(" · ") : "",
     };
   });
   const statDiff = [...new Set([...Object.keys(ownedF), ...Object.keys(targetF)])]
@@ -289,7 +287,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
 
   // Widget: hand the build to the meter's Build mode (pmWidget.js reads it) and
   // show the meter. Every slot counts: owned = slots whose piece is in hand.
-  const total = SAMPLE_SLOTS.length;
+  const total = SLOTS.length;
   const widgetJson = JSON.stringify({
     key: gearKey,
     character: name,
@@ -301,7 +299,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
     total,
     progress: (total - missing.length) / total,
     // [short label, rarity, enhancement, owned, target item when missing, icon URL]
-    slots: SAMPLE_SLOTS.map(([id, label]) => {
+    slots: SLOTS.map(([id, label]) => {
       const x = slots.find((y) => y.id === id)!;
       const mine = itemById(g.owned[id]?.id);
       const want = itemById(g.target[id]?.id);
@@ -312,7 +310,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
       item: m.want?.name ?? `${m.label} · ${t("characters.builder.noTarget")}`,
       rarity: rarityOf(m.want),
       icon: m.want ? iconUrl(m.want.icon) : "",
-      source: { kind: m.kind, text: !m.want ? "—" : m.kind === "shop" ? `${n(Number(m.where))} Abyss Points` : m.where || "—" },
+      source: { kind: m.kind, text: m.src || "—" },
     })),
     stats: Object.entries(ownedStats)
       .slice(0, 6)
@@ -337,9 +335,10 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
     // Only a build of the active character's class can become one of yours.
     if (src.cls !== myCls) return setNoClone(true);
     showToast({ title: t("characters.builder.clonedTitle"), text: t("characters.builder.clonedText") });
-    const copy = (src.t.endsWith(copySuffix) ? src.t.slice(0, -copySuffix.length) : src.t) + copySuffix;
+    const base = titleOf(src.t);
+    const copy = (base.endsWith(copySuffix) ? base.slice(0, -copySuffix.length) : base) + copySuffix;
     storeGear(`${copy}|${src.cls}`, g);
-    const mine = { t: copy, au: SAMPLE_ME, cls: src.cls, own: true, tags: src.tags };
+    const mine = { t: copy, au: name, cls: src.cls, own: true, tags: src.tags };
     addMine(mine);
     setSrc(mine);
   };
@@ -352,7 +351,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
     );
     if (isNew) {
       storeGear(keyOf(typed, src.cls), newGear);
-      const mine = { t: typed, au: SAMPLE_ME, cls: src.cls, own: true, tags: newTags };
+      const mine = { t: typed, au: name, cls: src.cls, own: true, tags: newTags };
       addMine(mine);
       setSrc(mine);
     } else if (isMine && typed !== src.t) {
@@ -619,22 +618,39 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
                   )}
                 </button>
                 <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>
-                  {src.own ? name : t("characters.builder.by", { au: src.au })} · {src.cls} ·{" "}
-                  <span style={{ color: "#F4C77A", display: "inline-flex", alignItems: "center", gap: 3, verticalAlign: -3 }}>
-                    <img src={art("asmodian")} alt="" style={{ width: 14, height: 14 }} />
-                    Asmodian
-                  </span>{" "}
-                  · {t("characters.builder.buildOf", { i: 1, n: 2 })}
+                  {src.own ? name : t("characters.builder.by", { au: src.au })} · {src.cls}
+                  {src.own && faction && (
+                    <>
+                      {" · "}
+                      <FactionTag faction={faction} label={t(`collections.${faction}`)} />
+                    </>
+                  )}
+                  {ownIdx >= 0 && ` · ${t("characters.builder.buildOf", { i: ownIdx + 1, n: ownList.length })}`}
                 </div>
                 {bOpen && (
                   <div className="chPop" style={{ left: 0, top: 52, zIndex: 6, width: 280, padding: 6, gap: 4 }}>
-                    {SAMPLE_MY_BUILDS.map((mb) => (
-                      <button key={mb.n} type="button" className="chBtnReset chMyBuild" style={{ borderColor: mb.on ? "var(--pm-red)" : undefined }} onClick={() => setBOpen(false)}>
-                        <span style={{ fontSize: 12, fontWeight: 500 }}>{mb.n}</span>
+                    {ownList.map((mb) => (
+                      <button
+                        key={mb.t}
+                        type="button"
+                        className="chBtnReset chMyBuild"
+                        aria-current={mb.t === src.t && !isNew ? "true" : undefined}
+                        style={{ borderColor: mb.t === src.t && !isNew ? "var(--pm-red)" : undefined }}
+                        onClick={() => {
+                          setBOpen(false);
+                          setSrc(mb);
+                          setMode("dummy");
+                          setCur("mh");
+                        }}
+                      >
+                        <span style={{ fontSize: 12, fontWeight: 500 }}>{titleOf(mb.t)}</span>
+                        {/* The build's first owned pieces, by rarity. */}
                         <span style={{ display: "flex", gap: 3 }}>
-                          {MY_BUILD_ICONS.map((r, i) => (
-                            <span key={i} style={{ width: 16, height: 16, borderRadius: 3, border: `1.5px solid ${RARITY[r]}` }} />
-                          ))}
+                          {Object.values(stored[keyOf(mb.t, mb.cls)]?.owned ?? {})
+                            .slice(0, 5)
+                            .map((p, i) => (
+                              <span key={i} style={{ width: 16, height: 16, borderRadius: 3, border: `1.5px solid ${RARITY[rarityOf(itemById(p.id))] ?? "var(--pm-grey)"}` }} />
+                            ))}
                         </span>
                       </button>
                     ))}
@@ -645,7 +661,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
                       onClick={() => {
                         // Same reset as "Crea build" (openBuild), applied in place.
                         setBOpen(false);
-                        setSrc({ t: "", au: SAMPLE_ME, cls: myCls, own: true, isNew: true });
+                        setSrc({ t: "", au: name, cls: myCls, own: true, isNew: true });
                         setNewName("");
                         setNewTags([]);
                         setMode("dummy");
@@ -743,7 +759,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
             <div style={{ background: "var(--pm-s1)", border: "1px solid var(--pm-line)", borderRadius: 8, minWidth: 0, display: "flex", position: "sticky", top: 0 }}>
               <div role="tablist" aria-orientation="vertical" style={{ width: 48, flex: "none", borderRight: "1px solid var(--pm-line)", display: "flex", flexDirection: "column", gap: 4, padding: "8px 6px" }}>
                 {TABS.map(([id, Icon]) => {
-                  const label = t(`characters.builder.tab.${id}`, { n: SAMPLE_COMMENTS.length });
+                  const label = t(`characters.builder.tab.${id}`, { n: 0 });
                   return (
                     <button key={id} type="button" role="tab" aria-selected={tab === id} className="chRailBtn" title={label} aria-label={label} onClick={() => setTab(id)}>
                       <Icon aria-hidden="true" />
@@ -1021,23 +1037,11 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
                 )}
                 {tab === "comm" && (
                   <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
-                    {SAMPLE_COMMENTS.map(([au, when, text]) => (
-                      <div key={au} style={{ display: "flex", gap: 10 }}>
-                        <span style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--pm-s3)", flex: "none" }} />
-                        <div>
-                          <div style={{ fontSize: 12 }}>
-                            <b style={{ fontWeight: 500 }}>{au}</b> <span style={{ color: "var(--pm-t3)" }}>· {ago(lang, when)}</span>
-                          </div>
-                          <div style={{ fontSize: 13, color: "var(--pm-t2)" }}>{text}</div>
-                        </div>
-                      </div>
-                    ))}
-                    <input
-                      className="input"
-                      placeholder={t("characters.builder.commentPlaceholder")}
-                      aria-label={t("characters.builder.commentPlaceholder")}
-                      style={{ background: "var(--pm-s2)" }}
-                    />
+                    {/* Comments need the server (shared builds): visible empty state until then. */}
+                    <div style={{ padding: "24px 0", color: "var(--pm-t2)", fontSize: 13 }}>
+                      <div style={{ fontSize: 14, color: "var(--pm-t1)", marginBottom: 4 }}>{t("characters.builder.commentsEmptyTitle")}</div>
+                      {t("characters.builder.commentsEmptyText")}
+                    </div>
                   </div>
                 )}
               </fieldset>

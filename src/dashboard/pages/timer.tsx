@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { BellIcon, DiscordLogoIcon, PlusIcon } from "@phosphor-icons/react";
 import { REGIONS } from "../Onboarding";
-import { SAMPLE_ORG_TIMERS } from "../sample/organizer";
 import type { T } from "../i18n";
 import { nextDailyReset, nextWeeklyReset } from "./organizer/resets";
 import "./organizer/organizer.css";
@@ -17,10 +16,9 @@ function countdown(s: number, t: T) {
   return d ? `${t("home.days", { n: d })} ${hms}` : hms;
 }
 
-/** Prototype pg.timer. The two resets are real; the rest is sample data. */
+/** Prototype pg.timer: the two resets (custom timers wait for R5 storage). */
 export default function Timer({ t, settings }: PageProps) {
-  const [opened] = useState(Date.now);
-  const [now, setNow] = useState(opened);
+  const [now, setNow] = useState(Date.now);
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
@@ -28,12 +26,9 @@ export default function Timer({ t, settings }: PageProps) {
 
   const region = (REGIONS.find((r) => r.value === settings["pm.region"]) ?? REGIONS[0]).label;
   const left = (to: Date) => Math.max(0, Math.round((to.getTime() - now) / 1000));
-  const elapsed = Math.floor((now - opened) / 1000);
   const timers = [
     { name: t("organizer.dailyReset"), sub: t("organizer.dailyResetSub", { region }), left: left(nextDailyReset(new Date(now))), period: DAY, win: true, discord: false },
     { name: t("organizer.weeklyReset"), sub: t("organizer.weeklyResetSub"), left: left(nextWeeklyReset(new Date(now))), period: 7 * DAY, win: true, discord: true },
-    // Sample timers restart when they run out, like a repeating timer would.
-    ...SAMPLE_ORG_TIMERS.map((x) => ({ ...x, left: (((x.left - elapsed) % x.period) + x.period) % x.period })),
   ];
 
   return (

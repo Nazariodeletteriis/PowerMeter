@@ -50,7 +50,6 @@
   "characters.builder.namePlaceholder": "Nome della build",
   "characters.builder.missingN": "Pezzi mancanti: {n}",
   "characters.builder.goToSource": "Vai alla fonte",
-  "characters.builder.shopSrc": "Negozio · {n} Abyss Points",
   "characters.builder.readOnly": "Sola lettura",
   "characters.builder.by": "di {au}",
   "characters.builder.buildOf": "build {i} di {n}",
@@ -83,7 +82,6 @@
   "characters.builder.openSkillPlanner": "Apri nello Skill Planner",
   "characters.builder.openDaevanion": "Apri nel Daevanion Planner",
   "characters.builder.descPlaceholder": "Descrivi la build: rotazione, priorità delle statistiche, varianti…",
-  "characters.builder.commentPlaceholder": "Scrivi un commento…",
   "characters.builder.copySuffix": " (copia)",
   "characters.builder.clonedTitle": "Build clonata",
   "characters.builder.clonedText": "Ora è tra le tue build: puoi modificarla.",
@@ -180,5 +178,12 @@
   "characters.builds.edit": "Modifica",
   "characters.builder.editTitle": "La tua build",
   "characters.builder.editText": "Rinominala e premi Salva. Le modifiche all'equipaggiamento si salvano subito.",
-  "characters.builder.nameTaken": "Esiste già una build con questo nome."
+  "characters.builder.nameTaken": "Esiste già una build con questo nome.",
+  "characters.builds.noneTitle": "Nessuna build ancora",
+  "characters.builds.noneText": "Crea la tua prima build o clonane una nel Character Builder.",
+  "characters.builds.communityTitle": "Build della community",
+  "characters.builds.communityText": "Le build condivise dagli altri giocatori arriveranno con la condivisione online. Per ora qui trovi solo le tue.",
+  "characters.builder.defaultBuild": "Build principale",
+  "characters.builder.commentsEmptyTitle": "Ancora nessun commento",
+  "characters.builder.commentsEmptyText": "I commenti saranno disponibili con la condivisione online delle build."
 }

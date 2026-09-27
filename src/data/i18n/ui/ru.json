@@ -408,14 +408,18 @@
         "drop": "Дроп",
         "craft": "Крафт",
         "shop": "Магазин"
-      }
+      },
+      "emptyTitle": "Сборка не выбрана",
+      "emptyHint": "В панели откройте сборку в Character Builder и покажите её в виджете."
     },
     "lobby": {
       "ready": "{n}/{total} готовы",
       "player": "Игрок",
       "status": "Статус",
       "notReady": "Не готов",
-      "gsTip": "Gear score"
+      "gsTip": "Gear score",
+      "emptyTitle": "Нет данных группы",
+      "emptyHint": "Состав группы появится здесь, когда метр сможет его считывать."
     },
     "updateAvailable": "Доступно обновление",
     "updateNotes": "Примечания к выпуску",

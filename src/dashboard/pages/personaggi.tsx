@@ -1,9 +1,9 @@
 import { useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { CopyIcon, DownloadSimpleIcon, PlusIcon, TrashIcon, UploadSimpleIcon } from "@phosphor-icons/react";
-import { activate, activeId, newId, readCharacters, saveCharacters, type Character } from "../characters";
+import { activate, activeId, FACTIONS, newId, readCharacters, saveCharacters, type Character, type Faction } from "../characters";
 import { REGIONS } from "../Onboarding";
-import { ClassAvatar, fmt, RELEASED_CLASSES as CLASS_OPTIONS } from "../ui";
+import { ClassAvatar, FactionTag, fmt, RELEASED_CLASSES as CLASS_OPTIONS } from "../ui";
 import type { PageProps } from "./types";
 
 const NAME_MAX_LENGTH = 32;
@@ -18,6 +18,7 @@ function parse(x: unknown): Character | null {
     name: c.name.trim().slice(0, NAME_MAX_LENGTH),
     cls: c.cls,
     region: typeof c.region === "string" && REGIONS.some((r) => r.value === c.region) ? c.region : REGIONS[0].value,
+    faction: FACTIONS.includes(c.faction as Faction) ? c.faction : undefined,
     level: typeof c.level === "number" ? c.level : undefined,
     cp: typeof c.cp === "number" ? c.cp : undefined,
   };
@@ -26,8 +27,9 @@ function parse(x: unknown): Character | null {
 export default function Personaggi({ t, lang, settings, save, run }: PageProps) {
   const list = readCharacters(settings);
   const active = activeId(settings, list);
+  const factionName = (f: string) => t(`collections.${f}`);
   const [adding, setAdding] = useState(false);
-  const [draft, setDraft] = useState({ name: "", cls: settings["pm.class"] || CLASS_OPTIONS[0], region: settings["pm.region"] || REGIONS[0].value, level: "" });
+  const [draft, setDraft] = useState({ name: "", cls: settings["pm.class"] || CLASS_OPTIONS[0], region: settings["pm.region"] || REGIONS[0].value, faction: "" as Faction | "", level: "" });
   const file = useRef<HTMLInputElement>(null);
 
   const store = (next: Character[]) => run(() => saveCharacters(save, next));
@@ -36,15 +38,18 @@ export default function Personaggi({ t, lang, settings, save, run }: PageProps) 
     const name = draft.name.trim();
     if (!name) return;
     const level = Number(draft.level);
-    const c: Character = { id: newId(), name, cls: draft.cls, region: draft.region, level: level > 0 ? level : undefined };
+    if (!name || !draft.faction) return;
+    const c: Character = { id: newId(), name, cls: draft.cls, region: draft.region, faction: draft.faction, level: level > 0 ? level : undefined };
     run(async () => {
       await saveCharacters(save, [...list, c]);
       // The first character becomes active on its own.
       if (!list.length) await activate(save, c);
     });
-    setDraft({ ...draft, name: "", level: "" });
+    setDraft({ ...draft, name: "", faction: "", level: "" });
     setAdding(false);
   };
+
+  const setFaction = (c: Character, faction: Faction) => store(list.map((x) => (x.id === c.id ? { ...x, faction } : x)));
 
   const remove = (c: Character) => {
     if (!window.confirm(t("roster.deleteConfirm", { name: c.name }))) return;
@@ -133,6 +138,19 @@ export default function Personaggi({ t, lang, settings, save, run }: PageProps) 
               ))}
             </select>
           </label>
+          <label className="field" style={{ flex: "1 1 120px" }}>
+            {t("roster.faction")}
+            <select className="input" required value={draft.faction} onChange={(e) => setDraft({ ...draft, faction: e.target.value as Faction })}>
+              <option value="" disabled>
+                {t("roster.pickFaction")}
+              </option>
+              {FACTIONS.map((f) => (
+                <option key={f} value={f}>
+                  {factionName(f)}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="field" style={{ flex: "0 1 90px" }}>
             {t("roster.level")}
             <input className="input" type="number" min={1} max={99} value={draft.level} onChange={(e) => setDraft({ ...draft, level: e.target.value })} />
@@ -173,6 +191,28 @@ export default function Personaggi({ t, lang, settings, save, run }: PageProps) 
                   <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>
                     {[c.cls, c.level && `Lv ${c.level}`, regionLabel(c.region)].filter(Boolean).join(" · ")}
                   </div>
+                  {c.faction ? (
+                    <div style={{ fontSize: 11, marginTop: 3 }}>
+                      <FactionTag faction={c.faction} label={factionName(c.faction)} size={12} />
+                    </div>
+                  ) : (
+                    <select
+                      className="input"
+                      aria-label={t("roster.faction")}
+                      value=""
+                      style={{ marginTop: 4, height: 26, fontSize: 11, padding: "0 6px", borderColor: "var(--pm-red)" }}
+                      onChange={(e) => setFaction(c, e.target.value as Faction)}
+                    >
+                      <option value="" disabled>
+                        {t("roster.pickFaction")}
+                      </option>
+                      {FACTIONS.map((f) => (
+                        <option key={f} value={f}>
+                          {factionName(f)}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
                 {isActive && <span className="chActiveTag">{t("characters.active")}</span>}
               </div>
