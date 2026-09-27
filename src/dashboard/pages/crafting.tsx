@@ -85,8 +85,9 @@ export default function Crafting({ t, lang, settings, save, go, onError, setHead
   const sel = pick && (pick.race === race ? pick : list.find((r) => r.name === pick.name));
   const tree = sel && ix && buildTree(sel, count, ix, chances, have, !!saved.exp);
   const sum = tree && ix && totals(tree, ix);
+  // From the tree without owned parts: an owned tier must not cut the chain.
   const chain: Node[] = [];
-  for (let n = tree; n; n = n.kids.find((k) => k.recipe && GEAR.includes(itemById.get(k.id)?.cat ?? ""))) chain.unshift(n);
+  for (let n = sel && ix && buildTree(sel, 1, ix, chances, {}, false); n; n = n.kids.find((k) => k.recipe && GEAR.includes(itemById.get(k.id)?.cat ?? ""))) chain.unshift(n);
 
   const setHave = (id: string, v: string) => {
     const next = { ...have };

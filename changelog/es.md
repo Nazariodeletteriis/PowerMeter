@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.14
+
+- Nuevo: pestaña PvE en el medidor para farmear mobs. El daño se suma sobre todos los mobs que golpeas, incluso después de morir, y se reinicia tras 5 minutos sin golpear mobs, al cambiar de zona o con Reiniciar.
+- Nuevo: Jefe, PvE, Train y PvP están separados: cada golpe cuenta solo en la pestaña de su tipo de objetivo. El widget muestra siempre lo que está registrando (tipo y nombre del objetivo), y los combates guardados van a su pestaña, con un filtro por modo en el Historial.
+- Nuevo: Curación recibida por jugador (propia y de otros) y Aggro (golpes recibidos de los mobs; Templario y Gladiador marcados como TANK; una estimación, indicada como tal, hasta que los mobs golpeen a alguien).
+- Nuevo: Artesanía: todos los objetos fabricables con las armas primero, la cadena de mejora del primer al último nivel, el árbol de recetas y los materiales para la cantidad que elijas con Tienes y Faltan, guardados.
+- Cambiado: el daño se muestra completo en todas partes (widget, ventana de detalles, medidor e informe del panel), sin redondeo K/M.
+- Corregido: el medidor ya no deja de contar cuando un mob se mueve (se tomaba por un jugador), y la pestaña Jefe solo muestra jefes.
+- Corregido: bloquear el widget ya no vacía la lista de jugadores; Build y Lobby siguen visibles al bloquear.
+- Corregido: el widget muestra los iconos de la build guardada, incluso después de crearla o renombrarla.
+- Corregido: Subir en el widget sube el combate recién terminado, pide iniciar sesión con Discord si hace falta y avisa cuando un combate de entrenamiento no se puede subir.
+
 ## 0.2.13
 
 - Nuevo: los personajes tienen una facción (Elyos o Asmodian). Elígela al añadir un personaje, o en la tarjeta de uno existente; aparece en Inicio y en el Character Builder.

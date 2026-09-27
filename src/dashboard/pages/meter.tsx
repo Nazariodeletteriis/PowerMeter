@@ -131,6 +131,7 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
               aria-pressed={(data?.targetMode ?? mode) === id}
               onClick={() => {
                 setMode(id);
+                history.current.clear();
                 setData((d) => d && { ...d, targetMode: id });
                 run(() => invoke("set_target_mode", { mode: id }));
               }}

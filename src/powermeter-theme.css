@@ -816,6 +816,8 @@ body.legacyUi .pmOnly {
   .meter.pmMode-dps:is(.pmView-waiting, .pmView-error, .pmView-ended) :is(.header .bossNames, .bossHpBar, .list, .meterFooter) {
     display: none;
   }
+  /* An empty mode still shows what the engine is recording and the mode button, to switch to it. */
+  .meter.pmMode-dps.pmView-waiting .header .bossNames { display: flex; }
   .meter.pmMode-dps.pmView-waiting { min-height: 220px; }
   .meter.pmMode-dps.pmView-waiting .pmEmpty {
     display: flex;
@@ -1374,6 +1376,8 @@ body.legacyUi .pmOnly {
      dismissed the fight-over card, so a locked widget always keeps its rows. */
   .meter.isPmLocked.pmMode-dps:is(.pmView-waiting, .pmView-error, .pmView-ended, .isPmDetail) .list { display: grid; }
   /* Same for the Build and Lobby cards: locked keeps the mode's own card. */
+  .meter.isPmLocked.pmMode-dps.pmView-ended .pmEnd { display: none; }
+  .meter.isPmLocked.pmMode-dps:is(.pmView-waiting, .pmView-ended) { min-height: 0; }
   .meter.isPmLocked.pmMode-build .pmBuild { display: flex; }
   .meter.isPmLocked.pmMode-lobby .pmLobby { display: block; }
 

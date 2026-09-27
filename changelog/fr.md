@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.14
+
+- Nouveau : onglet PvE dans le meter pour le farm de mobs. Les dégâts s'additionnent sur tous les mobs touchés, même après leur mort, et se remettent à zéro après 5 minutes sans toucher de mob, au changement de zone ou avec Réinitialiser.
+- Nouveau : Boss, PvE, Train et PvP sont séparés : chaque coup ne compte que dans l'onglet de son type de cible. Le widget affiche toujours ce qu'il enregistre (type et nom de la cible), et les combats enregistrés vont dans leur onglet, avec un filtre par mode dans l'Historique.
+- Nouveau : Soins reçus par joueur (les siens et ceux des autres) et Aggro (coups reçus des mobs ; Templier et Gladiateur marqués TANK ; une estimation, indiquée comme telle, tant que les mobs n'ont touché personne).
+- Nouveau : Artisanat : tous les objets fabricables avec les armes en premier, la chaîne d'amélioration du premier au dernier palier, l'arbre des recettes et les matériaux pour la quantité choisie avec Possédés et Manquants, enregistrés.
+- Modifié : les dégâts sont affichés en entier partout (widget, fenêtre de détails, meter et rapport du tableau de bord), plus d'arrondi K/M.
+- Corrigé : le meter ne s'arrête plus de compter quand un mob se déplace (il était pris pour un joueur), et l'onglet Boss n'affiche que les boss.
+- Corrigé : verrouiller le widget ne vide plus la liste des joueurs ; Build et Lobby restent visibles une fois verrouillé.
+- Corrigé : le widget affiche les icônes du build enregistré, même après l'avoir créé ou renommé.
+- Corrigé : Envoyer dans le widget envoie le combat qui vient de se terminer, demande de se connecter avec Discord si besoin et prévient quand un combat d'entraînement ne peut pas être envoyé.
+
 ## 0.2.13
 
 - Nouveau : les personnages ont une faction (Elyséen ou Asmodien). Choisissez-la en ajoutant un personnage, ou sur la carte d'un personnage existant ; elle apparaît sur l'Accueil et dans le Character Builder.

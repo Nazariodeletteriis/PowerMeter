@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.14
+
+- Neu: PvE-Tab im Meter für das Farmen von Mobs. Der Schaden summiert sich über alle getroffenen Mobs, auch nach ihrem Tod, und wird nach 5 Minuten ohne Mob-Treffer, beim Zonenwechsel oder mit Zurücksetzen gelöscht.
+- Neu: Boss, PvE, Train und PvP sind getrennt: jeder Treffer zählt nur im Tab seines Zieltyps. Das Widget zeigt immer, was es aufzeichnet (Typ und Zielname), und gespeicherte Kämpfe landen in ihrem Tab, mit einem Modusfilter im Kampfverlauf.
+- Neu: Erhaltene Heilung pro Spieler (eigene und von anderen) und Aggro (von Mobs erlittene Treffer; Templer und Gladiator als TANK markiert; eine als solche gekennzeichnete Schätzung, bis Mobs jemanden getroffen haben).
+- Neu: Handwerk: alle herstellbaren Gegenstände mit Waffen zuerst, die Aufwertungskette von der ersten bis zur letzten Stufe, der Rezeptbaum und die Materialien für die gewählte Menge mit Vorhanden und Fehlend, gespeichert.
+- Geändert: Schaden wird überall vollständig angezeigt (Widget, Detailfenster, Meter und Bericht im Dashboard), keine K/M-Rundung mehr.
+- Behoben: Das Meter hört nicht mehr auf zu zählen, wenn sich ein Mob bewegt (er wurde für einen Spieler gehalten), und der Boss-Tab zeigt nur Bosse.
+- Behoben: Das Sperren des Widgets leert die Spielerliste nicht mehr; Build und Lobby bleiben im gesperrten Zustand sichtbar.
+- Behoben: Das Widget zeigt die Symbole des gespeicherten Builds, auch nach dem Erstellen oder Umbenennen.
+- Behoben: Hochladen im Widget lädt den gerade beendeten Kampf hoch, bittet bei Bedarf um Anmeldung mit Discord und meldet, wenn ein Trainingskampf nicht hochgeladen werden kann.
+
 ## 0.2.13
 
 - Neu: Charaktere haben eine Fraktion (Elyos oder Asmodier). Wähle sie beim Hinzufügen eines Charakters oder auf der Karte eines bestehenden; sie erscheint auf der Startseite und im Character Builder.

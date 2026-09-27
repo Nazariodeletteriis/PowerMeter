@@ -4,6 +4,18 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.2.14
+
+- New: PvE tab in the meter for mob farming. Damage adds up over every mob you hit, even after it dies, and resets after 5 minutes without hitting mobs, on a zone change or with Reset.
+- New: Boss, PvE, Train and PvP are separate: each hit counts only in the tab of its target type. The widget always shows what it is recording (type and target name), and saved fights go into their tab, with a mode filter in Fight history.
+- New: Healing received per player (own and from others) and Aggro (hits taken from mobs; Templar and Gladiator marked as TANK; an estimate, labelled as such, until mobs have hit anyone).
+- New: Crafting: every craftable item with weapons first, the upgrade chain from the first tier to the last, the recipe tree, and the materials for the quantity you choose with Have and Missing, saved.
+- Changed: damage is shown in full everywhere (widget, details window, dashboard meter and report), no more K/M rounding.
+- Fixed: the meter no longer stops counting when a mob moves (it was taken for a player), and the Boss tab only shows bosses.
+- Fixed: locking the widget no longer empties the player list; Build and Lobby stay visible when locked.
+- Fixed: the widget shows the icons of the saved build, even after creating or renaming it.
+- Fixed: Upload in the widget uploads the fight that just ended, asks you to sign in with Discord if needed and says when a training fight can't be uploaded.
+
 ## 0.2.13
 
 - New: characters have a faction (Elyos or Asmodian). Choose it when you add a character, or on the card of an existing one; it shows on Home and in the Character Builder.

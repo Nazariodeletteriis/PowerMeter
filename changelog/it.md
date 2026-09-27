@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.14
+
+- Nuovo: tab PvE nel meter per il farming dei mob. Il danno si somma su tutti i mob che colpisci, anche dopo che muoiono, e si azzera dopo 5 minuti senza colpire mob, al cambio zona o con Reset.
+- Nuovo: Boss, PvE, Train e PvP sono separati: ogni colpo conta solo nella tab del tipo di bersaglio. Il widget mostra sempre cosa sta registrando (tipo e nome del bersaglio), e i combattimenti salvati finiscono nella loro tab, con un filtro per modalità nello Storico.
+- Nuovo: Cure ricevute per giocatore (proprie e da altri) e Aggro (colpi subiti dai mob; Templar e Gladiator segnati come TANK; una stima, indicata come tale, finché i mob non hanno colpito nessuno).
+- Nuovo: Crafting: tutti gli oggetti craftabili con le armi in cima, la catena di upgrade dal primo all'ultimo tier, l'albero delle ricette e i materiali per la quantità che scegli, con Hai e Mancano, salvati.
+- Cambiato: il danno è mostrato per intero ovunque (widget, finestra dettagli, meter e report della dashboard), niente più arrotondamenti K/M.
+- Corretto: il meter non smette più di contare quando un mob si muove (veniva scambiato per un giocatore), e la tab Boss mostra solo i boss.
+- Corretto: bloccare il widget non svuota più la lista dei giocatori; Build e Lobby restano visibili da bloccato.
+- Corretto: il widget mostra le icone della build salvata, anche dopo averla creata o rinominata.
+- Corretto: Carica nel widget carica il combattimento appena finito, chiede di accedere con Discord se serve e avvisa quando un combattimento di allenamento non si può caricare.
+
 ## 0.2.13
 
 - Nuovo: i personaggi hanno una fazione (Elyos o Asmodian). Si sceglie quando aggiungi un personaggio, o sulla scheda di uno esistente; compare nella Home e nel Character Builder.

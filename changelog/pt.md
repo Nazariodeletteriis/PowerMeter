@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.2.14
+
+- Novo: separador PvE no medidor para farm de mobs. O dano soma-se em todos os mobs que atinge, mesmo depois de morrerem, e reinicia após 5 minutos sem atingir mobs, ao mudar de zona ou com Repor.
+- Novo: Chefe, PvE, Train e PvP estão separados: cada golpe conta só no separador do seu tipo de alvo. O widget mostra sempre o que está a registar (tipo e nome do alvo), e os combates guardados vão para o seu separador, com um filtro por modo no Histórico.
+- Novo: Cura recebida por jogador (própria e de outros) e Aggro (golpes recebidos dos mobs; Templário e Gladiador marcados como TANK; uma estimativa, indicada como tal, até os mobs atingirem alguém).
+- Novo: Criação: todos os itens criáveis com as armas primeiro, a cadeia de melhoria do primeiro ao último nível, a árvore de receitas e os materiais para a quantidade escolhida com Tens e Faltam, guardados.
+- Alterado: o dano é mostrado por inteiro em todo o lado (widget, janela de detalhes, medidor e relatório do painel), sem arredondamento K/M.
+- Corrigido: o medidor já não para de contar quando um mob se move (era tomado por um jogador), e o separador Chefe mostra só chefes.
+- Corrigido: bloquear o widget já não esvazia a lista de jogadores; Build e Lobby continuam visíveis quando bloqueado.
+- Corrigido: o widget mostra os ícones da build guardada, mesmo depois de a criar ou renomear.
+- Corrigido: Enviar no widget envia o combate que acabou de terminar, pede para entrar com o Discord se necessário e avisa quando um combate de treino não pode ser enviado.
+
 ## 0.2.13
 
 - Novo: os personagens têm uma facção (Elyos ou Asmodian). Escolha-a ao adicionar um personagem, ou no cartão de um existente; aparece no Início e no Character Builder.

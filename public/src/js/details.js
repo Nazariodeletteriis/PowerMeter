@@ -63,7 +63,7 @@ const createDetailsUI = ({
   // Exact damage, with the locale's thousands separators (no k/m rounding).
   const formatDamageCompact = (v) => {
     const n = Number(v);
-    return Number.isFinite(n) ? Math.round(n).toLocaleString() : "-";
+    return Number.isFinite(n) ? Math.round(n).toLocaleString(window.i18n?.getLanguage?.() || undefined) : "-";
   };
   const formatMinutesSince = (timestampMs) => {
     const ts = Number(timestampMs);
