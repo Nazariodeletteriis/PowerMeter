@@ -3,6 +3,10 @@
 Every release needs a `## <version>` section here: CI copies its bullet points into the
 GitHub release and into the in-app update window, and refuses to publish without it.
 
+## 0.2.3
+
+- Fixed: the update notice now also appears while the dashboard stays open (checks every 30 minutes and when you switch back to it).
+
 ## 0.2.2
 
 - New: the dashboard opens on every launch, next to the meter.

@@ -24,16 +24,27 @@ export function TitleBar({ t, lang, onError }: { t: T; lang: string; onError: (e
   const [banner, setBanner] = useState(true);
   const [notes, setNotes] = useState(false);
   useEffect(() => {
-    invoke<string>("get_app_version").then((current) => {
-      setVersion(current);
-      // No release yet, offline or a bad manifest: no banner and no error.
+    let current = "";
+    // No release yet, offline or a bad manifest: no banner and no error.
+    const check = () =>
+      current &&
       invoke<string>("fetch_url", { url: MANIFEST })
         .then((raw) => {
           const latest = JSON.parse(raw) as UpdateInfo;
           if (newer(latest.version, current)) setUpdate(latest);
         })
         .catch(() => {});
+    invoke<string>("get_app_version").then((v) => {
+      setVersion((current = v));
+      check();
     }, onError);
+    // The dashboard stays open for hours: check again periodically and when it regains focus.
+    const timer = setInterval(check, 30 * 60_000);
+    window.addEventListener("focus", check);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", check);
+    };
   }, [onError]);
 
   const win = getCurrentWindow();
