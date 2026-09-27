@@ -68,18 +68,20 @@ export function rank(rows: Omit<Row, "pos" | "pct" | "barW" | "hits">[]): Row[] 
     .map((r, k) => ({ ...r, pos: k + 1, pct: (r.dmg / tot) * 100, barW: (r.dps / max) * 100, hits: Math.round(r.dmg / 13400) }));
 }
 
-/** Prototype pMeter series: 60 samples per player, with the phase-2 dip and Vharok's death. */
+/** Prototype pMeter series: 60 DPS samples of one player, with the phase-2 dip and Vharok's death. */
+export function samplePoints(p: Pick<Row, "n" | "i" | "dps">) {
+  const pts: number[] = [];
+  for (let k = 0; k < 60; k++) {
+    let v = p.dps * (0.8 + 0.18 * Math.sin(k * 0.35 + p.i * 1.7) + 0.1 * Math.sin(k * 1.3 + p.i));
+    if (k >= 30 && k <= 33) v *= 0.25;
+    if (p.n === "Vharok" && k >= 41 && k <= 45) v = 0;
+    pts.push(v);
+  }
+  return pts;
+}
+
 export function sampleSeries(rows: Row[]) {
-  return rows.map((p) => {
-    const pts: number[] = [];
-    for (let k = 0; k < 60; k++) {
-      let v = p.dps * (0.8 + 0.18 * Math.sin(k * 0.35 + p.i * 1.7) + 0.1 * Math.sin(k * 1.3 + p.i));
-      if (k >= 30 && k <= 33) v *= 0.25;
-      if (p.n === "Vharok" && k >= 41 && k <= 45) v = 0;
-      pts.push(v);
-    }
-    return { key: p.key, col: classColor(p.cls), d: path(pts, 26000) };
-  });
+  return rows.map((p) => ({ key: p.key, col: classColor(p.cls), d: path(samplePoints(p), 26000) }));
 }
 
 /** SVG path on the 1000×200 chart box. */

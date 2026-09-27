@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { ArrowSquareOutIcon, CaretRightIcon, HeartIcon } from "@phosphor-icons/react";
-import { fmt } from "../ui";
-import { BOARD, MY_RANK, PODIUM, RANK_BOSSES, RANK_CLASSES, RANK_DUNGEONS, REGIONS } from "../sample/combat";
+import { fmt, RELEASED_CLASSES } from "../ui";
+import { RANK_BOSSES, RANK_DUNGEONS, REGIONS, sampleRanking } from "../sample/combat";
 import { Av } from "./combat/parts";
 import type { PageProps } from "./types";
 
@@ -13,6 +13,13 @@ const PERIODS = ["week", "month", "season"] as const;
 
 export default function Classifiche({ t, lang }: PageProps) {
   const [period, setPeriod] = useState<(typeof PERIODS)[number]>("week");
+  const [region, setRegion] = useState(REGIONS[0]);
+  const [dungeon, setDungeon] = useState(RANK_DUNGEONS[0]);
+  const [boss, setBoss] = useState(RANK_BOSSES[0]);
+  const [cls, setCls] = useState("");
+  // ponytail: the filters only reshuffle the sample board until online logs (R2) serve real ones.
+  const seed = REGIONS.indexOf(region) + 2 * RANK_DUNGEONS.indexOf(dungeon) + 4 * RANK_BOSSES.indexOf(boss) + 8 * PERIODS.indexOf(period);
+  const { podium, board, me } = sampleRanking(seed, cls || undefined);
   const caret = <CaretRightIcon aria-hidden="true" style={{ color: "var(--pm-t3)" }} />;
   const heart = (size: number) => <HeartIcon weight="fill" aria-label="Supporter" style={{ color: "var(--pm-redt)", fontSize: size }} />;
   const openLog = (
@@ -26,27 +33,27 @@ export default function Classifiche({ t, lang }: PageProps) {
   return (
     <>
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
-        <select className="cbSelect" aria-label={t("combat.region")}>
+        <select className="cbSelect" aria-label={t("combat.region")} value={region} onChange={(e) => setRegion(e.target.value)}>
           {REGIONS.map((r) => (
             <option key={r}>{r}</option>
           ))}
         </select>
         {caret}
-        <select className="cbSelect" aria-label="Dungeon">
+        <select className="cbSelect" aria-label="Dungeon" value={dungeon} onChange={(e) => setDungeon(e.target.value)}>
           {RANK_DUNGEONS.map((r) => (
             <option key={r}>{r}</option>
           ))}
         </select>
         {caret}
-        <select className="cbSelect" aria-label="Boss">
+        <select className="cbSelect" aria-label="Boss" value={boss} onChange={(e) => setBoss(e.target.value)}>
           {RANK_BOSSES.map((r) => (
             <option key={r}>{r}</option>
           ))}
         </select>
         {caret}
-        <select className="cbSelect" aria-label={t("combat.col.class")}>
-          <option>{t("combat.allClasses")}</option>
-          {RANK_CLASSES.map((r) => (
+        <select className="cbSelect" aria-label={t("combat.col.class")} value={cls} onChange={(e) => setCls(e.target.value)}>
+          <option value="">{t("combat.allClasses")}</option>
+          {RELEASED_CLASSES.map((r) => (
             <option key={r}>{r}</option>
           ))}
         </select>
@@ -60,7 +67,7 @@ export default function Classifiche({ t, lang }: PageProps) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 12, alignItems: "end", marginBottom: 12, maxWidth: 900 }}>
-        {PODIUM.map(([n, cls, dps, cp, d], i) => (
+        {podium.map(({ n, cls, dps, cp, d, sup }, i) => (
           <div
             key={n}
             className="card"
@@ -73,7 +80,7 @@ export default function Classifiche({ t, lang }: PageProps) {
               <Av cls={cls} size={28} />
               <div>
                 <div style={{ fontWeight: 500 }}>
-                  {n} {i === 0 && heart(11)}
+                  {n} {sup && heart(11)}
                 </div>
                 <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>{cls}</div>
               </div>
@@ -102,7 +109,7 @@ export default function Classifiche({ t, lang }: PageProps) {
           <span />
         </div>
         <div style={{ maxHeight: 360, overflow: "auto" }}>
-          {BOARD.map((r) => (
+          {board.map((r) => (
             <div key={r.pos} className="cbHover" style={{ display: "grid", gridTemplateColumns: COLS, gap: 10, alignItems: "center", minHeight: 36, padding: "0 8px", borderBottom: "1px solid var(--pm-line)" }}>
               <span className="mono" style={{ color: "var(--pm-t3)" }}>
                 {r.pos}
@@ -123,35 +130,37 @@ export default function Classifiche({ t, lang }: PageProps) {
             </div>
           ))}
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: COLS,
-            gap: 10,
-            alignItems: "center",
-            minHeight: 40,
-            padding: "0 8px",
-            background: "var(--pm-tint)",
-            borderTop: "1px solid var(--pm-red)",
-            borderRadius: "0 0 6px 6px",
-          }}
-        >
-          <span className="mono" style={{ color: "var(--pm-redt)" }}>
-            {MY_RANK.pos}
-          </span>
-          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Av cls={MY_RANK.cls} size={22} radius={5} font={8} bare />
-            {MY_RANK.n} <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>{t("combat.you")}</span>
-          </span>
-          <span style={{ color: "var(--pm-t2)", fontSize: 12 }}>{MY_RANK.cls}</span>
-          <span className="num">{fmt(MY_RANK.dps, lang)}</span>
-          <span style={mono}>{fmt(MY_RANK.cp, lang)}</span>
-          <span style={mono}>{MY_RANK.d}</span>
-          <span className="mono" style={{ fontSize: 12, color: "var(--pm-t3)" }}>
-            {MY_RANK.date}
-          </span>
-          {openLog}
-        </div>
+        {me && (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: COLS,
+              gap: 10,
+              alignItems: "center",
+              minHeight: 40,
+              padding: "0 8px",
+              background: "var(--pm-tint)",
+              borderTop: "1px solid var(--pm-red)",
+              borderRadius: "0 0 6px 6px",
+            }}
+          >
+            <span className="mono" style={{ color: "var(--pm-redt)" }}>
+              {me.pos}
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Av cls={me.cls} size={22} radius={5} font={8} bare />
+              {me.n} <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>{t("combat.you")}</span>
+            </span>
+            <span style={{ color: "var(--pm-t2)", fontSize: 12 }}>{me.cls}</span>
+            <span className="num">{fmt(me.dps, lang)}</span>
+            <span style={mono}>{fmt(me.cp, lang)}</span>
+            <span style={mono}>{me.d}</span>
+            <span className="mono" style={{ fontSize: 12, color: "var(--pm-t3)" }}>
+              {me.date}
+            </span>
+            {openLog}
+          </div>
+        )}
       </div>
     </>
   );

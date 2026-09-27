@@ -13,7 +13,7 @@ import { Home } from "./Home";
 import type { T } from "./i18n";
 import { ALL_PAGES, NAV, NAV_BOTTOM, type NavPage } from "./nav";
 import { Palette } from "./Palette";
-import { SAMPLE_CHARACTER } from "./sampleData";
+import { activeId, readCharacters } from "./characters";
 import { Supporter } from "./Supporter";
 import { ClassAvatar, fmt, ProfileAvatar } from "./ui";
 import States from "./pages/shared/States";
@@ -111,6 +111,8 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
 
   const name = capture.data?.characterName || localStorage.getItem(USER_NAME_KEY) || t("home.notSet");
   const cls = settings["pm.class"];
+  const characters = readCharacters(settings);
+  const activeChar = characters.find((c) => c.id === activeId(settings, characters));
   const run = (action: () => Promise<unknown>) => action().catch(onError);
   const openWidget = () => run(() => invoke("show_overlay"));
   const current = ALL_PAGES.find((x) => x.id === page)!;
@@ -210,17 +212,17 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
               <span>{t(`status.${status}`)}</span>
             </div>
           )}
-          <div className="charChip">
+          <button type="button" className="charChip" title={t("nav.myCharacters")} onClick={() => go("personaggi")}>
             <ClassAvatar cls={cls} />
             <div className="who">
               <div>{name}</div>
               <div className="sub">
                 {cls && `${cls} · `}
-                <span className="mono">CP {fmt(SAMPLE_CHARACTER.cp, lang)}</span>
+                <span className="mono">CP {activeChar?.cp ? fmt(activeChar.cp, lang) : "—"}</span>
               </div>
             </div>
             <CaretDownIcon aria-hidden="true" />
-          </div>
+          </button>
           <button type="button" className="btn fill" onClick={openWidget}>
             <PictureInPictureIcon aria-hidden="true" />
             {t("topbar.openWidget")}

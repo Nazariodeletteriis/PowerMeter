@@ -140,7 +140,7 @@
 .wMap {
   position: relative;
   height: calc(100vh - 190px);
-  min-height: 520px;
+  min-height: 380px;
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--pm-line);
@@ -150,21 +150,78 @@
     repeating-linear-gradient(0deg, #ffffff08 0 1px, transparent 1px 64px),
     repeating-linear-gradient(90deg, #ffffff08 0 1px, transparent 1px 64px),
     #141111;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.wMap:active {
+  cursor: grabbing;
+}
+/* Map in native tile pixels, moved and scaled as one layer. --k undoes the
+   scale for markers, labels and the popup so they keep their screen size. */
+.wWorld {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+.wWorld > img,
+.wWorld > svg {
+  position: absolute;
+  pointer-events: none;
+}
+.wWorld > svg {
+  left: 0;
+  top: 0;
+  overflow: visible;
+}
+.wWorld polygon {
+  fill: none;
+  stroke: #eae3d2;
+  stroke-opacity: 0.35;
+  stroke-width: 1.5;
+}
+.wRegion {
+  position: absolute;
+  transform: translate(-50%, -50%) scale(var(--k));
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--pm-t1);
+  text-shadow: 0 1px 3px #000, 0 0 8px #000;
+  pointer-events: none;
 }
 .wMapLabel {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--pm-s1);
   font-size: 11px;
   color: var(--pm-t3);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   pointer-events: none;
 }
+.wCredit {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--pm-s1);
+  font-size: 11px;
+  color: var(--pm-t3);
+}
+.wCredit a {
+  color: var(--pm-t2);
+}
 .wMarker {
   position: absolute;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(var(--k));
   width: 26px;
   height: 26px;
   padding: 0;
@@ -177,9 +234,19 @@
   cursor: pointer;
   font-size: 13px;
 }
+.wMarker[data-found] {
+  opacity: 0.4;
+}
+/* Enters from the marker: `scale` and `opacity` transition, `transform`
+   (which follows the zoom through --kp, the full 1/scale) doesn't. */
 .wPopup {
   position: absolute;
-  transform: translate(18px, -50%);
+  transform-origin: 0 0;
+  transform: scale(var(--kp)) translate(18px, -50%);
+  transition:
+    opacity 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    scale 150ms cubic-bezier(0.23, 1, 0.32, 1);
+  cursor: auto;
   width: 240px;
   background: var(--pm-s2);
   border-radius: 8px;
@@ -189,6 +256,22 @@
   flex-direction: column;
   gap: 8px;
   z-index: 3;
+}
+@starting-style {
+  .wPopup {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wPopup {
+    transition: opacity 150ms ease;
+  }
+  @starting-style {
+    .wPopup {
+      scale: 1;
+    }
+  }
 }
 .wPopup .close {
   width: 24px;
@@ -228,6 +311,9 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  /* Leaves room for the credit line below on short (600px) windows. */
+  max-height: calc(100% - 60px);
+  overflow-y: auto;
 }
 .wPanel select {
   height: 30px;
@@ -290,6 +376,11 @@
   gap: 6px;
   align-items: center;
 }
+.wRouteBtn[aria-pressed="false"] {
+  border-color: var(--pm-line);
+  background: var(--pm-s1);
+  color: var(--pm-t1);
+}
 .wZoom {
   position: absolute;
   right: 12px;
@@ -311,4 +402,8 @@
 }
 .wZoom button + button {
   border-top: 1px solid var(--pm-line);
+}
+.wZoom button:disabled {
+  color: var(--pm-t3);
+  cursor: default;
 }

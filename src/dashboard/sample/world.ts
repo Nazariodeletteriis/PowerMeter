@@ -1,20 +1,21 @@
 // SAMPLE DATA — copied from the Claude Design prototype
 // (docs/design/claude-design/videogame-tool-design-system/project/PowerMeter Dashboard.dc.html),
-// functions pDb and pMap. Nothing here is real: replace each block with the
+// function pDb (the map now uses real data, src/data/map). Nothing here is real: replace each block with the
 // game data after launch (30/09) and delete it.
 // Game names stay in English. `type` is either a game term (shown as is) or a
 // world.* i18n key for the prototype's UI labels; `n` fills its {n}.
 
 export type DbItem = { name: string; cat: string; type: string; n?: number; lv: number; rarity?: string };
 
-// pDb.items — `cat` is the category id (world.cat.<id>).
+// pDb.items — `cat` is the category id (world.cat.<id>). The "items" rows are
+// real names (src/data/items.json, rarity by game grade) so their icons resolve.
 export const DB_ITEMS: DbItem[] = [
-  { name: "Staff of the Ashen Tide", cat: "items", type: "Staff", lv: 45, rarity: "Mythic" },
-  { name: "Robe of the Ashbound", cat: "items", type: "Chest", lv: 45, rarity: "Legendary" },
-  { name: "Earring of the Ashen Tide", cat: "items", type: "Earring", lv: 45, rarity: "Heroic" },
-  { name: "Gloves of Storm Oath", cat: "items", type: "Gloves", lv: 44, rarity: "Heroic" },
-  { name: "Ring of Quiet Aether", cat: "items", type: "Ring", lv: 40, rarity: "Rare" },
-  { name: "Aether Crystal Shard", cat: "items", type: "world.type.material", lv: 30, rarity: "Uncommon" },
+  { name: "Ludra's Grimoire", cat: "items", type: "Spellbook", lv: 45, rarity: "Legendary" },
+  { name: "Wisdom Breastplate", cat: "items", type: "Chest", lv: 30, rarity: "Legendary" },
+  { name: "Tranquility Diamond Earrings", cat: "items", type: "Earring", lv: 30, rarity: "Legendary" },
+  { name: "Wisdom Gloves", cat: "items", type: "Gloves", lv: 30, rarity: "Legendary" },
+  { name: "Ritual Sapphire Ring", cat: "items", type: "Ring", lv: 20, rarity: "Rare" },
+  { name: "Fine Orichalcum Ore", cat: "items", type: "world.type.material", lv: 1, rarity: "Uncommon" },
   { name: "Ashen Tide", cat: "itemSets", type: "world.type.setPieces", n: 5, lv: 45, rarity: "Legendary" },
   { name: "Storm Oath", cat: "itemSets", type: "world.type.setPieces", n: 4, lv: 44, rarity: "Heroic" },
   { name: "Refined Ember Ingot", cat: "recipes", type: "Armorsmith", lv: 38, rarity: "Rare" },
@@ -38,7 +39,7 @@ export const DB_ITEMS: DbItem[] = [
 
 // pDb.dbCatCards.n — entries per category on the hub cards.
 export const DB_COUNTS: Record<string, number> = {
-  items: 845,
+  items: 9449, // real: src/data/items.json
   itemSets: 297,
   recipes: 297,
   quests: 297,
@@ -66,8 +67,8 @@ export type ItemDetail = {
 };
 
 export const ITEM_DETAILS: Record<string, ItemDetail> = {
-  "Staff of the Ashen Tide": {
-    type: "Two-Handed Staff",
+  "Ludra's Grimoire": {
+    type: "Spellbook",
     classes: "Sorcerer, Spiritmaster",
     stats: [
       { name: "Magic Attack", value: 1842, max: 2310 },
@@ -88,36 +89,3 @@ export const ITEM_DETAILS: Record<string, ItemDetail> = {
     craft: "Weaponsmith Lv 5",
   },
 };
-
-// pMap — layer id → total markers in the zone (world.layer.<id>).
-export const MAP_LAYER_COUNTS: Record<string, number> = {
-  services: 42,
-  npcs: 118,
-  monsters: 236,
-  gathering: 412,
-  monoliths: 560,
-};
-
-// pMap.pts — x/y in % of the map.
-export type MapPoint = { layer: string; x: number; y: number; name: string };
-
-export const MAP_POINTS: MapPoint[] = [
-  { layer: "services", x: 22, y: 30, name: "Teleporter · Eltnen Fortress" },
-  { layer: "services", x: 40, y: 62, name: "Shugo Merchant" },
-  { layer: "npcs", x: 30, y: 44, name: "Captain Lyra" },
-  { layer: "npcs", x: 58, y: 28, name: "Oracle Venn" },
-  { layer: "monsters", x: 64, y: 52, name: "Ashclaw Stalker" },
-  { layer: "monsters", x: 72, y: 40, name: "Named · Kargath the Blighted" },
-  { layer: "monsters", x: 48, y: 74, name: "Cinder Wyrmling" },
-  { layer: "gathering", x: 18, y: 58, name: "Berries · Emberroot" },
-  { layer: "gathering", x: 36, y: 80, name: "Ore · Aetherite" },
-  { layer: "gathering", x: 80, y: 66, name: "Herbs · Moonpetal" },
-  { layer: "gathering", x: 54, y: 18, name: "Gems · Duskstone" },
-  { layer: "monoliths", x: 26, y: 18, name: "Monolith #112" },
-  { layer: "monoliths", x: 86, y: 24, name: "Monolith #113" },
-  { layer: "monoliths", x: 68, y: 84, name: "Monolith #114" },
-];
-
-export const MAP_ZONES = ["Eltnen", "Heiron", "Morheim"];
-export const MAP_ROUTE = "18,58 36,80 48,74 64,52 80,66";
-export const MONOLITHS_FOUND = 34;

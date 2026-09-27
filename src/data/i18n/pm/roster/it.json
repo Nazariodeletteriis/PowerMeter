@@ -1,0 +1,7 @@
+{
+  "roster.level": "Livello",
+  "roster.cancel": "Annulla",
+  "roster.empty": "Nessun personaggio. Aggiungine uno o importa un file.",
+  "roster.deleteConfirm": "Eliminare {name}?",
+  "roster.importError": "Nessun personaggio valido in questo file."
+}

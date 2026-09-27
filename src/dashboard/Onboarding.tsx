@@ -14,12 +14,11 @@ import { USER_NAME_KEY } from "./Shell";
 import { CLASSES, Logo } from "./ui";
 import { usePoll } from "./usePoll";
 
-// Region names are shown as the game shows them, so they are not translated.
+// Region names are short codes, so they are not translated. Only the EU/NA
+// servers PowerMeter supports are offered; a saved "kr"/"tw" falls back to EU.
 export const REGIONS = [
-  { value: "global-eu", label: "Global/EU" },
+  { value: "global-eu", label: "EU" },
   { value: "us-na", label: "NA" },
-  { value: "kr", label: "KR" },
-  { value: "tw", label: "TW" },
 ];
 // Prototype order (Brawler has no art yet and is not offered).
 const CLASS_OPTIONS = ["Sorcerer", "Gladiator", "Templar", "Assassin", "Ranger", "Spiritmaster", "Cleric", "Chanter"];
@@ -259,7 +258,7 @@ function Req({
 
 function Character(props: StepProps & { settings: Settings; save: SaveSetting }) {
   const { t, settings, save, onNext } = props;
-  const [region, setRegion] = useState(settings["pm.region"] || REGIONS[0].value);
+  const [region, setRegion] = useState(REGIONS.find((r) => r.value === settings["pm.region"])?.value ?? REGIONS[0].value);
   const [name, setName] = useState(() => localStorage.getItem(USER_NAME_KEY) ?? "");
   const [cls, setCls] = useState(settings["pm.class"] || CLASS_OPTIONS[0]);
   const { busy, error, run } = useAction();

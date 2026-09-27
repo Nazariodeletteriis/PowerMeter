@@ -48,9 +48,8 @@ const TABS = [
 const LANG_ORDER = ["it", "en", "de", "fr", "es", "pt", "ru", "ja", "ko", "zh-Hans", "zh-Hant"];
 const TARGET_MODES = [
   ["bossTargets", "Boss"],
-  ["lastHitByMe", "Last Hit"],
-  ["allTargets", "All Targets"],
   ["trainTargets", "Train"],
+  ["pvpTargets", "PvP"],
 ] as const;
 // Switches the engine has no setting for yet: sample state, prototype defaults.
 const SAMPLE_SWITCHES = { boot: true, tray: true, autosave: true, autoup: false, pos: true, n1: true, n2: true, n3: true, n4: true };

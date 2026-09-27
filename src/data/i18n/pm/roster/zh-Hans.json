@@ -1,0 +1,7 @@
+{
+  "roster.level": "等级",
+  "roster.cancel": "取消",
+  "roster.empty": "还没有角色。添加一个或导入文件。",
+  "roster.deleteConfirm": "删除 {name}？",
+  "roster.importError": "此文件中没有有效的角色。"
+}

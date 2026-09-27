@@ -4,6 +4,19 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.2.8
+
+- New: My characters works: add, import, export, duplicate and delete characters, and set the active one. Switching character updates the whole dashboard (builder, Skill Planner, Daevanion).
+- New: the Daevanion Planner shows the real boards of your character's class.
+- New: real item icons in the builder, item pages, search and home.
+- New: interactive world map with real markers (data: aion2-interactive-map, CC BY-NC 4.0).
+- New: choose tags when creating a new build.
+- Changed: the DPS Meter tabs are now Boss, Train and PvP.
+- Changed: only EU and NA are shown; the Brawler is hidden until it launches in the West.
+- Fixed: switching DPS Meter tab no longer jumps back to Boss.
+- Fixed: selecting a range in the fight report updates the statistics below it.
+- Fixed: rankings tabs and filters and Build community page numbers work.
+
 ## 0.2.7
 
 - Fixed: the release notes in the update window now appear in the language you chose for PowerMeter.

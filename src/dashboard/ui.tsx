@@ -17,6 +17,8 @@ export const CLASSES: Record<string, [initials: string, color: string]> = {
   Chanter: ["CH", "#CAC172"],
   Brawler: ["BR", "#C58B55"],
 };
+/** Classes the dashboard offers: Brawler is not out in EU/NA yet (it keeps its color for the meter). */
+export const RELEASED_CLASSES = Object.keys(CLASSES).filter((c) => c !== "Brawler");
 
 // Item rarity colors (prototype RAR).
 export const RARITY: Record<string, string> = {

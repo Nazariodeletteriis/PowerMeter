@@ -44,42 +44,42 @@ export type CommunityBuild = {
 };
 const b = (t: string, cls: string, sub: string, n: number, reg: string, tags: string[], ago: Ago, au: string, likes: number): CommunityBuild => ({ t, cls, sub, n, reg, tags, ago, au, likes });
 export const SAMPLE_BUILDS: CommunityBuild[] = [
-  b("Ashen Burst · PvE e PvP", "Sorcerer", "Guida endgame Global", 4, "Global", ["PvE", "DPS"], [2, "hour"], "kaelthas", 17),
-  b("Veiled Blade Starter", "Assassin", "Dal livello 1 al Veiled Crypt", 6, "Korea & Taiwan", ["PvE", "Beginner Friendly"], [1, "day"], "nyxara", 11),
-  b("Radiant Bulwark", "Templar", "Tank per dungeon a 6", 2, "Global", ["Tank", "Dungeon"], [43, "minute"], "ironveil", 10),
-  b("Storm Oath Ranger", "Ranger", "Endgame PvE (crafting)", 8, "Korea & Taiwan", ["PvE", "DPS"], [2, "week"], "duskwarden", 8),
-  b("Mantra Support", "Chanter", "Buff e cure per raid", 5, "Global", ["Support", "Healer"], [1, "day"], "elowyn", 8),
-  b("Crimson Wrath", "Gladiator", "Siege e Large-Scale", 4, "Global", ["PvP", "Siege"], [7, "hour"], "vharok", 7),
-  b("Radiant Cure", "Cleric", "Healer PvE early game", 8, "Global", ["PvE", "Healer"], [3, "hour"], "solenne", 6),
-  b("Tidecaller", "Spiritmaster", "Evocazioni teoriche", 7, "Global", ["PvE", "DPS"], [15, "hour"], "morwyn", 5),
-  b("Iron Fist", "Brawler", "Arena of Discipline", 3, "Korea & Taiwan", ["PvP", "Arena"], [21, "hour"], "brakkus", 5),
-  b("Budget Frost", "Sorcerer", "Build economica 0–800 GS", 5, "Global", ["Budget Build", "PvE"], [13, "hour"], "ysolde", 4),
-  b("Shadowstep PvP", "Assassin", "Stagione 1 PvP", 5, "Korea & Taiwan", ["PvP"], [2, "month"], "thalanor", 4),
-  b("Aegis Endgame", "Templar", "Hero set completo", 4, "Global", ["Endgame Build", "Tank"], [1, "week"], "brannoc", 3),
+  b("Ashen Burst · PvE e PvP", "Sorcerer", "Guida endgame EU", 4, "EU", ["PvE", "DPS"], [2, "hour"], "kaelthas", 17),
+  b("Veiled Blade Starter", "Assassin", "Dal livello 1 al Veiled Crypt", 6, "NA", ["PvE", "Beginner Friendly"], [1, "day"], "nyxara", 11),
+  b("Radiant Bulwark", "Templar", "Tank per dungeon a 6", 2, "EU", ["Tank", "Dungeon"], [43, "minute"], "ironveil", 10),
+  b("Storm Oath Ranger", "Ranger", "Endgame PvE (crafting)", 8, "NA", ["PvE", "DPS"], [2, "week"], "duskwarden", 8),
+  b("Mantra Support", "Chanter", "Buff e cure per raid", 5, "EU", ["Support", "Healer"], [1, "day"], "elowyn", 8),
+  b("Crimson Wrath", "Gladiator", "Siege e Large-Scale", 4, "EU", ["PvP", "Siege"], [7, "hour"], "vharok", 7),
+  b("Radiant Cure", "Cleric", "Healer PvE early game", 8, "EU", ["PvE", "Healer"], [3, "hour"], "solenne", 6),
+  b("Tidecaller", "Spiritmaster", "Evocazioni teoriche", 7, "EU", ["PvE", "DPS"], [15, "hour"], "morwyn", 5),
+  b("Budget Frost", "Sorcerer", "Build economica 0–800 GS", 5, "EU", ["Budget Build", "PvE"], [13, "hour"], "ysolde", 4),
+  b("Shadowstep PvP", "Assassin", "Stagione 1 PvP", 5, "NA", ["PvP"], [2, "month"], "thalanor", 4),
+  b("Aegis Endgame", "Templar", "Hero set completo", 4, "EU", ["Endgame Build", "Tank"], [1, "week"], "brannoc", 3),
 ];
-export const BUILD_REGIONS = ["Global", "Korea & Taiwan"];
+export const BUILD_REGIONS = ["EU", "NA"];
 export const BUILD_TAGS = ["PvE", "PvP", "Arena", "Dungeon", "Siege", "Large-Scale", "Beginner Friendly", "Budget Build", "Endgame Build", "Tank", "DPS", "Healer", "Support"];
 
 // pBuilder.SL: [id, slot label, owned item, rarity, enhancement, target item]
+// Item names are real (src/data/items.json), rarity by their game grade.
 export const SAMPLE_SLOTS: [id: string, label: string, name: string, rarity: string, enh: number, target: string][] = [
-  ["mh", "Main Hand", "Staff of the Ashen Tide", "Mythic", 15, "Staff of the Ashen Tide"],
-  ["oh", "Off Hand", "Orb of Quiet Embers", "Legendary", 12, "Orb of the Crimson Veil"],
-  ["head", "Head", "Hood of Storm Oath", "Heroic", 10, "Hood of Storm Oath"],
-  ["neck", "Necklace", "Pendant of Veiled Flame", "Heroic", 5, "Pendant of Veiled Flame"],
-  ["sh", "Shoulders", "Mantle of Cinders", "Legendary", 12, "Mantle of Cinders"],
-  ["ear1", "Earring I", "Earring of Quiet Aether", "Rare", 5, "Earring of the Ashen Tide"],
-  ["chest", "Chest", "Robe of the Ashbound", "Legendary", 11, "Robe of the Ashbound"],
-  ["ear2", "Earring II", "Earring of Quiet Aether", "Rare", 5, "Earring of Quiet Aether"],
-  ["hands", "Gloves", "Gloves of Quiet Embers", "Rare", 8, "Gloves of Storm Oath"],
-  ["ring1", "Ring I", "Ring of Silent Aether", "Rare", 5, "Ring of Crimson Oath"],
-  ["legs", "Legs", "Leggings of Cinders", "Legendary", 12, "Leggings of Cinders"],
-  ["ring2", "Ring II", "Ring of Quiet Aether", "Rare", 5, "Ring of Quiet Aether"],
-  ["feet", "Boots", "Shoes of Silent Aether", "Rare", 9, "Shoes of the Ashen Tide"],
-  ["br1", "Bracelet I", "Band of Embers", "Heroic", 5, "Band of Embers"],
-  ["belt", "Belt", "Sash of Embers", "Heroic", 7, "Sash of Embers"],
-  ["br2", "Bracelet II", "Band of Embers", "Heroic", 5, "Band of Embers"],
-  ["cloak", "Cloak", "Cloak of the Ashen Tide", "Legendary", 10, "Cloak of the Ashen Tide"],
-  ["amu", "Amulet", "Sigil of Dawnfire", "Legendary", 0, "Sigil of Dawnfire"],
+  ["mh", "Main Hand", "Ludra's Grimoire", "Legendary", 15, "Ludra's Grimoire"],
+  ["oh", "Off Hand", "Tranquility Orb", "Legendary", 12, "Fallen Ancient God Orb"],
+  ["head", "Head", "Wisdom Helm", "Legendary", 10, "Wisdom Helm"],
+  ["neck", "Necklace", "Tranquility Ruby Necklace", "Legendary", 5, "Tranquility Ruby Necklace"],
+  ["sh", "Shoulders", "Wisdom Pauldrons", "Legendary", 12, "Wisdom Pauldrons"],
+  ["ear1", "Earring I", "Ritual Diamond Earrings", "Rare", 5, "Tranquility Diamond Earrings"],
+  ["chest", "Chest", "Wisdom Breastplate", "Legendary", 11, "Wisdom Breastplate"],
+  ["ear2", "Earring II", "Ritual Diamond Earrings", "Rare", 5, "Ritual Diamond Earrings"],
+  ["hands", "Gloves", "Elder Gloves", "Rare", 8, "Wisdom Gloves"],
+  ["ring1", "Ring I", "Starlight Sapphire Ring", "Rare", 5, "Courage Sapphire Ring"],
+  ["legs", "Legs", "Wisdom Greaves", "Legendary", 12, "Wisdom Greaves"],
+  ["ring2", "Ring II", "Ritual Sapphire Ring", "Rare", 5, "Ritual Sapphire Ring"],
+  ["feet", "Boots", "Elder Boots", "Rare", 9, "Wisdom Boots"],
+  ["br1", "Bracelet I", "Drifter Bracelet", "Rare", 5, "Drifter Bracelet"],
+  ["belt", "Belt", "Noble Belt", "Legendary", 7, "Noble Belt"],
+  ["br2", "Bracelet II", "Drifter Bracelet", "Rare", 5, "Drifter Bracelet"],
+  ["cloak", "Cloak", "Wisdom Cloak", "Legendary", 10, "Wisdom Cloak"],
+  ["amu", "Amulet", "Revelation Amulet", "Legendary", 0, "Revelation Amulet"],
 ];
 // pX.grp — group label is an i18n key suffix.
 export const SLOT_GROUPS: [group: string, ids: string[]][] = [
@@ -97,11 +97,11 @@ export const SAMPLE_SOURCES: Record<string, string> = {
 };
 // pBuilder.picker: [item, rarity, Magic Boost vs current]
 export const SAMPLE_PICKER: [string, string, string][] = [
-  ["Staff of the Ashen Tide", "Mythic", "+214"],
-  ["Staff of Crimson Oath", "Legendary", "+168"],
-  ["Staff of Dawnfire", "Legendary", "+151"],
-  ["Staff of Quiet Embers", "Heroic", "−42"],
-  ["Staff of Silent Aether", "Rare", "−120"],
+  ["Ludra's Grimoire", "Legendary", "+214"],
+  ["Courage Spellbook", "Legendary", "+168"],
+  ["Fantasy Spellbook", "Legendary", "+151"],
+  ["Elder Spellbook", "Rare", "−42"],
+  ["Rainy Forest Spellbook", "Uncommon", "−120"],
 ];
 // pBuilder.subs: [stat, min, max, unit]
 export const SAMPLE_SUBS: [string, number, number, string][] = [
@@ -149,37 +149,5 @@ export const SAMPLE_COMMENTS: [string, Ago, string][] = [
 // pSkill — the skills themselves are the real ones (src/dashboard/skills.tsx).
 export const SKILL_BUILDS = ["Frost Control · Sorcerer", "Burst PvE · Sorcerer", "Guardian Wall · Templar"];
 
-// pDaev — a fake 11×11 board; the real one comes from the game data.
-export const DV_N = 11;
-export const DV_CENTER = "5,5";
-export const DV_BOARDS: [string, number][] = [["Nezekan", 134], ["Zikel", 134], ["Vaizel", 134], ["Triniel", 168], ["Azphel", 232]];
+// pDaev — the planner's build dropdown; the boards themselves are real (data/daevanion.json).
 export const DV_BUILDS = ["Burst Nezekan · Sorcerer", "Tank Zikel · Templar"];
-export type DvType = "start" | "stat" | "skill" | "rune";
-export const DV_COST: Record<DvType, number> = { start: 0, stat: 1, skill: 3, rune: 5 };
-export function dvType(x: number, y: number): DvType | null {
-  const C = 5, N = DV_N;
-  if (x === C && y === C) return "start";
-  if ((x === 0 || x === N - 1) && (y === 0 || y === N - 1)) return "rune";
-  if (Math.abs(x - C) + Math.abs(y - C) > 1 && (x * 7 + y * 5) % 9 === 0) return null;
-  if ((x * 3 + y * 11) % 13 === 0) return "skill";
-  return "stat";
-}
-const DV_STATS = ["Attack +12", "HP +180", "Accuracy +15", "Critical Hit +14", "Defense +20", "Magic Boost +10", "Evasion +12", "PvE Attack +8"];
-/** Which of the class's skills a skill node raises (the page passes the real list). */
-export const dvSkill = <S>(x: number, y: number, skills: S[]) => skills[(x + y) % skills.length];
-/** Node label; null for the start node (translated by the page). Skill nodes are named by the page. */
-export function dvLabel(t: DvType, x: number, y: number): string | null {
-  if (t === "rune") return "Rune: Aether Surge";
-  if (t === "start") return null;
-  return DV_STATS[(x * 2 + y) % DV_STATS.length];
-}
-/** Points spent on a board (set of active "x,y" keys). */
-export function dvPoints(on: Record<string, true>) {
-  let p = 0;
-  for (const k of Object.keys(on)) {
-    const [x, y] = k.split(",").map(Number);
-    const t = dvType(x, y);
-    if (t) p += DV_COST[t];
-  }
-  return p;
-}

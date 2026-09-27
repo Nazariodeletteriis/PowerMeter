@@ -1,0 +1,7 @@
+{
+  "roster.level": "레벨",
+  "roster.cancel": "취소",
+  "roster.empty": "캐릭터가 없습니다. 추가하거나 파일을 가져오세요.",
+  "roster.deleteConfirm": "{name}을(를) 삭제할까요?",
+  "roster.importError": "이 파일에 유효한 캐릭터가 없습니다."
+}

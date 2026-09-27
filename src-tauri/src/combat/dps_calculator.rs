@@ -25,6 +25,7 @@ pub enum TargetSelectionMode {
     LastHitByMe,
     AllTargets,
     TrainTargets,
+    PvpTargets,
 }
 
 impl TargetSelectionMode {
@@ -36,6 +37,7 @@ impl TargetSelectionMode {
             "lastHitByMe" => Self::LastHitByMe,
             "allTargets" => Self::AllTargets,
             "trainTargets" => Self::TrainTargets,
+            "pvpTargets" => Self::PvpTargets,
             _ => Self::LastHitByMe,
         }
     }
@@ -48,6 +50,7 @@ impl TargetSelectionMode {
             Self::LastHitByMe => "lastHitByMe",
             Self::AllTargets => "allTargets",
             Self::TrainTargets => "trainTargets",
+            Self::PvpTargets => "pvpTargets",
         }
     }
 }
@@ -92,6 +95,9 @@ impl DpsCalculator {
 
     pub fn set_target_selection_mode(&mut self, id: &str) {
         self.target_selection_mode = TargetSelectionMode::from_id(id);
+        // Recompute on the next tick: the cached snapshot still carries the old
+        // mode and target, and would be re-emitted until new damage arrives.
+        self.last_damage_gen = -1;
     }
 
     pub fn set_all_targets_window_ms(&mut self, ms: i64) {
@@ -475,6 +481,16 @@ impl DpsCalculator {
                     .cloned()
                     .collect();
                 (trains, "Train".to_string(), 0)
+            }
+            TargetSelectionMode::PvpTargets => {
+                // Players have no mob spawn code. Caveat: data_storage still books
+                // player-on-player damage as friendly (is_friendly_action), so this
+                // stays empty until the engine can tell allies from enemies.
+                let players: HashSet<i32> = combat_data.keys()
+                    .filter(|&&tid| !mob_data.contains_key(&tid))
+                    .cloned()
+                    .collect();
+                (players, "PvP".to_string(), 0)
             }
             TargetSelectionMode::LastHitByMe => {
                 let local_ids = self.resolve_local_ids(summon_data);

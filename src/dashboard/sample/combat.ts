@@ -89,29 +89,40 @@ export const SAMPLE_PING = 38;
 /** Fight timer starts at 3:12 and ticks, like the prototype. */
 export const FIGHT_START_S = 192;
 
-// pLists: storico is real (get_fight_history). Rankings:
-export const PODIUM: [string, string, number, number, string][] = [
-  ["Varkhan", "Gladiator", 26940, 52110, "3:02"],
-  ["Lyssandra", "Assassin", 26515, 51880, "3:04"],
-  ["Oberyth", "Sorcerer", 26102, 52430, "3:11"],
-];
-const BOARD_NAMES = ["Nyxara", "Seraphine", "Kaelthas", "Duskwarden", "Vaelric", "Morwyn", "Thalanor", "Ysolde", "Kaelen", "Rhovan", "Ilyria", "Brakkus", "Veyla", "Sorren", "Ashenmoor"];
-const BOARD_CLASSES = ["Assassin", "Sorcerer", "Sorcerer", "Ranger", "Gladiator", "Spiritmaster", "Assassin", "Sorcerer", "Ranger", "Gladiator", "Spiritmaster", "Brawler", "Assassin", "Ranger", "Templar"];
-export const BOARD = BOARD_NAMES.map((n, i) => ({
-  pos: i + 4,
-  n,
-  cls: BOARD_CLASSES[i],
-  dps: 24800 - i * 410 - (i % 3) * 90,
-  cp: 51200 - i * 260,
-  d: `${3 + (i % 3)}:${String(10 + ((i * 3) % 50)).padStart(2, "0")}`,
-  date: `${20 + (i % 6)}/09`,
-  sup: i % 4 === 1,
-}));
-export const MY_RANK = { pos: 142, n: "Kaelthas", cls: "Sorcerer", dps: 18420, cp: 48215, d: "5:12", date: "26/09" };
-export const REGIONS = ["EU", "NA", "SA", "TW", "KR", "Asia"];
+// pLists: storico is real (get_fight_history). Rankings: 18 places, podium first.
+const RANK_NAMES = ["Varkhan", "Lyssandra", "Oberyth", "Nyxara", "Seraphine", "Kaelthas", "Duskwarden", "Vaelric", "Morwyn", "Thalanor", "Ysolde", "Kaelen", "Rhovan", "Ilyria", "Brakkus", "Veyla", "Sorren", "Ashenmoor"];
+const RANK_CLS = ["Gladiator", "Assassin", "Sorcerer", "Assassin", "Sorcerer", "Sorcerer", "Ranger", "Gladiator", "Spiritmaster", "Assassin", "Sorcerer", "Ranger", "Gladiator", "Spiritmaster", "Cleric", "Assassin", "Chanter", "Templar"];
+const PODIUM_DPS = [26940, 26515, 26102];
+const PODIUM_CP = [52110, 51880, 52430];
+const PODIUM_D = ["3:02", "3:04", "3:11"];
+const MY_RANK = { pos: 142, n: "Kaelthas", cls: "Sorcerer", dps: 18420, cp: 48215, d: "5:12", date: "26/09" };
+/**
+ * One leaderboard view. `seed` stands for the region/dungeon/boss/period filters: it rotates
+ * who holds each place and shifts the DPS; `cls` makes it that class's board.
+ * `me` is undefined when the class filter excludes the local player.
+ */
+export function sampleRanking(seed: number, cls?: string) {
+  const f = 1 - (seed % 7) * 0.012;
+  const rows = RANK_NAMES.map((_, i) => {
+    const j = (i + seed * 5) % RANK_NAMES.length;
+    const b = i - 3;
+    return {
+      pos: i + 1,
+      n: RANK_NAMES[j],
+      cls: cls ?? RANK_CLS[j],
+      dps: Math.round((i < 3 ? PODIUM_DPS[i] : 24800 - b * 410 - (b % 3) * 90) * f),
+      cp: j < 3 ? PODIUM_CP[j] : 51200 - (j - 3) * 260,
+      d: i < 3 ? PODIUM_D[i] : `${3 + (b % 3)}:${String(10 + ((b * 3) % 50)).padStart(2, "0")}`,
+      date: `${20 + (i % 6)}/09`,
+      sup: j === 0 || (j >= 3 && (j - 3) % 4 === 1),
+    };
+  });
+  const me = !cls || cls === MY_RANK.cls ? { ...MY_RANK, pos: MY_RANK.pos + ((seed * 7) % 41) - 20, dps: Math.round(MY_RANK.dps * f) } : undefined;
+  return { podium: rows.slice(0, 3), board: rows.slice(3), me };
+}
+export const REGIONS = ["EU", "NA"];
 export const RANK_DUNGEONS = ["Ashen Sanctum", "Veiled Crypt"];
 export const RANK_BOSSES = ["Vorathis the Ashbound", "Grimtooth Warden"];
-export const RANK_CLASSES = ["Sorcerer", "Assassin"];
 
 // pParty: [name, class, role, CP, gear score, Daevanion]
 export const PT_MEMBERS: [string, string, string, string, string, string][] = [

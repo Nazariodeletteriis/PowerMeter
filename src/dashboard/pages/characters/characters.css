@@ -273,6 +273,10 @@
   border-color: var(--pm-red);
   color: var(--pm-redt);
 }
+.chPage:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
 
 /* ---------- builder ---------- */
 .chMiniClass .classAvatar {

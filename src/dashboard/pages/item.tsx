@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { HammerIcon, ShareNetworkIcon, ShoppingCartIcon, SkullIcon, SwordIcon } from "@phosphor-icons/react";
+import { ItemIcon } from "../items";
 import { DB_ITEMS, ITEM_DETAILS } from "../sample/world";
 import { fmt, RARITY } from "../ui";
 import { SELECTED_ITEM } from "./database";
@@ -27,7 +28,7 @@ export default function Item({ t, lang, onError, setHeader }: PageProps) {
       <section className="card" style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
           <div className="wItemIcon" style={{ "--c": col ?? "var(--pm-grey)" } as CSSProperties}>
-            {t("world.item.icon")}
+            <ItemIcon name={item.name}>{t("world.item.icon")}</ItemIcon>
           </div>
           <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: 22, fontWeight: 500, color: col ?? "var(--pm-t1)" }}>{item.name}</h2>

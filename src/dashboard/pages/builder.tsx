@@ -30,8 +30,6 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import {
-  DV_BOARDS,
-  dvPoints,
   MY_BUILD_ICONS,
   SAMPLE_BUILD_SCORE,
   SAMPLE_COLLECTIONS,
@@ -44,8 +42,12 @@ import {
   SAMPLE_STATS,
   SAMPLE_SUBS,
   SLOT_GROUPS,
+  BUILD_TAGS,
 } from "../sample/characters";
-import { classSkills, SkillIcon } from "../skills";
+import { ItemIcon } from "../items";
+import { dvSummary } from "./daevanion";
+import { REGIONS } from "../Onboarding";
+import { classSkills, planClass, SkillIcon } from "../skills";
 import { art, ClassAvatar, CLASSES, fmt, RARITY } from "../ui";
 import { ago, SectionHead, useMem, useToast, type BuildSrc } from "./characters/shared";
 import { ShareModal } from "./shared/ShareModal";
@@ -59,12 +61,17 @@ const TABS = [
   ["desc", TextAlignLeftIcon],
   ["comm", ChatCircleIcon],
 ] as const;
-const DEFAULT_SRC: BuildSrc = { t: "Ashen Burst · PvE e PvP", au: SAMPLE_ME, cls: "Sorcerer", own: true };
 const LABEL: CSSProperties = { fontSize: 11, color: "var(--pm-t3)", marginBottom: 6 };
 
 // Prototype pg.builder (pBuilder + pX + pBRO).
-export default function Builder({ t, lang, go, onError, setHeader }: PageProps) {
-  const [src, setSrc] = useMem("bSrc", DEFAULT_SRC);
+export default function Builder({ t, lang, name, go, onError, setHeader, settings }: PageProps) {
+  // New and default builds use the active character's class (onboarding).
+  const myCls = planClass(settings["pm.class"]);
+  const [src, setSrc] = useMem<BuildSrc>("bSrc", { t: "Ashen Burst · PvE e PvP", au: SAMPLE_ME, cls: myCls, own: true });
+  // Your own build follows the active character: switching character re-targets it.
+  useEffect(() => {
+    if (src.own && !src.isNew && src.cls !== myCls) setSrc({ ...src, cls: myCls });
+  }, [myCls]); // eslint-disable-line react-hooks/exhaustive-deps
   const [mode, setMode] = useMem("bmode", "dummy");
   const [view, setView] = useMem("bview", "owned");
   const [cur, setCur] = useMem("slot", "mh");
@@ -76,8 +83,9 @@ export default function Builder({ t, lang, go, onError, setHeader }: PageProps) 
   const [sCat, setSCat] = useMem("sCat", "");
   const [tab, setTab] = useMem("ctab", "equip");
   const [newName, setNewName] = useMem("newName", "");
+  const [newTags, setNewTags] = useMem<string[]>("newTags", []);
   const [liked, setLiked] = useMem<Record<string, boolean>>("liked", {});
-  const [dv] = useMem<Record<string, Record<string, true>>>("dv", {});
+  const [dv] = useMem<Record<string, Record<string, true>>>("dvCls", {});
   const [itemOpen, setItemOpen] = useState(false);
   const [bOpen, setBOpen] = useState(false);
   const [itemQ, setItemQ] = useState("");
@@ -188,7 +196,7 @@ export default function Builder({ t, lang, go, onError, setHeader }: PageProps) 
           <ArrowLeftIcon aria-hidden="true" />
           {t("characters.builder.back")}
         </button>
-        <span className="chRegion">Global</span>
+        <span className="chRegion">{(REGIONS.find((r) => r.value === settings["pm.region"]) ?? REGIONS[0]).label}</span>
         <span className="chMiniClass" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--pm-t2)" }}>
           <ClassAvatar cls={src.cls} size={22} />
           {src.cls}
@@ -250,7 +258,7 @@ export default function Builder({ t, lang, go, onError, setHeader }: PageProps) 
         </div>
       )}
       {isNew && (
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", margin: "-4px 0 12px", borderRadius: 8, background: "var(--pm-tint)", border: "1px solid var(--pm-red)" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, padding: "10px 14px", margin: "-4px 0 12px", borderRadius: 8, background: "var(--pm-tint)", border: "1px solid var(--pm-red)" }}>
           <PlusCircleIcon aria-hidden="true" style={{ fontSize: 18, color: "var(--pm-redt)", flex: "none" }} />
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 500 }}>{t("characters.builder.newBuild")}</div>
@@ -264,6 +272,20 @@ export default function Builder({ t, lang, go, onError, setHeader }: PageProps) 
             aria-label={t("characters.builder.namePlaceholder")}
             style={{ height: 32, width: 220 }}
           />
+          <div role="group" aria-label={t("characters.builds.tag")} style={{ flexBasis: "100%", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 5, paddingLeft: 30 }}>
+            <span className="kicker" style={{ marginRight: 4 }}>{t("characters.builds.tag")}</span>
+            {BUILD_TAGS.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                className="chChip"
+                aria-pressed={newTags.includes(tag)}
+                onClick={() => setNewTags(newTags.includes(tag) ? newTags.filter((x) => x !== tag) : [...newTags, tag])}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
         </div>
       )}
       {toast}
@@ -310,7 +332,7 @@ export default function Builder({ t, lang, go, onError, setHeader }: PageProps) 
                   )}
                 </button>
                 <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>
-                  {src.own ? "Kaelthas" : t("characters.builder.by", { au: src.au })} · {src.cls} ·{" "}
+                  {src.own ? name : t("characters.builder.by", { au: src.au })} · {src.cls} ·{" "}
                   <span style={{ color: "#F4C77A", display: "inline-flex", alignItems: "center", gap: 3, verticalAlign: -3 }}>
                     <img src={art("asmodian")} alt="" style={{ width: 14, height: 14 }} />
                     Asmodian
@@ -336,7 +358,9 @@ export default function Builder({ t, lang, go, onError, setHeader }: PageProps) 
                       onClick={() => {
                         // Same reset as "Crea build" (openBuild), applied in place.
                         setBOpen(false);
-                        setSrc({ t: "", au: SAMPLE_ME, cls: "Sorcerer", own: true, isNew: true });
+                        setSrc({ t: "", au: SAMPLE_ME, cls: myCls, own: true, isNew: true });
+                        setNewName("");
+                        setNewTags([]);
                         setMode("dummy");
                         setView("owned");
                         setCur("mh");
@@ -409,7 +433,7 @@ export default function Builder({ t, lang, go, onError, setHeader }: PageProps) 
                         >
                           <span style={{ display: "flex", gap: 8, alignItems: "center", minWidth: 0, width: "100%" }}>
                             <span style={{ width: 38, height: 38, flex: "none", borderRadius: "50%", border: x.bd, opacity: x.op, background: "radial-gradient(circle at 35% 30%,var(--pm-s3),var(--pm-bg))", display: "grid", placeItems: "center", fontSize: 10, color: "var(--pm-t3)" }}>
-                              {x.short}
+                              <ItemIcon name={x.name}>{x.short}</ItemIcon>
                             </span>
                             <span style={{ minWidth: 0, flex: 1 }}>
                               <span style={{ fontSize: 10, color: "var(--pm-t3)", display: "flex", gap: 6 }}>
@@ -461,7 +485,9 @@ export default function Builder({ t, lang, go, onError, setHeader }: PageProps) 
                         onKeyDown={(e) => e.key === "Escape" && setItemOpen(false)}
                       >
                         <button type="button" className="chBtnReset chItemBtn" aria-expanded={itemOpen} onClick={() => setItemOpen(!itemOpen)}>
-                          <span style={{ width: 30, height: 30, borderRadius: 5, border: `1.5px solid ${sel.col}`, background: "var(--pm-s3)", flex: "none" }} />
+                          <span style={{ width: 30, height: 30, borderRadius: 5, border: `1.5px solid ${sel.col}`, background: "var(--pm-s3)", flex: "none" }}>
+                            <ItemIcon name={sel.name} />
+                          </span>
                           <span style={{ flex: 1, minWidth: 0 }}>
                             <span style={{ display: "block", color: sel.col, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{sel.name}</span>
                             <span style={{ display: "block", fontSize: 10, color: "var(--pm-t3)" }}>{sel.rar} · Lv 45</span>
@@ -505,7 +531,9 @@ export default function Builder({ t, lang, go, onError, setHeader }: PageProps) 
                                   setItemOpen(false);
                                 }}
                               >
-                                <span style={{ width: 24, height: 24, borderRadius: 4, border: `1.5px solid ${RARITY[r]}`, flex: "none" }} />
+                                <span style={{ width: 24, height: 24, borderRadius: 4, border: `1.5px solid ${RARITY[r]}`, flex: "none" }}>
+                                  <ItemIcon name={name} />
+                                </span>
                                 <span style={{ flex: 1, color: RARITY[r] }}>{name}</span>
                                 <span className="mono" title={t("characters.builder.boostHint")} style={{ fontSize: 12, color: c[0] === "+" ? "#5FD99A" : "#FF6B6B" }}>
                                   {c}
@@ -648,11 +676,11 @@ export default function Builder({ t, lang, go, onError, setHeader }: PageProps) 
                 )}
                 {tab === "daev" && (
                   <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 8 }}>
-                    {DV_BOARDS.map(([board, max]) => (
+                    {dvSummary(planClass(src.cls), dv).map(([board, pts, max]) => (
                       <div key={board} style={{ display: "flex", gap: 10, alignItems: "center", minHeight: 34, borderBottom: "1px solid var(--pm-line)" }}>
                         <span style={{ flex: 1 }}>{board}</span>
                         <span className="mono" style={{ fontSize: 12 }}>
-                          {dvPoints(dv[board] ?? {})} / {max}
+                          {pts} / {max}
                         </span>
                       </div>
                     ))}

@@ -12,7 +12,7 @@ import {
 } from "@phosphor-icons/react";
 import { fmt } from "../ui";
 import { BOSS, DUNGEON, BOSS_STATS, BUFFS, CLASS_SKILLS, DEATH, DURATION, FIGHT_DATE, PHASE, PLAYER_EXTRA, REPORT_LISTS, TL_PERIOD } from "../sample/combat";
-import { ab, Av, Chart, classColor, clock, pc, sampleBadges, sampleParty, sampleSeries, sampleSkills, type Skill } from "./combat/parts";
+import { ab, Av, Chart, classColor, clock, pc, rank, sampleBadges, sampleParty, samplePoints, sampleSeries, sampleSkills, type Row, type Skill } from "./combat/parts";
 import { SkillIcon } from "../skills";
 import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
@@ -40,9 +40,18 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
   const [mine, setMine] = useState(true);
   const [share, setShare] = useState(false);
 
-  const party = sampleParty();
+  const full = sampleParty();
+  // Stats below the chart follow the dragged window; the whole fight when there is none.
+  const win: [number, number] | null = range && Math.abs(range[1] - range[0]) >= 0.01 ? [Math.min(...range), Math.max(...range)] : null;
+  const party = win ? inWindow(full, win) : full;
+  const t0 = win ? win[0] * DURATION : 0;
+  const secs = win ? (win[1] - win[0]) * DURATION : DURATION;
+  const tf = secs / DURATION;
   const p = party.find((r) => r.i === sel)!;
-  const skills = sampleSkills(p, ...sort);
+  const df = p.dmg / full.find((r) => r.i === sel)!.dmg;
+  // dmg already follows the window (p); hits scale with it, so avg/min/max stay put.
+  const skills = sampleSkills(p, ...sort).map((s) => ({ ...s, hits: Math.round(s.hits * df) }));
+  const partyShare = party.reduce((a, r) => a + r.dmg, 0) / full.reduce((a, r) => a + r.dmg, 0);
   const date = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(FIGHT_DATE);
 
   const pos = (e: MouseEvent<HTMLDivElement>) => {
@@ -129,7 +138,7 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
           )}
         </div>
         <Chart
-          lines={sampleSeries(party)}
+          lines={sampleSeries(full)}
           sel={sel}
           label={t("combat.dpsOverTime")}
           style={{ cursor: "crosshair", userSelect: "none" }}
@@ -283,18 +292,18 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
               title={p.n}
               rows={[
                 [t("combat.col.dmg"), fmt(p.dmg, lang)],
-                ["Cast", fmt(PLAYER_EXTRA.casts, lang)],
-                [t("combat.tab.taken"), fmt(PLAYER_EXTRA.taken, lang)],
-                [t("combat.tab.heal"), fmt(PLAYER_EXTRA.heal, lang)],
+                ["Cast", fmt(PLAYER_EXTRA.casts * tf, lang)],
+                [t("combat.tab.taken"), fmt(PLAYER_EXTRA.taken * tf, lang)],
+                [t("combat.tab.heal"), fmt(PLAYER_EXTRA.heal * tf, lang)],
               ]}
             />
             <StatCard
               title={BOSS}
               rows={[
-                [t("combat.col.dmg"), fmt(BOSS_STATS.damage, lang)],
-                ["Cast", fmt(BOSS_STATS.casts, lang)],
-                [t("combat.col.hits"), fmt(BOSS_STATS.hits, lang)],
-                [t("combat.duration"), clock(DURATION)],
+                [t("combat.col.dmg"), fmt(BOSS_STATS.damage * tf, lang)],
+                ["Cast", fmt(BOSS_STATS.casts * tf, lang)],
+                [t("combat.col.hits"), fmt(BOSS_STATS.hits * tf, lang)],
+                [t("combat.duration"), clock(secs)],
               ]}
             />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5,minmax(0,1fr))", gap: 8 }}>
@@ -414,7 +423,7 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
           </div>
           {BUFFS.map(([n, kind, segs]) => {
             const col = kind === "buff" ? "#3FBF7F" : "var(--pm-red)";
-            const up = (segs.reduce((a, [x, y]) => a + (y - x), 0) / DURATION) * 100;
+            const up = (segs.reduce((a, [x, y]) => a + Math.max(0, Math.min(y, t0 + secs) - Math.max(x, t0)), 0) / secs) * 100;
             return (
               <div key={n} style={{ display: "grid", gridTemplateColumns: "200px minmax(0,1fr) 64px", gap: 12, alignItems: "center", height: 32, borderBottom: "1px solid var(--pm-line)" }}>
                 <span style={{ fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{n}</span>
@@ -438,7 +447,7 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
       {(tab === "taken" || tab === "heal" || tab === "targets") && (
         <>
           <div style={{ fontSize: 12, color: "var(--pm-t3)", marginBottom: 8 }}>{t(`combat.caption.${tab}`)}</div>
-          {REPORT_LISTS[tab].map(([a, b, v]) => (
+          {REPORT_LISTS[tab].map(([a, b, v]) => [a, b, v * (tab === "targets" ? partyShare : tf)] as const).map(([a, b, v], _, list) => (
             <div
               key={a}
               style={{
@@ -459,11 +468,11 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
                 <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>{b.startsWith("combat.") ? t(b) : b}</div>
               </div>
               <div className="cbTrack" style={{ height: 8, borderRadius: 4 }}>
-                <div style={{ height: "100%", width: `${(v / REPORT_LISTS[tab][0][2]) * 100}%`, background: "var(--pm-red)", borderRadius: 4 }} />
+                <div style={{ height: "100%", width: `${(v / list[0][2]) * 100}%`, background: "var(--pm-red)", borderRadius: 4 }} />
               </div>
               <span className="num">{ab(v, lang)}</span>
               <span className="num" style={{ color: "var(--pm-t2)", fontSize: 12 }}>
-                {fmt(v / DURATION, lang)}
+                {fmt(v / secs, lang)}
                 {tab === "heal" ? " HPS" : "/s"}
               </span>
             </div>
@@ -473,6 +482,21 @@ export default function Report({ t, lang, onError, setHeader }: PageProps) {
 
       {share && <ShareModal t={t} lang={lang} kind="log" onClose={() => setShare(false)} onError={onError} />}
     </>
+  );
+}
+
+/** Party over a chart window [a, b] (fractions of the fight): each DPS scales with the mean of its chart samples inside it. */
+function inWindow(rows: Row[], [a, b]: [number, number]) {
+  const secs = (b - a) * DURATION;
+  const inside = (k: number) => k / 59 >= a && k / 59 <= b;
+  const mean = (v: number[]) => v.reduce((x, y) => x + y, 0) / v.length;
+  return rank(
+    rows.map((r) => {
+      const pts = samplePoints(r);
+      const cut = pts.filter((_, k) => inside(k));
+      const dps = (r.dps * mean(cut.length ? cut : [pts[Math.round(((a + b) / 2) * 59)]])) / mean(pts);
+      return { key: r.key, n: r.n, cls: r.cls, cp: r.cp, me: r.me, i: r.i, dps, dmg: dps * secs, deaths: r.n === DEATH.name && inside(DEATH.at) ? r.deaths : 0 };
+    }),
   );
 }
 

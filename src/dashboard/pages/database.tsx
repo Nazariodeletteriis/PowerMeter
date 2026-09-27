@@ -18,6 +18,7 @@ import {
   TrophyIcon,
   type Icon,
 } from "@phosphor-icons/react";
+import { ItemIcon } from "../items";
 import { DB_COUNTS, DB_ITEMS } from "../sample/world";
 import { RARITY } from "../ui";
 import type { PageProps } from "./types";
@@ -131,7 +132,9 @@ export default function Database({ t, go, setHeader }: PageProps) {
                     go("item");
                   }}
                 >
-                  <span className="ic" style={{ "--c": col ?? "var(--pm-grey)" } as CSSProperties} />
+                  <span className="ic" style={{ "--c": col ?? "var(--pm-grey)" } as CSSProperties}>
+                    <ItemIcon name={r.name} />
+                  </span>
                   <span style={{ color: col ?? "var(--pm-t1)" }}>{r.name}</span>
                   <span style={{ color: "var(--pm-t2)", fontSize: 12 }}>
                     {t(`world.cat.${r.cat}`)} · {t(r.type, { n: r.n ?? "" })}

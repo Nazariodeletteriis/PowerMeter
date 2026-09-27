@@ -36,14 +36,12 @@ const JOB: Record<string, string> = {
   치유성: "Cleric",
   정령성: "Spiritmaster",
   호법성: "Chanter",
-  권성: "Brawler",
 };
-// Prototype labels → set_target_mode ids (dps_calculator.rs).
+// Tab labels → set_target_mode ids (dps_calculator.rs).
 const MODES = [
   ["Boss", "bossTargets"],
-  ["Last Hit", "lastHitByMe"],
-  ["All Targets", "allTargets"],
   ["Train", "trainTargets"],
+  ["PvP", "pvpTargets"],
 ] as const;
 /** Chart window: 60 dps-update samples (500 ms each). */
 const HISTORY = 60;
@@ -53,6 +51,8 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
   const [data, setData] = useState<Dps>();
   const [ping, setPing] = useState<number>();
   const [sel, setSel] = useState<string | number>();
+  // Chosen tab while no engine snapshot exists (browser preview); the engine's targetMode wins once it reports.
+  const [mode, setMode] = useState("bossTargets");
   const [healSel, setHealSel] = useState("Solenne");
   const [skills, setSkills] = useState<SkillEntry[]>();
   const history = useRef(new Map<number, number[]>());
@@ -137,8 +137,9 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
             <button
               key={id}
               type="button"
-              aria-pressed={(data?.targetMode ?? "bossTargets") === id}
+              aria-pressed={(data?.targetMode ?? mode) === id}
               onClick={() => {
+                setMode(id);
                 setData((d) => d && { ...d, targetMode: id });
                 run(() => invoke("set_target_mode", { mode: id }));
               }}

@@ -629,6 +629,15 @@ button.gridRow:hover {
   height: 36px;
   padding: 0 10px 0 4px;
   border-radius: 6px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.charChip:hover {
+  background: var(--pm-s2);
 }
 .charChip .who {
   line-height: 1.15;

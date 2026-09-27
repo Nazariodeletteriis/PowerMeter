@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { CaretRightIcon, CheckIcon, SwordIcon } from "@phosphor-icons/react";
 import type { Settings } from "./App";
 import type { T } from "./i18n";
+import { ItemIcon } from "./items";
 import { REGIONS } from "./Onboarding";
 import { nextDailyReset, nextWeeklyReset } from "./pages/organizer/resets";
 import { SAMPLE_CHARACTER, SAMPLE_NEWS, SAMPLE_TIMERS, SAMPLE_TODAY, SAMPLE_UPGRADES } from "./sampleData";
@@ -197,7 +198,9 @@ function BuildCard({ t }: { t: T }) {
               background: "var(--pm-s3)",
               flex: "none",
             }}
-          />
+          >
+            <ItemIcon name={u.name} />
+          </div>
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ color: RARITY[u.rarity], whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {u.name}

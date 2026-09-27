@@ -11,7 +11,8 @@ import {
   UserIcon,
 } from "@phosphor-icons/react";
 import { BUILD_REGIONS, BUILD_TAGS, SAMPLE_BUILDS, SAMPLE_ME } from "../sample/characters";
-import { ClassAvatar, CLASSES } from "../ui";
+import { planClass } from "../skills";
+import { ClassAvatar, CLASSES, RELEASED_CLASSES } from "../ui";
 import { ago, openBuild, useMem } from "./characters/shared";
 import type { PageProps } from "./types";
 
@@ -33,6 +34,7 @@ const PORTRAIT: Record<string, string> = {
 };
 
 const ALL = "";
+const PAGE_SIZE = 6;
 const TABS = [
   ["all", "characters.builds.all", SquaresFourIcon],
   ["mine", "characters.builds.mine", UserIcon],
@@ -40,11 +42,12 @@ const TABS = [
 ] as const;
 
 // Prototype pg.builds (pBuilds).
-export default function Builds({ t, lang, go }: PageProps) {
-  const [f, setF] = useMem("bf", { reg: ALL, cls: ALL, tag: ALL, q: "", tab: "all" });
+export default function Builds({ t, lang, go, settings }: PageProps) {
+  const [f, setF] = useMem("bf", { reg: ALL, cls: ALL, tag: ALL, q: "", tab: "all", page: 1 });
   const [broken, setBroken] = useState<Record<string, boolean>>({});
   const [liked, setLiked] = useMem<Record<string, boolean>>("liked", {});
-  const upd = (o: Partial<typeof f>) => setF({ ...f, ...o });
+  // Any filter change goes back to the first page.
+  const upd = (o: Partial<typeof f>) => setF({ ...f, page: 1, ...o });
 
   let list = SAMPLE_BUILDS.filter(
     (x) =>
@@ -56,6 +59,9 @@ export default function Builds({ t, lang, go }: PageProps) {
   if (f.tab === "mine") list = list.filter((x) => x.au === SAMPLE_ME);
   // ponytail: the prototype fakes "liked" as every third build; real likes come with accounts.
   if (f.tab === "liked") list = list.filter((_, i) => i % 3 === 0);
+  const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  const page = Math.min(f.page, pages);
+  const shown = list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const chip = (v: string, label: string, cur: string, key: "reg" | "tag") => (
     <button key={label} type="button" className="chChip" aria-pressed={v === cur} onClick={() => upd({ [key]: v })}>
@@ -94,7 +100,7 @@ export default function Builds({ t, lang, go }: PageProps) {
         </div>
         <div className="kicker">{t("characters.builds.class")}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          {[ALL, ...Object.keys(CLASSES)].map((v) => (
+          {[ALL, ...RELEASED_CLASSES].map((v) => (
             <button key={v || "all"} type="button" className="chBtnReset chClassRow" aria-pressed={v === f.cls} onClick={() => upd({ cls: v })}>
               {v ? (
                 <ClassAvatar cls={v} size={20} />
@@ -133,7 +139,7 @@ export default function Builds({ t, lang, go }: PageProps) {
             type="button"
             className="btn sm fill"
             style={{ padding: "0 12px", marginBottom: 5 }}
-            onClick={() => openBuild({ t: "", au: SAMPLE_ME, cls: "Sorcerer", own: true, isNew: true }, go)}
+            onClick={() => openBuild({ t: "", au: SAMPLE_ME, cls: planClass(settings["pm.class"]), own: true, isNew: true }, go)}
           >
             <PlusIcon aria-hidden="true" />
             {t("characters.builds.create")}
@@ -146,10 +152,10 @@ export default function Builds({ t, lang, go }: PageProps) {
           </div>
         )}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(330px,1fr))", gap: 10 }}>
-          {list.map((x) => {
+          {shown.map((x) => {
             const L = !!liked[x.t];
             const col = CLASSES[x.cls][1];
-            const global = x.reg === "Global";
+            const global = x.reg === "EU";
             const open = () => openBuild({ t: x.t, au: x.au, cls: x.cls, own: x.au === SAMPLE_ME, likes: x.likes }, go);
             return (
               // The whole card opens the build on click; the title button is the keyboard path.
@@ -226,20 +232,21 @@ export default function Builds({ t, lang, go }: PageProps) {
             );
           })}
         </div>
-        {/* Static in the prototype: pages arrive with the online build list. */}
-        <nav aria-label={t("characters.builds.pages")} style={{ display: "flex", justifyContent: "center", gap: 4, marginTop: 16 }}>
-          <button type="button" className="chPage" aria-label={t("characters.builds.prev")}>
-            <CaretLeftIcon aria-hidden="true" />
-          </button>
-          {[1, 2, 3].map((n) => (
-            <button key={n} type="button" className="chPage" aria-current={n === 1 ? "page" : undefined}>
-              {n}
+        {pages > 1 && (
+          <nav aria-label={t("characters.builds.pages")} style={{ display: "flex", justifyContent: "center", gap: 4, marginTop: 16 }}>
+            <button type="button" className="chPage" aria-label={t("characters.builds.prev")} disabled={page === 1} onClick={() => upd({ page: page - 1 })}>
+              <CaretLeftIcon aria-hidden="true" />
             </button>
-          ))}
-          <button type="button" className="chPage" aria-label={t("characters.builds.next")}>
-            <CaretRightIcon aria-hidden="true" />
-          </button>
-        </nav>
+            {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
+              <button key={n} type="button" className="chPage" aria-current={n === page ? "page" : undefined} onClick={() => upd({ page: n })}>
+                {n}
+              </button>
+            ))}
+            <button type="button" className="chPage" aria-label={t("characters.builds.next")} disabled={page === pages} onClick={() => upd({ page: page + 1 })}>
+              <CaretRightIcon aria-hidden="true" />
+            </button>
+          </nav>
+        )}
       </div>
     </div>
   );

@@ -21,7 +21,7 @@ export type BuildSrc = { t: string; au: string; cls: string; own: boolean; isNew
 /** Open a build in the builder, resetting the view like the prototype. */
 export function openBuild(src: BuildSrc, go: (page: string) => void) {
   Object.assign(mem, { bSrc: src, bmode: "dummy", slot: "mh" });
-  if (src.isNew) Object.assign(mem, { bview: "owned", itemOv: {} });
+  if (src.isNew) Object.assign(mem, { bview: "owned", itemOv: {}, newName: "", newTags: [] });
   go("builder");
 }
 

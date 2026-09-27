@@ -25,9 +25,9 @@ export const SAMPLE_CHARACTER = {
 
 // pHome.upgrades
 export const SAMPLE_UPGRADES = [
-  { name: "Earring of the Ashen Tide", rarity: "Heroic", source: "Ashen Sanctum · Vorathis" },
-  { name: "Gloves of Storm Oath", rarity: "Legendary", source: "Crafting · Armorsmith" },
-  { name: "Ring of Quiet Aether", rarity: "Heroic", source: "Shop · Abyss Points" },
+  { name: "Tranquility Diamond Earrings", rarity: "Legendary", source: "Ashen Sanctum · Vorathis" },
+  { name: "Wisdom Gloves", rarity: "Legendary", source: "Crafting · Armorsmith" },
+  { name: "Courage Sapphire Ring", rarity: "Legendary", source: "Shop · Abyss Points" },
 ];
 
 // pHome.homeTimers — seconds left when the page opens.
