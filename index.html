@@ -105,6 +105,13 @@
             <button type="button" class="pmOnly headerBtn pmCloseBtn" aria-label="Close" data-i18n-aria-label="pmWidget.close" title="Close" data-i18n-title="pmWidget.close"><svg class="phIcon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
           </div>
         </div>
+        <!-- PowerMeter: update notice; opens the dashboard's update window (checkRelease.js). -->
+        <button type="button" class="pmOnly pmUpdateStrip" hidden>
+          <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm37.66-101.66a8,8,0,0,1-11.32,11.32L136,107.31V168a8,8,0,0,1-16,0V107.31l-18.34,18.35a8,8,0,0,1-11.32-11.32l32-32a8,8,0,0,1,11.32,0Z"/></svg>
+          <span data-i18n="pmWidget.updateAvailable">Update available</span>
+          <span class="pmUpdateVersion"></span>
+          <span class="pmUpdateNotes" data-i18n="pmWidget.updateNotes">Release notes</span>
+        </button>
         <div class="bossHpBar" style="display:none">
           <div class="bossHpFill"></div>
           <span class="bossHpText">

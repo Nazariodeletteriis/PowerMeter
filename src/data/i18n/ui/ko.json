@@ -416,6 +416,8 @@
       "status": "상태",
       "notReady": "준비 안 됨",
       "gsTip": "장비 점수"
-    }
+    },
+    "updateAvailable": "업데이트 가능",
+    "updateNotes": "릴리스 노트"
   }
 }

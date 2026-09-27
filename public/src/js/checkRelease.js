@@ -19,12 +19,17 @@
 
   let once = false;
 
-  const start = () =>
+  // PowerMeter: re-check every 30 minutes, the meter stays open for whole sessions.
+  const start = () => {
+    if (once) return;
+    once = true;
+    check();
+    setInterval(check, 30 * 60 * 1000);
+  };
+
+  const check = () =>
     setTimeout(async () => {
       try {
-        if (once) return;
-        once = true;
-
         // Wait for the bridge AND for the async version fetch to complete
         for (
           let i = 0;
@@ -68,12 +73,18 @@
 
         if (!hasUpdate) return;
 
+        // PowerMeter: a strip under the meter header instead of the native
+        // MessageBox; it opens the dashboard's update window (TitleBar.tsx
+        // picks up the localStorage flag, shared by both windows).
         console.log("[A2Tools] Update available:", current, "->", latest);
-        await window.__TAURI__.core.invoke("show_update_window", {
-          current,
-          latest,
-          msiUrl: result.msi,
-        });
+        const strip = document.querySelector(".pmUpdateStrip");
+        if (!strip) return;
+        strip.querySelector(".pmUpdateVersion").textContent = latest;
+        strip.hidden = false;
+        strip.onclick = () => {
+          localStorage.setItem("pm.openUpdate", "1");
+          window.__TAURI__.core.invoke("open_dashboard_window").catch((err) => console.error("[PowerMeter] open_dashboard_window failed", err));
+        };
       } catch (e) {
         console.error("[A2Tools] Update check error:", e);
       }

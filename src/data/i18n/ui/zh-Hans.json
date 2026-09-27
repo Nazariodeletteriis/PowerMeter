@@ -416,6 +416,8 @@
       "status": "状态",
       "notReady": "未准备",
       "gsTip": "装备评分"
-    }
+    },
+    "updateAvailable": "有可用更新",
+    "updateNotes": "发行说明"
   }
 }

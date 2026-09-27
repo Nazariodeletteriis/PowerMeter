@@ -416,6 +416,8 @@
       "status": "狀態",
       "notReady": "未準備",
       "gsTip": "裝備評分"
-    }
+    },
+    "updateAvailable": "有可用更新",
+    "updateNotes": "版本資訊"
   }
 }

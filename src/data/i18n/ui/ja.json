@@ -416,6 +416,8 @@
       "status": "状態",
       "notReady": "未準備",
       "gsTip": "Gear score"
-    }
+    },
+    "updateAvailable": "アップデートがあります",
+    "updateNotes": "リリースノート"
   }
 }

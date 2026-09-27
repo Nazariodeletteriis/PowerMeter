@@ -8,6 +8,7 @@ import { Logo } from "./ui";
 
 // Same manifest the meter's checkRelease.js reads (written by build.yml).
 const MANIFEST = "https://github.com/Nazariodeletteriis/PowerMeter/releases/latest/download/latest.json";
+const OPEN_UPDATE_KEY = "pm.openUpdate";
 
 /** a > b for "1.5.0"-style versions; a release beats its own prerelease. */
 function newer(a: string, b: string) {
@@ -46,6 +47,19 @@ export function TitleBar({ t, lang, onError }: { t: T; lang: string; onError: (e
       window.removeEventListener("focus", check);
     };
   }, [onError]);
+
+  // The meter's update strip sets this flag and opens the dashboard (checkRelease.js).
+  useEffect(() => {
+    if (!update) return;
+    const openFromMeter = () => {
+      if (!localStorage.getItem(OPEN_UPDATE_KEY)) return;
+      localStorage.removeItem(OPEN_UPDATE_KEY);
+      setNotes(true);
+    };
+    openFromMeter();
+    window.addEventListener("storage", openFromMeter);
+    return () => window.removeEventListener("storage", openFromMeter);
+  }, [update]);
 
   const win = getCurrentWindow();
   const act = (fn: () => Promise<void>) => () => fn().catch(onError);

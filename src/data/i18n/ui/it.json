@@ -416,6 +416,8 @@
       "status": "Stato",
       "notReady": "Non pronto",
       "gsTip": "Gear score"
-    }
+    },
+    "updateAvailable": "Aggiornamento disponibile",
+    "updateNotes": "Note di rilascio"
   }
 }

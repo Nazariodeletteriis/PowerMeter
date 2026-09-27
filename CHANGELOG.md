@@ -5,6 +5,7 @@ GitHub release and into the in-app update window, and refuses to publish without
 
 ## 0.2.3
 
+- New: the meter shows an "Update available" strip; click it to see the release notes and update in one click.
 - Fixed: the update notice now also appears while the dashboard stays open (checks every 30 minutes and when you switch back to it).
 
 ## 0.2.2
