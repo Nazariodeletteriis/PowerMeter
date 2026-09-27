@@ -572,7 +572,9 @@ button.gridRow:hover {
 }
 
 /* ---------- main column ---------- */
+/* Container "main": pages adapt to the room left by the sidebar (@container main). */
 .main {
+  container: main / inline-size;
   flex: 1;
   min-width: 0;
   display: flex;

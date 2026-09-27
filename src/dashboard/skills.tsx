@@ -20,6 +20,9 @@ const ICON_BASE = "https://assets.playnccdn.com/static-aion2-gamedata/resources/
 
 export const classSkills = (cls: string) => GAME_SKILLS.filter((s) => s.class === cls);
 
+/** The active character's class (onboarding), or Sorcerer when unset or without skill data (Brawler). */
+export const planClass = (cls?: string) => (cls && classSkills(cls).length ? cls : "Sorcerer");
+
 /** A skill by name, preferring the given class (several classes share names like "Shock Release"). */
 export const findSkill = (name: string, cls?: string) =>
   GAME_SKILLS.find((s) => s.name === name && s.class === cls) ?? GAME_SKILLS.find((s) => s.name === name);

@@ -55,16 +55,21 @@ body.legacyUi .pmOnly {
   --pm-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
-/* The other themes: the widget's accent and surface tint come from the
-   theme's own palette in styles.css (--isUser-fill is each theme's accent). */
+/* The other themes: the widget's colours come from the theme's swatch, the
+   --row-fill that paints it in the Settings theme dropdown (styles.css). Hue
+   and chroma are the swatch's. Lightness is bounded in OKLCH so contrast holds
+   for every theme: the bar stays in 0.36-0.42 (powermeter's #7f1112 is 0.38),
+   where white text is AA, and still follows the swatch a little, so light
+   Elyos reads lighter than steel Cogni; accents are at least 0.62 / 0.8 on the
+   dark surface. Graphite Obsidian (near-zero chroma) stays graphite. */
 :root[data-theme]:not([data-theme="powermeter"]) {
-  --pm-red: var(--isUser-fill);
-  --pm-redt: color-mix(in srgb, var(--isUser-fill) 75%, #fff);
-  --pm-hot: var(--isUser-fill);
-  --pm-link: color-mix(in srgb, var(--isUser-fill) 60%, #fff);
-  --pm-deep: color-mix(in srgb, var(--isUser-fill) 42%, #0b0b0e);
+  --pm-red: oklch(from var(--row-fill) max(l, 0.62) c h);
+  --pm-redt: oklch(from var(--row-fill) max(l, 0.8) c h);
+  --pm-hot: oklch(from var(--row-fill) max(l, 0.72) c h);
+  --pm-link: oklch(from var(--row-fill) max(l, 0.84) c h);
+  --pm-deep: oklch(from var(--row-fill) calc(0.3 + l * 0.15) c h);
   --pm-fill: var(--pm-deep);
-  --pm-wsurf: color-mix(in srgb, var(--isUser-fill) 7%, #0b0b0d);
+  --pm-wsurf: oklch(from var(--row-fill) 0.16 calc(c * 0.3) h);
   --pm-wbar: color-mix(in srgb, var(--pm-deep) 85%, transparent);
 }
 

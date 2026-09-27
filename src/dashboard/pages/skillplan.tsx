@@ -14,7 +14,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { SKILL_BUILDS } from "../sample/characters";
-import { classSkills, SkillIcon, type GameSkill } from "../skills";
+import { classSkills, planClass, SkillIcon, type GameSkill } from "../skills";
 import { CLASSES } from "../ui";
 import { SectionHead, useMem } from "./characters/shared";
 import { ShareModal } from "./shared/ShareModal";
@@ -48,10 +48,8 @@ const CARD = { background: "var(--pm-s1)", border: "1px solid var(--pm-line)", b
 export default function SkillPlan({ t, lang, name, settings, onError, setHeader }: PageProps) {
   const title = `${t("nav.skillPlanner")} · ${name}`;
   useEffect(() => setHeader({ title }), [setHeader, title]);
-  // The active character's class (onboarding); Sorcerer when unset or without skill data (Brawler).
-  const mine = classSkills(settings["pm.class"] ?? "");
-  const cls = mine.length ? settings["pm.class"]! : "Sorcerer";
-  const SKILLS = mine.length ? mine : classSkills(cls);
+  const cls = planClass(settings["pm.class"]);
+  const SKILLS = classSkills(cls);
   const col = CLASSES[cls]?.[1] ?? "var(--pm-grey)";
   const start = startOf(SKILLS);
   // Planner state is per class, so switching class does not mix skill ids.
@@ -116,7 +114,7 @@ export default function SkillPlan({ t, lang, name, settings, onError, setHeader 
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "300px minmax(0,1fr) 280px", gap: 12, alignItems: "start" }}>
+      <div className="spGrid">
         <section aria-label={t("characters.skill.library")} style={{ ...CARD, display: "flex", flexDirection: "column", maxHeight: "calc(100vh - 210px)", minHeight: 480 }}>
           <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 8, borderBottom: "1px solid var(--pm-line)" }}>
             <div className="chSeg">
@@ -165,7 +163,7 @@ export default function SkillPlan({ t, lang, name, settings, onError, setHeader 
           </div>
         </section>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
+        <div className="spMid">
           <section style={{ ...CARD, padding: 16 }}>
             <SectionHead title="Stigma" style={{ marginBottom: 14 }}>
               <span className="mono" style={{ fontSize: 11, color: "var(--pm-t1)" }}>
@@ -173,7 +171,7 @@ export default function SkillPlan({ t, lang, name, settings, onError, setHeader 
               </span>
               <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>· {t("characters.skill.stigmaHint")}</span>
             </SectionHead>
-            <div style={{ display: "flex", gap: 26, justifyContent: "center", padding: "8px 0 4px" }}>
+            <div className="spStigma">
               {Array.from({ length: MAX_STIGMA }, (_, i) => {
                 const sk = equipped[i];
                 return (
@@ -193,13 +191,13 @@ export default function SkillPlan({ t, lang, name, settings, onError, setHeader 
             </div>
           </section>
 
-          <section style={{ ...CARD, padding: 16, overflowX: "auto" }}>
+          <section style={{ ...CARD, padding: 16 }}>
             <SectionHead title={t("characters.skill.quickbars")} style={{ marginBottom: 12 }}>
               <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>· {t("characters.skill.quickbarsHint")}</span>
             </SectionHead>
-            <div style={{ display: "flex", flexDirection: "column", gap: 5, width: "max-content", margin: "0 auto" }}>
+            <div className="spBars">
               {[0, 1, 2, 3].map((r) => (
-                <div key={r} style={{ display: "grid", gridTemplateColumns: "repeat(12,40px)", gap: 5 }}>
+                <div key={r} className="spBarRow">
                   {KEYS.map((k, c) => {
                     const pos = `${r},${c}`;
                     const v = bar[pos];
@@ -226,7 +224,7 @@ export default function SkillPlan({ t, lang, name, settings, onError, setHeader 
                   })}
                 </div>
               ))}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(12,40px)", gap: 5 }} aria-hidden="true">
+              <div className="spBarRow" aria-hidden="true">
                 {KEYS.map((k) => (
                   <span key={k} className="mono" style={{ fontSize: 10, color: "var(--pm-t3)", textAlign: "center" }}>
                     {k}
@@ -241,8 +239,8 @@ export default function SkillPlan({ t, lang, name, settings, onError, setHeader 
             {ROWS.map(([type, label]) => (
               <div key={type} style={{ display: "flex", alignItems: "center", minHeight: 52, position: "relative" }}>
                 <span style={{ width: 74, fontSize: 10, letterSpacing: ".08em", color: "var(--pm-t3)" }}>{label}</span>
-                <div style={{ flex: 1, display: "flex", alignItems: "center", position: "relative", minWidth: 0, overflowX: "auto" }}>
-                  <div style={{ position: "absolute", left: 0, right: 0, top: "50%", height: 1, background: "var(--pm-line)" }} />
+                <div className="spRotTrack">
+                  <div className="spRotLine" />
                   {rot[type].flatMap((id) => byId(id) ?? []).map((sk, k) => {
                     const id = sk.id;
                     return (
@@ -277,7 +275,7 @@ export default function SkillPlan({ t, lang, name, settings, onError, setHeader 
           </section>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, position: "sticky", top: 0 }}>
+        <div className="spSide">
           <section aria-label={cur.name} style={{ ...CARD, padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", right: -40, top: -40, width: 160, height: 160, background: `radial-gradient(circle,${col}33,transparent 70%)` }} />
             <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, textAlign: "center" }}>

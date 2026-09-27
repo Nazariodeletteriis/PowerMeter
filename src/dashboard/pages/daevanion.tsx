@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { ArrowCounterClockwiseIcon, CheckIcon, ChecksIcon, FloppyDiskIcon, ShareNetworkIcon } from "@phosphor-icons/react";
-import { DV_BOARDS, DV_BUILDS, DV_CENTER, DV_COST, DV_N, dvLabel, dvPoints, dvType, type DvType } from "../sample/characters";
+import { ArrowCounterClockwiseIcon, CheckIcon, ChecksIcon, FloppyDiskIcon, PlusIcon, ShareNetworkIcon } from "@phosphor-icons/react";
+import { DV_BOARDS, DV_BUILDS, DV_CENTER, DV_COST, DV_N, dvLabel, dvPoints, dvSkill, dvType, type DvType } from "../sample/characters";
+import { classSkills, planClass, SkillIcon, type GameSkill } from "../skills";
 import { useMem, useToast } from "./characters/shared";
 import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
@@ -35,7 +36,7 @@ function connected(on: Board): Board {
 }
 
 // Prototype pg.daevanion (pDaev + pX).
-export default function Daevanion({ t, lang, name, onError, setHeader }: PageProps) {
+export default function Daevanion({ t, lang, name, settings, onError, setHeader }: PageProps) {
   const title = `${t("nav.daevanion")} · ${name}`;
   useEffect(() => setHeader({ title }), [setHeader, title]);
   const [all, setAll] = useMem<Record<string, Board>>("dv", {});
@@ -49,9 +50,13 @@ export default function Daevanion({ t, lang, name, onError, setHeader }: PagePro
   const setBoard = (next: Board) => setAll({ ...all, [bd]: next });
   const max = DV_BOARDS.find((b) => b[0] === bd)![1];
   const pts = dvPoints(on);
-  const nodeName = (type: DvType, x: number, y: number) => dvLabel(type, x, y) ?? t("characters.dv.startNode");
+  // Skill nodes raise one of the class's active skills by a level.
+  const actives = classSkills(planClass(settings["pm.class"])).filter((s) => s.type === "Active");
+  const nodeName = (type: DvType, x: number, y: number) =>
+    type === "skill" ? `${dvSkill(x, y, actives).name} Lv +1` : (dvLabel(type, x, y) ?? t("characters.dv.startNode"));
 
   const gains: Record<string, number> = {};
+  const gainSkill: Record<string, GameSkill> = {};
   const cells = [];
   for (let y = 0; y < DV_N; y++)
     for (let x = 0; x < DV_N; x++) {
@@ -65,6 +70,7 @@ export default function Daevanion({ t, lang, name, onError, setHeader }: PagePro
       const can = !act && STEPS.some(([dx, dy]) => on[`${x + dx},${y + dy}`]);
       const label = nodeName(type, x, y);
       if (act && type !== "start") gains[label] = (gains[label] ?? 0) + 1;
+      if (type === "skill") gainSkill[label] = dvSkill(x, y, actives);
       const col = COLOR[type];
       const click = () => {
         if (type !== "start" && act) {
@@ -87,13 +93,23 @@ export default function Daevanion({ t, lang, name, onError, setHeader }: PagePro
           onClick={click}
           style={{
             background: act ? (type === "stat" ? "var(--pm-tint)" : `${col}33`) : "var(--pm-s2)",
+            overflow: "hidden",
             border: act ? `1.5px solid ${type === "stat" ? "var(--pm-red)" : col}` : can ? "1px dashed var(--pm-grey)" : "1px solid var(--pm-line)",
             boxShadow: pick === k ? "0 0 0 2px var(--pm-t1)" : "none",
             opacity: act || can || type === "start" ? 1 : 0.55,
             color: act ? "var(--pm-t1)" : col,
           }}
         >
-          {(icons || type !== "skill") && { skill: "SK", rune: "R", start: "◆", stat: "" }[type]}
+          {type === "skill" ? (
+            icons && (
+              // Desaturated until the node is taken, so the chosen path stands out.
+              <SkillIcon skill={dvSkill(x, y, actives)} name={label} style={{ filter: act ? "none" : "grayscale(0.5)" }} />
+            )
+          ) : type === "stat" ? (
+            <PlusIcon aria-hidden="true" weight="bold" style={{ fontSize: 11, color: act ? "var(--pm-t1)" : "var(--pm-t3)" }} />
+          ) : (
+            { rune: "R", start: "◆" }[type]
+          )}
         </button>,
       );
     }
@@ -235,6 +251,11 @@ export default function Daevanion({ t, lang, name, onError, setHeader }: PagePro
             {Object.keys(gains).length === 0 && <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{t("characters.dv.noGains")}</div>}
             {Object.entries(gains).map(([n, c]) => (
               <div key={n} style={{ display: "flex", gap: 8, fontSize: 12, minHeight: 24, alignItems: "center", borderBottom: "1px solid var(--pm-line)" }}>
+                {gainSkill[n] && (
+                  <span style={{ width: 18, height: 18, flex: "none", borderRadius: 4, overflow: "hidden", display: "grid", placeItems: "center", fontSize: 7, background: "var(--pm-s3)" }}>
+                    <SkillIcon skill={gainSkill[n]} name={gainSkill[n].name} />
+                  </span>
+                )}
                 <span style={{ flex: 1, color: "var(--pm-t2)" }}>{n}</span>
                 <span className="mono">×{c}</span>
               </div>

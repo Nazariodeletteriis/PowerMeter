@@ -27,6 +27,13 @@ Windows 10/11 (x64). One download, nothing to install beforehand:
 Npcap's license does not allow shipping it inside the MSI, which is why the setup fetches it for
 you instead. Updates arrive in-app.
 
+### Requirements
+
+- Windows desktop or laptop (the installer is a Windows `.msi`).
+- A screen that fits a 1024×600 window: the dashboard opens maximized and does not go smaller.
+- Phones are not supported (screen too small, and there is no Windows installer for them).
+- Tablets will need the upcoming Android APK, which is not available yet.
+
 ## Development
 
 Prerequisites: Rust (stable), Node.js 24, Npcap.

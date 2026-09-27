@@ -3,6 +3,13 @@
 Every release needs a `## <version>` section here: CI copies its bullet points into the
 GitHub release and into the in-app update window, and refuses to publish without it.
 
+## 0.2.6
+
+- Fixed: every meter theme now has its own colour (as shown in the theme menu); Obsidian and AION2 look right.
+- New: the Daevanion Planner shows the real skill icon on skill (+1) nodes.
+- New: the dashboard opens maximized; below 1200 px wide the sidebar collapses by itself and the Skill Planner switches to two columns, so nothing overflows down to 1024×600.
+- New: build cards in Build community show the class portrait.
+
 ## 0.2.5
 
 - Fixed: clicking the lock of a locked meter now really unlocks it (it turns red when you hover it).

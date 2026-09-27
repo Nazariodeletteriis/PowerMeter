@@ -253,7 +253,10 @@ fn show_dashboard(app: &tauri::AppHandle) -> Result<(), String> {
         // The dashboard draws its own title bar (design: 34px bar with window controls).
         .decorations(false)
         .inner_size(1280.0, 800.0)
-        .min_inner_size(1024.0, 640.0)
+        // Desktop, laptop and landscape-tablet sizes only: below this the
+        // layout isn't supported (no phone/portrait mode, see README).
+        .min_inner_size(1024.0, 600.0)
+        .maximized(true)
         .background_color(tauri::window::Color(10, 14, 22, 255))
         .center()
         .build()

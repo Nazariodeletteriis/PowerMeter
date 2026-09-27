@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   CaretDoubleLeftIcon,
@@ -65,11 +65,18 @@ const PAGES = Object.fromEntries(
   ).map(([path, Page]) => [path.slice("./pages/".length, -".tsx".length), Page]),
 );
 
+// Under 1200 px the sidebar starts collapsed (PowerMeter's minimum window is 1024×600).
+const NARROW = window.matchMedia("(max-width: 1199px)");
+const onNarrow = (cb: () => void) => (NARROW.addEventListener("change", cb), () => NARROW.removeEventListener("change", cb));
+
 export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Props) {
   const capture = usePoll(getCaptureStatus, 2000);
   const game = usePoll(getGameTitle, 2000);
   const [page, setPage] = useState("home");
-  const [collapsed, setCollapsed] = useState(false);
+  const narrow = useSyncExternalStore(onNarrow, () => NARROW.matches);
+  // null = follow the window width; once the user toggles, their choice wins.
+  const [userCollapsed, setCollapsed] = useState<boolean | null>(null);
+  const collapsed = userCollapsed ?? narrow;
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [palette, setPalette] = useState(false);
   const [diagnosis, setDiagnosis] = useState(false);

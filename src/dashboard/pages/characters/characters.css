@@ -463,6 +463,73 @@
   background: var(--pm-s3);
   box-shadow: inset 2px 0 0 #db0000;
 }
+/* Skill Planner: library | stigma, bars, rotation | detail. Under 1100 px of
+   main column the detail column moves under the library (container "main"). */
+.spGrid {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 280px;
+  gap: 12px;
+  align-items: start;
+}
+.spMid,
+.spSide {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.spSide {
+  position: sticky;
+  top: 0;
+}
+@container main (max-width: 1100px) {
+  .spGrid { grid-template-columns: 300px minmax(0, 1fr); }
+  .spMid { grid-column: 2; grid-row: 1 / span 2; }
+  .spSide { grid-column: 1; position: static; }
+}
+/* Stigma sockets and quickbars shrink or wrap instead of overflowing. */
+.spStigma {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 26px;
+  padding: 8px 0 4px;
+}
+.spBars {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 535px; /* 12 × 40 px keys + gaps */
+  margin: 0 auto;
+}
+.spBarRow {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 40px));
+  gap: 5px;
+}
+.spBarRow .chBarCell {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+.spRotTrack {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 8px;
+}
+/* Runs through the first row of chips (38 px tall). */
+.spRotLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 19px;
+  height: 1px;
+  background: var(--pm-line);
+}
 .chBarCell {
   width: 40px;
   height: 40px;

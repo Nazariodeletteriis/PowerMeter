@@ -165,10 +165,10 @@ export function dvType(x: number, y: number): DvType | null {
   return "stat";
 }
 const DV_STATS = ["Attack +12", "HP +180", "Accuracy +15", "Critical Hit +14", "Defense +20", "Magic Boost +10", "Evasion +12", "PvE Attack +8"];
-const DV_SKILLS = ["Flame Arrow Lv +1", "Ice Chain Lv +1", "Hellfire Lv +1", "Soul Freeze Lv +1", "Frost Burst Lv +1"];
-/** Node label; null for the start node (translated by the page). */
+/** Which of the class's skills a skill node raises (the page passes the real list). */
+export const dvSkill = <S>(x: number, y: number, skills: S[]) => skills[(x + y) % skills.length];
+/** Node label; null for the start node (translated by the page). Skill nodes are named by the page. */
 export function dvLabel(t: DvType, x: number, y: number): string | null {
-  if (t === "skill") return DV_SKILLS[(x + y) % DV_SKILLS.length];
   if (t === "rune") return "Rune: Aether Surge";
   if (t === "start") return null;
   return DV_STATS[(x * 2 + y) % DV_STATS.length];

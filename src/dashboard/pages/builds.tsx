@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   CaretLeftIcon,
   CaretRightIcon,
@@ -14,6 +15,23 @@ import { ClassAvatar, CLASSES } from "../ui";
 import { ago, openBuild, useMem } from "./characters/shared";
 import type { PageProps } from "./types";
 
+// Standard class portraits, hotlinked at runtime (never bundled): NCSoft's game
+// CDN has only the class emblems (UT_Class_<Class>_Large.png), so these are the
+// ones questlog.gg serves for its build cards. The hashed names change when
+// questlog redeploys; a failed load falls back to the class icon on the tint.
+// No Brawler portrait exists yet.
+const PORTRAIT_BASE = "";
+const PORTRAIT: Record<string, string> = {
+  Gladiator: "gladiator.BX_aSO0C.webp",
+  Templar: "templar.BY_wrmrR.webp",
+  Assassin: "assassin.C_F4-F8z.webp",
+  Ranger: "ranger.Dmc84MYb.webp",
+  Sorcerer: "sorcerer.CSSgJHSN.webp",
+  Spiritmaster: "elementalist.ODaonq0L.webp",
+  Cleric: "cleric.Dz3xHG9D.webp",
+  Chanter: "chanter.BTjTO8gb.webp",
+};
+
 const ALL = "";
 const TABS = [
   ["all", "characters.builds.all", SquaresFourIcon],
@@ -24,6 +42,7 @@ const TABS = [
 // Prototype pg.builds (pBuilds).
 export default function Builds({ t, lang, go }: PageProps) {
   const [f, setF] = useMem("bf", { reg: ALL, cls: ALL, tag: ALL, q: "", tab: "all" });
+  const [broken, setBroken] = useState<Record<string, boolean>>({});
   const [liked, setLiked] = useMem<Record<string, boolean>>("liked", {});
   const upd = (o: Partial<typeof f>) => setF({ ...f, ...o });
 
@@ -136,9 +155,20 @@ export default function Builds({ t, lang, go }: PageProps) {
               // The whole card opens the build on click; the title button is the keyboard path.
               <div key={x.t} className="chBuildCard" onClick={open}>
                 <div style={{ width: 84, flex: "none", position: "relative", background: `linear-gradient(160deg,${col}55 0%,var(--pm-s2) 70%)` }}>
-                  <span style={{ position: "absolute", left: "50%", top: "44%", transform: "translate(-50%,-50%)", fontSize: 9, color: "var(--pm-t3)" }}>
-                    {t("characters.builds.portrait")}
-                  </span>
+                  {PORTRAIT[x.cls] && !broken[x.cls] ? (
+                    <img
+                      src={PORTRAIT_BASE + PORTRAIT[x.cls]}
+                      alt=""
+                      loading="lazy"
+                      draggable={false}
+                      onError={() => setBroken({ ...broken, [x.cls]: true })}
+                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 12%" }}
+                    />
+                  ) : (
+                    <span style={{ position: "absolute", left: "50%", top: "44%", transform: "translate(-50%,-50%)", fontSize: 9, color: "var(--pm-t3)" }}>
+                      {t("characters.builds.portrait")}
+                    </span>
+                  )}
                   <ClassAvatar cls={x.cls} size={24} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0, padding: "10px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
