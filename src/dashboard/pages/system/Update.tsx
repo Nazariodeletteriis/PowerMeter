@@ -15,6 +15,8 @@ export type UpdateInfo = {
   date?: string;
   sizeMb?: number;
   notes?: string[];
+  /** Same notes per UI language (changelog/<lang>.md); `notes` is the English fallback. */
+  notesI18n?: Record<string, string[]>;
 };
 
 const BTN = { height: 34, padding: "0 14px" };
@@ -108,6 +110,7 @@ export function UpdateModal({
   onClose: () => void;
 }) {
   const [phase, setPhase] = useState<Phase>("notes");
+  const notes = update.notesI18n?.[lang] ?? update.notes;
   const [pct, setPct] = useState<number | null>(null); // null: no progress events (yet)
   const [error, setError] = useState("");
   const busy = phase === "download" || phase === "install";
@@ -203,9 +206,9 @@ export function UpdateModal({
       {phase === "notes" ? (
         <>
           {meta.length > 0 && <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{meta.join(" · ")}</div>}
-          {update.notes && (
+          {notes && (
             <ul style={{ fontSize: 13, lineHeight: 1.7, color: "var(--pm-t2)" }}>
-              {update.notes.map((n) => (
+              {notes.map((n) => (
                 <li key={n}>• {n}</li>
               ))}
             </ul>

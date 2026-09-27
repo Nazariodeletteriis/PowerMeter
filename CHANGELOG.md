@@ -2,6 +2,11 @@
 
 Every release needs a `## <version>` section here: CI copies its bullet points into the
 GitHub release and into the in-app update window, and refuses to publish without it.
+The same section must also exist, translated, in changelog/<lang>.md for every UI language.
+
+## 0.2.7
+
+- Fixed: the release notes in the update window now appear in the language you chose for PowerMeter.
 
 ## 0.2.6
 
