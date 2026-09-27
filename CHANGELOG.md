@@ -5,6 +5,7 @@ GitHub release and into the in-app update window, and refuses to publish without
 
 ## 0.2.4
 
+- Fixed: changing "Meter layout" in the meter settings now applies right away instead of after a restart.
 - Fixed: a locked meter can be unlocked with the mouse: hover the lock in its top-right corner and click it.
 - New: locking the meter shows for a few seconds how to unlock it; "Open widget" in the dashboard also unlocks it.
 

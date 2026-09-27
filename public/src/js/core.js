@@ -3990,6 +3990,11 @@ class DpsApp {
   // dropdowns (theme, layout, player limit) are not native inputs and need
   // their own handling, so they are deliberately absent.
   applyRemoteSettingChange(key, value) {
+    // PowerMeter: "Meter layout" is a dropdown pair (beta/classic + slim), not a
+    // form control, so the map below can't reach it and the meter kept its layout
+    // until restart. Apply it directly; no persist, so there is no echo.
+    if (key === this.storageKeys.betaUi) return this.setBetaUi(value !== "false");
+    if (key === this.storageKeys.slimMode) return this.setSlimMode(value === "true");
     const selector = REMOTE_APPLIED_SETTING_CONTROLS[key];
     if (!selector) return;
     const control = document.querySelector(selector);
