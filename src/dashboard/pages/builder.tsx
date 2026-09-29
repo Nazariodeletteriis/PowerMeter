@@ -388,6 +388,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   };
   const L = !!liked[src.t];
   const likeBuild = () => setLiked({ ...liked, [src.t]: !L });
+  const likes = (src.likes ?? 0) + (L ? 1 : 0);
 
   const seg = (items: [string, string][], value: string, set: (v: string) => void, style?: CSSProperties) => (
     <div className="chSeg" style={style}>
@@ -459,11 +460,12 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
           {src.cls}
         </span>
         <span style={{ fontSize: 12, color: "var(--pm-t3)", display: "flex", gap: 10 }}>
-          <span aria-label={t("characters.builder.likes", { n: 17 })}>
-            <HeartIcon aria-hidden="true" style={{ verticalAlign: "-2px" }} /> 17
+          <span aria-label={t("characters.builder.likes", { n: likes })}>
+            <HeartIcon aria-hidden="true" style={{ verticalAlign: "-2px" }} /> {likes}
           </span>
-          <span aria-label={t("characters.builder.comments", { n: 2 })}>
-            <ChatCircleIcon aria-hidden="true" style={{ verticalAlign: "-2px" }} /> 2
+          {/* No comment system yet, so there are none to count. */}
+          <span aria-label={t("characters.builder.comments", { n: 0 })}>
+            <ChatCircleIcon aria-hidden="true" style={{ verticalAlign: "-2px" }} /> 0
           </span>
         </span>
         {seg([["dummy", t("characters.builder.modeBuilder")], ["missing", t("characters.builder.modeMissing")]], mode, setMode, { marginLeft: 8 })}
@@ -510,7 +512,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
           <button type="button" className="btn sm" aria-pressed={L} style={{ color: L ? "var(--pm-redt)" : "var(--pm-t1)" }} onClick={likeBuild}>
             <HeartIcon weight={L ? "fill" : "regular"} aria-hidden="true" />
             <span className="srOnly">{t("characters.like")}</span>
-            {(src.likes ?? 0) + (L ? 1 : 0)}
+            {likes}
           </button>
         </div>
       )}

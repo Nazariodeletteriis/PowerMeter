@@ -7,6 +7,8 @@ The same section must also exist, translated, in changelog/<lang>.md for every U
 ## 0.3.1
 
 - New: Before you start: the full Terms and conditions and Privacy policy (English, Italian, German, French, Spanish, Portuguese, Russian) must be accepted before PowerMeter reads any combat data. Existing users accept them once at the next launch.
+- Fixed: Gear Viewer listed most pieces twice (the same item exists once per faction); now each piece appears once.
+- Fixed: the build header showed placeholder like and comment counts instead of the build's real likes.
 
 ## 0.3.0
 

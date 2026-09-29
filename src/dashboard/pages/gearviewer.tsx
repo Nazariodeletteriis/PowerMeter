@@ -39,6 +39,18 @@ const readPins = (json?: string): string[] => {
   }
 };
 
+// Many pieces exist twice under different ids (one per faction) with the same
+// stats: keep one row each, or the list shows everything twice.
+const onePerPiece = (rows: GearRow[]) => {
+  const seen = new Set<string>();
+  return rows.filter((r) => {
+    const key = `${r.item.name}|${r.item.sub}|${r.score}|${JSON.stringify(r.stats)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
 const sortValue = (r: GearRow, k: SortKey) => (k === "__level" ? (r.item.lv ?? 0) : k === "__score" ? r.score : (r.stats[k] ?? 0));
 
 export default function GearViewer({ t, lang, go, setHeader, settings, save, onError }: PageProps) {
@@ -48,14 +60,14 @@ export default function GearViewer({ t, lang, go, setHeader, settings, save, onE
   const rows = useMemo<GearRow[]>(
     () =>
       ready
-        ? (DATA as Item[])
+        ? onePerPiece((DATA as Item[])
             .filter((i) => ["weapon", "armor", "accessory", "equip"].includes(i.cat) && ALL_SLOTS.includes(i.sub ?? ""))
             .map((item) => {
               const top = { id: item.id, enh: maxEnh(item.id), subs: [] };
               return { item, stats: baseStats(top), score: pieceLevel(top) };
             })
             .filter((r) => r.score > 0) // not in equip.json: no stats to show
-            .sort((a, b) => (b.item.lv ?? 0) - (a.item.lv ?? 0) || b.item.grade - a.item.grade || a.item.name.localeCompare(b.item.name))
+            .sort((a, b) => (b.item.lv ?? 0) - (a.item.lv ?? 0) || b.item.grade - a.item.grade || a.item.name.localeCompare(b.item.name)))
         : [],
     [ready],
   );
