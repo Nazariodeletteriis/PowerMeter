@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.3.5
+
+- New: Monsters found inside a dungeon show the world map with the dungeon entrance and a link to the dungeon (Found inside), and monsters of Verteron's Illusion Curtain layer are now on the Verteron map.
+
 ## 0.3.4
 
 - New: Supporter plans on Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € a month). The meter and most tabs stay free; Database, Fight report, Online logs and Rankings need Recluta, Party, Crafting and Calculators need Daeva. Locked tabs stay in the menu with a padlock and a blurred preview.

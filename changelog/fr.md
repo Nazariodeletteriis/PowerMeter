@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.5
+
+- Nouveau : les monstres situés dans un donjon affichent la carte du monde avec l'entrée du donjon et un lien vers celui-ci, et les monstres de la couche Illusion Curtain de Verteron apparaissent désormais sur la carte de Verteron.
+
 ## 0.3.4
 
 - Nouveau : formules Soutien sur Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € par mois). Le meter et la plupart des onglets restent gratuits ; Base de données, Rapport de combat, Journaux en ligne et Classements nécessitent Recluta, Groupe et rotations, Artisanat et Calculateurs nécessitent Daeva. Les onglets verrouillés restent dans le menu avec un cadenas et un aperçu flouté.

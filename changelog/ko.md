@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.5
+
+- 신규: 던전 안에 있는 몬스터는 던전 입구가 표시된 월드 맵과 던전 링크를 보여 주며, Verteron의 Illusion Curtain 레이어 몬스터도 이제 Verteron 맵에 표시됩니다.
+
 ## 0.3.4
 
 - 신규: Patreon 후원자 플랜 출시(Recluta 3 €, Daeva 7 €, Empyrean 15 €, 월간). 미터와 대부분의 탭은 계속 무료입니다. 데이터베이스, 전투 리포트, 온라인 로그, 랭킹은 Recluta가, 파티와 로테이션, 제작, 계산기는 Daeva가 필요합니다. 잠긴 탭은 메뉴에 자물쇠 아이콘과 흐린 미리보기로 남아 있습니다.

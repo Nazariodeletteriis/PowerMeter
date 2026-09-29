@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.5
+
+- Nuovo: i mostri che si trovano dentro un dungeon mostrano la mappa del mondo con l'ingresso del dungeon e un link al dungeon (Si trova dentro), e i mostri dello strato Illusion Curtain di Verteron ora compaiono sulla mappa di Verteron.
+
 ## 0.3.4
 
 - Nuovo: piani Supporter su Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € al mese). Il meter e la maggior parte delle tab restano gratis; Database, Report combattimento, Log online e Classifiche richiedono Recluta, Party, Crafting e Calcolatori richiedono Daeva. Le tab bloccate restano nel menu con un lucchetto e un'anteprima sfocata.

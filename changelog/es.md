@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.5
+
+- Nuevo: los monstruos que están dentro de una mazmorra muestran el mapa del mundo con la entrada de la mazmorra y un enlace a ella, y los monstruos de la capa Illusion Curtain de Verteron ahora aparecen en el mapa de Verteron.
+
 ## 0.3.4
 
 - Nuevo: planes de Mecenas en Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € al mes). El medidor y la mayoría de las pestañas siguen siendo gratis; Base de datos, Informe de combate, Registros en línea y Clasificaciones requieren Recluta, Grupo y rotaciones, Crafteo y Calculadoras requieren Daeva. Las pestañas bloqueadas permanecen en el menú con un candado y una vista previa borrosa.

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.5
+
+- Novo: monstros que ficam dentro de uma masmorra mostram o mapa do mundo com a entrada da masmorra e um link para ela, e os monstros da camada Illusion Curtain de Verteron agora aparecem no mapa de Verteron.
+
 ## 0.3.4
 
 - Novo: planos de Apoiador no Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € por mês). O medidor e a maioria das abas continuam gratuitas; Banco de dados, Relatório de combate, Logs online e Classificações exigem Recluta, Grupo e rotações, Crafting e Calculadoras exigem Daeva. As abas bloqueadas ficam no menu com um cadeado e uma prévia desfocada.

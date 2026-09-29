@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.5
+
+- Neu: Monster in einem Dungeon zeigen die Weltkarte mit dem Dungeon-Eingang und einen Link zum Dungeon, und Monster der Illusion-Curtain-Ebene von Verteron erscheinen jetzt auf der Karte von Verteron.
+
 ## 0.3.4
 
 - Neu: Unterstützer-Pläne auf Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € im Monat). Das Meter und die meisten Tabs bleiben kostenlos; Datenbank, Kampfbericht, Online-Logs und Ranglisten erfordern Recluta, Gruppe und Rotationen, Crafting und Rechner erfordern Daeva. Gesperrte Tabs bleiben im Menü, mit Schloss-Symbol und unscharfer Vorschau.

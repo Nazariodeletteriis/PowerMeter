@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.5
+
+- 新機能：ダンジョン内にいるモンスターは、ダンジョン入口を示すワールドマップとダンジョンへのリンクを表示します。VerteronのIllusion Curtainレイヤーのモンスターも、Verteronのマップに表示されるようになりました。
+
 ## 0.3.4
 
 - 新機能：Patreonでのサポータープラン（Recluta 3 €、Daeva 7 €、Empyrean 15 €、月額）。メーターとほとんどのタブは引き続き無料です。データベース、戦闘レポート、オンラインログ、ランキングにはReclutaが、パーティとローテーション、クラフト、計算機にはDaevaが必要です。ロックされたタブはメニューに残り、錠前アイコンとぼかしたプレビューが表示されます。

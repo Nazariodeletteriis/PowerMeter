@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.5
+
+- 新增：位於副本內的怪物會顯示標有副本入口的世界地圖與副本連結，Verteron 的 Illusion Curtain 層怪物現在也會顯示在 Verteron 地圖上。
+
 ## 0.3.4
 
 - 新增：Patreon 推出贊助者方案（Recluta 3 €、Daeva 7 €、Empyrean 15 €，每月）。計量器與大部分分頁仍然免費；資料庫、戰鬥報告、線上記錄與排行榜需要 Recluta，隊伍與循環、製作與計算器需要 Daeva。鎖定的分頁仍保留在選單中，顯示鎖頭圖示與模糊預覽。
