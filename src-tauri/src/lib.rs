@@ -1546,9 +1546,11 @@ pub fn run() {
             let (tx, rx) = mpsc::channel::<CapturedPayload>(4096);
 
             let capturer = PcapCapturer::new(tx);
-            if npcap_available {
-                capturer.start();
-            }
+            powermeter::start_capture_after_terms(app.handle(), move || {
+                if npcap_available {
+                    capturer.start();
+                }
+            });
 
             let mut dispatcher = CaptureDispatcher::new(
                 data_storage.clone(),

@@ -11,6 +11,39 @@ use crate::platform::hotkeys::{parse_hotkey_label, HotkeyManager};
 use crate::AppState;
 
 const CLICK_THROUGH_HOTKEY_KEY: &str = "pm.clickThroughHotkey";
+/// Must match TERMS_VERSION in src/dashboard/Onboarding.tsx.
+const TERMS_VERSION: &str = "2026-09-29";
+
+/// Nothing is captured before the user accepts the current terms (the last
+/// onboarding step writes `pm.termsAccepted`): until then the meter stays
+/// hidden and `start` waits. The meter window opens on launch next to the
+/// dashboard, so without this it would read combat data during onboarding.
+pub fn start_capture_after_terms(app: &tauri::AppHandle, start: impl FnOnce() + Send + 'static) {
+    let accepted = |app: &tauri::AppHandle| {
+        app.try_state::<AppState>()
+            .is_some_and(|s| s.settings.get("pm.termsAccepted").as_deref() == Some(TERMS_VERSION))
+    };
+    if accepted(app) {
+        start();
+        return;
+    }
+    set_user_hidden(true);
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.hide();
+    }
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        while !accepted(&app) {
+            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+        }
+        set_user_hidden(false);
+        if let Some(window) = app.get_webview_window("main") {
+            let _ = window.show();
+            let _ = window.set_always_on_top(true);
+        }
+        start();
+    });
+}
 
 /// Not persisted on purpose: the overlay always starts clickable, so a user
 /// who forgot the hotkey is never locked out of it.

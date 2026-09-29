@@ -13,6 +13,8 @@ import { LANGUAGE_SETTING, LANGUAGES, type Key, type T } from "./i18n";
 import { USER_NAME_KEY } from "./Shell";
 import { CLASSES, Logo } from "./ui";
 import { usePoll } from "./usePoll";
+// .orgTabs/.orgTab, the app's tab strip, reused by the legal step.
+import "./pages/organizer/organizer.css";
 
 // Region names are short codes, so they are not translated. Only the EU/NA
 // servers PowerMeter supports are offered; a saved "kr"/"tw" falls back to EU.
@@ -30,13 +32,27 @@ const NAME_MAX_LENGTH = 32;
 const STEPS = 5;
 const NPCAP_URL = "https://npcap.com/#download";
 
+// Date of the terms/privacy text the user accepted, saved as pm.termsAccepted.
+// Bump it whenever src/data/legal changes in substance: App then shows only
+// the legal step to users who accepted an older version. The backend keeps
+// the same constant (powermeter.rs) and captures nothing until it matches.
+export const TERMS_VERSION = "2026-09-29";
+
+// Terms and privacy as static HTML (scripts/sync-legal.mjs), one chunk per
+// language, loaded when the legal step opens. Languages without a translation
+// read the English text.
+type Legal = { terms: string; privacy: string };
+const LEGAL = import.meta.glob<Legal>("../data/legal/*.json", { import: "default" });
+const loadLegal = (lang: string) => (LEGAL[`../data/legal/${lang}.json`] ?? LEGAL["../data/legal/en.json"])();
+const LEGAL_TABS = ["terms", "privacy"] as const;
+
 const checkNpcap = () => invoke<boolean>("npcap_installed");
 const checkAdmin = () => invoke<boolean>("is_admin");
 const checkGame = () => invoke<string | null>("get_aion2_window_title");
 
-type Props = { t: T; lang: string; settings: Settings; save: SaveSetting; startStep: number };
+type Props = { t: T; lang: string; settings: Settings; save: SaveSetting; startStep: number; termsOnly?: boolean };
 
-export function Onboarding({ t, lang, settings, save, startStep }: Props) {
+export function Onboarding({ t, lang, settings, save, startStep, termsOnly }: Props) {
   const [step, setStep] = useState(startStep);
   const nav = {
     t,
@@ -44,6 +60,8 @@ export function Onboarding({ t, lang, settings, save, startStep }: Props) {
     onBack: () => setStep((s) => s - 1),
     onNext: () => setStep((s) => s + 1),
   };
+  // Already onboarded, but the terms changed: only the legal step, standalone.
+  if (termsOnly) return <Disclaimer {...nav} onBack={undefined} lang={lang} save={save} updated />;
   switch (step) {
     case 1:
       return <Welcome {...nav} lang={lang} save={save} />;
@@ -54,11 +72,13 @@ export function Onboarding({ t, lang, settings, save, startStep }: Props) {
     case 4:
       return <Account {...nav} />;
     default:
-      return <Disclaimer {...nav} save={save} />;
+      return <Disclaimer {...nav} lang={lang} save={save} />;
   }
 }
 
-type StepProps = { t: T; step: number; onBack: () => void; onNext: () => void };
+// No onBack: a standalone screen (terms re-acceptance), with no way back and
+// no step progress.
+type StepProps = { t: T; step: number; onBack?: () => void; onNext: () => void };
 
 /** Runs an invoke-backed action, tracking busy state and the error to show. */
 function useAction() {
@@ -89,21 +109,35 @@ function Frame({
   gap = hero ? 14 : 12,
   error,
   next,
+  fit,
   children,
-}: StepProps & { title: ReactNode; hero?: boolean; gap?: number; error?: string; next: ReactNode; children: ReactNode }) {
+}: StepProps & {
+  title: ReactNode;
+  hero?: boolean;
+  gap?: number;
+  error?: string;
+  next: ReactNode;
+  /** The column fills the window and the body shrinks, so the footer never scrolls away. */
+  fit?: boolean;
+  children: ReactNode;
+}) {
   const heading = useRef<HTMLHeadingElement>(null);
   // Each step mounts its own Frame: moving focus to the title lets keyboard
   // and screen reader users follow the step change.
   useEffect(() => heading.current?.focus(), []);
   return (
-    <main className="onboarding">
+    <main className={fit ? "onboarding fit" : "onboarding"}>
       <div className="onbColumn">
-        <div className="onbDots" aria-hidden="true">
-          {Array.from({ length: STEPS }, (_, k) => (
-            <span key={k} className={k < step ? "on" : undefined} />
-          ))}
-        </div>
-        <div className="onbStep">{t("onboarding.step", { n: step, total: STEPS })}</div>
+        {onBack && (
+          <>
+            <div className="onbDots" aria-hidden="true">
+              {Array.from({ length: STEPS }, (_, k) => (
+                <span key={k} className={k < step ? "on" : undefined} />
+              ))}
+            </div>
+            <div className="onbStep">{t("onboarding.step", { n: step, total: STEPS })}</div>
+          </>
+        )}
         <div className="onbBody" style={{ gap }}>
           {hero && <Logo size={44} />}
           <h1 ref={heading} tabIndex={-1} className={hero ? "hero" : undefined}>
@@ -118,9 +152,11 @@ function Frame({
         </div>
         <div className="onbFoot">
           {/* Shown on step 1 too, like the prototype, but inert there. */}
-          <button type="button" className="btn lg" onClick={onBack} disabled={step === 1}>
-            {t("common.back")}
-          </button>
+          {onBack && (
+            <button type="button" className="btn lg" onClick={onBack} disabled={step === 1}>
+              {t("common.back")}
+            </button>
+          )}
           {next}
         </div>
       </div>
@@ -364,28 +400,71 @@ function Account(props: StepProps) {
   );
 }
 
-function Disclaimer(props: StepProps & { save: SaveSetting }) {
-  const { t, save } = props;
+function Disclaimer(props: StepProps & { lang: string; save: SaveSetting; updated?: boolean }) {
+  const { t, lang, save, updated } = props;
   const [accepted, setAccepted] = useState(false);
+  const [tab, setTab] = useState<(typeof LEGAL_TABS)[number]>("terms");
+  const [legal, setLegal] = useState<Legal>();
   const { busy, error, run } = useAction();
-  // Completing onboarding flips pm.onboarded, which makes App show the shell.
+  useEffect(() => {
+    let live = true;
+    run(() => loadLegal(lang).then((doc) => live && setLegal(doc)));
+    return () => {
+      live = false;
+    };
+  }, [lang]);
+  // Saving the accepted version (and, the first time, pm.onboarded) makes App
+  // show the shell; pm.onboarded goes last so App never sees it without terms.
   const finish = () =>
     run(async () => {
       await save("pm.disclaimerAccepted", "1");
+      await save("pm.termsAccepted", TERMS_VERSION);
       await save("pm.onboarded", "1");
     });
   return (
     <Frame
       {...props}
-      title={t("disclaimer.title")}
+      fit
+      title={t(updated ? "disclaimer.updatedTitle" : "disclaimer.title")}
       error={error}
       next={
-        <button type="button" className="btn fill lg next" disabled={!accepted || busy} onClick={finish}>
+        // Nothing to accept until the text is on screen.
+        <button type="button" className="btn fill lg next" disabled={!accepted || !legal || busy} onClick={finish}>
           {t("disclaimer.finish")}
         </button>
       }
     >
       <div className="notice">{t("disclaimer.body")}</div>
+      <div className="legal">
+        <div className="orgTabs" role="tablist" aria-label={t("disclaimer.title")}>
+          {LEGAL_TABS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              id={`legal-tab-${id}`}
+              aria-controls="legal-panel"
+              className="orgTab"
+              aria-selected={id === tab}
+              onClick={() => setTab(id)}
+            >
+              {t(`legal.${id}`)}
+            </button>
+          ))}
+        </div>
+        {/* Our own HTML, bundled at build time from src/data/legal. Keyed by
+            tab so switching starts the new text from the top. Focusable, so
+            the keyboard can scroll it. */}
+        <div
+          key={tab}
+          id="legal-panel"
+          role="tabpanel"
+          aria-labelledby={`legal-tab-${tab}`}
+          tabIndex={0}
+          className="legalDoc"
+          dangerouslySetInnerHTML={{ __html: legal?.[tab] ?? "" }}
+        />
+      </div>
       <label className="check">
         <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
         {t("disclaimer.accept")}

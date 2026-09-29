@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.3.1
+
+- New: Before you start: the full Terms and conditions and Privacy policy (English, Italian, German, French, Spanish, Portuguese, Russian) must be accepted before PowerMeter reads any combat data. Existing users accept them once at the next launch.
+
 ## 0.3.0
 
 - New: Online logs: the fights you uploaded, with link, visibility (public, unlisted, private) you can change, views, ranking position and delete.

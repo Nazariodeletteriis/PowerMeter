@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { initialLanguage, LANGUAGE_SETTING, translator } from "./i18n";
-import { Onboarding } from "./Onboarding";
+import { Onboarding, TERMS_VERSION } from "./Onboarding";
 import { applyPalette } from "./pages/system/theme";
 import { Shell } from "./Shell";
 import { TitleBar } from "./TitleBar";
@@ -40,6 +40,7 @@ export function App() {
   }, [settings]);
 
   const t = translator(lang);
+  const onboarded = settings?.["pm.onboarded"] === "1";
   const save: SaveSetting = async (key, value) => {
     await invoke("update_settings", { key, value });
     setSettings((s) => ({ ...s, [key]: value }));
@@ -62,10 +63,11 @@ export function App() {
         </p>
       )}
       {settings &&
-        (settings["pm.onboarded"] === "1" ? (
+        (onboarded && settings["pm.termsAccepted"] === TERMS_VERSION ? (
           <Shell t={t} lang={lang} settings={settings} save={save} onError={onError} reviewOnboarding={reviewOnboarding} />
         ) : (
-          <Onboarding t={t} lang={lang} settings={settings} save={save} startStep={startStep} />
+          // Onboarded under older terms: only the legal step until accepted.
+          <Onboarding t={t} lang={lang} settings={settings} save={save} startStep={startStep} termsOnly={onboarded} />
         ))}
     </div>
   );
