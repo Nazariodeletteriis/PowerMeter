@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.3
+
+- 변경: 내 캐릭터의 카드에 항상 비어 있던 CP 대신 캐릭터 메인 빌드의 Gear Score(보유 / 목표, Character Builder와 같은 수치)를 표시합니다. 상단 바에도 더 이상 CP가 표시되지 않습니다.
+- 수정: 캐릭터 카드에서 연 빌드는 활성 캐릭터가 아닌 해당 캐릭터의 Arcana와 Daevanion을 사용합니다.
+
 ## 0.3.2
 
 - 수정: 내 캐릭터에서 캐릭터 카드 전체를 눌러 빌드를 열 수 있습니다(이전에는 이름만 가능했고 시각적 표시도 없었습니다).

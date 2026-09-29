@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.3
+
+- Geändert: Die Karten in Meine Charaktere zeigen den Gear Score des Hauptbuilds (vorhanden / Ziel, dieselben Zahlen wie im Character Builder) statt des immer leeren CP; auch die obere Leiste zeigt ihn nicht mehr.
+- Behoben: Ein über die Charakterkarte geöffneter Build nutzt Arcana und Daevanion dieses Charakters, nicht die des aktiven.
+
 ## 0.3.2
 
 - Behoben: In Meine Charaktere öffnet die ganze Charakterkarte seinen Build (vorher nur der Name, ohne sichtbaren Hinweis).

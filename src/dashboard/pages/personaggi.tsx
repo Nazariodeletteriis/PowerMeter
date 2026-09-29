@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { CopyIcon, DownloadSimpleIcon, PlusIcon, TrashIcon, UploadSimpleIcon } from "@phosphor-icons/react";
-import { OWN_BUILD } from "./characters/gear";
+import { OWN_BUILD, useGearData } from "./characters/gear";
+import { mainBuildGs } from "./characters/gearscore";
 import { openBuild } from "./characters/shared";
 import { activate, activeId, FACTIONS, newId, readCharacters, saveCharacters, type Character, type Faction } from "../characters";
 import { REGIONS } from "../Onboarding";
@@ -29,6 +30,7 @@ function parse(x: unknown): Character | null {
 export default function Personaggi({ t, lang, settings, save, run, go }: PageProps) {
   const list = readCharacters(settings);
   const active = activeId(settings, list);
+  const gearReady = useGearData(); // equip.json, for the Gear Score
   const factionName = (f: string) => t(`collections.${f}`);
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({ name: "", cls: settings["pm.class"] || CLASS_OPTIONS[0], region: settings["pm.region"] || REGIONS[0].value, faction: "" as Faction | "", level: "" });
@@ -171,6 +173,8 @@ export default function Personaggi({ t, lang, settings, save, run, go }: PagePro
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 12 }}>
         {list.map((c) => {
           const isActive = c.id === active;
+          // Main build's Gear Score, owned / target, the same numbers the builder shows.
+          const gs = gearReady ? mainBuildGs(settings, c) : undefined;
           return (
             <section
               key={c.id}
@@ -228,7 +232,9 @@ export default function Personaggi({ t, lang, settings, save, run, go }: PagePro
                 {isActive && <span className="chActiveTag">{t("characters.active")}</span>}
               </div>
               <div className="mono" style={{ fontSize: 24 }}>
-                {c.cp ? fmt(c.cp, lang) : "—"} <span style={{ fontSize: 11, color: "var(--pm-t3)", fontFamily: "Inter,sans-serif" }}>CP</span>
+                {gs ? fmt(gs.owned, lang) : "—"}{" "}
+                {!!gs?.target && <span style={{ fontSize: 13, color: "var(--pm-t3)" }}>/ {fmt(gs.target, lang)}</span>}{" "}
+                <span style={{ fontSize: 11, color: "var(--pm-t3)", fontFamily: "Inter,sans-serif" }}>Gear Score</span>
               </div>
               <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
                 {!isActive && (

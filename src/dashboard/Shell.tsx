@@ -14,9 +14,8 @@ import { Home } from "./Home";
 import type { T } from "./i18n";
 import { ALL_PAGES, NAV, NAV_BOTTOM, type NavPage } from "./nav";
 import { Palette } from "./Palette";
-import { activeId, readCharacters } from "./characters";
 import { Supporter } from "./Supporter";
-import { ClassAvatar, fmt, ProfileAvatar } from "./ui";
+import { ClassAvatar, ProfileAvatar } from "./ui";
 import States from "./pages/shared/States";
 import { Diagnosis } from "./pages/system/Diagnosis";
 import type { PageHeader, PageProps } from "./pages/types";
@@ -112,8 +111,6 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
 
   const name = capture.data?.characterName || localStorage.getItem(USER_NAME_KEY) || t("home.notSet");
   const cls = settings["pm.class"];
-  const characters = readCharacters(settings);
-  const activeChar = characters.find((c) => c.id === activeId(settings, characters));
   const run = (action: () => Promise<unknown>) => action().catch(onError);
   const openWidget = () => run(() => invoke("show_overlay"));
   const current = ALL_PAGES.find((x) => x.id === page)!;
@@ -218,8 +215,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
             <div className="who">
               <div>{name}</div>
               <div className="sub">
-                {cls && `${cls} · `}
-                <span className="mono">CP {activeChar?.cp ? fmt(activeChar.cp, lang) : "—"}</span>
+                {cls}
               </div>
             </div>
           </button>

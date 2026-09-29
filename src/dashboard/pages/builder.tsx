@@ -109,7 +109,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   // Builds created or cloned here, listed under "Your builds" (builds.tsx); one per title.
   const myBuilds = readMyBuilds(settings[MY_BUILDS_KEY]);
   const addMine = (b: BuildSrc) => saveSetting(MY_BUILDS_KEY, JSON.stringify([b, ...myBuilds.filter((x) => x.t !== b.t)])).catch(onError);
-  const dv = readDv(settings);
+  const dv = readDv(settings, src.char);
   const [itemOpen, setItemOpen] = useState(false);
   const [bOpen, setBOpen] = useState(false);
   const [itemQ, setItemQ] = useState("");
@@ -220,7 +220,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   // equipped Arcana + Daevanion points spent. Arcana and Daevanion are the
   // active character's: none for someone else's build. Combat Power isn't
   // shown: neither the game data nor questlog has a formula for it.
-  const gsExtra = ro ? 0 : arcanaScore(equippedArcana(settings)) + dvSummary(planClass(src.cls), dv).reduce((sum, [, pts]) => sum + pts, 0);
+  const gsExtra = ro ? 0 : arcanaScore(equippedArcana(settings, src.char)) + dvSummary(planClass(src.cls), dv).reduce((sum, [, pts]) => sum + pts, 0);
   const gsOwned = gearScore(g.owned) + gsExtra;
   const gsTarget = gearScore(g.target) + gsExtra;
   const gs = tgt ? gsTarget : gsOwned;

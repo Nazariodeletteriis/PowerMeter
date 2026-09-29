@@ -59,8 +59,8 @@ const readAll = (settings: Settings): Record<string, Record<string, Board>> => {
   }
 };
 const charId = (settings: Settings) => activeId(settings, readCharacters(settings)) ?? "";
-/** The active character's boards (this page and the Character Builder). */
-export const readDv = (settings: Settings) => readAll(settings)[charId(settings)] ?? {};
+/** A character's boards, the active one's by default (this page and the Character Builder). */
+export const readDv = (settings: Settings, id = charId(settings)) => readAll(settings)[id] ?? {};
 
 /** Points spent / total per board of a class, from the planner's saved state (Character Builder tab). */
 export function dvSummary(cls: string, all: Record<string, Board>) {

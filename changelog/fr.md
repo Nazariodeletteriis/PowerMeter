@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.3
+
+- Modifié : les cartes de Mes personnages affichent le Gear Score du build principal du personnage (possédé / objectif, les mêmes chiffres que le Character Builder) au lieu d'un CP toujours vide ; la barre du haut ne l'affiche plus non plus.
+- Corrigé : un build ouvert depuis la carte d'un personnage utilise l'Arcana et le Daevanion de ce personnage, et non ceux du personnage actif.
+
 ## 0.3.2
 
 - Corrigé : dans Mes personnages, toute la carte du personnage ouvre son build (avant, seul le nom le faisait, sans aucun indice visuel).

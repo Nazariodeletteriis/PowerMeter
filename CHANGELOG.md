@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.3.3
+
+- Changed: character cards in My characters show the Gear Score of the character's main build (owned / target, the same numbers as the Character Builder) instead of an always-empty CP; the top bar no longer shows it either.
+- Fixed: a build opened from a character's card uses that character's Arcana and Daevanion, not the active character's.
+
 ## 0.3.2
 
 - Fixed: in My characters the whole character card opens its build (before, only the name did, with no visual hint).

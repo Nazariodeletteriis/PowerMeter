@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.3
+
+- 变更：“我的角色”中的卡片改为显示角色主构筑的 Gear Score（已有 / 目标，与 Character Builder 中的数值相同），不再显示始终为空的 CP；顶部栏也不再显示 CP。
+- 修复：从角色卡片打开的构筑会使用该角色的Arcana 与 Daevanion，而不是当前角色的。
+
 ## 0.3.2
 
 - 修复：在“我的角色”中，点击整张角色卡片即可打开其构筑（之前只有名称可以点击，且没有任何视觉提示）。

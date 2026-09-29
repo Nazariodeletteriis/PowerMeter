@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.3
+
+- 變更：「我的角色」中的卡片改為顯示角色主配置的 Gear Score（已有 / 目標，與 Character Builder 中的數值相同），不再顯示始終為空的 CP；頂部列也不再顯示 CP。
+- 修正：從角色卡片開啟的配置會使用該角色的Arcana 與 Daevanion，而不是目前角色的。
+
 ## 0.3.2
 
 - 修正：在「我的角色」中，點擊整張角色卡片即可開啟其配置（之前只有名稱可以點擊，且沒有任何視覺提示）。
