@@ -4219,6 +4219,12 @@ class DpsApp {
     if (this.localActorIdInput && document.activeElement !== this.localActorIdInput) {
       this.localActorIdInput.value = this.localPlayerId ? String(this.localPlayerId) : "";
     }
+    // The backend's name is authoritative once the game has said who you are
+    // playing (self record): follow it, without echoing it back (no syncBackend).
+    const backendName = String(info?.characterName || "").trim();
+    if (backendName && backendName !== this.USER_NAME) {
+      this.setUserName(backendName, { persist: true });
+    }
     if (this.characterNameInput) {
       const nickname = String(info?.characterName || this.USER_NAME || "").trim();
       this.characterNameInput.value = nickname;

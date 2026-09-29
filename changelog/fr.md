@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.2
+
+- Corrigé : dans Mes personnages, toute la carte du personnage ouvre son build (avant, seul le nom le faisait, sans aucun indice visuel).
+- Corrigé : le meter suit le personnage avec lequel vous jouez réellement, lu depuis le jeu ; rendre un personnage actif dans Mes personnages ne change plus le personnage suivi par le meter.
+
 ## 0.3.1
 
 - Nouveau : Avant de commencer : les Conditions générales et la Politique de confidentialité complètes (anglais, italien, allemand, français, espagnol, portugais, russe) doivent être acceptées avant que PowerMeter ne lise la moindre donnée de combat. Les utilisateurs existants les acceptent une fois au prochain lancement.

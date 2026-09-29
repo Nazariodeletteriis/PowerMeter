@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.2
+
+- Corrigido: em Meus personagens o card inteiro do personagem abre a build dele (antes só o nome, sem nenhuma indicação visual).
+- Corrigido: o medidor segue o personagem com que você está jogando de verdade, lido do jogo; ativar um personagem em Meus personagens não muda mais quem o medidor acompanha.
+
 ## 0.3.1
 
 - Novo: Antes de começar: os Termos e condições e a Política de privacidade completos (inglês, italiano, alemão, francês, espanhol, português, russo) precisam ser aceitos antes que o PowerMeter leia qualquer dado de combate. Quem já usa o app os aceita uma vez na próxima inicialização.

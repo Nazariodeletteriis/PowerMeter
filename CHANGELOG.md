@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.3.2
+
+- Fixed: in My characters the whole character card opens its build (before, only the name did, with no visual hint).
+- Fixed: the meter follows the character you are actually playing, read from the game; making a character active in My characters no longer changes who the meter tracks.
+
 ## 0.3.1
 
 - New: Before you start: the full Terms and conditions and Privacy policy (English, Italian, German, French, Spanish, Portuguese, Russian) must be accepted before PowerMeter reads any combat data. Existing users accept them once at the next launch.

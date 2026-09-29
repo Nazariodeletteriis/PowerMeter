@@ -899,13 +899,10 @@ impl StreamProcessor {
                 .append_nickname_authoritative(id.value, &sanitized);
             if is_self {
                 self.data_storage.set_local_player_id(Some(id.value as i64));
-                // Adopt the name as the configured character name when the user
-                // hasn't set one, so every "is this me?" check downstream lines up.
-                if self
-                    .data_storage
-                    .local_character_name()
-                    .is_none_or(|n| n.trim().is_empty())
-                {
+                // The game says who you are playing: adopt that name over whatever
+                // was typed or picked in the dashboard (an alt, a stale name), so
+                // every "is this me?" check downstream lines up.
+                if self.data_storage.local_character_name().as_deref().map(str::trim) != Some(sanitized.as_str()) {
                     self.data_storage
                         .set_local_character_name(Some(sanitized.clone()));
                 }

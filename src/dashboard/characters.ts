@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core";
 import type { SaveSetting, Settings } from "./App";
 import { USER_NAME_KEY } from "./Shell";
 
@@ -33,9 +32,9 @@ export const newId = () => `c${Date.now().toString(36)}${Math.random().toString(
 
 export const saveCharacters = (save: SaveSetting, list: Character[]) => save(CHARACTERS_KEY, JSON.stringify(list));
 
+// The dashboard's character only. The meter finds who you are playing by itself
+// (game window title, self record in the packets), so this never touches it.
 export async function activate(save: SaveSetting, c: Character) {
-  localStorage.setItem(USER_NAME_KEY, c.name);
-  await invoke("set_character_name", { name: c.name });
   await save("pm.region", c.region);
   await save(ACTIVE_KEY, c.id);
   await save("pm.class", c.cls);

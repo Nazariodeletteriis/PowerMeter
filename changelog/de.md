@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.2
+
+- Behoben: In Meine Charaktere öffnet die ganze Charakterkarte seinen Build (vorher nur der Name, ohne sichtbaren Hinweis).
+- Behoben: Das Meter folgt dem Charakter, den du tatsächlich spielst, und liest ihn aus dem Spiel; einen Charakter in Meine Charaktere aktiv zu setzen ändert nicht mehr, wen das Meter erfasst.
+
 ## 0.3.1
 
 - Neu: Bevor du startest: Die vollständigen Nutzungsbedingungen und die Datenschutzerklärung (Englisch, Italienisch, Deutsch, Französisch, Spanisch, Portugiesisch, Russisch) müssen akzeptiert werden, bevor PowerMeter Kampfdaten liest. Bestehende Nutzer akzeptieren sie einmal beim nächsten Start.
