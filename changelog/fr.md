@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.9
+
+- Modifié : Conditions mises à jour : dans Recluta et Daeva, la Base de données, le Gear Viewer, l’aide à l’artisanat et le calculateur sont inclus dès que les données officielles du jeu sont disponibles. Il vous sera demandé d’accepter à nouveau les Conditions.
+
 ## 0.3.8
 
 - Retiré : Base de données, Gear Viewer, Armurerie, planificateur Daevanion, Artisanat, Calculateurs et Marché affichent « Données officielles à venir » jusqu’à ce que des données officielles du jeu soient disponibles.

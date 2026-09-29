@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.9
+
+- 變更：條款已更新：Recluta 和 Daeva 在官方遊戲資料可用後包含資料庫、Gear Viewer、製作助手和計算機。你需要重新接受條款。
+
 ## 0.3.8
 
 - 移除：資料庫、Gear Viewer、軍械庫、守護星規劃器、製作、計算機和市場在官方遊戲資料可用前顯示「官方資料即將推出」。

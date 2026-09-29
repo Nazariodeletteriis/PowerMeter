@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.9
+
+- 变更：条款已更新：Recluta 和 Daeva 在官方游戏数据可用后包含数据库、Gear Viewer、制作助手和计算器。你需要重新接受条款。
+
 ## 0.3.8
 
 - 移除：数据库、Gear Viewer、军械库、守护星规划器、制作、计算器和市场在官方游戏数据可用前显示“官方数据即将推出”。

@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.3.9
+
+- Changed: updated Terms: in Recluta and Daeva, the Database, Gear Viewer, crafting helper and calculator are included once official game data is available. You will be asked to accept the Terms again.
+
 ## 0.3.8
 
 - Removed: Database, Gear Viewer, Armory, Daevanion planner, Crafting, Calculators and Marketplace show "Official data coming" until official game data is available.

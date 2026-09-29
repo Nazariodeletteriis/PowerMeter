@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.9
+
+- Geändert: Nutzungsbedingungen aktualisiert: In Recluta und Daeva sind Datenbank, Gear Viewer, Crafting-Helfer und Rechner enthalten, sobald offizielle Spieldaten verfügbar sind. Du wirst gebeten, die Bedingungen erneut zu akzeptieren.
+
 ## 0.3.8
 
 - Entfernt: Datenbank, Gear Viewer, Armory, Daevanion-Planer, Crafting, Rechner und Marktplatz zeigen „Offizielle Daten folgen“, bis offizielle Spieldaten verfügbar sind.

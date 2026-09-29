@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.9
+
+- 변경: 이용약관이 업데이트되었습니다. Recluta와 Daeva에는 공식 게임 데이터가 제공되는 시점부터 데이터베이스, Gear Viewer, 제작 도우미, 계산기가 포함됩니다. 이용약관에 다시 동의해 주셔야 합니다.
+
 ## 0.3.8
 
 - 제거: 데이터베이스, Gear Viewer, 아머리, 데바니온 플래너, 제작, 계산기, 마켓은 공식 게임 데이터가 제공될 때까지 "공식 데이터 준비 중"을 표시합니다.

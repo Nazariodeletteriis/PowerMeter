@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.9
+
+- Alterado: Termos atualizados: em Recluta e Daeva, o Banco de dados, o Gear Viewer, o assistente de criação e a calculadora estão incluídos quando houver dados oficiais do jogo. Será pedido que você aceite os Termos de novo.
+
 ## 0.3.8
 
 - Removido: Banco de dados, Gear Viewer, Arsenal, planejador Daevanion, Criação, Calculadoras e Mercado mostram "Dados oficiais em breve" até que haja dados oficiais do jogo.

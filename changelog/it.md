@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.9
+
+- Cambiato: Termini aggiornati: in Recluta e Daeva, Database, Gear Viewer, aiuto crafting e calcolatore sono inclusi quando saranno disponibili i dati ufficiali del gioco. Ti verrà chiesto di accettare di nuovo i Termini.
+
 ## 0.3.8
 
 - Rimosso: Database, Gear Viewer, Armory, Daevanion planner, Crafting, Calcolatori e Marketplace mostrano "Dati ufficiali in arrivo" finché non saranno disponibili i dati ufficiali del gioco.

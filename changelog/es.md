@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.9
+
+- Cambiado: Términos actualizados: en Recluta y Daeva, la Base de datos, el Gear Viewer, la ayuda de artesanía y la calculadora se incluyen cuando haya datos oficiales del juego. Se te pedirá que vuelvas a aceptar los Términos.
+
 ## 0.3.8
 
 - Eliminado: Base de datos, Gear Viewer, Armería, planificador Daevanion, Artesanía, Calculadoras y Mercado muestran «Datos oficiales próximamente» hasta que haya datos oficiales del juego.
