@@ -88,11 +88,12 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   // New and default builds use the active character's class (onboarding).
   const myCls = planClass(settings["pm.class"]);
   const chars = readCharacters(settings);
-  const faction = chars.find((c) => c.id === activeId(settings, chars))?.faction;
   const [src, setSrc] = useMem<BuildSrc>("bSrc", { t: OWN_BUILD, au: name, cls: myCls, own: true });
-  // Your own build follows the active character: switching character re-targets it.
+  const faction = chars.find((c) => c.id === (src.char ?? activeId(settings, chars)))?.faction;
+  // Your own build follows the active character: switching character re-targets it
+  // (not one opened from a character's card: looking at it must not change anything).
   useEffect(() => {
-    if (src.own && !src.isNew && src.cls !== myCls) setSrc({ ...src, cls: myCls });
+    if (src.own && !src.isNew && !src.char && src.cls !== myCls) setSrc({ ...src, cls: myCls });
   }, [myCls]); // eslint-disable-line react-hooks/exhaustive-deps
   const [mode, setMode] = useMem("bmode", "dummy");
   const [view, setView] = useMem("bview", "owned");

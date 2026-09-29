@@ -135,6 +135,7 @@
   "organizer.diag.fix": "Исправить",
   "organizer.diag.manualAdapter": "Адаптер вручную",
   "organizer.diag.retry": "Повторить",
+  "organizer.update.badge": "Новая версия",
   "organizer.update.released": "Выпущено {date}",
   "organizer.update.later": "Позже",
   "organizer.update.now": "Обновить сейчас",

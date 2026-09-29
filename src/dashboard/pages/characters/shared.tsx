@@ -19,7 +19,8 @@ export function useMem<V>(key: string, init: V) {
 }
 
 /** The build the Character Builder shows (prototype bSrc). */
-export type BuildSrc = { t: string; au: string; cls: string; own: boolean; isNew?: boolean; likes?: number; tags?: string[] };
+/** `char`: id of the character whose card opened it; the build then stays on that character instead of following the active one. */
+export type BuildSrc = { t: string; au: string; cls: string; own: boolean; isNew?: boolean; likes?: number; tags?: string[]; char?: string };
 /** Build filters: regions and tags (tags are game/community terms, not translated). */
 export const BUILD_REGIONS = ["EU", "NA"];
 export const BUILD_TAGS = ["PvE", "PvP", "Arena", "Dungeon", "Siege", "Large-Scale", "Beginner Friendly", "Budget Build", "Endgame Build", "Tank", "DPS", "Healer", "Support"];

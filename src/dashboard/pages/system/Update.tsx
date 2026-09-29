@@ -31,6 +31,29 @@ type Phase = "notes" | "download" | "install" | "error";
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
+ * Release notes grouped by their leading label ("New: …", "Nouveau : …", "新機能：…"),
+ * in the order the labels first appear. The label is already translated in
+ * changelog/<lang>.md, so it doubles as the section title with no lookup table.
+ * A second separator close to the start marks a feature name ("Gear Viewer: …").
+ * Notes without a label go in an untitled group.
+ */
+type Note = { name?: string; text: string };
+const LABEL = /^([^:：]{1,24}?)\s*[:：]\s*(.+)$/s;
+const NAME = /^[^:：]{1,50}?\s*[:：]\s*(.+)$/s;
+
+function groupNotes(notes: string[]) {
+  const groups = new Map<string, Note[]>();
+  for (const n of notes) {
+    const [, label = "", rest = n] = n.match(LABEL) ?? [];
+    const text = rest.match(NAME)?.[1] ?? rest;
+    // The name keeps its own separator and spacing ("Armurerie : ", "装備ビューア：").
+    const name = text === rest ? undefined : rest.slice(0, -text.length);
+    groups.set(label, [...(groups.get(label) ?? []), { name, text }]);
+  }
+  return [...groups];
+}
+
+/**
  * What is happening, at a glance. Downloading: the designer's Lottie arrow
  * (download.lottie.json, trimmed from docs/design/download.json), looping; the
  * Phosphor arrow stands in until the player chunk has loaded. Installing:
@@ -198,22 +221,40 @@ export function UpdateModal({
       // Nothing to go back to while the installer is being fetched or started.
       onClose={busy ? () => {} : onClose}
       title={(id) => (
-        <h2 id={id} style={{ fontSize: 17, fontWeight: 500 }}>
-          PowerMeter {update.version}
-        </h2>
+        <div className="updHeader">
+          {phase === "notes" && <span className="updBadge">{t("organizer.update.badge")}</span>}
+          <h2 id={id} style={{ fontSize: 17, fontWeight: 500 }}>
+            PowerMeter {update.version}
+          </h2>
+          {phase === "notes" && meta.length > 0 && <div className="updMeta">{meta.join(" · ")}</div>}
+        </div>
       )}
     >
       {phase === "notes" ? (
         <>
-          {meta.length > 0 && <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{meta.join(" · ")}</div>}
-          {notes && (
-            <ul style={{ fontSize: 13, lineHeight: 1.7, color: "var(--pm-t2)" }}>
-              {notes.map((n) => (
-                <li key={n}>• {n}</li>
+          {notes && notes.length > 0 && (
+            // Focusable so the notes can be scrolled from the keyboard.
+            <div className="updNotes" tabIndex={0}>
+              {groupNotes(notes).map(([label, items]) => (
+                <section key={label}>
+                  {label && (
+                    <h3>
+                      {label} <span className="mono">{items.length}</span>
+                    </h3>
+                  )}
+                  <ul>
+                    {items.map((n, i) => (
+                      <li key={i}>
+                        {n.name && <strong>{n.name}</strong>}
+                        {n.text}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               ))}
-            </ul>
+            </div>
           )}
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+          <div className="updFoot">
             <button type="button" className="btn" style={BTN} autoFocus onClick={onClose}>
               {t("organizer.update.later")}
             </button>

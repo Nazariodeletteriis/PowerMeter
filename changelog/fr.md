@@ -2,6 +2,16 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.1
+
+- Nouveau : Avant de commencer : les Conditions générales et la Politique de confidentialité complètes (anglais, italien, allemand, français, espagnol, portugais, russe) doivent être acceptées avant que PowerMeter ne lise la moindre donnée de combat. Les utilisateurs existants les acceptent une fois au prochain lancement.
+- Modifié : « Ouvrir le widget » devient « Lancer le DPSMeter ».
+- Modifié : les modes du meter s'affichent en BOSS, TRAIN, PVE, PVP, dans cet ordre, dans le meter, l'Historique des combats et les Paramètres.
+- Modifié : cliquer sur le nom d'un personnage dans Mes personnages ouvre son build sans changer de personnage actif.
+- Modifié : la fenêtre de mise à jour regroupe les notes de version par type (nouveau, modifié, corrigé) et se lit plus facilement.
+- Corrigé : le Gear Viewer affichait la plupart des pièces en double (le même objet existe une fois par faction) ; chaque pièce n'apparaît désormais qu'une fois.
+- Corrigé : l'en-tête du build affichait des compteurs de j'aime et de commentaires fictifs au lieu des vrais j'aime du build.
+
 ## 0.3.0
 
 - Nouveau : Logs en ligne : les combats que vous avez envoyés, avec lien, visibilité modifiable (public, non répertorié, privé), vues, position au classement et suppression.

@@ -2,6 +2,16 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.1
+
+- Nuevo: Antes de empezar: hay que aceptar los Términos y condiciones y la Política de privacidad completos (inglés, italiano, alemán, francés, español, portugués, ruso) antes de que PowerMeter lea cualquier dato de combate. Quien ya usa la app los acepta una vez en el próximo inicio.
+- Cambiado: "Abrir widget" ahora se llama "Iniciar DPSMeter".
+- Cambiado: los modos del medidor aparecen como BOSS, TRAIN, PVE, PVP, en este orden, en el medidor, el Historial de combates y los Ajustes.
+- Cambiado: hacer clic en el nombre de un personaje en Mis personajes abre su build sin cambiar el personaje activo.
+- Cambiado: la ventana de actualización agrupa las notas de la versión por tipo (nuevo, cambiado, corregido) y se lee mejor.
+- Corregido: el Gear Viewer mostraba casi todas las piezas dos veces (el mismo objeto existe una vez por facción); ahora cada pieza aparece una sola vez.
+- Corregido: la cabecera de la build mostraba contadores de me gusta y comentarios ficticios en lugar de los me gusta reales de la build.
+
 ## 0.3.0
 
 - Nuevo: Registros en línea: los combates que subiste, con enlace, visibilidad modificable (público, no listado, privado), visitas, posición en la clasificación y borrado.

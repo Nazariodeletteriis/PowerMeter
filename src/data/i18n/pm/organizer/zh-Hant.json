@@ -135,6 +135,7 @@
   "organizer.diag.fix": "修復",
   "organizer.diag.manualAdapter": "手動選擇介面卡",
   "organizer.diag.retry": "重試",
+  "organizer.update.badge": "新版本",
   "organizer.update.released": "發佈於 {date}",
   "organizer.update.later": "稍後",
   "organizer.update.now": "立即更新",

@@ -135,6 +135,7 @@
   "organizer.diag.fix": "Beheben",
   "organizer.diag.manualAdapter": "Manueller Adapter",
   "organizer.diag.retry": "Erneut versuchen",
+  "organizer.update.badge": "Neue Version",
   "organizer.update.released": "Veröffentlicht am {date}",
   "organizer.update.later": "Später",
   "organizer.update.now": "Jetzt aktualisieren",

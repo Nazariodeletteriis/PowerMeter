@@ -135,6 +135,7 @@
   "organizer.diag.fix": "修正",
   "organizer.diag.manualAdapter": "手動アダプター",
   "organizer.diag.retry": "再試行",
+  "organizer.update.badge": "新しいバージョン",
   "organizer.update.released": "{date}にリリース",
   "organizer.update.later": "後で",
   "organizer.update.now": "今すぐ更新",

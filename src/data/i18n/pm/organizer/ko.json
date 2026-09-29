@@ -135,6 +135,7 @@
   "organizer.diag.fix": "수정",
   "organizer.diag.manualAdapter": "수동 어댑터",
   "organizer.diag.retry": "재시도",
+  "organizer.update.badge": "새 버전",
   "organizer.update.released": "{date}에 출시됨",
   "organizer.update.later": "나중에",
   "organizer.update.now": "지금 업데이트",

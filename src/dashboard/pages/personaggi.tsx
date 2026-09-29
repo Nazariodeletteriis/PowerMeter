@@ -190,17 +190,11 @@ export default function Personaggi({ t, lang, settings, save, run, go }: PagePro
                 <ClassAvatar cls={c.cls} size={36} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h2 style={{ fontWeight: 500, fontSize: 15 }}>
-                    {/* The builder works on the active character, so this makes it active first. */}
                     <button
                       type="button"
                       className="linkBtn chCardName"
                       title={t("nav.builder")}
-                      onClick={() =>
-                        run(async () => {
-                          if (!isActive) await activate(save, c);
-                          openBuild({ t: OWN_BUILD, au: c.name, cls: c.cls, own: true }, go);
-                        })
-                      }
+                      onClick={() => openBuild({ t: OWN_BUILD, au: c.name, cls: c.cls, own: true, char: c.id }, go)}
                     >
                       {c.name}
                     </button>

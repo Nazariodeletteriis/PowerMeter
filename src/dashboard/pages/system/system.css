@@ -293,6 +293,93 @@
   }
 }
 
+/* Update modal, notes view: header, grouped notes that scroll, fixed footer. */
+.updHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.updBadge {
+  margin-bottom: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--pm-tint);
+  color: var(--pm-redt);
+  font-size: 11px;
+  font-weight: 500;
+}
+.updMeta {
+  font-size: 12px;
+  color: var(--pm-t3);
+}
+/* Tall enough for several notes, short enough that header and footer stay in
+   view at the 1024x600 minimum (the overlay starts 10vh down). */
+.updNotes {
+  max-height: min(440px, calc(90vh - 220px));
+  overflow-y: auto;
+  margin-right: -12px;
+  padding-right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.updNotes:focus-visible {
+  outline: 2px solid var(--pm-red);
+  outline-offset: 2px;
+}
+.updNotes h3 {
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--pm-t1);
+}
+.updNotes h3 .mono {
+  margin-left: 4px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--pm-t3);
+}
+.updNotes ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.updNotes li {
+  position: relative;
+  padding-left: 14px;
+  line-height: 1.55;
+  color: var(--pm-t2);
+}
+.updNotes li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--pm-grey);
+}
+.updNotes strong {
+  font-weight: 500;
+  color: var(--pm-t1);
+}
+/* The first group (what's new, in every changelog) carries the accent. */
+.updNotes section:first-child h3 {
+  color: var(--pm-redt);
+}
+.updNotes section:first-child li::before {
+  background: var(--pm-red);
+}
+.updFoot {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 14px;
+  border-top: 1px solid var(--pm-line);
+}
+
 /* Update modal: download / install / error views (motion in Update.tsx via anime.js). */
 .updPanel {
   display: flex;
