@@ -4,6 +4,7 @@ Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
 ## 0.3.3
 
+- Cambiado: la build principal ahora es por personaje y no por clase: dos personajes de la misma clase tienen equipo separado. Hasta que un personaje edite la suya, parte de la build compartida anterior.
 - Cambiado: las tarjetas de Mis personajes muestran el Gear Score de la build principal del personaje (actual / objetivo, los mismos números que el Character Builder) en lugar de un CP siempre vacío; la barra superior tampoco lo muestra ya.
 - Corregido: una build abierta desde la tarjeta de un personaje usa el Arcana y el Daevanion de ese personaje, no los del activo.
 

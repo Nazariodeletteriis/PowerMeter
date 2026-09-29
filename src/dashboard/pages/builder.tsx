@@ -38,6 +38,8 @@ import { BUILD_TAGS, closeBuild, DANGER, DeleteBuildModal, MY_BUILDS_KEY, readMy
 import {
   arcanaScore,
   baseStats,
+  buildGear,
+  buildKey,
   GEAR_KEY,
   gearKey as keyOf,
   gearScore,
@@ -144,9 +146,10 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   // Equipment: owned and target per build and class, saved in settings; a
   // build never edited (or new) starts empty.
   const ready = useGearData(); // equip.json: stats, sockets, enhancement levels
-  const gearKey = keyOf(src.t, src.cls);
-  const saved = stored[gearKey];
-  const g: BuildGear = isNew ? newGear : (saved ?? EMPTY_GEAR);
+  // The default build is per character: the card's one, else the active one.
+  const owner = src.char ?? activeId(settings, chars);
+  const gearKey = buildKey(src.t, src.cls, owner);
+  const g: BuildGear = isNew ? newGear : buildGear(stored, src.t, src.cls, owner);
   const storeGear = (key: string, next: BuildGear) => {
     const all = { ...stored, [key]: next };
     setStored(all);
@@ -661,7 +664,7 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
                         <span style={{ fontSize: 12, fontWeight: 500 }}>{titleOf(mb.t)}</span>
                         {/* The build's first owned pieces, by rarity. */}
                         <span style={{ display: "flex", gap: 3 }}>
-                          {Object.values(stored[keyOf(mb.t, mb.cls)]?.owned ?? {})
+                          {Object.values(buildGear(stored, mb.t, mb.cls, owner).owned)
                             .slice(0, 5)
                             .map((p, i) => (
                               <span key={i} style={{ width: 16, height: 16, borderRadius: 3, overflow: "hidden", border: `1.5px solid ${RARITY[rarityOf(itemById(p.id))] ?? "var(--pm-grey)"}` }}>

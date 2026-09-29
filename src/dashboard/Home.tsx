@@ -6,7 +6,7 @@ import { activeId, readCharacters } from "./characters";
 import type { T } from "./i18n";
 import { ItemIcon } from "./items";
 import { REGIONS } from "./Onboarding";
-import { GEAR_KEY, gearKey, itemById, missingSlots, OWN_BUILD, rarityOf, readGear, SLOTS } from "./pages/characters/gear";
+import { buildGear, GEAR_KEY, itemById, missingSlots, OWN_BUILD, rarityOf, readGear, SLOTS } from "./pages/characters/gear";
 import { nextDailyReset, nextWeeklyReset } from "./pages/organizer/resets";
 import { Card, ClassAvatar, EmptyState, FactionTag, fmt, RARITY } from "./ui";
 import { usePoll } from "./usePoll";
@@ -138,9 +138,9 @@ function CharacterCard({ t, lang, settings, openCharacters }: Props) {
   );
 }
 
-/** Progress of the active class's own build (pm.builderGear), once the user has set one in the builder. */
+/** Progress of the active character's own build (pm.builderGear), once the user has set one in the builder. */
 function BuildCard({ t, settings }: { t: T; settings: Settings }) {
-  const g = readGear(settings[GEAR_KEY])[gearKey(OWN_BUILD, settings["pm.class"] ?? "")];
+  const g = buildGear(readGear(settings[GEAR_KEY]), OWN_BUILD, settings["pm.class"] ?? "", activeId(settings, readCharacters(settings)));
   if (!g || !Object.keys(g.target).length) {
     return (
       <Card title={t("home.buildProgress")} style={{ gridColumn: "span 4" }}>

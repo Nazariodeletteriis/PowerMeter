@@ -4,6 +4,7 @@ Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
 ## 0.3.3
 
+- Geändert: Der Hauptbuild gilt jetzt pro Charakter statt pro Klasse: Zwei Charaktere derselben Klasse haben getrennte Ausrüstung. Bis ein Charakter seinen eigenen bearbeitet, startet er mit dem bisher geteilten Build.
 - Geändert: Die Karten in Meine Charaktere zeigen den Gear Score des Hauptbuilds (vorhanden / Ziel, dieselben Zahlen wie im Character Builder) statt des immer leeren CP; auch die obere Leiste zeigt ihn nicht mehr.
 - Behoben: Ein über die Charakterkarte geöffneter Build nutzt Arcana und Daevanion dieses Charakters, nicht die des aktiven.
 

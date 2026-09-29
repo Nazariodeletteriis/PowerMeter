@@ -4,6 +4,7 @@ Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
 ## 0.3.3
 
+- 변경: 메인 빌드가 클래스별이 아닌 캐릭터별로 바뀌어, 같은 클래스의 두 캐릭터가 장비를 따로 가집니다. 캐릭터가 자신의 빌드를 수정하기 전까지는 기존 공유 빌드에서 시작합니다.
 - 변경: 내 캐릭터의 카드에 항상 비어 있던 CP 대신 캐릭터 메인 빌드의 Gear Score(보유 / 목표, Character Builder와 같은 수치)를 표시합니다. 상단 바에도 더 이상 CP가 표시되지 않습니다.
 - 수정: 캐릭터 카드에서 연 빌드는 활성 캐릭터가 아닌 해당 캐릭터의 Arcana와 Daevanion을 사용합니다.
 

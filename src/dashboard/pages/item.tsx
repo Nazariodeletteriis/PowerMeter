@@ -3,7 +3,8 @@ import { HammerIcon, ScrollIcon, ShareNetworkIcon, SwordIcon, TargetIcon } from 
 import { planClass } from "../skills";
 import { fmt } from "../ui";
 import { CollectionBonus } from "./characters/collections";
-import { activeBuild, addToOwned, addToTarget, GEAR_KEY, itemSlots, OWN_BUILD, readGear, useGearData, type BuildGear } from "./characters/gear";
+import { activeId, readCharacters } from "../characters";
+import { activeBuild, addToGear, GEAR_KEY, itemSlots, OWN_BUILD, readGear, useGearData, type BuildGear } from "./characters/gear";
 import { useMem, useToast, type BuildSrc } from "./characters/shared";
 import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
@@ -36,10 +37,13 @@ export default function Item({ t, go, setHeader, ...rest }: PageProps) {
 // Prototype pg.item layout, with the scraped data.
 function ItemCard({ t, lang, name, onError, settings, save, row, open }: PageProps & { row: DbRow; open: (r: DbRow) => void }) {
   const [share, setShare] = useState(false);
-  const cls = planClass(settings["pm.class"]);
+  const activeCls = planClass(settings["pm.class"]);
   // The build open in the builder when it is yours, else your default one.
-  const [src] = useMem<BuildSrc>("bSrc", { t: OWN_BUILD, au: name, cls, own: true });
+  const [src] = useMem<BuildSrc>("bSrc", { t: OWN_BUILD, au: name, cls: activeCls, own: true });
   const build = activeBuild(src);
+  // A build opened from a character's card belongs to that character (and its class).
+  const cls = src.char ? src.cls : activeCls;
+  const charId = src.char ?? activeId(settings, readCharacters(settings));
   const [stored, setStored] = useMem<Record<string, BuildGear>>("gear", readGear(settings[GEAR_KEY]));
   const [toast, showToast] = useToast();
   useGearData(); // a new piece's soul imprint lines and enhancement cap come from equip.json
@@ -48,7 +52,7 @@ function ItemCard({ t, lang, name, onError, settings, save, row, open }: PagePro
   const fits = useMemo(() => itemSlots(row, cls), [row, cls]);
   const why = fits.length ? "" : row.cat === "weapon" ? t("db.item.notClass", { cls }) : t("db.item.noSlot");
   const add = (view: keyof BuildGear) => {
-    const done = (view === "owned" ? addToOwned : addToTarget)(stored, build, cls, row);
+    const done = addToGear(stored, build, cls, view, row, charId);
     if (!done) return;
     setStored(done.all);
     save(GEAR_KEY, JSON.stringify(done.all)).catch(onError);
