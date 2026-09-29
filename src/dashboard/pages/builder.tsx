@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   ArrowLeftIcon,
+  ArrowSquareOutIcon,
   CaretDownIcon,
   ChartBarIcon,
   ChatCircleIcon,
@@ -34,7 +35,8 @@ import { REGIONS } from "../Onboarding";
 import { classSkills, planClass, SkillIcon } from "../skills";
 import { art, ClassAvatar, CLASSES, FactionTag, fmt, RARITY } from "../ui";
 import { activeId, readCharacters } from "../characters";
-import { BUILD_TAGS, closeBuild, DANGER, DeleteBuildModal, MY_BUILDS_KEY, readMyBuilds, SectionHead, useMem, useToast, type BuildSrc } from "./characters/shared";
+import { QUESTLOG_BUILD_URL } from "./characters/questlog";
+import { BUILD_TAGS, closeBuild, DANGER, DeleteBuildModal, LIKED_KEY, MY_BUILDS_KEY, readLiked, readMyBuilds, SectionHead, toggleLiked, useMem, useToast, type BuildSrc, type QlOpened } from "./characters/shared";
 import {
   arcanaScore,
   baseStats,
@@ -107,7 +109,9 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   const [tab, setTab] = useMem("ctab", "equip");
   const [newName, setNewName] = useMem("newName", "");
   const [newTags, setNewTags] = useMem<string[]>("newTags", []);
-  const [liked, setLiked] = useMem<Record<string, boolean>>("liked", {});
+  // Community builds opened from the list (builds.tsx): gear and card, by slug.
+  const [qlOpened] = useMem<QlOpened>("ql", {});
+  const liked = readLiked(settings[LIKED_KEY]);
   // Builds created or cloned here, listed under "Your builds" (builds.tsx); one per title.
   const myBuilds = readMyBuilds(settings[MY_BUILDS_KEY]);
   const addMine = (b: BuildSrc) => saveSetting(MY_BUILDS_KEY, JSON.stringify([b, ...myBuilds.filter((x) => x.t !== b.t)])).catch(onError);
@@ -149,13 +153,14 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
   // The default build is per character: the card's one, else the active one.
   const owner = src.char ?? activeId(settings, chars);
   const gearKey = buildKey(src.t, src.cls, owner);
-  const g: BuildGear = isNew ? newGear : buildGear(stored, src.t, src.cls, owner);
+  const g: BuildGear = isNew ? newGear : src.ql ? qlOpened[src.ql]?.gear ?? EMPTY_GEAR : buildGear(stored, src.t, src.cls, owner);
   const storeGear = (key: string, next: BuildGear) => {
     const all = { ...stored, [key]: next };
     setStored(all);
     saveSetting(GEAR_KEY, JSON.stringify(all)).catch(onError);
   };
-  const setG = (next: BuildGear) => (isNew ? setNewGear(next) : storeGear(gearKey, next));
+  // A community build is read-only: never written to pm.builderGear (Clone makes it yours).
+  const setG = (next: BuildGear) => (isNew ? setNewGear(next) : src.ql ? undefined : storeGear(gearKey, next));
   const gear = tgt ? g.target : g.owned;
   const piece = gear[cur] as Piece | undefined;
   const setPiece = (p?: Piece) => {
@@ -390,8 +395,10 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
     saveSetting(MY_BUILDS_KEY, JSON.stringify(myBuilds.filter((x) => x.t !== src.t))).catch(onError);
     go("builds");
   };
-  const L = !!liked[src.t];
-  const likeBuild = () => setLiked({ ...liked, [src.t]: !L });
+  // Only community builds can be liked (favourites, pm.likedBuilds).
+  const qlCard = src.ql ? qlOpened[src.ql]?.card : undefined;
+  const L = !!src.ql && liked.some((x) => x.slug === src.ql);
+  const likeBuild = () => qlCard && saveSetting(LIKED_KEY, toggleLiked(liked, qlCard)).catch(onError);
   const likes = (src.likes ?? 0) + (L ? 1 : 0);
 
   const seg = (items: [string, string][], value: string, set: (v: string) => void, style?: CSSProperties) => (
@@ -513,9 +520,15 @@ export default function Builder({ t, lang, name, go, run, onError, setHeader, se
             <div style={{ fontWeight: 500 }}>{t("characters.builder.roTitle", { au: src.au })}</div>
             <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("characters.builder.roText")}</div>
           </div>
-          <button type="button" className="btn sm" aria-pressed={L} style={{ color: L ? "var(--pm-redt)" : "var(--pm-t1)" }} onClick={likeBuild}>
+          {src.ql && (
+            <button type="button" className="btn sm" onClick={() => run(() => invoke("open_url", { url: QUESTLOG_BUILD_URL + src.ql }))}>
+              <ArrowSquareOutIcon aria-hidden="true" />
+              {t("characters.builds.openQl")}
+            </button>
+          )}
+          <button type="button" className="btn sm" aria-pressed={L} disabled={!qlCard} style={{ color: L ? "var(--pm-redt)" : "var(--pm-t1)" }} onClick={likeBuild}>
             <HeartIcon weight={L ? "fill" : "regular"} aria-hidden="true" />
-            <span className="srOnly">{t("characters.like")}</span>
+            <span className="srOnly">{t("characters.builds.fav")}</span>
             {likes}
           </button>
         </div>

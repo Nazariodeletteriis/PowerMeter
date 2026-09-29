@@ -29,12 +29,15 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
  * A map's tiles with pan (drag) and zoom (wheel, +/- buttons). `world` is drawn
  * in map pixels on top of the tiles (markers, borders, popups: --k and --kp keep
  * them at screen size); `children` float over the viewport (panels, credits).
- * Opens on the whole map, or on `focus` when given.
+ * Opens on the whole map, or on `focus` when given (zoomed in at most to `maxFocus`).
+ * Only the tiles that have been in view load, so a focused minimap costs a handful.
  */
 export function MapView({
   t,
   map,
   focus,
+  maxFocus = FOCUS_MAX,
+  ctrlZoom,
   onBareClick,
   style,
   world,
@@ -43,6 +46,9 @@ export function MapView({
   t: T;
   map: MapData;
   focus?: MapBox;
+  maxFocus?: number;
+  /** Wheel zooms only with Ctrl (a map inside a scrolling page lets the page scroll). */
+  ctrlZoom?: boolean;
   onBareClick?: () => void;
   style?: CSSProperties;
   world?: ReactNode;
@@ -52,6 +58,8 @@ export function MapView({
   const box = useRef<HTMLDivElement>(null);
   const fit = useRef(0.1);
   const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
+  const size = useRef({ w: 0, h: 0 });
+  const seen = useRef({ map: "", tiles: new Set<number>() });
 
   const w = map.tiles[0] * map.tile;
   const h = map.tiles[1] * map.tile;
@@ -72,12 +80,13 @@ export function MapView({
   useLayoutEffect(() => {
     const fitMap = () => {
       const r = box.current!.getBoundingClientRect();
+      size.current = { w: r.width, h: r.height };
       const s = Math.min(r.width / w, r.height / h);
       fit.current = s;
       if (!focus) return setView({ s, x: (r.width - w * s) / 2, y: (r.height - h * s) / 2 });
       const [x0, y0, x1, y1] = focus;
-      // A single point (zero-size box) divides by 0: Infinity, clamped to FOCUS_MAX.
-      const fs = clamp(Math.min((r.width - 2 * FOCUS_PAD) / (x1 - x0), (r.height - 2 * FOCUS_PAD) / (y1 - y0)), s, FOCUS_MAX);
+      // A single point (zero-size box) divides by 0: Infinity, clamped to maxFocus.
+      const fs = clamp(Math.min((r.width - 2 * FOCUS_PAD) / (x1 - x0), (r.height - 2 * FOCUS_PAD) / (y1 - y0)), s, maxFocus);
       setView(place({ s: fs, x: r.width / 2 - ((x0 + x1) / 2) * fs, y: r.height / 2 - ((y0 + y1) / 2) * fs }));
     };
     const ro = new ResizeObserver(fitMap);
@@ -89,6 +98,7 @@ export function MapView({
   useEffect(() => {
     const el = box.current!;
     const wheel = (e: WheelEvent) => {
+      if (ctrlZoom && !e.ctrlKey) return;
       e.preventDefault();
       const r = el.getBoundingClientRect();
       setView((v) => zoomAt(v, Math.exp(-e.deltaY * 0.002), e.clientX - r.left, e.clientY - r.top));
@@ -127,26 +137,42 @@ export function MapView({
   const k = clamp(view.s * 2, MARKER_MIN, 1) / view.s;
   const pad = (n: number) => String(n).padStart(2, "0");
 
+  // Tiles in view join the ones already loaded (kept, so panning back doesn't reload them).
+  if (seen.current.map !== map.id) seen.current = { map: map.id, tiles: new Set() };
+  const cols = map.tiles[0];
+  const ts = map.tile * view.s;
+  if (size.current.w) {
+    const [c0, c1] = [Math.floor(-view.x / ts), Math.floor((size.current.w - view.x) / ts)].map((c) => clamp(c, 0, cols - 1));
+    const [r0, r1] = [Math.floor(-view.y / ts), Math.floor((size.current.h - view.y) / ts)].map((r) => clamp(r, 0, map.tiles[1] - 1));
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) seen.current.tiles.add(r * cols + c);
+  }
+
   return (
     <div className="wMap" style={style} ref={box} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
       <div
         className="wWorld"
         style={{ width: w, height: h, transform: `translate(${view.x}px, ${view.y}px) scale(${view.s})`, "--k": k, "--kp": 1 / view.s } as CSSProperties}
       >
-        {Array.from({ length: map.tiles[0] * map.tiles[1] }, (_, i) => {
-          const col = i % map.tiles[0];
-          const row = Math.floor(i / map.tiles[0]);
-          return (
-            <img
-              key={i}
-              src={`${TILES}${map.id}/Res/${map.id}_${pad(col)}_${pad(row)}.webp`}
-              alt=""
-              draggable={false}
-              decoding="async"
-              style={{ left: col * map.tile, top: row * map.tile, width: map.tile, height: map.tile }}
-            />
-          );
-        })}
+        {"image" in map && map.image ? (
+          // questlog's single image for the worlds without tiles (scripts/fetch-map.mjs).
+          // ~3.5 MB: lazy, so a minimap out of view doesn't fetch it.
+          <img src={map.image} alt="" draggable={false} decoding="async" loading="lazy" style={{ left: 0, top: 0, width: w, height: h }} />
+        ) : (
+          [...seen.current.tiles].map((i) => {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            return (
+              <img
+                key={i}
+                src={`${TILES}${map.id}/Res/${map.id}_${pad(col)}_${pad(row)}.webp`}
+                alt=""
+                draggable={false}
+                decoding="async"
+                style={{ left: col * map.tile, top: row * map.tile, width: map.tile, height: map.tile }}
+              />
+            );
+          })
+        )}
         {world}
       </div>
       {children}

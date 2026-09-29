@@ -32,11 +32,12 @@ const NAME_MAX_LENGTH = 32;
 const STEPS = 5;
 const NPCAP_URL = "https://npcap.com/#download";
 
-// Date of the terms/privacy text the user accepted, saved as pm.termsAccepted.
+// Date of the terms/privacy text the user accepted, saved as pm.termsAccepted
+// (".2" and so on for a second revision on the same day).
 // Bump it whenever src/data/legal changes in substance: App then shows only
 // the legal step to users who accepted an older version. The backend keeps
 // the same constant (powermeter.rs) and captures nothing until it matches.
-export const TERMS_VERSION = "2026-09-29";
+export const TERMS_VERSION = "2026-09-29.2";
 
 // Terms and privacy as static HTML (scripts/sync-legal.mjs), one chunk per
 // language, loaded when the legal step opens. Languages without a translation

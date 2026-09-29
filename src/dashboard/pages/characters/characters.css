@@ -246,6 +246,16 @@
 .chBuildCard:hover {
   border-color: var(--pm-grey);
 }
+/* A favourite community build stands out in the list. */
+.chBuildCard[data-fav],
+.chBuildCard[data-fav]:hover {
+  border-color: var(--pm-red);
+}
+/* Its gear is on the way from questlog. */
+.chBuildCard[aria-busy="true"] {
+  opacity: 0.6;
+  cursor: progress;
+}
 /* Portrait band. The portraits are full-length figures with the face in the top
    tenth, and the band always fills them by width: anchored to the top, it shows
    face and upper body for every class. Hovering zooms out to that framing. */

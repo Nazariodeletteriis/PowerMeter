@@ -237,19 +237,84 @@
 .wMarker[data-found] {
   opacity: 0.4;
 }
-/* An NPC spawn point (SpawnMap): a dot in the accent color. Unlike .wMarker it
-   never shrinks (--kp, the full 1/scale): it is small already, and far-apart
-   spawns open the map zoomed out. */
+/* A spawn point (SpawnMap): a dot in the accent color, or its quest role's
+   (data-role). Unlike .wMarker it never shrinks (--kp, the full 1/scale): it is
+   small already, and far-apart spawns open the map zoomed out. */
 .wSpawn {
   position: absolute;
   transform: translate(-50%, -50%) scale(var(--kp));
   width: 12px;
   height: 12px;
+  padding: 0;
   border-radius: 50%;
-  background: var(--pm-red);
+  background: var(--c, var(--pm-red));
   border: 2px solid var(--pm-bg);
-  box-shadow: 0 0 0 1px var(--pm-redt);
+  box-shadow: 0 0 0 1px var(--c, var(--pm-redt));
   pointer-events: none;
+}
+.wSpawn.on {
+  pointer-events: auto;
+  cursor: pointer;
+}
+@media (hover: hover) and (pointer: fine) {
+  .wSpawn.on:hover {
+    box-shadow: 0 0 0 3px var(--c);
+  }
+}
+/* Quest roles: giver, target, turn-in, dungeon entrance (a square, not only a color). */
+:is(.wSpawn, .wSwatch)[data-role="npc"] {
+  --c: var(--pm-okt);
+}
+:is(.wSpawn, .wSwatch)[data-role="tgt"] {
+  --c: var(--pm-redt);
+}
+:is(.wSpawn, .wSwatch)[data-role="to"] {
+  --c: var(--pm-warn);
+}
+:is(.wSpawn, .wSwatch)[data-role="dg"] {
+  --c: var(--pm-t1);
+  border-radius: 2px;
+}
+.wSwatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--c);
+}
+.wLegend {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+.wLegendItem {
+  margin-right: 14px;
+  color: var(--pm-t1);
+}
+.wLegendItem:hover {
+  color: var(--pm-redt);
+}
+/* The minimap's "open large" button, over the map like .wZoom. */
+.wMapExpand {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--pm-line);
+  border-radius: 6px;
+  background: var(--pm-s1);
+  color: var(--pm-t1);
+  cursor: pointer;
+}
+.wMapExpand:hover {
+  background: var(--pm-s2);
 }
 /* Enters from the marker: `scale` and `opacity` transition, `transform`
    (which follows the zoom through --kp, the full 1/scale) doesn't. */

@@ -2,6 +2,8 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { CheckCircleIcon, TrashIcon } from "@phosphor-icons/react";
 import type { T } from "../../i18n";
 import { Modal } from "../system/Modal";
+import type { BuildGear } from "./gear";
+import { tagSlug, type CommunityBuild } from "./questlog";
 import "./characters.css";
 
 // Page state that survives switching page, like the prototype's single state
@@ -20,13 +22,16 @@ export function useMem<V>(key: string, init: V) {
 
 /** The build the Character Builder shows (prototype bSrc). */
 /** `char`: id of the character whose card opened it; the build then stays on that character instead of following the active one. */
-export type BuildSrc = { t: string; au: string; cls: string; own: boolean; isNew?: boolean; likes?: number; tags?: string[]; char?: string };
+/** `ql`: slug of a questlog.gg community build; its gear lives in module memory (useMem "ql"), never in settings. */
+export type BuildSrc = { t: string; au: string; cls: string; own: boolean; isNew?: boolean; likes?: number; tags?: string[]; char?: string; ql?: string };
+/** Opened community builds, by slug: the card (for the like snapshot) and its gear. */
+export type QlOpened = Record<string, { card: CommunityBuild; gear: BuildGear }>;
 /** Build filters: regions and tags (tags are game/community terms, not translated). */
 export const BUILD_REGIONS = ["EU", "NA"];
 export const BUILD_TAGS = ["PvE", "PvP", "Arena", "Dungeon", "Siege", "Large-Scale", "Beginner Friendly", "Budget Build", "Endgame Build", "Tank", "DPS", "Healer", "Support"];
 /** Builds created or cloned in the Character Builder, newest first: settings["pm.myBuilds"] = BuildSrc[]. */
 export const MY_BUILDS_KEY = "pm.myBuilds";
-export function readMyBuilds(json?: string): BuildSrc[] {
+export function readMyBuilds<V = BuildSrc>(json?: string): V[] {
   try {
     const v = JSON.parse(json ?? "");
     return Array.isArray(v) ? v : [];
@@ -34,6 +39,14 @@ export function readMyBuilds(json?: string): BuildSrc[] {
     return []; // missing or hand-edited: no builds of your own yet
   }
 }
+/** Favourite community builds, newest first, as snapshots (shown without asking questlog): settings["pm.likedBuilds"] = CommunityBuild[]. */
+export const LIKED_KEY = "pm.likedBuilds";
+export const readLiked = (json?: string) => readMyBuilds<CommunityBuild>(json);
+/** The favourites JSON after toggling one build (by slug). */
+export const toggleLiked = (list: CommunityBuild[], b: CommunityBuild) =>
+  JSON.stringify(list.some((x) => x.slug === b.slug) ? list.filter((x) => x.slug !== b.slug) : [b, ...list]);
+/** questlog tag slug → our BUILD_TAGS label ("beginner-friendly" → "Beginner Friendly"); unknown slugs as they are. */
+export const tagLabel = (slug: string) => BUILD_TAGS.find((l) => tagSlug(l) === slug) ?? slug;
 /** A deleted build open in the builder: the builder reopens on its default build. */
 export function closeBuild(title: string) {
   if ((mem.bSrc as BuildSrc | undefined)?.t === title) delete mem.bSrc;

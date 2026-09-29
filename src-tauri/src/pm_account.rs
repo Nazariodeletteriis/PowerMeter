@@ -10,6 +10,9 @@
 
 use std::time::Duration;
 
+use base64::Engine;
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use serde_json::{json, Value};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
@@ -21,6 +24,10 @@ const TOKEN_KEY: &str = "pm.token";
 const USER_KEY: &str = "pm.user";
 const DEFAULT_SERVER_URL: &str = "https://powermeter.letrionlabs.it";
 const LOGIN_TIMEOUT: Duration = Duration::from_secs(300);
+const PERMIT_KEY: &str = "pm.permit";
+const ENTITLEMENT_KEY: &str = "pm.entitlement";
+/// Public half of the server's ENTITLEMENT_KEY: only the server can sign a permit this accepts.
+const PERMIT_PUBLIC_KEY: &str = "d6ebo/vZAEGGK9R5qx+QSe6j5T/FAp67lRO3XshEzTE=";
 
 fn server_url(state: &AppState) -> String {
     state
@@ -68,6 +75,20 @@ async fn authed(state: &AppState, method: reqwest::Method, path: &str, body: Opt
         state.settings.remove(USER_KEY);
     }
     res
+}
+
+/// Payload of a permit (`base64url(json).base64url(ed25519)`) if the server signed it, expired or not.
+fn permit_payload(permit: &str) -> Option<Value> {
+    let (payload, sig) = permit.split_once('.')?;
+    let payload = URL_SAFE_NO_PAD.decode(payload).ok()?;
+    let sig = Signature::from_slice(&URL_SAFE_NO_PAD.decode(sig).ok()?).ok()?;
+    let key: [u8; 32] = base64::engine::general_purpose::STANDARD.decode(PERMIT_PUBLIC_KEY).ok()?.try_into().ok()?;
+    VerifyingKey::from_bytes(&key).ok()?.verify(&payload, &sig).ok()?;
+    serde_json::from_slice(&payload).ok()
+}
+
+fn now_ms() -> f64 {
+    std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0.0, |d| d.as_millis() as f64)
 }
 
 /// Log ids are 10 base62 characters; checked here so an id can never change the request path.
@@ -230,6 +251,100 @@ pub async fn pm_delete_log(state: tauri::State<'_, AppState>, id: String) -> Res
     authed(&state, reqwest::Method::DELETE, &log_path(&id)?, None).await.map(|_| ())
 }
 
+/// What the user may open: `{tier, admin, features, …}` (tier: free/trial/recluta/daeva/empyrean).
+/// Tier, admin and features always come from the signed permit, never from the unsigned fields;
+/// offline, the last permit counts until it expires (7 days at most).
+#[tauri::command]
+pub async fn pm_entitlement(state: tauri::State<'_, AppState>) -> Result<Value, String> {
+    // The developer's own builds are always unlocked.
+    if cfg!(debug_assertions) {
+        return Ok(json!({ "tier": "empyrean", "admin": true, "features": [], "source": "dev" }));
+    }
+    let free = json!({ "tier": "free", "admin": false, "features": [], "source": "free" });
+    if state.settings.get(TOKEN_KEY).is_none() {
+        state.settings.remove(PERMIT_KEY);
+        return Ok(free);
+    }
+    let signed = |info: &mut Value, permit: &Value| {
+        for k in ["tier", "admin", "features"] {
+            info[k] = permit[k].clone();
+        }
+    };
+    match authed(&state, reqwest::Method::GET, "/api/me/entitlements", None).await {
+        Ok(mut info) => {
+            let permit = info["permit"].as_str().map(str::to_string).ok_or("no permit in server reply")?;
+            let payload = permit_payload(&permit).ok_or("permit not signed by the server")?;
+            info.as_object_mut().map(|o| o.remove("permit"));
+            signed(&mut info, &payload);
+            state.settings.set(PERMIT_KEY, &permit);
+            state.settings.set(ENTITLEMENT_KEY, &info.to_string());
+            Ok(info)
+        }
+        Err(e) if e == "unauthorized" => {
+            state.settings.remove(PERMIT_KEY);
+            Ok(free)
+        }
+        // Offline or server down: the cached permit, while valid.
+        Err(_) => {
+            let payload = state.settings.get(PERMIT_KEY).and_then(|p| permit_payload(&p));
+            match payload.filter(|p| p["exp"].as_f64().is_some_and(|exp| exp > now_ms())) {
+                Some(payload) => {
+                    let mut info: Value = state.settings.get(ENTITLEMENT_KEY).and_then(|s| serde_json::from_str(&s).ok()).unwrap_or(json!({}));
+                    signed(&mut info, &payload);
+                    info["offline"] = json!(true);
+                    Ok(info)
+                }
+                None => Ok(free),
+            }
+        }
+    }
+}
+
+/// Opens Patreon in the browser to link it to this account; the app re-reads the entitlement after.
+#[tauri::command]
+pub async fn pm_patreon_link(state: tauri::State<'_, AppState>) -> Result<(), String> {
+    let res = authed(&state, reqwest::Method::POST, "/api/patreon/link", Some(&json!({}))).await?;
+    let url = res["url"].as_str().filter(|u| u.starts_with("https://www.patreon.com/")).ok_or("invalid link url")?;
+    tauri_plugin_opener::open_url(url, None::<&str>).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn pm_patreon_unlink(state: tauri::State<'_, AppState>) -> Result<(), String> {
+    authed(&state, reqwest::Method::DELETE, "/api/patreon/link", None).await.map(|_| ())
+}
+
+/// Admin only (the server checks): last 50 users, or those matching name / Discord id.
+#[tauri::command]
+pub async fn pm_admin_users(state: tauri::State<'_, AppState>, q: String) -> Result<Value, String> {
+    authed(&state, reqwest::Method::GET, &format!("/api/admin/users?q={}", urlencoding::encode(q.trim())), None).await
+}
+
+fn grant_path(user_id: &str) -> Result<String, String> {
+    if !user_id.is_empty() && user_id.len() <= 20 && user_id.bytes().all(|b| b.is_ascii_digit()) {
+        Ok(format!("/api/admin/grants/{user_id}"))
+    } else {
+        Err("invalid user id".into())
+    }
+}
+
+/// Admin only: gives a tier by hand (`days` None = forever).
+#[tauri::command]
+pub async fn pm_admin_grant(
+    state: tauri::State<'_, AppState>,
+    user_id: String,
+    tier: String,
+    days: Option<u32>,
+    note: Option<String>,
+) -> Result<(), String> {
+    let body = json!({ "tier": tier, "days": days, "note": note });
+    authed(&state, reqwest::Method::PUT, &grant_path(&user_id)?, Some(&body)).await.map(|_| ())
+}
+
+#[tauri::command]
+pub async fn pm_admin_revoke(state: tauri::State<'_, AppState>, user_id: String) -> Result<(), String> {
+    authed(&state, reqwest::Method::DELETE, &grant_path(&user_id)?, None).await.map(|_| ())
+}
+
 /// Class stats over the community's public logs; no account needed.
 #[tauri::command]
 pub async fn pm_class_stats(
@@ -252,4 +367,27 @@ pub async fn pm_class_stats(
         }
     }
     call(reqwest::Method::GET, url.as_str(), None, None).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Signed by the server's key: {"v":1,"uid":"0","tier":"daeva",…,"exp":1000}.
+    const PERMIT: &str = "eyJ2IjoxLCJ1aWQiOiIwIiwidGllciI6ImRhZXZhIiwiYWRtaW4iOmZhbHNlLCJmZWF0dXJlcyI6W10sImZvdW5kZXIiOmZhbHNlLCJpYXQiOjAsImV4cCI6MTAwMH0.az8VVur51Vl5JnsbR_p6488Y-rhYlj_wbWH3Etf-1B0LzDvZYWtqWH88ejtrPU3udVvZQ4LRaPjVtIpbb8C1BQ";
+
+    #[test]
+    fn permit_signed_by_the_server() {
+        assert_eq!(permit_payload(PERMIT).unwrap()["tier"], "daeva");
+    }
+
+    #[test]
+    fn tampered_permit_rejected() {
+        let (payload, sig) = PERMIT.split_once('.').unwrap();
+        let forged = URL_SAFE_NO_PAD.encode(
+            String::from_utf8(URL_SAFE_NO_PAD.decode(payload).unwrap()).unwrap().replace("daeva", "empyr"),
+        );
+        assert!(permit_payload(&format!("{forged}.{sig}")).is_none());
+        assert!(permit_payload("garbage").is_none());
+    }
 }

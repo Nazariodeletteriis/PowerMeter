@@ -6,11 +6,14 @@ import {
   CaretDoubleRightIcon,
   CaretDownIcon,
   CaretUpIcon,
+  LockSimpleIcon,
   MagnifyingGlassIcon,
   PictureInPictureIcon,
 } from "@phosphor-icons/react";
 import type { SaveSetting, Settings } from "./App";
+import { canOpen, PLANS, useEntitlement } from "./entitlement";
 import { Home } from "./Home";
+import { Locked, TrialReminder } from "./Locked";
 import type { T } from "./i18n";
 import { ALL_PAGES, NAV, NAV_BOTTOM, type NavPage } from "./nav";
 import { Palette } from "./Palette";
@@ -81,6 +84,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
   const [palette, setPalette] = useState(false);
   const [diagnosis, setDiagnosis] = useState(false);
   const [header, setHeader] = useState<PageHeader>({});
+  const entitlement = useEntitlement();
   // Cleared on navigation; the new page sets its own from an effect.
   const go = (id: string) => {
     setHeader({});
@@ -119,19 +123,24 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
   // show their group as breadcrumb.
   const crumb = header.crumb ?? (group && (!PAGES[page] || PAGES[page] === States) ? t(group) : undefined);
 
-  const item = (x: NavPage, indent: boolean) => (
-    <button
-      key={x.id}
-      type="button"
-      className={indent ? "navItem indent" : "navItem"}
-      title={t(x.label)}
-      aria-current={x.id === page ? "page" : undefined}
-      onClick={() => go(x.id)}
-    >
-      <x.icon aria-hidden="true" />
-      {collapsed ? <span className="srOnly">{t(x.label)}</span> : <span>{t(x.label)}</span>}
-    </button>
-  );
+  // Locked tabs stay in the menu and open to what unlocks them (Locked.tsx).
+  const item = (x: NavPage, indent: boolean) => {
+    const locked = !canOpen(entitlement, x.tier) && t("subs.requires", { tier: PLANS[x.tier!].name });
+    return (
+      <button
+        key={x.id}
+        type="button"
+        className={indent ? "navItem indent" : "navItem"}
+        title={locked ? `${t(x.label)} (${locked})` : t(x.label)}
+        aria-current={x.id === page ? "page" : undefined}
+        onClick={() => go(x.id)}
+      >
+        <x.icon aria-hidden="true" />
+        {collapsed ? <span className="srOnly">{t(x.label)}</span> : <span>{t(x.label)}</span>}
+        {locked && <LockSimpleIcon weight="fill" className="lock" role="img" aria-label={locked} />}
+      </button>
+    );
+  };
 
   return (
     <div className="frame">
@@ -179,6 +188,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
       </nav>
 
       <div className="main">
+        <TrialReminder t={t} lang={lang} go={go} />
         <header className="topbar">
           <button type="button" className="searchBox" onClick={() => setPalette(true)}>
             <MagnifyingGlassIcon aria-hidden="true" />
@@ -254,11 +264,20 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
               reviewOnboarding={reviewOnboarding}
             />
           ) : page === "supporter" ? (
-            <Supporter t={t} name={name} onError={onError} />
+            <Supporter t={t} lang={lang} onError={onError} />
           ) : (
             (() => {
               const Page = PAGES[page];
-              return <Page t={t} lang={lang} settings={settings} save={save} name={name} go={go} run={run} onError={onError} setHeader={setHeader} />;
+              if (canOpen(entitlement, current.tier)) {
+                return <Page t={t} lang={lang} settings={settings} save={save} name={name} go={go} run={run} onError={onError} setHeader={setHeader} />;
+              }
+              // Preview only: the page can't navigate, save or report errors.
+              const none = () => {};
+              return (
+                <Locked t={t} tier={current.tier!} go={go} onError={onError}>
+                  <Page t={t} lang={lang} settings={settings} save={async () => {}} name={name} go={none} run={none} onError={none} setHeader={none} />
+                </Locked>
+              );
             })()
           )}
         </main>
