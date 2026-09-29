@@ -4,6 +4,16 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.3.4
+
+- New: Supporter plans on Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € a month). The meter and most tabs stay free; Database, Fight report, Online logs and Rankings need Recluta, Party, Crafting and Calculators need Daeva. Locked tabs stay in the menu with a padlock and a blurred preview.
+- New: 14-day free trial of everything, once per Discord account: sign in with Discord to start it.
+- New: Supporter page: your plan and where it comes from, link or unlink Patreon, and the plans side by side.
+- New: Build community shows the community's builds from questlog.gg, with class, tag, region and search filters; open any of them in the Character Builder and duplicate it to make it yours.
+- New: NPC, monster and dungeon cards show a minimap of where they are, and quest cards show where the quest giver, the targets, the turn-in NPC and the dungeon are. Added the Poeta, Ishalgen, Eltnen and Morheim maps.
+- Changed: "Your builds" lists only the builds you created or duplicated; "Liked" is now "Favorites" and is kept after a restart.
+- Changed: maps load only the part you are looking at.
+
 ## 0.3.3
 
 - New: NPCs and monsters in the database show their spawn points on the map (Show on map), for Verteron, Altgard and Reshanta.

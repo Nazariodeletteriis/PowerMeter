@@ -2,6 +2,16 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.4
+
+- Novo: planos de Apoiador no Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € por mês). O medidor e a maioria das abas continuam gratuitas; Banco de dados, Relatório de combate, Logs online e Classificações exigem Recluta, Grupo e rotações, Crafting e Calculadoras exigem Daeva. As abas bloqueadas ficam no menu com um cadeado e uma prévia desfocada.
+- Novo: teste grátis de tudo por 14 dias, uma vez por conta do Discord: entre com o Discord para começá-lo.
+- Novo: página do Apoiador: seu plano e de onde ele vem, vincular ou desvincular o Patreon, e os planos lado a lado.
+- Novo: Builds da comunidade mostra as builds da comunidade vindas do questlog.gg, com filtros de classe, tag, região e busca; abra qualquer uma no Character Builder e duplique-a para torná-la sua.
+- Novo: os cards de NPCs, monstros e masmorras mostram um minimapa de onde eles estão, e os cards de missão mostram onde estão quem dá a missão, os alvos, o NPC de entrega e a masmorra. Adicionados os mapas de Poeta, Ishalgen, Eltnen e Morheim.
+- Alterado: "Suas builds" lista apenas as builds que você criou ou duplicou; "Curtidas" agora se chama "Favoritas" e permanece após reiniciar.
+- Alterado: os mapas carregam apenas a parte que você está vendo.
+
 ## 0.3.3
 
 - Novo: NPCs e monstros do banco de dados mostram seus pontos de spawn no mapa (Ver no mapa), para Verteron, Altgard e Reshanta.
