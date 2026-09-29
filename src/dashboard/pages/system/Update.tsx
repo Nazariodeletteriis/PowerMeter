@@ -206,14 +206,14 @@ export function UpdateModal({
     return () => void a.revert();
   }, [pct, phase]);
 
+  const mb = (n: number) => n.toLocaleString(lang, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const meta = [
     update.date &&
       t("organizer.update.released", {
         date: new Date(update.date).toLocaleDateString(lang, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }),
       }),
-    update.sizeMb && `${update.sizeMb} MB`,
+    update.sizeMb && `${mb(update.sizeMb)} MB`,
   ].filter(Boolean);
-  const mb = (n: number) => n.toLocaleString(lang, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
   return (
     <Modal
