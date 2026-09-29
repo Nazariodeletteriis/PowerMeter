@@ -4,6 +4,7 @@ Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
 ## 0.3.3
 
+- Novo: NPCs e monstros do banco de dados mostram seus pontos de spawn no mapa (Ver no mapa), para Verteron, Altgard e Reshanta.
 - Alterado: a build principal agora é por personagem e não por classe: dois personagens da mesma classe têm equipamentos separados. Até um personagem editar a sua, ele parte da build compartilhada anterior.
 - Alterado: os cards em Meus personagens mostram o Gear Score da build principal do personagem (atual / objetivo, os mesmos números do Character Builder) em vez de um CP sempre vazio; a barra superior também não o mostra mais.
 - Corrigido: uma build aberta pelo card de um personagem usa o Arcana e o Daevanion desse personagem, não os do ativo.

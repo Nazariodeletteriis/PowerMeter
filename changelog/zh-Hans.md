@@ -4,6 +4,7 @@ Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
 ## 0.3.3
 
+- 新增：数据库中的 NPC 和怪物可在地图上显示刷新点（在地图上显示），适用于贝尔特伦、阿尔特加德和深渊。
 - 变更：主构筑改为按角色而非按职业保存：同职业的两个角色拥有各自的装备。在角色编辑自己的构筑之前，会从之前共享的构筑开始。
 - 变更：“我的角色”中的卡片改为显示角色主构筑的 Gear Score（已有 / 目标，与 Character Builder 中的数值相同），不再显示始终为空的 CP；顶部栏也不再显示 CP。
 - 修复：从角色卡片打开的构筑会使用该角色的Arcana 与 Daevanion，而不是当前角色的。

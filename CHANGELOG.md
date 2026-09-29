@@ -6,6 +6,7 @@ The same section must also exist, translated, in changelog/<lang>.md for every U
 
 ## 0.3.3
 
+- New: NPCs and monsters in the database show their spawn points on the map (Show on map), for Verteron, Altgard and Reshanta.
 - Changed: the main build is now per character, not per class: two characters of the same class keep separate gear. Until a character edits its own, it starts from the previous shared build.
 - Changed: character cards in My characters show the Gear Score of the character's main build (owned / target, the same numbers as the Character Builder) instead of an always-empty CP; the top bar no longer shows it either.
 - Fixed: a build opened from a character's card uses that character's Arcana and Daevanion, not the active character's.

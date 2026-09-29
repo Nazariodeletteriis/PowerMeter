@@ -237,6 +237,20 @@
 .wMarker[data-found] {
   opacity: 0.4;
 }
+/* An NPC spawn point (SpawnMap): a dot in the accent color. Unlike .wMarker it
+   never shrinks (--kp, the full 1/scale): it is small already, and far-apart
+   spawns open the map zoomed out. */
+.wSpawn {
+  position: absolute;
+  transform: translate(-50%, -50%) scale(var(--kp));
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--pm-red);
+  border: 2px solid var(--pm-bg);
+  box-shadow: 0 0 0 1px var(--pm-redt);
+  pointer-events: none;
+}
 /* Enters from the marker: `scale` and `opacity` transition, `transform`
    (which follows the zoom through --kp, the full 1/scale) doesn't. */
 .wPopup {
