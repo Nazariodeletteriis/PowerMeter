@@ -10,10 +10,10 @@ import type { PageProps } from "./types";
 type Fight = { id: string; bossName: string; startTimeMs: number; durationMs: number; jobs: string[]; isTrain: boolean; mode: string };
 // Meter mode of a saved fight ("boss" / "pve" / "train" / "pvp"); PVE and PvP are whole sessions.
 const MODES = [
-  ["boss", "Boss"],
+  ["boss", "BOSS"],
+  ["train", "TRAIN"],
   ["pve", "PVE"],
-  ["train", "Train"],
-  ["pvp", "PvP"],
+  ["pvp", "PVP"],
 ] as const;
 /** Only boss fights go online (the server takes boss logs). */
 const uploadable = (f?: { isTrain?: boolean; mode?: string }) => !f?.isTrain && (!f?.mode || f.mode === "boss");

@@ -1883,7 +1883,7 @@ class DpsApp {
     });
     this.targetModeBtn?.addEventListener("click", () => {
       // The four exclusive modes: each hit counts in exactly one of them.
-      const modes = ["bossTargets", "pveTargets", "trainTargets", "pvpTargets"];
+      const modes = ["bossTargets", "trainTargets", "pveTargets", "pvpTargets"];
       const currentIndex = modes.indexOf(this.targetSelection);
       const nextMode = modes[(currentIndex + 1) % modes.length];
       console.log("[Target Mode Toggle]", {

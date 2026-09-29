@@ -182,6 +182,16 @@ button {
 .linkBtn:hover {
   color: var(--pm-t1);
 }
+/* Character name on its card: opens that character's build. */
+.chCardName {
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.chCardName:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
 .card {
   background: var(--pm-s1);

@@ -47,10 +47,10 @@ const TABS = [
 // Prototype order for the language list.
 const LANG_ORDER = ["it", "en", "de", "fr", "es", "pt", "ru", "ja", "ko", "zh-Hans", "zh-Hant"];
 const TARGET_MODES = [
-  ["bossTargets", "Boss"],
+  ["bossTargets", "BOSS"],
+  ["trainTargets", "TRAIN"],
   ["pveTargets", "PVE"],
-  ["trainTargets", "Train"],
-  ["pvpTargets", "PvP"],
+  ["pvpTargets", "PVP"],
 ] as const;
 
 const getCapture = () => invoke<CaptureStatus>("get_capture_status");

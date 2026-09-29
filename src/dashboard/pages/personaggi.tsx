@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { CopyIcon, DownloadSimpleIcon, PlusIcon, TrashIcon, UploadSimpleIcon } from "@phosphor-icons/react";
+import { OWN_BUILD } from "./characters/gear";
+import { openBuild } from "./characters/shared";
 import { activate, activeId, FACTIONS, newId, readCharacters, saveCharacters, type Character, type Faction } from "../characters";
 import { REGIONS } from "../Onboarding";
 import { ClassAvatar, FactionTag, fmt, RELEASED_CLASSES as CLASS_OPTIONS } from "../ui";
@@ -24,7 +26,7 @@ function parse(x: unknown): Character | null {
   };
 }
 
-export default function Personaggi({ t, lang, settings, save, run }: PageProps) {
+export default function Personaggi({ t, lang, settings, save, run, go }: PageProps) {
   const list = readCharacters(settings);
   const active = activeId(settings, list);
   const factionName = (f: string) => t(`collections.${f}`);
@@ -187,7 +189,22 @@ export default function Personaggi({ t, lang, settings, save, run }: PageProps) 
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <ClassAvatar cls={c.cls} size={36} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <h2 style={{ fontWeight: 500, fontSize: 15 }}>{c.name}</h2>
+                  <h2 style={{ fontWeight: 500, fontSize: 15 }}>
+                    {/* The builder works on the active character, so this makes it active first. */}
+                    <button
+                      type="button"
+                      className="linkBtn chCardName"
+                      title={t("nav.builder")}
+                      onClick={() =>
+                        run(async () => {
+                          if (!isActive) await activate(save, c);
+                          openBuild({ t: OWN_BUILD, au: c.name, cls: c.cls, own: true }, go);
+                        })
+                      }
+                    >
+                      {c.name}
+                    </button>
+                  </h2>
                   <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>
                     {[c.cls, c.level && `Lv ${c.level}`, regionLabel(c.region)].filter(Boolean).join(" · ")}
                   </div>

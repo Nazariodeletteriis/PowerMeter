@@ -9,6 +9,9 @@ The same section must also exist, translated, in changelog/<lang>.md for every U
 - New: Before you start: the full Terms and conditions and Privacy policy (English, Italian, German, French, Spanish, Portuguese, Russian) must be accepted before PowerMeter reads any combat data. Existing users accept them once at the next launch.
 - Fixed: Gear Viewer listed most pieces twice (the same item exists once per faction); now each piece appears once.
 - Fixed: the build header showed placeholder like and comment counts instead of the build's real likes.
+- Changed: "Open widget" is now "Launch DPSMeter".
+- Changed: meter modes are shown as BOSS, TRAIN, PVE, PVP, in this order, in the meter, History and Settings.
+- Changed: clicking a character's name in My characters makes it active and opens its build.
 
 ## 0.3.0
 

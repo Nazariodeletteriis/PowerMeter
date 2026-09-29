@@ -37,12 +37,12 @@ const JOB: Record<string, string> = {
 // Tab labels → set_target_mode ids (dps_calculator.rs).
 // Exclusive: every hit counts in exactly one of them.
 const MODES = [
-  ["Boss", "bossTargets"],
+  ["BOSS", "bossTargets"],
+  ["TRAIN", "trainTargets"],
   ["PVE", "pveTargets"],
-  ["Train", "trainTargets"],
-  ["PvP", "pvpTargets"],
+  ["PVP", "pvpTargets"],
 ] as const;
-const KIND_LABEL: Record<string, string> = { boss: "Boss", pve: "PVE", train: "Train", pvp: "PvP" };
+const KIND_LABEL: Record<string, string> = { boss: "BOSS", pve: "PVE", train: "TRAIN", pvp: "PVP" };
 // Classes marked TANK on the aggro card.
 const TANKS = new Set(["Templar", "Gladiator"]);
 /** Chart window: 60 dps-update samples (500 ms each). */
