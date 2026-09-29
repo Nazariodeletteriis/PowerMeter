@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.6
+
+- Corregido: la página Supporter ya no deja la ventana en negro cuando el panel de administración lista usuarios; si una página falla, muestra el error con Reintentar en lugar de una ventana negra.
+
 ## 0.3.5
 
 - Nuevo: los monstruos que están dentro de una mazmorra muestran el mapa del mundo con la entrada de la mazmorra y un enlace a ella, y los monstruos de la capa Illusion Curtain de Verteron ahora aparecen en el mapa de Verteron.

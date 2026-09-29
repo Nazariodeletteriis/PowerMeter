@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.6
+
+- 수정: 관리자 패널이 사용자를 표시할 때 서포터 페이지에서 창이 검게 변하던 문제를 수정했습니다. 페이지에 오류가 나면 검은 화면 대신 오류와 다시 시도 버튼을 보여 줍니다.
+
 ## 0.3.5
 
 - 신규: 던전 안에 있는 몬스터는 던전 입구가 표시된 월드 맵과 던전 링크를 보여 주며, Verteron의 Illusion Curtain 레이어 몬스터도 이제 Verteron 맵에 표시됩니다.

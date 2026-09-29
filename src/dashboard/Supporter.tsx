@@ -50,7 +50,8 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
   const signIn = () => invoke("pm_login").then(setAccount).then(refreshEntitlement).catch(onError);
   const unlink = () => confirm(t("subs.unlinkConfirm")) && invoke("pm_patreon_unlink").then(refreshEntitlement).catch(onError);
   const date = new Intl.DateTimeFormat(lang, { dateStyle: "medium" });
-  const fmt = (ms: number) => date.format(ms);
+  // The server sends dates as ISO strings (admin list) or epoch ms (permit): both parse.
+  const fmt = (d: number | string) => date.format(new Date(d));
   // The trial unlocks what Daeva unlocks.
   const current = e && (e.tier === "trial" ? "daeva" : e.tier);
   const [before, after] = t("about.a2tools").split("{link}");
@@ -201,8 +202,8 @@ type AdminUser = {
   id: string;
   discordId: string;
   name: string;
-  lastLoginAt: number | null;
-  grant: { tier: PaidTier; expiresAt: number | null; note: string | null } | null;
+  lastLoginAt: string | null;
+  grant: { tier: PaidTier; expiresAt: string | null; note: string | null } | null;
   patreonTier: Tier | null;
   trialEndsAt: number | null;
   devices: number;
@@ -212,7 +213,7 @@ type AdminUser = {
 const DURATIONS = [7, 30, 90, 365];
 
 /** Admin only (the server checks too): who gets which tier by hand. */
-function Admin({ t, fmt, onError }: { t: T; fmt: (ms: number) => string; onError: (e: unknown) => void }) {
+function Admin({ t, fmt, onError }: { t: T; fmt: (d: number | string) => string; onError: (e: unknown) => void }) {
   const [q, setQ] = useState("");
   const [users, setUsers] = useState<AdminUser[]>();
   const [busy, setBusy] = useState(false);

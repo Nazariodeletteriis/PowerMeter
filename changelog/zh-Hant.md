@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.6
+
+- 修正：修正了管理面板列出使用者時贊助者頁面導致視窗變黑的問題；頁面出錯時會顯示錯誤與重試按鈕，而不是黑色畫面。
+
 ## 0.3.5
 
 - 新增：位於副本內的怪物會顯示標有副本入口的世界地圖與副本連結，Verteron 的 Illusion Curtain 層怪物現在也會顯示在 Verteron 地圖上。

@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
+import { Component, useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { REPORT_FIGHT_KEY } from "./pages/combat/parts";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -67,6 +67,26 @@ const PAGES = Object.fromEntries(
     import.meta.glob<(props: PageProps) => ReactNode>("./pages/*.tsx", { eager: true, import: "default" }),
   ).map(([path, Page]) => [path.slice("./pages/".length, -".tsx".length), Page]),
 );
+
+/** A page that throws while rendering shows the error and a retry instead of blanking the whole window. */
+class PageBoundary extends Component<{ t: T; children: ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  render() {
+    const { t, children } = this.props;
+    if (!this.state.error) return children;
+    return (
+      <div role="alert" className="card" style={{ maxWidth: 640, display: "grid", gap: 10 }}>
+        <div>{t("common.error", { message: this.state.error.message })}</div>
+        <button type="button" className="btn" style={{ justifySelf: "start" }} onClick={() => this.setState({ error: null })}>
+          {t("organizer.diag.retry")}
+        </button>
+      </div>
+    );
+  }
+}
 
 // Under 1200 px the sidebar starts collapsed (PowerMeter's minimum window is 1024×600).
 const NARROW = window.matchMedia("(max-width: 1199px)");
@@ -249,6 +269,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
               <h1>{header.title ?? t(current.label)}</h1>
             </div>
           </div>
+          <PageBoundary key={page} t={t}>
           {page === "home" ? (
             <Home
               t={t}
@@ -280,6 +301,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
               );
             })()
           )}
+          </PageBoundary>
         </main>
       </div>
 

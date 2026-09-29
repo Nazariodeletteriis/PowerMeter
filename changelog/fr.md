@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.6
+
+- Corrigé : la page Supporter ne rend plus la fenêtre noire quand le panneau d'administration liste les utilisateurs ; si une page plante, elle affiche l'erreur avec Réessayer au lieu d'une fenêtre noire.
+
 ## 0.3.5
 
 - Nouveau : les monstres situés dans un donjon affichent la carte du monde avec l'entrée du donjon et un lien vers celui-ci, et les monstres de la couche Illusion Curtain de Verteron apparaissent désormais sur la carte de Verteron.

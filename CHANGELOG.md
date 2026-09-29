@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.3.6
+
+- Fixed: the Supporter page no longer turns the window black when the admin panel lists users; if a page ever fails, it shows the error with a retry instead of a black window.
+
 ## 0.3.5
 
 - New: Monsters found inside a dungeon show the world map with the dungeon entrance and a link to the dungeon (Found inside), and monsters of Verteron's Illusion Curtain layer are now on the Verteron map.

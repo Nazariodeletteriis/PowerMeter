@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.6
+
+- Corretto: la pagina Supporter non rende più nera la finestra quando il pannello admin elenca gli utenti; se una pagina va in errore, ora mostra l'errore con Riprova invece di una finestra nera.
+
 ## 0.3.5
 
 - Nuovo: i mostri che si trovano dentro un dungeon mostrano la mappa del mondo con l'ingresso del dungeon e un link al dungeon (Si trova dentro), e i mostri dello strato Illusion Curtain di Verteron ora compaiono sulla mappa di Verteron.

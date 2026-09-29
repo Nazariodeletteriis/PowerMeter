@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.6
+
+- Behoben: Die Unterstützer-Seite färbt das Fenster nicht mehr schwarz, wenn das Admin-Panel Nutzer auflistet; schlägt eine Seite fehl, zeigt sie den Fehler mit „Erneut versuchen“ statt eines schwarzen Fensters.
+
 ## 0.3.5
 
 - Neu: Monster in einem Dungeon zeigen die Weltkarte mit dem Dungeon-Eingang und einen Link zum Dungeon, und Monster der Illusion-Curtain-Ebene von Verteron erscheinen jetzt auf der Karte von Verteron.

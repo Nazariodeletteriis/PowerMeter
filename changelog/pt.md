@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.6
+
+- Corrigido: a página Supporter não deixa mais a janela preta quando o painel de administração lista usuários; se uma página falhar, mostra o erro com Tentar novamente em vez de uma janela preta.
+
 ## 0.3.5
 
 - Novo: monstros que ficam dentro de uma masmorra mostram o mapa do mundo com a entrada da masmorra e um link para ela, e os monstros da camada Illusion Curtain de Verteron agora aparecem no mapa de Verteron.

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.6
+
+- 修复：修复了管理面板列出用户时赞助者页面导致窗口变黑的问题；页面出错时会显示错误和重试按钮，而不是黑屏。
+
 ## 0.3.5
 
 - 新增：位于副本内的怪物会显示标有副本入口的世界地图和副本链接，Verteron 的 Illusion Curtain 层怪物现在也会显示在 Verteron 地图上。
