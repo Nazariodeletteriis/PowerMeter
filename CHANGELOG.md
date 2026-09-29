@@ -8,6 +8,7 @@ The same section must also exist, translated, in changelog/<lang>.md for every U
 
 - New: Supporter plans on Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € a month). The meter and most tabs stay free; Database, Fight report, Online logs and Rankings need Recluta, Party, Crafting and Calculators need Daeva. Locked tabs stay in the menu with a padlock and a blurred preview.
 - New: 14-day free trial of everything, once per Discord account: sign in with Discord to start it.
+- New: a plan works on up to 2 PCs per account (a PC frees its place after 30 days unused), and the free trial is one per person, tied to both the Discord account and the PC.
 - New: Supporter page: your plan and where it comes from, link or unlink Patreon, and the plans side by side.
 - New: Build community shows the community's builds from questlog.gg, with class, tag, region and search filters; open any of them in the Character Builder and duplicate it to make it yours.
 - New: NPC, monster and dungeon cards show a minimap of where they are, and quest cards show where the quest giver, the targets, the turn-in NPC and the dungeon are. Added the Poeta, Ishalgen, Eltnen and Morheim maps.

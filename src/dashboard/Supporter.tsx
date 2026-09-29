@@ -1,12 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import { CheckIcon, HeartIcon, WifiSlashIcon } from "@phosphor-icons/react";
 import { useEffect, useState, type FormEvent } from "react";
-import { PLANS, refreshEntitlement, useEntitlement, type Entitlement, type PaidTier, type Tier } from "./entitlement";
+import { MAX_DEVICES, PLANS, refreshEntitlement, useEntitlement, type Entitlement, type PaidTier, type Tier } from "./entitlement";
 import type { Key, T } from "./i18n";
 import { PATREON_URL } from "./Shell";
 
 const A2TOOLS_URL = "https://github.com/taengu/A2Tools-DPS-Meter";
 const MANAGE_URL = "https://www.patreon.com/settings/memberships";
+// Same terms the onboarding shows (scripts/sync-legal.mjs); the hash picks the language.
+const TERMS_URL = "https://powermeter.letrionlabs.it/terms.html";
 const DAY = 86_400_000;
 
 const tierName = (t: T, tier: Tier) => (tier === "free" || tier === "trial" ? t(`subs.tier.${tier}`) : PLANS[tier].name);
@@ -40,6 +42,7 @@ function origin(t: T, e: Entitlement, signedIn: boolean, fmt: (ms: number) => st
 export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (e: unknown) => void }) {
   const e = useEntitlement();
   const [account, setAccount] = useState<unknown>(); // undefined until pm_account answers
+  const [waiver, setWaiver] = useState(false); // never preselected
   useEffect(() => {
     invoke("pm_account").then(setAccount, onError);
   }, []);
@@ -104,7 +107,12 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
             <div style={{ fontSize: 13, color: "var(--pm-t2)" }}>{origin(t, e, account != null, fmt)}</div>
             {e.patreon?.linked && <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{t("subs.patreonLinked")}</div>}
           </div>
-          {account !== undefined && (
+          {account !== undefined &&
+            (e.deviceLimit ? (
+              <p className="notice" style={{ maxWidth: 420, fontSize: 13 }}>
+                {t("subs.deviceLimit", { n: MAX_DEVICES })}
+              </p>
+            ) : (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {account === null ? (
                 <button type="button" className="btn fill lg" onClick={signIn}>
@@ -121,16 +129,31 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
                 </>
               ) : (
                 <>
+                  {/* Linking is what starts paid access: the server wants the waiver of the 14-day withdrawal. */}
+                  <div style={{ flexBasis: "100%", maxWidth: 420, fontSize: 12, color: "var(--pm-t2)" }}>
+                    <label className="check" style={{ alignItems: "flex-start", lineHeight: 1.5 }}>
+                      <input type="checkbox" checked={waiver} onChange={(ev) => setWaiver(ev.target.checked)} style={{ flex: "none", marginTop: 2 }} />
+                      {t("subs.waiver")}
+                    </label>
+                    <button type="button" className="linkBtn" style={{ marginLeft: 26 }} onClick={() => open(`${TERMS_URL}#${lang}`)}>
+                      {t("legal.terms")}
+                    </button>
+                  </div>
                   <button type="button" className="btn lg" onClick={() => open(PATREON_URL)}>
                     {t("subs.subscribe")}
                   </button>
-                  <button type="button" className="btn fill lg" onClick={() => invoke("pm_patreon_link").catch(onError)}>
+                  <button
+                    type="button"
+                    className="btn fill lg"
+                    disabled={!waiver}
+                    onClick={() => invoke("pm_patreon_link", { waiver: true }).catch(onError)}
+                  >
                     {t("subs.link")}
                   </button>
                 </>
               )}
             </div>
-          )}
+            ))}
         </section>
       )}
 
@@ -182,6 +205,8 @@ type AdminUser = {
   grant: { tier: PaidTier; expiresAt: number | null; note: string | null } | null;
   patreonTier: Tier | null;
   trialEndsAt: number | null;
+  devices: number;
+  maxDevices: number;
 };
 
 const DURATIONS = [7, 30, 90, 365];
@@ -209,6 +234,8 @@ function Admin({ t, fmt, onError }: { t: T; fmt: (ms: number) => string; onError
     act("pm_admin_grant", { userId: u.id, tier: f.get("tier"), days: days ? Number(days) : null, note: note || null });
   };
   const revoke = (u: AdminUser) => confirm(t("subs.admin.revokeConfirm", { name: u.name })) && act("pm_admin_revoke", { userId: u.id });
+  const resetDevices = (u: AdminUser) =>
+    confirm(t("subs.admin.resetDevicesConfirm", { name: u.name })) && act("pm_admin_reset_devices", { userId: u.id });
 
   return (
     <section className="card">
@@ -250,6 +277,7 @@ function Admin({ t, fmt, onError }: { t: T; fmt: (ms: number) => string; onError
                 </div>
                 <div className="meta">
                   {t("subs.admin.lastLogin", { date: u.lastLoginAt ? fmt(u.lastLoginAt) : "-" })}
+                  <span className="mono">{t("subs.admin.devices", { devices: u.devices, max: u.maxDevices })}</span>
                   {u.grant && (
                     <span className="badge" style={{ borderColor: "#DB000088", color: "#FF6B6B" }} title={u.grant.note ?? undefined}>
                       {u.grant.expiresAt
@@ -292,6 +320,11 @@ function Admin({ t, fmt, onError }: { t: T; fmt: (ms: number) => string; onError
                 {u.grant && (
                   <button type="button" className="btn sm" disabled={busy} onClick={() => revoke(u)}>
                     {t("subs.admin.revoke")}
+                  </button>
+                )}
+                {u.devices > 0 && (
+                  <button type="button" className="btn sm" disabled={busy} onClick={() => resetDevices(u)}>
+                    {t("subs.admin.resetDevices")}
                   </button>
                 )}
               </form>

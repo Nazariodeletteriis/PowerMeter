@@ -6,6 +6,7 @@ Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
 - Nouveau : formules Soutien sur Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € par mois). Le meter et la plupart des onglets restent gratuits ; Base de données, Rapport de combat, Journaux en ligne et Classements nécessitent Recluta, Groupe et rotations, Artisanat et Calculateurs nécessitent Daeva. Les onglets verrouillés restent dans le menu avec un cadenas et un aperçu flouté.
 - Nouveau : essai gratuit de tout pendant 14 jours, une fois par compte Discord : connecte-toi avec Discord pour le démarrer.
+- Nouveau : un abonnement fonctionne sur 2 PC maximum par compte (un PC libère sa place après 30 jours sans utilisation) et l'essai gratuit est unique par personne, lié au compte Discord et au PC.
 - Nouveau : page Soutien : ta formule et son origine, lier ou délier Patreon, et les formules côte à côte.
 - Nouveau : Builds de la communauté affiche les builds de la communauté depuis questlog.gg, avec des filtres par classe, tag, région et recherche ; ouvre n'importe lequel dans le Character Builder et duplique-le pour te l'approprier.
 - Nouveau : les cartes de PNJ, monstres et donjons affichent une minicarte de leur emplacement, et les cartes de quête indiquent où se trouvent le donneur de quête, les cibles, le PNJ de remise et le donjon. Ajout des cartes de Poeta, Ishalgen, Eltnen et Morheim.

@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { HourglassIcon, LockSimpleIcon } from "@phosphor-icons/react";
 import { useEffect, useState, type ReactNode } from "react";
-import { PLANS, refreshEntitlement, useEntitlement, type PaidTier } from "./entitlement";
+import { MAX_DEVICES, PLANS, refreshEntitlement, useEntitlement, type PaidTier } from "./entitlement";
 import type { T } from "./i18n";
 import { PATREON_URL } from "./Shell";
 
@@ -9,6 +9,7 @@ type Props = { t: T; tier: PaidTier; go: (page: string) => void; onError: (e: un
 
 /** A tab the plan doesn't include: the real page, blurred and inert, under what unlocks it. */
 export function Locked({ t, tier, go, onError, children }: Props) {
+  const e = useEntitlement();
   const [account, setAccount] = useState<unknown>(); // undefined until pm_account answers
   useEffect(() => {
     invoke("pm_account").then(setAccount, onError);
@@ -24,7 +25,9 @@ export function Locked({ t, tier, go, onError, children }: Props) {
         <LockSimpleIcon weight="fill" className="lockedIcon" aria-hidden="true" />
         <h2 id="lockedTitle">{t("subs.requires", { tier: name })}</h2>
         <div className="mono lockedPrice">{t("subs.perMonth", { price: PLANS[tier].price })}</div>
-        {account !== undefined && (
+        {e?.deviceLimit ? (
+          <p className="notice">{t("subs.deviceLimit", { n: MAX_DEVICES })}</p>
+        ) : account !== undefined && (
           <>
             <p>{account === null ? t("subs.lockedSignedOut") : t("subs.lockedText", { tier: name })}</p>
             <div className="lockedActions">

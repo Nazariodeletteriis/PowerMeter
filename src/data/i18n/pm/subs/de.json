@@ -54,5 +54,10 @@
   "subs.admin.note": "Notiz (optional)",
   "subs.admin.grant": "Vergeben",
   "subs.admin.revoke": "Entziehen",
-  "subs.admin.revokeConfirm": "Den an {name} vergebenen Plan entziehen?"
+  "subs.admin.revokeConfirm": "Den an {name} vergebenen Plan entziehen?",
+  "subs.waiver": "Ich verlange den sofortigen Zugang zu den digitalen Inhalten und weiß, dass ich dadurch mein 14-tägiges Widerrufsrecht verliere.",
+  "subs.deviceLimit": "Dein Konto ist bereits auf {n} PCs aktiv. Ein PC wird frei, wenn du ihn 30 Tage lang nicht benutzt, oder du bittest auf dem PowerMeter-Discord um einen Reset.",
+  "subs.admin.devices": "PCs: {devices}/{max}",
+  "subs.admin.resetDevices": "PCs zurücksetzen",
+  "subs.admin.resetDevicesConfirm": "Die registrierten PCs von {name} zurücksetzen? Der nächste PC, mit dem sich der Nutzer anmeldet, wird neu registriert."
 }

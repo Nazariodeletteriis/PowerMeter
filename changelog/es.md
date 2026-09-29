@@ -6,6 +6,7 @@ Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
 - Nuevo: planes de Mecenas en Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € al mes). El medidor y la mayoría de las pestañas siguen siendo gratis; Base de datos, Informe de combate, Registros en línea y Clasificaciones requieren Recluta, Grupo y rotaciones, Crafteo y Calculadoras requieren Daeva. Las pestañas bloqueadas permanecen en el menú con un candado y una vista previa borrosa.
 - Nuevo: prueba gratuita de todo durante 14 días, una vez por cuenta de Discord: inicia sesión con Discord para empezarla.
+- Nuevo: un plan funciona en hasta 2 PC por cuenta (un PC libera su plaza tras 30 días sin usarlo) y la prueba gratuita es una por persona, ligada a la cuenta de Discord y al PC.
 - Nuevo: página de Mecenas: tu plan y de dónde viene, vincular o desvincular Patreon, y los planes uno junto al otro.
 - Nuevo: Builds de la comunidad muestra las builds de la comunidad desde questlog.gg, con filtros por clase, etiqueta, región y búsqueda; abre cualquiera en el Character Builder y duplícala para hacerla tuya.
 - Nuevo: las tarjetas de NPC, monstruos y mazmorras muestran un minimapa de dónde están, y las tarjetas de misión muestran dónde están quien la da, los objetivos, el NPC de entrega y la mazmorra. Se añadieron los mapas de Poeta, Ishalgen, Eltnen y Morheim.

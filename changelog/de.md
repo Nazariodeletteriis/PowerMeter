@@ -6,6 +6,7 @@ Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
 - Neu: Unterstützer-Pläne auf Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € im Monat). Das Meter und die meisten Tabs bleiben kostenlos; Datenbank, Kampfbericht, Online-Logs und Ranglisten erfordern Recluta, Gruppe und Rotationen, Crafting und Rechner erfordern Daeva. Gesperrte Tabs bleiben im Menü, mit Schloss-Symbol und unscharfer Vorschau.
 - Neu: 14 Tage kostenlose Testphase für alles, einmal pro Discord-Konto: melde dich mit Discord an, um sie zu starten.
+- Neu: Ein Plan gilt auf bis zu 2 PCs pro Konto (ein PC gibt seinen Platz nach 30 Tagen ohne Nutzung frei), und die kostenlose Testphase gibt es einmal pro Person, gebunden an Discord-Konto und PC.
 - Neu: Unterstützer-Seite: dein Plan und woher er kommt, Patreon verknüpfen oder trennen, und die Pläne im Vergleich.
 - Neu: Community-Builds zeigt die Builds der Community von questlog.gg, mit Filtern nach Klasse, Tag, Region und Suche; öffne einen davon im Character Builder und dupliziere ihn, um ihn dir zu eigen zu machen.
 - Neu: Karten von NPCs, Monstern und Dungeons zeigen jetzt eine Minikarte ihres Standorts, und Quest-Karten zeigen, wo sich Questgeber, Ziele, der Abgabe-NPC und der Dungeon befinden. Die Karten von Poeta, Ishalgen, Eltnen und Morheim wurden hinzugefügt.

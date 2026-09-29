@@ -54,5 +54,10 @@
   "subs.admin.note": "メモ（任意）",
   "subs.admin.grant": "付与",
   "subs.admin.revoke": "取り消し",
-  "subs.admin.revokeConfirm": "{name}に付与したプランを取り消しますか？"
+  "subs.admin.revokeConfirm": "{name}に付与したプランを取り消しますか？",
+  "subs.waiver": "デジタルコンテンツへの即時アクセスを希望し、これにより14日間の撤回権を失うことを理解しています。",
+  "subs.deviceLimit": "このアカウントはすでに{n}台のPCで有効です。30日間使用しなかったPCは解放されます。またはPowerMeterのDiscordでリセットを依頼してください。",
+  "subs.admin.devices": "PC: {devices}/{max}",
+  "subs.admin.resetDevices": "PCをリセット",
+  "subs.admin.resetDevicesConfirm": "{name}の登録済みPCをリセットしますか？次にログインしたPCが新たに登録されます。"
 }

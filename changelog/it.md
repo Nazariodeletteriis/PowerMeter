@@ -6,6 +6,7 @@ Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
 - Nuovo: piani Supporter su Patreon (Recluta 3 €, Daeva 7 €, Empyrean 15 € al mese). Il meter e la maggior parte delle tab restano gratis; Database, Report combattimento, Log online e Classifiche richiedono Recluta, Party, Crafting e Calcolatori richiedono Daeva. Le tab bloccate restano nel menu con un lucchetto e un'anteprima sfocata.
 - Nuovo: prova gratuita di tutto per 14 giorni, una per account Discord: accedi con Discord per iniziarla.
+- Nuovo: un piano funziona su massimo 2 PC per account (un PC libera il posto dopo 30 giorni che non lo usi) e la prova gratuita è una per persona, legata sia all'account Discord sia al PC.
 - Nuovo: pagina Supporter: il tuo piano e da dove arriva, collega o scollega Patreon, i piani a confronto.
 - Nuovo: Build community mostra le build della community da questlog.gg, con filtri per classe, tag, regione e ricerca; aprile nel Character Builder e duplicale per farle tue.
 - Nuovo: le card di NPC, mostri e dungeon mostrano una minimappa di dove si trovano, e le card delle quest mostrano dove sono chi assegna la quest, gli obiettivi, l'NPC di consegna e il dungeon. Aggiunte le mappe di Poeta, Ishalgen, Eltnen e Morheim.

@@ -54,5 +54,10 @@
   "subs.admin.note": "Note (optional)",
   "subs.admin.grant": "Assign",
   "subs.admin.revoke": "Revoke",
-  "subs.admin.revokeConfirm": "Revoke the plan assigned to {name}?"
+  "subs.admin.revokeConfirm": "Revoke the plan assigned to {name}?",
+  "subs.waiver": "I request immediate access to the digital content and understand that I thereby lose my 14-day right of withdrawal.",
+  "subs.deviceLimit": "Your account is already active on {n} PCs. A PC is freed up after 30 days without using it, or you can ask for a reset on the PowerMeter Discord.",
+  "subs.admin.devices": "PCs: {devices}/{max}",
+  "subs.admin.resetDevices": "Reset PCs",
+  "subs.admin.resetDevicesConfirm": "Reset the registered PCs of {name}? The next PC they sign in from will be registered again."
 }

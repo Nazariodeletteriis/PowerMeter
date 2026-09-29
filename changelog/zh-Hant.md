@@ -6,6 +6,7 @@ Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
 - 新增：Patreon 推出贊助者方案（Recluta 3 €、Daeva 7 €、Empyrean 15 €，每月）。計量器與大部分分頁仍然免費；資料庫、戰鬥報告、線上記錄與排行榜需要 Recluta，隊伍與循環、製作與計算器需要 Daeva。鎖定的分頁仍保留在選單中，顯示鎖頭圖示與模糊預覽。
 - 新增：所有功能可免費試用 14 天，每個 Discord 帳號限一次：使用 Discord 登入即可開始。
+- 新增：每個帳號的方案最多可在 2 台電腦上使用（30 天未使用的電腦會釋出名額），免費試用每人一次，同時綁定 Discord 帳號與電腦。
 - 新增：贊助者頁面：顯示你的方案及其來源，可連接或中斷 Patreon，並將各方案並列比較。
 - 新增：社群配裝展示來自 questlog.gg 的社群配置，可依職業、標籤、地區與關鍵字篩選；在 Character Builder 中開啟任一個並複製，即可變成你自己的配置。
 - 新增：NPC、怪物與副本的卡片會顯示其所在位置的小地圖，任務卡片會顯示任務發布者、目標、交付 NPC 與副本的位置。新增了 Poeta、Ishalgen、Eltnen 與 Morheim 的地圖。

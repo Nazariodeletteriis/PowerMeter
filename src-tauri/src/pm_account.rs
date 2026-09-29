@@ -59,6 +59,9 @@ async fn call(method: reqwest::Method, url: &str, token: Option<&str>, body: Opt
     if let Some(token) = token {
         req = req.bearer_auth(token);
     }
+    if let Some(device) = device_id() {
+        req = req.header("X-PM-Device", device);
+    }
     read_json(req.send().await.map_err(|e| e.to_string())?).await
 }
 
@@ -85,6 +88,53 @@ fn permit_payload(permit: &str) -> Option<Value> {
     let key: [u8; 32] = base64::engine::general_purpose::STANDARD.decode(PERMIT_PUBLIC_KEY).ok()?.try_into().ok()?;
     VerifyingKey::from_bytes(&key).ok()?.verify(&payload, &sig).ok()?;
     serde_json::from_slice(&payload).ok()
+}
+
+/// This PC's id for the server: hex SHA-256 of Windows' MachineGuid (it survives reinstalling the
+/// app), salted so it cannot be matched with other software. None if the registry can't be read.
+fn device_id() -> Option<&'static str> {
+    use sha2::{Digest, Sha256};
+    static ID: std::sync::OnceLock<Option<String>> = std::sync::OnceLock::new();
+    ID.get_or_init(|| {
+        let guid = machine_guid()?;
+        let hash = Sha256::digest(format!("PowerMeter device:{guid}"));
+        Some(hash.iter().map(|b| format!("{b:02x}")).collect())
+    })
+    .as_deref()
+}
+
+#[cfg(windows)]
+fn machine_guid() -> Option<String> {
+    use windows::Win32::System::Registry::{HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ, RRF_SUBKEY_WOW6464KEY, RegGetValueW};
+    use windows::core::w;
+    let mut buf = [0u16; 64];
+    let mut len = (buf.len() * 2) as u32;
+    unsafe {
+        RegGetValueW(
+            HKEY_LOCAL_MACHINE,
+            w!("SOFTWARE\\Microsoft\\Cryptography"),
+            w!("MachineGuid"),
+            RRF_RT_REG_SZ | RRF_SUBKEY_WOW6464KEY,
+            None,
+            Some(buf.as_mut_ptr().cast()),
+            Some(&mut len),
+        )
+    }
+    .ok()
+    .ok()?;
+    // len is in bytes and counts the terminating NUL.
+    let guid = String::from_utf16_lossy(&buf[..(len as usize / 2).saturating_sub(1)]);
+    (!guid.is_empty()).then_some(guid)
+}
+
+#[cfg(not(windows))]
+fn machine_guid() -> Option<String> {
+    std::fs::read_to_string("/etc/machine-id").ok().map(|s| s.trim().to_string())
+}
+
+/// The permit is only good on the PC it was issued to: a settings folder copied to another PC stays free.
+fn permit_for_this_pc(permit: &str) -> Option<Value> {
+    permit_payload(permit).filter(|p| p["dev"].as_str() == device_id())
 }
 
 fn now_ms() -> f64 {
@@ -273,7 +323,7 @@ pub async fn pm_entitlement(state: tauri::State<'_, AppState>) -> Result<Value, 
     match authed(&state, reqwest::Method::GET, "/api/me/entitlements", None).await {
         Ok(mut info) => {
             let permit = info["permit"].as_str().map(str::to_string).ok_or("no permit in server reply")?;
-            let payload = permit_payload(&permit).ok_or("permit not signed by the server")?;
+            let payload = permit_for_this_pc(&permit).ok_or("permit not valid for this PC")?;
             info.as_object_mut().map(|o| o.remove("permit"));
             signed(&mut info, &payload);
             state.settings.set(PERMIT_KEY, &permit);
@@ -286,7 +336,7 @@ pub async fn pm_entitlement(state: tauri::State<'_, AppState>) -> Result<Value, 
         }
         // Offline or server down: the cached permit, while valid.
         Err(_) => {
-            let payload = state.settings.get(PERMIT_KEY).and_then(|p| permit_payload(&p));
+            let payload = state.settings.get(PERMIT_KEY).and_then(|p| permit_for_this_pc(&p));
             match payload.filter(|p| p["exp"].as_f64().is_some_and(|exp| exp > now_ms())) {
                 Some(payload) => {
                     let mut info: Value = state.settings.get(ENTITLEMENT_KEY).and_then(|s| serde_json::from_str(&s).ok()).unwrap_or(json!({}));
@@ -301,9 +351,10 @@ pub async fn pm_entitlement(state: tauri::State<'_, AppState>) -> Result<Value, 
 }
 
 /// Opens Patreon in the browser to link it to this account; the app re-reads the entitlement after.
+/// `waiver`: the user asked for immediate access and waived the 14-day withdrawal (the server requires it).
 #[tauri::command]
-pub async fn pm_patreon_link(state: tauri::State<'_, AppState>) -> Result<(), String> {
-    let res = authed(&state, reqwest::Method::POST, "/api/patreon/link", Some(&json!({}))).await?;
+pub async fn pm_patreon_link(state: tauri::State<'_, AppState>, waiver: bool) -> Result<(), String> {
+    let res = authed(&state, reqwest::Method::POST, "/api/patreon/link", Some(&json!({ "waiver": waiver }))).await?;
     let url = res["url"].as_str().filter(|u| u.starts_with("https://www.patreon.com/")).ok_or("invalid link url")?;
     tauri_plugin_opener::open_url(url, None::<&str>).map_err(|e| e.to_string())
 }
@@ -338,6 +389,12 @@ pub async fn pm_admin_grant(
 ) -> Result<(), String> {
     let body = json!({ "tier": tier, "days": days, "note": note });
     authed(&state, reqwest::Method::PUT, &grant_path(&user_id)?, Some(&body)).await.map(|_| ())
+}
+
+/// Admin only: forgets a user's PCs (new or reinstalled PC over the limit).
+#[tauri::command]
+pub async fn pm_admin_reset_devices(state: tauri::State<'_, AppState>, user_id: String) -> Result<(), String> {
+    authed(&state, reqwest::Method::DELETE, &grant_path(&user_id)?.replace("/grants/", "/devices/"), None).await.map(|_| ())
 }
 
 #[tauri::command]

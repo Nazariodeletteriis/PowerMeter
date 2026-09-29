@@ -1859,6 +1859,7 @@ pub fn run() {
             pm_account::pm_admin_users,
             pm_account::pm_admin_grant,
             pm_account::pm_admin_revoke,
+            pm_account::pm_admin_reset_devices,
             powermeter::install_npcap,
             powermeter::open_dashboard_window,
             powermeter::show_overlay,
