@@ -4,11 +4,9 @@ import { CaretRightIcon, ListChecksIcon, NewspaperIcon, ShieldIcon, SwordIcon, U
 import type { Settings } from "./App";
 import { activeId, readCharacters } from "./characters";
 import type { T } from "./i18n";
-import { ItemIcon } from "./items";
 import { REGIONS } from "./Onboarding";
-import { buildGear, GEAR_KEY, itemById, missingSlots, OWN_BUILD, rarityOf, readGear, SLOTS } from "./pages/characters/gear";
 import { nextDailyReset, nextWeeklyReset } from "./pages/organizer/resets";
-import { Card, ClassAvatar, EmptyState, FactionTag, fmt, RARITY } from "./ui";
+import { Card, ClassAvatar, EmptyState, FactionTag, fmt } from "./ui";
 import { usePoll } from "./usePoll";
 
 /** The fields of FightSummary (src-tauri/src/entity/fight_record.rs) shown here. */
@@ -59,7 +57,7 @@ export function Home(props: Props) {
       ) : (
         <div className="homeGrid">
           <CharacterCard {...props} />
-          <BuildCard t={t} settings={props.settings} />
+          <BuildCard t={t} />
           <TimersCard t={t} />
           <Card
             title={t("home.fights")}
@@ -138,52 +136,11 @@ function CharacterCard({ t, lang, settings, openCharacters }: Props) {
   );
 }
 
-/** Progress of the active character's own build (pm.builderGear), once the user has set one in the builder. */
-function BuildCard({ t, settings }: { t: T; settings: Settings }) {
-  const g = buildGear(readGear(settings[GEAR_KEY]), OWN_BUILD, settings["pm.class"] ?? "", activeId(settings, readCharacters(settings)));
-  if (!g || !Object.keys(g.target).length) {
-    return (
-      <Card title={t("home.buildProgress")} style={{ gridColumn: "span 4" }}>
-        <EmptyState icon={<ShieldIcon aria-hidden="true" />} title={t("shell.states.noData")} text={t("home.noBuildText")} />
-      </Card>
-    );
-  }
-  const missing = missingSlots(g);
-  const total = SLOTS.length;
-  const owned = total - missing.length;
-  const upgrades = missing.flatMap((id) => itemById(g.target[id]?.id) ?? []).slice(0, 3);
+/** Build progress needs the equipment data: official data coming. */
+function BuildCard({ t }: { t: T }) {
   return (
-    <Card
-      title={t("home.buildProgress")}
-      style={{ gridColumn: "span 4", display: "flex", flexDirection: "column", gap: 10 }}
-      aside={
-        <span className="mono" style={{ fontSize: 12 }}>
-          {owned}/{total}
-        </span>
-      }
-    >
-      <div
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={total}
-        aria-valuenow={owned}
-        aria-label={t("home.buildProgress")}
-        style={{ height: 6, borderRadius: 3, background: "var(--pm-s3)", overflow: "hidden" }}
-      >
-        <div style={{ width: `${(owned / total) * 100}%`, height: "100%", background: "var(--pm-red)" }} />
-      </div>
-      <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("home.buildOwned", { owned, total })}</div>
-      {upgrades.map((u) => {
-        const col = RARITY[rarityOf(u)];
-        return (
-          <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 22, height: 22, borderRadius: 4, border: `1.5px solid ${col}`, background: "var(--pm-s3)", flex: "none" }}>
-              <ItemIcon name={u.name} />
-            </div>
-            <div style={{ minWidth: 0, flex: 1, color: col, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.name}</div>
-          </div>
-        );
-      })}
+    <Card title={t("home.buildProgress")} style={{ gridColumn: "span 4" }}>
+      <EmptyState icon={<ShieldIcon aria-hidden="true" />} title={t("shell.states.officialTitle")} text={t("shell.states.officialText")} />
     </Card>
   );
 }

@@ -24,20 +24,11 @@ const createPmWidget = (app) => {
   const SPARK_POINTS = 41; // design 8.7: the sparkline's sample count
   const NO_TRAFFIC_MS = 60000; // detecting this long with the game open = capture error
   const MODE_KEY = "pm.widgetMode";
-  const RARITY = {
-    Common: "#9C9494",
-    Uncommon: "#6CC46A",
-    Rare: "#4F93EA",
-    Heroic: "#B377E8",
-    Legendary: "#F0A63A",
-    Mythic: "#FF4040",
-  };
 
   const storedMode = app.safeGetStorage(MODE_KEY);
   let mode = ["dps", "build", "lobby"].includes(storedMode) ? storedMode : "dps";
   let view = "";
   let locked = false;
-  let buildTab = "slots";
   let detailRow = null;
   let detailTimer = 0;
   let frame = null; // last render from core.js
@@ -227,88 +218,15 @@ const createPmWidget = (app) => {
   $(".pmDetailReportBtn")?.addEventListener("click", () => detailRow && app.openRowDetailsWindow(detailRow));
 
   // --- Build (8.5) and Lobby (8.6)
-  // The Character Builder's "Widget" button hands its build over here; none yet = empty state.
-  const BUILD_KEY = "pm.widgetBuild";
-  const buildData = () => {
-    try {
-      const b = JSON.parse(app.safeGetStorage(BUILD_KEY));
-      return b?.key ? b : null; // no key = a pre-0.2.10 handover (no icons, never refreshed): ask for a new one
-    } catch {
-      return null; // unreadable handover: the next Widget click rewrites it
-    }
-  };
   /** Centered title + hint, like the waiting state (8.4). */
   const emptyCard = (key, title, hintKey, hint) =>
     `<div class="pmModeEmpty"><div class="pmEmptyTitle">${esc(t(key, title))}</div><div class="pmEmptyHint">${esc(t(hintKey, hint))}</div></div>`;
-  window.addEventListener("storage", (event) => {
-    if (event.key === MODE_KEY && event.newValue === "build") setMode("build");
-    if (event.key === BUILD_KEY && mode === "build") render();
-  });
   const buildEl = $(".pmBuild");
   const lobbyEl = $(".pmLobby");
+  // The build view needs the equipment data: official data coming.
   const renderBuild = () => {
-    const b = buildData();
-    if (!b) {
-      buildEl.innerHTML = emptyCard("pmWidget.build.emptyTitle", "No build selected", "pmWidget.build.emptyHint", "Open a build in the dashboard's Character Builder and press Widget");
-      return;
-    }
-    const tabs = [
-      ["slots", "Slots"],
-      ["missing", "Missing"],
-      ["stats", "Stats"],
-    ]
-      .map(
-        ([id, fallback]) =>
-          `<button type="button" role="tab" class="pmSubTab" data-tab="${id}" aria-selected="${id === buildTab}">${esc(t(`pmWidget.build.${id}`, fallback))}</button>`
-      )
-      .join("");
-    let body = "";
-    // The item's game icon over the slot's short label; a broken icon removes itself and the label shows.
-    const icon = (url) =>
-      url ? `<img src="${esc(url)}" alt="" loading="lazy" draggable="false" onerror="this.remove()" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit">` : "";
-    if (buildTab === "slots") {
-      body =
-        `<div class="pmSlots">${b.slots
-          .map(([label, rarity, enchant, owned, target, url]) => {
-            const tip = owned ? t("pmWidget.build.ownedTip", "Owned") : tf("pmWidget.build.targetTip", { item: target }, `Target: ${target}`);
-            return `<div class="pmSlot${owned ? "" : " isMissing"}" style="--rar:${RARITY[rarity]}" title="${esc(tip)}">${esc(label)}${icon(url)}<span class="pmSlotEnh">${enchant ? `+${enchant}` : ""}</span></div>`;
-          })
-          .join("")}</div>` +
-        `<div class="pmSlotsHint">${esc(t("pmWidget.build.slotsHint", "Dashed: missing pieces · hover for the target item"))}</div>`;
-    } else if (buildTab === "missing") {
-      body = b.missing
-        .map(
-          (m) =>
-            `<div class="pmMissing" style="--rar:${RARITY[m.rarity]}"><span class="pmMissingIcon" style="position:relative">${icon(m.icon)}</span><div class="pmMissingText"><div class="pmMissingName">${esc(m.item)}</div><div class="pmMissingSrc">${m.source.kind ? `${esc(t(`pmWidget.build.source.${m.source.kind}`, m.source.kind))} · ` : ""}${esc(m.source.text)}</div></div></div>`
-        )
-        .join("");
-    } else {
-      body = b.stats
-        .map(
-          ([name, current, target]) =>
-            `<div class="pmStat"><span>${esc(name)}</span><span>${esc(current)}</span><span>→</span><span>${esc(target)}</span></div>`
-        )
-        .join("");
-    }
-    buildEl.innerHTML =
-      `<div class="pmBuildHead"><div class="pmBuildTitle"><span class="pmBuildName">${esc(b.name)}</span><span class="pmBuildClass">${esc(b.className)}</span><span class="pmSpacer"></span><span class="pmMono" title="Gear Score">${num(b.gs ?? b.cp)}</span><span class="pmBuildArrow">→</span><span class="pmMono pmBuildTarget">${num(b.gsTarget ?? b.cpTarget)}</span></div>` +
-      `<div class="pmBuildBar"><div style="width:${(b.progress * 100).toFixed(1)}%"></div></div></div>` +
-      `<div class="pmSubTabs" role="tablist">${tabs}</div>` +
-      `<div class="pmBuildBody">${body}</div>` +
-      `<div class="pmBuildFoot"><span>${esc(tf("pmWidget.build.owned", { owned: b.owned, total: b.total }, `${b.owned}/${b.total} owned`))}</span><span class="pmSpacer"></span><button type="button" class="pmLinkBtn pmOpenBuilder">${esc(t("pmWidget.build.openBuilder", "Open in builder ↗"))}</button></div>`;
+    buildEl.innerHTML = emptyCard("pmWidget.build.officialTitle", "Official data coming", "pmWidget.build.officialHint", "This view returns with the game's official data");
   };
-  buildEl?.addEventListener("click", (event) => {
-    const tab = event.target.closest(".pmSubTab");
-    if (tab) {
-      buildTab = tab.dataset.tab;
-      renderBuild();
-      buildEl.querySelector(`.pmSubTab[data-tab="${buildTab}"]`)?.focus();
-      return;
-    }
-    if (event.target.closest(".pmOpenBuilder")) {
-      invoke("open_dashboard_window").catch((err) => console.error("[PowerMeter] open_dashboard_window failed", err));
-    }
-  });
   // ponytail: no party roster source yet (the engine doesn't report one): the Lobby is an
   // empty state until it does; the grid rows (.pmLobbyGrid in the theme CSS) are kept for then.
   const renderLobby = () => {
@@ -397,17 +315,10 @@ const createPmWidget = (app) => {
       tab.hidden = tab.dataset.pmMode === "lobby" && mode === "dps";
     });
     let title = "";
-    let right = "";
     if (mode === "dps" && view === "ended") title = t("pmWidget.end.title", "Fight over");
-    if (mode === "build") {
-      const b = buildData();
-      if (b) right = `${b.character} · ${b.name} ▾`;
-      renderBuild();
-    }
+    if (mode === "build") renderBuild();
     if (mode === "lobby") renderLobby();
     setText(".pmBarTitle", title);
-    setText(".pmBarRight", right);
-    $(".pmBarRight").title = right; // the bar cuts it short on narrow widgets
     meter.classList.toggle("isPmUploaded", !!upload);
     if (lastFight) {
       const label = $(".pmOutcome");

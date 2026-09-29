@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import type { T } from "../../i18n";
 
 // Shared by the Shugo Festival and Spacetime Rift pages. Both schedules are
-// defined in server time (questlog.gg computes them client-side, from the
-// KR/TW tables); we show every time in the PC's local time.
+// defined in server time (NCSOFT's KR notices); we show every time in the PC's
+// local time.
 
 export const MIN = 60e3;
 export const HOUR = 60 * MIN;

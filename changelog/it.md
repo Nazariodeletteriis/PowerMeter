@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.8
+
+- Rimosso: Database, Gear Viewer, Armory, Daevanion planner, Crafting, Calcolatori e Marketplace mostrano "Dati ufficiali in arrivo" finché non saranno disponibili i dati ufficiali del gioco.
+- Rimosso: il Character Builder mantiene skill, descrizione e commenti; equipaggiamento, statistiche, Gear Score e collezioni torneranno con i dati ufficiali, e l'equipaggiamento salvato nelle tue build è stato cancellato.
+- Rimosso: Build community elenca solo le tue build; build della community, preferite e punti di spawn sulla mappa non ci sono più.
+- Cambiato: Spacetime Rift e Shugo Festival mostrano solo i dettagli confermati da NCSOFT; il portale del Rift resta aperto 15 minuti.
+
 ## 0.3.7
 
 - Cambiato: Recluta, Daeva e la prova gratuita funzionano su 1 PC per account, Empyrean su 2; passando a un piano con meno PC restano attivi quelli registrati per primi.

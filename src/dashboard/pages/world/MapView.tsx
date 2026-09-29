@@ -13,14 +13,10 @@ export const MAP_LICENSE = "https://creativecommons.org/licenses/by-nc/4.0/";
 const MAX_SCALE = 1.5; // 1 = native tile pixels
 const ZOOM_STEP = 1.6;
 const MARKER_MIN = 0.45; // marker size when zoomed out, as a share of full size
-const FOCUS_PAD = 48; // screen pixels kept around a focused area
-const FOCUS_MAX = 0.6; // a focused area (even a single point) keeps some of its surroundings in view
 
 export const MAPS = DATA.maps;
 export const MAP_TYPES = DATA.types;
 export type MapData = (typeof DATA.maps)[number];
-/** An area of a map, in its pixels: [left, top, right, bottom]. */
-export type MapBox = [number, number, number, number];
 type View = { x: number; y: number; s: number };
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
@@ -29,28 +25,18 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
  * A map's tiles with pan (drag) and zoom (wheel, +/- buttons). `world` is drawn
  * in map pixels on top of the tiles (markers, borders, popups: --k and --kp keep
  * them at screen size); `children` float over the viewport (panels, credits).
- * Opens on the whole map, or on `focus` when given (zoomed in at most to `maxFocus`).
- * Only the tiles that have been in view load, so a focused minimap costs a handful.
+ * Opens on the whole map. Only the tiles that have been in view load.
  */
 export function MapView({
   t,
   map,
-  focus,
-  maxFocus = FOCUS_MAX,
-  ctrlZoom,
   onBareClick,
-  style,
   world,
   children,
 }: {
   t: T;
   map: MapData;
-  focus?: MapBox;
-  maxFocus?: number;
-  /** Wheel zooms only with Ctrl (a map inside a scrolling page lets the page scroll). */
-  ctrlZoom?: boolean;
   onBareClick?: () => void;
-  style?: CSSProperties;
   world?: ReactNode;
   children?: ReactNode;
 }) {
@@ -75,30 +61,24 @@ export function MapView({
     return place({ s, x: cx - ((cx - v.x) * s) / v.s, y: cy - ((cy - v.y) * s) / v.s });
   };
 
-  // New map, new focus or resized window: fit the map (or the focus) in the viewport.
-  const focusKey = focus?.join();
+  // New map or resized window: fit the map in the viewport.
   useLayoutEffect(() => {
     const fitMap = () => {
       const r = box.current!.getBoundingClientRect();
       size.current = { w: r.width, h: r.height };
       const s = Math.min(r.width / w, r.height / h);
       fit.current = s;
-      if (!focus) return setView({ s, x: (r.width - w * s) / 2, y: (r.height - h * s) / 2 });
-      const [x0, y0, x1, y1] = focus;
-      // A single point (zero-size box) divides by 0: Infinity, clamped to maxFocus.
-      const fs = clamp(Math.min((r.width - 2 * FOCUS_PAD) / (x1 - x0), (r.height - 2 * FOCUS_PAD) / (y1 - y0)), s, maxFocus);
-      setView(place({ s: fs, x: r.width / 2 - ((x0 + x1) / 2) * fs, y: r.height / 2 - ((y0 + y1) / 2) * fs }));
+      setView({ s, x: (r.width - w * s) / 2, y: (r.height - h * s) / 2 });
     };
     const ro = new ResizeObserver(fitMap);
     ro.observe(box.current!);
     return () => ro.disconnect();
-  }, [map.id, focusKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [map.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // React's onWheel is passive: preventDefault needs a native listener.
   useEffect(() => {
     const el = box.current!;
     const wheel = (e: WheelEvent) => {
-      if (ctrlZoom && !e.ctrlKey) return;
       e.preventDefault();
       const r = el.getBoundingClientRect();
       setView((v) => zoomAt(v, Math.exp(-e.deltaY * 0.002), e.clientX - r.left, e.clientY - r.top));
@@ -148,31 +128,25 @@ export function MapView({
   }
 
   return (
-    <div className="wMap" style={style} ref={box} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
+    <div className="wMap" ref={box} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
       <div
         className="wWorld"
         style={{ width: w, height: h, transform: `translate(${view.x}px, ${view.y}px) scale(${view.s})`, "--k": k, "--kp": 1 / view.s } as CSSProperties}
       >
-        {"image" in map && map.image ? (
-          // questlog's single image for the worlds without tiles (scripts/fetch-map.mjs).
-          // ~3.5 MB: lazy, so a minimap out of view doesn't fetch it.
-          <img src={map.image} alt="" draggable={false} decoding="async" loading="lazy" style={{ left: 0, top: 0, width: w, height: h }} />
-        ) : (
-          [...seen.current.tiles].map((i) => {
-            const col = i % cols;
-            const row = Math.floor(i / cols);
-            return (
-              <img
-                key={i}
-                src={`${TILES}${map.id}/Res/${map.id}_${pad(col)}_${pad(row)}.webp`}
-                alt=""
-                draggable={false}
-                decoding="async"
-                style={{ left: col * map.tile, top: row * map.tile, width: map.tile, height: map.tile }}
-              />
-            );
-          })
-        )}
+        {[...seen.current.tiles].map((i) => {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          return (
+            <img
+              key={i}
+              src={`${TILES}${map.id}/Res/${map.id}_${pad(col)}_${pad(row)}.webp`}
+              alt=""
+              draggable={false}
+              decoding="async"
+              style={{ left: col * map.tile, top: row * map.tile, width: map.tile, height: map.tile }}
+            />
+          );
+        })}
         {world}
       </div>
       {children}

@@ -20,16 +20,6 @@ export const CLASSES: Record<string, [initials: string, color: string]> = {
 /** Classes the dashboard offers: Brawler is not out in EU/NA yet (it keeps its color for the meter). */
 export const RELEASED_CLASSES = Object.keys(CLASSES).filter((c) => c !== "Brawler");
 
-// Item rarity colors (prototype RAR).
-export const RARITY: Record<string, string> = {
-  Common: "#9C9494",
-  Uncommon: "#6CC46A",
-  Rare: "#4F93EA",
-  Heroic: "#B377E8",
-  Legendary: "#F0A63A",
-  Mythic: "#FF4040",
-};
-
 /** The PowerMeter mark: three bars, the last one red. */
 export function Logo({ size }: { size: number }) {
   return (

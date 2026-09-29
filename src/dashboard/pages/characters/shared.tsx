@@ -2,14 +2,12 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { CheckCircleIcon, TrashIcon } from "@phosphor-icons/react";
 import type { T } from "../../i18n";
 import { Modal } from "../system/Modal";
-import type { BuildGear } from "./gear";
-import { tagSlug, type CommunityBuild } from "./questlog";
 import "./characters.css";
 
 // Page state that survives switching page, like the prototype's single state
 // object: the shell unmounts a page when you leave it.
 // ponytail: module memory, lost on reload; persist via settings if users ask
-// (done for the builder's gear, pm.builderGear, and your builds, pm.myBuilds).
+// (done for your builds, pm.myBuilds).
 const mem: Record<string, unknown> = {};
 export function useMem<V>(key: string, init: V) {
   const [value, setValue] = useState<V>(() => (key in mem ? (mem[key] as V) : init));
@@ -22,16 +20,15 @@ export function useMem<V>(key: string, init: V) {
 
 /** The build the Character Builder shows (prototype bSrc). */
 /** `char`: id of the character whose card opened it; the build then stays on that character instead of following the active one. */
-/** `ql`: slug of a questlog.gg community build; its gear lives in module memory (useMem "ql"), never in settings. */
-export type BuildSrc = { t: string; au: string; cls: string; own: boolean; isNew?: boolean; likes?: number; tags?: string[]; char?: string; ql?: string };
-/** Opened community builds, by slug: the card (for the like snapshot) and its gear. */
-export type QlOpened = Record<string, { card: CommunityBuild; gear: BuildGear }>;
+export type BuildSrc = { t: string; au: string; cls: string; own: boolean; isNew?: boolean; tags?: string[]; char?: string };
+/** Title of a character's default own build; shown as characters.builder.defaultBuild. */
+export const OWN_BUILD = "pm.default";
 /** Build filters: regions and tags (tags are game/community terms, not translated). */
 export const BUILD_REGIONS = ["EU", "NA"];
 export const BUILD_TAGS = ["PvE", "PvP", "Arena", "Dungeon", "Siege", "Large-Scale", "Beginner Friendly", "Budget Build", "Endgame Build", "Tank", "DPS", "Healer", "Support"];
 /** Builds created or cloned in the Character Builder, newest first: settings["pm.myBuilds"] = BuildSrc[]. */
 export const MY_BUILDS_KEY = "pm.myBuilds";
-export function readMyBuilds<V = BuildSrc>(json?: string): V[] {
+export function readMyBuilds(json?: string): BuildSrc[] {
   try {
     const v = JSON.parse(json ?? "");
     return Array.isArray(v) ? v : [];
@@ -39,22 +36,14 @@ export function readMyBuilds<V = BuildSrc>(json?: string): V[] {
     return []; // missing or hand-edited: no builds of your own yet
   }
 }
-/** Favourite community builds, newest first, as snapshots (shown without asking questlog): settings["pm.likedBuilds"] = CommunityBuild[]. */
-export const LIKED_KEY = "pm.likedBuilds";
-export const readLiked = (json?: string) => readMyBuilds<CommunityBuild>(json);
-/** The favourites JSON after toggling one build (by slug). */
-export const toggleLiked = (list: CommunityBuild[], b: CommunityBuild) =>
-  JSON.stringify(list.some((x) => x.slug === b.slug) ? list.filter((x) => x.slug !== b.slug) : [b, ...list]);
-/** questlog tag slug → our BUILD_TAGS label ("beginner-friendly" → "Beginner Friendly"); unknown slugs as they are. */
-export const tagLabel = (slug: string) => BUILD_TAGS.find((l) => tagSlug(l) === slug) ?? slug;
 /** A deleted build open in the builder: the builder reopens on its default build. */
 export function closeBuild(title: string) {
   if ((mem.bSrc as BuildSrc | undefined)?.t === title) delete mem.bSrc;
 }
 /** Open a build in the builder, resetting the view like the prototype. */
 export function openBuild(src: BuildSrc, go: (page: string) => void) {
-  Object.assign(mem, { bSrc: src, bmode: "dummy", slot: "mh" });
-  if (src.isNew) Object.assign(mem, { bview: "owned", newGear: { owned: {}, target: {} }, newName: "", newTags: [] });
+  mem.bSrc = src;
+  if (src.isNew) Object.assign(mem, { newName: "", newTags: [] });
   go("builder");
 }
 

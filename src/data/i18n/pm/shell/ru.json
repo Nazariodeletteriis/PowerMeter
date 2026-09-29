@@ -2,8 +2,6 @@
   "shell.diagnoseHint": "Нажми, чтобы открыть диагностику.",
   "shell.attempt": "Попытка {n}",
   "shell.crumb.builder": "Сборки сообщества → Конструктор персонажа",
-  "shell.databaseTitle": "Поиск по базе Aion 2",
-  "shell.itemTitle": "Карточка предмета",
   "shell.share.log": "Поделиться логом",
   "shell.share.party": "Поделиться группой",
   "shell.share.build": "Поделиться сборкой",
@@ -25,5 +23,7 @@
   "shell.states.soonTitle": "Скоро",
   "shell.states.soonText": "Этот раздел появится в одном из следующих обновлений.",
   "shell.states.afterLaunch": "Станет доступно после запуска Aion 2, когда появятся реальные данные.",
-  "shell.states.noData": "Пока нет данных"
+  "shell.states.noData": "Пока нет данных",
+  "shell.states.officialTitle": "Официальные данные скоро",
+  "shell.states.officialText": "Эта функция в разработке и вернётся с официальными данными игры."
 }

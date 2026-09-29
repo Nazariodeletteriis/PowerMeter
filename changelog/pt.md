@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.8
+
+- Removido: Banco de dados, Gear Viewer, Arsenal, planejador Daevanion, Criação, Calculadoras e Mercado mostram "Dados oficiais em breve" até que haja dados oficiais do jogo.
+- Removido: o Character Builder mantém habilidades, descrição e comentários; equipamento, atributos, Gear Score e coleções voltarão com os dados oficiais, e o equipamento salvo nas suas builds foi apagado.
+- Removido: Builds da comunidade lista só as suas builds; builds da comunidade, favoritos e pontos de spawn no mapa foram retirados.
+- Alterado: Fenda espaço-temporal e Festival Shugo mostram só os detalhes confirmados pela NCSOFT; o portal da Fenda fica aberto 15 minutos.
+
 ## 0.3.7
 
 - Alterado: Recluta, Daeva e o teste gratuito funcionam em 1 PC por conta, Empyrean em 2; ao mudar para um plano com menos PCs, os registrados primeiro mantêm o acesso.

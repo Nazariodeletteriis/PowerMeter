@@ -2,42 +2,23 @@ import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import type { T } from "./i18n";
 import { ALL_PAGES } from "./nav";
-import { DB_TYPES, DbIcon, matches, openEntry, useDb } from "./pages/world/db";
-
-// Database hits shown under the pages (the database page has them all).
-const DB_HITS = 8;
 
 /**
- * Ctrl K palette (prototype md.palette). Searches the dashboard pages and,
- * from 3 characters, the game database.
+ * Ctrl K palette (prototype md.palette). Searches the dashboard pages.
  * No open/close animation on purpose: it is keyboard-driven.
  */
 export function Palette({ t, onClose, onPick }: { t: T; onClose: () => void; onPick: (id: string) => void }) {
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState(0);
   const q = query.trim().toLowerCase();
-  const db = useDb(q.length >= 3 ? DB_TYPES : []);
   type Option = { key: string; group: string; label: string; icon: ReactNode; pick: () => void };
-  const found: Option[] = [
-    ...ALL_PAGES.filter((p) => t(p.label).toLowerCase().includes(q)).map((p) => ({
-      key: p.id,
-      group: t("search.pages"),
-      label: t(p.label),
-      icon: <p.icon aria-hidden="true" />,
-      pick: () => onPick(p.id),
-    })),
-    ...(q.length >= 3 && db ? matches(db, q).slice(0, DB_HITS) : []).map((r) => ({
-      key: r.type + r.id,
-      group: t("nav.database"),
-      label: r.name,
-      icon: (
-        <span style={{ width: 20, height: 20, flex: "none", borderRadius: 4, overflow: "hidden", display: "grid", placeItems: "center" }}>
-          <DbIcon row={r} />
-        </span>
-      ),
-      pick: () => openEntry(onPick, r.type, r.id),
-    })),
-  ];
+  const found: Option[] = ALL_PAGES.filter((p) => t(p.label).toLowerCase().includes(q)).map((p) => ({
+    key: p.id,
+    group: t("search.pages"),
+    label: t(p.label),
+    icon: <p.icon aria-hidden="true" />,
+    pick: () => onPick(p.id),
+  }));
   const sel = Math.min(index, Math.max(0, found.length - 1));
   const cur = found[sel];
 
@@ -66,7 +47,7 @@ export function Palette({ t, onClose, onPick }: { t: T; onClose: () => void; onP
           <input
             autoFocus
             value={query}
-            placeholder={t("search.placeholderLong")}
+            placeholder={t("search.placeholder")}
             aria-label={t("search.placeholder")}
             role="combobox"
             aria-expanded="true"

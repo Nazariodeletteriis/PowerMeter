@@ -16,7 +16,7 @@
 | Desktop | Tauri 2 — Rust (cattura pacchetti via Npcap, solo Windows) + UI TypeScript |
 | Server | Node.js 24 LTS + TypeScript su Netsons cPanel (Setup Node.js App), deploy via `git pull` |
 | Database | PostgreSQL 18 (Netsons) |
-| Dati di gioco | Opzione C: cron server-side importa da questlog.gg e shugo.gg nel nostro Postgres; l'app legge solo da noi |
+| Dati di gioco | Solo fonti ufficiali NCSOFT (richiesta in corso). Niente dati né chiamate verso questlog.gg (rifiuto 2026-09-29) |
 | Login | Discord OAuth (Patreon collegato in R6) |
 | Build Windows | GitHub Actions (runner Windows) produce l'MSI; Nazario testa in gioco |
 | Rischio ToS NCSoft | Accettato. Disclaimer "tool non ufficiale" in app e sul sito |
@@ -28,7 +28,6 @@
 - **A2Tools-DPS-Meter** (GPL-3.0) — core cattura e calcolo DPS. Si riusa il codice.
 - **AbyssLogs** (abysslogs.com) — riferimento di punta per meter, report e community. Solo UX, niente codice.
 - **Aion2-TM-DesktopApp** (licenza custom) — task, timer, armory. Solo feature, si riscrive da zero.
-- **questlog.gg/aion-2** — database, builder, mappa, crafting, armory. Solo feature, dati via import.
 
 ## Release
 

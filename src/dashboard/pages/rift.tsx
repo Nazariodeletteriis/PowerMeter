@@ -1,21 +1,20 @@
-import { ArrowRightIcon, ClockIcon, CrownSimpleIcon, DoorOpenIcon, ShieldCheckIcon, SwordIcon, UsersThreeIcon } from "@phosphor-icons/react";
-import { activeId, FACTIONS, readCharacters, type Faction } from "../characters";
+import { ClockIcon, CrownSimpleIcon, DoorOpenIcon, ShieldCheckIcon, SwordIcon, UsersThreeIcon } from "@phosphor-icons/react";
 import { REGIONS } from "../Onboarding";
 import { Card } from "../ui";
 import { HOUR, MIN, clock, countdown, dayLabel, serverHour, serverZone, useNow } from "./shugo/events";
 import "./shugo/events.css";
 import type { PageProps } from "./types";
 
-// Spacetime Rift, from questlog.gg /spacetime-rift and NC's KR/TW notice
-// (aion2kina.com): a window every 3 hours from 02:00 server time, the portal
-// open for its first 5 minutes, the event running the whole hour.
+// Spacetime Rift, from NCSOFT's official KR guidebook
+// (aion2.plaync.com/ko-kr/guidebook/view?title=시공의+균열, TW: tw.ncsoft.com/aion2
+// guidebook 時空裂縫) and KR update notes 2025-11-26 / 2025-12-03: a window every
+// 3 hours from 02:00 server time, the portal open for its first 15 minutes, one
+// hour in the enemy territory; level 45+, up to 400 players, 70 minutes to switch
+// the PvP/PvE mode again.
 const FIRST_HOUR = 2;
-const PORTAL = 5 * MIN;
+const PORTAL = 15 * MIN;
 const LEN = HOUR;
 const DAY = 24 * HOUR;
-const FACTION_KEY = "rift.faction";
-// Portals open in your own faction's zone and lead into the enemy one.
-const ROUTE: Record<Faction, [from: string, to: string]> = { elyos: ["Verteron", "Altgard"], asmodian: ["Altgard", "Verteron"] };
 
 const isRift = (ms: number, zone: string) => serverHour(ms, zone) % 3 === FIRST_HOUR % 3;
 
@@ -27,15 +26,11 @@ function upcoming(now: number, zone: string, n: number) {
 }
 
 /** Spacetime Rift: portal state, today's windows on a 24h rail, the next ones and your route. */
-export default function Rift({ t, lang, settings, save }: PageProps) {
+export default function Rift({ t, lang, settings }: PageProps) {
   const now = useNow();
   const regionValue = settings["pm.region"];
   const region = (REGIONS.find((r) => r.value === regionValue) ?? REGIONS[0]).label;
   const zone = serverZone(regionValue);
-
-  const chars = readCharacters(settings);
-  const saved = settings[FACTION_KEY] as Faction;
-  const faction: Faction = FACTIONS.includes(saved) ? saved : (chars.find((c) => c.id === activeId(settings, chars))?.faction ?? "elyos");
 
   const wins = upcoming(now, zone, 9);
   const w = wins[0];
@@ -138,30 +133,6 @@ export default function Rift({ t, lang, settings, save }: PageProps) {
                   <span className="evLeft">{countdown(h - now, t)}</span>
                 </div>
               ))}
-            </div>
-          </Card>
-          <Card
-            title={t("events.rift.route")}
-            aside={
-              <div className="evToggle" role="group" aria-label={t("events.rift.route")}>
-                {FACTIONS.map((f) => (
-                  <button key={f} type="button" aria-pressed={f === faction} onClick={() => save(FACTION_KEY, f)}>
-                    {t(`collections.${f}`)}
-                  </button>
-                ))}
-              </div>
-            }
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 14 }}>
-              <div>
-                <div className="kicker">{t("events.rift.portalsIn")}</div>
-                <div style={{ fontSize: 18, fontWeight: 500 }}>{ROUTE[faction][0]}</div>
-              </div>
-              <ArrowRightIcon aria-hidden="true" style={{ color: "var(--pm-redt)", fontSize: 18 }} />
-              <div>
-                <div className="kicker">{t("events.rift.leadsTo")}</div>
-                <div style={{ fontSize: 18, fontWeight: 500 }}>{ROUTE[faction][1]}</div>
-              </div>
             </div>
           </Card>
         </div>

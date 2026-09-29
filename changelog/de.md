@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.8
+
+- Entfernt: Datenbank, Gear Viewer, Armory, Daevanion-Planer, Crafting, Rechner und Marktplatz zeigen „Offizielle Daten folgen“, bis offizielle Spieldaten verfügbar sind.
+- Entfernt: Der Character Builder behält Skills, Beschreibung und Kommentare; Ausrüstung, Werte, Gear Score und Sammlungen kommen mit offiziellen Daten zurück, und die in deinen Builds gespeicherte Ausrüstung wurde gelöscht.
+- Entfernt: Build-Community listet nur noch deine eigenen Builds; Community-Builds, Favoriten und Spawnpunkte auf der Karte sind weg.
+- Geändert: Raumzeit-Riss und Shugo-Festival zeigen nur noch von NCSOFT bestätigte Details; das Riss-Portal bleibt 15 Minuten offen.
+
 ## 0.3.7
 
 - Geändert: Recluta, Daeva und die kostenlose Testphase gelten auf 1 PC pro Konto, Empyrean auf 2; nach einem Wechsel zu einem Plan mit weniger PCs behalten die zuerst registrierten PCs den Zugang.

@@ -747,7 +747,7 @@ body.legacyUi .pmOnly {
   .pmDetail,
   .pmLast { display: none; }
 
-  button:is(.pmBackBtn, .pmDetailReportBtn, .pmLinkBtn, .pmSubTab, .pmPill) {
+  button:is(.pmBackBtn, .pmDetailReportBtn, .pmPill) {
     padding: 0;
     border: 0;
     background: none;
@@ -756,11 +756,10 @@ body.legacyUi .pmOnly {
     text-shadow: inherit;
     cursor: pointer;
   }
-  :is(.pmBackBtn, .pmDetailReportBtn, .pmLinkBtn, .pmSubTab, .pmPill, .pmFillBtn, .pmGhostBtn):focus-visible {
+  :is(.pmBackBtn, .pmDetailReportBtn, .pmPill, .pmFillBtn, .pmGhostBtn):focus-visible {
     outline: 1px solid var(--pm-redt);
     outline-offset: 2px;
   }
-  .pmMono { font-family: var(--pm-mono); }
 
   /* --- 8.1 hover frame: grips on the corners and the right edge --- */
   .pmGrip {
@@ -989,156 +988,6 @@ body.legacyUi .pmOnly {
     flex-direction: column;
     min-height: 0;
   }
-  .pmBuildHead {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    padding: 8px 10px;
-  }
-  .pmBuildTitle {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-  }
-  .pmBuildName { font-weight: 600; }
-  .pmBuildClass {
-    font-size: 10px;
-    color: #4f93ea;
-  }
-  .pmBuildArrow { color: var(--pm-widget-muted); }
-  .pmBuildTarget { color: var(--pm-redt); }
-  .pmBuildBar {
-    height: 5px;
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.12);
-  }
-  .pmBuildBar > div {
-    height: 100%;
-    border-radius: 3px;
-    background: var(--pm-red);
-  }
-  .pmSubTabs {
-    display: flex;
-    gap: 2px;
-    padding: 0 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  button.pmSubTab {
-    height: 26px;
-    padding: 0 10px;
-    border-bottom: 2px solid transparent;
-    color: var(--pm-widget-muted);
-    font-size: 11px;
-    transition: color 120ms ease;
-  }
-  button.pmSubTab:hover { color: var(--pm-widget-text); }
-  button.pmSubTab[aria-selected="true"] {
-    border-bottom-color: var(--pm-red);
-    color: var(--pm-widget-text);
-  }
-  .pmBuildBody {
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-    padding: 8px 10px;
-  }
-  .pmSlots {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 5px;
-  }
-  .pmSlot {
-    position: relative;
-    display: grid;
-    place-items: center;
-    aspect-ratio: 1;
-    border: 1.5px solid var(--rar);
-    border-radius: 5px;
-    background: rgba(0, 0, 0, 0.35);
-    color: var(--pm-t2);
-    font-size: 8px;
-  }
-  .pmSlot.isMissing {
-    border-style: dashed;
-    opacity: 0.55;
-  }
-  .pmSlotEnh {
-    position: absolute;
-    right: 2px;
-    bottom: 0;
-    font-family: var(--pm-mono);
-    font-size: 8px;
-    color: var(--pm-widget-text);
-  }
-  .pmSlotsHint {
-    margin-top: 8px;
-    font-size: 10px;
-    color: var(--pm-widget-muted);
-  }
-  .pmMissing {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 30px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  }
-  .pmMissingIcon {
-    flex: none;
-    width: 18px;
-    height: 18px;
-    box-sizing: border-box;
-    border: 1.5px dashed var(--rar);
-    border-radius: 4px;
-  }
-  .pmMissingText {
-    flex: 1;
-    min-width: 0;
-  }
-  .pmMissingName {
-    overflow: hidden;
-    color: var(--rar);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .pmMissingSrc {
-    font-size: 10px;
-    color: var(--pm-widget-muted);
-  }
-  .pmStat {
-    display: grid;
-    grid-template-columns: 1fr 60px 16px 60px;
-    gap: 4px;
-    align-items: center;
-    min-height: 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  }
-  .pmStat > :nth-child(1) { color: var(--pm-t2); }
-  .pmStat > :nth-child(2),
-  .pmStat > :nth-child(4) {
-    font-family: var(--pm-mono);
-    text-align: right;
-  }
-  .pmStat > :nth-child(3) {
-    color: #8a8181;
-    text-align: center;
-  }
-  .pmStat > :nth-child(4) { color: #5fd99a; }
-  .pmBuildFoot {
-    display: flex;
-    align-items: center;
-    flex: none;
-    height: 30px;
-    padding: 0 10px;
-    border-radius: 0 0 8px 8px;
-    background: var(--pm-wbar);
-    font-size: 11px;
-    color: var(--pm-widget-muted);
-  }
-  button.pmLinkBtn {
-    color: var(--pm-link);
-    transition: color 120ms ease;
-  }
-  button.pmLinkBtn:hover { color: var(--pm-widget-text); }
 
   /* --- 8.6 Lobby --- */
   .meter.pmMode-lobby { min-height: 0; }

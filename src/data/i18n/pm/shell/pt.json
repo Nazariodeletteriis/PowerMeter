@@ -2,8 +2,6 @@
   "shell.diagnoseHint": "Clique para abrir o diagnóstico.",
   "shell.attempt": "Tentativa {n}",
   "shell.crumb.builder": "Builds da comunidade → Character Builder",
-  "shell.databaseTitle": "Buscar no banco de dados do Aion 2",
-  "shell.itemTitle": "Ficha do item",
   "shell.share.log": "Compartilhar log",
   "shell.share.party": "Compartilhar grupo",
   "shell.share.build": "Compartilhar build",
@@ -25,5 +23,7 @@
   "shell.states.soonTitle": "Em breve",
   "shell.states.soonText": "Esta seção chega numa próxima atualização.",
   "shell.states.afterLaunch": "Disponível após o lançamento de Aion 2, quando houver dados reais.",
-  "shell.states.noData": "Ainda sem dados"
+  "shell.states.noData": "Ainda sem dados",
+  "shell.states.officialTitle": "Dados oficiais a caminho",
+  "shell.states.officialText": "Esta função está em desenvolvimento e voltará com os dados oficiais do jogo."
 }

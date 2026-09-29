@@ -17,6 +17,9 @@ export function App() {
   const onError = useCallback((e: unknown) => setError(String(e)), []);
 
   useEffect(() => {
+    // Builds saved before 0.3.8 hold third-party item data we no longer ship: wipe them once.
+    localStorage.removeItem("pm.widgetBuild");
+    for (const key of ["pm.builderGear", "pm.likedBuilds"]) invoke("update_settings", { key, value: "" }).catch(() => {});
     invoke<Settings>("get_settings").then(setSettings, (e) => {
       setError(String(e));
       setSettings({});

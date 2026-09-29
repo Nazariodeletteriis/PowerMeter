@@ -2,8 +2,6 @@
   "shell.diagnoseHint": "点击查看诊断信息。",
   "shell.attempt": "第 {n} 次尝试",
   "shell.crumb.builder": "社区配装 → 角色配装器",
-  "shell.databaseTitle": "搜索 Aion 2 数据库",
-  "shell.itemTitle": "物品详情",
   "shell.share.log": "分享日志",
   "shell.share.party": "分享队伍",
   "shell.share.build": "分享配装",
@@ -25,5 +23,7 @@
   "shell.states.soonTitle": "即将推出",
   "shell.states.soonText": "此部分将在后续更新中推出。",
   "shell.states.afterLaunch": "Aion 2 上线后，有了真实数据即可使用。",
-  "shell.states.noData": "暂无数据"
+  "shell.states.noData": "暂无数据",
+  "shell.states.officialTitle": "官方数据即将推出",
+  "shell.states.officialText": "此功能制作中，将随游戏官方数据回归。"
 }

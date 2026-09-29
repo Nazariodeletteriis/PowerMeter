@@ -8,13 +8,10 @@
 import { writeFileSync } from "node:fs";
 
 const RAW = "https://raw.githubusercontent.com/aion2-interactive-map/aion2-interactive-map/master/public/";
-// Maps with markers first; the starter zones have (almost) none but hold NPC spawns (scrape-spawns.mjs).
+// Maps with markers first; the starter zones have (almost) none.
 const MAPS = ["World_L_A", "World_D_A", "Abyss_Reshanta_A", "World_L_Starter", "World_D_Starter"];
-// Worlds this project has no tiles for: questlog.gg's single map image (hotlinked, never bundled,
-// like the build portraits), for NPC spawns only (no regions or markers). [id, name, size in px].
 // The project names the starter zones just "Starter".
 const NAME = { World_L_Starter: "Poeta (Elyos)", World_D_Starter: "Ishalgen (Asmodian)" };
-const QUESTLOG_MAPS = [["World_L_B", "Eltnen (Elyos)", 8192], ["World_D_B", "Morheim (Asmodian)", 8192]];
 // Marker subtypes kept, in panel order. The source defines gathering and pet
 // subtypes too, but has no markers for them yet.
 const TYPES = ["teleport", "village", "seal", "battlefield", "occupation", "monolithMaterial", "hiddenCube"];
@@ -142,5 +139,4 @@ for (const id of MAPS) {
   console.log(`${id}: ${out.length} markers, ${regs.length} regions, ${out.filter((x) => x[3] < 0).length} outside regions`);
 }
 
-for (const [id, name, size] of QUESTLOG_MAPS) {
-  maps.push({ id, name, tiles: [1, 1], tile: size, image: `"../src/data/map/maps.json", import.meta.url), JSON.stringify({ types: TYPES, maps }));
+writeFileSync(new URL("../src/data/map/maps.json", import.meta.url), JSON.stringify({ types: TYPES, maps }));

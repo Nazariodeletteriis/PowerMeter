@@ -4,6 +4,13 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.3.8
+
+- Removed: Database, Gear Viewer, Armory, Daevanion planner, Crafting, Calculators and Marketplace show "Official data coming" until official game data is available.
+- Removed: the Character Builder keeps skills, description and comments; gear, stats, Gear Score and collections will return with official data, and the gear saved in your builds has been cleared.
+- Removed: Build community lists only your own builds; community builds, favorites and the spawn points on the map are gone.
+- Changed: Spacetime Rift and Shugo Festival show only the details confirmed by NCSOFT; the Rift portal stays open 15 minutes.
+
 ## 0.3.7
 
 - Changed: Recluta, Daeva and the free trial work on 1 PC per account, Empyrean on 2; after moving to a plan with fewer PCs, the PCs registered first keep access.

@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.8
+
+- 移除：数据库、Gear Viewer、军械库、守护星规划器、制作、计算器和市场在官方游戏数据可用前显示“官方数据即将推出”。
+- 移除：Character Builder 保留技能、描述和评论；装备、属性、Gear Score 和收藏将随官方数据回归，构筑中保存的装备已清除。
+- 移除：社区构筑只列出你自己的构筑；社区构筑、收藏和地图上的刷新点已移除。
+- 变更：时空裂缝和修果节只显示 NCSOFT 确认的信息；裂缝传送门开放 15 分钟。
+
 ## 0.3.7
 
 - 变更：Recluta、Daeva 和免费试用每个账号限 1 台电脑，Empyrean 为 2 台；改用电脑数更少的方案后，最先登记的电脑保留访问权限。

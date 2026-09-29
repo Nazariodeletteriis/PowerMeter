@@ -2,8 +2,6 @@
   "shell.diagnoseHint": "클릭하면 진단 결과를 확인합니다.",
   "shell.attempt": "시도 {n}",
   "shell.crumb.builder": "커뮤니티 빌드 → 캐릭터 빌더",
-  "shell.databaseTitle": "Aion 2 데이터베이스 검색",
-  "shell.itemTitle": "아이템 정보",
   "shell.share.log": "로그 공유",
   "shell.share.party": "파티 공유",
   "shell.share.build": "빌드 공유",
@@ -25,5 +23,7 @@
   "shell.states.soonTitle": "곧 제공 예정",
   "shell.states.soonText": "이 섹션은 향후 업데이트에서 제공됩니다.",
   "shell.states.afterLaunch": "Aion 2 출시 후 실제 데이터가 쌓이면 이용할 수 있습니다.",
-  "shell.states.noData": "아직 데이터가 없습니다"
+  "shell.states.noData": "아직 데이터가 없습니다",
+  "shell.states.officialTitle": "공식 데이터 준비 중",
+  "shell.states.officialText": "이 기능은 준비 중이며 게임 공식 데이터와 함께 돌아옵니다."
 }

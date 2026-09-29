@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.8
+
+- Retiré : Base de données, Gear Viewer, Armurerie, planificateur Daevanion, Artisanat, Calculateurs et Marché affichent « Données officielles à venir » jusqu’à ce que des données officielles du jeu soient disponibles.
+- Retiré : le Character Builder garde les compétences, la description et les commentaires ; équipement, statistiques, Gear Score et collections reviendront avec les données officielles, et l’équipement enregistré dans vos builds a été effacé.
+- Retiré : Builds de la communauté ne liste plus que vos propres builds ; les builds de la communauté, les favoris et les points d’apparition sur la carte ont disparu.
+- Modifié : Faille spatio-temporelle et Festival Shugo n’affichent que les détails confirmés par NCSOFT ; le portail de la Faille reste ouvert 15 minutes.
+
 ## 0.3.7
 
 - Modifié : Recluta, Daeva et l'essai gratuit fonctionnent sur 1 PC par compte, Empyrean sur 2 ; en passant à un abonnement avec moins de PC, les PC enregistrés en premier gardent l'accès.

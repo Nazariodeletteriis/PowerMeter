@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.8
+
+- Eliminado: Base de datos, Gear Viewer, Armería, planificador Daevanion, Artesanía, Calculadoras y Mercado muestran «Datos oficiales próximamente» hasta que haya datos oficiales del juego.
+- Eliminado: el Character Builder conserva habilidades, descripción y comentarios; equipo, estadísticas, Gear Score y colecciones volverán con los datos oficiales, y el equipo guardado en tus builds se ha borrado.
+- Eliminado: Builds de la comunidad muestra solo tus builds; las builds de la comunidad, los favoritos y los puntos de aparición en el mapa ya no están.
+- Cambiado: Grieta espaciotemporal y Festival Shugo muestran solo los detalles confirmados por NCSOFT; el portal de la Grieta sigue abierto 15 minutos.
+
 ## 0.3.7
 
 - Cambiado: Recluta, Daeva y la prueba gratuita funcionan en 1 PC por cuenta, Empyrean en 2; al pasar a un plan con menos PC, conservan el acceso los registrados primero.
