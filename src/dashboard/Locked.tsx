@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { HourglassIcon, LockSimpleIcon } from "@phosphor-icons/react";
 import { useEffect, useState, type ReactNode } from "react";
-import { MAX_DEVICES, PLANS, refreshEntitlement, useEntitlement, type PaidTier } from "./entitlement";
+import { PLANS, refreshEntitlement, useEntitlement, type PaidTier } from "./entitlement";
 import type { T } from "./i18n";
 import { PATREON_URL } from "./Shell";
 
@@ -26,7 +26,7 @@ export function Locked({ t, tier, go, onError, children }: Props) {
         <h2 id="lockedTitle">{t("subs.requires", { tier: name })}</h2>
         <div className="mono lockedPrice">{t("subs.perMonth", { price: PLANS[tier].price })}</div>
         {e?.deviceLimit ? (
-          <p className="notice">{t("subs.deviceLimit", { n: MAX_DEVICES })}</p>
+          <p className="notice">{t("subs.deviceLimit", { n: e?.maxDevices ?? 1 })}</p>
         ) : account !== undefined && (
           <>
             <p>{account === null ? t("subs.lockedSignedOut") : t("subs.lockedText", { tier: name })}</p>

@@ -37,7 +37,7 @@ const NPCAP_URL = "https://npcap.com/#download";
 // Bump it whenever src/data/legal changes in substance: App then shows only
 // the legal step to users who accepted an older version. The backend keeps
 // the same constant (powermeter.rs) and captures nothing until it matches.
-export const TERMS_VERSION = "2026-09-29.3";
+export const TERMS_VERSION = "2026-09-29.4";
 
 // Terms and privacy as static HTML (scripts/sync-legal.mjs), one chunk per
 // language, loaded when the legal step opens. Languages without a translation

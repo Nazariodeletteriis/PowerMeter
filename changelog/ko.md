@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.7
+
+- 변경: Recluta, Daeva, 무료 체험은 계정당 PC 1대, Empyrean은 2대에서 사용할 수 있습니다. PC 수가 적은 플랜으로 바꾸면 먼저 등록한 PC가 계속 사용할 수 있습니다.
+
 ## 0.3.6
 
 - 수정: 관리자 패널이 사용자를 표시할 때 서포터 페이지에서 창이 검게 변하던 문제를 수정했습니다. 페이지에 오류가 나면 검은 화면 대신 오류와 다시 시도 버튼을 보여 줍니다.

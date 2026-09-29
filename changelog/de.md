@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.7
+
+- Geändert: Recluta, Daeva und die kostenlose Testphase gelten auf 1 PC pro Konto, Empyrean auf 2; nach einem Wechsel zu einem Plan mit weniger PCs behalten die zuerst registrierten PCs den Zugang.
+
 ## 0.3.6
 
 - Behoben: Die Unterstützer-Seite färbt das Fenster nicht mehr schwarz, wenn das Admin-Panel Nutzer auflistet; schlägt eine Seite fehl, zeigt sie den Fehler mit „Erneut versuchen“ statt eines schwarzen Fensters.

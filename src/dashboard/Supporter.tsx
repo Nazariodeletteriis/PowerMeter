@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { CheckIcon, HeartIcon, WifiSlashIcon } from "@phosphor-icons/react";
 import { useEffect, useState, type FormEvent } from "react";
-import { MAX_DEVICES, PLANS, refreshEntitlement, useEntitlement, type Entitlement, type PaidTier, type Tier } from "./entitlement";
+import { PLANS, refreshEntitlement, useEntitlement, type Entitlement, type PaidTier, type Tier } from "./entitlement";
 import type { Key, T } from "./i18n";
 import { PATREON_URL } from "./Shell";
 
@@ -111,7 +111,7 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
           {account !== undefined &&
             (e.deviceLimit ? (
               <p className="notice" style={{ maxWidth: 420, fontSize: 13 }}>
-                {t("subs.deviceLimit", { n: MAX_DEVICES })}
+                {t("subs.deviceLimit", { n: e?.maxDevices ?? 1 })}
               </p>
             ) : (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>

@@ -12,7 +12,7 @@ use crate::AppState;
 
 const CLICK_THROUGH_HOTKEY_KEY: &str = "pm.clickThroughHotkey";
 /// Must match TERMS_VERSION in src/dashboard/Onboarding.tsx.
-const TERMS_VERSION: &str = "2026-09-29.3";
+const TERMS_VERSION: &str = "2026-09-29.4";
 
 /// Nothing is captured before the user accepts the current terms (the last
 /// onboarding step writes `pm.termsAccepted`): until then the meter stays

@@ -56,7 +56,7 @@
   "subs.admin.revoke": "Retirer",
   "subs.admin.revokeConfirm": "Retirer l'offre attribuée à {name} ?",
   "subs.waiver": "Je demande l'accès immédiat aux contenus numériques et je sais que je perds ainsi mon droit de rétractation de 14 jours.",
-  "subs.deviceLimit": "Ton compte est déjà actif sur {n} PC. Un PC se libère après 30 jours sans l'utiliser, ou demande une réinitialisation sur le Discord de PowerMeter.",
+  "subs.deviceLimit": "Ton abonnement est déjà actif sur un autre PC (maximum {n} ; avec Empyrean 2). Un PC libère sa place après 30 jours sans utilisation, ou demande une réinitialisation sur le Discord de PowerMeter.",
   "subs.admin.devices": "PC : {devices}/{max}",
   "subs.admin.resetDevices": "Réinitialiser les PC",
   "subs.admin.resetDevicesConfirm": "Réinitialiser les PC enregistrés de {name} ? Le prochain PC avec lequel il se connecte sera enregistré à nouveau."

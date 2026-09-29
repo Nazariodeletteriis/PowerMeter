@@ -56,7 +56,7 @@
   "subs.admin.revoke": "회수",
   "subs.admin.revokeConfirm": "{name}에게 부여한 플랜을 회수할까요?",
   "subs.waiver": "디지털 콘텐츠에 즉시 접근하기를 요청하며, 이로 인해 14일 청약 철회권을 잃는다는 것을 이해합니다.",
-  "subs.deviceLimit": "이 계정은 이미 PC {n}대에서 사용 중입니다. 30일 동안 사용하지 않은 PC는 해제되며, PowerMeter Discord에서 초기화를 요청할 수도 있습니다.",
+  "subs.deviceLimit": "플랜이 이미 다른 PC에서 활성화되어 있습니다(최대 {n}대, Empyrean은 2대). 30일 동안 사용하지 않은 PC는 자리가 비워지며, PowerMeter Discord에서 초기화를 요청할 수도 있습니다.",
   "subs.admin.devices": "PC: {devices}/{max}",
   "subs.admin.resetDevices": "PC 초기화",
   "subs.admin.resetDevicesConfirm": "{name}님의 등록된 PC를 초기화할까요? 다음에 로그인하는 PC가 새로 등록됩니다."

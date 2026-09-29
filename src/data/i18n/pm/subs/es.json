@@ -56,7 +56,7 @@
   "subs.admin.revoke": "Revocar",
   "subs.admin.revokeConfirm": "¿Revocar el plan asignado a {name}?",
   "subs.waiver": "Solicito el acceso inmediato al contenido digital y sé que así pierdo mi derecho de desistimiento de 14 días.",
-  "subs.deviceLimit": "Tu cuenta ya está activa en {n} PC. Un PC se libera tras 30 días sin usarlo, o puedes pedir un reinicio en el Discord de PowerMeter.",
+  "subs.deviceLimit": "Tu plan ya está activo en otro PC (máximo {n}; con Empyrean 2). Un PC libera su plaza tras 30 días sin usarlo, o pide un reinicio en el Discord de PowerMeter.",
   "subs.admin.devices": "PC: {devices}/{max}",
   "subs.admin.resetDevices": "Reiniciar PC",
   "subs.admin.resetDevicesConfirm": "¿Reiniciar los PC registrados de {name}? El próximo PC con el que inicie sesión se registrará de nuevo."

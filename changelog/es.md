@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.7
+
+- Cambiado: Recluta, Daeva y la prueba gratuita funcionan en 1 PC por cuenta, Empyrean en 2; al pasar a un plan con menos PC, conservan el acceso los registrados primero.
+
 ## 0.3.6
 
 - Corregido: la página Supporter ya no deja la ventana en negro cuando el panel de administración lista usuarios; si una página falla, muestra el error con Reintentar en lugar de una ventana negra.

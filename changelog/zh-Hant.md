@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.3.7
+
+- 變更：Recluta、Daeva 與免費試用每個帳號限 1 台電腦，Empyrean 為 2 台；改用電腦數較少的方案後，最先登記的電腦保留存取權限。
+
 ## 0.3.6
 
 - 修正：管理面板列出使用者時贊助者頁面導致視窗變黑的問題；頁面出錯時會顯示錯誤與重試按鈕，而不是黑色畫面。

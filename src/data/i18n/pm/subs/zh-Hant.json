@@ -56,7 +56,7 @@
   "subs.admin.revoke": "撤銷",
   "subs.admin.revokeConfirm": "要撤銷授予 {name} 的方案嗎？",
   "subs.waiver": "我要求立即取得數位內容，並了解我將因此失去 14 天的撤回權。",
-  "subs.deviceLimit": "你的帳號已在 {n} 台電腦上啟用。電腦 30 天未使用後即會釋出，或到 PowerMeter 的 Discord 申請重設。",
+  "subs.deviceLimit": "你的方案已在另一台電腦上啟用（最多 {n} 台；Empyrean 為 2 台）。30 天未使用的電腦會釋出名額，也可以在 PowerMeter 的 Discord 申請重置。",
   "subs.admin.devices": "電腦：{devices}/{max}",
   "subs.admin.resetDevices": "重設電腦",
   "subs.admin.resetDevicesConfirm": "要重設 {name} 已登記的電腦嗎？他下次登入的電腦會重新登記。"

@@ -26,12 +26,12 @@ export type Entitlement = {
   founder?: boolean;
   patreon?: { linked: boolean; tier: Tier; status: string | null };
   offline?: boolean;
+  /** PCs the plan allows (Empyrean 2, others 1). */
+  maxDevices?: number;
   /** The account already has its maximum of PCs: nothing paid on this one. */
   deviceLimit?: boolean;
 };
 
-/** PCs per account (server MAX_DEVICES). */
-export const MAX_DEVICES = 2;
 
 let current: Entitlement | null = null;
 const listeners = new Set<() => void>();
