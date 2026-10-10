@@ -24,6 +24,6 @@
   "shell.states.soonText": "이 섹션은 향후 업데이트에서 제공됩니다.",
   "shell.states.afterLaunch": "Aion 2 출시 후 실제 데이터가 쌓이면 이용할 수 있습니다.",
   "shell.states.noData": "아직 데이터가 없습니다",
-  "shell.states.officialTitle": "공식 데이터 준비 중",
-  "shell.states.officialText": "이 기능은 준비 중이며 게임 공식 데이터와 함께 돌아옵니다."
+  "shell.states.officialTitle": "곧 제공 예정",
+  "shell.states.officialText": "이 기능은 준비 중이며 곧 돌아옵니다."
 }

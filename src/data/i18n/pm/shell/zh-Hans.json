@@ -24,6 +24,6 @@
   "shell.states.soonText": "此部分将在后续更新中推出。",
   "shell.states.afterLaunch": "Aion 2 上线后，有了真实数据即可使用。",
   "shell.states.noData": "暂无数据",
-  "shell.states.officialTitle": "官方数据即将推出",
-  "shell.states.officialText": "此功能制作中，将随游戏官方数据回归。"
+  "shell.states.officialTitle": "即将推出",
+  "shell.states.officialText": "此功能制作中，即将回归。"
 }

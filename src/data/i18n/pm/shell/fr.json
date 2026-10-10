@@ -24,6 +24,6 @@
   "shell.states.soonText": "Cette section arrive dans une prochaine mise à jour.",
   "shell.states.afterLaunch": "Disponible après le lancement d'Aion 2, dès qu'il y aura des données réelles.",
   "shell.states.noData": "Pas encore de données",
-  "shell.states.officialTitle": "Données officielles à venir",
-  "shell.states.officialText": "Cette fonction est en préparation et reviendra avec les données officielles du jeu."
+  "shell.states.officialTitle": "Bientôt disponible",
+  "shell.states.officialText": "Cette fonction est en préparation et reviendra bientôt."
 }

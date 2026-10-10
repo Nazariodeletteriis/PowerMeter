@@ -225,7 +225,7 @@ const createPmWidget = (app) => {
   const lobbyEl = $(".pmLobby");
   // The build view needs the equipment data: official data coming.
   const renderBuild = () => {
-    buildEl.innerHTML = emptyCard("pmWidget.build.officialTitle", "Official data coming", "pmWidget.build.officialHint", "This view returns with the game's official data");
+    buildEl.innerHTML = emptyCard("pmWidget.build.officialTitle", "Coming soon", "pmWidget.build.officialHint", "This view is in the works and will be back soon");
   };
   // ponytail: no party roster source yet (the engine doesn't report one): the Lobby is an
   // empty state until it does; the grid rows (.pmLobbyGrid in the theme CSS) are kept for then.

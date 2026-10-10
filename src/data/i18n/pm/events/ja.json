@@ -5,7 +5,7 @@
   "events.shugo.nextRound": "次のラウンド",
   "events.shugo.upcoming": "今後のラウンド",
   "events.shugo.games": "ミニゲーム",
-  "events.shugo.source": "NCSOFTの韓国向け告知によると、すべてのミニゲームは毎時0分に開始します。グローバルサーバーでは異なる場合があります。",
+  "events.shugo.source": "すべてのミニゲームは毎時0分に開始します。グローバルサーバーでは異なる場合があります。",
   "events.rift.next": "次の時空の裂け目",
   "events.rift.portal": "ポータル開放中",
   "events.rift.running": "裂け目開催中",

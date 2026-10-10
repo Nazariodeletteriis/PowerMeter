@@ -36,7 +36,7 @@
   "account.later": "稍后",
   "account.browser": "请在刚打开的浏览器页面中完成登录。",
   "disclaimer.title": "开始之前",
-  "disclaimer.body": "PowerMeter 是一个非官方工具，与 NCSoft 无关。它被动读取战斗数据。使用风险自负。",
+  "disclaimer.body": "PowerMeter 不是 AION 2 的官方软件，而是为 Aion 2 社区制作的业余软件，与 NCSoft 无关。它被动读取战斗数据。使用风险自负。",
   "disclaimer.accept": "我已阅读并同意《使用条款》和《隐私政策》",
   "disclaimer.finish": "开始",
   "disclaimer.updatedTitle": "我们更新了条款",

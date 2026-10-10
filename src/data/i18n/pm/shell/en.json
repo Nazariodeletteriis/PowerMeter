@@ -24,6 +24,6 @@
   "shell.states.soonText": "This section arrives in a future update.",
   "shell.states.afterLaunch": "Available after the Aion 2 launch, once there is real data.",
   "shell.states.noData": "No data yet",
-  "shell.states.officialTitle": "Official data coming",
-  "shell.states.officialText": "This feature is in the works and will return with the game's official data."
+  "shell.states.officialTitle": "Coming soon",
+  "shell.states.officialText": "This feature is in the works and will be back soon."
 }

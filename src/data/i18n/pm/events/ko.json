@@ -5,7 +5,7 @@
   "events.shugo.nextRound": "다음 라운드",
   "events.shugo.upcoming": "다음 라운드들",
   "events.shugo.games": "미니게임",
-  "events.shugo.source": "NCSOFT 한국 공지 기준, 모든 미니게임은 매시 정각에 열립니다. 글로벌 서버는 다를 수 있습니다.",
+  "events.shugo.source": "모든 미니게임은 매시 정각에 열립니다. 글로벌 서버는 다를 수 있습니다.",
   "events.rift.next": "다음 시공의 균열",
   "events.rift.portal": "포털 열림",
   "events.rift.running": "균열 진행 중",
