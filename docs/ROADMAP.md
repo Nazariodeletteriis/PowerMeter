@@ -15,7 +15,7 @@
 | Regione di riferimento | Global / EU |
 | Desktop | Tauri 2 — Rust (cattura pacchetti via Npcap, solo Windows) + UI TypeScript |
 | Server | Node.js 24 LTS + TypeScript su Netsons cPanel (Setup Node.js App), deploy via `git pull` |
-| Database | PostgreSQL 18 (Netsons) |
+| Database | MySQL (MariaDB 10.11, Netsons) |
 | Dati di gioco | Solo fonti ufficiali NCSOFT (richiesta in corso). Niente dati né chiamate verso questlog.gg (rifiuto 2026-09-29) |
 | Login | Discord OAuth (Patreon collegato in R6) |
 | Build Windows | GitHub Actions (runner Windows) produce l'MSI; Nazario testa in gioco |
@@ -40,7 +40,7 @@ Ogni release è utilizzabile da sola. Alla fine di R6 ci sono tutte le feature d
 - Storico combattimenti locale con auto-save sui boss
 
 ### R2 — Logs online
-- Server su Netsons + Postgres, login Discord
+- Server su Netsons + MySQL (MariaDB), login Discord
 - Upload con un click, report web stile AbyssLogs (dungeon → segmento → tentativo, tabella skill 13 colonne, skill timeline, buff timeline con uptime)
 - Link condivisibile `/e/<id>`, browse dei log pubblici, classifiche per regione/boss/classe, statistiche di classe
 - Widget: lobby dungeon (CP, gear score, stato pronto)

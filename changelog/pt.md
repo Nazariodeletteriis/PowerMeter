@@ -2,6 +2,23 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.0
+
+- Novo: Base de dados: pesquisa, itens, NPCs e monstros com os seus drops e um botão Mapa que mostra onde estão, missões, masmorras, crafting e habilidades, com os dados do jogo.
+- Novo: Gear Viewer com os dados do jogo.
+- Novo: Temporizadores: 9 eventos recorrentes na tua hora local, com contagem decrescente e som opcional.
+- Novo: Daevanion Planner: os tabuleiros Daevanion do jogo, escolhe os nós e vê as estatísticas e níveis de habilidade que dão.
+- Novo: Character Builder: estatísticas base, níveis de melhoria e uma estimativa de CP e DPS da build.
+- Alterado: o PowerMeter é descrito em todo o lado como um projeto amador não oficial feito para a comunidade de Aion 2.
+- Corrigido: o jogo é detetado de forma fiável quando é iniciado a partir do Purple.
+- Corrigido: o DPS e o dano já não ficam negativos com ataques de vários golpes muito fortes.
+- Corrigido: as curas de um curandeiro que ainda não usou uma habilidade no combate já não se perdem.
+- Corrigido: em Os meus personagens, clicar num personagem abre diretamente a sua build no Character Builder.
+- Corrigido: o Character Builder já não mostra gostos nem respostas que não existem: uma build começa em 0.
+- Corrigido: a ficha de um monstro já não está vazia, e o botão Mapa abre o seu mapa numa janela.
+- Corrigido: o Gear Viewer mostra cada peça uma vez em vez de duas.
+- Corrigido: Masmorras lista todas as masmorras, cada uma uma vez.
+
 ## 0.3.9
 
 - Alterado: Termos atualizados: em Recluta e Daeva, o Banco de dados, o Gear Viewer, o assistente de criação e a calculadora estão incluídos quando houver dados oficiais do jogo. Será pedido que você aceite os Termos de novo.

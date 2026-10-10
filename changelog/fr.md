@@ -2,6 +2,23 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.0
+
+- Nouveau : Base de données : recherche, objets, PNJ et monstres avec leurs butins et un bouton Carte qui montre où ils se trouvent, quêtes, donjons, artisanat et compétences, avec les données du jeu.
+- Nouveau : Gear Viewer avec les données du jeu.
+- Nouveau : Minuteurs : 9 événements récurrents à ton heure locale, avec compte à rebours et son facultatif.
+- Nouveau : Daevanion Planner : les plateaux Daevanion du jeu, choisis les nœuds et vois les statistiques et niveaux de compétence qu'ils donnent.
+- Nouveau : Character Builder : statistiques de base, niveaux d'amélioration et une estimation du CP et du DPS du build.
+- Modifié : PowerMeter est présenté partout comme un projet amateur non officiel fait pour la communauté d'Aion 2.
+- Corrigé : le jeu est détecté de façon fiable quand il est lancé depuis Purple.
+- Corrigé : le DPS et les dégâts ne deviennent plus négatifs avec des attaques multi-coups très puissantes.
+- Corrigé : les soins d'un soigneur qui n'a pas encore utilisé de compétence dans le combat ne sont plus perdus.
+- Corrigé : dans Mes personnages, cliquer sur un personnage ouvre directement son build dans le Character Builder.
+- Corrigé : le Character Builder n'affiche plus de « j'aime » ni de réponses inexistants : un build part de 0.
+- Corrigé : la fiche d'un monstre n'est plus vide, et le bouton Carte ouvre sa carte dans une fenêtre.
+- Corrigé : Gear Viewer affiche chaque pièce une fois au lieu de deux.
+- Corrigé : Donjons liste tous les donjons, chacun une fois.
+
 ## 0.3.9
 
 - Modifié : Conditions mises à jour : dans Recluta et Daeva, la Base de données, le Gear Viewer, l’aide à l’artisanat et le calculateur sont inclus dès que les données officielles du jeu sont disponibles. Il vous sera demandé d’accepter à nouveau les Conditions.

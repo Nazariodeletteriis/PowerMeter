@@ -2,6 +2,23 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.0
+
+- Neu: Datenbank: Suche, Gegenstände, NPCs und Monster mit ihren Drops und einer Karte-Schaltfläche, die zeigt, wo sie sind, Quests, Dungeons, Crafting und Skills, mit den Spieldaten.
+- Neu: Gear Viewer mit den Spieldaten.
+- Neu: Timer: 9 wiederkehrende Events in deiner Ortszeit, mit Countdown und optionalem Ton.
+- Neu: Daevanion Planner: die Daevanion-Tafeln des Spiels, wähle die Knoten und sieh die Werte und Skillstufen, die sie geben.
+- Neu: Character Builder: Grundwerte, Verstärkungsstufen und eine Schätzung von CP und DPS des Builds.
+- Geändert: PowerMeter wird überall als inoffizielles Amateurprojekt für die Aion-2-Community beschrieben.
+- Behoben: das Spiel wird zuverlässig erkannt, wenn es über Purple gestartet wird.
+- Behoben: DPS und Schaden werden bei sehr starken Mehrfachtreffern nicht mehr negativ.
+- Behoben: Heilungen eines Heilers, der im Kampf noch keinen Skill benutzt hat, gehen nicht mehr verloren.
+- Behoben: in Meine Charaktere öffnet ein Klick auf einen Charakter direkt seinen Build im Character Builder.
+- Behoben: der Character Builder zeigt keine erfundenen Likes und Antworten mehr: ein Build startet bei 0.
+- Behoben: die Karte eines Monsters ist nicht mehr leer, und die Karte-Schaltfläche öffnet seine Karte in einem Popup.
+- Behoben: Gear Viewer zeigt jedes Teil einmal statt zweimal.
+- Behoben: Dungeons listet alle Dungeons, jeden einmal.
+
 ## 0.3.9
 
 - Geändert: Nutzungsbedingungen aktualisiert: In Recluta und Daeva sind Datenbank, Gear Viewer, Crafting-Helfer und Rechner enthalten, sobald offizielle Spieldaten verfügbar sind. Du wirst gebeten, die Bedingungen erneut zu akzeptieren.

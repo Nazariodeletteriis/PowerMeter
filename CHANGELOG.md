@@ -4,6 +4,23 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.4.0
+
+- New: Database: search, items, NPCs and monsters with their drops and a Map button that shows where they are, quests, dungeons, crafting and skills, with the game data.
+- New: Gear Viewer with the game data.
+- New: Timers: 9 recurring events in your local time, with a countdown and an optional sound.
+- New: Daevanion Planner: the game's Daevanion boards, pick the nodes and see the stats and skill levels they give.
+- New: Character Builder: base stats, enhancement levels and an estimate of CP and DPS for the build.
+- Changed: PowerMeter is described everywhere as an unofficial, amateur project made for the Aion 2 community.
+- Fixed: the game is detected reliably when launched from Purple.
+- Fixed: DPS and damage no longer turn negative on very large multi-hit attacks.
+- Fixed: heals from a healer who has not used a skill yet in the fight are no longer lost.
+- Fixed: in My characters, clicking a character opens its build in the Character Builder directly.
+- Fixed: the Character Builder no longer shows likes and replies that do not exist: a build starts at 0.
+- Fixed: a monster's card is no longer empty, and the Map button opens its map in a popup.
+- Fixed: Gear Viewer shows each piece once instead of twice.
+- Fixed: Dungeons lists every dungeon, each once.
+
 ## 0.3.9
 
 - Changed: updated Terms: in Recluta and Daeva, the Database, Gear Viewer, crafting helper and calculator are included once official game data is available. You will be asked to accept the Terms again.
