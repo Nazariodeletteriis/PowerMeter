@@ -48,11 +48,17 @@ settings.properties
 .claude/
 
 # PowerMeter: strumenti interni, mai nel repo
-HANDOFF.md
+HANDOFF*.md
 graphify-out/
 *:Zone.Identifier
 docs/design/*.zip
 .graphify_*
+
+# Datamining locale-only (scraper + dati grezzi): mai nel repo pubblico
+/tools/datamine/
+
+# Reverse engineering client di gioco (log/estrazioni FModel): mai nel repo pubblico
+docs/design/Reverse_eng/
 
 # Python env for asset scripts
 docs/design/.venv/
