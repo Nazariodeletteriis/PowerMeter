@@ -175,7 +175,11 @@ export default function Personaggi({ t, settings, save, run, go }: PageProps) {
               key={c.id}
               className="chCharCard"
               aria-label={c.name}
+              // Bug 4: a click anywhere on the card opens the character's build; its own controls keep their action.
+              // Keyboard users reach the same through the name button.
+              onClick={(e) => !(e.target as HTMLElement).closest("button,select,input,a,label") && openBuild({ t: OWN_BUILD, au: c.name, cls: c.cls, own: true, char: c.id }, go)}
               style={{
+                cursor: "pointer",
                 background: "var(--pm-s1)",
                 border: `1px solid ${isActive ? "var(--pm-red)" : "var(--pm-line)"}`,
                 borderRadius: 8,

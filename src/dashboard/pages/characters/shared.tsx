@@ -36,6 +36,17 @@ export function readMyBuilds(json?: string): BuildSrc[] {
     return []; // missing or hand-edited: no builds of your own yet
   }
 }
+/** Level and gear of each build, by title: settings["pm.buildData"]. Gear: slot → archive item id + enhancement level. */
+export const BUILD_DATA_KEY = "pm.buildData";
+export type BuildData = { lvl?: number; gear?: Record<string, { id: string; enh: number }> };
+export function readBuildData(json?: string): Record<string, BuildData> {
+  try {
+    const v = JSON.parse(json ?? "");
+    return v && typeof v === "object" && !Array.isArray(v) ? v : {};
+  } catch {
+    return {}; // missing or hand-edited
+  }
+}
 /** A deleted build open in the builder: the builder reopens on its default build. */
 export function closeBuild(title: string) {
   if ((mem.bSrc as BuildSrc | undefined)?.t === title) delete mem.bSrc;

@@ -639,3 +639,56 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
+
+const STAT_NAMES_SQL: &str = "SELECT stat_key, name, percent, json_extract(data_json, '$.group') AS grp FROM stat_dictionary ORDER BY name";
+const BASE_STATS_SQL: &str = "SELECT level, stats_json FROM class_base_stats WHERE class = ?1 ORDER BY level";
+const BUDGETS_SQL: &str = "SELECT budgets_json FROM class_board_budgets WHERE class = ?1";
+const SKILL_DAMAGE_SQL: &str = "SELECT skill_id, name, attack_ratio_min_percent, attack_ratio_max_percent, flat_min, flat_max, hits, cooldown_ms
+     FROM skill_coefficients WHERE class = ?1 ORDER BY name";
+
+/// What the Character Builder and the Daevanion Planner compute with for one class (`assassin`, ...):
+/// stat names, base stats per level, Daevanion budgets (null when the archive has none), skill damage coefficients.
+#[tauri::command]
+pub fn gamedata_builder(state: tauri::State<'_, AppState>, class: String) -> Result<Value, String> {
+    if class.is_empty() || !class.bytes().all(|b| b.is_ascii_lowercase()) {
+        return Err("invalid class".into());
+    }
+    let gd = &state.gamedata;
+    let budgets = gd.query(BUDGETS_SQL, &[&class])?.into_iter().next().map_or(Value::Null, |r| r["budgets_json"].clone());
+    Ok(json!({
+        "stats": gd.query(STAT_NAMES_SQL, &[])?,
+        "base": gd.query(BASE_STATS_SQL, &[&class])?,
+        "budgets": budgets,
+        "skills": gd.query(SKILL_DAMAGE_SQL, &[&class])?,
+    }))
+}
+
+#[cfg(test)]
+mod builder_tests {
+    use super::*;
+
+    #[test]
+    fn builder_sql_matches_archive_tables() {
+        let c = Connection::open_in_memory().unwrap();
+        c.execute_batch(
+            "CREATE TABLE stat_dictionary (dataset_id TEXT, stat_key TEXT, name TEXT, percent INTEGER, data_json TEXT);
+             CREATE TABLE class_base_stats (dataset_id TEXT, class TEXT, level INTEGER, stats_json TEXT);
+             CREATE TABLE class_board_budgets (dataset_id TEXT, class TEXT, budgets_json TEXT);
+             CREATE TABLE skill_coefficients (dataset_id TEXT, skill_id TEXT, class TEXT, name TEXT, attack_ratio_min_raw INTEGER,
+               attack_ratio_max_raw INTEGER, attack_ratio_min_percent REAL, attack_ratio_max_percent REAL, flat_min INTEGER, flat_max INTEGER,
+               hits INTEGER, cooldown_ms INTEGER, mp_cost INTEGER, range_cm INTEGER, effect TEXT, has_unresolved_values INTEGER,
+               damage_json TEXT, variants_json TEXT);
+             INSERT INTO stat_dictionary VALUES ('g', 'HPMax', 'HP', 0, '{\"group\":\"BookMark\"}');
+             INSERT INTO class_base_stats VALUES ('g', 'templar', 1, '{\"HPMax\":100}');
+             INSERT INTO class_board_budgets VALUES ('g', 'templar', '{\"DaevanionCrystal\":840}');
+             INSERT INTO skill_coefficients (skill_id, class, name, cooldown_ms) VALUES ('1', 'templar', 'Strike', 1000);",
+        )
+        .unwrap();
+        let one = |sql: &str, p: &[&dyn ToSql]| c.prepare(sql).unwrap().query_map(params_from_iter(p.iter()), |_| Ok(())).unwrap().count();
+        assert_eq!(one(STAT_NAMES_SQL, &[]), 1);
+        assert_eq!(one(BASE_STATS_SQL, &[&"templar"]), 1);
+        assert_eq!(one(BUDGETS_SQL, &[&"templar"]), 1);
+        assert_eq!(one(SKILL_DAMAGE_SQL, &[&"templar"]), 1);
+        assert_eq!(one(SKILL_DAMAGE_SQL, &[&"cleric"]), 0);
+    }
+}

@@ -1,15 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeftIcon,
   CaretDownIcon,
   ChatCircleIcon,
   CopyIcon,
+  DatabaseIcon,
   FloppyDiskIcon,
+  GraphIcon,
+  HeartIcon,
   LightningIcon,
+  MagnifyingGlassIcon,
   PencilSimpleIcon,
   PlusCircleIcon,
   PlusIcon,
   ShareNetworkIcon,
+  TShirtIcon,
   TextAlignLeftIcon,
   TrashIcon,
   XIcon,
@@ -18,18 +23,59 @@ import { REGIONS } from "../Onboarding";
 import { classSkills, planClass, SkillIcon } from "../skills";
 import { art, ClassAvatar, CLASSES, FactionTag } from "../ui";
 import { activeId, readCharacters } from "../characters";
-import { BUILD_TAGS, closeBuild, DANGER, DeleteBuildModal, MY_BUILDS_KEY, OWN_BUILD, readMyBuilds, useMem, useToast, type BuildSrc } from "./characters/shared";
-import States from "./shared/States";
+import type { BuilderData, EnhancementGroup, EnhancementValue, GearPiece, PlannerBoardData } from "../../data/db/types";
+import { boardMax, buildStats, estimates, planTotals, plannerNodes, PLAN_KEY, readPlans, savedNodes, statValue, type Equipped } from "./characters/calc";
+import {
+  BUILD_DATA_KEY,
+  BUILD_TAGS,
+  closeBuild,
+  DANGER,
+  DeleteBuildModal,
+  MY_BUILDS_KEY,
+  OWN_BUILD,
+  readBuildData,
+  readMyBuilds,
+  SectionHead,
+  useMem,
+  useToast,
+  type BuildData,
+  type BuildSrc,
+} from "./characters/shared";
+import { onePerPiece } from "./gearviewer";
+import { DataState, GameIcon, gd, gradeColor, openEntry, useGd, useIcons } from "./world/db";
 import { ShareModal } from "./shared/ShareModal";
 import { Modal } from "./system/Modal";
 import type { PageProps } from "./types";
 
-// Equipment, stats and Gear Score wait for official game data (States, left column).
 const TABS = [
+  ["equip", TShirtIcon],
   ["skills", LightningIcon],
+  ["daev", GraphIcon],
   ["desc", TextAlignLeftIcon],
   ["comm", ChatCircleIcon],
 ] as const;
+
+// Equipment slots: id → item slots of the archive it accepts. Brawler gauntlets left out (class not out yet).
+const WEAPONS = ["Sword", "Dagger", "Mace", "Greatsword", "Staff", "Bow", "Magicbook", "Orb"];
+const SLOT_GROUPS: [group: string, slots: [id: string, accepts: string[]][]][] = [
+  ["weapons", [["weapon", WEAPONS], ["offhand", ["Guarder", "Sword", "Dagger"]]]],
+  ["armors", ["Helmet", "Shoulder", "Torso", "Pants", "Gloves", "Boots", "Belt", "Cape"].map((s) => [s, [s]])],
+  ["accessories", [["Necklace", ["Necklace"]], ["Earring 1", ["Earring"]], ["Earring 2", ["Earring"]], ["Ring 1", ["Ring"]], ["Ring 2", ["Ring"]], ["Bracelet", ["Bracelet"]], ["Amulet", ["Amulet"]], ["Rune", ["Rune"]]]],
+  ["arcana", ["ArcanaBell", "ArcanaCompass", "ArcanaGrail", "ArcanaMirror", "ArcanaParchment"].map((s) => [s, [s]])],
+];
+const SLOTS = SLOT_GROUPS.flatMap(([, list]) => list);
+type Gear = NonNullable<BuildData["gear"]>;
+/** The level the builder starts at when the build has none saved. */
+const DEFAULT_LEVEL = 45;
+
+/** Published enhancement bonuses of an item (first group; never extrapolated past max_published_level). */
+async function enhancementOf(id: string): Promise<EnhancementValue[]> {
+  const g = (await gd.rows<EnhancementGroup>("item_enhancement_groups", "item_code", id))[0];
+  if (!g?.enchant_group) return [];
+  const max = g.max_published_level ?? 0;
+  const rows = await gd.rows<EnhancementValue>("enhancement_values", "enchant_group", g.enchant_group);
+  return rows.filter((v) => v.status === "published" && v.value_kind === "enhancement_bonus" && v.level >= 1 && v.level <= max && v.value_raw != null);
+}
 
 // Prototype pg.builder (pBuilder + pX + pBRO).
 export default function Builder({ t, lang, name, go, onError, setHeader, settings, save: saveSetting }: PageProps) {
@@ -57,6 +103,42 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const [draft, setDraft] = useState({ of: "", v: "" });
   const nameField = draft.of === src.t ? draft.v : src.t;
   const [toast, showToast] = useToast();
+
+  // Level and gear of this build: saved in pm.buildData, edited here until Save (one build at a time).
+  const allData = readBuildData(settings[BUILD_DATA_KEY]);
+  const saved = allData[src.t] ?? {};
+  const charLevel = chars.find((c) => c.id === (src.char ?? activeId(settings, chars)))?.level;
+  const [edit, setEdit] = useMem<{ t: string; lvl: number; gear: Gear } | null>("bEdit", null);
+  const cur = edit?.t === src.t ? edit : { t: src.t, lvl: saved.lvl ?? charLevel ?? DEFAULT_LEVEL, gear: saved.gear ?? {} };
+  const update = (p: Partial<typeof cur>) => setEdit({ ...cur, ...p });
+  const storeData = (title: string, from?: string) => {
+    const next = { ...allData, [title]: { lvl: cur.lvl, gear: cur.gear } };
+    if (from !== undefined && from !== title) delete next[from];
+    setEdit({ ...cur, t: title });
+    saveSetting(BUILD_DATA_KEY, JSON.stringify(next)).catch(onError);
+  };
+  const [slot, setSlot] = useMem("bSlot", "weapon");
+
+  const clsKey = src.cls.toLowerCase(); // archive class names: the app's, lowercase
+  const pieces = useGd(gd.gear, "gear");
+  const calcData = useGd(() => gd.builder(clsKey), clsKey);
+  const planner = useGd(() => gd.planner(clsKey), clsKey);
+  const ids = [...new Set(Object.values(cur.gear).map((g) => g.id))].sort();
+  const enh = useGd(() => Promise.all(ids.map(enhancementOf)).then((l) => Object.fromEntries(ids.map((id, i) => [id, l[i]]))), ids.join("|"));
+  const byId = useMemo(() => new Map((pieces.data ?? []).map((p) => [p.id, p])), [pieces.data]);
+  const equipped: (Equipped & { slot: string })[] = Object.entries(cur.gear).flatMap(([s, g]) => {
+    const piece = byId.get(g.id);
+    if (!piece) return [];
+    const bonus = (enh.data?.[g.id] ?? []).filter((v) => v.level === g.enh).map((v) => [v.stat_key, statValue(v.value_raw!, v.percent === 1)] as [string, number]);
+    return [{ slot: s, piece, enh: g.enh, bonus }];
+  });
+  const nodes = useMemo(() => (planner.data ? plannerNodes(planner.data) : []), [planner.data]);
+  const plan = useMemo(() => planTotals(nodes, savedNodes(readPlans(settings[PLAN_KEY]), src.cls)), [nodes, settings[PLAN_KEY], src.cls]); // eslint-disable-line react-hooks/exhaustive-deps
+  const totals = calcData.data ? buildStats(calcData.data, cur.lvl, equipped, plan) : {};
+  const est = calcData.data && estimates(totals, calcData.data.skills);
+  const levels = calcData.data?.base.map((b) => b.level) ?? [];
+  const icons = useIcons(equipped.map((e) => e.piece.icon));
+  const maxByBoard = useMemo(() => boardMax(nodes), [nodes]);
 
   const isNew = !!src.isNew;
   // Created or cloned here: renamable and deletable (the default own build is neither).
@@ -86,6 +168,7 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
     const copy = (base.endsWith(copySuffix) ? base.slice(0, -copySuffix.length) : base) + copySuffix;
     const mine = { t: copy, au: name, cls: src.cls, own: true, tags: src.tags };
     addMine(mine);
+    storeData(copy);
     setSrc(mine);
   };
   const save = () => {
@@ -98,17 +181,21 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
     if (isNew) {
       const mine = { t: typed, au: name, cls: src.cls, own: true, tags: newTags };
       addMine(mine);
+      storeData(typed);
       setSrc(mine);
     } else if (isMine && typed !== src.t) {
       // Rename: same place in "Your builds".
       const renamed = { ...src, t: typed };
       saveSetting(MY_BUILDS_KEY, JSON.stringify(myBuilds.map((x) => (x.t === src.t ? renamed : x)))).catch(onError);
+      storeData(typed, src.t);
       setSrc(renamed);
-    }
+    } else storeData(src.t);
   };
   /** Delete this build of yours (after the modal) and go back to the list. */
   const remove = () => {
     closeBuild(src.t);
+    const { [src.t]: _gone, ...rest } = allData; // eslint-disable-line @typescript-eslint/no-unused-vars
+    saveSetting(BUILD_DATA_KEY, JSON.stringify(rest)).catch(onError);
     saveSetting(MY_BUILDS_KEY, JSON.stringify(myBuilds.filter((x) => x.t !== src.t))).catch(onError);
     go("builds");
   };
@@ -125,9 +212,14 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
           <ClassAvatar cls={src.cls} size={22} />
           {src.cls}
         </span>
-        {/* No comment system yet, so there are none to count. */}
-        <span style={{ fontSize: 12, color: "var(--pm-t3)" }} aria-label={t("characters.builder.comments", { n: 0 })}>
-          <ChatCircleIcon aria-hidden="true" style={{ verticalAlign: "-2px" }} /> 0
+        {/* No likes or comment system yet, so there are none to count. */}
+        <span style={{ fontSize: 12, color: "var(--pm-t3)", display: "flex", gap: 10 }}>
+          <span aria-label={t("planner.builder.likes", { n: 0 })}>
+            <HeartIcon aria-hidden="true" style={{ verticalAlign: "-2px" }} /> 0
+          </span>
+          <span aria-label={t("characters.builder.comments", { n: 0 })}>
+            <ChatCircleIcon aria-hidden="true" style={{ verticalAlign: "-2px" }} /> 0
+          </span>
         </span>
         <div style={{ flex: 1 }} />
         <button type="button" className="btn sm" onClick={clone}>
@@ -264,11 +356,53 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
               </div>
             )}
           </div>
+          <div style={{ flex: 1 }} />
+          <label className="field" style={{ margin: 0, minWidth: 90 }}>
+            {t("planner.builder.level")}
+            <select className="input sm" value={cur.lvl} onChange={(e) => update({ lvl: Number(e.target.value) })} disabled={!levels.length}>
+              {(levels.length ? levels : [cur.lvl]).map((l) => (
+                <option key={l} value={l}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Estimate t={t} lang={lang} label="Combat Power" value={est?.cp} help={t("planner.builder.cpHelp")} big />
+          <Estimate t={t} lang={lang} label="DPS" value={est?.dps} help={t("planner.builder.dpsHelp")} />
         </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.2fr) minmax(380px,1fr)", gap: 12, alignItems: "start" }}>
-        <States t={t} />
+        {!pieces.data || !calcData.data ? (
+          <DataState t={t} error={pieces.error ?? calcData.error} retry={() => (pieces.retry(), calcData.retry())} />
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
+            {SLOT_GROUPS.map(([group, list]) => (
+              <section key={group} className="bSlots">
+                <SectionHead title={t(`planner.builder.group.${group}`)} style={{ marginBottom: 10 }} />
+                <div className="bSlotGrid">
+                  {list.map(([id]) => {
+                    const e = equipped.find((x) => x.slot === id);
+                    return (
+                      <button key={id} type="button" className="chBtnReset bSlot" aria-pressed={slot === id} onClick={() => (setSlot(id), setTab("equip"))}>
+                        <GameIcon url={e?.piece.icon ? icons[e.piece.icon] : undefined} grade={e?.piece.grade} size={38} glyph={<span />} />
+                        <span style={{ minWidth: 0, flex: 1 }}>
+                          <span style={{ fontSize: 10, color: "var(--pm-t3)", display: "flex", gap: 6 }}>
+                            <span style={{ flex: 1 }}>{slotLabel(t, id)}</span>
+                            {e && e.enh > 0 && <span className="mono" style={{ color: "var(--pm-t1)" }}>+{e.enh}</span>}
+                          </span>
+                          <span style={{ display: "block", fontSize: 12, color: e ? gradeColor(e.piece.grade) : "var(--pm-t3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {e ? (e.piece.name ?? e.piece.id) : t("planner.builder.empty")}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
         <div style={{ background: "var(--pm-s1)", border: "1px solid var(--pm-line)", borderRadius: 8, minWidth: 0, display: "flex", position: "sticky", top: 0 }}>
           <div role="tablist" aria-orientation="vertical" style={{ width: 48, flex: "none", borderRight: "1px solid var(--pm-line)", display: "flex", flexDirection: "column", gap: 4, padding: "8px 6px" }}>
             {TABS.map(([id, Icon]) => {
@@ -281,6 +415,43 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
             })}
           </div>
           <div role="tabpanel" style={{ flex: 1, minWidth: 0 }}>
+            {tab === "equip" && (
+              <EquipPanel
+                t={t}
+                lang={lang}
+                slot={slot}
+                pieces={pieces.data ?? []}
+                equipped={equipped.find((x) => x.slot === slot)}
+                levels={cur.gear[slot] ? enh.data?.[cur.gear[slot].id] : undefined}
+                set={(g) => {
+                  const gear = { ...cur.gear };
+                  if (g) gear[slot] = g;
+                  else delete gear[slot];
+                  update({ gear });
+                }}
+                openItem={(id) => openEntry(go, "item", id)}
+              />
+            )}
+            {tab === "daev" && (
+              <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+                {(planner.data?.boards ?? []).map((b) => {
+                  const d = b.data_json as unknown as PlannerBoardData;
+                  return (
+                    <div key={b.id} style={{ display: "flex", gap: 10, alignItems: "center", minHeight: 34, borderBottom: "1px solid var(--pm-line)" }}>
+                      <span style={{ flex: 1 }}>{d.title}</span>
+                      <span className="mono" style={{ fontSize: 12 }}>
+                        {plan.spent[d.board] ?? 0} / {maxByBoard[d.board] ?? 0}
+                      </span>
+                    </div>
+                  );
+                })}
+                <div>
+                  <button type="button" className="btn sm" onClick={() => go("daevanion")}>
+                    {t("planner.builder.openPlanner")}
+                  </button>
+                </div>
+              </div>
+            )}
             {tab === "skills" && (
               <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                 <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("characters.builder.linkedSkills")}</div>
@@ -321,6 +492,7 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
           </div>
         </div>
       </div>
+      {calcData.data && <StatsPanel t={t} lang={lang} data={calcData.data} totals={totals} />}
       {noClone && (
         <Modal
           width={420}
@@ -351,5 +523,197 @@ function NameTaken({ t }: { t: PageProps["t"] }) {
     <div role="alert" style={{ flexBasis: "100%", paddingLeft: 30, fontSize: 12, color: "var(--pm-redt)" }}>
       {t("characters.builder.nameTaken")}
     </div>
+  );
+}
+
+/** Header figure marked as an estimate (the archive has no Combat Power formula). */
+function Estimate({ t, lang, label, value, help, big }: { t: PageProps["t"]; lang: string; label: string; value?: number; help: string; big?: boolean }) {
+  return (
+    <div title={help} style={{ paddingLeft: 18, borderLeft: "1px solid var(--pm-line)" }}>
+      <div className="kicker" style={{ display: "flex", gap: 6, alignItems: "center" }}>
+        {label}
+        <span className="bEst">{t("planner.builder.estimate")}</span>
+      </div>
+      <div className="mono" style={{ fontSize: big ? 30 : 20, lineHeight: 1.1 }}>
+        {value == null ? <span className="wNd">{t("world.db.nd")}</span> : value.toLocaleString(lang)}
+      </div>
+    </div>
+  );
+}
+
+const slotLabel = (t: PageProps["t"], id: string) => (id === "weapon" || id === "offhand" ? t(`planner.builder.slot.${id}`) : id.replace(/^Arcana/, "Arcana "));
+
+/** Right rail "Equipment" tab: the item in the selected slot, its enhancement level (published levels only) and stats. */
+function EquipPanel({
+  t,
+  lang,
+  slot,
+  pieces,
+  equipped,
+  levels,
+  set,
+  openItem,
+}: {
+  t: PageProps["t"];
+  lang: string;
+  slot: string;
+  pieces: GearPiece[];
+  equipped?: Equipped;
+  levels?: EnhancementValue[];
+  set: (g: { id: string; enh: number } | null) => void;
+  openItem: (id: string) => void;
+}) {
+  const [q, setQ] = useState("");
+  const accepts = SLOTS.find(([id]) => id === slot)?.[1] ?? [];
+  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const list = useMemo(() => onePerPiece(pieces.filter((p) => accepts.includes(p.slot ?? ""))), [pieces, slot]); // eslint-disable-line react-hooks/exhaustive-deps
+  const found = list.filter((p) => words.every((w) => `${p.name ?? ""} ${p.slot ?? ""}`.toLowerCase().includes(w))).slice(0, 30);
+  const p = equipped?.piece;
+  const icons = useIcons([...found.map((x) => x.icon), p?.icon]);
+  const steps = [0, ...new Set((levels ?? []).map((v) => v.level))].sort((a, b) => a - b);
+  const fmt = (v: number) => v.toLocaleString(lang, { maximumFractionDigits: 2 });
+
+  return (
+    <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 16 }}>
+      <div>
+        <div style={{ fontSize: 11, color: "var(--pm-t3)", marginBottom: 6 }}>{t("planner.builder.equipped", { slot: slotLabel(t, slot) })}</div>
+        {p ? (
+          <div style={{ display: "flex", gap: 6 }}>
+            <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, height: 44, padding: "0 8px", borderRadius: 6, border: "1px solid var(--pm-line)", background: "var(--pm-s2)" }}>
+              <GameIcon url={p.icon ? icons[p.icon] : undefined} grade={p.grade} size={30} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ color: gradeColor(p.grade), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name ?? p.id}</div>
+                <div style={{ fontSize: 10, color: "var(--pm-t3)" }}>
+                  {p.grade} · {t("world.db.lv", { n: p.level ?? "-" })}
+                </div>
+              </div>
+            </div>
+            <button type="button" className="chIconBtn" style={{ height: 44, width: 40 }} title={t("planner.builder.remove")} aria-label={t("planner.builder.remove")} onClick={() => set(null)}>
+              <XIcon aria-hidden="true" />
+            </button>
+            <button type="button" className="chIconBtn" style={{ height: 44, width: 40 }} title={t("planner.builder.openDb")} aria-label={t("planner.builder.openDb")} onClick={() => openItem(p.id)}>
+              <DatabaseIcon aria-hidden="true" />
+            </button>
+          </div>
+        ) : (
+          <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{t("planner.builder.empty")}</div>
+        )}
+      </div>
+
+      {p && equipped && (
+        <>
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--pm-t3)", marginBottom: 8 }}>
+              <span>{t("planner.builder.enh")}</span>
+              <span className="mono" style={{ color: "var(--pm-t1)" }}>
+                +{equipped.enh}
+              </span>
+            </div>
+            {steps.length > 1 ? (
+              <div role="group" aria-label={t("planner.builder.enh")} style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                {steps.map((l) => (
+                  <button key={l} type="button" className="wChip mono" style={{ height: 24, padding: "0 8px" }} aria-pressed={l === equipped.enh} onClick={() => set({ id: p.id, enh: l })}>
+                    +{l}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{t("planner.builder.noEnh")}</div>
+            )}
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: "var(--pm-t3)", marginBottom: 6 }}>{t("planner.builder.mainStats")}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "4px 12px", fontSize: 12 }}>
+              {(p.stats_json ?? []).map(([k, label, v, unit], i) => {
+                const b = equipped.bonus.find(([bk]) => bk === k);
+                return (
+                  <span key={k + i} style={{ display: "contents" }}>
+                    <span style={{ color: "var(--pm-t2)" }}>{label ?? k}</span>
+                    <span className="mono">
+                      {v == null ? t("world.db.nd") : fmt(v) + (unit === "percent" ? "%" : "")}
+                      {b && <span style={{ color: "#5FD99A" }}> +{fmt(b[1])}</span>}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
+            <div style={{ fontSize: 11, color: "var(--pm-t3)", marginTop: 8 }}>{t("planner.builder.rolledNote")}</div>
+          </div>
+        </>
+      )}
+
+      <div style={{ borderTop: "1px solid var(--pm-line)", paddingTop: 12 }}>
+        <label className="chSearch" style={{ marginBottom: 6 }}>
+          <MagnifyingGlassIcon aria-hidden="true" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("planner.builder.pick")} aria-label={t("planner.builder.pick")} />
+        </label>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, maxHeight: 320, overflow: "auto" }}>
+          {found.map((x) => (
+            <button key={x.id} type="button" className="chBtnReset bPick" aria-pressed={x.id === p?.id} onClick={() => set({ id: x.id, enh: 0 })}>
+              <GameIcon url={x.icon ? icons[x.icon] : undefined} grade={x.grade} size={24} />
+              <span style={{ flex: 1, minWidth: 0, color: gradeColor(x.grade), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{x.name ?? x.id}</span>
+              <span className="mono" style={{ fontSize: 11, color: "var(--pm-t3)" }}>
+                {x.level != null && t("world.db.lv", { n: x.level })}
+              </span>
+            </button>
+          ))}
+          {found.length === 0 && <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{t("world.db.noResults", { q: q.trim() })}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Bottom "Statistics" panel: every stat the build has, grouped as in the stat dictionary, with a filter. */
+function StatsPanel({ t, lang, data, totals }: { t: PageProps["t"]; lang: string; data: BuilderData; totals: Record<string, number> }) {
+  const [grp, setGrp] = useMem("bStatGrp", "");
+  const [q, setQ] = useState("");
+  const dict = new Map(data.stats.map((s) => [s.stat_key, s]));
+  const rows = Object.entries(totals)
+    .filter(([, v]) => v !== 0)
+    .map(([k, v]) => ({ k, v, d: dict.get(k), g: dict.get(k)?.grp ?? "Other" }));
+  const groups = [...new Set(rows.map((r) => r.g))].sort();
+  const words = q.trim().toLowerCase();
+  const shown = rows.filter((r) => (!grp || r.g === grp) && (r.d?.name ?? r.k).toLowerCase().includes(words));
+  const grpLabel = (g: string) => t(`planner.grp.${g}`);
+  return (
+    <section style={{ marginTop: 12, background: "var(--pm-s1)", border: "1px solid var(--pm-line)", borderRadius: 8, padding: "12px 14px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
+        <h2 style={{ fontWeight: 500, fontSize: 14 }}>{t("planner.builder.stats")}</h2>
+        <div role="group" aria-label={t("planner.builder.stats")} style={{ display: "flex", gap: 5, flexWrap: "wrap", flex: 1 }}>
+          {["", ...groups].map((g) => (
+            <button key={g} type="button" className="wChip" style={{ height: 26, fontSize: 11 }} aria-pressed={grp === g} onClick={() => setGrp(g)}>
+              {g ? grpLabel(g) : t("planner.builder.allGroups")}
+            </button>
+          ))}
+        </div>
+        <label className="chSearch" style={{ width: 200 }}>
+          <MagnifyingGlassIcon aria-hidden="true" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("planner.builder.statsSearch")} aria-label={t("planner.builder.statsSearch")} />
+        </label>
+      </div>
+      {shown.length === 0 && <div style={{ color: "var(--pm-t3)", fontSize: 12 }}>{t("planner.builder.noStats")}</div>}
+      <div style={{ columns: "4 200px", columnGap: 24 }}>
+        {groups
+          .filter((g) => shown.some((r) => r.g === g))
+          .map((g) => (
+            <div key={g} style={{ breakInside: "avoid", marginBottom: 12 }}>
+              <div style={{ fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--pm-redt)", paddingBottom: 4 }}>{grpLabel(g)}</div>
+              {shown
+                .filter((r) => r.g === g)
+                .sort((a, b) => (a.d?.name ?? a.k).localeCompare(b.d?.name ?? b.k))
+                .map((r) => (
+                  <div key={r.k} className="dvRow" style={{ minHeight: 22 }}>
+                    <span>{r.d?.name ?? r.k}</span>
+                    <span className="mono">
+                      {r.v.toLocaleString(lang, { maximumFractionDigits: 2 })}
+                      {r.d?.percent ? "%" : ""}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          ))}
+      </div>
+    </section>
   );
 }

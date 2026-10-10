@@ -463,3 +463,244 @@
     transition: none;
   }
 }
+
+/* Daevanion Planner: boards | grid | totals. Under 1100 px of main column the boards become a row on top. */
+.dvGrid {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr) 260px;
+  gap: 12px;
+  align-items: start;
+}
+.dvTabs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dvTab {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--pm-s1);
+  border: 1px solid var(--pm-line);
+  transition: border-color 150ms ease;
+}
+.dvTab[aria-selected="true"] {
+  background: var(--pm-s3);
+  border-color: var(--pm-red);
+}
+.dvDiamond {
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  border: 1.5px solid var(--pm-line);
+}
+.dvTab[aria-selected="true"] .dvDiamond {
+  border-color: var(--pm-red);
+}
+.dvBar {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--pm-s3);
+}
+.dvBar > span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--pm-red);
+}
+.dvStage {
+  position: relative;
+  border-radius: 10px;
+  border: 1px solid var(--pm-line);
+  background: radial-gradient(circle at 50% 45%, rgba(219, 0, 0, 0.1), transparent 60%), var(--pm-bg);
+  padding: 18px 18px 64px;
+  min-width: 0;
+}
+.dvBoard {
+  position: relative;
+  /* Fits the window height too (1024×600 minimum), never under 360 px. */
+  width: min(100%, 600px, max(360px, 100dvh - 250px));
+  aspect-ratio: 1;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  grid-template-rows: repeat(15, 1fr);
+  gap: 3px;
+}
+.dvBoard > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.dvCell {
+  position: relative;
+  min-width: 0;
+  padding: 0;
+  border-radius: 22%;
+  border: 1px solid color-mix(in srgb, var(--c) 35%, var(--pm-line));
+  background: var(--pm-s2);
+  color: var(--c);
+  font-size: 9px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+}
+.dvCell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dvCell[data-can] {
+  opacity: 1;
+  border: 1px dashed var(--pm-grey);
+}
+.dvCell[data-on] {
+  opacity: 1;
+  border: 1.5px solid var(--c);
+  background: color-mix(in srgb, var(--c) 22%, var(--pm-s2));
+  color: var(--pm-t1);
+}
+.dvCell[data-kind="stat"][data-on] {
+  background: var(--pm-tint);
+}
+.dvCell[aria-disabled="true"] {
+  cursor: default;
+}
+.dvCell[data-pick] {
+  box-shadow: 0 0 0 2px var(--pm-t1);
+}
+.dvCell:focus-visible {
+  outline: 2px solid var(--pm-t1);
+  outline-offset: 1px;
+}
+.dvHint {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  max-width: 260px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--pm-t3);
+}
+.dvLegend {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 2px 12px;
+  font-size: 11px;
+  color: var(--pm-t3);
+}
+.dvLegend > span > span {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  border: 1.5px solid;
+}
+.dvSide {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.dvDonut {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(#db0000 var(--p), var(--pm-s3) 0);
+  display: grid;
+  place-items: center;
+}
+.dvDonut > div {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--pm-s1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.dvRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 24px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--pm-line);
+}
+.dvRow > span:first-child {
+  flex: 1;
+  min-width: 0;
+  color: var(--pm-t2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@container main (max-width: 1100px) {
+  .dvGrid { grid-template-columns: minmax(0, 1fr) 240px; }
+  .dvTabs { grid-column: 1 / -1; flex-direction: row; }
+  .dvTab { flex: 1; min-width: 0; }
+}
+
+/* Character Builder: equipment slots (prototype slotGroups), item picker, "estimate" tag. */
+.bSlots {
+  background: var(--pm-s1);
+  border: 1px solid var(--pm-line);
+  border-radius: 8px;
+  padding: 12px;
+}
+.bSlotGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+  gap: 8px;
+}
+.bSlot {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--pm-s2);
+  border: 1px solid var(--pm-line);
+  transition: border-color 150ms ease;
+}
+.bSlot[aria-pressed="true"] {
+  border-color: var(--pm-red);
+}
+.bPick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 8px;
+  border-radius: 6px;
+}
+.bPick[aria-pressed="true"] {
+  background: var(--pm-s3);
+}
+@media (hover: hover) and (pointer: fine) {
+  .bSlot:hover { border-color: var(--pm-grey); }
+  .bSlot[aria-pressed="true"]:hover { border-color: var(--pm-red); }
+  .bPick:hover { background: var(--pm-s3); }
+}
+.bEst {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--pm-grey);
+  color: var(--pm-t2);
+}

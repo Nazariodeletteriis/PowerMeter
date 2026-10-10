@@ -178,3 +178,45 @@ export interface GearPiece {
   max_enh: number | null;
   stats_json: [key: string, label: string | null, value: number | null, unit: string][];
 }
+
+/** data_json of a daevanion_node record ("None" kind = empty grid cell, kept for the layout). */
+export interface PlannerNodeData {
+  id: number;
+  board: number;
+  row: number;
+  col: number;
+  rarity: string;
+  kind: "Start" | "Stat" | "SkillLevel" | "None" | string;
+  cost: number;
+  title?: string;
+  /** Stat key, or the skill id on SkillLevel nodes. */
+  stat?: string;
+  value?: string;
+  stats?: { stat: string; value: string }[];
+  skillIcon?: string;
+}
+/** data_json of a daevanion_board record. */
+export interface PlannerBoardData {
+  board: number;
+  title: string;
+  unlockLevel: number | null;
+  pointType: string;
+}
+
+/** gamedata_builder(class): `percent` stats have raw values ×100. */
+export interface BuilderData {
+  stats: { stat_key: string; name: string | null; percent: 0 | 1; grp: string | null }[];
+  base: { level: number; stats_json: Record<string, number> }[];
+  /** Points per point type (DaevanionCrystal, BattleCrystal, ...); null when not in the archive. */
+  budgets: Record<string, number> | null;
+  skills: {
+    skill_id: string;
+    name: string | null;
+    attack_ratio_min_percent: number | null;
+    attack_ratio_max_percent: number | null;
+    flat_min: number | null;
+    flat_max: number | null;
+    hits: number | null;
+    cooldown_ms: number | null;
+  }[];
+}

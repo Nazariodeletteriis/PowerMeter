@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { ArrowLeftIcon, CaretLeftIcon, CaretRightIcon, CloudArrowDownIcon, CubeIcon, MagnifyingGlassIcon, WarningIcon } from "@phosphor-icons/react";
-import type { Category, CategoryCount, Dungeon, DungeonBoss, GameRecord, GearPiece, IconUrls, ListRow, MonsterDrop, SearchHit } from "../../../data/db/types";
+import type { BuilderData, Category, CategoryCount, Dungeon, DungeonBoss, GameRecord, GearPiece, IconUrls, ListRow, MonsterDrop, Planner, SearchHit } from "../../../data/db/types";
 import type { T } from "../../i18n";
 import { EmptyState } from "../../ui";
 import type { PageProps } from "../types";
@@ -20,6 +20,8 @@ export const gd = {
   drops: (monsterId: string) => invoke<MonsterDrop[]>("gamedata_monster_drops", { monsterId }),
   dungeons: () => invoke<{ dungeons: Dungeon[]; bosses: DungeonBoss[] }>("gamedata_dungeons"),
   gear: () => invoke<GearPiece[]>("gamedata_gear"),
+  planner: (cls: string) => invoke<Planner>("gamedata_planner", { class: cls }),
+  builder: (cls: string) => invoke<BuilderData>("gamedata_builder", { class: cls }),
   sync: () => invoke("gamedata_sync"),
 };
 
