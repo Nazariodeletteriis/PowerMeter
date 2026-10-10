@@ -284,3 +284,279 @@
   color: var(--pm-t3);
   cursor: default;
 }
+
+/* ---------- database (prototype pg.database / pg.item) ---------- */
+.wDbHint {
+  color: var(--pm-t2);
+  margin: -8px 0 14px;
+}
+.wDbSearch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  padding: 0 16px;
+  border: 1px solid var(--pm-line);
+  border-radius: 10px;
+  background: var(--pm-s1);
+  margin-bottom: 22px;
+  max-width: 720px;
+  box-shadow: 0 0 40px rgba(219, 0, 0, 0.08);
+}
+.wDbSearch > svg {
+  font-size: 22px;
+  color: var(--pm-t3);
+}
+.wDbSearch input {
+  flex: 1;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--pm-t1);
+  font-size: 17px;
+  outline: none;
+}
+.wDbSearch:focus-within {
+  /* Not in the prototype: its input has no focus style (a11y). */
+  border-color: var(--pm-red);
+}
+/* The same box as a list filter. */
+.wDbSearch.sm {
+  flex: 1;
+  height: 40px;
+  margin: 0;
+  box-shadow: none;
+  border-radius: 8px;
+}
+.wDbSearch.sm > svg {
+  font-size: 17px;
+}
+.wDbSearch.sm input {
+  font-size: 14px;
+}
+.wDbCats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+.wDbCat {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--pm-s1);
+  border: 1px solid var(--pm-line);
+}
+.wDbCat:hover {
+  border-color: var(--pm-red);
+}
+.wDbCat .ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--pm-s3);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  color: var(--pm-t1);
+}
+.wChip {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 14px;
+  border: 1px solid var(--pm-line);
+  background: transparent;
+  color: var(--pm-t2);
+  cursor: pointer;
+  font-size: 12px;
+}
+.wChip[aria-pressed="true"] {
+  border-color: var(--pm-red);
+  color: var(--pm-t1);
+}
+.wDbRow {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1.5fr) minmax(0, 1fr) 60px 80px;
+  gap: 12px;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 6px;
+  border-bottom: 1px solid var(--pm-line);
+}
+.wDbRow:hover {
+  background: var(--pm-s2);
+}
+/* Game icon on a square outlined in the grade color (--c). */
+.wIc {
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  border: 1.5px solid var(--c);
+  background: radial-gradient(circle, color-mix(in srgb, var(--c) 13.3%, transparent), var(--pm-s2));
+  color: var(--pm-t3);
+  overflow: hidden;
+}
+.wIc img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.wIc > svg {
+  width: 55%;
+  height: 55%;
+}
+.wPager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+.wLabel {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pm-t3);
+  margin: 0 0 8px;
+  font-weight: 400;
+}
+.wTag {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--pm-s3);
+}
+.wNd {
+  color: var(--pm-t3);
+  font-style: italic;
+}
+.wLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  font-size: 13px;
+}
+.wLinkName {
+  flex: 1;
+  min-width: 0;
+}
+button.wLinkName:hover span {
+  text-decoration: underline;
+}
+/* Key/value pairs of a record (two columns). */
+.wFacts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 14px;
+  font-size: 13px;
+}
+.wFacts > :nth-child(odd) {
+  color: var(--pm-t2);
+}
+/* Data table inside a card (enhancement levels, drops, skill levels). */
+.wTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.wTable th {
+  font-weight: 400;
+  color: var(--pm-t3);
+  text-align: right;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--pm-line);
+}
+.wTable td {
+  padding: 5px 8px;
+  text-align: right;
+  font-family: var(--pm-mono);
+  border-bottom: 1px solid var(--pm-line);
+}
+.wTable :is(th, td):first-child {
+  text-align: left;
+}
+.wTableWrap {
+  overflow-x: auto;
+}
+.wTwo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.wStack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Monster spawn regions on the map modal: the region's zone border, filled. */
+.wWorld polygon.on {
+  fill: var(--pm-red);
+  fill-opacity: 0.28;
+  stroke: var(--pm-redt);
+  stroke-opacity: 1;
+  stroke-width: 2;
+}
+.wMapModal .wMap {
+  height: min(62vh, 560px);
+  min-height: 300px;
+}
+
+/* ---------- gear viewer ---------- */
+.gvTableWrap {
+  padding: 0;
+  overflow: auto;
+  max-height: calc(100vh - 290px);
+  min-height: 240px;
+}
+.gvTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.gvTable th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--pm-s1);
+  font-weight: 400;
+  color: var(--pm-t3);
+  padding: 8px;
+  border-bottom: 1px solid var(--pm-line);
+  white-space: nowrap;
+}
+.gvTable td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--pm-line);
+  white-space: nowrap;
+}
+.gvTable tr:hover td {
+  background: var(--pm-s2);
+}
+.gvNum {
+  text-align: right;
+  font-family: var(--pm-mono);
+}
+.gvSort {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.gvItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 220px;
+}

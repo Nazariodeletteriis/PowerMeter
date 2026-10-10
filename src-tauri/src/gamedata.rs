@@ -357,6 +357,125 @@ pub fn gamedata_planner(state: tauri::State<'_, AppState>, class: String) -> Res
     }))
 }
 
+const EVENTS_SQL: &str = "SELECT event_id, category, name, timezone, duration_minutes, cadence_json, location, server_verified
+     FROM events ORDER BY event_id";
+
+/// Event timer rules (Asia/Seoul times; the page shows them in local time).
+#[tauri::command]
+pub fn gamedata_events(state: tauri::State<'_, AppState>) -> Result<Vec<Value>, String> {
+    state.gamedata.query(EVENTS_SQL, &[])
+}
+
+/// How many records each category has.
+#[tauri::command]
+pub fn gamedata_counts(state: tauri::State<'_, AppState>) -> Result<Vec<Value>, String> {
+    state.gamedata.query("SELECT category, count(*) AS n FROM records GROUP BY category", &[])
+}
+
+/// Every record of one category with the few fields a list row shows (null when the category has none).
+const LIST_SQL: &str = "SELECT id, name,
+       coalesce(json_extract(data_json, '$.item.grade'), json_extract(data_json, '$.recipe.output.grade')) AS grade,
+       coalesce(json_extract(data_json, '$.item.level'), json_extract(data_json, '$.monster.level'),
+                json_extract(data_json, '$.quest.level'), json_extract(data_json, '$.recipe.output.level')) AS level,
+       coalesce(json_extract(data_json, '$.item.slot'), json_extract(data_json, '$.item.type'),
+                json_extract(data_json, '$.monster.subType'), json_extract(data_json, '$.quest.category'),
+                json_extract(data_json, '$.categoryLabel'), json_extract(data_json, '$.class_name')) AS kind,
+       coalesce(json_extract(data_json, '$.item.icon'), json_extract(data_json, '$.recipe.output.icon'),
+                json_extract(data_json, '$.icon')) AS icon
+     FROM records WHERE category = ?1 ORDER BY name, id";
+
+#[tauri::command]
+pub fn gamedata_list(state: tauri::State<'_, AppState>, category: String) -> Result<Vec<Value>, String> {
+    state.gamedata.query(LIST_SQL, &[&category])
+}
+
+/// Child tables the pages read by one key. Names go into the SQL text, so only these pairs are allowed.
+const ROWS: &[(&str, &str)] = &[
+    ("item_stats", "item_code"),
+    ("item_enhancement_groups", "item_code"),
+    ("enhancement_values", "enchant_group"),
+    ("monster_regions", "monster_id"),
+    ("quest_item_rewards", "quest_id"),
+    ("quest_currency_rewards", "quest_id"),
+    ("splendent_recipes", "recipe_id"),
+    ("skill_coefficients", "skill_id"),
+    ("skill_effects", "skill_id"),
+];
+
+fn rows_sql(table: &str, column: &str) -> Option<String> {
+    ROWS.iter()
+        .any(|&(t, c)| t == table && c == column)
+        .then(|| format!("SELECT * FROM {table} WHERE {column} = ?1 ORDER BY rowid"))
+}
+
+/// Rows of a child table for one key, in archive order (e.g. `item_stats` of `item_code`).
+#[tauri::command]
+pub fn gamedata_rows(state: tauri::State<'_, AppState>, table: String, column: String, value: String) -> Result<Vec<Value>, String> {
+    let sql = rows_sql(&table, &column).ok_or("table not readable")?;
+    state.gamedata.query(&sql, &[&value])
+}
+
+/// All dungeons with their bosses (the dungeon list shows every entry).
+#[tauri::command]
+pub fn gamedata_dungeons(state: tauri::State<'_, AppState>) -> Result<Value, String> {
+    let gd = &state.gamedata;
+    Ok(json!({
+        "dungeons": gd.query("SELECT * FROM dungeons ORDER BY name, dungeon_id", &[])?,
+        "bosses": gd.query("SELECT * FROM dungeon_bosses ORDER BY dungeon_id, boss_index", &[])?,
+    }))
+}
+
+/// Equipment with its fixed (not rolled) stats and the highest published enhancement level.
+#[tauri::command]
+pub fn gamedata_gear(state: tauri::State<'_, AppState>) -> Result<Vec<Value>, String> {
+    state.gamedata.query(
+        "SELECT r.id, r.name,
+                json_extract(r.data_json, '$.item.slot') AS slot, json_extract(r.data_json, '$.item.grade') AS grade,
+                json_extract(r.data_json, '$.item.level') AS level, json_extract(r.data_json, '$.item.icon') AS icon,
+                (SELECT max(g.max_published_level) FROM item_enhancement_groups g WHERE g.item_code = r.id) AS max_enh,
+                (SELECT json_group_array(json_array(s.stat_key, s.label, s.fixed_display, s.unit))
+                   FROM (SELECT * FROM item_stats WHERE item_code = r.id AND is_rolled = 0 ORDER BY stat_index) s) AS stats_json
+         FROM records r
+         WHERE r.category = 'item' AND json_extract(r.data_json, '$.item.type') = 'Equip'
+         ORDER BY level DESC, r.name, r.id",
+        &[],
+    )
+}
+
+/// Path of the CDN folder on the server (the manifest's `cdn` field).
+const CDN_PATH: &str = "/cdn/";
+
+/// Image URL for game icon names (`Icon_...`). The archive lists images per record, not per icon: an icon gets the
+/// image of a record that shows that icon and has exactly one image (unambiguous). Icons without one are left out.
+#[tauri::command]
+pub fn gamedata_icons(state: tauri::State<'_, AppState>, icons: Vec<String>) -> Result<Value, String> {
+    let icons: Vec<String> = icons.into_iter().filter(|i| !i.is_empty()).take(500).collect();
+    if icons.is_empty() {
+        return Ok(json!({}));
+    }
+    let marks = vec!["?"; icons.len()].join(",");
+    let params: Vec<&dyn ToSql> = icons.iter().map(|i| i as &dyn ToSql).collect();
+    let rows = state.gamedata.query(
+        &format!(
+            "SELECT r.icon, min(a.file) AS file FROM (
+               SELECT coalesce(json_extract(data_json, '$.item.icon'), json_extract(data_json, '$.icon')) AS icon,
+                      'asset_' || substr(json_extract(image_paths_json, '$[0]'), 8, 64) AS asset_id
+               FROM records WHERE json_array_length(image_paths_json) = 1) r
+             JOIN asset_files a ON a.asset_id = r.asset_id
+             WHERE r.icon IN ({marks}) GROUP BY r.icon"
+        ),
+        &params,
+    )?;
+    let base = format!("{}{CDN_PATH}", crate::pm_account::server_url(&state));
+    let mut out = Map::new();
+    for r in rows {
+        if let (Some(icon), Some(file)) = (r["icon"].as_str(), r["file"].as_str()) {
+            out.insert(icon.to_string(), json!(format!("{base}{file}")));
+        }
+    }
+    Ok(Value::Object(out))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -488,6 +607,35 @@ mod tests {
         assert_eq!(gd.apply(&all(&["global_204"])).unwrap(), Vec::<String>::new());
         let r = gd.query("SELECT data_json FROM records WHERE id = ?1", &[&"sword"]).unwrap();
         assert_eq!(r[0]["data_json"], json!({"kind": "item"}));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn page_reads() {
+        let dir = tmp_dir("reads");
+        let gd = Gamedata::new(&dir);
+        let v1 = archive_bytes(&dir, 1);
+        gd.install(&v1, &signed_for(&v1, 1), &all(&["global_204"])).unwrap();
+        {
+            let c = Connection::open(gd.path()).unwrap();
+            c.execute_batch(
+                "CREATE TABLE events (dataset_id TEXT, event_id TEXT, category TEXT, name TEXT, timezone TEXT,
+                   duration_minutes INTEGER, cadence_json TEXT, location TEXT, server_verified INTEGER);
+                 INSERT INTO events VALUES ('events', 'e1', 'field', 'Rift', 'Asia/Seoul', 30, '{\"every\":\"day\"}', NULL, 0);
+                 UPDATE records SET data_json = '{\"item\":{\"grade\":\"Rare\",\"slot\":\"Sword\",\"icon\":\"Icon_SW\"}}';",
+            )
+            .unwrap();
+        }
+        let ev = gd.query(EVENTS_SQL, &[]).unwrap();
+        assert_eq!(ev[0]["name"], "Rift");
+        assert_eq!(ev[0]["cadence_json"], json!({"every": "day"}));
+        assert_eq!(ev[0]["duration_minutes"], 30);
+        let list = gd.query(LIST_SQL, &[&"item"]).unwrap();
+        assert_eq!(list, vec![json!({"id": "sword", "name": "Sword", "grade": "Rare", "level": null, "kind": "Sword", "icon": "Icon_SW"})]);
+        // Only whitelisted table/column pairs reach the SQL text.
+        assert!(rows_sql("monster_regions", "monster_id").is_some());
+        assert!(rows_sql("meta", "key").is_none());
+        assert!(rows_sql("item_stats", "item_code; DROP TABLE records").is_none());
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

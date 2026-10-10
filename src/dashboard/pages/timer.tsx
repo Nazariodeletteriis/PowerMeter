@@ -1,28 +1,51 @@
-import { useEffect, useState } from "react";
-import { BellIcon, DiscordLogoIcon, PlusIcon } from "@phosphor-icons/react";
+import { useEffect, useRef } from "react";
+import { BellIcon, CalendarBlankIcon, DiscordLogoIcon, PlusIcon } from "@phosphor-icons/react";
 import { REGIONS } from "../Onboarding";
-import type { T } from "../i18n";
+import { Card, EmptyState } from "../ui";
 import { nextDailyReset, nextWeeklyReset } from "./organizer/resets";
+import { eventStatus, startsBetween, useGameEvents } from "./organizer/schedule";
+import { clock, countdown, dayLabel, useNow } from "./shugo/events";
 import "./organizer/organizer.css";
+import "./shugo/events.css";
+import "./system/system.css";
 import type { PageProps } from "./types";
 
 const DAY = 86400;
-const pad = (n: number) => String(n).padStart(2, "0");
 
-/** Prototype cd(): "2g 04:20:00", days only when there are any. */
-function countdown(s: number, t: T) {
-  const d = Math.floor(s / DAY);
-  const hms = `${pad(Math.floor((s % DAY) / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
-  return d ? `${t("home.days", { n: d })} ${hms}` : hms;
+const SOUND = "pm.eventSound"; // "1" = the user turned the alert on; off by default
+
+/** Short two-tone chime, no audio file. */
+function chime() {
+  const ctx = new AudioContext();
+  const gain = ctx.createGain();
+  gain.connect(ctx.destination);
+  gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.6);
+  [880, 1320].forEach((hz, i) => {
+    const osc = ctx.createOscillator();
+    osc.frequency.value = hz;
+    osc.connect(gain);
+    osc.start(ctx.currentTime + i * 0.15);
+    osc.stop(ctx.currentTime + 0.6);
+  });
+  setTimeout(() => ctx.close(), 1000);
 }
 
-/** Prototype pg.timer: the two resets (custom timers wait for R5 storage). */
-export default function Timer({ t, settings }: PageProps) {
-  const [now, setNow] = useState(Date.now);
+/** Prototype pg.timer: the two resets (custom timers wait for R5 storage) and the archive's event rules. */
+export default function Timer({ t, lang, settings, save, run, onError }: PageProps) {
+  const now = useNow();
+  const events = useGameEvents(onError);
+  const sound = settings[SOUND] === "1";
+
+  // ponytail: rings only while this page is open; app-wide alerts need the shell.
+  const last = useRef(now);
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
+    if (sound && events && startsBetween(events, last.current, now)) chime();
+    last.current = now;
+  }, [now]);
+
+  const rows = (events ?? []).map((e) => ({ e, ...eventStatus(e, now) })).sort((a, b) => a.window.start - b.window.start);
 
   const region = (REGIONS.find((r) => r.value === settings["pm.region"]) ?? REGIONS[0]).label;
   const left = (to: Date) => Math.max(0, Math.round((to.getTime() - now) / 1000));
@@ -56,7 +79,7 @@ export default function Timer({ t, settings }: PageProps) {
                 </div>
               </div>
               <div className="mono" role="timer" style={{ fontSize: 26, color: soon ? "var(--pm-redt)" : "var(--pm-t1)" }}>
-                {countdown(x.left, t)}
+                {countdown(x.left * 1000, t)}
               </div>
               <div style={{ height: 3, background: "var(--pm-s3)", borderRadius: 2 }}>
                 <div
@@ -67,6 +90,53 @@ export default function Timer({ t, settings }: PageProps) {
           );
         })}
       </div>
+
+      <Card
+        title={t("events.timer.title")}
+        style={{ marginTop: 14, maxWidth: 760 }}
+        aside={
+          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--pm-t2)" }}>
+            {t("events.timer.sound")}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={sound}
+              aria-label={t("events.timer.sound")}
+              className="switch"
+              onClick={() => run(() => save(SOUND, sound ? "0" : "1"))}
+            >
+              <span />
+            </button>
+          </label>
+        }
+      >
+        {events === undefined ? null : rows.length === 0 ? (
+          <EmptyState icon={<CalendarBlankIcon aria-hidden="true" />} title={t("events.timer.emptyTitle")} text={t("events.timer.emptyText")} />
+        ) : (
+          <div className="evList" style={{ marginTop: 8 }}>
+            {rows.map(({ e, window: w, remaining }, i) => (
+              <div key={e.event_id} className="evRow" data-first={i === 0}>
+                <span className="mono">{clock(w.start, lang)}</span>
+                <span>
+                  {e.name}
+                  <small>{[dayLabel(w.start, now, lang), e.location].filter(Boolean).join(" · ")}</small>
+                </span>
+                <span className="evLeft" role="timer">
+                  {w.active ? (
+                    <span className="evState" data-live="true">
+                      <span className="dot" aria-hidden="true" />
+                      {t("events.endsIn")} {countdown(remaining, t)}
+                    </span>
+                  ) : (
+                    countdown(remaining, t)
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="evNote" style={{ marginTop: 8 }}>{t("events.timer.note")}</p>
+      </Card>
     </>
   );
 }

@@ -1,6 +1,7 @@
 import { ClockIcon, CrownSimpleIcon, DoorOpenIcon, ShieldCheckIcon, SwordIcon, UsersThreeIcon } from "@phosphor-icons/react";
 import { REGIONS } from "../Onboarding";
 import { Card } from "../ui";
+import { useGameEvents } from "./organizer/schedule";
 import { HOUR, MIN, clock, countdown, dayLabel, serverHour, serverZone, useNow } from "./shugo/events";
 import "./shugo/events.css";
 import type { PageProps } from "./types";
@@ -12,27 +13,32 @@ import type { PageProps } from "./types";
 // hour in the enemy territory; level 45+, up to 400 players, 70 minutes to switch
 // the PvP/PvE mode again.
 const FIRST_HOUR = 2;
+// When the game data archive is on disk its `spacetime-rift` rule wins (hours in its own zone).
 const PORTAL = 15 * MIN;
-const LEN = HOUR;
 const DAY = 24 * HOUR;
 
-const isRift = (ms: number, zone: string) => serverHour(ms, zone) % 3 === FIRST_HOUR % 3;
+type Rule = { hours: number[]; zone: string } | undefined;
+const isRift = (ms: number, zone: string, rule: Rule) =>
+  rule ? rule.hours.includes(serverHour(ms, rule.zone)) : serverHour(ms, zone) % 3 === FIRST_HOUR % 3;
 
 /** Rift windows still running or ahead, from the current hour on. */
-function upcoming(now: number, zone: string, n: number) {
+function upcoming(now: number, len: number, zone: string, rule: Rule, n: number) {
   const out: number[] = [];
-  for (let h = Math.floor(now / HOUR) * HOUR; out.length < n; h += HOUR) if (isRift(h, zone)) out.push(h);
+  for (let h = Math.floor((now - len) / HOUR) * HOUR; out.length < n; h += HOUR) if (h + len > now && isRift(h, zone, rule)) out.push(h);
   return out;
 }
 
 /** Spacetime Rift: portal state, today's windows on a 24h rail, the next ones and your route. */
-export default function Rift({ t, lang, settings }: PageProps) {
+export default function Rift({ t, lang, settings, onError }: PageProps) {
   const now = useNow();
+  const db = useGameEvents(onError)?.find((e) => e.event_id === "spacetime-rift");
+  const rule: Rule = db?.cadence_json.kind === "hourOfDay" ? { hours: db.cadence_json.hours, zone: db.timezone } : undefined;
+  const LEN = rule && db?.duration_minutes ? db.duration_minutes * MIN : HOUR;
   const regionValue = settings["pm.region"];
   const region = (REGIONS.find((r) => r.value === regionValue) ?? REGIONS[0]).label;
   const zone = serverZone(regionValue);
 
-  const wins = upcoming(now, zone, 9);
+  const wins = upcoming(now, LEN, zone, rule, 9);
   const w = wins[0];
   const state = now < w ? "next" : now < w + PORTAL ? "portal" : "running";
   const target = state === "next" ? w : state === "portal" ? w + PORTAL : w + LEN;
@@ -40,7 +46,7 @@ export default function Rift({ t, lang, settings }: PageProps) {
   // Today's rail: local midnight to midnight, UTC hours so server hours stay whole.
   const midnight = new Date(now).setHours(0, 0, 0, 0);
   const today: number[] = [];
-  for (let h = Math.floor(midnight / HOUR) * HOUR; h < midnight + DAY; h += HOUR) if (h >= midnight && isRift(h, zone)) today.push(h);
+  for (let h = Math.floor(midnight / HOUR) * HOUR; h < midnight + DAY; h += HOUR) if (h >= midnight && isRift(h, zone, rule)) today.push(h);
   const pct = (ms: number) => `${((ms - midnight) / DAY) * 100}%`;
 
   const facts = [
