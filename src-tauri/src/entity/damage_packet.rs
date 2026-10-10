@@ -86,6 +86,6 @@ impl ParsedDamagePacket {
     }
 
     pub fn total_damage(&self) -> i32 {
-        self.damage + self.multi_hit_damage
+        self.damage.saturating_add(self.multi_hit_damage)
     }
 }

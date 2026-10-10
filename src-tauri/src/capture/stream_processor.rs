@@ -1969,7 +1969,7 @@ impl StreamProcessor {
 
             // Extract multi-hits
             let mut multi_hit_count = 0;
-            let mut multi_hit_damage = 0;
+            let mut multi_hit_damage: i32 = 0;
             let mut first_multi_hit_value: Option<i32> = None;
             let mut all_multi_hits_match = true;
 
@@ -2008,7 +2008,8 @@ impl StreamProcessor {
                         _ => {}
                     }
 
-                    multi_hit_damage += hit_value;
+                    // Up to 25 hits of up to ~99M each overflows i32 and wraps negative.
+                    multi_hit_damage = multi_hit_damage.saturating_add(hit_value);
                     hits_read += 1;
                 }
                 multi_hit_count = hits_read;
@@ -2018,7 +2019,7 @@ impl StreamProcessor {
                 if let Some(fv) = first_multi_hit_value {
                     if all_multi_hits_match {
                         multi_hit_count = hit_count;
-                        multi_hit_damage = fv * hit_count;
+                        multi_hit_damage = fv.saturating_mul(hit_count);
                     }
                 }
             }

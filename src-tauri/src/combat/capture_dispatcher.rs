@@ -38,8 +38,8 @@ const COMBAT_SIGNATURES: [&[u8]; 2] = [
 /// so it can no longer hijack the lock. The window (vs. a plain running total) means
 /// only a *high-rate* flow qualifies, not one that slowly drips coincidental matches.
 const SIGNATURE_LOCK_THRESHOLD: u32 = 12;
-/// Sliding window for the signature-rate lock; the THRESHOLD packets must land within
-/// this span. Reset the per-flow count whenever the gap since the last hit exceeds it.
+/// Fixed window for the signature-rate lock; the THRESHOLD packets must land within
+/// this span, counted from the window's first hit.
 const SIGNATURE_WINDOW_MS: i64 = 3_000;
 const TLS_CONTENT_TYPES: [u8; 4] = [0x14, 0x15, 0x16, 0x17];
 const TLS_VERSIONS: [u8; 5] = [0x00, 0x01, 0x02, 0x03, 0x04];
@@ -97,7 +97,7 @@ impl CaptureDispatcher {
         let mut assemblers: HashMap<(u16, u16), (StreamAssembler, StreamProcessor)> = HashMap::new();
         // Per-flow count of signature-bearing packets seen while still unlocked, used
         // for the no-combat-needed signature lock (see SIGNATURE_LOCK_THRESHOLD).
-        // Per-flow signature-rate tracker: (count_in_window, last_hit_ms).
+        // Per-flow signature-rate tracker: (count_in_window, window_start_ms).
         let mut sig_hits: HashMap<(u16, u16), (u32, i64)> = HashMap::new();
         let mut last_window_check_ms: i64 = 0;
         let mut is_aion_running = false;
@@ -215,15 +215,15 @@ impl CaptureDispatcher {
                 // signature only ever travels server->client). The lock decision is
                 // made below, after process_chunk, so we don't touch `assemblers`
                 // while the assembler for this flow is still borrowed.
-                // Windowed signature rate: reset the count if too long since the last
-                // hit, so only a sustained high-rate flow (the live game) accumulates.
+                // Fixed signature window: the count restarts when the window that
+                // opened on its first hit expires, so a slow periodic flow (a launcher
+                // heartbeat on loopback) can never add up to the threshold.
                 let now = now_ms();
                 let slot = sig_hits.entry(key).or_insert((0, now));
                 if now - slot.1 > SIGNATURE_WINDOW_MS {
-                    slot.0 = 0;
+                    *slot = (0, now);
                 }
                 slot.0 += 1;
-                slot.1 = now;
             }
 
             // A flow locks the port only by sustaining the game's signature RATE

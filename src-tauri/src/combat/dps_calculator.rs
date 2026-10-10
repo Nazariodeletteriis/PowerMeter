@@ -867,7 +867,7 @@ impl DpsCalculator {
         let mut targets = Vec::new();
 
         for (&target_id, target_data) in &combat_data {
-            let mut actor_damage: HashMap<i32, i32> = HashMap::new();
+            let mut actor_damage: HashMap<i32, i64> = HashMap::new();
             let canonical = build_nickname_canonical_map_from_aggregates(
                 &target_data.actors.iter().map(|(&id, ad)| (id, ad.total_damage)).collect(),
                 &summon_data,
@@ -880,7 +880,7 @@ impl DpsCalculator {
                 if raw_uid <= 0 { continue; }
                 let nickname = resolve_nickname(raw_uid, &nickname_data, &summon_data);
                 let uid = *canonical.get(&nickname).unwrap_or(&raw_uid);
-                *actor_damage.entry(uid).or_insert(0) += actor_data.total_damage as i32;
+                *actor_damage.entry(uid).or_insert(0) += actor_data.total_damage;
 
                 actor_meta.entry(uid).or_insert_with(|| {
                     (resolve_nickname(uid, &nickname_data, &summon_data), String::new())
@@ -944,7 +944,7 @@ impl DpsCalculator {
                 max_hp: mob_hp_data.get(&target_id).copied().unwrap_or(0),
                 battle_time: (target_data.last_damage_time - target_data.first_damage_time).max(0),
                 last_damage_time: target_data.last_damage_time,
-                total_damage: target_data.total_damage as i32,
+                total_damage: target_data.total_damage,
                 actor_damage,
             });
         }

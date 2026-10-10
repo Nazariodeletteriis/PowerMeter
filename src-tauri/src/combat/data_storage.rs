@@ -378,7 +378,7 @@ impl DataStorage {
             // Track damage received on the player target
             let resolved_target = summon_resolver::resolve(target_id, &inner.summon_storage);
             if inner.known_player_ids.contains(&resolved_target) {
-                let dmg = pdp.total_damage() as i64;
+                let dmg = pdp.total_damage().max(0) as i64;
                 let e = inner
                     .mob_hits
                     .entry(actor_id)
@@ -488,7 +488,8 @@ impl DataStorage {
         if timestamp > target_data.last_damage_time {
             target_data.last_damage_time = timestamp;
         }
-        let total_dmg = pdp.total_damage();
+        // A misread varint can still come out negative: never let it subtract.
+        let total_dmg = pdp.total_damage().max(0);
         target_data.total_damage += total_dmg as i64;
         target_data.last_packet_id = packet_id;
 
@@ -1156,7 +1157,12 @@ fn apply_pending_nickname(inner: &mut Inner, uid: i32) {
 fn is_friendly_action(inner: &Inner, actor_id: i32, target_id: i32) -> bool {
     let resolved_actor = summon_resolver::resolve(actor_id, &inner.summon_storage);
     let resolved_target = summon_resolver::resolve(target_id, &inner.summon_storage);
-    inner.known_player_ids.contains(&resolved_actor) && inner.known_player_ids.contains(&resolved_target)
+    // A named, non-mob target is a player even before it casts its first skill:
+    // otherwise a heal on it at the pull is booked as PvE damage and then lost.
+    let target_is_player = inner.known_player_ids.contains(&resolved_target)
+        || (inner.nickname_storage.contains_key(&resolved_target)
+            && !inner.mob_storage.contains_key(&resolved_target));
+    inner.known_player_ids.contains(&resolved_actor) && target_is_player
 }
 
 /// The local player or a party member (by roster name). Party membership is the
@@ -1294,6 +1300,18 @@ mod pvp_tests {
         hit(&s, FOE, MOB, 10); // FOE identified -> purge runs
         assert!(s.get_pvp_target_ids().contains(&FOE));
         assert_eq!(s.get_combat_snapshot_light()[&FOE].total_damage, 700);
+    }
+
+    #[test]
+    fn heal_on_named_mate_before_its_first_skill_is_a_heal() {
+        let s = DataStorage::new();
+        s.set_local_player_id(Some(ME as i64));
+        s.append_nickname_authoritative(MATE, "Mate");
+        s.set_party_roster(vec![("Mate".to_string(), PartyMember::default())], true);
+        hit(&s, ME, MOB, 10);
+        hit(&s, ME, MATE, 900); // MATE has a name but has not cast yet
+        assert!(!s.get_combat_snapshot_light().contains_key(&MATE));
+        assert_eq!(s.get_heal_snapshot()[&ME][&(SKILL, false)].total_heal, 900);
     }
 
     #[test]
