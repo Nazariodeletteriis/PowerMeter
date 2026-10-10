@@ -8,6 +8,7 @@ pub mod logging;
 pub mod platform;
 pub mod powermeter;
 pub mod pm_account;
+pub mod gamedata;
 
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -61,6 +62,7 @@ pub struct AppState {
     pub npc_lookup: Arc<NpcLookup>,
     pub app_data_dir: std::path::PathBuf,
     pub i18n_data_dir: Option<std::path::PathBuf>,
+    pub gamedata: gamedata::Gamedata,
 }
 
 // ===== TAURI COMMANDS =====
@@ -1486,9 +1488,11 @@ pub fn run() {
                 npc_lookup: npc_lookup.clone(),
                 app_data_dir: app_data_dir.clone(),
                 i18n_data_dir: found_data_dir.clone(),
+                gamedata: gamedata::Gamedata::new(&app_data_dir),
             };
 
             app.manage(state);
+            gamedata::start_sync(app.handle().clone());
             powermeter::open_dashboard_on_start(app.handle());
             powermeter::start_click_through_hotkey(app.handle());
 
@@ -1860,6 +1864,12 @@ pub fn run() {
             pm_account::pm_admin_grant,
             pm_account::pm_admin_revoke,
             pm_account::pm_admin_reset_devices,
+            gamedata::gamedata_sync,
+            gamedata::gamedata_get,
+            gamedata::gamedata_search,
+            gamedata::gamedata_monster_drops,
+            gamedata::gamedata_item_recipes,
+            gamedata::gamedata_planner,
             powermeter::install_npcap,
             powermeter::open_dashboard_window,
             powermeter::show_overlay,

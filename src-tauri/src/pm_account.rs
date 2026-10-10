@@ -29,7 +29,7 @@ const ENTITLEMENT_KEY: &str = "pm.entitlement";
 /// Public half of the server's ENTITLEMENT_KEY: only the server can sign a permit this accepts.
 const PERMIT_PUBLIC_KEY: &str = "d6ebo/vZAEGGK9R5qx+QSe6j5T/FAp67lRO3XshEzTE=";
 
-fn server_url(state: &AppState) -> String {
+pub(crate) fn server_url(state: &AppState) -> String {
     state
         .settings
         .get(SERVER_URL_KEY)
@@ -81,7 +81,8 @@ async fn authed(state: &AppState, method: reqwest::Method, path: &str, body: Opt
 }
 
 /// Payload of a permit (`base64url(json).base64url(ed25519)`) if the server signed it, expired or not.
-fn permit_payload(permit: &str) -> Option<Value> {
+/// The game data manifest uses the same key and format (gamedata.rs tells the two apart by `typ`).
+pub(crate) fn permit_payload(permit: &str) -> Option<Value> {
     let (payload, sig) = permit.split_once('.')?;
     let payload = URL_SAFE_NO_PAD.decode(payload).ok()?;
     let sig = Signature::from_slice(&URL_SAFE_NO_PAD.decode(sig).ok()?).ok()?;
