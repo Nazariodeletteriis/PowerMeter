@@ -20,5 +20,10 @@
   "events.rift.f.capacity": "Up to 400 players",
   "events.rift.f.warMode": "War Mode: choose whether to take part in PvP (70 minutes to switch again)",
   "events.rift.f.activities": "PvP, Sealed Dungeons, quests and Abyss Points",
-  "events.rift.source": "Times in your PC's local time. Schedule from the KR/TW servers (from 02:00 server time, every 3 hours); the {region} server clock is provisional until NC confirms it at the global launch."
+  "events.rift.source": "Times in your PC's local time.",
+  "events.timer.title": "Events",
+  "events.timer.sound": "Sound alert",
+  "events.timer.emptyTitle": "No events yet",
+  "events.timer.emptyText": "The event schedule arrives with the game data download.",
+  "events.timer.note": "Times in your PC's local time, daylight saving included."
 }

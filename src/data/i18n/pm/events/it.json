@@ -20,5 +20,10 @@
   "events.rift.f.capacity": "Fino a 400 giocatori",
   "events.rift.f.warMode": "Modalità Guerra: scegli se partecipare al PvP (70 minuti per cambiare di nuovo)",
   "events.rift.f.activities": "PvP, Sealed Dungeon, missioni e Punti Abisso",
-  "events.rift.source": "Orari nell'ora locale del PC. Orari dei server KR/TW (dalle 02:00 ora server, ogni 3 ore); l'orologio del server {region} è provvisorio finché NC non lo conferma al lancio global."
+  "events.rift.source": "Orari nell'ora locale del tuo PC.",
+  "events.timer.title": "Eventi",
+  "events.timer.sound": "Avviso sonoro",
+  "events.timer.emptyTitle": "Nessun evento per ora",
+  "events.timer.emptyText": "Gli orari degli eventi arrivano con il download dei dati di gioco.",
+  "events.timer.note": "Orari nell'ora locale del tuo PC, ora legale compresa."
 }

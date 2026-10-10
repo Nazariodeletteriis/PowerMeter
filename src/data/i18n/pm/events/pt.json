@@ -20,5 +20,10 @@
   "events.rift.f.capacity": "Até 400 jogadores",
   "events.rift.f.warMode": "Modo Guerra: escolha se participa do JxJ (70 minutos para trocar de novo)",
   "events.rift.f.activities": "JxJ, Masmorras Seladas, missões e Pontos do Abismo",
-  "events.rift.source": "Horários no fuso local do seu PC. Horários dos servidores KR/TW (a partir das 02:00 do servidor, a cada 3 horas); o relógio do servidor {region} é provisório até a NC confirmar no lançamento global."
+  "events.rift.source": "Horários no fuso local do seu PC.",
+  "events.timer.title": "Eventos",
+  "events.timer.sound": "Alerta sonoro",
+  "events.timer.emptyTitle": "Ainda não há eventos",
+  "events.timer.emptyText": "O calendário de eventos chega com o download dos dados do jogo.",
+  "events.timer.note": "Horários no fuso local do seu PC, horário de verão incluído."
 }

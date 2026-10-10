@@ -20,5 +20,10 @@
   "events.rift.f.capacity": "最大400人",
   "events.rift.f.warMode": "戦争モード：PvPに参加するか選べる（再変更まで70分）",
   "events.rift.f.activities": "PvP、封印ダンジョン、クエスト、アビスポイント",
-  "events.rift.source": "時間はPCのローカル時間です。KR/TW サーバーのスケジュール（サーバー時間02:00から3時間ごと）。{region} サーバーの時計は、グローバル版開始時にNCが確定するまで暫定です。"
+  "events.rift.source": "時刻はPCの現地時間で表示されます。",
+  "events.timer.title": "イベント",
+  "events.timer.sound": "サウンド通知",
+  "events.timer.emptyTitle": "イベントはまだありません",
+  "events.timer.emptyText": "イベントのスケジュールはゲームデータのダウンロード後に表示されます。",
+  "events.timer.note": "時刻はPCの現地時間（夏時間を含む）で表示されます。"
 }

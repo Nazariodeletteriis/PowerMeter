@@ -20,5 +20,10 @@
   "events.rift.f.capacity": "最多400名玩家",
   "events.rift.f.warMode": "战争模式：可选择是否参与PvP（再次切换需70分钟）",
   "events.rift.f.activities": "PvP、封印地下城、任务和深渊点数",
-  "events.rift.source": "时间为电脑本地时间。KR/TW 服务器时间表（服务器时间02:00起每3小时）；{region} 服务器时钟为暂定，待NC在全球版上线时确认。"
+  "events.rift.source": "时间按你电脑的本地时间显示。",
+  "events.timer.title": "活动",
+  "events.timer.sound": "声音提醒",
+  "events.timer.emptyTitle": "暂无活动",
+  "events.timer.emptyText": "下载游戏数据后即可显示活动时间表。",
+  "events.timer.note": "时间按你电脑的本地时间显示，已计入夏令时。"
 }

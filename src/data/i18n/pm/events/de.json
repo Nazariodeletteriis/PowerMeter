@@ -20,5 +20,10 @@
   "events.rift.f.capacity": "Bis zu 400 Spieler",
   "events.rift.f.warMode": "Kriegsmodus: Wähle, ob du am PvP teilnimmst (70 Minuten bis zum nächsten Wechsel)",
   "events.rift.f.activities": "PvP, Versiegelte Dungeons, Quests und Abyss-Punkte",
-  "events.rift.source": "Zeiten in der Ortszeit deines PCs. Zeitplan der KR/TW-Server (ab 02:00 Serverzeit, alle 3 Stunden); die Serveruhr für {region} ist vorläufig, bis NC sie zum globalen Start bestätigt."
+  "events.rift.source": "Zeiten in der Ortszeit deines PCs.",
+  "events.timer.title": "Events",
+  "events.timer.sound": "Tonsignal",
+  "events.timer.emptyTitle": "Noch keine Events",
+  "events.timer.emptyText": "Der Eventplan kommt mit dem Download der Spieldaten.",
+  "events.timer.note": "Zeiten in der Ortszeit deines PCs, inklusive Sommerzeit."
 }

@@ -20,5 +20,10 @@
   "events.rift.f.capacity": "최대 400명",
   "events.rift.f.warMode": "전쟁 모드: PvP 참여 여부 선택 (다시 바꾸려면 70분)",
   "events.rift.f.activities": "PvP, 봉인된 던전, 퀘스트, 어비스 포인트",
-  "events.rift.source": "시간은 PC 현지 시간 기준입니다. KR/TW 서버 일정(서버 시간 02:00부터 3시간마다)이며, {region} 서버 시계는 글로벌 출시 때 NC가 확정할 때까지 임시입니다."
+  "events.rift.source": "시간은 PC의 현지 시간으로 표시됩니다.",
+  "events.timer.title": "이벤트",
+  "events.timer.sound": "소리 알림",
+  "events.timer.emptyTitle": "아직 이벤트가 없습니다",
+  "events.timer.emptyText": "이벤트 일정은 게임 데이터를 내려받으면 표시됩니다.",
+  "events.timer.note": "시간은 PC의 현지 시간(서머타임 포함)으로 표시됩니다."
 }

@@ -20,5 +20,10 @@
   "events.rift.f.capacity": "Jusqu'à 400 joueurs",
   "events.rift.f.warMode": "Mode Guerre : choisissez de participer ou non au JcJ (70 minutes avant de changer à nouveau)",
   "events.rift.f.activities": "JcJ, Donjons scellés, quêtes et Points d'Abysse",
-  "events.rift.source": "Heures dans l'heure locale de votre PC. Horaires des serveurs KR/TW (à partir de 02:00 heure serveur, toutes les 3 heures) ; l'horloge du serveur {region} est provisoire jusqu'à confirmation par NC au lancement mondial."
+  "events.rift.source": "Heures dans l'heure locale de ton PC.",
+  "events.timer.title": "Événements",
+  "events.timer.sound": "Alerte sonore",
+  "events.timer.emptyTitle": "Aucun événement pour l'instant",
+  "events.timer.emptyText": "Le calendrier des événements arrive avec le téléchargement des données du jeu.",
+  "events.timer.note": "Heures dans l'heure locale de ton PC, heure d'été comprise."
 }

@@ -20,5 +20,10 @@
   "events.rift.f.capacity": "Hasta 400 jugadores",
   "events.rift.f.warMode": "Modo Guerra: elige si participas en el JcJ (70 minutos para volver a cambiar)",
   "events.rift.f.activities": "JcJ, Mazmorras Selladas, misiones y Puntos del Abismo",
-  "events.rift.source": "Horas en la hora local de tu PC. Horario de los servidores KR/TW (desde las 02:00 hora del servidor, cada 3 horas); el reloj del servidor {region} es provisional hasta que NC lo confirme en el lanzamiento global."
+  "events.rift.source": "Horas en la hora local de tu PC.",
+  "events.timer.title": "Eventos",
+  "events.timer.sound": "Aviso sonoro",
+  "events.timer.emptyTitle": "Aún no hay eventos",
+  "events.timer.emptyText": "El horario de eventos llega con la descarga de los datos del juego.",
+  "events.timer.note": "Horas en la hora local de tu PC, horario de verano incluido."
 }
