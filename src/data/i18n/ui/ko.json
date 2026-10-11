@@ -380,7 +380,7 @@
       "last": "마지막: {boss} · {outcome} {time}"
     },
     "end": {
-      "title": "전투 종료",
+      "title": "종료",
       "duration": "지속시간",
       "yourDps": "내 DPS",
       "position": "순위",
@@ -427,6 +427,18 @@
     },
     "updateAvailable": "업데이트 가능",
     "updateNotes": "릴리스 노트",
-    "unlockHint": "잠김: 자물쇠를 클릭하거나 {key}를 눌러 잠금 해제"
+    "unlockHint": "잠김: 자물쇠를 클릭하거나 {key}를 눌러 잠금 해제",
+    "cols": {
+      "name": "이름",
+      "total": "합계"
+    },
+    "avg": {
+      "button": "직업별 평균 DPS",
+      "title": "직업별 평균 DPS",
+      "hint": "공정한 비교를 위해 보스를 선택하세요",
+      "error": "통계를 불러올 수 없음",
+      "sample": "표본",
+      "bosses": "보스 {n}"
+    }
   }
 }

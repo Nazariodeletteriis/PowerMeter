@@ -380,7 +380,7 @@
       "last": "上次：{boss} · {outcome} {time}"
     },
     "end": {
-      "title": "戰鬥結束",
+      "title": "已結束",
       "duration": "時長",
       "yourDps": "你的 DPS",
       "position": "排名",
@@ -427,6 +427,18 @@
     },
     "updateAvailable": "有可用更新",
     "updateNotes": "版本資訊",
-    "unlockHint": "已鎖定：點擊鎖圖示或按 {key} 解鎖"
+    "unlockHint": "已鎖定：點擊鎖圖示或按 {key} 解鎖",
+    "cols": {
+      "name": "名稱",
+      "total": "總計"
+    },
+    "avg": {
+      "button": "各職業平均DPS",
+      "title": "各職業平均DPS",
+      "hint": "選擇首領以便公平比較",
+      "error": "職業統計無法取得",
+      "sample": "樣本",
+      "bosses": "{n} 個首領"
+    }
   }
 }

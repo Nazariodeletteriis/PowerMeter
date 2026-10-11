@@ -380,7 +380,7 @@
       "last": "前回：{boss}・{outcome} {time}"
     },
     "end": {
-      "title": "戦闘終了",
+      "title": "終了",
       "duration": "経過時間",
       "yourDps": "あなたのDPS",
       "position": "順位",
@@ -427,6 +427,18 @@
     },
     "updateAvailable": "アップデートがあります",
     "updateNotes": "リリースノート",
-    "unlockHint": "ロック中：鍵をクリックするか {key} で解除"
+    "unlockHint": "ロック中：鍵をクリックするか {key} で解除",
+    "cols": {
+      "name": "名前",
+      "total": "合計"
+    },
+    "avg": {
+      "button": "クラス別平均DPS",
+      "title": "クラス別平均DPS",
+      "hint": "公平に比較するにはボスを選んでください",
+      "error": "統計を取得できません",
+      "sample": "サンプル",
+      "bosses": "ボス{n}体"
+    }
   }
 }

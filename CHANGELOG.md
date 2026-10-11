@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.4.1
+
+- Changed: New DPS Meter widget design: bigger, easier to click buttons, clearer boss bar and player rows with class icons.
+- New: Class average DPS view in the widget, from the button next to the lock.
+
 ## 0.4.0
 
 - New: Database: search, items, NPCs and monsters with their drops and a Map button that shows where they are, quests, dungeons, crafting and skills, with the game data.

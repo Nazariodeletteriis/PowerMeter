@@ -380,7 +380,7 @@
       "last": "Last: {boss} · {outcome} {time}"
     },
     "end": {
-      "title": "Fight over",
+      "title": "Ended",
       "duration": "Duration",
       "yourDps": "Your DPS",
       "position": "Position",
@@ -427,6 +427,18 @@
     },
     "updateAvailable": "Update available",
     "updateNotes": "Release notes",
-    "unlockHint": "Locked. Click the lock or press {key} to unlock"
+    "unlockHint": "Locked. Click the lock or press {key} to unlock",
+    "cols": {
+      "name": "Name",
+      "total": "Total"
+    },
+    "avg": {
+      "button": "Average DPS by class",
+      "title": "Average DPS by class",
+      "hint": "Pick a boss for a fair comparison",
+      "error": "Class stats unavailable",
+      "sample": "Sample",
+      "bosses": "{n} boss"
+    }
   }
 }

@@ -49,6 +49,7 @@ const createPmWidget = (app) => {
   const moves = [
     [document.querySelector(".battleTime"), $(".pmBarTitle"), "before"],
     [document.querySelector(".targetModeBtn"), $(".pmBerserk"), "after"],
+    [document.querySelector(".bossName"), $(".pmHpKind"), "after"],
   ]
     .filter(([el, anchor]) => el && anchor)
     .map(([el, anchor, where]) => ({ el, anchor, where, home: el.parentNode, next: el.nextSibling }));
@@ -140,6 +141,58 @@ const createPmWidget = (app) => {
     Promise.resolve()
       .then(() => window.__TAURI__.core.invoke("hide_overlay"))
       .catch((err) => console.error("[PowerMeter] hide failed", err));
+  });
+
+  // --- average DPS by class (community public logs; the dashboard's class stats).
+  // For the boss on screen when there is one, else over every boss.
+  const AVG_CLASSES = ["Chanter", "Gladiator", "Ranger", "Spiritmaster", "Sorcerer", "Cleric", "Templar", "Assassin"]; // design order for ties
+  const avgBtn = $(".pmAvgBtn");
+  let avgOn = false;
+  let avgKey = null; // boss the shown stats are for ("null" = every boss)
+  let avgStats = null;
+  let avgError = false;
+  const renderAvg = () => {
+    const byCls = new Map((avgStats?.classes || []).map((c) => [c.cls, Number(c.avgDps) || 0]));
+    const top = Math.max(1, ...byCls.values());
+    $(".pmAvgRows").innerHTML = AVG_CLASSES.map((cls) => ({ cls, avg: byCls.get(cls) || 0 }))
+      .sort((a, b) => b.avg - a.avg)
+      .map(({ cls, avg }) => {
+        const bar = avg ? `<span style="width:${((avg / top) * 100).toFixed(1)}%"></span>` : "";
+        const value = avg ? `<span>${num(avg)}</span>` : `<span class="isNone">—</span>`;
+        return `<div class="pmAvgRow" data-cls="${cls.toLowerCase()}"><span>${cls}</span><span class="pmAvgBar">${bar}</span>${value}</div>`;
+      })
+      .join("");
+    setText(".pmAvgHint", avgError ? t("pmWidget.avg.error", "Stats unavailable") : t("pmWidget.avg.hint", "Pick a boss for a fair comparison"));
+    const bosses = avgKey === "null" ? avgStats?.bosses?.length || 0 : 1;
+    setText(".pmSampleN", avgStats ? tf("pmWidget.avg.bosses", { n: bosses }, `${bosses} boss`) : "-");
+  };
+  const loadAvg = () => {
+    const boss = frame?.targetMode === "bossTargets" && Number(frame.targetId) > 0 ? Number(frame.targetId) : null;
+    const key = String(boss);
+    if (key === avgKey) return;
+    avgKey = key;
+    avgStats = null;
+    avgError = false;
+    renderAvg();
+    invoke("pm_class_stats", { boss, region: null, period: "90" })
+      .then((stats) => {
+        if (avgKey !== key) return;
+        avgStats = stats;
+        renderAvg();
+      })
+      .catch((err) => {
+        console.warn("[PowerMeter] class stats failed", err);
+        if (avgKey !== key) return;
+        avgError = true;
+        renderAvg();
+        avgKey = null; // retried on the next frame or toggle
+      });
+  };
+  avgBtn?.addEventListener("click", () => {
+    avgOn = !avgOn;
+    meter.classList.toggle("isPmAvg", avgOn);
+    avgBtn.setAttribute("aria-pressed", String(avgOn));
+    if (avgOn) loadAvg();
   });
 
   // --- mode tabs
@@ -315,7 +368,7 @@ const createPmWidget = (app) => {
       tab.hidden = tab.dataset.pmMode === "lobby" && mode === "dps";
     });
     let title = "";
-    if (mode === "dps" && view === "ended") title = t("pmWidget.end.title", "Fight over");
+    if (mode === "dps" && view === "ended") title = t("pmWidget.end.title", "Ended");
     if (mode === "build") renderBuild();
     if (mode === "lobby") renderLobby();
     setText(".pmBarTitle", title);
@@ -333,6 +386,8 @@ const createPmWidget = (app) => {
       setText(".pmLastDps", `${num(lastFight.dps)} DPS`);
     }
     meter.classList.toggle("hasPmLast", !!lastFight);
+    setText(".pmModeTitle", app.getDefaultTargetLabel?.(frame?.targetMode || app.targetSelection) || "");
+    if (avgOn) renderAvg();
   };
 
   const setView = (next) => {
@@ -403,9 +458,22 @@ const createPmWidget = (app) => {
     setText(".pmPillTime", app.battleTime?.getCombatTimeText?.() || "0:00");
   };
 
-  // After each render: target extras and the sparkline samples.
+  const HP_KIND = { bossTargets: "BOSS", trainTargets: "TRAIN", pveTargets: "PVE", pvpTargets: "PVP" };
+  // After each render: title, HP readout, target extras and the sparkline samples.
   const onFrame = (next) => {
     frame = next;
+    setText(".pmModeTitle", app.getDefaultTargetLabel?.(next.targetMode || app.targetSelection) || "");
+    // HP as the design writes it ("6.708.921 HP · 68,0%"), same remaining-HP rule as core.js updateBossHpBar.
+    const maxHp = Number(next.targetMaxHp) || 0;
+    meter.classList.toggle("hasPmHp", maxHp > 0);
+    if (maxHp > 0) {
+      const live = Number(next.targetCurrentHp);
+      const left = live >= 0 ? Math.min(maxHp, live) : Math.max(0, maxHp - (Number(next.targetTotalDamage) || 0));
+      setText(".pmHpKind", HP_KIND[next.targetMode] || "");
+      setText(".pmHpText", `${num(left)} HP · ${oneDec((left / maxHp) * 100)}%`);
+      $(".bossHpBar")?.classList.toggle("isPmKilled", left <= 0);
+    }
+    if (avgOn) loadAvg();
     const berserk = $(".pmBerserk");
     const berserkMs = Number(next.targetBerserkMs);
     const hasBerserk = next.targetBerserkMs != null && Number.isFinite(berserkMs) && berserkMs >= 0;

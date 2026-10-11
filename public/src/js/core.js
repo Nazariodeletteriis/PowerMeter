@@ -1116,6 +1116,7 @@ class DpsApp {
     this.pmWidget?.onFrame({
       rows: rowsToRender,
       targetMode,
+      targetId,
       targetMaxHp,
       targetTotalDamage,
       targetCurrentHp,

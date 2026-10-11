@@ -380,7 +380,7 @@
       "last": "上次：{boss} · {outcome} {time}"
     },
     "end": {
-      "title": "战斗结束",
+      "title": "已结束",
       "duration": "时长",
       "yourDps": "你的 DPS",
       "position": "排名",
@@ -427,6 +427,18 @@
     },
     "updateAvailable": "有可用更新",
     "updateNotes": "发行说明",
-    "unlockHint": "已锁定：点击锁图标或按 {key} 解锁"
+    "unlockHint": "已锁定：点击锁图标或按 {key} 解锁",
+    "cols": {
+      "name": "名称",
+      "total": "总计"
+    },
+    "avg": {
+      "button": "各职业平均DPS",
+      "title": "各职业平均DPS",
+      "hint": "选择首领以便公平比较",
+      "error": "职业统计不可用",
+      "sample": "样本",
+      "bosses": "{n} 个首领"
+    }
   }
 }

@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.1
+
+- Modifié : Nouveau design du widget DPS Meter : boutons plus grands et plus faciles à cliquer, barre du boss et lignes des joueurs plus claires avec les icônes de classe.
+- Nouveau : Vue du DPS moyen par classe dans le widget, depuis le bouton à côté du cadenas.
+
 ## 0.4.0
 
 - Nouveau : Base de données : recherche, objets, PNJ et monstres avec leurs butins et un bouton Carte qui montre où ils se trouvent, quêtes, donjons, artisanat et compétences, avec les données du jeu.

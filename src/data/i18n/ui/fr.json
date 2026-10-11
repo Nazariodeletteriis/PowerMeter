@@ -380,7 +380,7 @@
       "last": "Dernier : {boss} · {outcome} {time}"
     },
     "end": {
-      "title": "Combat terminé",
+      "title": "Terminé",
       "duration": "Durée",
       "yourDps": "Ton DPS",
       "position": "Position",
@@ -427,6 +427,18 @@
     },
     "updateAvailable": "Mise à jour disponible",
     "updateNotes": "Notes de version",
-    "unlockHint": "Verrouillé : clique sur le cadenas ou appuie sur {key} pour déverrouiller"
+    "unlockHint": "Verrouillé : clique sur le cadenas ou appuie sur {key} pour déverrouiller",
+    "cols": {
+      "name": "Nom",
+      "total": "Total"
+    },
+    "avg": {
+      "button": "DPS moyen par classe",
+      "title": "DPS moyen par classe",
+      "hint": "Choisis un boss pour une comparaison équitable",
+      "error": "Statistiques indisponibles",
+      "sample": "Échantillon",
+      "bosses": "{n} boss"
+    }
   }
 }

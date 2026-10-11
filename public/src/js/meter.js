@@ -383,6 +383,8 @@ const createMeterUI = ({
       const contributionText = `${formatOneDecimal(damageContribution)}%`;
       if (view.lastContributionText !== contributionText) {
         view.dpsContribution.textContent = contributionText;
+        // PowerMeter: the theme fills the row bar to this share (design), not to the top DPS.
+        view.rowEl.style.setProperty("--pm-share", `${damageContribution.toFixed(1)}%`);
         view.lastContributionText = contributionText;
       }
 
