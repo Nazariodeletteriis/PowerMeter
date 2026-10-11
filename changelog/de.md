@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.6
+
+- Behoben: Builder: Die Ausrüstung wird beim Betreten der Welt wieder gelesen (ein großes Login-Paket wurde verworfen, die aktuelle Ausrüstung blieb leer).
+- Behoben: Die Ausrüstung gehört dem gespielten Charakter: Beim Charakterwechsel landet sie nicht mehr beim vorherigen.
+- Behoben: Aus dem Spiel gelesene Ausrüstung zeigt jetzt die Gegenstandssymbole.
+
 ## 0.4.5
 
 - Neu: Builder: Deine aktuelle Ausrüstung kommt aus dem Spiel (beim Login und bei jedem Wechsel gelesen), mit Werten und Verstärkungsstufen.

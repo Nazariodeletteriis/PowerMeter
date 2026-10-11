@@ -4,6 +4,12 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.4.6
+
+- Fixed: Builder: the gear is read again when you enter the world (a large login packet was being dropped, so the current gear stayed empty).
+- Fixed: The gear goes to the character you are playing: switching character no longer saves the new one's gear on the previous one.
+- Fixed: Gear taken from the game now shows the item icons.
+
 ## 0.4.5
 
 - New: Builder: your current gear comes from the game (read at login and on every change), with item stats and enhancement levels.

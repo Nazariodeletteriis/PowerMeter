@@ -446,7 +446,7 @@ pub fn gamedata_gear(state: tauri::State<'_, AppState>) -> Result<Vec<Value>, St
 }
 
 /// Equipment the game shows by numeric item id (what the packets carry), from the Taiwan item data: name, slot,
-/// grade, level, fixed stats as written (`key`, label, value text) and the enhancement bonus of each level.
+/// grade, level, icon (an asset id, see gamedata_icons), fixed stats as written (`key`, label, value text) and the enhancement bonus of each level.
 #[tauri::command]
 pub fn gamedata_tw_gear(state: tauri::State<'_, AppState>, ids: Vec<String>) -> Result<Vec<Value>, String> {
     let ids: Vec<String> = ids.into_iter().take(64).collect();
@@ -458,6 +458,7 @@ pub fn gamedata_tw_gear(state: tauri::State<'_, AppState>, ids: Vec<String>) -> 
     state.gamedata.query(
         &format!(
             "SELECT m.item_id AS id, m.name, m.item_type AS slot, m.grade, m.item_level AS level,
+                    'asset_' || substr(m.icon_local_path, 8, 64) AS icon,
                     (SELECT json_group_array(json_array(s.\"key\", s.label, s.value))
                        FROM (SELECT * FROM tw_item_stats WHERE category = 'item' AND id = m.item_id ORDER BY stat_index) s) AS stats_json,
                     (SELECT json_group_array(json_array(e.level, json(e.stats_json), json(e.additional_stats_json)))
@@ -473,6 +474,7 @@ const CDN_PATH: &str = "/cdn/";
 
 /// Image URL for game icon names (`Icon_...`). The archive lists images per record, not per icon: an icon gets the
 /// image of a record that shows that icon and has exactly one image (unambiguous). Icons without one are left out.
+/// An asset id (`asset_<sha>`, the Taiwan items' icons) is looked up as is.
 #[tauri::command]
 pub fn gamedata_icons(state: tauri::State<'_, AppState>, icons: Vec<String>) -> Result<Value, String> {
     let icons: Vec<String> = icons.into_iter().filter(|i| !i.is_empty()).take(500).collect();
@@ -480,7 +482,7 @@ pub fn gamedata_icons(state: tauri::State<'_, AppState>, icons: Vec<String>) -> 
         return Ok(json!({}));
     }
     let marks = vec!["?"; icons.len()].join(",");
-    let params: Vec<&dyn ToSql> = icons.iter().map(|i| i as &dyn ToSql).collect();
+    let params: Vec<&dyn ToSql> = icons.iter().chain(&icons).map(|i| i as &dyn ToSql).collect();
     let rows = state.gamedata.query(
         &format!(
             "SELECT r.icon, min(a.file) AS file FROM (
@@ -488,7 +490,8 @@ pub fn gamedata_icons(state: tauri::State<'_, AppState>, icons: Vec<String>) -> 
                       'asset_' || substr(json_extract(image_paths_json, '$[0]'), 8, 64) AS asset_id
                FROM records WHERE json_array_length(image_paths_json) = 1) r
              JOIN asset_files a ON a.asset_id = r.asset_id
-             WHERE r.icon IN ({marks}) GROUP BY r.icon"
+             WHERE r.icon IN ({marks}) GROUP BY r.icon
+             UNION ALL SELECT asset_id, file FROM asset_files WHERE asset_id IN ({marks})"
         ),
         &params,
     )?;

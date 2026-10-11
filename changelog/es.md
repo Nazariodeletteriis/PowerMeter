@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.6
+
+- Corregido: Builder: el equipo se vuelve a leer al entrar en el mundo (se descartaba un paquete grande del inicio de sesión y el equipo actual quedaba vacío).
+- Corregido: El equipo va al personaje que estás jugando: al cambiar de personaje ya no acaba en el anterior.
+- Corregido: El equipo leído del juego ahora muestra los iconos de los objetos.
+
 ## 0.4.5
 
 - Nuevo: Builder: tu equipo actual llega del juego (leído al entrar y en cada cambio), con estadísticas y niveles de mejora.

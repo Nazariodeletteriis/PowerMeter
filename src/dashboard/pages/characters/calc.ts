@@ -177,6 +177,8 @@ export type TwGearRow = {
   slot: string | null;
   grade: string | null;
   level: number | null;
+  /** asset_<sha>, resolved like the game's icon names (gamedata_icons); null in archives before 0.4.6. */
+  icon: string | null;
   stats_json: [key: string | null, label: string | null, value: string | null][];
   /** [level, stats, extra stats] per enhancement level; stats are { key: "10" | "1%" } or []. */
   enh_json: [level: number, stats: Record<string, string> | [], extra: Record<string, string> | []][];
@@ -216,7 +218,7 @@ export function twPiece(row: TwGearRow): { piece: GearPiece; levels: Enhancement
     }
   }
   const max = levels.reduce((m, v) => Math.max(m, v.level), 0);
-  return { piece: { id: row.id, name: row.name, slot: row.slot, grade: row.grade, level: row.level, icon: null, max_enh: max || null, stats_json: stats }, levels };
+  return { piece: { id: row.id, name: row.name, slot: row.slot, grade: row.grade, level: row.level, icon: row.icon ?? null, max_enh: max || null, stats_json: stats }, levels };
 }
 
 /** Builder slot of each game equipment slot (equip_parser.rs). Slots the Builder has no place for are left out. */

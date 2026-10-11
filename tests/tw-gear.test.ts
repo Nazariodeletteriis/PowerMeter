@@ -14,6 +14,7 @@ const mace: TwGearRow = {
   slot: "Mace",
   grade: "Unique",
   level: 57,
+  icon: "asset_ab",
   stats_json: [
     ["WeaponMinDamage|WeaponDamage", "Attack", "203 ~ 261"],
     ["Block", "Block", "50"],

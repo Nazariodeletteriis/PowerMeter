@@ -50,6 +50,9 @@ pub struct BarSkill {
 #[derive(Serialize, Default, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CapturedCharacter {
+    /// Who wears `equipment`: the self record's name after the last login inventory. None until the game says it
+    /// (on a character switch the inventory comes ~7 s before the self record, packets_20261011_183820).
+    pub owner: Option<String>,
     pub equipment: Vec<WornItem>,
     pub skillbar: Vec<BarSkill>,
 }
@@ -60,13 +63,20 @@ struct State {
     /// Item uid → item id, from `1B 56`.
     items: BTreeMap<u64, u32>,
     skillbar: Vec<BarSkill>,
+    owner: Option<String>,
 }
 
-static STATE: Mutex<State> = Mutex::new(State { worn: Vec::new(), items: BTreeMap::new(), skillbar: Vec::new() });
+static STATE: Mutex<State> = Mutex::new(State { worn: Vec::new(), items: BTreeMap::new(), skillbar: Vec::new(), owner: None });
+
+/// The self record named the character being played (stream_processor).
+pub fn set_owner(name: &str) {
+    STATE.lock().unwrap_or_else(|e| e.into_inner()).owner = Some(name.to_string());
+}
 
 pub fn snapshot() -> CapturedCharacter {
     let s = STATE.lock().unwrap_or_else(|e| e.into_inner());
     CapturedCharacter {
+        owner: s.owner.clone(),
         equipment: s
             .worn
             .iter()
@@ -142,6 +152,7 @@ fn parse_inventory(b: &[u8]) {
     // A later page with only bag items must not wipe the worn list.
     if !worn.is_empty() {
         s.worn = worn;
+        s.owner = None; // a login: the character may be another one
     }
 }
 
@@ -209,5 +220,9 @@ mod tests {
             snapshot().equipment,
             vec![WornItem { slot: 1, item_id: 110130051 }, WornItem { slot: 0x13, item_id: 210730053 }]
         );
+        // The inventory comes before the self record: nobody owns it until the self record names the character.
+        assert_eq!(snapshot().owner, None);
+        set_owner("Agniezska");
+        assert_eq!(snapshot().owner.as_deref(), Some("Agniezska"));
     }
 }

@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.6
+
+- Corretto: Builder: l'equip viene letto di nuovo quando entri nel mondo (un pacchetto grande del login veniva scartato e l'equip corrente restava vuoto).
+- Corretto: L'equip va al personaggio che stai giocando: cambiando personaggio non finisce più sul precedente.
+- Corretto: L'equip preso dal gioco ora mostra le icone degli oggetti.
+
 ## 0.4.5
 
 - Nuovo: Builder: l'equip corrente arriva dal gioco (letto al login e a ogni cambio), con statistiche e livelli di potenziamento.

@@ -127,9 +127,13 @@ impl StreamProcessor {
                 continue;
             }
 
-            // 3. TCP fragmentation check (anti-stall gate)
+            // 3. TCP fragmentation check (anti-stall gate). A compressed bundle (FF FF after the length) is a real
+            // packet whatever its size: the inventory sent on entering the world is one of 16-17 KB, split over
+            // several segments (packets_20261011_183820), and skipping it lost the worn equipment.
             if offset + total_packet_bytes > buffer.len() {
-                if total_packet_bytes > 16384 {
+                let marker = offset + length_info.length as usize;
+                let bundle = buffer.get(marker..marker + 2).is_none_or(|m| m == [0xFF, 0xFF]);
+                if total_packet_bytes > 16384 && !bundle {
                     offset += 1;
                     continue;
                 }
@@ -947,6 +951,7 @@ impl StreamProcessor {
                     self.data_storage
                         .set_local_character_name(Some(sanitized.clone()));
                 }
+                super::equip_parser::set_owner(&sanitized);
                 tracing::info!("self record: local player '{}' -> entity {}", sanitized, id.value);
             } else {
                 tracing::debug!("player record: '{}' -> entity {}", sanitized, id.value);
@@ -2720,6 +2725,18 @@ mod stagger_tests {
         let storage = Arc::new(DataStorage::new());
         let sp = StreamProcessor::new(storage.clone(), Arc::new(SkillLookup::new()), Arc::new(NpcLookup::new()));
         (storage, sp)
+    }
+
+    /// A compressed bundle over 16 KB whose tail has not arrived yet is waited for, not skipped byte by byte
+    /// (the login inventory, packets_20261011_183820). Any other packet that long still counts as misframed.
+    #[test]
+    fn big_bundle_fragment_waits_for_the_rest() {
+        let (_, mut sp) = processor();
+        // Length varint 3 bytes, total = value - 4 + 3 = 17000.
+        let value: u32 = 17000 + 4 - 3;
+        let head = |tail: [u8; 2]| vec![(value & 0x7F) as u8 | 0x80, ((value >> 7) & 0x7F) as u8 | 0x80, (value >> 14) as u8, tail[0], tail[1], 0x10, 0x20];
+        assert_eq!(sp.consume_stream(&head([0xFF, 0xFF])), 0, "bundle fragment kept for the next segment");
+        assert!(sp.consume_stream(&head([0x11, 0x56])) > 0, "plain packet that long is skipped");
     }
 
     /// Boss id `9E FF 02` = 49054 (three-byte varint).

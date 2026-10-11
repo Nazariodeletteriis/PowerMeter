@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.6
+
+- Corrigé : Builder : l’équipement est de nouveau lu à l’entrée dans le monde (un gros paquet de connexion était ignoré et l’équipement actuel restait vide).
+- Corrigé : L’équipement va au personnage que tu joues : en changeant de personnage, il ne finit plus sur le précédent.
+- Corrigé : L’équipement lu dans le jeu affiche maintenant les icônes des objets.
+
 ## 0.4.5
 
 - Nouveau : Builder : ton équipement actuel vient du jeu (lu à la connexion et à chaque changement), avec les stats et les niveaux d’amélioration.

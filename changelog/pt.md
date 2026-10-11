@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.6
+
+- Corrigido: Builder: o equipamento volta a ser lido ao entrar no mundo (um pacote grande do login era descartado e o equipamento atual ficava vazio).
+- Corrigido: O equipamento vai para a personagem que estás a jogar: ao trocar de personagem já não fica na anterior.
+- Corrigido: O equipamento lido do jogo agora mostra os ícones dos itens.
+
 ## 0.4.5
 
 - Novo: Builder: o teu equipamento atual vem do jogo (lido ao entrar e a cada troca), com atributos e níveis de aprimoramento.
