@@ -71,7 +71,6 @@
   "combat.nSelected": "{n} sélectionnés",
   "combat.nextAttempt": "Tentative suivante",
   "combat.noMatch": "Aucun combat ne correspond à ces filtres.",
-  "combat.onlyMe": "Seulement moi",
   "combat.openLog": "Ouvrir le journal",
   "combat.openerHint": "opener (10 premiers sorts) · APM {apm}",
   "combat.overheal": "Overheal",
@@ -104,6 +103,7 @@
   "combat.tab.buff": "Chronologie des buffs",
   "combat.tab.heal": "Soins",
   "combat.tab.overview": "Vue d'ensemble",
+  "combat.tab.rot": "Rotation",
   "combat.tab.skill": "Compétences",
   "combat.tab.taken": "Dégâts subis",
   "combat.tab.targets": "Cibles",
@@ -182,5 +182,10 @@
   "combat.stats.nPlayers": "{n} joueurs",
   "combat.stats.distribution": "Répartition des classes",
   "combat.stats.trend": "Évolution hebdomadaire (DPS moyen)",
-  "combat.stats.trendNeedsWeeks": "Il faut des logs d'au moins deux semaines différentes pour afficher l'évolution."
+  "combat.stats.trendNeedsWeeks": "Il faut des logs d'au moins deux semaines différentes pour afficher l'évolution.",
+  "combat.stats.topPlayers": "Meilleurs joueurs par classe",
+  "combat.rotationBtn": "Rotation",
+  "combat.bossN": "Boss {n}",
+  "combat.nBosses": "{n} boss",
+  "combat.castOrder": "Ordre des sorts, {n} premiers · les coups d'une même compétence à moins de 1,5 s comptent comme un seul sort"
 }

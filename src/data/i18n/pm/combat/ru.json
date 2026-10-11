@@ -71,7 +71,6 @@
   "combat.nSelected": "{n} выбрано",
   "combat.nextAttempt": "Следующая попытка",
   "combat.noMatch": "Нет боёв, соответствующих этим фильтрам.",
-  "combat.onlyMe": "Только я",
   "combat.openLog": "Открыть лог",
   "combat.openerHint": "опенер (первые 10 кастов) · APM {apm}",
   "combat.overheal": "Overheal",
@@ -104,6 +103,7 @@
   "combat.tab.buff": "Таймлайн баффов",
   "combat.tab.heal": "Лечение",
   "combat.tab.overview": "Обзор",
+  "combat.tab.rot": "Ротация",
   "combat.tab.skill": "Скиллы",
   "combat.tab.taken": "Полученный урон",
   "combat.tab.targets": "Цели",
@@ -182,5 +182,10 @@
   "combat.stats.nPlayers": "Игроков: {n}",
   "combat.stats.distribution": "Распределение классов",
   "combat.stats.trend": "Динамика по неделям (средний DPS)",
-  "combat.stats.trendNeedsWeeks": "Для динамики нужны логи минимум за две разные недели."
+  "combat.stats.trendNeedsWeeks": "Для динамики нужны логи минимум за две разные недели.",
+  "combat.stats.topPlayers": "Лучшие игроки по классам",
+  "combat.rotationBtn": "Ротация",
+  "combat.bossN": "Босс {n}",
+  "combat.nBosses": "Боссов: {n}",
+  "combat.castOrder": "Порядок применения, первые {n} · удары одного умения с интервалом меньше 1,5 с считаются одним применением"
 }

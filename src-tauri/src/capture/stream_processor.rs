@@ -115,8 +115,11 @@ impl StreamProcessor {
                 continue;
             }
 
-            // 2. AION 2 quirk: length - 3 == physical size
-            let total_packet_bytes = (length_info.value - 3) as usize;
+            // 2. AION 2 quirk: the length counts 4 bytes more than the packet
+            // minus its own varint (`length - 3` held only for a 1-byte varint,
+            // so every packet of 128+ bytes was cut one byte short and the
+            // next one misframed: 121052 log, 5914 -> 6318 packets).
+            let total_packet_bytes = packet_size(length_info);
 
             // Resync on invalid sizes
             if total_packet_bytes == 0 || total_packet_bytes > 65535 {
@@ -141,18 +144,11 @@ impl StreamProcessor {
                 && buffer[offset + payload_start + 1] == 0xFF;
 
             if is_bundle {
-                let bundle_size = total_packet_bytes + 1;
-                if offset + bundle_size > buffer.len() {
-                    break;
-                }
-                let bundle_payload = &buffer[offset + payload_start..offset + bundle_size];
-                self.unwrap_bundle(bundle_payload);
-                offset += bundle_size;
+                self.unwrap_bundle(&buffer[offset + payload_start..offset + total_packet_bytes]);
             } else {
-                let full_packet = &buffer[offset..offset + total_packet_bytes];
-                self.parse_perfect_packet(full_packet);
-                offset += total_packet_bytes;
+                self.parse_perfect_packet(&buffer[offset..offset + total_packet_bytes]);
             }
+            offset += total_packet_bytes;
         }
 
         // Scan for embedded 04 8D ownership sub-packets
@@ -221,11 +217,11 @@ impl StreamProcessor {
                 break;
             }
 
-            if length_info.value <= 3 {
+            let inner_total_bytes = packet_size(length_info);
+            if inner_total_bytes == 0 {
                 offset += 1;
                 continue;
             }
-            let inner_total_bytes = (length_info.value - 3) as usize;
 
             let inner_packet_end = offset + inner_total_bytes;
             if inner_packet_end > decompressed.len() {
@@ -279,6 +275,7 @@ impl StreamProcessor {
         self.parse_death_packet(packet);
         self.parse_zone_change_packet(packet);
         self.parse_stagger_packet(packet);
+        super::equip_parser::parse(packet);
 
         if !parsed_damage && !parsed_name && !parsed_summon && !parsed_ownership && !parsed_hp {
             self.parse_dot_packet(packet);
@@ -2273,6 +2270,11 @@ impl StreamProcessor {
 
 // ===== FREE FUNCTIONS =====
 
+/// Physical size of a framed packet from its length varint (0 = invalid).
+fn packet_size(len: VarIntResult) -> usize {
+    (len.value - 4 + len.length).max(0) as usize
+}
+
 pub fn read_varint(bytes: &[u8], offset: usize) -> VarIntResult {
     let mut value: i32 = 0;
     let mut shift = 0;
@@ -2779,5 +2781,18 @@ mod stagger_tests {
         sp.scan_for_entity_hp(&rec("8927")); // 5001 = varint 89 27
         assert_eq!(storage.get_mob_current_hp(1000), None);
         assert_eq!(storage.get_mob_current_hp(5001), Some(1000));
+    }
+
+    /// A 130-byte packet has a 2-byte length varint (84 01 = 132): its size is
+    /// `value - 4 + 2`. Framed as `value - 3` its last byte was left over and
+    /// misframed what followed, here the stagger record.
+    #[test]
+    fn two_byte_length_frames_the_next_packet() {
+        let (storage, mut sp) = processor();
+        let mut stream = vec![0x84, 0x01, 0x99, 0x99];
+        stream.resize(130, 0x11);
+        stream.extend(hex("1405e09eff020301280000001e00000002"));
+        assert_eq!(sp.consume_stream(&stream), stream.len());
+        assert_eq!(storage.get_stagger(BOSS), Some(Stagger { cur: 30, max: 40, broken: false }));
     }
 }

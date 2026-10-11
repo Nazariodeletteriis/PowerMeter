@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ArrowCounterClockwiseIcon, ChecksIcon, FloppyDiskIcon, ShareNetworkIcon, SwordIcon } from "@phosphor-icons/react";
 import type { PlannerBoardData } from "../../data/db/types";
-import { planClass } from "../skills";
+import { GAME_SKILLS, planClass, SkillIcon } from "../skills";
 import { RELEASED_CLASSES } from "../ui";
 import { boardMax, connected, planTotals, plannerNodes, PLAN_KEY, PLAN_PROFILE, reachableNow, readPlans, savedNodes, statValue, toggle, type PNode } from "./characters/calc";
 import { SectionHead, useMem, useToast } from "./characters/shared";
@@ -170,7 +170,8 @@ export default function Daevanion({ t, lang, name, go, settings, save, onError, 
                     edit(toggle(nodes, picked, n.id));
                   }}
                 >
-                  {k === "start" ? "◆" : img ? <img src={img} alt="" /> : k === "skill" && icons ? "SK" : ""}
+                  {/* The archive has images for passive skill icons only: active ones come from the game CDN, by skill id. */}
+                  {k === "start" ? "◆" : img ? <img src={img} alt="" /> : k === "skill" && icons ? <SkillIcon skill={GAME_SKILLS.find((s) => s.id === n.skill?.id)} name="SK" /> : ""}
                 </button>
               );
             })}

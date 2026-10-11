@@ -381,7 +381,10 @@ const LIST_SQL: &str = "SELECT id, name,
                 json_extract(data_json, '$.monster.subType'), json_extract(data_json, '$.quest.category'),
                 json_extract(data_json, '$.categoryLabel'), json_extract(data_json, '$.class_name')) AS kind,
        coalesce(json_extract(data_json, '$.item.icon'), json_extract(data_json, '$.recipe.output.icon'),
-                json_extract(data_json, '$.icon')) AS icon
+                json_extract(data_json, '$.icon')) AS icon,
+       json_extract(data_json, '$.facts.exchange') AS exchange,
+       json_extract(data_json, '$.item.race') AS race,
+       (SELECT group_concat(DISTINCT json_extract(s.value, '$.type')) FROM json_each(data_json, '$.sources') s) AS sources
      FROM records WHERE category = ?1 ORDER BY name, id";
 
 #[tauri::command]
@@ -631,7 +634,8 @@ mod tests {
         assert_eq!(ev[0]["cadence_json"], json!({"every": "day"}));
         assert_eq!(ev[0]["duration_minutes"], 30);
         let list = gd.query(LIST_SQL, &[&"item"]).unwrap();
-        assert_eq!(list, vec![json!({"id": "sword", "name": "Sword", "grade": "Rare", "level": null, "kind": "Sword", "icon": "Icon_SW"})]);
+        assert_eq!(list, vec![json!({"id": "sword", "name": "Sword", "grade": "Rare", "level": null, "kind": "Sword", "icon": "Icon_SW",
+            "exchange": null, "race": null, "sources": null})]);
         // Only whitelisted table/column pairs reach the SQL text.
         assert!(rows_sql("monster_regions", "monster_id").is_some());
         assert!(rows_sql("meta", "key").is_none());

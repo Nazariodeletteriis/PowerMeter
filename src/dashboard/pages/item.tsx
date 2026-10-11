@@ -1,9 +1,11 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { CubeIcon, HammerIcon, ScrollIcon, SkullIcon, CastleTurretIcon, StorefrontIcon, GiftIcon, TrophyIcon, PlantIcon, CalendarIcon } from "@phosphor-icons/react";
-import type { Category, EnhancementGroup, EnhancementValue, GameRecord, ItemStat } from "../../data/db/types";
+import type { Category, EnhancementGroup, EnhancementValue, GameRecord, ItemStat, ListRow } from "../../data/db/types";
 import type { T } from "../i18n";
 import type { PageProps } from "./types";
-import { Capped, EntryHead, EntryLink, gd, Nd, None, RecordCard, Section, TypePage, useGd, useIcons, type Open } from "./world/db";
+import { ClassAvatar, RELEASED_CLASSES } from "../ui";
+import { SLOTS } from "./gearviewer";
+import { Capped, DataState, DbList, EntryHead, EntryLink, FilterBox, gd, gradeColor, Nd, None, RecordCard, Section, TypePage, useGd, useIcons, type Open } from "./world/db";
 import "./world/world.css";
 
 // Shapes inside an item record's data_json (only the fields shown here).
@@ -29,6 +31,8 @@ type ItemData = {
 };
 
 export default function Item({ t, lang, go, setHeader }: PageProps) {
+  // Held here, not in the list: opening an item and going back keeps the filters.
+  const [filters, setFilters] = useState(NO_FILTERS);
   return (
     <TypePage
       t={t}
@@ -37,7 +41,178 @@ export default function Item({ t, lang, go, setHeader }: PageProps) {
       category="item"
       title={t("world.item.title")}
       card={(id, open) => <RecordCard t={t} category="item" id={id}>{(r) => <ItemCard t={t} lang={lang} rec={r} open={open} />}</RecordCard>}
+      list={(open) => <ItemList t={t} f={filters} setF={setFilters} onPick={(r) => open("item", r.id)} />}
     />
+  );
+}
+
+// List filters on the fields gamedata_list returns for an item: kind (slot or type), grade, level, trade, faction, source.
+const KINDS: Record<string, string[]> = { ...SLOTS, usable: ["Usable"], misc: ["Misc"], currency: ["Currency"] };
+const GRADES = ["Common", "Rare", "Legend", "Unique", "Special", "Epic"]; // lowest to highest
+// facts.exchange values: a soul-bound item is not tradable.
+const TRADES: Record<string, string[]> = { tradable: ["Exchangeable"], bound: ["NonExchangeable", "SoulBind", "SoulBind_Acquire"] };
+// item.race: Light = Elyos, Dark = Asmodian; "All"/"None" items fit either.
+const FACTIONS: Record<string, string> = { elyos: "Light", asmodian: "Dark" };
+// Weapon slot -> class, as in each class's skills in the archive (skill.weapon): one weapon per class.
+// The shield goes with the Templar's sword; gauntlets are the Brawler's (not out yet). Non-weapons fit every class.
+const WEAPON_CLASS: Record<string, string> = {
+  Greatsword: "Gladiator",
+  Sword: "Templar",
+  Guarder: "Templar",
+  Dagger: "Assassin",
+  Bow: "Ranger",
+  Magicbook: "Sorcerer",
+  Orb: "Spiritmaster",
+  Mace: "Cleric",
+  Staff: "Chanter",
+  Gauntlet: "Brawler",
+};
+const SOURCE_TYPES = ["monster", "quest", "dungeon", "craft", "shop", "container", "gather", "event", "achievement"];
+type Filters = { q: string; kind: string; slot: string; cls: string; grades: string[]; min: string; max: string; trade: string; faction: string; sources: string[] };
+const NO_FILTERS: Filters = { q: "", kind: "", slot: "", cls: "", grades: [], min: "", max: "", trade: "", faction: "", sources: [] };
+
+function ItemList({ t, f, setF, onPick }: { t: T; f: Filters; setF: (f: Filters) => void; onPick: (r: ListRow) => void }) {
+  const rows = useGd(() => gd.list("item"), "item");
+  const set = (patch: Partial<Filters>) => setF({ ...f, ...patch });
+  const words = f.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const min = f.min === "" ? null : Number(f.min);
+  const max = f.max === "" ? null : Number(f.max);
+  const found = rows.data?.filter((r) => {
+    if (f.kind && !KINDS[f.kind].includes(r.kind ?? "")) return false;
+    if (f.slot && r.kind !== f.slot) return false;
+    const owner = WEAPON_CLASS[r.kind ?? ""];
+    if (f.cls && owner && owner !== f.cls) return false;
+    if (f.grades.length && !f.grades.includes(r.grade ?? "")) return false;
+    // A level range leaves out items without a level (consumables, materials).
+    if (min != null && (r.level == null || r.level < min)) return false;
+    if (max != null && (r.level == null || r.level > max)) return false;
+    if (f.trade && !TRADES[f.trade].includes(r.exchange ?? "")) return false;
+    if (f.faction && r.race !== FACTIONS[f.faction] && r.race !== "All" && r.race !== "None") return false;
+    if (f.sources.length && !(r.sources ?? "").split(",").some((x) => f.sources.includes(x))) return false;
+    const hay = `${r.name ?? ""} ${r.kind ?? ""} ${r.id}`.toLowerCase();
+    return words.every((w) => hay.includes(w));
+  });
+  const active = JSON.stringify(f) !== JSON.stringify(NO_FILTERS);
+  const slots = f.kind && SLOTS[f.kind];
+
+  return (
+    <div className="wFiltered">
+      <div style={{ minWidth: 0 }}>
+        <FilterBox t={t} q={f.q} setQ={(q) => set({ q })} count={found?.length} />
+        {!found ? (
+          <DataState t={t} error={rows.error} retry={rows.retry} />
+        ) : found.length === 0 ? (
+          <None>{t("database.noMatch")}</None>
+        ) : (
+          <DbList key={JSON.stringify(f)} t={t} rows={found} onPick={onPick} />
+        )}
+      </div>
+      <aside className="card wFilters" aria-label={t("database.filters")}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+          <h3 className="wLabel" style={{ margin: 0 }}>
+            {t("database.filters")}
+          </h3>
+          <button type="button" className="linkBtn" disabled={!active} onClick={() => setF(NO_FILTERS)}>
+            {t("database.reset")}
+          </button>
+        </div>
+        <div className="wFilterGroup" role="group" aria-label={t("database.category")}>
+          <span>{t("database.category")}</span>
+          <div>
+            {["", ...Object.keys(KINDS)].map((k) => (
+              <button key={k} type="button" className="wChip" aria-pressed={f.kind === k} onClick={() => set({ kind: k, slot: "" })}>
+                {t(`database.kind.${k || "all"}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+        {slots && (
+          <label className="field">
+            {t("world.gear.slot")}
+            <select className="input sm" value={f.slot} onChange={(e) => set({ slot: e.target.value })}>
+              <option value="">{t("world.gear.allSlots")}</option>
+              {slots.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <div className="wFilterGroup" role="group" aria-label={t("char.class")}>
+          <span>{t("char.class")}</span>
+          <div>
+            {["", ...RELEASED_CLASSES].map((c) => (
+              <button key={c} type="button" className="wChip" aria-pressed={f.cls === c} onClick={() => set({ cls: c })} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                {c && <ClassAvatar cls={c} size={18} />}
+                {c || t("database.kind.all")}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="wFilterGroup" role="group" aria-label={t("world.gear.grade")}>
+          <span>{t("world.gear.grade")}</span>
+          <div>
+            {GRADES.map((g) => (
+              <button
+                key={g}
+                type="button"
+                className="wChip"
+                aria-pressed={f.grades.includes(g)}
+                style={{ color: gradeColor(g) }}
+                onClick={() => set({ grades: f.grades.includes(g) ? f.grades.filter((x) => x !== g) : [...f.grades, g] })}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="wFilterGroup" role="group" aria-label={t("world.gear.level")}>
+          <span>{t("world.gear.level")}</span>
+          <div style={{ flexWrap: "nowrap", alignItems: "center" }}>
+            <input className="input sm mono" type="number" min={0} inputMode="numeric" value={f.min} onChange={(e) => set({ min: e.target.value })} placeholder={t("database.min")} aria-label={t("database.minLevel")} />
+            <span aria-hidden="true">-</span>
+            <input className="input sm mono" type="number" min={0} inputMode="numeric" value={f.max} onChange={(e) => set({ max: e.target.value })} placeholder={t("database.max")} aria-label={t("database.maxLevel")} />
+          </div>
+        </div>
+        <div className="wFilterGroup" role="group" aria-label={t("world.item.trade")}>
+          <span>{t("world.item.trade")}</span>
+          <div>
+            {["", ...Object.keys(TRADES)].map((k) => (
+              <button key={k} type="button" className="wChip" aria-pressed={f.trade === k} onClick={() => set({ trade: k })}>
+                {t(`database.trade.${k || "all"}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="wFilterGroup" role="group" aria-label={t("roster.faction")}>
+          <span>{t("roster.faction")}</span>
+          <div>
+            {["", ...Object.keys(FACTIONS)].map((k) => (
+              <button key={k} type="button" className="wChip" aria-pressed={f.faction === k} onClick={() => set({ faction: k })}>
+                {k ? t(`collections.${k}`) : t("database.kind.all")}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="wFilterGroup" role="group" aria-label={t("world.item.sources")}>
+          <span>{t("world.item.sources")}</span>
+          <div>
+            {SOURCE_TYPES.map((k) => (
+              <button
+                key={k}
+                type="button"
+                className="wChip"
+                aria-pressed={f.sources.includes(k)}
+                onClick={() => set({ sources: f.sources.includes(k) ? f.sources.filter((x) => x !== k) : [...f.sources, k] })}
+              >
+                {t(`database.source.${k}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </aside>
+    </div>
   );
 }
 

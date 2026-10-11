@@ -154,3 +154,23 @@
     transition: none;
   }
 }
+
+/* Rankings: the whole board card opens its full view; the footer button is the keyboard path. */
+.rkCard {
+  cursor: pointer;
+}
+.rkCard:hover {
+  border-color: var(--pm-grey);
+}
+.rkMore {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 1px solid var(--pm-line);
+  font-size: 12px;
+  color: var(--pm-t2);
+}
+.rkMore:hover {
+  color: var(--pm-t1);
+}

@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties, type HTMLAttributes, type Reac
 import { invoke } from "@tauri-apps/api/core";
 import { art, CLASSES } from "../../ui";
 import { findSkill, type GameSkill } from "../../skills";
+import { gd } from "../world/db";
 import "./combat.css";
 
 // ---------- formatting (prototype pc) ----------
@@ -156,8 +157,40 @@ export type FightRecord = {
   details: { skills: FightSkill[]; healSkills?: FightSkill[] };
 };
 /** FightSummary, the fields used here. Newest first (the backend sorts by start time). */
-export type FightSummary = { id: string; bossName: string; startTimeMs: number; durationMs: number };
+export type FightSummary = { id: string; bossName: string; startTimeMs: number; durationMs: number; jobs: string[]; isTrain: boolean; mode: string; mobCode: number };
 export const getFights = () => invoke<FightSummary[]>("get_fight_history");
+/** Boss-mode fight; records saved before modes existed have no mode (boss, or train if isTrain). */
+export const isBoss = (f: FightSummary) => (f.mode ? f.mode === "boss" : !f.isTrain);
+
+/** Boss fights of one dungeon (by name, all difficulties) with at most RUN_GAP between one and the next, oldest first. */
+export type Run = { key: string; dungeon: string; fights: FightSummary[]; /** bossName → boss_index */ bosses: Record<string, number> };
+const RUN_GAP = 60 * 60e3;
+
+/** Fight id → its dungeon run, from the game data's dungeon bosses (by monster id, else by name). Empty without game data. */
+export function useRuns(fights: FightSummary[]) {
+  const [db, setDb] = useState<Awaited<ReturnType<typeof gd.dungeons>>>();
+  useEffect(() => {
+    gd.dungeons().then(setDb, () => {});
+  }, []);
+  const runs = new Map<string, Run>();
+  if (!db) return runs;
+  const names = new Map(db.dungeons.map((d) => [d.dungeon_id, d.name]));
+  let cur: Run | undefined;
+  let end = 0;
+  for (const f of [...fights].reverse()) {
+    if (!isBoss(f)) continue;
+    const b = db.bosses.find((x) => x.monster_id === String(f.mobCode)) ?? db.bosses.find((x) => !x.monster_id && x.name === f.bossName);
+    const dungeon = b && names.get(b.dungeon_id);
+    if (!b || !dungeon) continue;
+    // Fights outside dungeons (trash PVE sessions, field bosses) in between do not break a run.
+    if (!cur || cur.dungeon !== dungeon || f.startTimeMs - end > RUN_GAP) cur = { key: f.id, dungeon, fights: [], bosses: {} };
+    cur.fights.push(f);
+    cur.bosses[f.bossName] = b.boss_index;
+    end = f.startTimeMs + f.durationMs;
+    runs.set(f.id, cur);
+  }
+  return runs;
+}
 
 /** Full record of fight `id`; undefined while it loads. */
 export function useFight(id: string | undefined, onError: (e: unknown) => void) {

@@ -71,7 +71,6 @@
   "combat.nSelected": "{n} selected",
   "combat.nextAttempt": "Next attempt",
   "combat.noMatch": "No fights match these filters.",
-  "combat.onlyMe": "Only me",
   "combat.openLog": "Open log",
   "combat.openerHint": "opener (first 10 casts) · APM {apm}",
   "combat.overheal": "Overheal",
@@ -104,6 +103,7 @@
   "combat.tab.buff": "Buff timeline",
   "combat.tab.heal": "Healing",
   "combat.tab.overview": "Overview",
+  "combat.tab.rot": "Rotation",
   "combat.tab.skill": "Skills",
   "combat.tab.taken": "Damage taken",
   "combat.tab.targets": "Targets",
@@ -182,5 +182,10 @@
   "combat.stats.nPlayers": "{n} players",
   "combat.stats.distribution": "Class distribution",
   "combat.stats.trend": "Weekly trend (average DPS)",
-  "combat.stats.trendNeedsWeeks": "Logs from at least two different weeks are needed to show the trend."
+  "combat.stats.trendNeedsWeeks": "Logs from at least two different weeks are needed to show the trend.",
+  "combat.stats.topPlayers": "Best players by class",
+  "combat.rotationBtn": "Rotation",
+  "combat.bossN": "Boss {n}",
+  "combat.nBosses": "{n} bosses",
+  "combat.castOrder": "Cast order, first {n} · hits of one skill less than 1.5 s apart count as one cast"
 }

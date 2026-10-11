@@ -96,6 +96,8 @@
   "organizer.set.saveProfile": "Änderungen speichern",
   "organizer.set.connectedAccounts": "Verbundene Konten",
   "organizer.set.patreonHint": "Unterstütze die Server für Logs, Ranglisten und geteilte Builds",
+  "organizer.set.autoUpload": "Boss-Kills automatisch hochladen",
+  "organizer.set.autoUploadHint": "Boss-Kills gehen von selbst online. Online-Logs sind öffentlich und enthalten die Namen der Spieler deiner Gruppe. Erfordert die PowerMeter-Anmeldung.",
   "organizer.set.becomeSupporter": "Supporter werden",
   "organizer.set.exportAll": "Alles exportieren",
   "organizer.set.exportAllHint": "Charaktere, Builds, Aufgaben und Einstellungen",

@@ -49,6 +49,7 @@ const createPmWidget = (app) => {
   const moves = [
     [document.querySelector(".battleTime"), $(".pmBarTitle"), "before"],
     [document.querySelector(".targetModeBtn"), $(".pmBerserk"), "after"],
+    [$(".pmLiveResetBtn"), document.querySelector(".targetModeBtn"), "after"],
     [document.querySelector(".bossName"), $(".pmHpKind"), "after"],
   ]
     .filter(([el, anchor]) => el && anchor)
@@ -352,6 +353,10 @@ const createPmWidget = (app) => {
     if (lastFight?.userRow) app.openRowDetailsWindow(lastFight.userRow);
   });
   $(".pmDiagnoseBtn")?.addEventListener("click", () => window.javaBridge?.openSettingsWindow?.());
+  // Fight over: the summary's Reset clears the meter like the old header reset.
+  meter.querySelectorAll(".pmEndResetBtn, .pmLiveResetBtn").forEach((btn) =>
+    btn.addEventListener("click", () => app.refreshDamageData({ reason: "fight summary reset" }))
+  );
 
   // --- render
   const setText = (sel, text) => {

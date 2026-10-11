@@ -38,8 +38,8 @@ import {
   SectionHead,
   useMem,
   useToast,
-  type BuildData,
   type BuildSrc,
+  type GearSet,
 } from "./characters/shared";
 import { onePerPiece } from "./gearviewer";
 import { DataState, GameIcon, gd, gradeColor, openEntry, useGd, useIcons } from "./world/db";
@@ -64,7 +64,6 @@ const SLOT_GROUPS: [group: string, slots: [id: string, accepts: string[]][]][] =
   ["arcana", ["ArcanaBell", "ArcanaCompass", "ArcanaGrail", "ArcanaMirror", "ArcanaParchment"].map((s) => [s, [s]])],
 ];
 const SLOTS = SLOT_GROUPS.flatMap(([, list]) => list);
-type Gear = NonNullable<BuildData["gear"]>;
 /** The level the builder starts at when the build has none saved. */
 const DEFAULT_LEVEL = 45;
 
@@ -104,37 +103,49 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const nameField = draft.of === src.t ? draft.v : src.t;
   const [toast, showToast] = useToast();
 
-  // Level and gear of this build: saved in pm.buildData, edited here until Save (one build at a time).
+  // Level and gear sets of this build: saved in pm.buildData, edited here until Save (one build at a time).
   const allData = readBuildData(settings[BUILD_DATA_KEY]);
   const saved = allData[src.t] ?? {};
   const charLevel = chars.find((c) => c.id === (src.char ?? activeId(settings, chars)))?.level;
-  const [edit, setEdit] = useMem<{ t: string; lvl: number; gear: Gear } | null>("bEdit", null);
-  const cur = edit?.t === src.t ? edit : { t: src.t, lvl: saved.lvl ?? charLevel ?? DEFAULT_LEVEL, gear: saved.gear ?? {} };
+  const [edit, setEdit] = useMem<{ t: string; lvl: number; gear: GearSet; want?: GearSet } | null>("bEdit", null);
+  const cur = edit?.t === src.t ? edit : { t: src.t, lvl: saved.lvl ?? charLevel ?? DEFAULT_LEVEL, gear: saved.gear ?? {}, want: saved.want };
   const update = (p: Partial<typeof cur>) => setEdit({ ...cur, ...p });
   const storeData = (title: string, from?: string) => {
-    const next = { ...allData, [title]: { lvl: cur.lvl, gear: cur.gear } };
+    const next = { ...allData, [title]: { lvl: cur.lvl, gear: cur.gear, want: cur.want } };
     if (from !== undefined && from !== title) delete next[from];
     setEdit({ ...cur, t: title });
     saveSetting(BUILD_DATA_KEY, JSON.stringify(next)).catch(onError);
   };
   const [slot, setSlot] = useMem("bSlot", "weapon");
+  // Gear set the slots, the Equipment tab, the stats and the estimates show: the worn one or the target one.
+  const [which, setWhich] = useMem<"gear" | "want">("bSet", "gear");
+  const want = cur.want ?? cur.gear; // the target starts as what you wear
+  const shown = which === "gear" ? cur.gear : want;
+  const differs = (s: string) => cur.gear[s]?.id !== want[s]?.id || cur.gear[s]?.enh !== want[s]?.enh;
+  const missing = SLOTS.filter(([id]) => differs(id)).length;
 
   const clsKey = src.cls.toLowerCase(); // archive class names: the app's, lowercase
   const pieces = useGd(gd.gear, "gear");
   const calcData = useGd(() => gd.builder(clsKey), clsKey);
   const planner = useGd(() => gd.planner(clsKey), clsKey);
-  const ids = [...new Set(Object.values(cur.gear).map((g) => g.id))].sort();
+  const ids = [...new Set([...Object.values(cur.gear), ...Object.values(want)].map((g) => g.id))].sort();
   const enh = useGd(() => Promise.all(ids.map(enhancementOf)).then((l) => Object.fromEntries(ids.map((id, i) => [id, l[i]]))), ids.join("|"));
   const byId = useMemo(() => new Map((pieces.data ?? []).map((p) => [p.id, p])), [pieces.data]);
-  const equipped: (Equipped & { slot: string })[] = Object.entries(cur.gear).flatMap(([s, g]) => {
-    const piece = byId.get(g.id);
-    if (!piece) return [];
-    const bonus = (enh.data?.[g.id] ?? []).filter((v) => v.level === g.enh).map((v) => [v.stat_key, statValue(v.value_raw!, v.percent === 1)] as [string, number]);
-    return [{ slot: s, piece, enh: g.enh, bonus }];
-  });
+  const equippedOf = (gear: GearSet): (Equipped & { slot: string })[] =>
+    Object.entries(gear).flatMap(([s, g]) => {
+      const piece = byId.get(g.id);
+      if (!piece) return [];
+      const bonus = (enh.data?.[g.id] ?? []).filter((v) => v.level === g.enh).map((v) => [v.stat_key, statValue(v.value_raw!, v.percent === 1)] as [string, number]);
+      return [{ slot: s, piece, enh: g.enh, bonus }];
+    });
+  const worn = equippedOf(cur.gear);
+  const equipped = which === "gear" ? worn : equippedOf(shown);
   const nodes = useMemo(() => (planner.data ? plannerNodes(planner.data) : []), [planner.data]);
   const plan = useMemo(() => planTotals(nodes, savedNodes(readPlans(settings[PLAN_KEY]), src.cls)), [nodes, settings[PLAN_KEY], src.cls]); // eslint-disable-line react-hooks/exhaustive-deps
-  const totals = calcData.data ? buildStats(calcData.data, cur.lvl, equipped, plan) : {};
+  const totalsOf = (gear: (Equipped & { slot: string })[]) => (calcData.data ? buildStats(calcData.data, cur.lvl, gear, plan) : {});
+  const totals = totalsOf(equipped);
+  const wornTotals = which === "want" ? totalsOf(worn) : undefined;
+  const wornHere = worn.find((x) => x.slot === slot);
   const est = calcData.data && estimates(totals, calcData.data.skills);
   const levels = calcData.data?.base.map((b) => b.level) ?? [];
   const icons = useIcons(equipped.map((e) => e.piece.icon));
@@ -377,14 +388,36 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
           <DataState t={t} error={pieces.error ?? calcData.error} retry={() => (pieces.retry(), calcData.retry())} />
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <div className="chSeg" role="group" aria-label={t("characters.builder.set.label")}>
+                {(["gear", "want"] as const).map((k) => (
+                  <button key={k} type="button" aria-pressed={which === k} onClick={() => setWhich(k)}>
+                    {t(`characters.builder.set.${k}`)}
+                  </button>
+                ))}
+              </div>
+              <span style={{ fontSize: 12, color: "var(--pm-t2)" }}>
+                {which === "gear" ? t("characters.builder.set.gearHint") : t("characters.builder.set.wantHint", { n: missing })}
+              </span>
+            </div>
             {SLOT_GROUPS.map(([group, list]) => (
               <section key={group} className="bSlots">
                 <SectionHead title={t(`planner.builder.group.${group}`)} style={{ marginBottom: 10 }} />
                 <div className="bSlotGrid">
                   {list.map(([id]) => {
                     const e = equipped.find((x) => x.slot === id);
+                    const diff = which === "want" && differs(id);
                     return (
-                      <button key={id} type="button" className="chBtnReset bSlot" aria-pressed={slot === id} onClick={() => (setSlot(id), setTab("equip"))}>
+                      <button
+                        key={id}
+                        type="button"
+                        className="chBtnReset bSlot"
+                        data-diff={diff || undefined}
+                        title={diff ? t("characters.builder.set.differs") : undefined}
+                        aria-pressed={slot === id}
+                        onClick={() => (setSlot(id), setTab("equip"))}
+                      >
+                        {diff && <span className="srOnly">{t("characters.builder.set.differs")}</span>}
                         <GameIcon url={e?.piece.icon ? icons[e.piece.icon] : undefined} grade={e?.piece.grade} size={38} glyph={<span />} />
                         <span style={{ minWidth: 0, flex: 1 }}>
                           <span style={{ fontSize: 10, color: "var(--pm-t3)", display: "flex", gap: 6 }}>
@@ -422,12 +455,17 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
                 slot={slot}
                 pieces={pieces.data ?? []}
                 equipped={equipped.find((x) => x.slot === slot)}
-                levels={cur.gear[slot] ? enh.data?.[cur.gear[slot].id] : undefined}
+                levels={shown[slot] ? enh.data?.[shown[slot].id] : undefined}
+                wornNote={
+                  which === "want" && differs(slot)
+                    ? t("characters.builder.set.wornIs", { item: wornHere ? `${wornHere.piece.name ?? wornHere.piece.id}${wornHere.enh ? ` +${wornHere.enh}` : ""}` : t("planner.builder.empty") })
+                    : undefined
+                }
                 set={(g) => {
-                  const gear = { ...cur.gear };
-                  if (g) gear[slot] = g;
-                  else delete gear[slot];
-                  update({ gear });
+                  const next = { ...shown };
+                  if (g) next[slot] = g;
+                  else delete next[slot];
+                  update(which === "gear" ? { gear: next } : { want: next });
                 }}
                 openItem={(id) => openEntry(go, "item", id)}
               />
@@ -492,7 +530,7 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
           </div>
         </div>
       </div>
-      {calcData.data && <StatsPanel t={t} lang={lang} data={calcData.data} totals={totals} />}
+      {calcData.data && <StatsPanel t={t} lang={lang} data={calcData.data} totals={totals} base={wornTotals} />}
       {noClone && (
         <Modal
           width={420}
@@ -551,6 +589,7 @@ function EquipPanel({
   pieces,
   equipped,
   levels,
+  wornNote,
   set,
   openItem,
 }: {
@@ -560,6 +599,8 @@ function EquipPanel({
   pieces: GearPiece[];
   equipped?: Equipped;
   levels?: EnhancementValue[];
+  /** Target set only, when the slot differs: what you wear there now. */
+  wornNote?: string;
   set: (g: { id: string; enh: number } | null) => void;
   openItem: (id: string) => void;
 }) {
@@ -598,6 +639,7 @@ function EquipPanel({
         ) : (
           <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{t("planner.builder.empty")}</div>
         )}
+        {wornNote && <div style={{ fontSize: 11, color: "var(--pm-t2)", marginTop: 6 }}>{wornNote}</div>}
       </div>
 
       {p && equipped && (
@@ -664,14 +706,17 @@ function EquipPanel({
   );
 }
 
-/** Bottom "Statistics" panel: every stat the build has, grouped as in the stat dictionary, with a filter. */
-function StatsPanel({ t, lang, data, totals }: { t: PageProps["t"]; lang: string; data: BuilderData; totals: Record<string, number> }) {
+/**
+ * Bottom "Statistics" panel: every stat the build has, grouped as in the stat dictionary, with a filter.
+ * `base` (target set shown): the worn set's totals, each stat then shows its change against them.
+ */
+function StatsPanel({ t, lang, data, totals, base }: { t: PageProps["t"]; lang: string; data: BuilderData; totals: Record<string, number>; base?: Record<string, number> }) {
   const [grp, setGrp] = useMem("bStatGrp", "");
   const [q, setQ] = useState("");
   const dict = new Map(data.stats.map((s) => [s.stat_key, s]));
-  const rows = Object.entries(totals)
-    .filter(([, v]) => v !== 0)
-    .map(([k, v]) => ({ k, v, d: dict.get(k), g: dict.get(k)?.grp ?? "Other" }));
+  const rows = [...new Set([...Object.keys(totals), ...Object.keys(base ?? {})])]
+    .map((k) => ({ k, v: totals[k] ?? 0, delta: base ? (totals[k] ?? 0) - (base[k] ?? 0) : 0, d: dict.get(k), g: dict.get(k)?.grp ?? "Other" }))
+    .filter((r) => r.v !== 0 || r.delta !== 0);
   const groups = [...new Set(rows.map((r) => r.g))].sort();
   const words = q.trim().toLowerCase();
   const shown = rows.filter((r) => (!grp || r.g === grp) && (r.d?.name ?? r.k).toLowerCase().includes(words));
@@ -680,6 +725,7 @@ function StatsPanel({ t, lang, data, totals }: { t: PageProps["t"]; lang: string
     <section style={{ marginTop: 12, background: "var(--pm-s1)", border: "1px solid var(--pm-line)", borderRadius: 8, padding: "12px 14px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
         <h2 style={{ fontWeight: 500, fontSize: 14 }}>{t("planner.builder.stats")}</h2>
+        {base && <span style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("characters.builder.set.deltaNote")}</span>}
         <div role="group" aria-label={t("planner.builder.stats")} style={{ display: "flex", gap: 5, flexWrap: "wrap", flex: 1 }}>
           {["", ...groups].map((g) => (
             <button key={g} type="button" className="wChip" style={{ height: 26, fontSize: 11 }} aria-pressed={grp === g} onClick={() => setGrp(g)}>
@@ -708,6 +754,12 @@ function StatsPanel({ t, lang, data, totals }: { t: PageProps["t"]; lang: string
                     <span className="mono">
                       {r.v.toLocaleString(lang, { maximumFractionDigits: 2 })}
                       {r.d?.percent ? "%" : ""}
+                      {Math.abs(r.delta) >= 0.005 && (
+                        <span style={{ marginLeft: 6, color: r.delta > 0 ? "var(--pm-okt)" : "var(--pm-err)" }}>
+                          {r.delta.toLocaleString(lang, { maximumFractionDigits: 2, signDisplay: "always" })}
+                          {r.d?.percent ? "%" : ""}
+                        </span>
+                      )}
                     </span>
                   </div>
                 ))}

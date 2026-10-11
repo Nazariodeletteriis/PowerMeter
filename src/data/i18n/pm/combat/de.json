@@ -71,7 +71,6 @@
   "combat.nSelected": "{n} ausgewählt",
   "combat.nextAttempt": "Nächster Versuch",
   "combat.noMatch": "Keine Kämpfe entsprechen diesen Filtern.",
-  "combat.onlyMe": "Nur ich",
   "combat.openLog": "Log öffnen",
   "combat.openerHint": "Opener (erste 10 Casts) · APM {apm}",
   "combat.overheal": "Overheal",
@@ -104,6 +103,7 @@
   "combat.tab.buff": "Buff-Timeline",
   "combat.tab.heal": "Heilung",
   "combat.tab.overview": "Übersicht",
+  "combat.tab.rot": "Rotation",
   "combat.tab.skill": "Skills",
   "combat.tab.taken": "Erhaltener Schaden",
   "combat.tab.targets": "Ziele",
@@ -182,5 +182,10 @@
   "combat.stats.nPlayers": "{n} Spieler",
   "combat.stats.distribution": "Klassenverteilung",
   "combat.stats.trend": "Wöchentlicher Verlauf (durchschnittlicher DPS)",
-  "combat.stats.trendNeedsWeeks": "Für den Verlauf werden Logs aus mindestens zwei verschiedenen Wochen benötigt."
+  "combat.stats.trendNeedsWeeks": "Für den Verlauf werden Logs aus mindestens zwei verschiedenen Wochen benötigt.",
+  "combat.stats.topPlayers": "Beste Spieler pro Klasse",
+  "combat.rotationBtn": "Rotation",
+  "combat.bossN": "Boss {n}",
+  "combat.nBosses": "{n} Bosse",
+  "combat.castOrder": "Cast-Reihenfolge, erste {n} · Treffer einer Fertigkeit im Abstand unter 1,5 s zählen als ein Cast"
 }

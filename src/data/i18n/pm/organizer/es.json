@@ -96,6 +96,8 @@
   "organizer.set.saveProfile": "Guardar cambios",
   "organizer.set.connectedAccounts": "Cuentas vinculadas",
   "organizer.set.patreonHint": "Apoya los servidores de registros, clasificaciones y builds compartidas",
+  "organizer.set.autoUpload": "Subir automáticamente las muertes de jefes",
+  "organizer.set.autoUploadHint": "Las muertes de jefes se suben solas. Los logs en línea son públicos y contienen los nombres de los jugadores de tu grupo. Requiere iniciar sesión en PowerMeter.",
   "organizer.set.becomeSupporter": "Hazte supporter",
   "organizer.set.exportAll": "Exportar todo",
   "organizer.set.exportAllHint": "Personajes, builds, tareas y ajustes",

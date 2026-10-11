@@ -11,7 +11,7 @@ use crate::entity::personal_data::PersonalData;
 use crate::entity::summon_resolver;
 use crate::i18n::lookup::{NpcLookup, SkillLookup};
 
-/// Train mob NPC type codes.
+/// Training dummy NPC type codes: never a boss, whatever the NPC data says.
 const TRAIN_MOB_CODES: &[i32] = &[
     2300229, 2300919, 2310229, 2310919, 2320229, 2320919,
     2400032, 2400392, 2500075, 2500076, 2701376,
@@ -28,7 +28,6 @@ pub enum TargetSelectionMode {
     MostRecent,
     LastHitByMe,
     AllTargets,
-    TrainTargets,
     PvpTargets,
     PveTargets,
 }
@@ -41,7 +40,8 @@ impl TargetSelectionMode {
             "mostRecent" => Self::MostRecent,
             "lastHitByMe" => Self::LastHitByMe,
             "allTargets" => Self::AllTargets,
-            "trainTargets" => Self::TrainTargets,
+            // Training dummies count as PVE now; an old saved "trainTargets" lands there.
+            "trainTargets" => Self::PveTargets,
             "pvpTargets" => Self::PvpTargets,
             "pveTargets" => Self::PveTargets,
             _ => Self::LastHitByMe,
@@ -55,7 +55,6 @@ impl TargetSelectionMode {
             Self::MostRecent => "mostRecent",
             Self::LastHitByMe => "lastHitByMe",
             Self::AllTargets => "allTargets",
-            Self::TrainTargets => "trainTargets",
             Self::PvpTargets => "pvpTargets",
             Self::PveTargets => "pveTargets",
         }
@@ -66,7 +65,6 @@ impl TargetSelectionMode {
     fn kind(&self) -> Option<&'static str> {
         match self {
             Self::BossTargets => Some("boss"),
-            Self::TrainTargets => Some("train"),
             Self::PvpTargets => Some("pvp"),
             Self::PveTargets => Some("pve"),
             _ => None,
@@ -167,10 +165,15 @@ impl DpsCalculator {
             self.last_damage_gen = -1;
         }
 
-        // If no new damage since last cycle, return cached result
+        // If no new damage since last cycle, return cached result. The stagger
+        // gauge moves without damage (it first shows up, breaks and refills on
+        // its own packets and timer), so it is read fresh even then.
         let current_gen = self.data_storage.damage_generation();
-        if current_gen == self.last_damage_gen && self.last_dps_snapshot.is_some() {
-            return self.last_dps_snapshot.as_ref().unwrap().clone();
+        if current_gen == self.last_damage_gen {
+            if let Some(snapshot) = self.last_dps_snapshot.as_mut() {
+                snapshot.target_stagger = self.data_storage.get_stagger(self.current_target);
+                return snapshot.clone();
+            }
         }
         self.last_damage_gen = current_gen;
 
@@ -540,7 +543,6 @@ impl DpsCalculator {
                 (all, "All Targets".to_string(), 0)
             }
             // get_dps already narrowed combat_data to the mode's targets.
-            TargetSelectionMode::TrainTargets => (combat_data.keys().cloned().collect(), "Train".to_string(), 0),
             TargetSelectionMode::PvpTargets => (combat_data.keys().cloned().collect(), "PvP".to_string(), 0),
             TargetSelectionMode::PveTargets => (combat_data.keys().cloned().collect(), "PVE".to_string(), 0),
             TargetSelectionMode::LastHitByMe => {
@@ -583,15 +585,16 @@ impl DpsCalculator {
     }
 
     /// The one meter mode a target's damage belongs to: "pvp" for a player,
-    /// "train" for a training dummy, "boss" for an NPC flagged boss in the NPC
-    /// data, "pve" for every other mob (including one whose spawn we never saw).
+    /// "boss" for an NPC flagged boss in the NPC data, "pve" for everything else
+    /// (training dummies and mobs whose spawn we never saw included).
     pub fn target_kind(&self, target_id: i32, mob_data: &HashMap<i32, i32>, pvp_ids: &HashSet<i32>) -> &'static str {
         if pvp_ids.contains(&target_id) {
             return "pvp";
         }
         match mob_data.get(&target_id) {
-            Some(&code) if self.npc_lookup.is_dummy(code) || TRAIN_MOB_CODES.contains(&code) => "train",
-            Some(&code) if self.npc_lookup.is_boss(code) => "boss",
+            Some(&code) if self.npc_lookup.is_boss(code)
+                && !self.npc_lookup.is_dummy(code)
+                && !TRAIN_MOB_CODES.contains(&code) => "boss",
             _ => "pve",
         }
     }
@@ -672,7 +675,7 @@ impl DpsCalculator {
         let boss_target_ids: Vec<i32> = combat_data.keys()
             .filter(|&&tid| {
                 !self.saved_boss_targets.contains(&tid)
-                    && matches!(self.target_kind(tid, &mob_data, &pvp_ids), "boss" | "train")
+                    && self.target_kind(tid, &mob_data, &pvp_ids) == "boss"
             })
             .cloned()
             .collect();
@@ -738,7 +741,7 @@ impl DpsCalculator {
             }
             let ids: Vec<i32> = session.keys().copied().collect();
             let details = self.merged_details(&combat_data, &ids, None);
-            records.push(self.build_record(
+            let record = self.build_record(
                 format!("auto_{}_{}", kind, start),
                 kind.to_uppercase(),
                 0,
@@ -749,7 +752,12 @@ impl DpsCalculator {
                 total,
                 details,
                 &combat_data,
-            ));
+            );
+            // No player of a known class in it: someone else's DoT ticking in town,
+            // not a session anyone wants in the history (nor opened by the report).
+            if !record.jobs.is_empty() {
+                records.push(record);
+            }
             if is_ended {
                 self.saved_boss_targets.insert(first_id);
             }
@@ -790,14 +798,10 @@ impl DpsCalculator {
             }
         }
 
-        let local_id = self.data_storage.local_player_id().unwrap_or(-1) as i32;
+        // Real in-game names for everyone (rankings and class stats show them, as in-game);
+        // records saved up to 0.4.3 masked all but the local player's.
         let actors: Vec<DetailsActorSummary> = record_actors.iter()
             .map(|(&id, (nick, job))| {
-                let display_nick = if id == local_id {
-                    nick.clone()
-                } else {
-                    crate::entity::fight_record::obscure_nickname(nick)
-                };
                 let job_class = JobClass::convert_from_skill(
                     details.skills.iter()
                         .find(|s| s.actor_id == id && !s.job.is_empty())
@@ -816,7 +820,7 @@ impl DpsCalculator {
                 }
                 DetailsActorSummary {
                     actor_id: id,
-                    nickname: display_nick,
+                    nickname: nick.clone(),
                     job: job.clone(),
                     job_id: job_class.map(|j| j.class_prefix()).unwrap_or(0),
                     party_heal,
@@ -855,6 +859,7 @@ impl DpsCalculator {
             app_version: crate::entity::fight_record::APP_VERSION.to_string(),
             mob_code,
             mode: mode.to_string(),
+            killed: (mode == "boss").then(|| self.data_storage.is_entity_dead(target_id)),
         }
     }
 
@@ -1499,7 +1504,7 @@ mod mode_tests {
         let pvp = HashSet::from([FOE]);
         assert_eq!(calc.target_kind(WOLF_A, &mob, &pvp), "pve");
         assert_eq!(calc.target_kind(BOSS, &mob, &pvp), "boss");
-        assert_eq!(calc.target_kind(DUMMY, &mob, &pvp), "train");
+        assert_eq!(calc.target_kind(DUMMY, &mob, &pvp), "pve", "a training dummy is PVE");
         assert_eq!(calc.target_kind(FOE, &mob, &pvp), "pvp");
     }
 
@@ -1509,13 +1514,11 @@ mod mode_tests {
         let t = now() - 60_000;
         hit_at(&s, ME, WOLF_A, 1000, t);
         assert_eq!(mine(&mut calc, "bossTargets"), 0.0, "a normal mob must not show in Boss");
-        assert_eq!(mine(&mut calc, "trainTargets"), 0.0);
         assert_eq!(mine(&mut calc, "pvpTargets"), 0.0);
         assert_eq!(mine(&mut calc, "pveTargets"), 1000.0);
         hit_at(&s, ME, DUMMY, 300, t + 1000);
         assert_eq!(mine(&mut calc, "bossTargets"), 0.0, "a training dummy is not a boss");
-        assert_eq!(mine(&mut calc, "trainTargets"), 300.0);
-        assert_eq!(mine(&mut calc, "pveTargets"), 1000.0);
+        assert_eq!(mine(&mut calc, "pveTargets"), 1300.0, "the dummy joins the PVE session");
     }
 
     #[test]
@@ -1567,6 +1570,20 @@ mod mode_tests {
         let d = calc.get_dps();
         assert_eq!(d.recording_kind, "pve");
         assert_eq!(d.recording_name, "Wolf");
+    }
+
+    /// The gauge's own packets carry no damage, so the cached snapshot must not
+    /// hide them (the 2026-10-11 log: the gauge appeared 0.5 s late).
+    #[test]
+    fn stagger_updates_without_new_damage() {
+        let (s, mut calc) = setup();
+        calc.set_target_selection_mode("bossTargets");
+        hit_at(&s, ME, BOSS, 100, now());
+        assert_eq!(calc.get_dps().target_stagger, None);
+        s.set_stagger(BOSS, 30, 40);
+        assert_eq!(calc.get_dps().target_stagger.map(|g| g.cur), Some(30));
+        s.break_stagger(BOSS);
+        assert_eq!(calc.get_dps().target_stagger.map(|g| g.broken), Some(true));
     }
 
     #[test]
@@ -1625,8 +1642,8 @@ mod mode_tests {
         let recs = calc.snapshot_boss_fights_force();
         let mode_of = |m: &str| recs.iter().find(|r| r.mode == m).map(|r| r.total_damage);
         assert_eq!(mode_of("boss"), Some(700));
-        assert_eq!(mode_of("train"), Some(35));
-        assert_eq!(mode_of("pve"), Some(70));
+        assert_eq!(mode_of("train"), None);
+        assert_eq!(mode_of("pve"), Some(105));
     }
 
     #[test]

@@ -71,7 +71,6 @@
   "combat.nSelected": "{n} selezionati",
   "combat.nextAttempt": "Tentativo successivo",
   "combat.noMatch": "Nessun combattimento con questi filtri.",
-  "combat.onlyMe": "Solo io",
   "combat.openLog": "Apri log",
   "combat.openerHint": "apertura (primi 10 cast) · APM {apm}",
   "combat.overheal": "Overheal",
@@ -104,6 +103,7 @@
   "combat.tab.buff": "Timeline buff",
   "combat.tab.heal": "Cure",
   "combat.tab.overview": "Panoramica",
+  "combat.tab.rot": "Rotazione",
   "combat.tab.skill": "Skill",
   "combat.tab.taken": "Danno ricevuto",
   "combat.tab.targets": "Bersagli",
@@ -182,5 +182,10 @@
   "combat.stats.nPlayers": "{n} giocatori",
   "combat.stats.distribution": "Distribuzione delle classi",
   "combat.stats.trend": "Andamento settimanale (DPS medio)",
-  "combat.stats.trendNeedsWeeks": "Servono log di almeno due settimane diverse per mostrare l'andamento."
+  "combat.stats.trendNeedsWeeks": "Servono log di almeno due settimane diverse per mostrare l'andamento.",
+  "combat.stats.topPlayers": "Migliori giocatori per classe",
+  "combat.rotationBtn": "Rotazione",
+  "combat.bossN": "Boss {n}",
+  "combat.nBosses": "{n} boss",
+  "combat.castOrder": "Ordine dei cast, primi {n} · i colpi della stessa skill a meno di 1,5 s contano come un cast"
 }

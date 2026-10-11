@@ -96,6 +96,8 @@
   "organizer.set.saveProfile": "Сохранить изменения",
   "organizer.set.connectedAccounts": "Привязанные аккаунты",
   "organizer.set.patreonHint": "Поддержите серверы логов, рейтингов и общих билдов",
+  "organizer.set.autoUpload": "Автоматически загружать убийства боссов",
+  "organizer.set.autoUploadHint": "Убийства боссов загружаются сами. Онлайн-логи публичны и содержат имена игроков вашей группы. Нужен вход в PowerMeter.",
   "organizer.set.becomeSupporter": "Стать supporter",
   "organizer.set.exportAll": "Экспортировать всё",
   "organizer.set.exportAllHint": "Персонажи, сборки, задачи и настройки",

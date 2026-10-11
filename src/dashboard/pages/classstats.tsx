@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { ChartBarHorizontalIcon, WarningOctagonIcon } from "@phosphor-icons/react";
-import { Card, EmptyState, fmt } from "../ui";
-import { classColor } from "./combat/parts";
+import { ArrowSquareOutIcon, ChartBarHorizontalIcon, WarningOctagonIcon } from "@phosphor-icons/react";
+import { Card, ClassAvatar, EmptyState, fmt } from "../ui";
+import { classColor, clock } from "./combat/parts";
 import "./combat/combat.css";
 import type { PageProps } from "./types";
 
@@ -12,6 +12,20 @@ type Stats = {
   bosses: { mobCode: number; name: string; logs: number }[];
   classes: { cls: string; players: number; avgDps: number }[];
   weeks: { week: string; cls: string; avgDps: number }[];
+  /** Best players per class (rank 1..5 within the class), sorted by class then rank. Missing on older servers. */
+  top?: Top[];
+};
+type Top = {
+  cls: string;
+  rank: number;
+  name: string;
+  dps: number;
+  boss: { mobCode: number; name: string };
+  durationMs: number;
+  startedAt: string;
+  region: string;
+  logId: string;
+  url: string;
 };
 const REGIONS = ["EU", "NA"];
 const PERIODS = [
@@ -20,7 +34,7 @@ const PERIODS = [
   ["all", "combat.allTime"],
 ] as const;
 
-export default function ClassStats({ t, lang }: PageProps) {
+export default function ClassStats({ t, lang, run }: PageProps) {
   const [region, setRegion] = useState("");
   const [boss, setBoss] = useState("");
   const [period, setPeriod] = useState("90");
@@ -111,6 +125,11 @@ export default function ClassStats({ t, lang }: PageProps) {
           <Card title={t("combat.stats.trend")} style={{ gridColumn: "1 / -1" }}>
             <Trend t={t} lang={lang} weeks={stats.weeks} />
           </Card>
+          {!!stats.top?.length && (
+            <Card title={t("combat.stats.topPlayers")} style={{ gridColumn: "1 / -1" }}>
+              <TopPlayers t={t} lang={lang} top={stats.top} order={stats.classes.map((c) => c.cls)} open={(url) => run(() => invoke("open_url", { url }))} />
+            </Card>
+          )}
         </div>
       )}
     </>
@@ -192,6 +211,51 @@ function Trend({ t, lang, weeks }: { t: PageProps["t"]; lang: string; weeks: Sta
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+/** The best players of each class, classes in the average-DPS order of the bars above. */
+function TopPlayers({ t, lang, top, order, open }: { t: PageProps["t"]; lang: string; top: Top[]; order: string[]; open: (url: string) => void }) {
+  const classes = [...new Set([...order, ...top.map((p) => p.cls)])].filter((c) => top.some((p) => p.cls === c));
+  const when = new Intl.DateTimeFormat(lang, { day: "2-digit", month: "2-digit", year: "numeric" });
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "16px 24px" }}>
+      {classes.map((cls) => (
+        <section key={cls} aria-label={cls}>
+          <h3 style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500, marginBottom: 6 }}>
+            <ClassAvatar cls={cls} size={20} />
+            {cls}
+          </h3>
+          <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            {top
+              .filter((p) => p.cls === cls)
+              .map((p) => (
+                <li
+                  key={p.logId + p.name}
+                  title={`${p.region} · ${when.format(new Date(p.startedAt))}`}
+                  style={{ display: "grid", gridTemplateColumns: "20px minmax(0, 1fr) 72px 28px", gap: 10, alignItems: "center", minHeight: 36, borderTop: "1px solid var(--pm-line)" }}
+                >
+                  <span className="num" style={{ fontSize: 12, color: "var(--pm-t3)" }}>
+                    {p.rank}
+                  </span>
+                  <span style={{ minWidth: 0 }}>
+                    <span style={{ display: "block", fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</span>
+                    <span style={{ display: "block", fontSize: 11, color: "var(--pm-t3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {p.boss.name} · {clock(p.durationMs / 1000)}
+                    </span>
+                  </span>
+                  <span className="num" style={{ fontSize: 13, textAlign: "right" }}>
+                    {fmt(p.dps, lang)}
+                  </span>
+                  <button type="button" className="btn sm" title={t("combat.openLog")} aria-label={`${t("combat.openLog")}: ${p.name}`} onClick={() => open(p.url)}>
+                    <ArrowSquareOutIcon aria-hidden="true" />
+                  </button>
+                </li>
+              ))}
+          </ol>
+        </section>
+      ))}
     </div>
   );
 }

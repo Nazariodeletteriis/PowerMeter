@@ -32,6 +32,11 @@ pub struct FightRecord {
     /// Empty on records saved before modes existed (boss, or train if is_train).
     #[serde(default)]
     pub mode: String,
+    /// Boss fights: whether the game reported the boss's death (kill vs wipe, for the rankings).
+    /// None on other modes and on records saved before it existed: never written as false, so the
+    /// server can still judge those by boss HP.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub killed: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -58,24 +63,4 @@ pub struct FightSummary {
     /// Empty on records saved before modes existed (boss, or train if is_train).
     #[serde(default)]
     pub mode: String,
-}
-
-/// Obscure a nickname for privacy: keep first char and last char, mask the middle.
-/// For CJK names (2-3 chars), keep first char, mask rest.
-/// The local player's name is NOT obscured.
-pub fn obscure_nickname(name: &str) -> String {
-    let chars: Vec<char> = name.chars().collect();
-    if chars.len() <= 1 {
-        return name.to_string();
-    }
-    if chars.len() == 2 {
-        return format!("{}*", chars[0]);
-    }
-    if chars.len() == 3 {
-        return format!("{}*{}", chars[0], chars[2]);
-    }
-    // For longer names: first 2 chars + asterisks + last char
-    let mask_len = (chars.len() - 3).min(4);
-    let mask: String = std::iter::repeat_n('*', mask_len).collect();
-    format!("{}{}{}{}", chars[0], chars[1], mask, chars[chars.len() - 1])
 }

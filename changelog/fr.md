@@ -2,6 +2,22 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.4
+
+- Nouveau : Le compteur change de mode tout seul : BOSS sur un boss, PVP contre des joueurs, PVE pour le reste.
+- Modifié : TRAIN disparaît : les mannequins comptent comme PVE, dans le widget et le tableau de bord.
+- Nouveau : Bouton RESET toujours visible dans le widget, à côté du sélecteur de mode.
+- Nouveau : Les kills de boss sont envoyés automatiquement (connecté, désactivable dans les Paramètres) ; les pages de log n'affichent que les noms des personnages.
+- Nouveau : Classements (plus gros coup, kill le plus rapide, DPS du groupe) et les meilleurs joueurs de chaque classe dans Statistiques des classes.
+- Nouveau : Onglet Rotation dans le Rapport ; le Rapport ouvre ton dernier boss avec le donjon et Boss 1/2/3.
+- Nouveau : Historique groupé par donjon, avec un vrai filtre Donjon.
+- Nouveau : Le Skill Planner remplit la barre de compétences depuis le jeu ; passifs en points, niveau 1–20.
+- Nouveau : Builder avec l'équipement actuel et souhaité et l'écart de statistiques.
+- Nouveau : Filtres d'objets (catégorie, emplacement, rang, niveau, échange, faction, source, classe) ; le Gear Viewer peut sélectionner, comparer et épingler.
+- Corrigé : Le widget ne se fige plus en changeant de mode, et la barre STAGGER se met à jour sans nouveaux dégâts.
+- Corrigé : Paquets perdus récupérés et latence réduite : le compteur suit le combat en temps réel.
+- Modifié : Marketplace supprimé.
+
 ## 0.4.3
 
 - Nouveau : Quand une mise à jour est disponible, une fenêtre s'affiche dès l'ouverture de l'app avec les boutons Mettre à jour et Notes de version.

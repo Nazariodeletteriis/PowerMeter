@@ -787,7 +787,8 @@
                       <div class="settingsDropdownMenu targetWindowDropdownMenu" role="menu"></div>
                     </div>
                   </div>
-                  <div class="settingsRow settingsRowSelect">
+                  <!-- No TRAIN mode since 0.4.4 (dummies count as PVE): kept for core.js, hidden. -->
+                  <div class="settingsRow settingsRowSelect" style="display:none">
                     <div class="settingsInfo">
                       <div class="settingsLabel" data-i18n="settings.trainingMode.label">
                         Training Mode target
@@ -928,6 +929,8 @@
           <div class="pmEndActions">
             <button type="button" class="pmFillBtn pmUploadBtn"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M178.34,165.66,160,147.31V208a8,8,0,0,1-16,0V147.31l-18.34,18.35a8,8,0,0,1-11.32-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32ZM160,40A88.08,88.08,0,0,0,81.29,88.68,64,64,0,1,0,72,216h40a8,8,0,0,0,0-16H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.12A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,100.8,66,8,8,0,0,0,3.2,15.34,7.9,7.9,0,0,0,3.2-.68A88,88,0,0,0,160,40Z"/></svg> <span class="pmUploadLabel" data-i18n="pmWidget.end.upload">Upload log</span></button>
             <button type="button" class="pmGhostBtn pmReportBtn" data-i18n="pmWidget.end.openReport">Open report</button>
+            <!-- Fight over: the meter is reset from here (the small header reset is gone). -->
+            <button type="button" class="pmGhostBtn pmEndResetBtn"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></svg> <span data-i18n="pmWidget.end.reset">Reset</span></button>
           </div>
         </div>
         <!-- PowerMeter: fight summary once the log is uploaded (design 8.4, automatic upload). -->
@@ -938,6 +941,7 @@
             <div class="pmCardSub pmUploadedSub"></div>
           </div>
           <button type="button" class="pmFillBtn pmCopyLinkBtn" data-i18n="pmWidget.end.copyLink">Copy link</button>
+          <button type="button" class="pmGhostBtn pmEndResetBtn"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></svg> <span data-i18n="pmWidget.end.reset">Reset</span></button>
         </div>
         <!-- PowerMeter: Build and Lobby modes (design 8.5, 8.6), drawn by pmWidget.js. -->
         <div class="pmOnly pmBuild"></div>
@@ -974,12 +978,18 @@
             <span class="meterTotalDmg"></span>
           </div>
           <div class="footerBtns">
-            <button
-              class="footerBtn targetModeBtn"
-              type="button"
-              aria-label="Target mode">
-              TARGET
-            </button>
+            <!-- What the meter shows. A native select: keyboard, screen readers and an
+                 OS list that may overflow the small overlay window come for free.
+                 TARGET/ALL are only reachable from Settings (default mode), hence hidden. -->
+            <select class="footerBtn targetModeBtn" aria-label="Target mode" data-i18n-aria-label="pmWidget.targetMode">
+              <option value="bossTargets">Boss</option>
+              <option value="pveTargets">PVE</option>
+              <option value="pvpTargets">PVP</option>
+              <option value="lastHitByMe" hidden>TARGET</option>
+              <option value="allTargets" hidden>ALL</option>
+            </select>
+            <!-- PowerMeter: a reset anyone can find during the fight (the header icon is hidden). -->
+            <button type="button" class="pmOnly footerBtn pmLiveResetBtn" title="Reset the meter (Ctrl+Alt+R)" data-i18n-title="pmWidget.resetTip"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></svg> <span data-i18n="pmWidget.end.reset">Reset</span></button>
             <button
               class="footerBtn metricToggleBtn"
               type="button"

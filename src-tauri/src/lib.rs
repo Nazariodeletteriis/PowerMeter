@@ -162,6 +162,12 @@ fn get_ping(state: tauri::State<'_, AppState>) -> Option<i32> {
     state.ping_tracker.current_ping_ms()
 }
 
+/// Worn equipment and skill bar of the local character, as last seen in the packets.
+#[tauri::command]
+fn get_captured_character() -> crate::capture::equip_parser::CapturedCharacter {
+    crate::capture::equip_parser::snapshot()
+}
+
 #[tauri::command]
 fn get_capture_status(state: tauri::State<'_, AppState>) -> serde_json::Value {
     let port = state.port_detector.current_port();
@@ -1619,15 +1625,22 @@ pub fn run() {
                 },
             );
 
-            // Periodic DPS update emission (every 500ms)
+            // Periodic DPS update emission (every 250ms; the window housekeeping
+            // below keeps its 500ms tick, which its tick counts are written for)
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
-                let mut interval = tokio::time::interval(Duration::from_millis(500));
+                let mut interval = tokio::time::interval(Duration::from_millis(250));
+                // A slow cycle must not be followed by a burst of catch-up ticks.
+                interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+                let mut half_tick = false;
                 let mut tick_count: u64 = 0;
                 let mut hide_delay: u64 = 0; // ticks to wait before hiding
                 loop {
                     interval.tick().await;
-                    tick_count += 1;
+                    half_tick = !half_tick;
+                    if !half_tick {
+                        tick_count += 1;
+                    }
 
                     if let Some(state) = handle.try_state::<AppState>() {
                         let t0 = std::time::Instant::now();
@@ -1644,6 +1657,9 @@ pub fn run() {
                             tracing::warn!("Slow: lock={}ms calc={}ms emit={}ms total={}ms gen={}",
                                 lock_ms, calc_ms - lock_ms, total_ms - calc_ms, total_ms,
                                 state.data_storage.damage_generation());
+                        }
+                        if half_tick {
+                            continue;
                         }
 
                         if let Some(ping) = state.ping_tracker.current_ping_ms() {
@@ -1786,7 +1802,10 @@ pub fn run() {
                                 let records = calc.snapshot_boss_fights();
                                 drop(calc);
                                 for record in &records {
-                                    let _ = state.fight_history.save_fight(record);
+                                    // Finished boss kills also go online (own task, never blocks this loop).
+                                    if state.fight_history.save_fight(record).is_ok() {
+                                        pm_account::auto_upload(&handle_save, record);
+                                    }
                                 }
                             }
                         }
@@ -1811,6 +1830,7 @@ pub fn run() {
             update_settings,
             get_ping,
             get_capture_status,
+            get_captured_character,
             set_target_mode,
             set_character_name,
             bind_local_actor_id,
@@ -1857,6 +1877,7 @@ pub fn run() {
             pm_account::pm_set_log_visibility,
             pm_account::pm_delete_log,
             pm_account::pm_class_stats,
+            pm_account::pm_rankings,
             pm_account::pm_entitlement,
             pm_account::pm_patreon_link,
             pm_account::pm_patreon_unlink,

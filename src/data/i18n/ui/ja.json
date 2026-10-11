@@ -360,6 +360,7 @@
   },
   "pmWidget": {
     "modeLabel": "ウィジェットモード",
+    "targetMode": "ターゲットモード",
     "expand": "クリックで展開",
     "ready": "準備完了",
     "locked": "ロック中",
@@ -394,6 +395,7 @@
       "training": "トレーニング戦闘はアップロードされません",
       "signIn": "Discordでログイン",
       "openReport": "レポートを開く",
+      "reset": "リセット",
       "uploaded": "アップロード済み ✓",
       "copyLink": "リンクをコピー",
       "linkCopied": "リンクをコピーしました"
@@ -444,6 +446,7 @@
       "error": "統計を取得できません",
       "sample": "サンプル",
       "bosses": "ボス{n}体"
-    }
+    },
+    "resetTip": "メーターをリセット (Ctrl+Alt+R)"
   }
 }

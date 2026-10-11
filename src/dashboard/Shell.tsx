@@ -12,6 +12,8 @@ import {
 } from "@phosphor-icons/react";
 import type { SaveSetting, Settings } from "./App";
 import { canOpen, PLANS, useEntitlement } from "./entitlement";
+import { AutoCharacter } from "./AutoCharacter";
+import { CaptureSync } from "./CaptureSync";
 import { Home } from "./Home";
 import { Locked, TrialReminder } from "./Locked";
 import type { T } from "./i18n";
@@ -316,6 +318,8 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
         />
       )}
       {diagnosis && <Diagnosis t={t} onClose={() => setDiagnosis(false)} onError={onError} />}
+      <AutoCharacter t={t} settings={settings} save={save} capture={capture.data} go={go} onError={onError} />
+      <CaptureSync />
     </div>
   );
 }

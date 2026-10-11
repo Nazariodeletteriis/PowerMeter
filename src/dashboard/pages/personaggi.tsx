@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { CopyIcon, DownloadSimpleIcon, PlusIcon, TrashIcon, UploadSimpleIcon } from "@phosphor-icons/react";
+import { NEW_CHARACTER_KEY } from "../AutoCharacter";
 import { openBuild, OWN_BUILD } from "./characters/shared";
 import { activate, activeId, FACTIONS, newId, readCharacters, saveCharacters, type Character, type Faction } from "../characters";
 import { REGIONS } from "../Onboarding";
@@ -29,8 +30,14 @@ export default function Personaggi({ t, settings, save, run, go }: PageProps) {
   const list = readCharacters(settings);
   const active = activeId(settings, list);
   const factionName = (f: string) => t(`collections.${f}`);
-  const [adding, setAdding] = useState(false);
-  const [draft, setDraft] = useState({ name: "", cls: settings["pm.class"] || CLASS_OPTIONS[0], region: settings["pm.region"] || REGIONS[0].value, faction: "" as Faction | "", level: "" });
+  // Coming from the "create the character you are playing" prompt (AutoCharacter): open the form with its name.
+  const [fromGame] = useState(() => {
+    const name = sessionStorage.getItem(NEW_CHARACTER_KEY) ?? "";
+    sessionStorage.removeItem(NEW_CHARACTER_KEY);
+    return name.slice(0, NAME_MAX_LENGTH);
+  });
+  const [adding, setAdding] = useState(!!fromGame);
+  const [draft, setDraft] = useState({ name: fromGame, cls: settings["pm.class"] || CLASS_OPTIONS[0], region: settings["pm.region"] || REGIONS[0].value, faction: "" as Faction | "", level: "" });
   const file = useRef<HTMLInputElement>(null);
 
   const store = (next: Character[]) => run(() => saveCharacters(save, next));

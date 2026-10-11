@@ -1,0 +1,6 @@
+{
+  "autochar.title": "Personnage pas encore créé",
+  "autochar.text": "Vous jouez {name}, qui n'est pas dans vos personnages. Créez-le d'abord pour que builds, planificateur et statistiques le suivent.",
+  "autochar.later": "Plus tard",
+  "autochar.create": "Créer le personnage"
+}

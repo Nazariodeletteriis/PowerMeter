@@ -167,9 +167,8 @@ body.legacyUi .pmOnly {
      The header wraps: row one is the 38px bar, row two the title row. The bar
      colour is painted only behind row one. .headerBtns is flattened so its
      buttons line up with the rest of the bar by `order`: logo, DPS | Build,
-     status, spacer, the A2Tools actions (screenshot, suspend, history, reset,
-     settings: shown on hover, the design has no slot for them), then the
-     design's controls (class averages, lock, contrast, pill, dashboard, close). */
+     status, spacer, then the controls (settings, class averages, lock,
+     contrast, pill, dashboard, close). */
   .header {
     flex-wrap: wrap;
     align-items: center;
@@ -201,15 +200,13 @@ body.legacyUi .pmOnly {
     background: transparent;
     cursor: pointer;
   }
-  .header .bossIcon { order: 50; }
+  /* The A2Tools small actions are left out of the widget: the screenshot is
+     dropped, history lives in the dashboard, reset comes back as the big
+     button of the fight summary (and Ctrl+Alt+R). Settings stays, always
+     shown, beside the class averages; suspend only when turned on in Settings. */
+  .header :is(.bossIcon, .historyBtn, .resetBtn, .pmSep) { display: none; }
   .header .suspendBtn { order: 51; }
-  .header .historyBtn { order: 52; }
-  .header .resetBtn { order: 53; }
-  .header .settingsBtn { order: 54; }
-  /* The hover-only actions sit edge to edge (26px each), so all five fit
-     beside the design's controls at the default 520px. */
-  .header :is(.suspendBtn, .historyBtn, .resetBtn, .settingsBtn) { margin-left: -8px; }
-  .pmSep { order: 60; display: block; width: 1px; height: 14px; background: rgba(255, 255, 255, 0.3); }
+  .header .settingsBtn { order: 61; }
   .header button.pmAvgBtn {
     order: 61;
     width: 28px;
@@ -224,18 +221,13 @@ body.legacyUi .pmOnly {
   .header .pmPillBtn { order: 64; }
   .header .dashboardBtn { order: 65; }
   .header .pmCloseBtn { order: 66; }
-  .meter:not(:hover, :has(:focus-visible)) :is(.bossIcon, .suspendBtn, .historyBtn, .resetBtn, .settingsBtn, .pmSep) {
-    display: none;
-  }
-  /* The bar is one row in every mode: revealing the actions on hover must not
-     push anything onto a second line. Build and Lobby have no title row, so
-     their header never wraps, and the fight-only actions (screenshot, suspend,
-     history, reset, class averages) stay out of them. Narrow DPS widgets drop
-     the first four, as the slim layout does. */
+  /* The bar is one row in every mode. Build and Lobby have no title row, so
+     their header never wraps, and the fight-only actions (suspend, class
+     averages) stay out of them. Narrow DPS widgets drop suspend, as slim does. */
   .meter:is(.pmMode-build, .pmMode-lobby) .header { flex-wrap: nowrap; }
-  .meter:is(.pmMode-build, .pmMode-lobby) :is(.bossIcon, .suspendBtn, .historyBtn, .resetBtn, .pmAvgBtn) { display: none; }
+  .meter:is(.pmMode-build, .pmMode-lobby) :is(.suspendBtn, .pmAvgBtn) { display: none; }
   @container pmMeter (max-width: 499px) {
-    .header :is(.bossIcon, .suspendBtn, .historyBtn, .resetBtn) { display: none; }
+    .header .suspendBtn { display: none; }
     .header .settingsBtn { margin-left: 0; }
   }
   .pmTabs {
@@ -459,7 +451,9 @@ body.legacyUi .pmOnly {
   }
 
   /* Target selector ("Boss ▾"), at the end of the title row (moved there by
-     pmWidget.js). Clicking cycles BOSS / TRAIN / PVE / PVP (core.js). */
+     pmWidget.js). A native select (BOSS / TRAIN / PVE / PVP, core.js); its open
+     list is the OS one, dark to match the widget. The caret is the old 8x5
+     triangle, drawn as a background since a select has no ::after. */
   .footerBtns { display: contents; }
   .footerBtns .metricToggleBtn,
   .footerBtns .collapseBtn { display: none; }
@@ -469,40 +463,58 @@ body.legacyUi .pmOnly {
     display: inline-block;
     height: 24px;
     min-width: 0;
+    padding: 0 24px 0 10px;
+    box-sizing: border-box;
+    border: 1px solid #574f4f;
+    border-radius: 4px;
+    background: #000000 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23fff'/%3E%3C/svg%3E") no-repeat right 10px center;
+    color: #ffffff;
+    color-scheme: dark;
+    font-family: inherit; font-weight: 400; font-size: 12px; line-height: 22px;
+    letter-spacing: 0;
+    text-transform: none;
+    text-shadow: none;
+    appearance: none;
+    cursor: pointer;
+    transition: border-color 120ms ease;
+  }
+  .targetModeBtn option {
+    background: #000000;
+    color: #ffffff;
+  }
+  .targetModeBtn:hover {
+    background-color: #000000;
+    color: #ffffff;
+    border-color: #8a8181;
+  }
+  :is(.targetModeBtn, .pmLiveResetBtn):focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 1px;
+  }
+  /* Reset beside the selector: labelled, so nobody has to guess the icon. */
+  .pmLiveResetBtn {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 24px;
     padding: 0 10px;
     box-sizing: border-box;
     border: 1px solid #574f4f;
     border-radius: 4px;
     background: #000000;
     color: #ffffff;
-    font-family: inherit; font-weight: 400; font-size: 12px; line-height: 22px;
-    letter-spacing: 0;
-    /* The mode is written "BOSS"; the design sets it "Boss". */
-    text-transform: lowercase;
-    text-shadow: none;
+    font-family: inherit; font-weight: 600; font-size: 12px; line-height: 22px;
+    text-transform: uppercase;
     cursor: pointer;
     transition: border-color 120ms ease;
   }
-  .targetModeBtn::first-letter { text-transform: uppercase; }
-  .targetModeBtn::after {
-    content: "";
-    display: inline-block;
-    width: 8px;
-    height: 5px;
-    margin-left: 6px;
-    vertical-align: 2px;
-    background: #ffffff;
-    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  .pmLiveResetBtn svg { width: 12px; height: 12px; }
+  @media (hover: hover) {
+    .pmLiveResetBtn:hover { border-color: #8a8181; }
   }
-  .targetModeBtn:hover {
-    background: #000000;
-    color: #ffffff;
-    border-color: #8a8181;
-  }
-  .targetModeBtn:focus-visible {
-    outline: 2px solid #ffffff;
-    outline-offset: 1px;
-  }
+  .pmLiveResetBtn:active { transform: scale(0.97); }
+
 
   /* --- Boss HP: "BOSS name" | "HP · %", then a 16px bar with notches at
      25/50/75%. Killed: a 22px empty bar reading KILLED. --- */
@@ -1149,6 +1161,20 @@ body.legacyUi .pmOnly {
     border: 1px solid rgba(255, 255, 255, 0.18);
     background: transparent;
     color: var(--pm-widget-text);
+  }
+  /* Reset after a fight: the one action that clears the meter, so it reads
+     at a glance (bold, brighter border) beside upload and report. */
+  .pmEndResetBtn {
+    border-color: rgba(255, 255, 255, 0.45);
+    font-weight: 700;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pmGhostBtn.pmEndResetBtn:hover { border-color: #ffffff; }
+  }
+  .pmEndResetBtn svg {
+    width: 12px;
+    height: 12px;
+    vertical-align: -2px;
   }
   .pmError .pmGhostBtn { border-color: rgba(255, 255, 255, 0.25); }
   :is(.pmError, .pmUploaded) button { height: 30px; flex: none; }

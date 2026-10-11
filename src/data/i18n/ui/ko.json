@@ -360,6 +360,7 @@
   },
   "pmWidget": {
     "modeLabel": "위젯 모드",
+    "targetMode": "대상 모드",
     "expand": "클릭하여 확장",
     "ready": "준비 완료",
     "locked": "잠김",
@@ -394,6 +395,7 @@
       "training": "훈련 전투는 업로드되지 않습니다",
       "signIn": "Discord로 로그인",
       "openReport": "리포트 열기",
+      "reset": "초기화",
       "uploaded": "업로드됨 ✓",
       "copyLink": "링크 복사",
       "linkCopied": "링크가 복사되었습니다"
@@ -444,6 +446,7 @@
       "error": "통계를 불러올 수 없음",
       "sample": "표본",
       "bosses": "보스 {n}"
-    }
+    },
+    "resetTip": "미터 초기화 (Ctrl+Alt+R)"
   }
 }

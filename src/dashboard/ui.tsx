@@ -7,14 +7,15 @@ export const art = (name: string) => ART[`../assets/pm/${name.toLowerCase()}.png
 
 // Class colors and fallback initials (prototype CLS). Brawler has no icon yet.
 export const CLASSES: Record<string, [initials: string, color: string]> = {
-  Gladiator: ["GL", "#52A5DB"],
-  Templar: ["TE", "#4CA8E0"],
+  // Same palette as the DPS Meter widget (powermeter-theme.css [data-cls]).
+  Gladiator: ["GL", "#4DA8E0"],
+  Templar: ["TE", "#2F62E8"],
   Assassin: ["AS", "#42C169"],
-  Ranger: ["RA", "#4BC670"],
-  Sorcerer: ["SO", "#AB61DD"],
-  Spiritmaster: ["SP", "#C24DAE"],
-  Cleric: ["CL", "#C8C171"],
-  Chanter: ["CH", "#CAC172"],
+  Ranger: ["RA", "#46C46E"],
+  Sorcerer: ["SO", "#A65BE0"],
+  Spiritmaster: ["SP", "#C84CB8"],
+  Cleric: ["CL", "#F5D547"],
+  Chanter: ["CH", "#FF8A2B"],
   Brawler: ["BR", "#C58B55"],
 };
 /** Classes the dashboard offers: Brawler is not out in EU/NA yet (it keeps its color for the meter). */

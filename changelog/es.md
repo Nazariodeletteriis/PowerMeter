@@ -2,6 +2,22 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.4
+
+- Nuevo: El medidor cambia de modo solo: BOSS en un jefe, PVP contra jugadores, PVE para todo lo demás.
+- Cambiado: TRAIN desaparece: los muñecos de entrenamiento cuentan como PVE, en el widget y en el panel.
+- Nuevo: Botón RESET siempre visible en el widget, junto al selector de modo.
+- Nuevo: Las muertes de jefes se suben solas (con sesión iniciada, desactivable en Ajustes); las páginas de log solo muestran nombres de personajes.
+- Nuevo: Clasificaciones (golpe más fuerte, muerte más rápida, DPS del grupo) y los mejores jugadores de cada clase en Estadísticas de clases.
+- Nuevo: Pestaña Rotación en el Informe; el Informe abre tu último jefe con la mazmorra y Jefe 1/2/3.
+- Nuevo: Historial agrupado por mazmorra, con un filtro Mazmorra real.
+- Nuevo: El Skill Planner rellena la barra de habilidades desde el juego; pasivas por puntos, nivel 1–20.
+- Nuevo: Builder con el equipo actual y el deseado y la diferencia de estadísticas.
+- Nuevo: Filtros de objetos (categoría, ranura, grado, nivel, intercambio, facción, fuente, clase); el Gear Viewer puede seleccionar, comparar y fijar.
+- Corregido: El widget ya no se congela al cambiar de modo, y la barra STAGGER se actualiza sin daño nuevo.
+- Corregido: Paquetes perdidos recuperados y menor latencia: el medidor sigue el combate en tiempo real.
+- Cambiado: Marketplace eliminado.
+
 ## 0.4.3
 
 - Nuevo: Cuando hay una actualización, al abrir la app aparece una ventana con los botones Actualizar ahora y Notas de la versión.

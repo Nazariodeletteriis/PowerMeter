@@ -965,7 +965,8 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   line-height: 1;
   transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
 }
-.footerBtns .targetModeBtn { min-width: 44px; }
+/* A native select reading as the chip it replaced (no OS arrow, upper case). */
+.footerBtns .targetModeBtn { min-width: 44px; appearance: none; text-transform: uppercase; color-scheme: dark; cursor: pointer; }
 .footerBtns .metricToggleBtn { min-width: 30px; }
 .footerBtns .footerBtn:hover {
   color: #fff;

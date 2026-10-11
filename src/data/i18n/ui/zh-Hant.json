@@ -360,6 +360,7 @@
   },
   "pmWidget": {
     "modeLabel": "小工具模式",
+    "targetMode": "目標模式",
     "expand": "點擊展開",
     "ready": "已就緒",
     "locked": "已鎖定",
@@ -394,6 +395,7 @@
       "training": "訓練戰鬥不會上傳",
       "signIn": "使用 Discord 登入",
       "openReport": "開啟報告",
+      "reset": "重置",
       "uploaded": "已上傳 ✓",
       "copyLink": "複製連結",
       "linkCopied": "連結已複製"
@@ -444,6 +446,7 @@
       "error": "職業統計無法取得",
       "sample": "樣本",
       "bosses": "{n} 個首領"
-    }
+    },
+    "resetTip": "重置計量器 (Ctrl+Alt+R)"
   }
 }

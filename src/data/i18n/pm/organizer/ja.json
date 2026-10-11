@@ -96,6 +96,8 @@
   "organizer.set.saveProfile": "変更を保存",
   "organizer.set.connectedAccounts": "連携アカウント",
   "organizer.set.patreonHint": "ログ・ランキング・共有ビルドを支えるサーバーを応援しよう",
+  "organizer.set.autoUpload": "ボス討伐を自動アップロード",
+  "organizer.set.autoUploadHint": "ボス討伐は自動でオンラインに送られます。オンラインのログは公開され、パーティーメンバーの名前が含まれます。PowerMeterへのログインが必要です。",
   "organizer.set.becomeSupporter": "サポーターになる",
   "organizer.set.exportAll": "すべてをエクスポート",
   "organizer.set.exportAllHint": "キャラクター、ビルド、タスク、設定",

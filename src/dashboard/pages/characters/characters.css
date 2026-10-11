@@ -680,6 +680,11 @@
 .bSlot[aria-pressed="true"] {
   border-color: var(--pm-red);
 }
+/* Target set: this slot differs from what you wear (same inset bar as the "your build" band). */
+.bSlot[data-diff] {
+  position: relative; /* keeps its sr-only label inside */
+  box-shadow: inset 3px 0 0 var(--pm-warn);
+}
 .bPick {
   display: flex;
   align-items: center;

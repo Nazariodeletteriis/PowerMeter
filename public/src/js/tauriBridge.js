@@ -139,8 +139,17 @@
   // --- DPS data polling via events ---
   // The Rust backend emits "dps-update" every 500ms.
   // We cache the latest snapshot so getDpsData() can return it synchronously.
+  // Mode just picked in the widget: updates for the old mode still in flight are
+  // dropped until the new mode's first one, so the rows never flick back.
+  let pendingMode = null;
   listen("dps-update", (event) => {
+    if (pendingMode) {
+      if (event.payload?.targetMode !== pendingMode) return;
+      pendingMode = null;
+    }
     cachedDpsJson = JSON.stringify(event.payload);
+    // Draw it now rather than on the next 100 ms poll.
+    window._dpsApp?.fetchDps?.();
     // NOTE: do NOT pre-fetch get_details_context here. It clones the full combat
     // aggregate and runs O(targets×actors×skills) work; firing it every 500ms
     // (even with the details panel closed) was a major source of CPU lag that
@@ -344,7 +353,19 @@
       this.resetDps();
     },
     setTargetSelection(mode) {
-      invoke("set_target_mode", { mode }).catch(() => {});
+      pendingMode = mode;
+      // The new mode's numbers right away, not at the next dps-update.
+      invoke("set_target_mode", { mode })
+        .then(() => invoke("get_dps_snapshot"))
+        .then((payload) => {
+          if (pendingMode !== mode) return; // a newer pick is on its way
+          pendingMode = null;
+          cachedDpsJson = JSON.stringify(payload);
+          window._dpsApp?.fetchDps?.();
+        })
+        .catch(() => {
+          if (pendingMode === mode) pendingMode = null;
+        });
     },
     setCharacterName(name) {
       invoke("set_character_name", { name }).catch(() => {});

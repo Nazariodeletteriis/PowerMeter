@@ -48,7 +48,6 @@ const TABS = [
 const LANG_ORDER = ["it", "en", "de", "fr", "es", "pt", "ru", "ja", "ko", "zh-Hans", "zh-Hant"];
 const TARGET_MODES = [
   ["bossTargets", "BOSS"],
-  ["trainTargets", "TRAIN"],
   ["pveTargets", "PVE"],
   ["pvpTargets", "PVP"],
 ] as const;
@@ -297,7 +296,7 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
         <Row label={t("organizer.set.targetMode")}>
           <Select
             label={t("organizer.set.targetMode")}
-            value={settings["dpsMeter.defaultMeterMode"] || "bossTargets"}
+            value={(settings["dpsMeter.defaultMeterMode"] || "bossTargets").replace("trainTargets", "pveTargets")}
             options={TARGET_MODES}
             set={(v) => setting("dpsMeter.defaultMeterMode", v)}
           />
@@ -504,6 +503,13 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
             <HeartIcon aria-hidden="true" />
             {t("organizer.set.becomeSupporter")}
           </button>
+        </Row>
+        <Row label={t("organizer.set.autoUpload")} desc={t("organizer.set.autoUploadHint")}>
+          <Switch
+            label={t("organizer.set.autoUpload")}
+            on={settings["pm.autoUpload"] !== "false"}
+            set={(on) => setting("pm.autoUpload", String(on))}
+          />
         </Row>
       </>
     ),

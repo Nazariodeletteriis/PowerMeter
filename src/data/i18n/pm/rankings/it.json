@@ -1,0 +1,17 @@
+{
+  "rankings.hit.title": "Colpo più forte",
+  "rankings.time.title": "Kill più veloce",
+  "rankings.party.title": "Party con più DPS",
+  "rankings.hit.value": "Danno",
+  "rankings.full": "Classifica completa",
+  "rankings.back": "Tutte le classifiche",
+  "rankings.emptyText": "Ancora nessun log pubblico con questi filtri. Prova un periodo più lungo o un'altra regione.",
+  "rankings.errorText": "Le classifiche non sono disponibili in questo momento. Riprova tra qualche minuto.",
+  "rankings.anon": "Nome nascosto",
+  "rankings.player": "Giocatore",
+  "rankings.skill": "Abilità",
+  "rankings.party": "Party",
+  "rankings.partyDps": "DPS del party",
+  "rankings.date": "Data",
+  "rankings.loadMore": "Carica altri"
+}

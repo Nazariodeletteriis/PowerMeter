@@ -12,7 +12,7 @@ const REMOTE_APPLIED_SETTING_CONTROLS = {
 
 // Target modes the meter accepts. The first four are exclusive (each hit counts
 // in exactly one); Target and All are the older cross-mode views.
-const TARGET_MODES = ["bossTargets", "pveTargets", "trainTargets", "pvpTargets", "lastHitByMe", "allTargets"];
+const TARGET_MODES = ["bossTargets", "pveTargets", "pvpTargets", "lastHitByMe", "allTargets"];
 
 class DpsApp {
   constructor() {
@@ -973,6 +973,7 @@ class DpsApp {
     this.applyLocalPlayerIdUpdate(localPlayerId, "backend local id update");
     this.updateLocalPlayerIdentity(rows);
     this._lastBattleTimeMs = battleTimeMs;
+    this.followFightMode(recordingKind);
     this.lastTargetMode = targetMode;
     this.lastTargetName = targetName;
     this.lastTargetId = targetId;
@@ -1015,10 +1016,12 @@ class DpsApp {
     // 빈값은 ui 안덮어씀
     let rowsToRender = rows;
     const listReasons = [];
-    // Modes are exclusive: an empty new mode (picked here or in the dashboard)
-    // must not keep showing the previous mode's rows.
-    if (rows.length === 0 && previousTargetMode && targetMode !== previousTargetMode) {
-      this.lastSnapshot = [];
+    // Modes are exclusive: a new mode (picked here or in the dashboard) must not
+    // keep showing the previous mode's rows. Out of combat the snapshot below is
+    // held as is, and the backend re-sends the same JSON until new damage, so a
+    // kept snapshot froze the meter on the old mode's rows.
+    if (previousTargetMode && targetMode !== previousTargetMode) {
+      this.lastSnapshot = rows.length === 0 ? [] : null;
     }
     if (rows.length === 0) {
       if (this.lastSnapshot) rowsToRender = this.lastSnapshot;
@@ -1886,23 +1889,14 @@ class DpsApp {
     this.suspendBtn?.addEventListener("click", () => {
       this._setCaptureSuspended(!this._captureSuspended);
     });
-    this.targetModeBtn?.addEventListener("click", () => {
-      // The four exclusive modes: each hit counts in exactly one of them.
-      const modes = ["bossTargets", "trainTargets", "pveTargets", "pvpTargets"];
-      const currentIndex = modes.indexOf(this.targetSelection);
-      const nextMode = modes[(currentIndex + 1) % modes.length];
-      console.log("[Target Mode Toggle]", {
-        from: this.targetSelection,
-        to: nextMode,
-      });
-      this.setTargetSelection(nextMode, {
+    // The four exclusive modes (each hit counts in exactly one), picked from a
+    // select. The bridge fetches the new mode's snapshot and redraws at once.
+    this.targetModeBtn?.addEventListener("change", () => {
+      this.setTargetSelection(this.targetModeBtn.value, {
         persist: true,
         syncBackend: true,
-        reason: "header toggle",
+        reason: "header select",
       });
-      if (!this.isCollapse) {
-        this.fetchDps();
-      }
     });
     this.metricToggleBtn?.addEventListener("click", () => {
       const nextMode = this.displayMode === "totalDamage" ? "dps" : "totalDamage";
@@ -2054,8 +2048,8 @@ class DpsApp {
       this.safeSetSetting(this.storageKeys.mainPlayerDpsBold, "true");
     }
     const validModes = TARGET_MODES;
-    const normalizedDefaultMode = validModes.includes(storedDefaultMeterMode)
-      ? storedDefaultMeterMode : "bossTargets";
+    const defaultMode = storedDefaultMeterMode === "trainTargets" ? "pveTargets" : storedDefaultMeterMode;
+    const normalizedDefaultMode = validModes.includes(defaultMode) ? defaultMode : "bossTargets";
     this.settingsSelections.defaultMeterMode = normalizedDefaultMode;
     this.setTargetSelection(normalizedDefaultMode, {
       persist: false,
@@ -2691,7 +2685,6 @@ class DpsApp {
       { value: "lastHitByMe", label: "TARGET" },
       { value: "bossTargets", label: "BOSS" },
       { value: "allTargets", label: "ALL" },
-      { value: "trainTargets", label: "TRAIN" },
       { value: "pveTargets", label: "PVE" },
       { value: "pvpTargets", label: "PVP" },
     ];
@@ -3823,8 +3816,25 @@ class DpsApp {
     }
   }
 
+  // The meter follows the fight on its own: a boss → BOSS, players → PVP, anything
+  // else (mobs, training dummies) → PVE. It acts only when the activity changes, so a
+  // mode picked by hand stays until the next one. BOSS holds for 30 s after the last
+  // boss hit, so adds and a quick mob after the kill don't throw the boss view away.
+  followFightMode(kind) {
+    const now = Date.now();
+    if (kind === "boss") this._lastBossHitAt = now;
+    let want = { boss: "bossTargets", pvp: "pvpTargets", pve: "pveTargets" }[kind];
+    if (want === "pveTargets" && now - (this._lastBossHitAt || 0) < 30000) want = "bossTargets";
+    if (!want || want === this._followedMode) return;
+    this._followedMode = want;
+    if (want !== this.targetSelection) {
+      this.setTargetSelection(want, { syncBackend: true, reason: `auto: ${kind} hit` });
+    }
+  }
+
   setTargetSelection(mode, { persist = false, syncBackend = false, reason = "update" } = {}) {
     const previousSelection = this.targetSelection;
+    if (mode === "trainTargets") mode = "pveTargets"; // training dummies are PVE since 0.4.4
     this.targetSelection = TARGET_MODES.includes(mode) ? mode : "lastHitByMe";
     if (persist) {
       this.safeSetStorage(this.storageKeys.targetSelection, String(this.targetSelection));
@@ -4524,9 +4534,7 @@ class DpsApp {
     const mode = this.targetSelection;
     this.targetModeBtn.classList.toggle("isAllTargets", mode === "allTargets");
     this.targetModeBtn.classList.toggle("isTrainTargets", mode === "trainTargets");
-    const label = { bossTargets: "BOSS", allTargets: "ALL", trainTargets: "TRAIN", pveTargets: "PVE", pvpTargets: "PVP" }[mode] || "TARGET";
-    this.targetModeBtn.textContent = label;
-    this.targetModeBtn.setAttribute("aria-label", `${label} mode`);
+    this.targetModeBtn.value = mode;
   }
 
   refreshBossLabel() {

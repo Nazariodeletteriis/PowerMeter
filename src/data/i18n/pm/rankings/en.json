@@ -1,0 +1,17 @@
+{
+  "rankings.hit.title": "Biggest hit",
+  "rankings.time.title": "Fastest kill",
+  "rankings.party.title": "Top party DPS",
+  "rankings.hit.value": "Damage",
+  "rankings.full": "Full ranking",
+  "rankings.back": "All rankings",
+  "rankings.emptyText": "No public logs match these filters yet. Try a longer period or another region.",
+  "rankings.errorText": "Rankings are not available right now. Try again in a few minutes.",
+  "rankings.anon": "Hidden name",
+  "rankings.player": "Player",
+  "rankings.skill": "Skill",
+  "rankings.party": "Party",
+  "rankings.partyDps": "Party DPS",
+  "rankings.date": "Date",
+  "rankings.loadMore": "Load more"
+}

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import {
-  ArrowsLeftRightIcon,
   CaretLeftIcon,
   CaretRightIcon,
   ColumnsIcon,
   ExportIcon,
+  ListNumbersIcon,
   ShareNetworkIcon,
   SwordIcon,
   WarningOctagonIcon,
@@ -12,18 +12,28 @@ import {
 import { fmt } from "../ui";
 import { invoke } from "@tauri-apps/api/core";
 import { usePoll } from "../usePoll";
-import { Av, Chart, classColor, clock, fightParty, fightSeries, getFights, pc, REPORT_FIGHT_KEY, uploadedUrl, useFight, type FightRecord, type FightRow, type FightSummary, type Skill } from "./combat/parts";
+import { Av, Chart, classColor, clock, fightParty, fightSeries, getFights, isBoss, pc, REPORT_FIGHT_KEY, uploadedUrl, useFight, useRuns, type FightRecord, type FightRow, type FightSkill, type FightSummary, type Run, type Skill } from "./combat/parts";
 import { SkillIcon } from "../skills";
 import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
 
-// The latest saved fight; its attempts are the saved fights on the same boss, oldest first.
-const TABS = ["overview", "skill", "tl", "taken", "heal"] as const;
+// The latest boss fight (the latest PVE/PvP session is often a few seconds of trash); its attempts are the saved fights on the same boss, oldest first.
+const TABS = ["overview", "skill", "tl", "rot", "taken", "heal"] as const;
 type Tab = (typeof TABS)[number];
 const OVERVIEW_COLS = "30px minmax(160px,1fr) 90px minmax(200px,1.4fr) 70px 64px";
 const SKILL_COLS = "minmax(220px,1.6fr) repeat(12,minmax(58px,1fr))";
 // Sort keys; labels are combat.col.<key>, tooltips combat.tip.<key>.
 const SKILL_HEAD: (keyof Skill)[] = ["n", "dmg", "pct", "hits", "crit", "min", "max", "avg", "back", "parry", "perfect", "double", "multi"];
+// The record has hits, not casts: a hit of a skill more than CAST_GAP ms after its previous hit starts a new cast.
+const CAST_GAP = 1500;
+const MAX_CASTS = 60;
+/** First MAX_CASTS casts in [from, to] ms, in order; `j` is the skill's index in `raw`. */
+const casts = (raw: FightSkill[], from: number, to: number) =>
+  raw
+    .flatMap((s, j) => [...s.hitTimestamps].sort((a, b) => a - b).filter((x, k, a) => !k || x - a[k - 1] > CAST_GAP).map((x) => ({ x, j })))
+    .filter(({ x }) => x >= from && x <= to)
+    .sort((a, b) => a.x - b.x)
+    .slice(0, MAX_CASTS);
 
 export default function Report(props: PageProps) {
   const { t, setHeader, onError } = props;
@@ -34,11 +44,13 @@ export default function Report(props: PageProps) {
     return id;
   });
   const all = fights.data ?? [];
-  const cur = all.find((f) => f.id === pick) ?? all[0];
+  const runs = useRuns(all);
+  const cur = all.find((f) => f.id === pick) ?? all.find(isBoss) ?? all[0];
+  const run = cur && runs.get(cur.id);
   const attempts = cur ? all.filter((f) => f.bossName === cur.bossName).reverse() : [];
   const att = attempts.findIndex((f) => f.id === cur?.id);
   const rec = useFight(cur?.id, onError);
-  const crumb = cur ? `${cur.bossName || "—"} → ${t("shell.attempt", { n: att + 1 })}` : undefined;
+  const crumb = cur ? `${run ? `${run.dungeon} → ${t("combat.bossN", { n: run.bosses[cur.bossName] })} · ` : ""}${cur.bossName || "—"} → ${t("shell.attempt", { n: att + 1 })}` : undefined;
   useEffect(() => setHeader(cur ? { title: cur.bossName || "—", crumb } : {}), [setHeader, cur?.bossName, crumb]);
 
   if (fights.error)
@@ -58,10 +70,10 @@ export default function Report(props: PageProps) {
       </section>
     );
   if (!rec) return <div className="skeleton" style={{ height: 260 }} />;
-  return <FightView key={rec.id} {...props} rec={rec} attempts={attempts} att={att} onPick={setPick} />;
+  return <FightView key={rec.id} {...props} rec={rec} attempts={attempts} att={att} dungeonRun={run} onPick={setPick} />;
 }
 
-function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: PageProps & { rec: FightRecord; attempts: FightSummary[]; att: number; onPick: (id: string) => void }) {
+function FightView({ t, lang, run, onError, name, rec, attempts, att, dungeonRun, onPick }: PageProps & { rec: FightRecord; attempts: FightSummary[]; att: number; dungeonRun?: Run; onPick: (id: string) => void }) {
   const dur = rec.durationMs / 1000;
   const [cmp, setCmp] = useState<string | null>(null);
   const other = useFight(cmp ?? undefined, onError);
@@ -70,8 +82,10 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: 
   const [range, setRange] = useState<[number, number] | null>(null);
   const drag = useRef<number | null>(null);
   const [sort, setSort] = useState<[keyof Skill, number]>(["dmg", -1]);
-  const [mine, setMine] = useState(true);
   const [share, setShare] = useState(false);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  // The run's bosses in boss order; each chip opens that boss's latest attempt in the run.
+  const runBosses = dungeonRun ? [...new Set(dungeonRun.fights.map((f) => f.bossName))].sort((a, b) => dungeonRun.bosses[a] - dungeonRun.bosses[b]) : [];
 
   const full = fightParty(rec, name);
   // Stats below the chart follow the dragged window; the whole fight when there is none.
@@ -83,8 +97,7 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: 
   const dmgMax = Math.max(1, ...full.map((r) => r.dmg));
   const p = party.find((r) => r.key === sel) ?? party.find((r) => r.me) ?? party[0];
   const skills = p ? [...p.skills].sort((a, b) => (a[sort[0]]! > b[sort[0]]! ? 1 : -1) * sort[1]) : [];
-  // Timelines below zoom to the window: % position of second `s` in it, and its axis.
-  const px = (s: number) => ((s - t0) / secs) * 100;
+  // Timelines below zoom to the window: its axis.
   const ticks = [0, 1, 2, 3, 4, 5].map((k) => clock(t0 + (k * secs) / 5));
   const date = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(rec.startTimeMs);
   const others = attempts.filter((_, k) => k !== att);
@@ -122,7 +135,7 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: 
 
   return (
     <>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "-6px 0 14px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "-6px 0 10px", flexWrap: "wrap" }}>
         {[-1, 0, 1].map((d) => {
           if (!d)
             return (
@@ -156,17 +169,24 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: 
           </span>{" "}
           · {date}
         </span>
-        <div style={{ display: "flex", gap: 3, marginLeft: 4 }}>
-          {full.map((q) => (
-            <span key={q.key} title={`${q.n} · ${q.cls}`} style={{ display: "flex" }}>
-              <Av cls={q.cls} size={22} radius={5} font={8} />
-            </span>
-          ))}
-        </div>
         <div style={{ flex: 1 }} />
         <button type="button" className="btn fill" style={outline} onClick={() => setShare(true)}>
           <ShareNetworkIcon aria-hidden="true" />
           {t("combat.share")}
+        </button>
+        {/* The selected player's rotation: its own tab. */}
+        <button
+          type="button"
+          className="btn"
+          style={outline}
+          disabled={!p}
+          onClick={() => {
+            setTab("rot");
+            tabsRef.current?.scrollIntoView({ block: "nearest" });
+          }}
+        >
+          <ListNumbersIcon aria-hidden="true" />
+          {t("combat.rotationBtn")}
         </button>
         <button
           type="button"
@@ -183,6 +203,35 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: 
           <ExportIcon aria-hidden="true" />
           {t("combat.export")}
         </button>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "0 0 14px", flexWrap: "wrap" }}>
+        {dungeonRun && (
+          <div className="cbSeg" role="group" aria-label={dungeonRun.dungeon}>
+            {runBosses.map((b) => (
+              <button
+                key={b}
+                type="button"
+                aria-pressed={b === rec.bossName}
+                onClick={() => {
+                  const last = dungeonRun.fights.filter((f) => f.bossName === b).pop();
+                  if (last) onPick(last.id);
+                }}
+              >
+                {t("combat.bossN", { n: dungeonRun.bosses[b] })} · {b}
+              </button>
+            ))}
+          </div>
+        )}
+        {/* Who this report is about. */}
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          {full.map((q) => (
+            <span key={q.key} title={q.cls} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: q.me ? "var(--pm-t1)" : "var(--pm-t2)" }}>
+              <Av cls={q.cls} size={20} radius={5} font={8} />
+              {q.n}
+            </span>
+          ))}
+        </div>
       </div>
 
       {cmp != null && (
@@ -247,7 +296,7 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: 
         </div>
       </section>
 
-      <div className="cbTabs" role="tablist">
+      <div ref={tabsRef} className="cbTabs" role="tablist">
         {TABS.map((id) => (
           <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}>
             {t(`combat.tab.${id}`)}
@@ -407,40 +456,35 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, onPick }: 
         </>
       )}
 
-      {tab === "tl" && p && (
+      {tab === "tl" && (
         <section className="card" style={{ padding: "14px 16px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <h2 style={{ fontWeight: 500 }}>{t("combat.tab.tl")}</h2>
-            <div style={{ flex: 1 }} />
-            <button type="button" className="btn" style={{ height: 28, padding: "0 10px", fontSize: 12, gap: 4 }} onClick={() => setMine(!mine)}>
-              <ArrowsLeftRightIcon aria-hidden="true" /> {mine ? t("combat.onlyMe") : "Party"}
-            </button>
+          <h2 style={{ fontWeight: 500, marginBottom: 12 }}>{t("combat.tab.tl")}</h2>
+          <Lanes rows={full.map((q) => ({ id: `${q.key}`, n: q.n, col: classColor(q.cls), ts: q.raw.flatMap((s) => s.hitTimestamps) }))} t0={t0} secs={secs} ticks={ticks} />
+        </section>
+      )}
+
+      {tab === "rot" && p && (
+        <section className="card" style={{ padding: "14px 16px" }}>
+          <h2 style={{ fontWeight: 500, marginBottom: 12 }}>{t("combat.rotation", { name: p.n })}</h2>
+          <div style={{ fontSize: 11, color: "var(--pm-t3)", marginBottom: 6 }}>{t("combat.castOrder", { n: MAX_CASTS })}</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 18 }}>
+            {casts(p.raw, t0 * 1000, (t0 + secs) * 1000).map(({ x, j }, k) => (
+              <span
+                key={k}
+                title={`${clock(x / 1000)} ${p.skills[j].n}`}
+                style={{ display: "flex", alignItems: "center", gap: 4, height: 26, padding: "0 6px 0 2px", borderRadius: 5, background: "var(--pm-s2)" }}
+              >
+                <span style={{ width: 22, height: 22, borderRadius: 4, background: "var(--pm-s3)", display: "grid", placeItems: "center", fontSize: 9, color: "var(--pm-t2)" }}>
+                  <SkillIcon skill={p.skills[j].sk} name={p.skills[j].n} />
+                </span>
+                <span className="mono" style={{ fontSize: 10, color: "var(--pm-t3)" }}>
+                  {clock(x / 1000)}
+                </span>
+              </span>
+            ))}
           </div>
-          {(mine
-            ? [...p.raw].sort((a, b) => b.dmg - a.dmg).slice(0, 7).map((s, j) => ({ id: `${j}`, n: s.name, col: classColor(p.cls), ts: s.hitTimestamps }))
-            : full.map((q) => ({ id: `${q.key}`, n: q.n, col: classColor(q.cls), ts: q.raw.flatMap((s) => s.hitTimestamps) }))
-          ).map((r) => {
-            // One mark per 0.1% of the axis: a hit per mark would be thousands of nodes on a long fight.
-            const marks = [...new Set(r.ts.map((x) => x / 1000).filter((x) => x >= t0 && x <= t0 + secs).map((x) => px(x).toFixed(1)))];
-            return (
-              <div key={r.id} style={{ display: "grid", gridTemplateColumns: "180px minmax(0,1fr)", gap: 12, alignItems: "center", height: 30, borderBottom: "1px solid var(--pm-line)" }}>
-                <span style={{ fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.n}</span>
-                <div style={{ position: "relative", height: 16 }}>
-                  {marks.map((x) => (
-                    <span key={x} style={{ position: "absolute", left: `${x}%`, top: 0, width: 3, height: 16, borderRadius: 1, background: r.col }} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-          <div style={{ display: "grid", gridTemplateColumns: "180px minmax(0,1fr)", gap: 12, marginTop: 6 }}>
-            <span />
-            <div className="cbTicks">
-              {ticks.map((x, k) => (
-                <span key={k}>{x}</span>
-              ))}
-            </div>
-          </div>
+          <div style={{ fontSize: 11, color: "var(--pm-t3)", marginBottom: 6 }}>{t("combat.tab.tl")}</div>
+          <Lanes rows={[...p.raw].sort((a, b) => b.dmg - a.dmg).slice(0, 7).map((s, j) => ({ id: `${j}`, n: s.name, col: classColor(p.cls), ts: s.hitTimestamps }))} t0={t0} secs={secs} ticks={ticks} />
         </section>
       )}
 
@@ -631,5 +675,35 @@ function SkillRow({ s, lang }: { s: Skill; lang: string }) {
       <span style={t2}>{pc(s.double, lang)}</span>
       <span style={t2}>{s.multi ? pc(s.multi, lang) : "—"}</span>
     </div>
+  );
+}
+
+/** One lane per row: its hits on the [t0, t0 + secs] s axis, with the axis ticks below. */
+function Lanes({ rows, t0, secs, ticks }: { rows: { id: string; n: string; col: string; ts: number[] }[]; t0: number; secs: number; ticks: string[] }) {
+  return (
+    <>
+      {rows.map((r) => {
+        // One mark per 0.1% of the axis: a hit per mark would be thousands of nodes on a long fight.
+        const marks = [...new Set(r.ts.map((x) => x / 1000).filter((x) => x >= t0 && x <= t0 + secs).map((x) => (((x - t0) / secs) * 100).toFixed(1)))];
+        return (
+          <div key={r.id} style={{ display: "grid", gridTemplateColumns: "180px minmax(0,1fr)", gap: 12, alignItems: "center", height: 30, borderBottom: "1px solid var(--pm-line)" }}>
+            <span style={{ fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.n}</span>
+            <div style={{ position: "relative", height: 16 }}>
+              {marks.map((x) => (
+                <span key={x} style={{ position: "absolute", left: `${x}%`, top: 0, width: 3, height: 16, borderRadius: 1, background: r.col }} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      <div style={{ display: "grid", gridTemplateColumns: "180px minmax(0,1fr)", gap: 12, marginTop: 6 }}>
+        <span />
+        <div className="cbTicks">
+          {ticks.map((x, k) => (
+            <span key={k}>{x}</span>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }

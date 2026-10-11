@@ -13,7 +13,6 @@ import {
   ConfettiIcon,
   HourglassIcon,
   ScalesIcon,
-  StorefrontIcon,
   GaugeIcon,
   GearIcon,
   GlobeHemisphereWestIcon,
@@ -103,7 +102,6 @@ export const NAV: NavGroup[] = [
     items: [
       p("attivita", "nav.tasks", CheckSquareIcon, "R5"),
       p("timer", "nav.timers", TimerIcon, "R5"),
-      p("market", "nav.marketplace", StorefrontIcon, "R5"),
       p("shugo", "nav.shugoFestival", ConfettiIcon, "R5"),
       p("rift", "nav.spacetimeRift", HourglassIcon, "R5"),
     ],

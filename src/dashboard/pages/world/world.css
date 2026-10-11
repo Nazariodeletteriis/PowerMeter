@@ -560,3 +560,133 @@ button.wLinkName:hover span {
   gap: 8px;
   min-width: 220px;
 }
+
+/* Gear viewer: selection, pins, compare. */
+.gvTable tbody tr {
+  cursor: pointer;
+}
+.gvCheck {
+  width: 28px;
+  text-align: center;
+}
+.gvCheck input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #db0000;
+  cursor: pointer;
+}
+.gvTable tr[data-selected] td {
+  background: var(--pm-tint);
+}
+/* Pinned pieces: red edge and the content stepped in, so they read as set apart. */
+.gvTable .gvPinned td {
+  background: var(--pm-s2);
+}
+.gvTable .gvPinned td:first-child {
+  box-shadow: inset 3px 0 0 var(--pm-red);
+}
+.gvPinned .gvItem {
+  padding-left: 12px;
+}
+.gvTable .gvPinnedLast td {
+  border-bottom-color: var(--pm-grey);
+}
+.gvUnpin {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--pm-redt);
+  cursor: pointer;
+}
+.gvUnpin:hover {
+  background: var(--pm-s3);
+}
+/* Selection bar: rises from the bottom of the page while something is selected. */
+.gvBar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  min-width: 360px;
+  margin: 12px auto 0;
+  padding: 8px 8px 8px 16px;
+  border-radius: 10px;
+  background: var(--pm-s1);
+  box-shadow: 0 0 0 1px var(--pm-grey), 0 12px 32px rgba(0, 0, 0, 0.6);
+  font-size: 13px;
+  transition:
+    transform 220ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.gvBar[data-open="false"] {
+  transform: translateY(calc(100% + 12px));
+  opacity: 0;
+  pointer-events: none;
+  transition-duration: 160ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gvBar[data-open="false"] {
+    transform: none;
+  }
+}
+.gvCmpWrap {
+  max-height: 65vh;
+  overflow: auto;
+  margin: 0 -20px -20px;
+  border-top: 1px solid var(--pm-line);
+}
+.gvMark {
+  vertical-align: -2px;
+  margin-left: 4px;
+}
+td[data-mark="hi"] {
+  color: var(--pm-okt);
+}
+td[data-mark="lo"] {
+  color: var(--pm-redt);
+}
+
+/* Item list with its filter panel on the right. */
+.wFiltered {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 248px;
+  gap: 16px;
+  align-items: start;
+}
+.wFilters {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+.wFilterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--pm-t2);
+}
+.wFilterGroup > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.wFilterGroup .input {
+  width: 0;
+  flex: 1;
+}
+.wFilters .linkBtn:disabled {
+  color: var(--pm-t3);
+  cursor: default;
+}

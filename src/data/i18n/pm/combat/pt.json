@@ -71,7 +71,6 @@
   "combat.nSelected": "{n} selecionados",
   "combat.nextAttempt": "Próxima tentativa",
   "combat.noMatch": "Nenhum combate corresponde a esses filtros.",
-  "combat.onlyMe": "Somente eu",
   "combat.openLog": "Abrir log",
   "combat.openerHint": "opener (10 primeiras habilidades) · APM {apm}",
   "combat.overheal": "Overheal",
@@ -104,6 +103,7 @@
   "combat.tab.buff": "Linha do tempo de buffs",
   "combat.tab.heal": "Cura",
   "combat.tab.overview": "Visão geral",
+  "combat.tab.rot": "Rotação",
   "combat.tab.skill": "Habilidades",
   "combat.tab.taken": "Dano recebido",
   "combat.tab.targets": "Alvos",
@@ -182,5 +182,10 @@
   "combat.stats.nPlayers": "{n} jogadores",
   "combat.stats.distribution": "Distribuição de classes",
   "combat.stats.trend": "Evolução semanal (DPS médio)",
-  "combat.stats.trendNeedsWeeks": "São necessários logs de pelo menos duas semanas diferentes para mostrar a evolução."
+  "combat.stats.trendNeedsWeeks": "São necessários logs de pelo menos duas semanas diferentes para mostrar a evolução.",
+  "combat.stats.topPlayers": "Melhores jogadores por classe",
+  "combat.rotationBtn": "Rotação",
+  "combat.bossN": "Chefe {n}",
+  "combat.nBosses": "{n} chefes",
+  "combat.castOrder": "Ordem de uso, primeiros {n} · golpes da mesma habilidade com menos de 1,5 s contam como um uso"
 }

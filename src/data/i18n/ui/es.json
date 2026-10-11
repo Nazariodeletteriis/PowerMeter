@@ -360,6 +360,7 @@
   },
   "pmWidget": {
     "modeLabel": "Modo del widget",
+    "targetMode": "Modo de objetivo",
     "expand": "Clic para expandir",
     "ready": "Listo",
     "locked": "Bloqueado",
@@ -394,6 +395,7 @@
       "training": "Los combates de entrenamiento no se suben",
       "signIn": "Inicia sesión con Discord",
       "openReport": "Abrir informe",
+      "reset": "Reiniciar",
       "uploaded": "Subido ✓",
       "copyLink": "Copiar enlace",
       "linkCopied": "Enlace copiado"
@@ -444,6 +446,7 @@
       "error": "Estadísticas no disponibles",
       "sample": "Muestra",
       "bosses": "{n} jefe"
-    }
+    },
+    "resetTip": "Reiniciar el medidor (Ctrl+Alt+R)"
   }
 }

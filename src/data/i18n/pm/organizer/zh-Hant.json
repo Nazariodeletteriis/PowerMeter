@@ -96,6 +96,8 @@
   "organizer.set.saveProfile": "儲存變更",
   "organizer.set.connectedAccounts": "已連結帳號",
   "organizer.set.patreonHint": "支持承載日誌、排行榜和共享 Build 的伺服器",
+  "organizer.set.autoUpload": "自動上傳首領擊殺",
+  "organizer.set.autoUploadHint": "首領擊殺會自動上傳。線上日誌為公開，包含你隊伍中玩家的名字。需要登入 PowerMeter。",
   "organizer.set.becomeSupporter": "成為支持者",
   "organizer.set.exportAll": "匯出全部",
   "organizer.set.exportAllHint": "角色、配置、任務與設定",

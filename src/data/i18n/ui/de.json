@@ -360,6 +360,7 @@
   },
   "pmWidget": {
     "modeLabel": "Widget-Modus",
+    "targetMode": "Zielmodus",
     "expand": "Klicken zum Erweitern",
     "ready": "Bereit",
     "locked": "Gesperrt",
@@ -394,6 +395,7 @@
       "training": "Trainingskämpfe werden nicht hochgeladen",
       "signIn": "Mit Discord anmelden",
       "openReport": "Bericht öffnen",
+      "reset": "Zurücksetzen",
       "uploaded": "Hochgeladen ✓",
       "copyLink": "Link kopieren",
       "linkCopied": "Link kopiert"
@@ -444,6 +446,7 @@
       "error": "Klassenstatistik nicht verfügbar",
       "sample": "Stichprobe",
       "bosses": "{n} Boss"
-    }
+    },
+    "resetTip": "Meter zurücksetzen (Strg+Alt+R)"
   }
 }

@@ -23,7 +23,7 @@ const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "−", "="];
 const ROWS = [
   ["a", "ACTIVE"],
   ["s", "STIGMA"],
-  ["p", "PASSIVE"],
+  // No passive row: passives are always on, they are never cast.
 ] as const;
 const MAX_STIGMA = 6;
 /** Skill level cap, from the tooltip source (meta.max_level). */
@@ -69,6 +69,11 @@ export default function SkillPlan({ t, lang, name, settings, onError, setHeader 
   const kind = (sk: GameSkill) => t(`characters.skill.kind.${sk.type === "Chain" ? "c" : letter(sk)}`);
   const stigN = Object.values(stig).filter(Boolean).length;
   const equipped = SKILLS.filter((x) => x.type === "Stigma" && stig[x.id]);
+  // Passives are always on: the planner only spreads levels across them.
+  const passives = SKILLS.filter((x) => x.type === "Passive");
+  // Level 1 is the base, every level above it is one point spent.
+  const passivePts = passives.reduce((n, x) => n + (lvl[x.id] ?? 1) - 1, 0);
+  const setLevel = (id: string, L: number) => setLvl({ ...lvl, [id]: Math.min(MAX_LEVEL, Math.max(1, L)) });
   // Only what the source has; "instant" is its word for no cooldown / cast time.
   const val = (v?: string) => (!v ? "—" : v === "instant" ? t("characters.skill.instant") : v);
 
@@ -232,6 +237,46 @@ export default function SkillPlan({ t, lang, name, settings, onError, setHeader 
           </section>
 
           <section style={{ ...CARD, padding: 16 }}>
+            <SectionHead title={t("characters.skill.passives")} style={{ marginBottom: 12 }}>
+              <span className="mono" style={{ fontSize: 11, color: "var(--pm-t1)" }} aria-live="polite">
+                {t("characters.skill.pointsSpent", { n: passivePts })}
+              </span>
+              <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>· {t("characters.skill.passivesHint")}</span>
+            </SectionHead>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 6 }}>
+              {passives.map((sk) => {
+                const L = lvl[sk.id] ?? 1;
+                return (
+                  <div key={sk.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 6px", borderRadius: 6, background: sk.id === cur.id ? "var(--pm-s2)" : undefined }}>
+                    <button type="button" className="chBtnReset" aria-pressed={sk.id === cur.id} onClick={() => setSel(sk.id)} style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 8, textAlign: "left" }}>
+                      <span style={{ width: 28, height: 28, flex: "none", borderRadius: "50%", background: "var(--pm-s3)", display: "grid", placeItems: "center", fontSize: 9, fontWeight: 600, overflow: "hidden" }}>
+                        <SkillIcon skill={sk} name={sk.name} />
+                      </span>
+                      <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+                        <span style={{ fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{sk.name}</span>
+                        <span style={{ display: "flex", gap: 2 }} aria-hidden="true">
+                          {Array.from({ length: MAX_LEVEL }, (_, i) => (
+                            <span key={i} style={{ flex: 1, height: 3, borderRadius: 1, background: i < L ? "var(--pm-red)" : "var(--pm-s3)" }} />
+                          ))}
+                        </span>
+                      </span>
+                    </button>
+                    <button type="button" className="chRound" disabled={L <= 1} style={{ opacity: L <= 1 ? 0.4 : 1 }} aria-label={`${t("characters.skill.levelDown")}: ${sk.name}`} onClick={() => setLevel(sk.id, L - 1)}>
+                      −
+                    </button>
+                    <span className="mono" style={{ fontSize: 12, minWidth: 22, textAlign: "center" }} aria-label={t("characters.skill.level", { n: L })}>
+                      {L}
+                    </span>
+                    <button type="button" className="chRound" disabled={L >= MAX_LEVEL} style={{ opacity: L >= MAX_LEVEL ? 0.4 : 1 }} aria-label={`${t("characters.skill.levelUp")}: ${sk.name}`} onClick={() => setLevel(sk.id, L + 1)}>
+                      +
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <section style={{ ...CARD, padding: 16 }}>
             <SectionHead title={t("characters.skill.rotation")} style={{ marginBottom: 12 }} />
             {ROWS.map(([type, label]) => (
               <div key={type} style={{ display: "flex", alignItems: "center", minHeight: 52, position: "relative" }}>
@@ -286,14 +331,14 @@ export default function SkillPlan({ t, lang, name, settings, onError, setHeader 
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <button type="button" className="chRound" aria-label={t("characters.skill.levelDown")} onClick={() => setLvl({ ...lvl, [cur.id]: Math.max(1, curLv - 1) })}>
+                <button type="button" className="chRound" aria-label={t("characters.skill.levelDown")} onClick={() => setLevel(cur.id, curLv - 1)}>
                   −
                 </button>
                 <span className="mono" style={{ fontSize: 20, minWidth: 62 }} aria-live="polite">
                   {curLv}
                   <span style={{ fontSize: 12, color: "var(--pm-t3)" }}>/{MAX_LEVEL}</span>
                 </span>
-                <button type="button" className="chRound" aria-label={t("characters.skill.levelUp")} onClick={() => setLvl({ ...lvl, [cur.id]: Math.min(MAX_LEVEL, curLv + 1) })}>
+                <button type="button" className="chRound" aria-label={t("characters.skill.levelUp")} onClick={() => setLevel(cur.id, curLv + 1)}>
                   +
                 </button>
               </div>

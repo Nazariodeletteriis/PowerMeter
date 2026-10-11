@@ -71,7 +71,6 @@
   "combat.nSelected": "{n}개 선택됨",
   "combat.nextAttempt": "다음 시도",
   "combat.noMatch": "이 필터와 일치하는 전투가 없습니다.",
-  "combat.onlyMe": "나만",
   "combat.openLog": "로그 열기",
   "combat.openerHint": "오프너(처음 10회 시전) · APM {apm}",
   "combat.overheal": "Overheal",
@@ -104,6 +103,7 @@
   "combat.tab.buff": "버프 타임라인",
   "combat.tab.heal": "힐",
   "combat.tab.overview": "개요",
+  "combat.tab.rot": "로테이션",
   "combat.tab.skill": "스킬",
   "combat.tab.taken": "받은 피해",
   "combat.tab.targets": "대상",
@@ -182,5 +182,10 @@
   "combat.stats.nPlayers": "{n}명",
   "combat.stats.distribution": "클래스 분포",
   "combat.stats.trend": "주간 추이(평균 DPS)",
-  "combat.stats.trendNeedsWeeks": "추이를 보려면 서로 다른 두 주 이상의 로그가 필요합니다."
+  "combat.stats.trendNeedsWeeks": "추이를 보려면 서로 다른 두 주 이상의 로그가 필요합니다.",
+  "combat.stats.topPlayers": "클래스별 상위 플레이어",
+  "combat.rotationBtn": "로테이션",
+  "combat.bossN": "보스 {n}",
+  "combat.nBosses": "보스 {n}",
+  "combat.castOrder": "시전 순서, 처음 {n}회 · 같은 스킬의 1.5초 미만 간격 타격은 1회 시전으로 셉니다"
 }

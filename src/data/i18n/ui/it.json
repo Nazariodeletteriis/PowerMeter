@@ -360,6 +360,7 @@
   },
   "pmWidget": {
     "modeLabel": "Modalità del widget",
+    "targetMode": "Modalità bersaglio",
     "expand": "Clic per espandere",
     "ready": "Pronto",
     "locked": "Bloccato",
@@ -394,6 +395,7 @@
       "training": "I combattimenti di allenamento non si caricano",
       "signIn": "Accedi con Discord",
       "openReport": "Apri report",
+      "reset": "Reset",
       "uploaded": "Caricato ✓",
       "copyLink": "Copia link",
       "linkCopied": "Link copiato"
@@ -444,6 +446,7 @@
       "error": "Statistiche non disponibili",
       "sample": "Campione",
       "bosses": "{n} boss"
-    }
+    },
+    "resetTip": "Azzera il meter (Ctrl+Alt+R)"
   }
 }

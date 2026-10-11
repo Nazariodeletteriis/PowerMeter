@@ -58,6 +58,12 @@ export interface ListRow {
   level: number | null;
   kind: string | null;
   icon: string | null;
+  /** Items only: facts.exchange (Exchangeable, NonExchangeable, SoulBind, SoulBind_Acquire). */
+  exchange?: string | null;
+  /** Items only: item.race (Light, Dark, All, None). */
+  race?: string | null;
+  /** Items only: the item's source types, comma-separated (monster,quest,shop...). */
+  sources?: string | null;
 }
 
 /** gamedata_counts */

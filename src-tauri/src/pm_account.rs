@@ -17,6 +17,9 @@ use serde_json::{json, Value};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 
+use tauri::{Emitter, Manager};
+
+use crate::entity::fight_record::FightRecord;
 use crate::AppState;
 
 const SERVER_URL_KEY: &str = "pm.serverUrl";
@@ -26,6 +29,17 @@ const DEFAULT_SERVER_URL: &str = "https://powermeter.letrionlabs.it";
 const LOGIN_TIMEOUT: Duration = Duration::from_secs(300);
 const PERMIT_KEY: &str = "pm.permit";
 const ENTITLEMENT_KEY: &str = "pm.entitlement";
+/// "false" turns off the automatic upload of boss kills (on by default).
+const AUTO_UPLOAD_KEY: &str = "pm.autoUpload";
+/// Fights uploaded automatically, `{fightId: url}` as JSON: the same shape as the UI's localStorage
+/// `pm.uploadedFights`, so the UI merges the two to mark them uploaded.
+const AUTO_UPLOADED_KEY: &str = "pm.autoUploaded";
+/// Only the newest fights stay in the registry (by the start time in their id): settings.json stays small.
+const AUTO_UPLOADED_MAX: usize = 500;
+/// A boss fight is over after this long without damage (the meter's own rule, dps_calculator.rs).
+const FIGHT_OVER_MS: i64 = 10_000;
+/// Wait before each upload attempt: the first right away, then a simple back-off.
+const AUTO_UPLOAD_WAITS_SECS: [u64; 4] = [0, 60, 300, 900];
 /// Public half of the server's ENTITLEMENT_KEY: only the server can sign a permit this accepts.
 const PERMIT_PUBLIC_KEY: &str = "d6ebo/vZAEGGK9R5qx+QSe6j5T/FAp67lRO3XshEzTE=";
 
@@ -233,7 +247,7 @@ pub async fn pm_logout(state: tauri::State<'_, AppState>) -> Result<(), String> 
 }
 
 /// Uploads a saved fight (the latest one when `id` is omitted) and returns
-/// `{id, url}` for sharing. Other players' names are already masked on save.
+/// `{id, url}` for sharing. Fights saved up to 0.4.3 have other players' names masked.
 #[tauri::command]
 pub async fn upload_combat_log(
     state: tauri::State<'_, AppState>,
@@ -271,17 +285,120 @@ pub async fn upload_combat_log(
     };
     // Local history id, so the UI can mark the fight uploaded (pm.uploadedFights).
     let fight_id = fight["id"].clone();
-    // Onboarding's region (pm.region) feeds the class stats' region filter.
+    let body = log_body(&state, fight, &visibility.unwrap_or_else(|| "unlisted".into()));
+    authed(&state, reqwest::Method::POST, "/api/logs", Some(&body)).await.map(|mut v| {
+        v["fightId"] = fight_id;
+        v
+    })
+}
+
+/// Body of POST /api/logs. Onboarding's region (pm.region) feeds the class stats' region filter.
+fn log_body(state: &AppState, fight: Value, visibility: &str) -> Value {
     let region = match state.settings.get("pm.region").as_deref() {
         Some("global-eu") => json!("EU"),
         Some("us-na") => json!("NA"),
         _ => Value::Null,
     };
-    let body = json!({ "fight": fight, "visibility": visibility.unwrap_or_else(|| "unlisted".into()), "region": region });
-    authed(&state, reqwest::Method::POST, "/api/logs", Some(&body)).await.map(|mut v| {
-        v["fightId"] = fight_id;
-        v
-    })
+    let uploader = uploader_name(state, &fight);
+    json!({ "fight": fight, "visibility": visibility, "region": region, "uploader": uploader })
+}
+
+/// The uploader's character in the fight (the local player's in-game name), shown on the log
+/// page in place of the Discord account. None when the local player is not among its actors.
+fn uploader_name(state: &AppState, fight: &Value) -> Option<String> {
+    let local = state.data_storage.local_player_id()? as i32;
+    let name = state.data_storage.get_nicknames().get(&local)?.trim().to_string();
+    let in_fight = fight["actors"].as_array()?.iter().any(|a| a["nickname"].as_str() == Some(name.as_str()));
+    (in_fight && !name.is_empty()).then_some(name)
+}
+
+/// Fights being uploaded automatically right now; its lock also guards the registry's read-modify-write.
+static AUTO_UPLOADING: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+
+/// A boss kill whose fight is over: what the auto-save loop uploads. Periodic snapshots of a fight
+/// still going (or of a dead boss still inside the idle window) wait for the final one.
+fn is_finished_kill(record: &FightRecord, now_ms: i64) -> bool {
+    record.mode == "boss" && !record.is_train && record.killed == Some(true)
+        && now_ms - (record.start_time_ms + record.duration_ms) >= FIGHT_OVER_MS
+}
+
+fn auto_uploaded(state: &AppState) -> serde_json::Map<String, Value> {
+    state.settings.get(AUTO_UPLOADED_KEY).and_then(|s| serde_json::from_str(&s).ok()).unwrap_or_default()
+}
+
+/// Start time in a fight id (`auto_<target>_<start ms>`), for pruning the registry; 0 if it has none.
+fn id_start(id: &str) -> i64 {
+    id.rsplit('_').next().and_then(|t| t.parse().ok()).unwrap_or(0)
+}
+
+/// Called by the auto-save loop for each fight it saved: a finished boss kill is uploaded as a public
+/// log (class stats and rankings count public logs only), once per fight, if the user is signed in
+/// and has not turned it off. Runs in its own task, so the loop never waits on the network.
+pub(crate) fn auto_upload(app: &tauri::AppHandle, record: &FightRecord) {
+    let Some(state) = app.try_state::<AppState>() else { return };
+    if !is_finished_kill(record, now_ms() as i64)
+        || state.settings.get(AUTO_UPLOAD_KEY).as_deref() == Some("false")
+        || state.settings.get(TOKEN_KEY).is_none()
+    {
+        return;
+    }
+    {
+        let Ok(mut busy) = AUTO_UPLOADING.lock() else { return };
+        if busy.contains(&record.id) || auto_uploaded(&state).contains_key(&record.id) {
+            return;
+        }
+        busy.push(record.id.clone());
+    }
+    let app = app.clone();
+    let record = record.clone();
+    tauri::async_runtime::spawn(async move {
+        upload_with_retry(&app, &record).await;
+        if let Ok(mut busy) = AUTO_UPLOADING.lock() {
+            busy.retain(|id| *id != record.id);
+        }
+    });
+}
+
+async fn upload_with_retry(app: &tauri::AppHandle, record: &FightRecord) {
+    let Ok(fight) = serde_json::to_value(record) else { return };
+    for wait in AUTO_UPLOAD_WAITS_SECS {
+        tokio::time::sleep(Duration::from_secs(wait)).await;
+        let Some(state) = app.try_state::<AppState>() else { return };
+        // Checked again on every try: the user may sign out or turn it off meanwhile.
+        if state.settings.get(AUTO_UPLOAD_KEY).as_deref() == Some("false") || state.settings.get(TOKEN_KEY).is_none() {
+            return;
+        }
+        let body = log_body(&state, fight.clone(), "public");
+        match authed(&state, reqwest::Method::POST, "/api/logs", Some(&body)).await {
+            Ok(res) => {
+                let url = res["url"].as_str().unwrap_or_default();
+                tracing::info!("Auto-uploaded fight {} as {url}", record.id);
+                remember_upload(app, &state, &record.id, url);
+                return;
+            }
+            // The session is gone (authed already dropped it): nothing to retry until the next login.
+            Err(e) if e == "unauthorized" => return,
+            Err(e) => tracing::warn!("Auto-upload of fight {} failed: {e}", record.id),
+        }
+    }
+}
+
+/// Adds the fight to the registry and tells the windows, like a setting changed from the UI.
+fn remember_upload(app: &tauri::AppHandle, state: &AppState, id: &str, url: &str) {
+    let Ok(_guard) = AUTO_UPLOADING.lock() else { return };
+    let mut map = auto_uploaded(state);
+    map.insert(id.to_string(), json!(url));
+    if map.len() > AUTO_UPLOADED_MAX {
+        let mut ids: Vec<String> = map.keys().cloned().collect();
+        ids.sort_by_key(|k| std::cmp::Reverse(id_start(k)));
+        for old in &ids[AUTO_UPLOADED_MAX..] {
+            map.remove(old);
+        }
+    }
+    let value = Value::Object(map).to_string();
+    if state.settings.set(AUTO_UPLOADED_KEY, &value) {
+        let _ = app.emit("setting-changed", json!({ "key": AUTO_UPLOADED_KEY, "value": value }));
+    }
 }
 
 /// The signed-in user's uploaded logs (`{logs:[…]}`, newest first).
@@ -427,6 +544,38 @@ pub async fn pm_class_stats(
     call(reqwest::Method::GET, url.as_str(), None, None).await
 }
 
+/// Rankings over the community's public boss logs (`kind`: hit / time / party); no account needed.
+/// The server validates every parameter; empty strings are left out so "all" needs no special value.
+#[tauri::command]
+#[allow(clippy::too_many_arguments)]
+pub async fn pm_rankings(
+    state: tauri::State<'_, AppState>,
+    kind: String,
+    period: Option<String>,
+    region: Option<String>,
+    cls: Option<String>,
+    boss: Option<i64>,
+    limit: Option<u32>,
+    offset: Option<u32>,
+) -> Result<Value, String> {
+    let mut url = reqwest::Url::parse(&format!("{}/api/rankings", server_url(&state))).map_err(|e| e.to_string())?;
+    {
+        let mut qs = url.query_pairs_mut();
+        qs.append_pair("kind", &kind);
+        for (k, v) in [("period", period), ("region", region), ("cls", cls)] {
+            if let Some(v) = v.filter(|v| !v.is_empty()) {
+                qs.append_pair(k, &v);
+            }
+        }
+        for (k, v) in [("boss", boss), ("limit", limit.map(i64::from)), ("offset", offset.map(i64::from))] {
+            if let Some(v) = v {
+                qs.append_pair(k, &v.to_string());
+            }
+        }
+    }
+    call(reqwest::Method::GET, url.as_str(), None, None).await
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -447,5 +596,31 @@ mod tests {
         );
         assert!(permit_payload(&format!("{forged}.{sig}")).is_none());
         assert!(permit_payload("garbage").is_none());
+    }
+
+    fn record(mode: &str, killed: Option<bool>) -> FightRecord {
+        serde_json::from_value(json!({
+            "id": "auto_7_1000", "bossName": "B", "targetId": 7, "startTimeMs": 1_000, "durationMs": 60_000,
+            "totalDamage": 1, "jobs": [], "actors": [], "mode": mode, "killed": killed,
+            "details": { "targetId": 7, "totalTargetDamage": 1, "battleTime": 60_000, "skills": [] },
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn only_finished_boss_kills_go_online() {
+        let over = 1_000 + 60_000 + FIGHT_OVER_MS;
+        assert!(is_finished_kill(&record("boss", Some(true)), over));
+        assert!(!is_finished_kill(&record("boss", Some(true)), over - 1), "still inside the idle window");
+        assert!(!is_finished_kill(&record("boss", Some(false)), over), "a wipe");
+        assert!(!is_finished_kill(&record("boss", None), over), "unknown");
+        assert!(!is_finished_kill(&record("train", Some(true)), over));
+        assert!(!is_finished_kill(&record("pve", None), over));
+    }
+
+    #[test]
+    fn registry_prunes_by_fight_start() {
+        assert_eq!(id_start("auto_123_1790000000000"), 1_790_000_000_000);
+        assert_eq!(id_start("imported"), 0);
     }
 }

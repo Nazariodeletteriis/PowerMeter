@@ -360,6 +360,7 @@
   },
   "pmWidget": {
     "modeLabel": "Mode du widget",
+    "targetMode": "Mode de cible",
     "expand": "Cliquer pour développer",
     "ready": "Prêt",
     "locked": "Verrouillé",
@@ -394,6 +395,7 @@
       "training": "Les combats d'entraînement ne sont pas envoyés",
       "signIn": "Se connecter avec Discord",
       "openReport": "Ouvrir le rapport",
+      "reset": "Réinitialiser",
       "uploaded": "Envoyé ✓",
       "copyLink": "Copier le lien",
       "linkCopied": "Lien copié"
@@ -444,6 +446,7 @@
       "error": "Statistiques indisponibles",
       "sample": "Échantillon",
       "bosses": "{n} boss"
-    }
+    },
+    "resetTip": "Réinitialiser le compteur (Ctrl+Alt+R)"
   }
 }

@@ -71,7 +71,6 @@
   "combat.nSelected": "{n}件選択中",
   "combat.nextAttempt": "次の挑戦",
   "combat.noMatch": "これらのフィルターに一致する戦闘はありません。",
-  "combat.onlyMe": "自分のみ",
   "combat.openLog": "ログを開く",
   "combat.openerHint": "オープナー(最初の10キャスト) ・ APM {apm}",
   "combat.overheal": "Overheal",
@@ -104,6 +103,7 @@
   "combat.tab.buff": "バフタイムライン",
   "combat.tab.heal": "回復",
   "combat.tab.overview": "概要",
+  "combat.tab.rot": "ローテーション",
   "combat.tab.skill": "スキル",
   "combat.tab.taken": "被ダメージ",
   "combat.tab.targets": "対象",
@@ -182,5 +182,10 @@
   "combat.stats.nPlayers": "{n}人",
   "combat.stats.distribution": "クラス分布",
   "combat.stats.trend": "週ごとの推移（平均DPS）",
-  "combat.stats.trendNeedsWeeks": "推移を表示するには、少なくとも2つの異なる週のログが必要です。"
+  "combat.stats.trendNeedsWeeks": "推移を表示するには、少なくとも2つの異なる週のログが必要です。",
+  "combat.stats.topPlayers": "クラス別トッププレイヤー",
+  "combat.rotationBtn": "ローテーション",
+  "combat.bossN": "ボス {n}",
+  "combat.nBosses": "ボス {n}体",
+  "combat.castOrder": "発動順・最初の{n}回 · 同じスキルの1.5秒未満のヒットは1回の発動として数えます"
 }

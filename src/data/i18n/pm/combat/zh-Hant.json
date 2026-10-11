@@ -71,7 +71,6 @@
   "combat.nSelected": "已選擇 {n} 個",
   "combat.nextAttempt": "下一次嘗試",
   "combat.noMatch": "沒有符合這些篩選條件的戰鬥。",
-  "combat.onlyMe": "僅我",
   "combat.openLog": "開啟記錄",
   "combat.openerHint": "開場（前10次施法） · APM {apm}",
   "combat.overheal": "過量治療",
@@ -104,6 +103,7 @@
   "combat.tab.buff": "Buff時間線",
   "combat.tab.heal": "治療",
   "combat.tab.overview": "總覽",
+  "combat.tab.rot": "連招",
   "combat.tab.skill": "技能",
   "combat.tab.taken": "承受傷害",
   "combat.tab.targets": "目標",
@@ -182,5 +182,10 @@
   "combat.stats.nPlayers": "{n} 名玩家",
   "combat.stats.distribution": "職業分布",
   "combat.stats.trend": "每週趨勢（平均 DPS）",
-  "combat.stats.trendNeedsWeeks": "至少需要兩個不同星期的紀錄才能顯示趨勢。"
+  "combat.stats.trendNeedsWeeks": "至少需要兩個不同星期的紀錄才能顯示趨勢。",
+  "combat.stats.topPlayers": "各職業最佳玩家",
+  "combat.rotationBtn": "連招",
+  "combat.bossN": "首領 {n}",
+  "combat.nBosses": "{n} 個首領",
+  "combat.castOrder": "施放順序，前 {n} 次 · 同一技能間隔不足 1.5 秒的命中計為一次施放"
 }

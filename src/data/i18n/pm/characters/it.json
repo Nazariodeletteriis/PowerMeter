@@ -70,6 +70,9 @@
   "characters.skill.quickbars": "Barre rapide",
   "characters.skill.quickbarsHint": "seleziona una skill, poi clicca un tasto",
   "characters.skill.assignHint": "Clicca per assegnare la skill selezionata",
+  "characters.skill.passives": "Skill passive",
+  "characters.skill.passivesHint": "sempre attive, distribuisci i livelli tra loro",
+  "characters.skill.pointsSpent": "{n} punti spesi",
   "characters.skill.rotation": "Rotazione",
   "characters.skill.addSelected": "Aggiungi la skill selezionata",
   "characters.skill.removeNamed": "Rimuovi {n}",
@@ -95,5 +98,13 @@
   "characters.builds.noneText": "Crea la tua prima build o clonane una nel Character Builder.",
   "characters.builder.defaultBuild": "Build principale",
   "characters.builder.commentsEmptyTitle": "Ancora nessun commento",
-  "characters.builder.commentsEmptyText": "I commenti saranno disponibili con la condivisione online delle build."
+  "characters.builder.commentsEmptyText": "I commenti saranno disponibili con la condivisione online delle build.",
+  "characters.builder.set.label": "Set di equipaggiamento",
+  "characters.builder.set.gear": "Equip corrente",
+  "characters.builder.set.want": "Equip desiderato",
+  "characters.builder.set.gearHint": "Quello che indossi ora.",
+  "characters.builder.set.wantHint": "Il tuo obiettivo. Slot diversi dal corrente: {n}",
+  "characters.builder.set.differs": "Diverso dall'equip corrente",
+  "characters.builder.set.wornIs": "Ora indossi: {item}",
+  "characters.builder.set.deltaNote": "Differenza rispetto all'equip corrente"
 }

@@ -38,11 +38,10 @@ const JOB: Record<string, string> = {
 // Exclusive: every hit counts in exactly one of them.
 const MODES = [
   ["BOSS", "bossTargets"],
-  ["TRAIN", "trainTargets"],
   ["PVE", "pveTargets"],
   ["PVP", "pvpTargets"],
 ] as const;
-const KIND_LABEL: Record<string, string> = { boss: "BOSS", pve: "PVE", train: "TRAIN", pvp: "PVP" };
+const KIND_LABEL: Record<string, string> = { boss: "BOSS", pve: "PVE", pvp: "PVP" };
 // Classes marked TANK on the aggro card.
 const TANKS = new Set(["Templar", "Gladiator"]);
 /** Chart window: 60 dps-update samples (500 ms each). */

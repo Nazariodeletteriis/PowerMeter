@@ -2,6 +2,22 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.4
+
+- Neu: Der Meter wechselt den Modus selbst: BOSS beim Boss, PVP gegen Spieler, PVE für alles andere.
+- Geändert: TRAIN entfällt: Trainingspuppen zählen als PVE, im Widget und im Dashboard.
+- Neu: RESET-Taste immer sichtbar im Widget, neben der Modusauswahl.
+- Neu: Boss-Kills werden automatisch hochgeladen (angemeldet, in den Einstellungen abschaltbar); Log-Seiten zeigen nur Charakternamen.
+- Neu: Ranglisten (stärkster Treffer, schnellster Kill, Gruppen-DPS) und die besten Spieler jeder Klasse in den Klassenstatistiken.
+- Neu: Tab Rotation im Bericht; der Bericht öffnet deinen letzten Boss mit Dungeon und Boss 1/2/3.
+- Neu: Verlauf nach Dungeon gruppiert, mit echtem Dungeon-Filter.
+- Neu: Der Skill-Planer übernimmt die Skillleiste aus dem Spiel; Passive als Punkte, Stufe 1–20.
+- Neu: Builder mit aktueller und gewünschter Ausrüstung und dem Wertunterschied.
+- Neu: Gegenstandsfilter (Kategorie, Slot, Grad, Stufe, Handel, Fraktion, Quelle, Klasse); der Gear Viewer kann auswählen, vergleichen und anheften.
+- Behoben: Das Widget friert beim Moduswechsel nicht mehr ein, und die STAGGER-Leiste aktualisiert sich auch ohne neuen Schaden.
+- Behoben: Verlorene Pakete werden erfasst und die Latenz ist geringer: der Meter folgt dem Kampf in Echtzeit.
+- Geändert: Marktplatz entfernt.
+
 ## 0.4.3
 
 - Neu: Wenn ein Update verfügbar ist, erscheint beim Öffnen der App ein Fenster mit den Schaltflächen Jetzt aktualisieren und Versionshinweise.

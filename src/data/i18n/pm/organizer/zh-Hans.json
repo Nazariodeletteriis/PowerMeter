@@ -96,6 +96,8 @@
   "organizer.set.saveProfile": "保存更改",
   "organizer.set.connectedAccounts": "已关联账号",
   "organizer.set.patreonHint": "支持承载日志、排行榜和共享 Build 的服务器",
+  "organizer.set.autoUpload": "自动上传首领击杀",
+  "organizer.set.autoUploadHint": "首领击杀会自动上传。在线日志是公开的，包含你队伍中玩家的名字。需要登录 PowerMeter。",
   "organizer.set.becomeSupporter": "成为支持者",
   "organizer.set.exportAll": "导出全部",
   "organizer.set.exportAllHint": "角色、配装、任务和设置",

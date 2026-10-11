@@ -96,6 +96,8 @@
   "organizer.set.saveProfile": "Salvar alterações",
   "organizer.set.connectedAccounts": "Contas vinculadas",
   "organizer.set.patreonHint": "Apoie os servidores de logs, rankings e builds compartilhadas",
+  "organizer.set.autoUpload": "Enviar automaticamente as mortes de chefes",
+  "organizer.set.autoUploadHint": "As mortes de chefes vão online sozinhas. Os logs online são públicos e contêm os nomes dos jogadores do seu grupo. Requer login no PowerMeter.",
   "organizer.set.becomeSupporter": "Torne-se supporter",
   "organizer.set.exportAll": "Exportar tudo",
   "organizer.set.exportAllHint": "Personagens, builds, tarefas e configurações",

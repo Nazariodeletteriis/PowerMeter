@@ -4,6 +4,22 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.4.4
+
+- New: The meter switches mode by itself: BOSS at a boss, PVP against players, PVE for everything else.
+- Changed: TRAIN is gone: training dummies count as PVE, in the widget and in the dashboard.
+- New: RESET button always visible in the widget, next to the mode selector.
+- New: Boss kills are uploaded automatically (when signed in, can be turned off in Settings); log pages show only in-game character names.
+- New: Rankings (biggest hit, fastest kill, party DPS) and the best players of each class in Class stats.
+- New: Rotation tab in the Report; the Report opens your last boss with the dungeon and Boss 1/2/3.
+- New: History grouped by dungeon, with a real Dungeon filter.
+- New: Skill Planner fills the skill bar from the game; passives as points, level 1–20.
+- New: Builder with current and wanted gear and the stat difference.
+- New: Item filters (category, slot, grade, level, trade, faction, source, class); Gear Viewer can select, compare and pin.
+- Fixed: The widget no longer freezes when switching mode, and the STAGGER bar updates without new damage.
+- Fixed: Lost packets recovered and lower latency: the meter follows the fight in real time.
+- Changed: Marketplace removed.
+
 ## 0.4.3
 
 - New: When an update is available, a window shows it as soon as you open the app, with Update now and Release notes buttons.

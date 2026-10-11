@@ -1,0 +1,6 @@
+{
+  "autochar.title": "아직 생성되지 않은 캐릭터",
+  "autochar.text": "플레이 중인 {name}이(가) 캐릭터 목록에 없습니다. 먼저 생성하면 빌드, 플래너, 통계가 연동됩니다.",
+  "autochar.later": "나중에",
+  "autochar.create": "캐릭터 생성"
+}

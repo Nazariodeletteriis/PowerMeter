@@ -1,0 +1,6 @@
+{
+  "autochar.title": "角色尚未创建",
+  "autochar.text": "你正在玩的 {name} 不在你的角色列表中。请先创建，构筑、规划器和统计才会跟随它。",
+  "autochar.later": "稍后",
+  "autochar.create": "创建角色"
+}

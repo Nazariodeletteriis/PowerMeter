@@ -70,6 +70,9 @@
   "characters.skill.quickbars": "Quickbars",
   "characters.skill.quickbarsHint": "select a skill, then click a key",
   "characters.skill.assignHint": "Click to assign the selected skill",
+  "characters.skill.passives": "Passive skills",
+  "characters.skill.passivesHint": "always active, spread the levels across them",
+  "characters.skill.pointsSpent": "{n} points spent",
   "characters.skill.rotation": "Rotation",
   "characters.skill.addSelected": "Add the selected skill",
   "characters.skill.removeNamed": "Remove {n}",
@@ -95,5 +98,13 @@
   "characters.builds.noneText": "Create your first build, or clone one in the Character Builder.",
   "characters.builder.defaultBuild": "Main build",
   "characters.builder.commentsEmptyTitle": "No comments yet",
-  "characters.builder.commentsEmptyText": "Comments will be available once online build sharing is live."
+  "characters.builder.commentsEmptyText": "Comments will be available once online build sharing is live.",
+  "characters.builder.set.label": "Gear set",
+  "characters.builder.set.gear": "Current gear",
+  "characters.builder.set.want": "Target gear",
+  "characters.builder.set.gearHint": "What you are wearing now.",
+  "characters.builder.set.wantHint": "Your goal. Slots that differ from current: {n}",
+  "characters.builder.set.differs": "Differs from current gear",
+  "characters.builder.set.wornIs": "Now wearing: {item}",
+  "characters.builder.set.deltaNote": "Change against current gear"
 }

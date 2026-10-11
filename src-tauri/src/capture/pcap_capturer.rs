@@ -191,7 +191,9 @@ impl PcapLib {
                 c_name.as_ptr(),
                 65535,  // snaplen
                 1,      // promiscuous
-                100,    // timeout ms
+                // Npcap hands buffered packets over when this read timeout
+                // expires, so it is a floor on capture latency (was 100 ms).
+                20,     // timeout ms
                 errbuf.as_mut_ptr() as *mut c_char,
             )
         };
@@ -354,6 +356,7 @@ fn start_capture_thread(
         };
 
         info!("Capture active on {}", label);
+        let mut dropped: u64 = 0;
 
         while running.load(Ordering::SeqCst) {
             let mut header: *mut PcapPkthdr = ptr::null_mut();
@@ -376,7 +379,14 @@ fn start_capture_thread(
                     let frame = unsafe { std::slice::from_raw_parts(data, len) };
                     if let Some(mut payload) = parse_tcp_payload(frame, &label) {
                         payload.captured_at_ms = ts;
-                        let _ = sender.try_send(payload);
+                        // A full channel drops the segment, a hole in the stream:
+                        // say so (first, then every 1000th) instead of losing hits silently.
+                        if sender.try_send(payload).is_err() {
+                            dropped += 1;
+                            if dropped % 1000 == 1 {
+                                warn!("Capture queue full on {}: {} segments dropped", label, dropped);
+                            }
+                        }
                     }
                 }
                 0 => continue, // Timeout
@@ -457,7 +467,17 @@ fn parse_tcp_payload(frame: &[u8], device_name: &str) -> Option<CapturedPayload>
     if payload_offset >= frame.len() {
         return None;
     }
-    let payload = &frame[payload_offset..];
+    // Ethernet pads frames to 60 bytes, so a short segment (every pure ACK)
+    // carries zero bytes that are not TCP data: the IP total length bounds it.
+    // Live logs have thousands of these 6-byte "payloads"; one landing inside
+    // a split game packet shifts that packet's bytes. Only a padded frame
+    // (IP length < 46) is trimmed, so offloaded segments are left as captured.
+    let ip_total = u16::from_be_bytes([ip_header[2], ip_header[3]]) as usize;
+    let end = if ip_offset == 14 && ip_total < 46 { (ip_offset + ip_total).min(frame.len()) } else { frame.len() };
+    if payload_offset >= end {
+        return None;
+    }
+    let payload = &frame[payload_offset..end];
     if payload.is_empty() {
         return None;
     }
@@ -473,4 +493,30 @@ fn parse_tcp_payload(frame: &[u8], device_name: &str) -> Option<CapturedPayload>
         tcp_seq,
         tcp_ack,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_tcp_payload;
+
+    /// Ethernet + IPv4 (`ip_len`) + 20-byte TCP header, then `tail`.
+    fn frame(ip_len: u16, tail: &[u8]) -> Vec<u8> {
+        let mut f = vec![0u8; 12];
+        f.extend_from_slice(&[0x08, 0x00, 0x45, 0x00]);
+        f.extend_from_slice(&ip_len.to_be_bytes());
+        f.extend_from_slice(&[0, 0, 0, 0, 64, 6, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2]);
+        f.extend_from_slice(&[0x31, 0x2d, 0xd4, 0x10, 0, 0, 0, 1, 0, 0, 0, 1, 0x50, 0x10, 0, 0, 0, 0, 0, 0]);
+        f.extend_from_slice(tail);
+        f
+    }
+
+    #[test]
+    fn ethernet_padding_is_not_payload() {
+        // A pure ACK padded to 60 bytes has no payload at all.
+        assert!(parse_tcp_payload(&frame(40, &[0; 6]), "eth").is_none());
+        // A 3-byte segment keeps its 3 bytes, not the 3 pad bytes after them.
+        assert_eq!(parse_tcp_payload(&frame(43, &[7, 8, 9, 0, 0, 0]), "eth").unwrap().data, vec![7, 8, 9]);
+        // An unpadded frame is untouched.
+        assert_eq!(parse_tcp_payload(&frame(48, &[1; 8]), "eth").unwrap().data, vec![1; 8]);
+    }
 }

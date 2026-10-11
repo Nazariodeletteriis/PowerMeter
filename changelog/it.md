@@ -2,6 +2,22 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.4
+
+- Nuovo: Il meter cambia modalità da solo: BOSS al boss, PVP contro i giocatori, PVE per tutto il resto.
+- Modificato: TRAIN non c'è più: i manichini contano come PVE, nel widget e nella dashboard.
+- Nuovo: Pulsante RESET sempre visibile nel widget, accanto al selettore della modalità.
+- Nuovo: I kill dei boss si caricano da soli (con l'accesso, disattivabile in Impostazioni); le pagine dei log mostrano solo i nomi dei personaggi.
+- Nuovo: Classifiche (colpo più forte, kill più veloce, DPS del party) e i migliori giocatori di ogni classe in Statistiche classi.
+- Nuovo: Tab Rotazione nel Report; il Report apre il tuo ultimo boss con il dungeon e Boss 1/2/3.
+- Nuovo: Storico raggruppato per dungeon, con un vero filtro Dungeon.
+- Nuovo: Lo Skill Planner riempie la barra skill dal gioco; passive a punti, livello 1–20.
+- Nuovo: Builder con equip attuale e desiderato e la differenza di statistiche.
+- Nuovo: Filtri Oggetti (categoria, slot, grado, livello, scambio, fazione, fonte, classe); il Gear Viewer seleziona, confronta e fissa.
+- Corretto: Il widget non si blocca più cambiando modalità e la barra STAGGER si aggiorna anche senza nuovi danni.
+- Corretto: Pacchetti persi recuperati e latenza più bassa: il meter segue il combattimento in tempo reale.
+- Modificato: Marketplace rimosso.
+
 ## 0.4.3
 
 - Nuovo: Quando c'è un aggiornamento, appena apri l'app compare una finestra con i pulsanti Aggiorna ora e Note di rilascio.

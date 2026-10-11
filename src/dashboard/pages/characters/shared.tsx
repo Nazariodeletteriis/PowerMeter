@@ -17,6 +17,10 @@ export function useMem<V>(key: string, init: V) {
   };
   return [value, set] as const;
 }
+/** Write page state from outside the page (the packet capture); the page reads it when it mounts. */
+export function setMem(key: string, value: unknown) {
+  mem[key] = value;
+}
 
 /** The build the Character Builder shows (prototype bSrc). */
 /** `char`: id of the character whose card opened it; the build then stays on that character instead of following the active one. */
@@ -36,9 +40,14 @@ export function readMyBuilds(json?: string): BuildSrc[] {
     return []; // missing or hand-edited: no builds of your own yet
   }
 }
-/** Level and gear of each build, by title: settings["pm.buildData"]. Gear: slot → archive item id + enhancement level. */
+/**
+ * Level and gear sets of each build, by title: settings["pm.buildData"]. A set: slot → archive item id + enhancement level.
+ * `gear`: what the character wears (the packet capture will write the worn equipment here, once it exists).
+ * `want`: the target set, filled by hand; missing until first edited, and then it starts from `gear`.
+ */
 export const BUILD_DATA_KEY = "pm.buildData";
-export type BuildData = { lvl?: number; gear?: Record<string, { id: string; enh: number }> };
+export type GearSet = Record<string, { id: string; enh: number }>;
+export type BuildData = { lvl?: number; gear?: GearSet; want?: GearSet };
 export function readBuildData(json?: string): Record<string, BuildData> {
   try {
     const v = JSON.parse(json ?? "");
