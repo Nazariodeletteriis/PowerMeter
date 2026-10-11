@@ -4,6 +4,7 @@ import { readCharacters } from "../characters";
 import { REGIONS } from "../Onboarding";
 import { EmptyState } from "../ui";
 import "./organizer/organizer.css";
+import { resetTime } from "./organizer/resets";
 import type { PageProps } from "./types";
 
 const TABS = [
@@ -43,7 +44,7 @@ export default function Attivita({ t, settings }: PageProps) {
           </button>
         ))}
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 12, color: "var(--pm-t3)", marginRight: 10 }}>{t("organizer.autoReset", { region })}</span>
+        <span style={{ fontSize: 12, color: "var(--pm-t3)", marginRight: 10 }}>{t("organizer.autoReset", { region, time: resetTime(new Date()) })}</span>
         <button
           type="button"
           style={{

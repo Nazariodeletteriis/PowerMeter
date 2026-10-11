@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { BellIcon, CalendarBlankIcon, DiscordLogoIcon, PlusIcon } from "@phosphor-icons/react";
 import { REGIONS } from "../Onboarding";
 import { Card, EmptyState } from "../ui";
-import { nextDailyReset, nextWeeklyReset } from "./organizer/resets";
+import { nextDailyReset, nextWeeklyReset, resetTime } from "./organizer/resets";
 import { eventStatus, startsBetween, useGameEvents } from "./organizer/schedule";
 import { clock, countdown, dayLabel, useNow } from "./shugo/events";
 import "./organizer/organizer.css";
@@ -50,8 +50,8 @@ export default function Timer({ t, lang, settings, save, run, onError }: PagePro
   const region = (REGIONS.find((r) => r.value === settings["pm.region"]) ?? REGIONS[0]).label;
   const left = (to: Date) => Math.max(0, Math.round((to.getTime() - now) / 1000));
   const timers = [
-    { name: t("organizer.dailyReset"), sub: t("organizer.dailyResetSub", { region }), left: left(nextDailyReset(new Date(now))), period: DAY, win: true, discord: false },
-    { name: t("organizer.weeklyReset"), sub: t("organizer.weeklyResetSub"), left: left(nextWeeklyReset(new Date(now))), period: 7 * DAY, win: true, discord: true },
+    { name: t("organizer.dailyReset"), sub: t("organizer.dailyResetSub", { region, time: resetTime(new Date(now)) }), left: left(nextDailyReset(new Date(now))), period: DAY, win: true, discord: false },
+    { name: t("organizer.weeklyReset"), sub: t("organizer.weeklyResetSub", { time: resetTime(new Date(now)) }), left: left(nextWeeklyReset(new Date(now))), period: 7 * DAY, win: true, discord: true },
   ];
 
   return (
