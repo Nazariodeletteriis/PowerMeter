@@ -122,7 +122,7 @@
   "organizer.set.disclaimerText": "비공식 도구이며 NCSoft와 관련이 없습니다.",
   "organizer.set.credits": "크레딧",
   "organizer.diag.title": "미터 진단",
-  "organizer.diag.npcapOk": "wpcap.dll 로드됨 · 캡처 사용 가능",
+  "organizer.diag.npcapOk": "이 PC에 Npcap이 이미 설치되어 있습니다",
   "organizer.diag.npcapMissing": "Npcap이 설치되어 있지 않습니다. 이것이 없으면 게임 트래픽을 읽을 수 없습니다.",
   "organizer.diag.admin": "관리자 권한",
   "organizer.diag.adminOk": "PowerMeter가 관리자 권한으로 실행 중입니다",

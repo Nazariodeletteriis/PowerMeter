@@ -182,6 +182,7 @@
       "label": "Max players shown"
     },
     "debugLogging": "Enable debug logging",
+    "logsRestricted": "Debugger and Admin roles only",
     "quit": "Quit",
     "discord": "Discord",
     "version": "Version",
@@ -274,6 +275,11 @@
       "working": "Waiting for approval…",
       "failed": "Sign-in failed: {error}",
       "supporter": "Supporter"
+    },
+    "eventVolume": {
+      "label": "Event alert volume",
+      "hint": "Rings 10 minutes before an event, if the sound is on in the dashboard Timer",
+      "test": "Test"
     }
   },
   "support": {
@@ -448,6 +454,9 @@
     },
     "resetTip": "Reset the meter (Ctrl+Alt+R)",
     "eventSoon": "{name} in {time}",
-    "eventDismiss": "Dismiss"
+    "eventDismiss": "Dismiss",
+    "pillHint": "Click to expand · drag to move",
+    "copy": "Copy fight summary",
+    "copied": "Copied"
   }
 }

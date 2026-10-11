@@ -385,7 +385,7 @@ const LIST_SQL: &str = "SELECT id, name,
        json_extract(data_json, '$.facts.exchange') AS exchange,
        json_extract(data_json, '$.item.race') AS race,
        (SELECT group_concat(DISTINCT json_extract(s.value, '$.type')) FROM json_each(data_json, '$.sources') s) AS sources
-     FROM records WHERE category = ?1 ORDER BY name, id";
+     FROM records WHERE category = ?1 ORDER BY name = '???', name, id"; // 117 quests the Global client names '???': last, not on top
 
 #[tauri::command]
 pub fn gamedata_list(state: tauri::State<'_, AppState>, category: String) -> Result<Vec<Value>, String> {
@@ -651,6 +651,7 @@ mod tests {
                 "CREATE TABLE events (dataset_id TEXT, event_id TEXT, category TEXT, name TEXT, timezone TEXT,
                    duration_minutes INTEGER, cadence_json TEXT, location TEXT, server_verified INTEGER);
                  INSERT INTO events VALUES ('events', 'e1', 'field', 'Rift', 'Asia/Seoul', 30, '{\"every\":\"day\"}', NULL, 0);
+                 INSERT INTO records VALUES ('global_204', 'item', 'unnamed', '???', 0, '[]', '{}');
                  UPDATE records SET data_json = '{\"item\":{\"grade\":\"Rare\",\"slot\":\"Sword\",\"icon\":\"Icon_SW\"}}';",
             )
             .unwrap();
@@ -660,8 +661,9 @@ mod tests {
         assert_eq!(ev[0]["cadence_json"], json!({"every": "day"}));
         assert_eq!(ev[0]["duration_minutes"], 30);
         let list = gd.query(LIST_SQL, &[&"item"]).unwrap();
-        assert_eq!(list, vec![json!({"id": "sword", "name": "Sword", "grade": "Rare", "level": null, "kind": "Sword", "icon": "Icon_SW",
-            "exchange": null, "race": null, "sources": null})]);
+        assert_eq!(list[0], json!({"id": "sword", "name": "Sword", "grade": "Rare", "level": null, "kind": "Sword", "icon": "Icon_SW",
+            "exchange": null, "race": null, "sources": null}));
+        assert_eq!(list[1]["id"], "unnamed", "'???' sorts before letters: it goes last");
         // Only whitelisted table/column pairs reach the SQL text.
         assert!(rows_sql("monster_regions", "monster_id").is_some());
         assert!(rows_sql("meta", "key").is_none());

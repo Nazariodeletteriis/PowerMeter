@@ -2,6 +2,22 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.9
+
+- Nuovo: Ruoli: tutti partono come Player con 30 giorni di prova completa (login Discord e account Discord di almeno 8 mesi); poi Party, rotazioni e Gear Viewer sono dei piani. I piani Patreon arrivano presto.
+- Nuovo: Pagina Dungeon rifatta: card Exploration e Conquest con requisiti, ricompense e drop.
+- Nuovo: Builder: la barra skill è mostrata come nel gioco, ogni set con le skill concatenate sopra ogni slot (stigma comprese).
+- Nuovo: Widget: pulsante Copia per il DPS del combattimento, pronto da incollare su Discord.
+- Nuovo: Widget: volume dell'avviso eventi nelle impostazioni.
+- Nuovo: Dopo un cambio personaggio, un suggerimento consiglia un teletrasporto per aggiornarlo.
+- Corretto: Cambiare personaggio cambia tutto il profilo, Builder e Daevanion compresi.
+- Corretto: Ridimensionamento del widget: niente più bordi trasparenti che bloccano il gioco, dimensione ricordata, l'icona ridotta si può trascinare.
+- Corretto: Npcap già installato viene riconosciuto: nessuna richiesta di reinstallarlo.
+- Corretto: Quest: la lista non parte più dalle quest senza nome.
+- Modificato: Log dei pacchetti e di debug solo per i ruoli Debugger e Admin.
+- Modificato: Rimossi Calcolatori e Armory.
+- Modificato: Termini e privacy aggiornati: ti verrà chiesto di accettarli di nuovo.
+
 ## 0.4.8
 
 - Nuovo: Builder: ogni dio della scheda Daevanion mostra il suo tabellone in piccolo, con i nodi che hai preso; la lente lo ingrandisce.

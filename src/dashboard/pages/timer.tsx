@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { BellIcon, CalendarBlankIcon, DiscordLogoIcon, PlusIcon } from "@phosphor-icons/react";
-import { chime, SOUND_KEY as SOUND } from "../chime";
+import { chime, SOUND_KEY as SOUND, VOLUME_KEY } from "../chime";
 import { REGIONS } from "../Onboarding";
 import { Card, EmptyState } from "../ui";
 import { nextDailyReset, nextWeeklyReset, resetTime } from "./organizer/resets";
@@ -23,7 +23,7 @@ export default function Timer({ t, lang, settings, save, run, onError }: PagePro
   // ponytail: rings only while this page is open; app-wide alerts need the shell.
   const last = useRef(now);
   useEffect(() => {
-    if (sound && events && startsBetween(events, last.current, now)) chime();
+    if (sound && events && startsBetween(events, last.current, now)) chime(settings[VOLUME_KEY]);
     last.current = now;
   }, [now]);
 

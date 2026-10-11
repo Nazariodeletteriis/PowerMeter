@@ -419,11 +419,56 @@ pub async fn pm_delete_log(state: tauri::State<'_, AppState>, id: String) -> Res
     authed(&state, reqwest::Method::DELETE, &log_path(&id)?, None).await.map(|_| ())
 }
 
-/// What the user may open: `{tier, admin, features, …}` (tier: free/trial/recluta/daeva/empyrean).
-/// Tier, admin and features always come from the signed permit, never from the unsigned fields;
-/// offline, the last permit counts until it expires (7 days at most).
+const DEBUG_LOG_KEY: &str = "dpsMeter.debugLoggingEnabled";
+const PACKET_LOG_KEY: &str = "dpsMeter.saveRawPackets";
+
+/// A permit that lets this PC write packet and debug logs: not expired, and the Admin or Debugger role.
+fn permit_allows_logs(permit: &Value, now: f64) -> bool {
+    permit["exp"].as_f64().is_some_and(|exp| exp > now) && (permit["admin"] == true || permit["debugger"] == true)
+}
+
+/// Packet and debug logs are for the Debugger and Admin roles only, read from the cached signed permit
+/// (whatever the settings say): the startup, the two switches and every entitlement refresh check it.
+pub(crate) fn may_log(settings: &crate::config::settings::Settings) -> bool {
+    cfg!(debug_assertions)
+        || settings.get(PERMIT_KEY).and_then(|p| permit_for_this_pc(&p)).is_some_and(|p| permit_allows_logs(&p, now_ms()))
+}
+
+/// For the widget's diagnostics switches (disabled when false).
+#[tauri::command]
+pub fn pm_may_log(state: tauri::State<'_, AppState>) -> bool {
+    may_log(&state.settings)
+}
+
+/// Turns packet or debug logging on or off; on is refused (and the setting saved off) without the role.
+pub(crate) fn set_log(state: &AppState, packets: bool, enabled: bool) -> Result<(), String> {
+    let on = enabled && may_log(&state.settings);
+    if packets {
+        crate::logging::logger::set_packet_log_enabled(on, &state.app_data_dir);
+    } else {
+        crate::logging::logger::set_debug_enabled(on, &state.app_data_dir);
+    }
+    state.settings.set(if packets { PACKET_LOG_KEY } else { DEBUG_LOG_KEY }, if on { "true" } else { "false" });
+    if enabled && !on {
+        return Err("packet and debug logs need the Debugger or Admin role".into());
+    }
+    Ok(())
+}
+
+/// What the user may open: `{tier, admin, debugger, features, …}` (tier: free/trial/recluta/daeva/empyrean).
+/// Tier, admin, debugger and features always come from the signed permit, never from the unsigned fields;
+/// offline, the last permit counts until it expires (7 days at most). A lost Debugger role stops the logs.
 #[tauri::command]
 pub async fn pm_entitlement(state: tauri::State<'_, AppState>) -> Result<Value, String> {
+    let res = entitlement(&state).await;
+    if !may_log(&state.settings) {
+        let _ = set_log(&state, true, false);
+        let _ = set_log(&state, false, false);
+    }
+    res
+}
+
+async fn entitlement(state: &AppState) -> Result<Value, String> {
     // The developer's own builds are always unlocked.
     if cfg!(debug_assertions) {
         return Ok(json!({ "tier": "empyrean", "admin": true, "features": [], "source": "dev" }));
@@ -434,7 +479,7 @@ pub async fn pm_entitlement(state: tauri::State<'_, AppState>) -> Result<Value, 
         return Ok(free);
     }
     let signed = |info: &mut Value, permit: &Value| {
-        for k in ["tier", "admin", "features"] {
+        for k in ["tier", "admin", "debugger", "features"] {
             info[k] = permit[k].clone();
         }
     };
@@ -520,6 +565,17 @@ pub async fn pm_admin_revoke(state: tauri::State<'_, AppState>, user_id: String)
     authed(&state, reqwest::Method::DELETE, &grant_path(&user_id)?, None).await.map(|_| ())
 }
 
+/// Admin only: gives (`on`) or takes a role: `debugger` (packet and debug logs) or `developer`
+/// (everything unlocked; taking it away restarts the trial).
+#[tauri::command]
+pub async fn pm_admin_role(state: tauri::State<'_, AppState>, user_id: String, role: String, on: bool) -> Result<(), String> {
+    if role != "debugger" && role != "developer" {
+        return Err("invalid role".into());
+    }
+    let method = if on { reqwest::Method::PUT } else { reqwest::Method::DELETE };
+    authed(&state, method, &grant_path(&user_id)?.replace("/grants/", &format!("/{role}/")), None).await.map(|_| ())
+}
+
 /// Class stats over the community's public logs; no account needed.
 #[tauri::command]
 pub async fn pm_class_stats(
@@ -586,6 +642,21 @@ mod tests {
     #[test]
     fn permit_signed_by_the_server() {
         assert_eq!(permit_payload(PERMIT).unwrap()["tier"], "daeva");
+    }
+
+    #[test]
+    fn logs_only_for_debugger_and_admin() {
+        let p = |role: &str, exp: f64| {
+            let mut v = json!({ "tier": "empyrean", "exp": exp });
+            v[role] = json!(true);
+            v
+        };
+        assert!(permit_allows_logs(&p("debugger", 2_000.0), 1_000.0));
+        assert!(permit_allows_logs(&p("admin", 2_000.0), 1_000.0));
+        assert!(!permit_allows_logs(&p("debugger", 500.0), 1_000.0), "expired");
+        assert!(!permit_allows_logs(&p("founder", 2_000.0), 1_000.0), "a plan alone");
+        assert!(!permit_allows_logs(&json!({ "debugger": "true", "exp": 2_000.0 }), 1_000.0), "not a boolean");
+        assert!(!permit_allows_logs(&json!({ "debugger": true }), 1_000.0), "no expiry");
     }
 
     #[test]

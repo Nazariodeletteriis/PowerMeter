@@ -12,7 +12,7 @@ use crate::AppState;
 
 const CLICK_THROUGH_HOTKEY_KEY: &str = "pm.clickThroughHotkey";
 /// Must match TERMS_VERSION in src/dashboard/Onboarding.tsx.
-const TERMS_VERSION: &str = "2026-09-29.5";
+const TERMS_VERSION: &str = "2026-10-12";
 
 /// Nothing is captured before the user accepts the current terms (the last
 /// onboarding step writes `pm.termsAccepted`): until then the meter stays
@@ -218,11 +218,38 @@ pub fn relaunch_elevated() -> bool {
     false
 }
 
-/// Same probe the capture engine uses (`PcapLib::load`): Npcap in WinPcap
-/// API-compatible mode puts `wpcap.dll` on the default DLL search path.
+/// Npcap counts as installed when any trace of it is on the PC: its DLL in
+/// `System32\Npcap`, its driver service, or a `wpcap.dll` that loads (WinPcap
+/// API-compatible mode, or an old WinPcap). Loading alone was the only probe
+/// before, so any loader hiccup reported an installed Npcap as missing and
+/// pushed the user to install it again.
 #[tauri::command]
 pub fn npcap_installed() -> bool {
-    unsafe { libloading::Library::new("wpcap.dll") }.is_ok()
+    npcap_dir().is_some_and(|dir| dir.join("wpcap.dll").is_file())
+        || npcap_service_registered()
+        || unsafe { libloading::Library::new("wpcap.dll") }.is_ok()
+}
+
+/// `%SystemRoot%\System32\Npcap`, where Npcap always puts its DLLs.
+fn npcap_dir() -> Option<std::path::PathBuf> {
+    std::env::var_os("SystemRoot").map(|root| std::path::Path::new(&root).join("System32").join("Npcap"))
+}
+
+/// The installer registers the `npcap` driver service and the uninstaller
+/// removes it. The SYSTEM hive is not redirected for 32/64-bit.
+#[cfg(windows)]
+fn npcap_service_registered() -> bool {
+    use windows::Win32::System::Registry::{HKEY_LOCAL_MACHINE, RRF_RT_ANY, RegGetValueW};
+    use windows::core::w;
+    unsafe {
+        RegGetValueW(HKEY_LOCAL_MACHINE, w!("SYSTEM\\CurrentControlSet\\Services\\npcap"), w!("Start"), RRF_RT_ANY, None, None, None)
+    }
+    .is_ok()
+}
+
+#[cfg(not(windows))]
+fn npcap_service_registered() -> bool {
+    false
 }
 
 /// Lets `wpcap.dll` load from Npcap's own folder, so capture works even when
@@ -230,10 +257,9 @@ pub fn npcap_installed() -> bool {
 /// it by bare name). Appended, so a compat-mode copy in System32 still wins.
 /// Call first thing in `run()`, before any thread reads the environment.
 pub fn add_npcap_to_dll_path() {
-    let Some(root) = std::env::var_os("SystemRoot") else { return };
+    let Some(dir) = npcap_dir() else { return };
     let path = std::env::var_os("PATH").unwrap_or_default();
-    let dirs = std::env::split_paths(&path)
-        .chain([std::path::Path::new(&root).join("System32").join("Npcap")]);
+    let dirs = std::env::split_paths(&path).chain([dir]);
     if let Ok(joined) = std::env::join_paths(dirs) {
         unsafe { std::env::set_var("PATH", joined) };
     }

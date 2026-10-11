@@ -182,6 +182,7 @@
       "label": "最大顯示人數"
     },
     "debugLogging": "啟用除錯記錄",
+    "logsRestricted": "僅限 Debugger 和 Admin 角色",
     "quit": "結束",
     "discord": "Discord",
     "version": "版本",
@@ -274,6 +275,11 @@
       "working": "等待確認…",
       "failed": "登入失敗：{error}",
       "supporter": "贊助者"
+    },
+    "eventVolume": {
+      "label": "活動提醒音量",
+      "hint": "若儀表板計時器中已開啟聲音，將在活動開始前 10 分鐘響起",
+      "test": "試聽"
     }
   },
   "support": {
@@ -448,6 +454,9 @@
     },
     "resetTip": "重置計量器 (Ctrl+Alt+R)",
     "eventSoon": "{name} 還有 {time}",
-    "eventDismiss": "關閉提醒"
+    "eventDismiss": "關閉提醒",
+    "pillHint": "點擊展開 · 拖曳以移動",
+    "copy": "複製戰鬥摘要",
+    "copied": "已複製"
   }
 }

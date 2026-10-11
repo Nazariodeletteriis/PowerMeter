@@ -1,5 +1,6 @@
 {
   "shell.diagnoseHint": "点击查看诊断信息。",
+  "shell.teleportHint": "已切换角色：使用传送来更新角色信息",
   "shell.attempt": "第 {n} 次尝试",
   "shell.crumb.builder": "社区配装 → 角色配装器",
   "shell.share.log": "分享日志",

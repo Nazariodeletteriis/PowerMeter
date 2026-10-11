@@ -182,6 +182,7 @@
       "label": "最大显示人数"
     },
     "debugLogging": "启用调试日志",
+    "logsRestricted": "仅限 Debugger 和 Admin 角色",
     "quit": "退出",
     "discord": "Discord",
     "version": "版本",
@@ -274,6 +275,11 @@
       "working": "等待确认…",
       "failed": "登录失败：{error}",
       "supporter": "赞助者"
+    },
+    "eventVolume": {
+      "label": "活动提醒音量",
+      "hint": "若仪表板计时器中已开启声音，将在活动开始前 10 分钟响起",
+      "test": "试听"
     }
   },
   "support": {
@@ -448,6 +454,9 @@
     },
     "resetTip": "重置计量器 (Ctrl+Alt+R)",
     "eventSoon": "{name} 还有 {time}",
-    "eventDismiss": "关闭提醒"
+    "eventDismiss": "关闭提醒",
+    "pillHint": "点击展开 · 拖动以移动",
+    "copy": "复制战斗摘要",
+    "copied": "已复制"
   }
 }

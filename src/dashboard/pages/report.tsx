@@ -5,6 +5,7 @@ import {
   ColumnsIcon,
   ExportIcon,
   ListNumbersIcon,
+  LockSimpleIcon,
   ShareNetworkIcon,
   SwordIcon,
   TShirtIcon,
@@ -20,6 +21,9 @@ import { ShareModal } from "./shared/ShareModal";
 import { Modal } from "./system/Modal";
 import { GameIcon, gd, gradeColor, useGd, useIcons } from "./world/db";
 import type { PageProps } from "./types";
+import { canOpen, useEntitlement } from "../entitlement";
+import { Locked } from "../Locked";
+import { ROTATION_TIER } from "../nav";
 
 // The latest boss fight (the latest PVE/PvP session is often a few seconds of trash); its attempts are the saved fights on the same boss, oldest first.
 const TABS = ["overview", "skill", "tl", "rot", "taken", "heal"] as const;
@@ -77,7 +81,7 @@ export default function Report(props: PageProps) {
   return <FightView key={rec.id} {...props} rec={rec} attempts={attempts} att={att} dungeonRun={run} onPick={setPick} />;
 }
 
-function FightView({ t, lang, run, onError, name, rec, attempts, att, dungeonRun, onPick }: PageProps & { rec: FightRecord; attempts: FightSummary[]; att: number; dungeonRun?: Run; onPick: (id: string) => void }) {
+function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeonRun, onPick }: PageProps & { rec: FightRecord; attempts: FightSummary[]; att: number; dungeonRun?: Run; onPick: (id: string) => void }) {
   const dur = rec.durationMs / 1000;
   const [cmp, setCmp] = useState<string | null>(null);
   const other = useFight(cmp ?? undefined, onError);
@@ -89,6 +93,10 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, dungeonRun
   const [share, setShare] = useState(false);
   const [inspect, setInspect] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
+  // Rotations lock with Party once a Player's trial ends (nav.ts): blurred, under the Locked card.
+  const rotLocked = !canOpen(useEntitlement(), ROTATION_TIER);
+  const lock = rotLocked && <LockSimpleIcon weight="fill" role="img" aria-label={t("subs.lockedSoon")} style={{ marginLeft: 4, color: "var(--pm-t3)" }} />;
+  const gateRot = (node: ReactNode) => (rotLocked ? <Locked t={t} tier={ROTATION_TIER} go={go} onError={onError}>{node}</Locked> : node);
   // The run's bosses in boss order; each chip opens that boss's latest attempt in the run.
   const runBosses = dungeonRun ? [...new Set(dungeonRun.fights.map((f) => f.bossName))].sort((a, b) => dungeonRun.bosses[a] - dungeonRun.bosses[b]) : [];
 
@@ -192,6 +200,7 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, dungeonRun
         >
           <ListNumbersIcon aria-hidden="true" />
           {t("combat.rotationBtn")}
+          {lock}
         </button>
         {/* The selected player's gear, read from their spawn in game. */}
         <button type="button" className="btn" style={outline} disabled={!p?.actor.gear?.length} title={p?.actor.gear?.length ? undefined : t("combat.inspectNone")} onClick={() => setInspect(true)}>
@@ -310,6 +319,7 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, dungeonRun
         {TABS.map((id) => (
           <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}>
             {t(`combat.tab.${id}`)}
+            {id === "rot" && lock}
           </button>
         ))}
       </div>
@@ -473,7 +483,7 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, dungeonRun
         </section>
       )}
 
-      {tab === "rot" && p && (
+      {tab === "rot" && p && gateRot(
         <section className="card" style={{ padding: "14px 16px" }}>
           <h2 style={{ fontWeight: 500, marginBottom: 12 }}>{t("combat.rotation", { name: p.n })}</h2>
           <div style={{ fontSize: 11, color: "var(--pm-t3)", marginBottom: 6 }}>{t("combat.castOrder", { n: MAX_CASTS })}</div>

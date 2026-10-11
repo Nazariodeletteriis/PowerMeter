@@ -182,6 +182,7 @@
       "label": "表示する最大プレイヤー数"
     },
     "debugLogging": "デバッグログを有効にする",
+    "logsRestricted": "Debugger と Admin ロール専用",
     "quit": "終了",
     "discord": "Discord",
     "version": "バージョン",
@@ -274,6 +275,11 @@
       "working": "承認を待っています…",
       "failed": "サインインに失敗しました: {error}",
       "supporter": "サポーター"
+    },
+    "eventVolume": {
+      "label": "イベント通知の音量",
+      "hint": "ダッシュボードのタイマーでサウンドがオンのとき、イベントの10分前に鳴ります",
+      "test": "テスト"
     }
   },
   "support": {
@@ -448,6 +454,9 @@
     },
     "resetTip": "メーターをリセット (Ctrl+Alt+R)",
     "eventSoon": "{name}まで {time}",
-    "eventDismiss": "通知を閉じる"
+    "eventDismiss": "通知を閉じる",
+    "pillHint": "クリックで展開 · ドラッグで移動",
+    "copy": "戦闘サマリーをコピー",
+    "copied": "コピーしました"
   }
 }

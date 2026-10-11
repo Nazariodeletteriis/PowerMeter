@@ -2,6 +2,22 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.9
+
+- Neu: Rollen: Alle starten als Player mit einer vollen 30-Tage-Testphase (Discord-Login und ein mindestens 8 Monate altes Discord-Konto); danach sind Party, Rotationen und Gear Viewer den Plänen vorbehalten. Die Patreon-Pläne kommen bald.
+- Neu: Dungeon-Seite neu gestaltet: Karten für Exploration und Conquest mit Voraussetzungen, Belohnungen und Drops.
+- Neu: Builder: Die Skillleiste wird wie im Spiel gezeigt, jedes Set mit den verketteten Skills über jedem Slot (inklusive Stigmata).
+- Neu: Widget: Kopieren-Button für den DPS des Kampfes, bereit zum Einfügen in Discord.
+- Neu: Widget: Lautstärke des Event-Hinweises in den Einstellungen.
+- Neu: Nach einem Charakterwechsel empfiehlt ein Hinweis einen Teleport, um den Charakter zu aktualisieren.
+- Behoben: Ein Charakterwechsel wechselt das ganze Profil, Builder und Daevanion eingeschlossen.
+- Behoben: Widget-Größe: keine transparenten Ränder mehr, die das Spiel blockieren, Größe wird gespeichert, das minimierte Icon lässt sich ziehen.
+- Behoben: Ein bereits installiertes Npcap wird erkannt: keine erneute Installation.
+- Behoben: Quests: Die Liste beginnt nicht mehr mit namenlosen Quests.
+- Geändert: Paket- und Debug-Logs nur für die Rollen Debugger und Admin.
+- Geändert: Rechner und Armory entfernt.
+- Geändert: Bedingungen und Datenschutz aktualisiert: Du wirst gebeten, sie erneut zu akzeptieren.
+
 ## 0.4.8
 
 - Neu: Builder: Jeder Gott im Daevanion-Tab zeigt sein Brett im Kleinen, mit deinen gewählten Knoten; die Lupe vergrößert es.

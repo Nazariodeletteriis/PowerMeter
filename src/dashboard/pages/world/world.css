@@ -690,3 +690,191 @@ td[data-mark="lo"] {
   color: var(--pm-t3);
   cursor: default;
 }
+
+/* ---------- Dungeon page: Expedition cards ---------- */
+/* Exploration reads neutral; Conquest (harder) takes the theme's red. */
+.dgTab.exploration[aria-selected="true"] {
+  border-bottom-color: var(--pm-t2);
+}
+.dgTab.conquest[aria-selected="true"] {
+  color: var(--pm-redt);
+}
+.dgGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+.dgCard {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  min-height: 430px;
+  border: 1px solid var(--pm-line);
+  border-radius: 8px;
+  background: var(--pm-s1);
+  transition: border-color 150ms ease;
+}
+.dgArt {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+/* Scrim: the art shows on top, the text sits on near-solid background below. */
+.dgCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgb(10 9 9 / 0.05) 0%, rgb(10 9 9 / 0.6) 32%, rgb(10 9 9 / 0.9) 52%, var(--pm-bg) 100%);
+}
+.dgCard.conquest {
+  border-color: color-mix(in srgb, var(--pm-red) 55%, var(--pm-line));
+}
+.dgCard.conquest::before {
+  background: linear-gradient(180deg, rgb(127 17 18 / 0.3) 0%, rgb(40 6 7 / 0.66) 32%, rgb(22 6 6 / 0.92) 52%, #120707 100%);
+}
+.dgTier {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: var(--pm-fill);
+  border: 1px solid var(--pm-red);
+  color: var(--pm-filltext);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.dgBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 140px 16px 16px;
+  min-width: 0;
+}
+.dgName {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 12px rgb(10 9 9 / 0.8);
+}
+.dgName button {
+  all: unset;
+  cursor: pointer;
+}
+/* The whole card opens the dungeon; reward icons stay above it for their tooltips. */
+.dgName button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.dgCard:has(.dgName button:focus-visible) {
+  outline: 2px solid var(--pm-red);
+  outline-offset: 2px;
+}
+.dgChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dgChips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 6px;
+  border: 1px solid rgb(250 247 247 / 0.14);
+  background: rgb(10 9 9 / 0.55);
+  font-size: 12px;
+  color: var(--pm-t1);
+}
+.conquest .dgChips li {
+  border-color: rgb(219 0 0 / 0.4);
+  background: rgb(127 17 18 / 0.28);
+}
+.dgChips svg,
+.dgText svg {
+  flex: none;
+  color: var(--pm-t3);
+}
+.conquest .dgChips svg,
+.conquest .dgText svg {
+  color: var(--pm-redt);
+}
+.dgLabel {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.dgLabel .mono {
+  color: var(--pm-t1);
+  letter-spacing: 0;
+}
+.dgText {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--pm-t2);
+}
+.dgKinah > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--pm-t1);
+}
+.dgMuted {
+  display: block;
+  font-size: 12px;
+  color: var(--pm-t3);
+}
+.dgMuted svg {
+  margin-right: 5px;
+  vertical-align: -2px;
+}
+.dgLoot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.dgLocked {
+  padding-top: 10px;
+  border-top: 1px solid rgb(219 0 0 / 0.3);
+  font-size: 12px;
+}
+.dgLockedVal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--pm-t1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .dgCard:hover {
+    border-color: var(--pm-t3);
+  }
+  .dgCard.conquest:hover {
+    border-color: var(--pm-red);
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .dgCard:hover .dgArt {
+    transform: scale(1.03);
+  }
+}

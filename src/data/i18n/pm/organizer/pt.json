@@ -122,7 +122,7 @@
   "organizer.set.disclaimerText": "Ferramenta não oficial, não afiliada à NCSoft.",
   "organizer.set.credits": "Créditos",
   "organizer.diag.title": "Diagnóstico do meter",
-  "organizer.diag.npcapOk": "wpcap.dll carregado · captura disponível",
+  "organizer.diag.npcapOk": "O Npcap já está instalado neste PC",
   "organizer.diag.npcapMissing": "O Npcap não está instalado: sem ele, o tráfego do jogo não pode ser lido.",
   "organizer.diag.admin": "Direitos de administrador",
   "organizer.diag.adminOk": "O PowerMeter está sendo executado como administrador",

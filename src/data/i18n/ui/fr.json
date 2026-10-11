@@ -182,6 +182,7 @@
       "label": "Joueurs affichés max."
     },
     "debugLogging": "Activer la journalisation de débogage",
+    "logsRestricted": "Réservé aux rôles Debugger et Admin",
     "quit": "Quitter",
     "discord": "Discord",
     "version": "Version",
@@ -274,6 +275,11 @@
       "working": "En attente de validation…",
       "failed": "Échec de la connexion : {error}",
       "supporter": "Soutien"
+    },
+    "eventVolume": {
+      "label": "Volume de l'alerte d'événement",
+      "hint": "Sonne 10 minutes avant un événement, si le son est activé dans le Minuteur du tableau de bord",
+      "test": "Tester"
     }
   },
   "support": {
@@ -448,6 +454,9 @@
     },
     "resetTip": "Réinitialiser le compteur (Ctrl+Alt+R)",
     "eventSoon": "{name} dans {time}",
-    "eventDismiss": "Fermer l’alerte"
+    "eventDismiss": "Fermer l’alerte",
+    "pillHint": "Cliquer pour agrandir · glisser pour déplacer",
+    "copy": "Copier le résumé du combat",
+    "copied": "Copié"
   }
 }

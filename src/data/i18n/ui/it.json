@@ -182,6 +182,7 @@
       "label": "Numero massimo di giocatori"
     },
     "debugLogging": "Attiva log di debug",
+    "logsRestricted": "Solo per i ruoli Debugger e Admin",
     "quit": "Esci",
     "discord": "Discord",
     "version": "Versione",
@@ -274,6 +275,11 @@
       "working": "In attesa di approvazione…",
       "failed": "Accesso non riuscito: {error}",
       "supporter": "Supporter"
+    },
+    "eventVolume": {
+      "label": "Volume avviso eventi",
+      "hint": "Suona 10 minuti prima di un evento, se il suono è attivo nel Timer della dashboard",
+      "test": "Prova"
     }
   },
   "support": {
@@ -448,6 +454,9 @@
     },
     "resetTip": "Azzera il meter (Ctrl+Alt+R)",
     "eventSoon": "{name} tra {time}",
-    "eventDismiss": "Chiudi avviso"
+    "eventDismiss": "Chiudi avviso",
+    "pillHint": "Clicca per espandere · trascina per spostare",
+    "copy": "Copia riepilogo del combattimento",
+    "copied": "Copiato"
   }
 }

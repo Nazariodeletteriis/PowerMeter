@@ -135,7 +135,28 @@ const createPmWidget = (app) => {
     (on ? pillEl : $(".pmPillBtn"))?.focus();
   };
   $(".pmPillBtn")?.addEventListener("click", () => setPill(true));
-  pillEl?.addEventListener("click", () => setPill(false));
+  // The pill drags the window like the meter's bar does (native move, start_drag); a press
+  // that stays within a few pixels is a click and expands it.
+  const DRAG_SLOP = 4;
+  let press = null;
+  let dragged = false;
+  pillEl?.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    press = { x: e.screenX, y: e.screenY };
+    dragged = false;
+  });
+  pillEl?.addEventListener("pointermove", (e) => {
+    if (!press || Math.hypot(e.screenX - press.x, e.screenY - press.y) < DRAG_SLOP) return;
+    press = null;
+    dragged = true;
+    invoke("start_drag").catch((err) => console.error("[PowerMeter] start_drag failed", err));
+  });
+  pillEl?.addEventListener("pointerup", () => (press = null));
+  // detail 0 = Enter/Space, never a drag.
+  pillEl?.addEventListener("click", (e) => {
+    if (dragged && e.detail) return;
+    setPill(false);
+  });
 
   // --- close: hides the overlay; the dashboard (show_overlay) or Ctrl+Alt+Up bring it back.
   $(".pmCloseBtn")?.addEventListener("click", () => {
@@ -331,6 +352,43 @@ const createPmWidget = (app) => {
       })
       .catch((err) => console.error("[PowerMeter] copy link failed", err));
   });
+  // --- Copy: the fight on the meter (live, or the last one until reset) as text for Discord.
+  // A code block keeps the columns lined up and stops names from turning into markdown.
+  const summaryBtn = $(".pmCopyBtn");
+  const fightText = () => {
+    const rows = (frame?.rows || []).slice().sort((a, b) => b.dps - a.dps);
+    if (!rows.length) return "";
+    const total = rows.reduce((sum, r) => sum + (Number(r.totalDamage) || 0), 0);
+    const share = (r) => (Number.isFinite(r.damageContribution) ? r.damageContribution : total ? (r.totalDamage / total) * 100 : 0);
+    const name = (r) => String(r.name ?? "").replace(/`/g, "'");
+    const nameW = Math.max(...rows.map((r) => name(r).length));
+    const ended = view === "ended" && lastFight ? outcome(lastFight) : "";
+    const head = [app.elBossName?.textContent, ended, app.battleTime?.getCombatTimeText?.()].filter(Boolean).join(" · ");
+    const lines = rows.map(
+      (r, i) =>
+        `${String(i + 1).padStart(2)}. ${name(r).padEnd(nameW)}  ${(JOB_CLASS[r.job] || r.job || "").padEnd(12)}  ${num(r.dps).padStart(9)} DPS  ${pct(share(r)).padStart(6)}`
+    );
+    return ["```", head, ...lines, "```"].join("\n");
+  };
+  let copiedTimer;
+  const markCopied = (on) => {
+    const label = on ? t("pmWidget.copied", "Copied") : t("pmWidget.copy", "Copy fight summary");
+    summaryBtn.classList.toggle("isCopied", on);
+    summaryBtn.title = label;
+    summaryBtn.setAttribute("aria-label", label);
+  };
+  summaryBtn?.addEventListener("click", () => {
+    const text = fightText();
+    if (!text) return;
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        markCopied(true);
+        clearTimeout(copiedTimer);
+        copiedTimer = setTimeout(() => markCopied(false), 1500);
+      })
+      .catch((err) => console.error("[PowerMeter] copy summary failed", err));
+  });
   $(".pmReportBtn")?.addEventListener("click", () => {
     if (lastFight?.userRow) app.openRowDetailsWindow(lastFight.userRow);
   });
@@ -440,6 +498,7 @@ const createPmWidget = (app) => {
 
     // Pill: your DPS and the fight time; "Ready" with nothing to show.
     meter.classList.toggle("isPmIdle", !hasRows);
+    if (summaryBtn) summaryBtn.disabled = !hasRows;
     const me = frame?.rows?.find((r) => r.isUser);
     setText(".pmPillDps", num(me?.dps ?? 0));
     setText(".pmPillTime", app.battleTime?.getCombatTimeText?.() || "0:00");

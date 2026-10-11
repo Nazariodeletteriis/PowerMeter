@@ -182,6 +182,7 @@
       "label": "최대 표시 인원"
     },
     "debugLogging": "디버그 로그 활성화",
+    "logsRestricted": "Debugger 및 Admin 역할 전용",
     "quit": "종료",
     "discord": "Discord",
     "version": "버전",
@@ -274,6 +275,11 @@
       "working": "승인을 기다리는 중…",
       "failed": "로그인 실패: {error}",
       "supporter": "후원자"
+    },
+    "eventVolume": {
+      "label": "이벤트 알림 음량",
+      "hint": "대시보드 타이머에서 소리가 켜져 있으면 이벤트 10분 전에 울립니다",
+      "test": "테스트"
     }
   },
   "support": {
@@ -448,6 +454,9 @@
     },
     "resetTip": "미터 초기화 (Ctrl+Alt+R)",
     "eventSoon": "{name}까지 {time}",
-    "eventDismiss": "알림 닫기"
+    "eventDismiss": "알림 닫기",
+    "pillHint": "클릭하여 펼치기 · 드래그하여 이동",
+    "copy": "전투 요약 복사",
+    "copied": "복사됨"
   }
 }

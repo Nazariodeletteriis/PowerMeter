@@ -11,7 +11,7 @@ import {
   PictureInPictureIcon,
 } from "@phosphor-icons/react";
 import type { SaveSetting, Settings } from "./App";
-import { canOpen, PLANS, useEntitlement } from "./entitlement";
+import { canOpen, PLANS, PLANS_OPEN, useEntitlement } from "./entitlement";
 import { AutoCharacter } from "./AutoCharacter";
 import { CaptureSync } from "./CaptureSync";
 import { Home } from "./Home";
@@ -135,6 +135,24 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
           ? "waiting"
           : "noGame";
 
+  // A character switch in a running game: some of the new character's data only comes on entering a zone, so
+  // hint a teleport until the next one (the self record comes again with a new entity id) or for 2 minutes.
+  // Only names the game tied to an entity (as AutoCharacter): the first one seen is not a switch.
+  const playing = capture.data?.locked && capture.data.localPlayerId != null ? capture.data.characterName?.trim() : undefined;
+  const [seen, setSeen] = useState<string>();
+  const [tpHint, setTpHint] = useState<number | null>(null); // entity id at the switch
+  useEffect(() => {
+    if (!playing) return;
+    if (seen && playing !== seen) setTpHint(capture.data!.localPlayerId);
+    setSeen(playing);
+  }, [playing]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (tpHint === null) return;
+    if (capture.data?.localPlayerId !== tpHint) return setTpHint(null);
+    const h = setTimeout(() => setTpHint(null), 120_000);
+    return () => clearTimeout(h);
+  }, [tpHint, capture.data?.localPlayerId]);
+
   const name = capture.data?.characterName || localStorage.getItem(USER_NAME_KEY) || t("home.notSet");
   const cls = settings["pm.class"];
   const run = (action: () => Promise<unknown>) => action().catch(onError);
@@ -147,7 +165,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
 
   // Locked tabs stay in the menu and open to what unlocks them (Locked.tsx).
   const item = (x: NavPage, indent: boolean) => {
-    const locked = !canOpen(entitlement, x.tier) && t("subs.requires", { tier: PLANS[x.tier!].name });
+    const locked = !canOpen(entitlement, x.tier) && (PLANS_OPEN ? t("subs.requires", { tier: PLANS[x.tier!].name }) : t("subs.lockedSoon"));
     return (
       <button
         key={x.id}
@@ -241,6 +259,11 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
               <span className="statusDot" />
               <span>{t(`status.${status}`)}</span>
             </div>
+          )}
+          {status === "connected" && tpHint !== null && (
+            <span role="status" title={t("shell.teleportHint")} style={{ fontSize: 12, color: "var(--pm-warn)", maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {t("shell.teleportHint")}
+            </span>
           )}
           <button type="button" className="charChip" title={t("nav.myCharacters")} onClick={() => go("personaggi")}>
             <ClassAvatar cls={cls} />

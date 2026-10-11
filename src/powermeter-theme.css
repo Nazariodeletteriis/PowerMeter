@@ -136,6 +136,10 @@ body.legacyUi .pmOnly {
 :root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
   .meter {
     width: 520px;
+    /* Room for the grips that sit 4px outside the top and left edges: the window
+       starts at the meter's corner and clipped them to half a hit area. The window
+       is meter + 16 x meter + 10 (tauriBridge.js updateWindowSize), so they fit. */
+    margin: 4px 0 0 4px;
     box-sizing: border-box;
     border: 1px solid #2b2b2b;
     border-radius: 6px;
@@ -221,13 +225,27 @@ body.legacyUi .pmOnly {
   .header .pmPillBtn { order: 64; }
   .header .dashboardBtn { order: 65; }
   .header .pmCloseBtn { order: 66; }
+  /* Copy fight summary: order 61 with the other fight actions; nothing to copy = dimmed.
+     The check fades in over the copy icon for 1.5 s (pmWidget.js). */
+  .header .pmCopyBtn { order: 61; }
+  .header .pmCopyBtn:disabled { opacity: 0.35; cursor: default; }
+  .pmCopyBtn svg {
+    grid-area: 1 / 1;
+    transition: opacity 150ms cubic-bezier(0.23, 1, 0.32, 1), transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .pmCopiedIcon { color: #3fbf7f; opacity: 0; transform: scale(0.9); }
+  .pmCopyBtn.isCopied .pmCopyIcon { opacity: 0; transform: scale(0.9); }
+  .pmCopyBtn.isCopied .pmCopiedIcon { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .pmCopyBtn svg { transition: opacity 150ms ease; transform: none !important; }
+  }
   /* The bar is one row in every mode. Build and Lobby have no title row, so
      their header never wraps, and the fight-only actions (suspend, class
-     averages) stay out of them. Narrow DPS widgets drop suspend, as slim does. */
+     averages, copy) stay out of them. Narrow DPS widgets drop suspend and copy, as slim does. */
   .meter:is(.pmMode-build, .pmMode-lobby) .header { flex-wrap: nowrap; }
-  .meter:is(.pmMode-build, .pmMode-lobby) :is(.suspendBtn, .pmAvgBtn) { display: none; }
+  .meter:is(.pmMode-build, .pmMode-lobby) :is(.suspendBtn, .pmAvgBtn, .pmCopyBtn) { display: none; }
   @container pmMeter (max-width: 499px) {
-    .header .suspendBtn { display: none; }
+    .header :is(.suspendBtn, button.pmCopyBtn) { display: none; }
     .header .settingsBtn { margin-left: 0; }
   }
   .pmTabs {
@@ -1511,6 +1529,8 @@ body.legacyUi .pmOnly {
     box-sizing: border-box;
     border-radius: 16px;
     color: var(--pm-widget-text);
+    cursor: grab; /* drags the window; a click expands (pmWidget.js) */
+    user-select: none;
   }
   .pmPillDot {
     flex: none;

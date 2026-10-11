@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { CheckIcon, HeartIcon, WifiSlashIcon } from "@phosphor-icons/react";
 import { useEffect, useState, type FormEvent } from "react";
-import { PLANS, refreshEntitlement, useEntitlement, type Entitlement, type PaidTier, type Tier } from "./entitlement";
+import { PLANS, PLANS_OPEN, refreshEntitlement, useEntitlement, type Entitlement, type PaidTier, type Tier } from "./entitlement";
 import type { Key, T } from "./i18n";
 import { PATREON_URL } from "./Shell";
 
@@ -13,12 +13,13 @@ const DAY = 86_400_000;
 
 const tierName = (t: T, tier: Tier) => (tier === "free" || tier === "trial" ? t(`subs.tier.${tier}`) : PLANS[tier].name);
 
-// What each plan adds to the one before (notes/patreon-tiers-plan.md, section 0).
+// What each plan adds to the one before (notes/patreon-tiers-plan.md, section 0). The paid plans'
+// contents are still to be decided (PLANS_OPEN): they show "coming soon".
 const PERKS: ["free" | PaidTier, Key[]][] = [
   ["free", ["subs.free.meter", "subs.free.rest"]],
-  ["recluta", ["subs.wholeDatabase", "nav.report", "nav.onlineLogs", "nav.rankings", "subs.discordRole"]],
-  ["daeva", ["nav.party", "nav.crafting", "nav.calculators", "subs.discordChat"]],
-  ["empyrean", ["subs.customFeature", "subs.privateChannel", "subs.directSupport"]],
+  ["recluta", []],
+  ["daeva", []],
+  ["empyrean", []],
 ];
 
 /** Where the current tier comes from. */
@@ -31,6 +32,7 @@ function origin(t: T, e: Entitlement, signedIn: boolean, fmt: (ms: number) => st
     case "grant":
       return e.until ? t("subs.source.grantUntil", { date: fmt(e.until) }) : t("subs.source.grantForever");
     case "admin":
+    case "developer":
     case "dev":
       return t("subs.source.dev");
     default:
@@ -92,6 +94,7 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
             <h3 className="kicker">{t("subs.status")}</h3>
             <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8, margin: "6px 0 2px" }}>
               <span style={{ fontSize: 20, fontWeight: 500 }}>{tierName(t, e.tier)}</span>
+              {e.debugger && !e.admin && <span className="badge">Debugger</span>}
               {e.founder && (
                 <span className="badge" style={{ borderColor: "#DB000088", color: "#FF6B6B" }}>
                   <HeartIcon weight="fill" aria-hidden="true" />
@@ -119,6 +122,8 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
                 <button type="button" className="btn fill lg" onClick={signIn}>
                   {t("subs.signIn")}
                 </button>
+              ) : !PLANS_OPEN && !e.patreon?.linked ? (
+                <span className="badge">{t("subs.comingSoon")}</span>
               ) : e.patreon?.linked ? (
                 <>
                   <button type="button" className="btn lg" onClick={unlink}>
@@ -166,12 +171,14 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
               <h4>
                 {tierName(t, tier)}
                 {tier === current && <span className="badge">{e?.tier === "trial" ? tierName(t, "trial") : t("subs.current")}</span>}
+                {tier !== "free" && !PLANS_OPEN && <span className="badge">{t("subs.comingSoon")}</span>}
               </h4>
               <div className="mono" style={{ color: "var(--pm-t3)" }}>
                 {t("subs.perMonth", { price: tier === "free" ? 0 : PLANS[tier].price })}
               </div>
               <ul>
-                {i > 0 && <li>{t("subs.everythingIn", { tier: tierName(t, PERKS[i - 1][0]) })}</li>}
+                {i > 0 && !PLANS_OPEN && <li>{t("subs.plansSoon")}</li>}
+                {i > 0 && PLANS_OPEN && <li>{t("subs.everythingIn", { tier: tierName(t, PERKS[i - 1][0]) })}</li>}
                 {perks.map((k) => (
                   <li key={k}>
                     <CheckIcon aria-hidden="true" />
@@ -208,7 +215,17 @@ type AdminUser = {
   trialEndsAt: number | null;
   devices: number;
   maxDevices: number;
+  /** Debugger role: packet and debug logs in the widget. */
+  debugger: boolean;
+  /** Developer role: everything unlocked, no trial running. */
+  developer: boolean;
 };
+
+/** Roles an admin gives by hand (pm_admin_role); the badge is the role's name, the same in every language. */
+const ROLES = [
+  ["debugger", "Debugger"],
+  ["developer", "Developer"],
+] as const;
 
 const DURATIONS = [7, 30, 90, 365];
 
@@ -235,6 +252,8 @@ function Admin({ t, fmt, onError }: { t: T; fmt: (d: number | string) => string;
     act("pm_admin_grant", { userId: u.id, tier: f.get("tier"), days: days ? Number(days) : null, note: note || null });
   };
   const revoke = (u: AdminUser) => confirm(t("subs.admin.revokeConfirm", { name: u.name })) && act("pm_admin_revoke", { userId: u.id });
+  const setRole = (u: AdminUser, role: "debugger" | "developer") =>
+    confirm(t(`subs.admin.${role}${u[role] ? "Off" : "On"}Confirm`, { name: u.name })) && act("pm_admin_role", { userId: u.id, role, on: !u[role] });
   const resetDevices = (u: AdminUser) =>
     confirm(t("subs.admin.resetDevicesConfirm", { name: u.name })) && act("pm_admin_reset_devices", { userId: u.id });
 
@@ -288,6 +307,7 @@ function Admin({ t, fmt, onError }: { t: T; fmt: (d: number | string) => string;
                   )}
                   {patreon && <span className="badge">Patreon {tierName(t, patreon)}</span>}
                   {trial && <span className="badge">{t("subs.admin.trialUntil", { date: fmt(u.trialEndsAt!) })}</span>}
+                  {ROLES.map(([role, label]) => u[role] && <span key={role} className="badge">{label}</span>)}
                   {!u.grant && !patreon && !trial && <span className="badge">{tierName(t, "free")}</span>}
                 </div>
               </div>
@@ -323,6 +343,11 @@ function Admin({ t, fmt, onError }: { t: T; fmt: (d: number | string) => string;
                     {t("subs.admin.revoke")}
                   </button>
                 )}
+                {ROLES.map(([role]) => (
+                  <button key={role} type="button" className="btn sm" disabled={busy} onClick={() => setRole(u, role)}>
+                    {t(`subs.admin.${role}${u[role] ? "Off" : "On"}`)}
+                  </button>
+                ))}
                 {u.devices > 0 && (
                   <button type="button" className="btn sm" disabled={busy} onClick={() => resetDevices(u)}>
                     {t("subs.admin.resetDevices")}

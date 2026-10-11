@@ -1,5 +1,6 @@
 {
   "shell.diagnoseHint": "Clique para abrir o diagnóstico.",
+  "shell.teleportHint": "Personagem alterado: use um teletransporte para atualizá-lo",
   "shell.attempt": "Tentativa {n}",
   "shell.crumb.builder": "Builds da comunidade → Character Builder",
   "shell.share.log": "Compartilhar log",

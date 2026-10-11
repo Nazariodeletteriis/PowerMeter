@@ -122,7 +122,7 @@
   "organizer.set.disclaimerText": "非官方工具,與 NCSoft 無關聯。",
   "organizer.set.credits": "致謝",
   "organizer.diag.title": "計量器診斷",
-  "organizer.diag.npcapOk": "wpcap.dll 已載入 · 可進行擷取",
+  "organizer.diag.npcapOk": "此電腦已安裝 Npcap",
   "organizer.diag.npcapMissing": "Npcap 尚未安裝:缺少它將無法讀取遊戲流量。",
   "organizer.diag.admin": "系統管理員權限",
   "organizer.diag.adminOk": "PowerMeter 正以系統管理員身分執行",

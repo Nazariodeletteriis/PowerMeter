@@ -182,6 +182,7 @@
       "label": "Máx. de jogadores exibidos"
     },
     "debugLogging": "Ativar registro de depuração",
+    "logsRestricted": "Apenas para os cargos Debugger e Admin",
     "quit": "Sair",
     "discord": "Discord",
     "version": "Versão",
@@ -274,6 +275,11 @@
       "working": "Aguardando aprovação…",
       "failed": "Falha ao entrar: {error}",
       "supporter": "Apoiador"
+    },
+    "eventVolume": {
+      "label": "Volume do alerta de eventos",
+      "hint": "Toca 10 minutos antes de um evento, se o som estiver ativado no Temporizador do painel",
+      "test": "Testar"
     }
   },
   "support": {
@@ -448,6 +454,9 @@
     },
     "resetTip": "Zerar o medidor (Ctrl+Alt+R)",
     "eventSoon": "{name} em {time}",
-    "eventDismiss": "Fechar aviso"
+    "eventDismiss": "Fechar aviso",
+    "pillHint": "Clique para expandir · arraste para mover",
+    "copy": "Copiar resumo do combate",
+    "copied": "Copiado"
   }
 }

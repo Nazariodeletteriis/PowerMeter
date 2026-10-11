@@ -56,7 +56,16 @@ const CARD: CSSProperties = { background: "var(--pm-s1)", border: "1px solid var
 export default function Daevanion({ t, lang, name, go, settings, save, onError, setHeader }: PageProps) {
   const title = `${t("nav.daevanion")} · ${name}`;
   useEffect(() => setHeader({ title }), [setHeader, title]);
-  const [cls, setCls] = useMem("dvCls", planClass(settings["pm.class"]));
+  const myCls = planClass(settings["pm.class"]);
+  const [cls, setCls] = useMem("dvCls", myCls);
+  // Switching character (here or while away) shows its class; a class picked by hand stays until then, and every
+  // class keeps its unsaved edits (dv:<class>).
+  const [dvFor, setFor] = useMem("dvFor", myCls);
+  useEffect(() => {
+    if (dvFor === myCls) return;
+    setFor(myCls);
+    setCls(myCls);
+  }, [myCls]); // eslint-disable-line react-hooks/exhaustive-deps
   const key = cls.toLowerCase(); // archive class names: the app's, lowercase
   const planner = useGd(() => gd.planner(key), key);
   const builder = useGd(() => gd.builder(key), key);

@@ -1731,6 +1731,13 @@ body.mainPlayerNamesBold .settingsPanel .themeDropdownMenu .settingsDropdownItem
   outline: 2px solid var(--isUser-fill);
   outline-offset: 2px;
 }
+/* A role-gated switch (packet / debug logs): visible, not usable; its label's title says why. */
+.settingsPanel .settingsToggleControl input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+}
+.settingsPanel .settingsToggleControl input[type="checkbox"]:disabled + .settingsToggleTrack {
+  opacity: 0.4;
+}
 
 /* Bold is one setting with two switches, so they ride together on the
    right rather than claiming a row each. */

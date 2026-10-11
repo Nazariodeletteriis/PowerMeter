@@ -14,14 +14,20 @@ export const PLANS: Record<PaidTier, { name: string; price: number }> = {
   daeva: { name: "Daeva", price: 7 },
   empyrean: { name: "Empyrean", price: 15 },
 };
+/** The Patreon plans are shown but not on sale yet (what they include is still to be decided): no
+ *  subscribe or link buttons, "coming soon" instead. Admin grants still work. */
+export const PLANS_OPEN = false;
 
 export type Entitlement = {
   tier: Tier;
   admin: boolean;
+  /** Debugger role (set by an admin): packet and debug logs in the widget. Admins have it too. */
+  debugger?: boolean | null;
   features: string[];
-  source: "admin" | "grant" | "patreon" | "trial" | "free" | "dev";
+  source: "admin" | "developer" | "grant" | "patreon" | "trial" | "free" | "dev";
   until?: number | null;
   trialEndsAt?: number | null;
+  /** The Discord account is at least 8 months old: the 30-day trial applies. */
   trialEligible?: boolean;
   founder?: boolean;
   patreon?: { linked: boolean; tier: Tier; status: string | null };

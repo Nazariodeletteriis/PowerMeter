@@ -3,16 +3,19 @@ import { invoke } from "@tauri-apps/api/core";
 import type { SaveSetting, Settings } from "./App";
 import { findCharacter, readCharacters } from "./characters";
 import { GAME_SLOTS } from "./pages/characters/calc";
-import { CAPTURED_BAR_KEY, CAPTURED_DAEV_KEY, CAPTURED_GEAR_KEY, readCapturedBar, readCapturedDaev, readCapturedGear, setMem } from "./pages/characters/shared";
+import { BAR_SLOTS, CAPTURED_BAR_KEY, CAPTURED_DAEV_KEY, CAPTURED_GEAR_KEY, readCapturedBar, readCapturedDaev, readCapturedGear, setMem } from "./pages/characters/shared";
 import { GAME_SKILLS } from "./skills";
 import { usePoll } from "./usePoll";
 
 /** Shape of get_captured_character (src-tauri/src/capture/equip_parser.rs). */
-type Captured = { owner: string | null; equipment: { slot: number; itemId: number; enchant: number }[]; skillbar: { slot: number; skillId: number }[]; daevanion: number[] };
+type Captured = {
+  owner: string | null;
+  equipment: { slot: number; itemId: number; enchant: number }[];
+  /** Row 0 is skillId, rows 1-3 the chain (0 = empty). */
+  skillbar: { bar: number; slot: number; skillId: number; chain: number[] }[];
+  daevanion: number[];
+};
 const load = () => invoke<Captured>("get_captured_character");
-
-/** Planner column of a game bar slot: the game bar has 12 slots, 0-7 and 20-23, laid on the planner's first row. */
-const column = (slot: number) => (slot < 8 ? slot : slot >= 20 && slot < 24 ? slot - 12 : undefined);
 
 /**
  * Copies what the game shows into the dashboard, without asking: the skill bar into the Skill Planner's quick
@@ -29,20 +32,24 @@ export function CaptureSync({ settings, save, onError }: { settings: Settings; s
   const key = JSON.stringify(bar ?? []);
   useEffect(() => {
     if (!bar?.length) return;
-    // Skills missing from our list are left out; skills of another class mean a bar we misread: leave it.
-    const known = bar.flatMap((b) => GAME_SKILLS.filter((s) => s.id === String(b.skillId)).map((s) => ({ slot: b.slot, s })));
-    const skills = known.map((k) => k.s);
-    const cls = skills[0]?.class;
-    if (!cls || skills.some((s) => s.class !== cls)) return;
-    const cells = known.flatMap(({ slot, s }) => {
-      const c = column(slot);
-      return c === undefined ? [] : [[`0,${c}`, s.id]];
-    });
-    setMem(`skBar:${cls}`, Object.fromEntries(cells));
+    // Every row of every set, at its place in the game's bar window. Skills missing from our list are left out;
+    // skills of another class mean a bar we misread: leave it.
+    const cells = bar.flatMap((b) =>
+      [b.skillId, ...b.chain].flatMap((id, row) => {
+        const s = GAME_SKILLS.find((x) => x.id === String(id));
+        const c = BAR_SLOTS.indexOf(b.slot);
+        return s && c >= 0 ? [{ set: b.bar, row, c, s }] : [];
+      }),
+    );
+    const cls = cells[0]?.s.class;
+    if (!cls || cells.some((x) => x.s.class !== cls)) return;
+    // The planner shows the first set; its rows run top to bottom above the keys, so the game's row 0 is its last.
+    const first = Math.min(...cells.map((x) => x.set));
+    setMem(`skBar:${cls}`, Object.fromEntries(cells.filter((x) => x.set === first).map((x) => [`${3 - x.row},${x.c}`, x.s.id])));
     // The Builder shows it per character: only when the bar is of the class the game says you play.
     const all = readCapturedBar(settings[CAPTURED_BAR_KEY]);
-    const ids = skills.map((x) => x.id);
-    if (char?.cls === cls && JSON.stringify(all[char.id]) !== JSON.stringify(ids)) save(CAPTURED_BAR_KEY, JSON.stringify({ ...all, [char.id]: ids })).catch(onError);
+    const grid = Object.fromEntries(cells.map((x) => [`${x.set},${x.row},${x.c}`, x.s.id]));
+    if (char?.cls === cls && JSON.stringify(all[char.id]) !== JSON.stringify(grid)) save(CAPTURED_BAR_KEY, JSON.stringify({ ...all, [char.id]: grid })).catch(onError);
   }, [key, char?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A guard (1150xxxxx) on a slot number not seen yet still is the off-hand (a Ranger's guard went missing, no log yet).

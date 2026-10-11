@@ -2,6 +2,22 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.9
+
+- Novo: Funções: todos começam como Player com 30 dias de teste completo (login Discord e uma conta Discord com pelo menos 8 meses); depois Party, rotações e Gear Viewer ficam para os planos. Os planos Patreon chegam em breve.
+- Novo: Página de masmorras refeita: cartões Exploration e Conquest com requisitos, recompensas e drops.
+- Novo: Builder: a barra de habilidades aparece como no jogo, cada conjunto com as habilidades encadeadas sobre cada espaço (estigmas incluídos).
+- Novo: Widget: botão Copiar para o DPS do combate, pronto a colar no Discord.
+- Novo: Widget: volume do aviso de eventos nas definições.
+- Novo: Depois de trocar de personagem, uma dica sugere um teletransporte para a atualizar.
+- Corrigido: Trocar de personagem troca todo o perfil, Builder e Daevanion incluídos.
+- Corrigido: Redimensionamento do widget: sem bordas transparentes a bloquear o jogo, tamanho guardado, o ícone minimizado pode ser arrastado.
+- Corrigido: Um Npcap já instalado é reconhecido: sem pedido para o reinstalar.
+- Corrigido: Missões: a lista já não começa com missões sem nome.
+- Alterado: Logs de pacotes e de depuração só para as funções Debugger e Admin.
+- Alterado: Calculadoras e Armory removidos.
+- Alterado: Termos e privacidade atualizados: vais ter de os aceitar de novo.
+
 ## 0.4.8
 
 - Novo: Builder: cada deus do separador Daevanion mostra o seu tabuleiro em pequeno, com os nós que escolheste; a lupa amplia-o.

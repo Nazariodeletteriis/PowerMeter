@@ -2191,12 +2191,18 @@ class DpsApp {
     if (this.saveRawPacketsCheckbox) {
       const storedSaveRaw = this.safeGetSetting(this.storageKeys.saveRawPackets) === "true";
       this.saveRawPacketsCheckbox.checked = storedSaveRaw;
+      // The switch can show on from localStorage while the backend's setting is missing (reinstall, reset
+      // settings.json): re-send it so what it shows is what gets written.
+      if (storedSaveRaw) window.javaBridge?.setSaveRawPackets?.(true);
       this.saveRawPacketsCheckbox.addEventListener("change", (event) => {
         const isChecked = !!event.target?.checked;
         this.safeSetSetting(this.storageKeys.saveRawPackets, String(isChecked));
         window.javaBridge?.setSaveRawPackets?.(isChecked);
       });
     }
+    // Packet and debug logs are for the Debugger and Admin roles only: the backend refuses them to anyone
+    // else (the re-sends above included), so their switches stay disabled and off (index.html starts them so).
+    Promise.resolve(window.javaBridge?.mayLog?.()).then((ok) => this.applyLogPermission(!!ok));
     if (this.pinMeToTopCheckbox) {
       this.pinMeToTopCheckbox.checked = this.pinMeToTop;
       this.pinMeToTopCheckbox.addEventListener("change", (event) => {
@@ -3435,6 +3441,15 @@ class DpsApp {
     if (!this.isCollapse) {
       this.fetchDps();
     }
+  }
+
+  applyLogPermission(allowed) {
+    for (const box of [this.debugLoggingCheckbox, this.saveRawPacketsCheckbox]) {
+      if (!box) continue;
+      box.disabled = !allowed;
+      if (!allowed) box.checked = false;
+    }
+    if (!allowed) this.setDebugLogging(false);
   }
 
   setDebugLogging(enabled, { persist = false, syncBackend = false } = {}) {
@@ -4688,9 +4703,21 @@ class DpsApp {
     let startHeight = 0;
     // PowerMeter: the design's minimum widget size is 280x160 (Compact).
     const minWidth = 280;
-    const minHeight = 30;
+    const minHeight = 160;
+    const SIZE_KEY = "pm.meterSize";
 
-    const onMouseMove = (event) => {
+    // The size the user left the meter at, clamped to this screen (it may be smaller now).
+    try {
+      const saved = JSON.parse(this.safeGetStorage(SIZE_KEY) || "null");
+      if (saved?.w > 0) this.meterEl.style.width = `${Math.min(Math.max(minWidth, saved.w), screen.availWidth)}px`;
+      if (saved?.h > 0) this.meterEl.style.minHeight = `${Math.min(Math.max(minHeight, saved.h), screen.availHeight)}px`;
+    } catch {
+      // unreadable: keep the default size
+    }
+
+    // Height is dragged as min-height: the meter can still grow for new rows, and a
+    // fixed height would lose to the CSS min-height (420px) and never shrink.
+    const onMove = (event) => {
       if (!isResizing) return;
       if (axes.includes("x")) {
         const nextWidth = Math.max(minWidth, startWidth + (event.clientX - startX));
@@ -4698,29 +4725,27 @@ class DpsApp {
       }
       if (axes.includes("y")) {
         const nextHeight = Math.max(minHeight, startHeight + (event.clientY - startY));
-        this.meterEl.style.height = `${nextHeight}px`;
+        this.meterEl.style.minHeight = `${nextHeight}px`;
       }
     };
 
-    const onMouseUp = () => {
+    const onEnd = () => {
       if (!isResizing) return;
       isResizing = false;
-      // Convert fixed height to min-height so the meter can still grow
-      // when new rows are added, while preserving the user's minimum.
-      const currentHeight = this.meterEl.style.height;
-      if (currentHeight) {
-        this.meterEl.style.minHeight = currentHeight;
-        this.meterEl.style.height = "";
-      }
+      const { width, minHeight: h } = this.meterEl.style;
+      this.safeSetStorage(SIZE_KEY, JSON.stringify({ w: parseFloat(width) || 0, h: parseFloat(h) || 0 }));
     };
 
     // PowerMeter: the design's frame has several grips (8.1). Each one says which
     // axes it drags in data-resize; the window grows right and down only, so the
     // grips on the left/top edges resize the axis they can.
+    // Pointer capture keeps the drag (and its release) even when the cursor leaves the window.
     document.querySelectorAll(".meter .resizeHandle").forEach((handle) => {
-      handle.addEventListener("mousedown", (event) => {
+      handle.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
         event.preventDefault();
         event.stopPropagation();
+        handle.setPointerCapture(event.pointerId);
         const rect = this.meterEl.getBoundingClientRect();
         axes = handle.dataset.resize || "xy";
         startWidth = rect.width;
@@ -4729,10 +4754,10 @@ class DpsApp {
         startY = event.clientY;
         isResizing = true;
       });
+      handle.addEventListener("pointermove", onMove);
+      handle.addEventListener("pointerup", onEnd);
+      handle.addEventListener("lostpointercapture", onEnd);
     });
-
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
   }
 
   _applySuspendBtnVisibility(show) {

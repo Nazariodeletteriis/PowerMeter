@@ -4,14 +4,28 @@
 // Same event rules and maths as the dashboard's Timer (gamedata_events + organizer/schedule.ts); rings the
 // Timer's chime when a new notice appears, if the Timer's sound is on.
 import { invoke } from "@tauri-apps/api/core";
-import { chime, SOUND_KEY } from "../dashboard/chime";
+import { chime, SOUND_KEY, VOLUME_KEY } from "../dashboard/chime";
 import { upcomingWindows, type GameEvent } from "../dashboard/pages/organizer/schedule";
 
 const LEAD = 10 * 60e3;
 const RELOAD = 60 * 60e3; // the archive can bring new rules while the app runs
 
 type I18n = { format?: (key: string, vars: Record<string, string>, fallback: string) => string };
-const w = window as unknown as { A2_VIEW?: string; i18n?: I18n };
+const w = window as unknown as { A2_VIEW?: string; i18n?: I18n; javaBridge?: { setSetting?: (key: string, value: string) => void } };
+
+// Settings > event alert volume (every window that shows the settings panel), with a Test button.
+const volume = document.querySelector<HTMLInputElement>(".eventVolumeInput");
+if (volume) {
+  const label = document.querySelector<HTMLElement>(".eventVolumeValue");
+  const show = () => label && (label.textContent = `${volume.value}%`);
+  invoke<Record<string, string>>("get_settings").then((s) => {
+    if (s[VOLUME_KEY] != null) volume.value = s[VOLUME_KEY];
+    show();
+  }, () => {});
+  volume.addEventListener("input", show);
+  volume.addEventListener("change", () => w.javaBridge?.setSetting?.(VOLUME_KEY, volume.value));
+  document.querySelector(".eventVolumeTest")?.addEventListener("click", () => chime(volume.value));
+}
 
 const strip = document.querySelector<HTMLElement>(".pmEventStrip");
 // index.html also hosts the details/settings windows: the notice is the overlay's only.
@@ -41,7 +55,7 @@ if (strip && w.A2_VIEW === "main") {
       strip.hidden = true;
       return;
     }
-    if (start !== shown) invoke<Record<string, string>>("get_settings").then((s) => s[SOUND_KEY] === "1" && chime(), () => {});
+    if (start !== shown) invoke<Record<string, string>>("get_settings").then((s) => s[SOUND_KEY] === "1" && chime(s[VOLUME_KEY]), () => {});
     shown = start;
     const left = Math.ceil((start - now) / 1000);
     const time = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;

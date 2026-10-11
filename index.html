@@ -56,7 +56,7 @@
         <!-- PowerMeter: widget chrome and modes from the design (PowerMeter Widget.dc.html,
              8.1-8.7). Every .pmOnly element is hidden outside the powermeter theme; the
              behaviour lives in public/src/js/pmWidget.js. -->
-        <button type="button" class="pmOnly pmPill" aria-label="Expand" data-i18n-aria-label="pmWidget.expand">
+        <button type="button" class="pmOnly pmPill" aria-label="Expand" data-i18n-aria-label="pmWidget.expand" title="Click to expand · drag to move" data-i18n-title="pmWidget.pillHint">
           <span class="pmPillDot" aria-hidden="true"></span>
           <span class="pmPillDps"></span>
           <span class="pmPillReady" data-i18n="pmWidget.ready">Ready</span>
@@ -108,6 +108,8 @@
                  revealed on hover beside them (see powermeter-theme.css). -->
             <span class="pmOnly pmSep" aria-hidden="true"></span>
             <button type="button" class="pmOnly headerBtn pmAvgBtn" aria-pressed="false" aria-label="Average DPS by class" data-i18n-aria-label="pmWidget.avg.button" title="Average DPS by class" data-i18n-title="pmWidget.avg.button"><svg viewBox="0 0 16 14" width="16" height="14" aria-hidden="true" focusable="false"><rect x="0" y="0" width="7" height="6" fill="currentColor"/><rect x="9" y="0" width="7" height="6" fill="currentColor"/><rect x="0" y="8" width="7" height="6" fill="currentColor"/><rect x="9" y="8" width="7" height="6" fill="currentColor"/></svg></button>
+            <!-- PowerMeter: copies the fight on the meter as text for Discord (pmWidget.js fightText). -->
+            <button type="button" class="pmOnly headerBtn pmCopyBtn" disabled aria-label="Copy fight summary" data-i18n-aria-label="pmWidget.copy" title="Copy fight summary" data-i18n-title="pmWidget.copy"><svg class="pmCopyIcon" viewBox="0 0 256 256" width="14" height="14" fill="currentColor" aria-hidden="true" focusable="false"><path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"/></svg><svg class="pmCopiedIcon" viewBox="0 0 256 256" width="14" height="14" fill="currentColor" aria-hidden="true" focusable="false"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg></button>
             <button type="button" class="pmOnly headerBtn pmLockBtn" aria-pressed="false" aria-label="Lock (click-through)" data-i18n-aria-label="pmWidget.lock" title="Lock (click-through)" data-i18n-title="pmWidget.lock"><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true" focusable="false"><rect x="2" y="6" width="10" height="7" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></button>
             <button type="button" class="pmOnly headerBtn pmOpacityBtn" aria-label="Opacity" data-i18n-aria-label="pmWidget.opacity" title="Opacity" data-i18n-title="pmWidget.opacity"><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M7 1.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/></svg></button>
             <button type="button" class="pmOnly headerBtn pmPillBtn" aria-label="Minimise to pill" data-i18n-aria-label="pmWidget.pill" title="Minimise to pill" data-i18n-title="pmWidget.pill"><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true" focusable="false"><path d="M2 11.5h10" stroke="currentColor" stroke-width="1.4"/></svg></button>
@@ -729,6 +731,18 @@
                       <span class="settingsToggleTrack" aria-hidden="true"></span>
                     </span>
                   </label>
+                  <!-- PowerMeter: volume of the event chime (src/widget/eventAlert.ts, src/dashboard/chime.ts). -->
+                  <div class="settingsRow settingsRowInput">
+                    <div class="settingsInfo">
+                      <label class="settingsLabel" for="eventVolumeInput" data-i18n="settings.eventVolume.label">Event alert volume</label>
+                      <div class="settingsHint" data-i18n="settings.eventVolume.hint">Rings 10 minutes before an event, if the sound is on in the dashboard Timer</div>
+                    </div>
+                    <div class="settingsRangeInline">
+                      <input id="eventVolumeInput" class="settingsRange eventVolumeInput" type="range" min="0" max="100" step="5" value="50" />
+                      <div class="settingsValue eventVolumeValue">50%</div>
+                      <button class="settingsAction eventVolumeTest" type="button" data-i18n="settings.eventVolume.test">Test</button>
+                    </div>
+                  </div>
                 </div>
               </section>
             </div>
@@ -756,17 +770,18 @@
             <section class="settingsGroup">
               <div class="settingsMiniTitle" data-i18n="settings.diagnostics">Diagnostics</div>
               <div class="settingsGroupBody settingsGroupSplit">
-                <label class="settingsToggle">
+                <!-- Debugger and Admin roles only: enabled by core.js (applyLogPermission) when the permit allows. -->
+                <label class="settingsToggle" title="Debugger and Admin roles only" data-i18n-title="settings.logsRestricted">
                   <span class="settingsToggleLabel settingsLabel" data-i18n="settings.debugLogging">Enable debug logging</span>
                   <span class="settingsToggleControl">
-                    <input type="checkbox" class="debugLoggingCheckbox" />
+                    <input type="checkbox" class="debugLoggingCheckbox" disabled />
                     <span class="settingsToggleTrack" aria-hidden="true"></span>
                   </span>
                 </label>
-                <label class="settingsToggle">
+                <label class="settingsToggle" title="Debugger and Admin roles only" data-i18n-title="settings.logsRestricted">
                   <span class="settingsToggleLabel settingsLabel" data-i18n="settings.saveRawPackets">Enable packet logging</span>
                   <span class="settingsToggleControl">
-                    <input type="checkbox" class="saveRawPacketsCheckbox" />
+                    <input type="checkbox" class="saveRawPacketsCheckbox" disabled />
                     <span class="settingsToggleTrack" aria-hidden="true"></span>
                   </span>
                 </label>

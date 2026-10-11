@@ -1,20 +1,56 @@
 import { useState } from "react";
-import { CastleTurretIcon, CrownSimpleIcon, SkullIcon } from "@phosphor-icons/react";
-import type { Dungeon as DungeonRow, DungeonBoss } from "../../data/db/types";
+import { CalendarBlankIcon, CastleTurretIcon, CoinsIcon, CrownSimpleIcon, LockSimpleIcon, ShieldChevronIcon, SkullIcon, UsersIcon } from "@phosphor-icons/react";
+import type { Dungeon as DungeonRow, DungeonBoss, IconUrls } from "../../data/db/types";
 import type { T } from "../i18n";
 import type { PageProps } from "./types";
-import { DataState, DbList, EntryHead, EntryLink, FilterBox, gd, Nd, None, Section, TypePage, useGd, type Open } from "./world/db";
+import { DataState, EntryHead, EntryLink, GameIcon, gd, Nd, None, Section, TypePage, useGd, useIcons, type Open } from "./world/db";
+import krao from "../../assets/dungeons/krao.webp";
+import urugugu from "../../assets/dungeons/urugugu.webp";
+import fire from "../../assets/dungeons/fire.webp";
+import draupnir from "../../assets/dungeons/draupnir.webp";
+import vakron from "../../assets/dungeons/vakron.webp";
+import ferocious from "../../assets/dungeons/ferocious.webp";
+import "./organizer/organizer.css";
 import "./world/world.css";
 
-// The archive lists every difficulty/tier of a dungeon as its own entry (351 for 279 dungeons):
-// the list shows each dungeon once, its card every entry.
+// Dungeon page: the Expedition dungeons as cards (Exploration / Conquest tabs).
+// The card of any dungeon (opened from a card, the search or an item's sources
+// through openEntry) still lists every version the archive holds.
 
-type Data = { dungeons: DungeonRow[]; bosses: DungeonBoss[] };
-const load = () => gd.dungeons();
-const groupKey = (d: DungeonRow) => d.name ?? d.dungeon_id;
+const Mode = ["exploration", "conquest"] as const;
+type Mode = (typeof Mode)[number];
+const MODE_KEY = "pm.dungeon.mode";
+
+// Art: in-game screenshots from the owner (src/assets/dungeons). Ids are the archive's
+// Expedition entries: Exploration, Conquest and the locked Conquest level (item level 2400-2600).
+// players, kinah and cube are not in the archive: they come from the in-game Expedition window
+// (Exploration tab, screenshots of 2026-10-12) and are shown on the Exploration cards only.
+const EXPEDITIONS = [
+  { name: "Krao Cave", art: krao, ids: ["600002", "600001", "600004"], players: "1-5", kinah: 15000, cube: 20 },
+  { name: "Urugugu Canyon", art: urugugu, ids: ["600011", "600012", "600013"], players: "2-5", kinah: 18000, cube: 20 },
+  { name: "Fire Temple", art: fire, ids: ["600021", "600022", "600023"], players: "1-5", kinah: 21000, cube: 30 },
+  { name: "Draupnir", art: draupnir, ids: ["600031", "600032", "600033"], players: "1-5", kinah: 24000, cube: 40 },
+  { name: "Vakron Sky Island", art: vakron, ids: ["600071", "600072", "600073"], players: "2-5", kinah: 30000, cube: 40 },
+  { name: "Ferocious Horn Den", art: ferocious, ids: ["600091", "600092", "600093"], players: "1-5", kinah: 36000, cube: 40 },
+];
+type Expedition = (typeof EXPEDITIONS)[number];
+// "Play Count x17, Odyle Energy Cube Kina Gain 20%": the same on every Exploration dungeon.
+const RUNS = 17;
+const CUBE_KINAH = 20;
+
+/** The part of a dungeon record's data_json the cards read. */
+type Rec = {
+  dungeon: { minLevel?: number; itemLevel?: number; entries?: number; resetDay?: string };
+  tierName?: string;
+  bosses?: { name: string; level?: number }[];
+  rewards?: { name: string; grade?: string; icon?: string }[];
+};
+const loadExpeditions = () =>
+  Promise.all(EXPEDITIONS.flatMap((e) => e.ids).map((id) => gd.get("dungeon", id))).then((rs) =>
+    Object.fromEntries(rs.flatMap((r) => (r ? [[r.id, r.data_json as Rec]] : []))),
+  );
 
 export default function DungeonPage({ t, lang, go, setHeader }: PageProps) {
-  const data = useGd(load, "dungeons");
   return (
     <TypePage
       t={t}
@@ -22,55 +58,170 @@ export default function DungeonPage({ t, lang, go, setHeader }: PageProps) {
       setHeader={setHeader}
       category="dungeon"
       title={t("world.dungeon.title")}
-      list={(open) => (data.data ? <DungeonList t={t} data={data.data} open={open} /> : <DataState t={t} error={data.error} retry={data.retry} />)}
-      card={(id, open) =>
-        data.data ? <DungeonCard t={t} lang={lang} data={data.data} id={id} open={open} /> : <DataState t={t} error={data.error} retry={data.retry} />
-      }
+      list={(open) => <Expeditions t={t} lang={lang} open={open} />}
+      card={(id, open) => <DungeonDetail t={t} lang={lang} id={id} open={open} />}
     />
   );
 }
 
-function DungeonList({ t, data, open }: { t: T; data: Data; open: Open }) {
-  const [q, setQ] = useState("");
-  const [type, setType] = useState<string | null>(null);
-  // One row per name: the first entry opens the card.
-  const groups = new Map<string, DungeonRow[]>();
-  for (const d of data.dungeons) groups.set(groupKey(d), [...(groups.get(groupKey(d)) ?? []), d]);
-  const types = [...new Set(data.dungeons.map((d) => d.type_label).filter((x): x is string => !!x))].sort();
-  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  const rows = [...groups.values()]
-    .filter((g) => !type || g.some((d) => d.type_label === type))
-    .filter((g) => words.every((w) => `${g[0].name} ${g[0].location_name ?? ""}`.toLowerCase().includes(w)))
-    .map((g) => {
-      const levels = g.map((d) => d.min_level).filter((l): l is number => l != null);
-      const kind = [...new Set(g.map((d) => d.type_label).filter(Boolean))].join(", ");
-      return {
-        id: g[0].dungeon_id,
-        name: g[0].name,
-        kind: g.length > 1 ? `${kind} · ${t("world.dungeon.variants", { n: g.length })}` : kind,
-        level: levels.length ? Math.min(...levels) : null,
-        grade: null,
-        icon: null,
-      };
-    });
+function Expeditions({ t, lang, open }: { t: T; lang: string; open: Open }) {
+  const [mode, setMode] = useState<Mode>(() => (sessionStorage.getItem(MODE_KEY) === "conquest" ? "conquest" : "exploration"));
+  const recs = useGd(loadExpeditions, "expeditions");
+  const conquest = mode === "conquest";
+  const cards = recs.data
+    ? EXPEDITIONS.map((e) => ({ e, id: e.ids[conquest ? 1 : 0], rec: recs.data![e.ids[conquest ? 1 : 0]], locked: conquest ? recs.data![e.ids[2]] : undefined }))
+        .filter((c) => c.rec)
+        // Conquest in the game's order: by item level (Krao, Draupnir, Urugugu, Vakron, Fire, Horn Den).
+        .sort((a, b) => (conquest ? (a.rec.dungeon.itemLevel ?? 0) - (b.rec.dungeon.itemLevel ?? 0) : 0))
+    : undefined;
+  const icons = useIcons(cards?.flatMap((c) => c.rec.rewards?.map((r) => r.icon) ?? []) ?? []);
+  const pick = (m: Mode) => {
+    sessionStorage.setItem(MODE_KEY, m);
+    setMode(m);
+  };
   return (
     <>
-      <FilterBox t={t} q={q} setQ={setQ} count={rows.length} />
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }} role="group" aria-label={t("world.dungeon.type")}>
-        {[null, ...types].map((id) => (
-          <button key={id ?? "all"} type="button" className="wChip" aria-pressed={id === type} onClick={() => setType(id)}>
-            {id ?? t("world.db.all")}
+      <div className="orgTabs" role="tablist" aria-label={t("world.dungeon.expedition")}>
+        {Mode.map((m) => (
+          <button key={m} id={`dg-${m}`} type="button" role="tab" aria-selected={m === mode} aria-controls="dg-panel" className={`orgTab dgTab ${m}`} onClick={() => pick(m)}>
+            {t(`world.dungeon.${m}`)}
           </button>
         ))}
       </div>
-      {rows.length === 0 ? (
-        <None>{t("world.db.noResults", { q: q.trim() })}</None>
-      ) : (
-        <DbList key={`${q}|${type}`} t={t} glyph={<CastleTurretIcon />} rows={rows} onPick={(r) => open("dungeon", r.id)} />
-      )}
+      <div id="dg-panel" role="tabpanel" aria-labelledby={`dg-${mode}`}>
+        {!cards ? (
+          <DataState t={t} error={recs.error} retry={recs.retry} />
+        ) : (
+          <div className="dgGrid">
+            {cards.map((c) => (
+              <ExpeditionCard key={c.id} t={t} lang={lang} conquest={conquest} icons={icons} open={() => open("dungeon", c.id)} {...c} />
+            ))}
+          </div>
+        )}
+      </div>
     </>
   );
 }
+
+function ExpeditionCard({
+  t,
+  lang,
+  e,
+  rec,
+  locked,
+  conquest,
+  icons,
+  open,
+}: {
+  t: T;
+  lang: string;
+  e: Expedition;
+  rec: Rec;
+  locked?: Rec;
+  conquest: boolean;
+  icons: IconUrls;
+  open: () => void;
+}) {
+  const d = rec.dungeon;
+  const num = (n: number) => n.toLocaleString(lang);
+  const tier = rec.tierName?.match(/\d+/)?.[0];
+  const bossLv = rec.bosses?.[0]?.level;
+  const ilvl = (n: number) => (
+    <>
+      <ShieldChevronIcon aria-hidden="true" />
+      <span className="srOnly">{t("world.dungeon.itemLevel")}</span>
+      <span className="mono">{num(n)}</span>
+    </>
+  );
+  return (
+    <article className={`dgCard${conquest ? " conquest" : ""}`}>
+      <img className="dgArt" src={e.art} alt="" />
+      {tier && <span className="dgTier">{t("world.dungeon.tier", { n: tier })}</span>}
+      <div className="dgBody">
+        <h3 className="dgName">
+          <button type="button" onClick={open}>
+            {e.name}
+          </button>
+        </h3>
+        <ul className="dgChips">
+          {d.minLevel != null && <li className="mono">{t("world.db.lv", { n: d.minLevel })}</li>}
+          {d.itemLevel != null && <li title={t("world.dungeon.itemLevel")}>{ilvl(d.itemLevel)}</li>}
+          {!conquest && (
+            <li>
+              <UsersIcon aria-hidden="true" />
+              {t("world.dungeon.players", { n: e.players })}
+            </li>
+          )}
+          {conquest && d.entries != null && (
+            <li>
+              <CalendarBlankIcon aria-hidden="true" />
+              {t("world.dungeon.perWeek", { n: d.entries })}
+            </li>
+          )}
+          {conquest && d.resetDay && <li>{t("world.dungeon.resetOn", { day: t(`world.day.${d.resetDay}`) })}</li>}
+        </ul>
+
+        {!conquest && (
+          <div>
+            <h4 className="wLabel dgLabel">{t("world.dungeon.weeklyReward")}</h4>
+            <p className="dgText">{t("world.dungeon.cubeKina", { n: RUNS, p: CUBE_KINAH })}</p>
+            <p className="dgText dgKinah">
+              {t("world.dungeon.allBosses")}
+              <span>
+                <CoinsIcon aria-hidden="true" />
+                <span className="mono">{num(e.kinah)}</span> {t("world.currency.gold")}
+              </span>
+            </p>
+          </div>
+        )}
+
+        {!!rec.rewards?.length && (
+          <div>
+            <h4 className="wLabel dgLabel">
+              {t("world.dungeon.cubeReward")}
+              {!conquest && <span className="mono">{e.cube}</span>}
+            </h4>
+            <ul className="dgLoot">
+              {rec.rewards.map((r) => (
+                <li key={r.name} title={r.name}>
+                  <GameIcon url={r.icon ? icons[r.icon] : undefined} grade={r.grade} size={32} />
+                  <span className="srOnly">{r.name}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {!!rec.bosses?.length && (
+          <p className="dgText dgMuted">
+            <SkullIcon aria-hidden="true" />
+            <span className="srOnly">{t("world.dungeon.bosses")}: </span>
+            {rec.bosses.map((b) => b.name).join(", ")}
+            {bossLv != null && <span className="mono"> {t("world.db.lv", { n: bossLv })}</span>}
+          </p>
+        )}
+
+        {locked?.dungeon.itemLevel != null && (
+          <p className="dgText dgLocked">
+            <LockSimpleIcon aria-hidden="true" />
+            {t("world.dungeon.locked")}
+            <span className="dgLockedVal">{ilvl(locked.dungeon.itemLevel)}</span>
+            {locked.bosses?.[0]?.level != null && <span className="mono">{t("world.db.lv", { n: locked.bosses[0].level })}</span>}
+          </p>
+        )}
+      </div>
+    </article>
+  );
+}
+
+/** A dungeon's own card: every version of its name the archive lists. */
+function DungeonDetail({ t, lang, id, open }: { t: T; lang: string; id: string; open: Open }) {
+  const data = useGd(gd.dungeons, "dungeons");
+  return data.data ? <DungeonCard t={t} lang={lang} data={data.data} id={id} open={open} /> : <DataState t={t} error={data.error} retry={data.retry} />;
+}
+
+type Data = { dungeons: DungeonRow[]; bosses: DungeonBoss[] };
+const groupKey = (d: DungeonRow) => d.name ?? d.dungeon_id;
 
 function DungeonCard({ t, lang, data, id, open }: { t: T; lang: string; data: Data; id: string; open: Open }) {
   const picked = data.dungeons.find((d) => d.dungeon_id === id);

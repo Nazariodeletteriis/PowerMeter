@@ -64,12 +64,19 @@ export function readCapturedGear(json?: string): Record<string, GearSet> {
     return {}; // missing or hand-edited
   }
 }
-/** Skill bar of the game, per roster character (CaptureSync): settings["pm.capturedBar"] = { [charId]: skill ids in bar order }. */
+/**
+ * Skill bar of the game, per roster character (CaptureSync): settings["pm.capturedBar"] = { [charId]: { "set,row,column": skill id } },
+ * set 1-3 of the game's bar window, row 0 (the keys' row) to 3, columns as in BAR_SLOTS.
+ */
 export const CAPTURED_BAR_KEY = "pm.capturedBar";
-export function readCapturedBar(json?: string): Record<string, string[]> {
+/** Game bar slot of each column of the game's bar window, left to right (equip_parser.rs); slot 0 has row 0 only. */
+export const BAR_SLOTS = [2, 3, 4, 5, 20, 21, 22, 23, 6, 7, 0, 1];
+export function readCapturedBar(json?: string): Record<string, Record<string, string>> {
   try {
     const v = JSON.parse(json ?? "");
-    return v && typeof v === "object" && !Array.isArray(v) ? v : {};
+    // Up to 0.4.8 a character held a bare list (bar 1, row 0): left out until the game sends the bar again.
+    if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+    return Object.fromEntries(Object.entries(v as Record<string, Record<string, string>>).filter(([, g]) => g && typeof g === "object" && !Array.isArray(g)));
   } catch {
     return {}; // missing or hand-edited
   }
@@ -100,6 +107,7 @@ export function closeBuild(title: string) {
 /** Open a build in the builder, resetting the view like the prototype. */
 export function openBuild(src: BuildSrc, go: (page: string) => void) {
   mem.bSrc = src;
+  delete mem.bFor; // opened now: a character switch seen before must not move off it (builder.tsx)
   if (src.isNew) Object.assign(mem, { newName: "", newTags: [] });
   go("builder");
 }

@@ -122,7 +122,7 @@
   "organizer.set.disclaimerText": "非公式ツールであり、NCSoftとは関係ありません。",
   "organizer.set.credits": "クレジット",
   "organizer.diag.title": "Meter診断",
-  "organizer.diag.npcapOk": "wpcap.dllを読み込み済み・キャプチャ利用可能",
+  "organizer.diag.npcapOk": "このPCにはNpcapがインストール済みです",
   "organizer.diag.npcapMissing": "Npcapがインストールされていません。これがないとゲームの通信を読み取れません。",
   "organizer.diag.admin": "管理者権限",
   "organizer.diag.adminOk": "PowerMeterは管理者として実行中です",

@@ -521,6 +521,10 @@
     setDebugLoggingEnabled(enabled) {
       invoke("set_debug_logging", { enabled: !!enabled }).catch(() => {});
     },
+    // Packet and debug logs: Debugger and Admin roles only (the backend refuses them otherwise).
+    mayLog() {
+      return invoke("pm_may_log").catch(() => false);
+    },
     getAion2WindowTitle() { return window._cachedAion2Title ?? null; },
     logDebug() {},
 
@@ -738,23 +742,28 @@
 
   // ===== Resize handle: expand viewport while dragging =====
   let resizeActive = false;
+  // Grow only up to the edge of the monitor the widget is on: a window spilling onto a
+  // neighbour with a different scale gets rescaled by Windows mid-drag.
   const expandViewport = () => {
     resizeActive = true;
-    const screenW = window.screen.availWidth || 1920;
-    const screenH = window.screen.availHeight || 1080;
-    invoke("resize_window", { width: Math.min(screenW, 2000), height: Math.min(screenH, 1200) }).catch(() => {});
+    const s = window.screen;
+    const width = Math.max(window.innerWidth, (s.availLeft || 0) + s.availWidth - window.screenX);
+    const height = Math.max(window.innerHeight, (s.availTop || 0) + s.availHeight - window.screenY);
+    invoke("resize_window", { width, height }).catch(() => {});
   };
+  // Shrink back at once: the expanded window is transparent but still eats clicks over the game.
   const shrinkViewport = () => {
-    if (resizeActive) {
-      resizeActive = false;
-      lastSizeKey = "";
-    }
+    if (!resizeActive) return;
+    resizeActive = false;
+    lastSizeKey = "";
+    updateWindowSize();
   };
-  // Expand during resize handle drag
-  document.addEventListener("mousedown", (e) => {
-    if (e.target?.closest?.(".resizeHandle")) expandViewport();
+  // The grips capture the pointer (core.js bindResizeHandle), so the release arrives even off the window.
+  document.addEventListener("pointerdown", (e) => {
+    if (e.button === 0 && e.target?.closest?.(".resizeHandle")) expandViewport();
   }, { capture: true });
-  document.addEventListener("mouseup", shrinkViewport);
+  document.addEventListener("pointerup", shrinkViewport, { capture: true });
+  document.addEventListener("lostpointercapture", shrinkViewport, { capture: true });
 
   // Startup diagnostics
   invoke("debug_status").then((s) => {

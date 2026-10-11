@@ -1,5 +1,6 @@
 {
   "shell.diagnoseHint": "クリックして診断を開く。",
+  "shell.teleportHint": "キャラクターが変更されました：テレポートで情報を更新してください",
   "shell.attempt": "試行{n}",
   "shell.crumb.builder": "コミュニティビルド → キャラクタービルダー",
   "shell.share.log": "ログを共有",

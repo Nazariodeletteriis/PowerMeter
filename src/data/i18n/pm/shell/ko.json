@@ -1,5 +1,6 @@
 {
   "shell.diagnoseHint": "클릭하면 진단 결과를 확인합니다.",
+  "shell.teleportHint": "캐릭터 변경됨: 텔레포트를 사용해 정보를 갱신하세요",
   "shell.attempt": "시도 {n}",
   "shell.crumb.builder": "커뮤니티 빌드 → 캐릭터 빌더",
   "shell.share.log": "로그 공유",

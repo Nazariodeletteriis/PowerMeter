@@ -271,15 +271,14 @@ fn set_language(state: tauri::State<'_, AppState>, language: String) {
 }
 
 #[tauri::command]
-fn set_debug_logging(state: tauri::State<'_, AppState>, enabled: bool) {
-    logging::logger::set_debug_enabled(enabled, &state.app_data_dir);
-    state.settings.set("dpsMeter.debugLoggingEnabled", if enabled { "true" } else { "false" });
+fn set_debug_logging(state: tauri::State<'_, AppState>, enabled: bool) -> Result<(), String> {
+    pm_account::set_log(&state, false, enabled)
 }
 
+/// Debugger and Admin roles only (pm_account::may_log): refused, and saved off, for everyone else.
 #[tauri::command]
-fn set_packet_logging(state: tauri::State<'_, AppState>, enabled: bool) {
-    logging::logger::set_packet_log_enabled(enabled, &state.app_data_dir);
-    state.settings.set("dpsMeter.saveRawPackets", if enabled { "true" } else { "false" });
+fn set_packet_logging(state: tauri::State<'_, AppState>, enabled: bool) -> Result<(), String> {
+    pm_account::set_log(&state, true, enabled)
 }
 
 #[tauri::command]
@@ -1475,11 +1474,12 @@ pub fn run() {
 
             let settings = Settings::new(app_data_dir.clone());
 
-            // Load logging settings from saved state
-            if settings.get("dpsMeter.debugLoggingEnabled").as_deref() == Some("true") {
+            // Load logging settings from saved state: only with the Debugger or Admin role in the cached permit.
+            let may_log = pm_account::may_log(&settings);
+            if may_log && settings.get("dpsMeter.debugLoggingEnabled").as_deref() == Some("true") {
                 logging::logger::set_debug_enabled(true, &app_data_dir);
             }
-            if settings.get("dpsMeter.saveRawPackets").as_deref() == Some("true") {
+            if may_log && settings.get("dpsMeter.saveRawPackets").as_deref() == Some("true") {
                 logging::logger::set_packet_log_enabled(true, &app_data_dir);
             }
 
@@ -1540,7 +1540,7 @@ pub fn run() {
             }
 
             // Check if Npcap is available before starting capture
-            let npcap_available = unsafe { libloading::Library::new("wpcap.dll").is_ok() };
+            let npcap_available = powermeter::npcap_installed();
             if !npcap_available {
                 tracing::error!("Npcap is not installed — packet capture disabled");
                 // Notify frontend to show install prompt
@@ -1884,6 +1884,8 @@ pub fn run() {
             pm_account::pm_admin_users,
             pm_account::pm_admin_grant,
             pm_account::pm_admin_revoke,
+            pm_account::pm_admin_role,
+            pm_account::pm_may_log,
             pm_account::pm_admin_reset_devices,
             gamedata::gamedata_sync,
             gamedata::gamedata_get,

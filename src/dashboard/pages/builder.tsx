@@ -27,6 +27,7 @@ import { activeId, readCharacters } from "../characters";
 import type { BuilderData, EnhancementGroup, EnhancementValue, GearPiece, PlannerBoardData } from "../../data/db/types";
 import { boardMax, buildStats, connected, estimates, GAME_SLOTS, planTotals, plannerNodes, PLAN_KEY, readPlans, savedNodes, statValue, twPiece, type Equipped } from "./characters/calc";
 import {
+  BAR_SLOTS,
   BUILD_DATA_KEY,
   BUILD_TAGS,
   CAPTURED_BAR_KEY,
@@ -74,6 +75,7 @@ const SLOT_GROUPS: [group: string, slots: [id: string, accepts: string[]][]][] =
 const SLOTS = SLOT_GROUPS.flatMap(([, list]) => list);
 /** The level the builder starts at when the build has none saved. */
 const DEFAULT_LEVEL = 45;
+type BuildEdit = { lvl: number; gear: GearSet; want?: GearSet };
 
 /** Game item ids (numeric, from the packets) are Taiwan data; the Builder's own pieces have string codes. */
 const isGameId = (id: string) => /^\d+$/.test(id);
@@ -94,10 +96,15 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const chars = readCharacters(settings);
   const [src, setSrc] = useMem<BuildSrc>("bSrc", { t: OWN_BUILD, au: name, cls: myCls, own: true });
   const faction = chars.find((c) => c.id === (src.char ?? activeId(settings, chars)))?.faction;
-  // Your own build follows the active character: switching character re-targets it
-  // (not one opened from a character's card: looking at it must not change anything).
+  // Your own builds follow the active character: the default one is each character's (level, gear, game data),
+  // and one of your named builds of another class gives way to the new character's default build (its unsaved
+  // edits stay parked, see bEdits). Untouched: a build being created, one opened from a character's card, one of
+  // another class opened since the switch (only a class change seen here or while away counts).
+  const [bFor, setFor] = useMem("bFor", myCls);
   useEffect(() => {
-    if (src.own && !src.isNew && !src.char && src.cls !== myCls) setSrc({ ...src, cls: myCls });
+    if (bFor === myCls) return;
+    setFor(myCls);
+    if (src.own && !src.isNew && !src.char && src.cls !== myCls) setSrc({ t: OWN_BUILD, au: name, cls: myCls, own: true });
   }, [myCls]); // eslint-disable-line react-hooks/exhaustive-deps
   const [tab, setTab] = useMem("ctab", "skills");
   const [newName, setNewName] = useMem("newName", "");
@@ -114,27 +121,36 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const nameField = draft.of === src.t ? draft.v : src.t;
   const [toast, showToast] = useToast();
 
-  // Level and gear sets of this build: saved in pm.buildData, edited here until Save (one build at a time).
+  // Level and gear sets of this build: saved in pm.buildData, edited here until Save.
   const allData = readBuildData(settings[BUILD_DATA_KEY]);
-  const saved = allData[src.t] ?? {};
   const char = chars.find((c) => c.id === (src.char ?? activeId(settings, chars)));
+  // The default build is each character's own (up to 0.4.8 one for all: kept as the first character's).
+  const dataKey = (title: string) => (title === OWN_BUILD && char ? `${OWN_BUILD}:${char.id}` : title);
+  const key = dataKey(src.t);
+  const saved = allData[key] ?? (key !== src.t && char?.id === chars[0]?.id ? allData[src.t] : undefined) ?? {};
   // Your builds of the character's class wear what the game shows it wearing (CaptureSync), enhancement
   // included; slots the game does not send (Arcana) keep what was picked.
   const captured = src.own && char?.cls === src.cls ? readCapturedGear(settings[CAPTURED_GEAR_KEY])[char.id] : undefined;
-  // And the skill bar it has in game, in bar order.
-  const gameBar = (src.own && char?.cls === src.cls ? readCapturedBar(settings[CAPTURED_BAR_KEY])[char.id] : undefined)?.flatMap((id) => classSkills(src.cls).find((sk) => sk.id === id) ?? []);
+  // And the skill bar it has in game, every set ("set,row,column" → skill id).
+  const gameBar = (src.own && char?.cls === src.cls ? readCapturedBar(settings[CAPTURED_BAR_KEY])[char.id] : undefined) ?? {};
+  const barSets = [...new Set(Object.keys(gameBar).map((k) => k.split(",")[0]))].sort();
+  const [barSetPick, setBarSet] = useState("1");
+  const barSet = barSets.includes(barSetPick) ? barSetPick : barSets[0];
   const wornGear = (g: GearSet = {}): GearSet => {
     if (!captured) return g;
     const kept = Object.entries(g).filter(([s]) => !Object.values(GAME_SLOTS).includes(s));
     return { ...Object.fromEntries(kept), ...captured };
   };
-  const [edit, setEdit] = useMem<{ t: string; lvl: number; gear: GearSet; want?: GearSet } | null>("bEdit", null);
-  const cur = edit?.t === src.t ? edit : { t: src.t, lvl: saved.lvl ?? char?.level ?? DEFAULT_LEVEL, gear: wornGear(saved.gear), want: saved.want };
-  const update = (p: Partial<typeof cur>) => setEdit({ ...cur, ...p });
+  // Unsaved edits per build (the default one per character): switching character or build parks them, coming
+  // back shows them again; nothing is dropped until Save or Delete.
+  const [edits, setEdits] = useMem<Record<string, BuildEdit>>("bEdits", {});
+  const cur = edits[key] ?? { lvl: saved.lvl ?? char?.level ?? DEFAULT_LEVEL, gear: wornGear(saved.gear), want: saved.want };
+  const update = (p: Partial<BuildEdit>) => setEdits({ ...edits, [key]: { ...cur, ...p } });
   const storeData = (title: string, from?: string) => {
-    const next = { ...allData, [title]: { lvl: cur.lvl, gear: cur.gear, want: cur.want } };
-    if (from !== undefined && from !== title) delete next[from];
-    setEdit({ ...cur, t: title });
+    const next = { ...allData, [dataKey(title)]: { lvl: cur.lvl, gear: cur.gear, want: cur.want } };
+    if (from !== undefined && from !== title) delete next[dataKey(from)];
+    const { [key]: _old, ...rest } = edits; // eslint-disable-line @typescript-eslint/no-unused-vars
+    setEdits({ ...rest, [dataKey(title)]: cur });
     saveSetting(BUILD_DATA_KEY, JSON.stringify(next)).catch(onError);
   };
   const [slot, setSlot] = useMem("bSlot", "weapon");
@@ -240,6 +256,8 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   /** Delete this build of yours (after the modal) and go back to the list. */
   const remove = () => {
     closeBuild(src.t);
+    const { [key]: _edit, ...others } = edits; // eslint-disable-line @typescript-eslint/no-unused-vars
+    setEdits(others);
     const { [src.t]: _gone, ...rest } = allData; // eslint-disable-line @typescript-eslint/no-unused-vars
     saveSetting(BUILD_DATA_KEY, JSON.stringify(rest)).catch(onError);
     saveSetting(MY_BUILDS_KEY, JSON.stringify(myBuilds.filter((x) => x.t !== src.t))).catch(onError);
@@ -536,14 +554,39 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
             {tab === "skills" && (
               <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                 <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("characters.builder.linkedSkills")}</div>
-                {!gameBar?.length && <div style={{ fontSize: 13, color: "var(--pm-t2)" }}>{t("characters.builder.skillBarNone")}</div>}
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {(gameBar ?? []).map((sk) => (
-                    <span key={sk.id} title={sk.name} style={{ width: 40, height: 40, borderRadius: 6, background: "var(--pm-s2)", boxShadow: "0 0 0 1px var(--pm-line)", display: "grid", placeItems: "center", fontSize: 10, fontWeight: 600 }}>
-                      <SkillIcon skill={sk} name={sk.name} />
-                    </span>
-                  ))}
-                </div>
+                {!barSet && <div style={{ fontSize: 13, color: "var(--pm-t2)" }}>{t("characters.builder.skillBarNone")}</div>}
+                {barSets.length > 1 && (
+                  <div className="chSeg" style={{ alignSelf: "flex-start" }}>
+                    {barSets.map((n) => (
+                      <button key={n} type="button" aria-pressed={n === barSet} title={t("characters.builder.skillSet", { n })} style={{ height: 28, minWidth: 36 }} onClick={() => setBarSet(n)}>
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {/* As the game's bar window: row 0 (the keys' row) at the bottom, the chained skills above it; the
+                    slot 0 column has no chain rows. */}
+                {barSet && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4, overflowX: "auto" }}>
+                    {[3, 2, 1, 0].map((row) => (
+                      <div key={row} style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                        {BAR_SLOTS.map((slot, c) => {
+                          const sk = classSkills(src.cls).find((x) => x.id === gameBar[`${barSet},${row},${c}`]);
+                          const gap = c === 4 || c === 8 || c === 10 ? 8 : 0;
+                          if (slot === 0 && row > 0) return <span key={c} style={{ width: 36, flex: "none", marginLeft: gap }} />;
+                          return (
+                            <span key={c} title={sk?.name} style={{ width: 36, height: 36, flex: "none", marginLeft: gap, borderRadius: 6, background: "var(--pm-s2)", boxShadow: "0 0 0 1px var(--pm-line)", display: "grid", placeItems: "center", fontSize: 10, fontWeight: 600, overflow: "hidden" }}>
+                              {sk && <SkillIcon skill={sk} name={sk.name} />}
+                            </span>
+                          );
+                        })}
+                        <span className="mono" aria-hidden="true" style={{ width: 16, marginLeft: 6, fontSize: 11, color: "var(--pm-t3)" }}>
+                          {row}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div>
                   <button type="button" className="btn sm" onClick={() => go("skillplan")}>
                     {t("characters.builder.openSkillPlanner")}

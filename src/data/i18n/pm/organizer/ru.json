@@ -122,7 +122,7 @@
   "organizer.set.disclaimerText": "Неофициальный инструмент, не связан с NCSoft.",
   "organizer.set.credits": "Благодарности",
   "organizer.diag.title": "Диагностика метра",
-  "organizer.diag.npcapOk": "wpcap.dll загружен · захват доступен",
+  "organizer.diag.npcapOk": "Npcap уже установлен на этом ПК",
   "organizer.diag.npcapMissing": "Npcap не установлен: без него нельзя читать трафик игры.",
   "organizer.diag.admin": "Права администратора",
   "organizer.diag.adminOk": "PowerMeter запущен от имени администратора",

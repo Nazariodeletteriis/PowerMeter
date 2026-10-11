@@ -4,6 +4,22 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.4.9
+
+- New: Roles: everyone starts as Player with a full 30-day trial (Discord login and a Discord account at least 8 months old); then Party, rotations and Gear Viewer are for the plans. Patreon plans are coming soon.
+- New: Dungeons page redone: Exploration and Conquest cards with entry requirements, rewards and drops.
+- New: Builder: the skill bar is shown as in game, every set with the skills chained above each slot (stigmas included).
+- New: Widget: Copy button for the fight's DPS, ready to paste on Discord.
+- New: Widget: volume of the event alert in the settings.
+- New: After a character switch, a hint suggests a teleport to refresh the character.
+- Fixed: Switching character switches the whole profile, Builder and Daevanion included.
+- Fixed: Widget resize: no more transparent edges blocking the game, size remembered, the minimized icon can be dragged.
+- Fixed: An Npcap already installed is recognised: no request to install it again.
+- Fixed: Quests: the list no longer starts with unnamed quests.
+- Changed: Packet and debug logs are only for the Debugger and Admin roles.
+- Changed: Calculators and Armory removed.
+- Changed: Terms and privacy updated: you will be asked to accept them again.
+
 ## 0.4.8
 
 - New: Builder: each god of the Daevanion tab shows its board in small, with the nodes you took; the magnifier enlarges it.

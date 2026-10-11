@@ -1,5 +1,6 @@
 {
   "shell.diagnoseHint": "點擊以開啟診斷。",
+  "shell.teleportHint": "已切換角色：使用傳送來更新角色資訊",
   "shell.attempt": "第 {n} 次嘗試",
   "shell.crumb.builder": "社群配裝 → 角色配裝器",
   "shell.share.log": "分享記錄",
