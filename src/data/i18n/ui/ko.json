@@ -100,7 +100,11 @@
     },
     "dpsChart": "DPS 차트",
     "historyBtn": "기록",
-    "timeline": "타임라인"
+    "timeline": "타임라인",
+    "mode": {
+      "dmg": "DMG",
+      "heal": "치유"
+    }
   },
   "history": {
     "title": "전투 기록",
@@ -319,7 +323,8 @@
     "later": "나중에 업데이트",
     "text": "새 업데이트가 있습니다!\n\n현재 버전: {current}\n최신 버전: {latest}",
     "installing": "업데이트 설치 중...",
-    "downloadError": "다운로드 실패. 다시 시도하거나 수동으로 설치하세요."
+    "downloadError": "다운로드 실패. 다시 시도하거나 수동으로 설치하세요.",
+    "cancel": "취소"
   },
   "connection": {
     "auto": "자동",

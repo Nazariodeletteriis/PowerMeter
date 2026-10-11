@@ -4,6 +4,13 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.4.2
+
+- New: STAGGER bar under the boss HP bar in the widget, with the real gauge: it drops with your hits and shows when the boss is broken.
+- Fixed: The widget and its Settings now follow the chosen language (they stayed in English in the installed app).
+- Fixed: Daily and weekly resets at 07:00 UTC, shown in your local time.
+- Fixed: Your own HP no longer mixes with the monsters' HP.
+
 ## 0.4.1
 
 - Changed: New DPS Meter widget design: bigger, easier to click buttons, clearer boss bar and player rows with class icons.

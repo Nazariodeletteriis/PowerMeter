@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.2
+
+- Neu: STAGGER-Leiste unter der HP-Leiste des Bosses im Widget, mit dem echten Wert: sie sinkt mit deinen Treffern und zeigt, wann der Boss gebrochen ist.
+- Behoben: Das Widget und seine Einstellungen folgen jetzt der gewählten Sprache (in der installierten App blieben sie auf Englisch).
+- Behoben: Täglicher und wöchentlicher Reset um 07:00 UTC, in deiner Ortszeit angezeigt.
+- Behoben: Deine eigenen HP mischen sich nicht mehr mit denen der Monster.
+
 ## 0.4.1
 
 - Geändert: Neues Design des DPS-Meter-Widgets: größere, leichter klickbare Schaltflächen, klarere Boss-Leiste und Spielerzeilen mit Klassensymbolen.

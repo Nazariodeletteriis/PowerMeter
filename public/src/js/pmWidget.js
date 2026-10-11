@@ -491,6 +491,18 @@ const createPmWidget = (app) => {
       phase.hidden = !(next.targetPhase != null && Number.isFinite(n) && n > 0);
       if (!phase.hidden) phase.textContent = tf("pmWidget.phase", { n }, `Phase ${n}`);
     }
+    const stagger = $(".pmStagger");
+    const st = next.targetStagger;
+    if (stagger) {
+      stagger.hidden = !(st?.max > 0);
+      if (!stagger.hidden) {
+        // Broken (groggy): the gauge reads empty until the refill record. The engine keeps cur <= max.
+        const p = st.broken ? 0 : Math.round((st.cur / st.max) * 100);
+        stagger.classList.toggle("isBroken", !!st.broken);
+        $(".pmStaggerFill").style.width = `${p}%`;
+        setText(".pmStaggerPct", `${p}%`);
+      }
+    }
     const now = Date.now();
     if (wasFighting && now - lastSparkAt >= 1000) {
       lastSparkAt = now;

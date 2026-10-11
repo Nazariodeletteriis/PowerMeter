@@ -100,7 +100,11 @@
     },
     "dpsChart": "DPS-Diagramm",
     "historyBtn": "Verlauf",
-    "timeline": "Zeitleiste"
+    "timeline": "Zeitleiste",
+    "mode": {
+      "dmg": "SCH",
+      "heal": "HEILUNG"
+    }
   },
   "history": {
     "title": "Kampfverlauf",
@@ -319,7 +323,8 @@
     "later": "Später aktualisieren",
     "text": "Ein neues Update ist verfügbar!\n\nAktuelle Version: {current}\nNeueste Version: {latest}",
     "installing": "Update wird installiert...",
-    "downloadError": "Download fehlgeschlagen. Bitte erneut versuchen oder manuell installieren."
+    "downloadError": "Download fehlgeschlagen. Bitte erneut versuchen oder manuell installieren.",
+    "cancel": "Abbrechen"
   },
   "connection": {
     "auto": "Auto",

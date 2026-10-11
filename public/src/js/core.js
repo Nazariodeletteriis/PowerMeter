@@ -944,6 +944,7 @@ class DpsApp {
       targetCurrentHp,
       targetBerserkMs,
       targetPhase,
+      targetStagger,
       recordingKind,
       recordingName,
     } = this.buildRowsFromPayload(raw);
@@ -1122,6 +1123,7 @@ class DpsApp {
       targetCurrentHp,
       targetBerserkMs,
       targetPhase,
+      targetStagger,
     });
   }
 
@@ -1164,6 +1166,8 @@ class DpsApp {
       // target header. The engine does not send them yet; absent = hidden.
       targetBerserkMs: payload?.targetBerserkMs ?? null,
       targetPhase: payload?.targetPhase ?? null,
+      // Stagger gauge { cur, max, broken } of the current target, null when it has none.
+      targetStagger: payload?.targetStagger ?? null,
       recordingKind: typeof payload?.recordingKind === "string" ? payload.recordingKind : "",
       recordingName: typeof payload?.recordingName === "string" ? payload.recordingName : "",
     };

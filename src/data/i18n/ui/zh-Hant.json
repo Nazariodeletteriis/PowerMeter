@@ -100,7 +100,11 @@
     },
     "dpsChart": "DPS 圖表",
     "historyBtn": "歷史",
-    "timeline": "時間軸"
+    "timeline": "時間軸",
+    "mode": {
+      "dmg": "DMG",
+      "heal": "治療"
+    }
   },
   "history": {
     "title": "戰鬥歷史",
@@ -319,7 +323,8 @@
     "later": "稍後更新",
     "text": "有新更新可用！\n\n目前版本：{current}\n最新版本：{latest}",
     "installing": "正在安裝更新...",
-    "downloadError": "下載失敗。請重試或手動安裝。"
+    "downloadError": "下載失敗。請重試或手動安裝。",
+    "cancel": "取消"
   },
   "connection": {
     "auto": "自動",

@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.2
+
+- Nuovo: Barra STAGGER sotto la barra HP del boss nel widget, con il valore vero: scende con i tuoi colpi e mostra quando il boss è rotto.
+- Corretto: Il widget e le sue Impostazioni seguono la lingua scelta (nell'app installata restavano in inglese).
+- Corretto: Reset giornaliero e settimanale alle 07:00 UTC, mostrati nella tua ora locale.
+- Corretto: I tuoi HP non si mescolano più con quelli dei mostri.
+
 ## 0.4.1
 
 - Cambiato: Nuovo design del widget DPS Meter: pulsanti più grandi e facili da cliccare, barra del boss e righe dei giocatori più chiare con le icone di classe.

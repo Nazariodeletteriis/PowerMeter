@@ -238,6 +238,9 @@ impl DpsCalculator {
             -1
         };
         dps_data.target_current_hp = target_current_hp;
+        // No target (id 0) has no stagger entry, so this is None then.
+        let target_stagger = self.data_storage.get_stagger(self.current_target);
+        dps_data.target_stagger = target_stagger;
 
         // Collect actors from selected targets
         let mut combined_actors: HashMap<i32, i64> = HashMap::new();
@@ -275,6 +278,7 @@ impl DpsCalculator {
                 snapshot.target_max_hp = target_max_hp;
                 snapshot.target_total_damage = 0;
                 snapshot.target_current_hp = target_current_hp;
+                snapshot.target_stagger = target_stagger;
                 snapshot.recording_kind = dps_data.recording_kind.clone();
                 snapshot.recording_name = dps_data.recording_name.clone();
                 snapshot.heals = dps_data.heals.clone();

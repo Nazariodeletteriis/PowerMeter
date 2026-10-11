@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.2
+
+- Nuevo: Barra STAGGER bajo la barra de vida del jefe en el widget, con el valor real: baja con tus golpes y muestra cuándo el jefe está roto.
+- Corregido: El widget y sus Ajustes siguen el idioma elegido (en la app instalada se quedaban en inglés).
+- Corregido: Reinicio diario y semanal a las 07:00 UTC, mostrados en tu hora local.
+- Corregido: Tu vida ya no se mezcla con la de los monstruos.
+
 ## 0.4.1
 
 - Cambiado: Nuevo diseño del widget DPS Meter: botones más grandes y fáciles de pulsar, barra del jefe y filas de jugadores más claras con iconos de clase.

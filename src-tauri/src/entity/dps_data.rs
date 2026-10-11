@@ -21,6 +21,8 @@ pub struct DpsData {
     /// Live current HP of the current target from the in-place HP feed, or -1 if
     /// none has been observed. When >= 0 the bar uses this real value directly.
     pub target_current_hp: i64,
+    /// Stagger gauge of the current target (`05 E0` feed), None when it has none.
+    pub target_stagger: Option<Stagger>,
     /// Kind of the target hit most recently by anyone ("boss" / "train" / "pve" /
     /// "pvp", "" before the first hit) — what the engine is recording right now,
     /// whatever mode is being viewed.
@@ -28,6 +30,14 @@ pub struct DpsData {
     pub recording_name: String,
     /// Healing received per player since the last reset (any healer, any class).
     pub heals: Vec<HealTaken>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct Stagger {
+    pub cur: i32,
+    pub max: i32,
+    /// Gauge broken: the boss is groggy until the refill record (or ~5 s).
+    pub broken: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -54,6 +64,7 @@ impl DpsData {
             target_max_hp: 0,
             target_total_damage: 0,
             target_current_hp: -1,
+            target_stagger: None,
             recording_kind: String::new(),
             recording_name: String::new(),
             heals: Vec::new(),

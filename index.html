@@ -137,6 +137,11 @@
             <!-- PowerMeter: boss phase (design 8.2). Hidden until the engine reports targetPhase. -->
             <span class="pmOnly pmPhase" hidden></span>
           </span>
+          <!-- PowerMeter: boss stagger gauge (05 E0 feed); shown only when the target has one. -->
+          <div class="pmOnly pmStagger" hidden>
+            <div class="pmStaggerTrack"><div class="pmStaggerFill"></div></div>
+            <div class="pmStaggerHead"><span class="pmStaggerLabel">STAGGER</span><span class="pmStaggerPct"></span></div>
+          </div>
         </div>
         <div
           class="detailsPanel"

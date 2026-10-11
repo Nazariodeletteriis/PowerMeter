@@ -278,6 +278,7 @@ impl StreamProcessor {
         let parsed_hp = self.parse_hp_mp_update_packet(packet);
         self.parse_death_packet(packet);
         self.parse_zone_change_packet(packet);
+        self.parse_stagger_packet(packet);
 
         if !parsed_damage && !parsed_name && !parsed_summon && !parsed_ownership && !parsed_hp {
             self.parse_dot_packet(packet);
@@ -312,6 +313,43 @@ impl StreamProcessor {
             return;
         }
         self.data_storage.note_zone_change();
+    }
+
+    // ===== STAGGER (05 E0) =====
+
+    /// Boss stagger gauge, always a standalone packet (never in a bundle):
+    /// long  `<len> 05 E0 <id varint> 03 01 <u32 LE max> <u32 LE cur> <state>`
+    ///       (state 03 = gauge shown, 02 = dropping, 00 = refilled after a break);
+    /// short `<len> 05 E0 <id varint> 00 03 02` = gauge broken (groggy), sent twice.
+    fn parse_stagger_packet(&self, packet: &[u8]) -> bool {
+        let length_info = read_varint(packet, 0);
+        if length_info.length <= 0 {
+            return false;
+        }
+        let op = length_info.length as usize;
+        if packet.len() < op + 3 || packet[op] != 0x05 || packet[op + 1] != 0xE0 {
+            return false;
+        }
+        let id = read_varint(packet, op + 2);
+        if id.length <= 0 || !(100..=9_999_999).contains(&id.value) {
+            return false;
+        }
+        match &packet[op + 2 + id.length as usize..] {
+            [0x03, 0x01, rest @ ..] if rest.len() >= 9 => {
+                let max = parse_u32_le(rest, 0);
+                let cur = parse_u32_le(rest, 4);
+                if max == 0 || max > 1_000_000 || cur > max {
+                    return false;
+                }
+                self.data_storage.set_stagger(id.value, cur as i32, max as i32);
+                true
+            }
+            [0x00, _, ..] => {
+                self.data_storage.break_stagger(id.value);
+                true
+            }
+            _ => false,
+        }
     }
 
     // ===== DEATH PACKET (41 36) =====
@@ -575,6 +613,10 @@ impl StreamProcessor {
     /// record; it comes from the spawn packet or the observed peak (see
     /// `set_mob_current_hp`). The `02` discriminator keeps the player's own
     /// `01 01 01` record out of the mob HP store.
+    fn is_player_id(&self, id: i32) -> bool {
+        self.data_storage.local_player_id() == Some(id as i64) || self.data_storage.is_known_player(id)
+    }
+
     fn scan_for_entity_hp(&self, data: &[u8]) {
         let mut i = 0;
         while i + 1 < data.len() {
@@ -608,7 +650,9 @@ impl StreamProcessor {
                 let h = disc + 3;
                 let cur = u32::from_le_bytes([data[h], data[h + 1], data[h + 2], data[h + 3]]);
                 // Sanity bound: real HP is well under this; rejects misparses.
-                if cur <= 100_000_000 {
+                // Players also send `02 01 00` records, so known player ids
+                // (and the local player) are kept out of the mob HP store.
+                if cur <= 100_000_000 && !self.is_player_id(id_info.value) {
                     self.data_storage.set_mob_current_hp(id_info.value, cur as i32);
                 }
                 i = disc + 11;
@@ -2658,5 +2702,82 @@ mod moving_mob_tests {
         assert!(!storage.get_pvp_target_ids().contains(&MOB), "mob was reclassified as a PvP target");
         assert!(storage.get_nickname(MOB).is_none(), "mob took a name from its own position bytes");
         assert_eq!(storage.get_combat_snapshot_light()[&MOB].total_damage, 1500);
+    }
+}
+
+#[cfg(test)]
+mod stagger_tests {
+    use super::*;
+    use crate::entity::dps_data::Stagger;
+
+    fn hex(s: &str) -> Vec<u8> {
+        (0..s.len()).step_by(2).map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap()).collect()
+    }
+
+    fn processor() -> (Arc<DataStorage>, StreamProcessor) {
+        let storage = Arc::new(DataStorage::new());
+        let sp = StreamProcessor::new(storage.clone(), Arc::new(SkillLookup::new()), Arc::new(NpcLookup::new()));
+        (storage, sp)
+    }
+
+    /// Boss id `9E FF 02` = 49054 (three-byte varint).
+    const BOSS: i32 = 49054;
+
+    #[test]
+    fn long_and_short_stagger_records() {
+        let (storage, mut sp) = processor();
+        // Long form: max 40, cur 30, state 02.
+        sp.consume_stream(&hex("1405e09eff020301280000001e00000002"));
+        assert_eq!(storage.get_stagger(BOSS), Some(Stagger { cur: 30, max: 40, broken: false }));
+        // Short form: gauge broken.
+        sp.consume_stream(&hex("0c05e09eff02000302"));
+        assert_eq!(storage.get_stagger(BOSS), Some(Stagger { cur: 0, max: 40, broken: true }));
+        // A mob without stagger data has none.
+        assert_eq!(storage.get_stagger(BOSS + 1), None);
+    }
+
+    /// The real sequence from the 2026-10-11 log, packets in capture order:
+    /// 40/40 st03 -> 40/40 st02 -> 30 -> 10 -> 3 -> break (x2) -> 40/40 st00.
+    #[test]
+    fn replays_the_real_log_sequence() {
+        let (storage, mut sp) = processor();
+        let steps: [(&str, Stagger); 8] = [
+            ("1405e09eff020301280000002800000003", Stagger { cur: 40, max: 40, broken: false }),
+            ("1405e09eff020301280000002800000002", Stagger { cur: 40, max: 40, broken: false }),
+            ("1405e09eff020301280000001e00000002", Stagger { cur: 30, max: 40, broken: false }),
+            ("1405e09eff020301280000000a00000002", Stagger { cur: 10, max: 40, broken: false }),
+            ("1405e09eff020301280000000300000002", Stagger { cur: 3, max: 40, broken: false }),
+            ("0c05e09eff02000302", Stagger { cur: 0, max: 40, broken: true }),
+            ("0c05e09eff02000302", Stagger { cur: 0, max: 40, broken: true }),
+            ("1405e09eff020301280000002800000000", Stagger { cur: 40, max: 40, broken: false }),
+        ];
+        for (packet, want) in steps {
+            sp.consume_stream(&hex(packet));
+            assert_eq!(storage.get_stagger(BOSS), Some(want), "after {packet}");
+        }
+    }
+
+    #[test]
+    fn single_byte_id_and_garbage() {
+        let (storage, mut sp) = processor();
+        // id 0x64 = 100 as a one-byte varint; length 0x12 = 15 bytes + 3.
+        sp.consume_stream(&hex("1205e0640301280000001400000002"));
+        assert_eq!(storage.get_stagger(100), Some(Stagger { cur: 20, max: 40, broken: false }));
+        // cur > max is rejected.
+        sp.consume_stream(&hex("1205e0650301280000002900000002"));
+        assert_eq!(storage.get_stagger(101), None);
+    }
+
+    /// A known player's own `8D <id> 02 01 00 <hp>` record must not land in the
+    /// mob HP store; a mob's still does.
+    #[test]
+    fn player_hp_records_stay_out_of_the_mob_store() {
+        let (storage, sp) = processor();
+        storage.set_local_player_id(Some(1000));
+        let rec = |id: &str| hex(&format!("8d{id}020100e803000000000000"));
+        sp.scan_for_entity_hp(&rec("e807")); // 1000 = varint e8 07
+        sp.scan_for_entity_hp(&rec("8927")); // 5001 = varint 89 27
+        assert_eq!(storage.get_mob_current_hp(1000), None);
+        assert_eq!(storage.get_mob_current_hp(5001), Some(1000));
     }
 }

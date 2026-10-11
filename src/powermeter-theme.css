@@ -599,6 +599,39 @@ body.legacyUi .pmOnly {
   .bossHpBar.isPmKilled .pmHpKilled { display: block; }
   .bossHpText,
   .pmPhase { display: none; }
+  /* Stagger: a 4px gauge and "STAGGER | %" under the HP bar (10px below it,
+     as in the design's separate block). Broken = empty gauge, label in the fill colour. */
+  .pmStagger {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 5px;
+  }
+  .pmStagger[hidden],
+  .bossHpBar.isPmKilled .pmStagger { display: none; }
+  .pmStaggerTrack {
+    height: 4px;
+    border: 1px solid #574f4f;
+    border-radius: 3px;
+    overflow: hidden;
+    background: #0f0f0f;
+  }
+  .pmStaggerFill {
+    height: 100%;
+    border-radius: 3px;
+    background: #7fd8ff;
+  }
+  .pmStaggerHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #b0a8a8;
+  }
+  .pmStaggerPct { font-variant-numeric: tabular-nums; }
+  .pmStagger.isBroken .pmStaggerLabel { color: #7fd8ff; }
 
   /* --- Party table: heads, then one bordered row per player in the class
      colour, the bar filled to the player's share of the damage. --- */

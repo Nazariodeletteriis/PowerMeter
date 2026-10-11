@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.2
+
+- Nouveau : Barre STAGGER sous la barre de PV du boss dans le widget, avec la vraie valeur : elle baisse avec tes coups et montre quand le boss est brisé.
+- Corrigé : Le widget et ses Paramètres suivent la langue choisie (dans l'app installée ils restaient en anglais).
+- Corrigé : Réinitialisations quotidienne et hebdomadaire à 07:00 UTC, affichées dans ton heure locale.
+- Corrigé : Tes propres PV ne se mélangent plus avec ceux des monstres.
+
 ## 0.4.1
 
 - Modifié : Nouveau design du widget DPS Meter : boutons plus grands et plus faciles à cliquer, barre du boss et lignes des joueurs plus claires avec les icônes de classe.

@@ -100,7 +100,11 @@
     },
     "dpsChart": "DPSチャート",
     "historyBtn": "履歴",
-    "timeline": "タイムライン"
+    "timeline": "タイムライン",
+    "mode": {
+      "dmg": "ダメージ",
+      "heal": "回復"
+    }
   },
   "history": {
     "title": "戦闘履歴",
@@ -319,7 +323,8 @@
     "later": "後で更新",
     "text": "新しいアップデートがあります！\n\n現在のバージョン: {current}\n最新バージョン: {latest}",
     "installing": "アップデートをインストール中...",
-    "downloadError": "ダウンロードに失敗しました。もう一度試すか、手動でインストールしてください。"
+    "downloadError": "ダウンロードに失敗しました。もう一度試すか、手動でインストールしてください。",
+    "cancel": "キャンセル"
   },
   "connection": {
     "auto": "自動",

@@ -100,7 +100,11 @@
     },
     "dpsChart": "Gráfico de DPS",
     "historyBtn": "Historial",
-    "timeline": "Cronología"
+    "timeline": "Cronología",
+    "mode": {
+      "dmg": "DÑO",
+      "heal": "CURACIÓN"
+    }
   },
   "history": {
     "title": "Historial de combates",
@@ -319,7 +323,8 @@
     "later": "Actualizar más tarde",
     "text": "¡Hay una nueva actualización disponible!\n\nVersión actual: {current}\nÚltima versión: {latest}",
     "installing": "Instalando la actualización...",
-    "downloadError": "Error en la descarga. Inténtalo de nuevo o instala manualmente."
+    "downloadError": "Error en la descarga. Inténtalo de nuevo o instala manualmente.",
+    "cancel": "Cancelar"
   },
   "connection": {
     "auto": "Auto",

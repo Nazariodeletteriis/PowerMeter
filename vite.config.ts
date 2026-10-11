@@ -8,7 +8,22 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig(async () => ({
   // React is used only by the PowerMeter dashboard (src/dashboard). The meter
   // (index.html + public/src/js) stays plain scripts that Vite leaves alone.
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      // The meter fetches its UI strings at runtime from ./i18n/ui/<lang>.json.
+      // Vite only serves src/data in dev, so without this the built app fell
+      // back to the English text in index.html whatever the language.
+      name: "meter-ui-i18n",
+      async generateBundle() {
+        const { readdirSync, readFileSync } = await import("node:fs");
+        const dir = "src/data/i18n/ui";
+        for (const file of readdirSync(dir)) {
+          this.emitFile({ type: "asset", fileName: `i18n/ui/${file}`, source: readFileSync(`${dir}/${file}`) });
+        }
+      },
+    },
+  ],
   build: {
     rollupOptions: {
       input: { index: "index.html", dashboard: "dashboard.html" },

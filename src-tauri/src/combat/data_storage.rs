@@ -5,6 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use parking_lot::RwLock;
 
 use crate::entity::damage_packet::ParsedDamagePacket;
+use crate::entity::dps_data::Stagger;
 use crate::entity::job_class::JobClass;
 use crate::entity::special_damage::SpecialDamage;
 use crate::entity::summon_resolver;
@@ -18,6 +19,9 @@ const IDLE_RESET_MS: i64 = 30_000;
 const ZONE_RESET_LULL_MS: i64 = 1_500;
 /// Minimum spacing between two zone-change resets (debounce).
 const ZONE_RESET_DEBOUNCE_MS: i64 = 4_000;
+/// A broken stagger gauge (groggy) lasts ~5 s in game (debuff duration 5000 ms);
+/// the refill record normally closes it, this is the fallback if it is missed.
+const STAGGER_BREAK_MS: i64 = 5_000;
 
 fn now_ms() -> i64 {
     SystemTime::now()
@@ -219,6 +223,8 @@ struct Inner {
     mob_hp_data: HashMap<i32, i32>,
     /// Live CURRENT HP per entity, from the in-place `8D <id> 02 01 00 <u32>` feed.
     mob_current_hp: HashMap<i32, i32>,
+    /// Stagger gauge per entity: (cur, max, broken_until ms; 0 = not broken).
+    stagger: HashMap<i32, (i32, i32, i64)>,
     known_player_ids: HashSet<i32>,
     /// Ids whose nickname came from an authoritative source (a 45/44 36 player
     /// spawn or the account char-list). Lower-confidence parsers may not steal
@@ -284,6 +290,7 @@ impl DataStorage {
                 heal_storage: HashMap::new(),
                 mob_hp_data: HashMap::new(),
                 mob_current_hp: HashMap::new(),
+                stagger: HashMap::new(),
                 known_player_ids: HashSet::new(),
                 authoritative_name_ids: HashSet::new(),
                 confirmed_summon_ids: HashSet::new(),
@@ -843,6 +850,35 @@ impl DataStorage {
         self.inner.read().mob_current_hp.get(&id).copied()
     }
 
+    /// Stagger gauge reading (`05 E0` long record). Any reading ends a break:
+    /// the one after a break is the refill (state 00).
+    pub fn set_stagger(&self, id: i32, cur: i32, max: i32) {
+        self.inner.write().stagger.insert(id, (cur, max, 0));
+    }
+
+    /// Stagger gauge broken (`05 E0` short record): empty, groggy for ~5 s.
+    pub fn break_stagger(&self, id: i32) {
+        let mut inner = self.inner.write();
+        let g = inner.stagger.entry(id).or_insert((0, 0, 0));
+        g.0 = 0;
+        g.2 = now_ms() + STAGGER_BREAK_MS;
+    }
+
+    pub fn get_stagger(&self, id: i32) -> Option<Stagger> {
+        self.stagger_at(id, now_ms())
+    }
+
+    fn stagger_at(&self, id: i32, now: i64) -> Option<Stagger> {
+        let (cur, max, until) = *self.inner.read().stagger.get(&id)?;
+        if max <= 0 {
+            return None;
+        }
+        let broken = until > now;
+        // Missed refill record: the game refills the gauge when the groggy ends.
+        let cur = if until != 0 && !broken { max } else { cur };
+        Some(Stagger { cur, max, broken })
+    }
+
     /// Record a heal tick done by `actor_id` with `skill_code` (is_hot marks a HoT).
     /// Keyed by the healer so "healing done" can be shown per player. Self-heals count.
     pub fn append_heal(&self, actor_id: i32, target_id: i32, skill_code: i32, amount: i64, is_hot: bool) {
@@ -962,6 +998,7 @@ impl DataStorage {
         inner.dead_entity_ids.clear();
         inner.mob_hp_data.clear();
         inner.mob_current_hp.clear();
+        inner.stagger.clear();
         inner.heal_storage.clear();
         inner.heal_received.clear();
         inner.mob_hits.clear();
@@ -980,6 +1017,7 @@ impl DataStorage {
         inner.dead_entity_ids.clear();
         inner.mob_hp_data.clear();
         inner.mob_current_hp.clear();
+        inner.stagger.clear();
         inner.heal_storage.clear();
         inner.heal_received.clear();
         inner.mob_hits.clear();
@@ -1320,5 +1358,20 @@ mod pvp_tests {
         hit(&s, ME, FOE, 500);
         s.flush_combat_only();
         assert!(s.get_pvp_target_ids().is_empty());
+    }
+}
+
+#[cfg(test)]
+mod stagger_tests {
+    use super::*;
+
+    #[test]
+    fn missed_refill_closes_the_break_after_the_timeout() {
+        let s = DataStorage::new();
+        s.set_stagger(7, 3, 40);
+        s.break_stagger(7);
+        let now = now_ms();
+        assert_eq!(s.stagger_at(7, now), Some(Stagger { cur: 0, max: 40, broken: true }));
+        assert_eq!(s.stagger_at(7, now + STAGGER_BREAK_MS + 1), Some(Stagger { cur: 40, max: 40, broken: false }));
     }
 }
