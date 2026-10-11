@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.3
+
+- Nuevo: Cuando hay una actualización, al abrir la app aparece una ventana con los botones Actualizar ahora y Notas de la versión.
+
 ## 0.4.2
 
 - Nuevo: Barra STAGGER bajo la barra de vida del jefe en el widget, con el valor real: baja con tus golpes y muestra cuándo el jefe está roto.

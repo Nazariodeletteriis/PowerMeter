@@ -1880,6 +1880,7 @@ pub fn run() {
             gamedata::gamedata_builder,
             powermeter::install_npcap,
             powermeter::open_dashboard_window,
+            powermeter::take_update_prompt,
             powermeter::show_overlay,
             powermeter::hide_overlay,
             powermeter::set_click_through,

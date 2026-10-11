@@ -8,6 +8,7 @@
   "window.close": "Закрыть",
   "update.available": "Доступна версия PowerMeter {version}",
   "update.notes": "Заметки о выпуске",
+  "update.current": "Ваша версия",
   "onboarding.step": "Шаг {n} из {total}",
   "welcome.title": "Добро пожаловать в PowerMeter",
   "welcome.body": "Измеряй свой DPS в реальном времени, анализируй каждый бой и планируй сборку персонажа в Aion 2.",

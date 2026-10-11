@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.4.3
+
+- New: When an update is available, a window shows it as soon as you open the app, with Update now and Release notes buttons.
+
 ## 0.4.2
 
 - New: STAGGER bar under the boss HP bar in the widget, with the real gauge: it drops with your hits and shows when the boss is broken.

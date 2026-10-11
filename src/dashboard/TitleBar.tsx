@@ -23,7 +23,8 @@ export function TitleBar({ t, lang, onError }: { t: T; lang: string; onError: (e
   const [version, setVersion] = useState("");
   const [update, setUpdate] = useState<UpdateInfo>();
   const [banner, setBanner] = useState(true);
-  const [notes, setNotes] = useState(false);
+  // "prompt": opened by the app at launch; "notes": opened from the banner or the meter.
+  const [open, setOpen] = useState<"prompt" | "notes">();
   useEffect(() => {
     let current = "";
     // No release yet, offline or a bad manifest: no banner and no error.
@@ -32,7 +33,10 @@ export function TitleBar({ t, lang, onError }: { t: T; lang: string; onError: (e
       invoke<string>("fetch_url", { url: MANIFEST })
         .then((raw) => {
           const latest = JSON.parse(raw) as UpdateInfo;
-          if (newer(latest.version, current)) setUpdate(latest);
+          if (!newer(latest.version, current)) return;
+          setUpdate(latest);
+          // Once per launch (the flag lives in the Rust process, so reopening the dashboard doesn't repeat it).
+          invoke<boolean>("take_update_prompt").then((first) => first && setOpen((o) => o ?? "prompt"), () => {});
         })
         .catch(() => {});
     invoke<string>("get_app_version").then((v) => {
@@ -54,7 +58,7 @@ export function TitleBar({ t, lang, onError }: { t: T; lang: string; onError: (e
     const openFromMeter = () => {
       if (!localStorage.getItem(OPEN_UPDATE_KEY)) return;
       localStorage.removeItem(OPEN_UPDATE_KEY);
-      setNotes(true);
+      setOpen("notes");
     };
     openFromMeter();
     window.addEventListener("storage", openFromMeter);
@@ -91,7 +95,7 @@ export function TitleBar({ t, lang, onError }: { t: T; lang: string; onError: (e
         <div className="updateBanner" role="status">
           <ArrowCircleUpIcon aria-hidden="true" />
           <b>{t("update.available", { version: update.version })}</b>
-          <button type="button" className="linkBtn" onClick={() => setNotes(true)}>
+          <button type="button" className="linkBtn" onClick={() => setOpen("notes")}>
             {t("update.notes")}
           </button>
           <button type="button" className="close" title={t("window.close")} aria-label={t("window.close")} onClick={() => setBanner(false)}>
@@ -99,7 +103,16 @@ export function TitleBar({ t, lang, onError }: { t: T; lang: string; onError: (e
           </button>
         </div>
       )}
-      {update && notes && <UpdateModal t={t} lang={lang} update={update} onClose={() => setNotes(false)} />}
+      {update && open && (
+        <UpdateModal
+          key={open}
+          t={t}
+          lang={lang}
+          update={update}
+          current={open === "prompt" ? version : undefined}
+          onClose={() => setOpen(undefined)}
+        />
+      )}
     </>
   );
 }

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.3
+
+- 新增：有更新時，開啟應用程式即會彈出視窗，提供「立即更新」和「更新說明」按鈕。
+
 ## 0.4.2
 
 - 新增：小視窗首領血條下方新增 STAGGER 條，顯示真實數值：隨你的攻擊下降，並顯示首領何時被破防。

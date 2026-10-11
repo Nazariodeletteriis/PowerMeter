@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.3
+
+- Nouveau : Quand une mise à jour est disponible, une fenêtre s'affiche dès l'ouverture de l'app avec les boutons Mettre à jour et Notes de version.
+
 ## 0.4.2
 
 - Nouveau : Barre STAGGER sous la barre de PV du boss dans le widget, avec la vraie valeur : elle baisse avec tes coups et montre quand le boss est brisé.

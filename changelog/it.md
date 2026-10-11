@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.3
+
+- Nuovo: Quando c'è un aggiornamento, appena apri l'app compare una finestra con i pulsanti Aggiorna ora e Note di rilascio.
+
 ## 0.4.2
 
 - Nuovo: Barra STAGGER sotto la barra HP del boss nel widget, con il valore vero: scende con i tuoi colpi e mostra quando il boss è rotto.

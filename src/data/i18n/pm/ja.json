@@ -8,6 +8,7 @@
   "window.close": "閉じる",
   "update.available": "PowerMeter {version} が利用可能です",
   "update.notes": "リリースノート",
+  "update.current": "現在のバージョン",
   "onboarding.step": "ステップ {n}/{total}",
   "welcome.title": "PowerMeterへようこそ",
   "welcome.body": "Aion 2でDPSをリアルタイムに計測し、すべての戦闘を分析し、キャラクターのビルドを計画できます。",

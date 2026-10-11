@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.3
+
+- 신규: 업데이트가 있으면 앱을 열 때 '지금 업데이트'와 '릴리스 노트' 버튼이 있는 창이 나타납니다.
+
 ## 0.4.2
 
 - 신규: 위젯의 보스 HP 바 아래에 STAGGER 바 추가. 실제 수치로 공격에 따라 줄어들고 보스가 무력화되면 표시.

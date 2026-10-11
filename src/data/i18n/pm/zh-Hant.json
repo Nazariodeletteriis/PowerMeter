@@ -8,6 +8,7 @@
   "window.close": "關閉",
   "update.available": "PowerMeter {version} 現已可用",
   "update.notes": "更新日誌",
+  "update.current": "目前版本",
   "onboarding.step": "第 {n} 步（共 {total} 步）",
   "welcome.title": "歡迎使用 PowerMeter",
   "welcome.body": "即時測量你的 DPS，分析每場戰鬥，並規劃你在《Aion 2》中角色的配裝。",

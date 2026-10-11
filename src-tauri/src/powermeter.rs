@@ -317,6 +317,15 @@ fn show_dashboard(app: &tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+/// True only for the first caller in this process: the dashboard's update
+/// popup shows once per launch, even if the dashboard window is reopened.
+static UPDATE_PROMPTED: AtomicBool = AtomicBool::new(false);
+
+#[tauri::command]
+pub fn take_update_prompt() -> bool {
+    !UPDATE_PROMPTED.swap(true, Ordering::SeqCst)
+}
+
 /// The dashboard is the main window: it opens on every launch next to the meter
 /// and shows onboarding itself until `pm.onboarded` is set. Spawned rather than
 /// called inline, keeping window creation off the setup path.

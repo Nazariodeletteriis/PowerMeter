@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { animate, cubicBezier, stagger } from "animejs";
-import { ArrowsClockwiseIcon, DownloadSimpleIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, ArrowsClockwiseIcon, DownloadSimpleIcon, WarningCircleIcon, XIcon } from "@phosphor-icons/react";
 import type { T } from "../../i18n";
 import { Modal } from "./Modal";
 import "./system.css";
@@ -26,7 +26,7 @@ const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 const PROGRESS_MS = 420; // each progress event retargets the bar and counter over this
 const PHASE_MS = 240;
 
-type Phase = "notes" | "download" | "install" | "error";
+type Phase = "prompt" | "notes" | "download" | "install" | "error";
 
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -117,6 +117,8 @@ function UpdateGlyph({ phase }: { phase: "download" | "install" }) {
 
 /**
  * Prototype md.update, opened from the update banner's "Note di rilascio".
+ * With `current` it opens on its own at launch as the "prompt" view instead
+ * (installed → new version, Update / Release notes), which leads to the notes.
  * "Aggiorna ora" switches the modal in place to download → install (or error):
  * install_update streams `download-progress` (0-100, only when the size is
  * known), starts msiexec and the app exits by itself.
@@ -125,14 +127,17 @@ export function UpdateModal({
   t,
   lang,
   update,
+  current,
   onClose,
 }: {
   t: T;
   lang: string;
   update: UpdateInfo;
+  /** Installed version: set when the app opened the modal by itself at launch. */
+  current?: string;
   onClose: () => void;
 }) {
-  const [phase, setPhase] = useState<Phase>("notes");
+  const [phase, setPhase] = useState<Phase>(current ? "prompt" : "notes");
   const notes = update.notesI18n?.[lang] ?? update.notes;
   const [pct, setPct] = useState<number | null>(null); // null: no progress events (yet)
   const [error, setError] = useState("");
@@ -167,7 +172,7 @@ export function UpdateModal({
   // Phase change: the new content rises in (opacity only when motion is reduced).
   // Layout effect so the first frame isn't painted before the tween hides it.
   useLayoutEffect(() => {
-    if (phase === "notes" || !panel.current) return;
+    if (phase === "notes" || phase === "prompt" || !panel.current) return;
     const reduce = reducedMotion();
     const a = animate(panel.current.children, {
       opacity: [0, 1],
@@ -214,23 +219,57 @@ export function UpdateModal({
       }),
     update.sizeMb && `${mb(update.sizeMb)} MB`,
   ].filter(Boolean);
+  const v = (s: string) => (/^v/i.test(s) ? s : `v${s}`);
 
   return (
     <Modal
       width={520}
+      enter={!!current}
       // Nothing to go back to while the installer is being fetched or started.
       onClose={busy ? () => {} : onClose}
       title={(id) => (
-        <div className="updHeader">
-          {phase === "notes" && <span className="updBadge">{t("organizer.update.badge")}</span>}
-          <h2 id={id} style={{ fontSize: 17, fontWeight: 500 }}>
-            PowerMeter {update.version}
-          </h2>
-          {phase === "notes" && meta.length > 0 && <div className="updMeta">{meta.join(" · ")}</div>}
+        <div className="updTitle">
+          <div className="updHeader">
+            {phase === "notes" && <span className="updBadge">{t("organizer.update.badge")}</span>}
+            <h2 id={id} style={{ fontSize: 17, fontWeight: 500 }}>
+              {phase === "prompt" ? t("update.available", { version: update.version }) : `PowerMeter ${update.version}`}
+            </h2>
+            {(phase === "notes" || phase === "prompt") && meta.length > 0 && <div className="updMeta">{meta.join(" · ")}</div>}
+          </div>
+          {!busy && (
+            <button type="button" className="updClose" title={t("window.close")} aria-label={t("window.close")} onClick={onClose}>
+              <XIcon aria-hidden="true" />
+            </button>
+          )}
         </div>
       )}
     >
-      {phase === "notes" ? (
+      {phase === "prompt" && current ? (
+        <>
+          <div className="updVersions">
+            <div>
+              <span>{t("update.current")}</span>
+              <b className="mono">{v(current)}</b>
+            </div>
+            <ArrowRightIcon aria-hidden="true" />
+            <div>
+              <span>{t("organizer.update.badge")}</span>
+              <b className="mono">{v(update.version)}</b>
+            </div>
+          </div>
+          <div className="updFoot updPromptFoot">
+            <button type="button" className="btn" onClick={onClose}>
+              {t("organizer.update.later")}
+            </button>
+            <button type="button" className="btn" autoFocus onClick={() => setPhase("notes")}>
+              {t("update.notes")}
+            </button>
+            <button type="button" className="btn fill" onClick={install}>
+              {t("organizer.update.now")}
+            </button>
+          </div>
+        </>
+      ) : phase === "notes" ? (
         <>
           {notes && notes.length > 0 && (
             // Focusable so the notes can be scrolled from the keyboard.

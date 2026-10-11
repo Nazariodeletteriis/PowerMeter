@@ -380,6 +380,100 @@
   border-top: 1px solid var(--pm-line);
 }
 
+/* Update modal title row: header on the left, close button on the right. */
+.updTitle {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.updClose {
+  width: 32px;
+  height: 32px;
+  margin: -6px -6px 0 0;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--pm-t3);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 150ms ease-out, color 150ms ease-out;
+}
+.updClose:hover {
+  background: var(--pm-s2);
+  color: var(--pm-t1);
+}
+.updClose:focus-visible {
+  outline: 2px solid var(--pm-red);
+  outline-offset: 2px;
+}
+
+/* Launch prompt: installed → new version, then the three actions (44px targets). */
+.updVersions {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: var(--pm-s2);
+}
+.updVersions > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.updVersions > div:last-child {
+  align-items: flex-end;
+}
+.updVersions span {
+  font-size: 12px;
+  color: var(--pm-t3);
+}
+.updVersions b {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--pm-t2);
+}
+.updVersions > div:last-child b {
+  color: var(--pm-redt);
+}
+.updVersions > svg {
+  font-size: 18px;
+  color: var(--pm-t3);
+}
+.updPromptFoot .btn {
+  height: 44px;
+  padding: 0 18px;
+}
+.updPromptFoot .btn:first-child {
+  margin-right: auto;
+}
+
+/* The launch prompt is the one modal the app opens by itself: it rises in so
+   the change of context reads. Strong ease-out, under 250ms; fade only when
+   motion is reduced. */
+.overlay.enter {
+  animation: pmfade 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.overlay.enter > .modal {
+  animation: pmModalIn 240ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes pmModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .overlay.enter > .modal {
+    animation-name: pmfade;
+  }
+}
+
 /* Update modal: download / install / error views (motion in Update.tsx via anime.js). */
 .updPanel {
   display: flex;

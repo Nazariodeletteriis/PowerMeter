@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.3
+
+- Neu: Wenn ein Update verfügbar ist, erscheint beim Öffnen der App ein Fenster mit den Schaltflächen Jetzt aktualisieren und Versionshinweise.
+
 ## 0.4.2
 
 - Neu: STAGGER-Leiste unter der HP-Leiste des Bosses im Widget, mit dem echten Wert: sie sinkt mit deinen Treffern und zeigt, wann der Boss gebrochen ist.

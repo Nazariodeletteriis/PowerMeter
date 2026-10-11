@@ -8,6 +8,7 @@
   "window.close": "Schließen",
   "update.available": "PowerMeter {version} ist verfügbar",
   "update.notes": "Versionshinweise",
+  "update.current": "Deine Version",
   "onboarding.step": "Schritt {n} von {total}",
   "welcome.title": "Willkommen bei PowerMeter",
   "welcome.body": "Miss deinen DPS in Echtzeit, analysiere jeden Kampf und plane den Build deines Charakters in Aion 2.",
