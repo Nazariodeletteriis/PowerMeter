@@ -5,6 +5,7 @@ import type { BuilderData, Category, CategoryCount, Dungeon, DungeonBoss, GameRe
 import type { T } from "../../i18n";
 import { EmptyState } from "../../ui";
 import type { PageProps } from "../types";
+import type { TwGearRow } from "../characters/calc";
 import "./world.css";
 
 // Game data archive (src-tauri/src/gamedata.rs): shared pieces of the Database pages.
@@ -20,6 +21,7 @@ export const gd = {
   drops: (monsterId: string) => invoke<MonsterDrop[]>("gamedata_monster_drops", { monsterId }),
   dungeons: () => invoke<{ dungeons: Dungeon[]; bosses: DungeonBoss[] }>("gamedata_dungeons"),
   gear: () => invoke<GearPiece[]>("gamedata_gear"),
+  twGear: (ids: string[]) => invoke<TwGearRow[]>("gamedata_tw_gear", { ids }),
   planner: (cls: string) => invoke<Planner>("gamedata_planner", { class: cls }),
   builder: (cls: string) => invoke<BuilderData>("gamedata_builder", { class: cls }),
   sync: () => invoke("gamedata_sync"),

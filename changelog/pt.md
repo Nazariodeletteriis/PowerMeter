@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.5
+
+- Novo: Builder: o teu equipamento atual vem do jogo (lido ao entrar e a cada troca), com atributos e níveis de aprimoramento.
+- Novo: O widget avisa 10 minutos antes de um evento (fenda, chefes do mundo, Festival Shugo, resets) com contagem regressiva.
+- Corrigido: Relatório: só jogadores reais, com os nomes como nos registos; sem linhas cinzentas com números.
+- Corrigido: Uma personagem já na tua lista é reconhecida mesmo com o nome escrito de forma ligeiramente diferente: já não pede para a criar de novo.
+- Corrigido: Itens: o escudo aparece como mão secundária para todas as classes.
+
 ## 0.4.4
 
 - Novo: O medidor muda de modo sozinho: BOSS num chefe, PVP contra jogadores, PVE para todo o resto.

@@ -447,6 +447,8 @@
       "sample": "サンプル",
       "bosses": "ボス{n}体"
     },
-    "resetTip": "メーターをリセット (Ctrl+Alt+R)"
+    "resetTip": "メーターをリセット (Ctrl+Alt+R)",
+    "eventSoon": "{name}まで {time}",
+    "eventDismiss": "通知を閉じる"
   }
 }

@@ -24,16 +24,18 @@ import { classSkills, planClass, SkillIcon } from "../skills";
 import { art, ClassAvatar, CLASSES, FactionTag } from "../ui";
 import { activeId, readCharacters } from "../characters";
 import type { BuilderData, EnhancementGroup, EnhancementValue, GearPiece, PlannerBoardData } from "../../data/db/types";
-import { boardMax, buildStats, estimates, planTotals, plannerNodes, PLAN_KEY, readPlans, savedNodes, statValue, type Equipped } from "./characters/calc";
+import { boardMax, buildStats, estimates, GAME_SLOTS, planTotals, plannerNodes, PLAN_KEY, readPlans, savedNodes, statValue, twPiece, type Equipped } from "./characters/calc";
 import {
   BUILD_DATA_KEY,
   BUILD_TAGS,
+  CAPTURED_GEAR_KEY,
   closeBuild,
   DANGER,
   DeleteBuildModal,
   MY_BUILDS_KEY,
   OWN_BUILD,
   readBuildData,
+  readCapturedGear,
   readMyBuilds,
   SectionHead,
   useMem,
@@ -60,12 +62,15 @@ const WEAPONS = ["Sword", "Dagger", "Mace", "Greatsword", "Staff", "Bow", "Magic
 const SLOT_GROUPS: [group: string, slots: [id: string, accepts: string[]][]][] = [
   ["weapons", [["weapon", WEAPONS], ["offhand", ["Guarder", "Sword", "Dagger"]]]],
   ["armors", ["Helmet", "Shoulder", "Torso", "Pants", "Gloves", "Boots", "Belt", "Cape"].map((s) => [s, [s]])],
-  ["accessories", [["Necklace", ["Necklace"]], ["Earring 1", ["Earring"]], ["Earring 2", ["Earring"]], ["Ring 1", ["Ring"]], ["Ring 2", ["Ring"]], ["Bracelet", ["Bracelet"]], ["Amulet", ["Amulet"]], ["Rune", ["Rune"]]]],
+  ["accessories", [["Necklace", ["Necklace"]], ["Earring 1", ["Earring"]], ["Earring 2", ["Earring"]], ["Ring 1", ["Ring"]], ["Ring 2", ["Ring"]], ["Bracelet", ["Bracelet"]], ["Bracelet 2", ["Bracelet"]], ["Amulet", ["Amulet"]], ["Rune", ["Rune"]], ["Rune 2", ["Rune"]]]],
   ["arcana", ["ArcanaBell", "ArcanaCompass", "ArcanaGrail", "ArcanaMirror", "ArcanaParchment"].map((s) => [s, [s]])],
 ];
 const SLOTS = SLOT_GROUPS.flatMap(([, list]) => list);
 /** The level the builder starts at when the build has none saved. */
 const DEFAULT_LEVEL = 45;
+
+/** Game item ids (numeric, from the packets) are Taiwan data; the Builder's own pieces have string codes. */
+const isGameId = (id: string) => /^\d+$/.test(id);
 
 /** Published enhancement bonuses of an item (first group; never extrapolated past max_published_level). */
 async function enhancementOf(id: string): Promise<EnhancementValue[]> {
@@ -106,9 +111,17 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   // Level and gear sets of this build: saved in pm.buildData, edited here until Save (one build at a time).
   const allData = readBuildData(settings[BUILD_DATA_KEY]);
   const saved = allData[src.t] ?? {};
-  const charLevel = chars.find((c) => c.id === (src.char ?? activeId(settings, chars)))?.level;
+  const char = chars.find((c) => c.id === (src.char ?? activeId(settings, chars)));
+  // Your builds of the character's class wear what the game shows it wearing (CaptureSync), at the enhancement
+  // level picked here for the same item; slots the game does not send (Arcana) keep what was picked.
+  const captured = src.own && char?.cls === src.cls ? readCapturedGear(settings[CAPTURED_GEAR_KEY])[char.id] : undefined;
+  const wornGear = (g: GearSet = {}): GearSet => {
+    if (!captured) return g;
+    const kept = Object.entries(g).filter(([s]) => !Object.values(GAME_SLOTS).includes(s));
+    return Object.fromEntries([...kept, ...Object.entries(captured).map(([s, id]) => [s, { id, enh: g[s]?.id === id ? g[s].enh : 0 }])]);
+  };
   const [edit, setEdit] = useMem<{ t: string; lvl: number; gear: GearSet; want?: GearSet } | null>("bEdit", null);
-  const cur = edit?.t === src.t ? edit : { t: src.t, lvl: saved.lvl ?? charLevel ?? DEFAULT_LEVEL, gear: saved.gear ?? {}, want: saved.want };
+  const cur = edit?.t === src.t ? edit : { t: src.t, lvl: saved.lvl ?? char?.level ?? DEFAULT_LEVEL, gear: wornGear(saved.gear), want: saved.want };
   const update = (p: Partial<typeof cur>) => setEdit({ ...cur, ...p });
   const storeData = (title: string, from?: string) => {
     const next = { ...allData, [title]: { lvl: cur.lvl, gear: cur.gear, want: cur.want } };
@@ -129,13 +142,19 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const calcData = useGd(() => gd.builder(clsKey), clsKey);
   const planner = useGd(() => gd.planner(clsKey), clsKey);
   const ids = [...new Set([...Object.values(cur.gear), ...Object.values(want)].map((g) => g.id))].sort();
-  const enh = useGd(() => Promise.all(ids.map(enhancementOf)).then((l) => Object.fromEntries(ids.map((id, i) => [id, l[i]]))), ids.join("|"));
-  const byId = useMemo(() => new Map((pieces.data ?? []).map((p) => [p.id, p])), [pieces.data]);
+  const gameIds = ids.filter(isGameId);
+  const tw = useGd(() => (gameIds.length ? gd.twGear(gameIds) : Promise.resolve([])).then((rows) => rows.map(twPiece)), gameIds.join("|"));
+  const enh = useGd(
+    () => Promise.all(ids.map((id) => (isGameId(id) ? [] : enhancementOf(id)))).then((l) => Object.fromEntries(ids.map((id, i) => [id, l[i]]))),
+    ids.join("|"),
+  );
+  const levelsOf = (id: string) => (isGameId(id) ? tw.data?.find((x) => x.piece.id === id)?.levels : enh.data?.[id]);
+  const byId = useMemo(() => new Map([...(pieces.data ?? []), ...(tw.data ?? []).map((x) => x.piece)].map((p) => [p.id, p])), [pieces.data, tw.data]);
   const equippedOf = (gear: GearSet): (Equipped & { slot: string })[] =>
     Object.entries(gear).flatMap(([s, g]) => {
       const piece = byId.get(g.id);
       if (!piece) return [];
-      const bonus = (enh.data?.[g.id] ?? []).filter((v) => v.level === g.enh).map((v) => [v.stat_key, statValue(v.value_raw!, v.percent === 1)] as [string, number]);
+      const bonus = (levelsOf(g.id) ?? []).filter((v) => v.level === g.enh).map((v) => [v.stat_key, statValue(v.value_raw!, v.percent === 1)] as [string, number]);
       return [{ slot: s, piece, enh: g.enh, bonus }];
     });
   const worn = equippedOf(cur.gear);
@@ -455,7 +474,7 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
                 slot={slot}
                 pieces={pieces.data ?? []}
                 equipped={equipped.find((x) => x.slot === slot)}
-                levels={shown[slot] ? enh.data?.[shown[slot].id] : undefined}
+                levels={shown[slot] ? levelsOf(shown[slot].id) : undefined}
                 wornNote={
                   which === "want" && differs(slot)
                     ? t("characters.builder.set.wornIs", { item: wornHere ? `${wornHere.piece.name ?? wornHere.piece.id}${wornHere.enh ? ` +${wornHere.enh}` : ""}` : t("planner.builder.empty") })
@@ -632,9 +651,11 @@ function EquipPanel({
             <button type="button" className="chIconBtn" style={{ height: 44, width: 40 }} title={t("planner.builder.remove")} aria-label={t("planner.builder.remove")} onClick={() => set(null)}>
               <XIcon aria-hidden="true" />
             </button>
-            <button type="button" className="chIconBtn" style={{ height: 44, width: 40 }} title={t("planner.builder.openDb")} aria-label={t("planner.builder.openDb")} onClick={() => openItem(p.id)}>
-              <DatabaseIcon aria-hidden="true" />
-            </button>
+            {!isGameId(p.id) && (
+              <button type="button" className="chIconBtn" style={{ height: 44, width: 40 }} title={t("planner.builder.openDb")} aria-label={t("planner.builder.openDb")} onClick={() => openItem(p.id)}>
+                <DatabaseIcon aria-hidden="true" />
+              </button>
+            )}
           </div>
         ) : (
           <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{t("planner.builder.empty")}</div>

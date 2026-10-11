@@ -445,6 +445,29 @@ pub fn gamedata_gear(state: tauri::State<'_, AppState>) -> Result<Vec<Value>, St
     )
 }
 
+/// Equipment the game shows by numeric item id (what the packets carry), from the Taiwan item data: name, slot,
+/// grade, level, fixed stats as written (`key`, label, value text) and the enhancement bonus of each level.
+#[tauri::command]
+pub fn gamedata_tw_gear(state: tauri::State<'_, AppState>, ids: Vec<String>) -> Result<Vec<Value>, String> {
+    let ids: Vec<String> = ids.into_iter().take(64).collect();
+    if ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    let marks = vec!["?"; ids.len()].join(",");
+    let params: Vec<&dyn ToSql> = ids.iter().map(|i| i as &dyn ToSql).collect();
+    state.gamedata.query(
+        &format!(
+            "SELECT m.item_id AS id, m.name, m.item_type AS slot, m.grade, m.item_level AS level,
+                    (SELECT json_group_array(json_array(s.\"key\", s.label, s.value))
+                       FROM (SELECT * FROM tw_item_stats WHERE category = 'item' AND id = m.item_id ORDER BY stat_index) s) AS stats_json,
+                    (SELECT json_group_array(json_array(e.level, json(e.stats_json), json(e.additional_stats_json)))
+                       FROM (SELECT * FROM tw_item_enchantments WHERE item_id = m.item_id ORDER BY level) e) AS enh_json
+             FROM tw_items_metadata m WHERE m.item_id IN ({marks})"
+        ),
+        &params,
+    )
+}
+
 /// Path of the CDN folder on the server (the manifest's `cdn` field).
 const CDN_PATH: &str = "/cdn/";
 

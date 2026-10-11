@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.5
+
+- Nuevo: Builder: tu equipo actual llega del juego (leído al entrar y en cada cambio), con estadísticas y niveles de mejora.
+- Nuevo: El widget avisa 10 minutos antes de un evento (grieta, jefes del mundo, Festival Shugo, reinicios) con cuenta atrás.
+- Corregido: Informe: solo jugadores reales, con los nombres como en los registros; sin filas grises con números.
+- Corregido: Un personaje que ya está en tu lista se reconoce aunque su nombre se escribiera algo distinto: ya no pide crearlo otra vez.
+- Corregido: Objetos: el escudo aparece como mano secundaria para todas las clases.
+
 ## 0.4.4
 
 - Nuevo: El medidor cambia de modo solo: BOSS en un jefe, PVP contra jugadores, PVE para todo lo demás.

@@ -13,6 +13,13 @@
 //!   container 0x0B = worn (slot as in `8D E2`), 0x01 = bag.
 //!   e.g. `01 01 01 | 4da51b00003f0000 | 1802880c | 01000000 00000000 | 0b 06` = pants 210240024 worn in slot 6.
 //!   Item ids are NCSoft's numeric item ids (210240024), not the archive's string codes.
+//! `11 56` the whole inventory, sent once on entering the world (packets_20261011_144836, Gladiator
+//!   with 20 worn pieces). Records vary in length; a worn one ends like the `1B 56` body:
+//!   `<item uid u64> <item id u32> 01000000 00000000 0B <slot u8>`
+//!   e.g. `056c1900004b0000 83739006 01000000 00000000 0b 01` = Enraged Kromede Claymore (110130051), weapon.
+//!   Slots: 1 weapon, 2 off-hand, 3 helmet, 4 pauldrons, 5 top, 6 pants, 7 gloves, 8 boots, 0x0A necklace,
+//!   0x0B-0x0C earrings, 0x0D-0x0E rings, 0x0F-0x10 bracelets, 0x11 belt, 0x13 cape, 0x16 amulet,
+//!   0x17-0x18 runes; 0x29-0x2D hold 810xxxxxx ids missing from the item data.
 //! `93 E2` skill bar, the whole bar, sent again on every change:
 //!   `01 <count u8> { <kind u8> 01 <slot u8> [kind 3: <skill id u32>] 04 <4 × u32> } × count`
 //!   kind 3 = the slot holds a skill, 2 = empty; slots 0-7 and 20-23.
@@ -91,6 +98,7 @@ pub fn parse(packet: &[u8]) {
     match (packet[op], packet[op + 1]) {
         (0x8D, 0xE2) => parse_worn(body),
         (0x1B, 0x56) => parse_item(body),
+        (0x11, 0x56) => parse_inventory(body),
         (0x93, 0xE2) => parse_skillbar(body),
         _ => {}
     }
@@ -115,6 +123,25 @@ fn parse_worn(b: &[u8]) {
 fn parse_item(b: &[u8]) {
     if let (Some(uid), Some(item)) = (u64_at(b, 3), u32_at(b, 11)) {
         STATE.lock().unwrap_or_else(|e| e.into_inner()).items.insert(uid, item);
+    }
+}
+
+fn parse_inventory(b: &[u8]) {
+    const WORN_TAIL: [u8; 9] = [1, 0, 0, 0, 0, 0, 0, 0, 0x0B];
+    let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
+    let mut worn = Vec::new();
+    for p in 12..b.len().saturating_sub(WORN_TAIL.len()) {
+        if b[p..p + WORN_TAIL.len()] != WORN_TAIL {
+            continue;
+        }
+        if let (Some(uid), Some(item), Some(&slot)) = (u64_at(b, p - 12), u32_at(b, p - 4), b.get(p + WORN_TAIL.len())) {
+            s.items.insert(uid, item);
+            worn.push((slot, uid));
+        }
+    }
+    // A later page with only bag items must not wipe the worn list.
+    if !worn.is_empty() {
+        s.worn = worn;
     }
 }
 
@@ -174,6 +201,13 @@ mod tests {
         assert_eq!(
             bar,
             vec![(0, 17010000), (1, 17370000), (2, 17100000), (3, 17440000), (4, 17410000), (6, 17060000), (7, 17090000), (23, 17400000)]
+        );
+
+        // packets_20261011_144836, 14:50:19.263: login inventory, two worn records (claymore, cape).
+        parse(&hex("975811561002ac01000000000001056c1900004b00008373900601000000000000000b0100000000015d00050000f70000457c8f0c01000000000000000b13"));
+        assert_eq!(
+            snapshot().equipment,
+            vec![WornItem { slot: 1, item_id: 110130051 }, WornItem { slot: 0x13, item_id: 210730053 }]
         );
     }
 }

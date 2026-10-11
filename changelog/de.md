@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.5
+
+- Neu: Builder: Deine aktuelle Ausrüstung kommt aus dem Spiel (beim Login und bei jedem Wechsel gelesen), mit Werten und Verstärkungsstufen.
+- Neu: Das Widget warnt 10 Minuten vor einem Event (Riss, Weltbosse, Shugo-Festival, Resets) mit Countdown.
+- Behoben: Bericht: nur echte Spieler, benannt wie in den Logs; keine grauen Zeilen mit Nummern mehr.
+- Behoben: Ein Charakter in deiner Liste wird auch erkannt, wenn sein Name leicht anders geschrieben wurde: keine Aufforderung mehr, ihn neu anzulegen.
+- Behoben: Gegenstände: Der Schild erscheint für jede Klasse als Nebenhand.
+
 ## 0.4.4
 
 - Neu: Der Meter wechselt den Modus selbst: BOSS beim Boss, PVP gegen Spieler, PVE für alles andere.

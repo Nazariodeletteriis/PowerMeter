@@ -4,6 +4,14 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.4.5
+
+- New: Builder: your current gear comes from the game (read at login and on every change), with item stats and enhancement levels.
+- New: The widget warns 10 minutes before an event (rift, world bosses, Shugo Festival, resets) with a countdown.
+- Fixed: Report: only real players, named as in the logs; no more grey rows with numbers.
+- Fixed: A character already in your list is recognised even if its name was typed slightly differently: no prompt to create it again.
+- Fixed: Items: the shield shows as off-hand for every class.
+
 ## 0.4.4
 
 - New: The meter switches mode by itself: BOSS at a boss, PVP against players, PVE for everything else.

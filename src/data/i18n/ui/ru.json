@@ -447,6 +447,8 @@
       "sample": "Выборка",
       "bosses": "боссов: {n}"
     },
-    "resetTip": "Сбросить счётчик (Ctrl+Alt+R)"
+    "resetTip": "Сбросить счётчик (Ctrl+Alt+R)",
+    "eventSoon": "{name} через {time}",
+    "eventDismiss": "Закрыть уведомление"
   }
 }

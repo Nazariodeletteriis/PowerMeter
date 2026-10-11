@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.5
+
+- Nouveau : Builder : ton équipement actuel vient du jeu (lu à la connexion et à chaque changement), avec les stats et les niveaux d’amélioration.
+- Nouveau : Le widget prévient 10 minutes avant un événement (faille, boss du monde, Festival Shugo, réinitialisations) avec un compte à rebours.
+- Corrigé : Rapport : seulement les vrais joueurs, nommés comme dans les logs ; plus de lignes grises avec des numéros.
+- Corrigé : Un personnage déjà dans ta liste est reconnu même si son nom a été saisi un peu différemment : plus de demande pour le recréer.
+- Corrigé : Objets : le bouclier apparaît en main secondaire pour toutes les classes.
+
 ## 0.4.4
 
 - Nouveau : Le compteur change de mode tout seul : BOSS sur un boss, PVP contre des joueurs, PVE pour le reste.

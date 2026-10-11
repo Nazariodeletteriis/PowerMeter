@@ -53,12 +53,11 @@ const GRADES = ["Common", "Rare", "Legend", "Unique", "Special", "Epic"]; // low
 const TRADES: Record<string, string[]> = { tradable: ["Exchangeable"], bound: ["NonExchangeable", "SoulBind", "SoulBind_Acquire"] };
 // item.race: Light = Elyos, Dark = Asmodian; "All"/"None" items fit either.
 const FACTIONS: Record<string, string> = { elyos: "Light", asmodian: "Dark" };
-// Weapon slot -> class, as in each class's skills in the archive (skill.weapon): one weapon per class.
-// The shield goes with the Templar's sword; gauntlets are the Brawler's (not out yet). Non-weapons fit every class.
+// Main weapon slot -> class, as in each class's skills in the archive (skill.weapon): one weapon per class.
+// The shield (Guarder) is everyone's secondary, so like non-weapons it fits every class. Gauntlets: Brawler (not out yet).
 const WEAPON_CLASS: Record<string, string> = {
   Greatsword: "Gladiator",
   Sword: "Templar",
-  Guarder: "Templar",
   Dagger: "Assassin",
   Bow: "Ranger",
   Magicbook: "Sorcerer",

@@ -405,6 +405,42 @@ body.legacyUi .pmOnly {
   .pmUpdateStrip .pmUpdateNotes { margin-left: auto; color: var(--pm-redt); text-decoration: underline; text-underline-offset: 2px; }
   .pmUpdateStrip:hover { background: color-mix(in srgb, var(--pm-red) 22%, transparent); }
   .pmUpdateStrip:focus-visible { outline: 2px solid var(--pm-hot); outline-offset: -2px; }
+  /* Event notice under the header (src/widget/eventAlert.ts): same strip, enters with a short drop. */
+  .pmEventStrip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px 4px 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--pm-red) 35%, transparent);
+    background: color-mix(in srgb, var(--pm-red) 14%, transparent);
+    color: #ffffff;
+    font-weight: 600; font-size: 11px; line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1), transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  @starting-style {
+    .pmEventStrip { opacity: 0; transform: translateY(-4px); }
+  }
+  .pmEventStrip[hidden] { display: none; }
+  .pmEventStrip > svg { width: 13px; height: 13px; flex: none; color: var(--pm-hot); }
+  .pmEventText { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pmEventClose {
+    display: grid; place-items: center;
+    width: 20px; height: 20px; flex: none;
+    padding: 0; border: 0; border-radius: 4px;
+    background: transparent; color: var(--pm-redt);
+    cursor: pointer;
+  }
+  .pmEventClose:focus-visible { outline: 2px solid var(--pm-hot); outline-offset: -2px; }
+  @media (hover: hover) and (pointer: fine) {
+    .pmEventClose:hover { background: color-mix(in srgb, var(--pm-red) 22%, transparent); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pmEventStrip { transition: opacity 200ms ease; }
+    @starting-style {
+      .pmEventStrip { transform: none; }
+    }
+  }
 
   /* Fight timer / status, in the bar after the tabs (moved there by
      pmWidget.js, and back for the Classic UI). In a fight it shows the timer;

@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.5
+
+- Nuovo: Builder: l'equip corrente arriva dal gioco (letto al login e a ogni cambio), con statistiche e livelli di potenziamento.
+- Nuovo: Il widget avvisa 10 minuti prima di un evento (rift, boss del mondo, Festival Shugo, reset) con il conto alla rovescia.
+- Corretto: Report: solo i giocatori veri, con i nomi come nei log; niente più righe grigie con i numeri.
+- Corretto: Un personaggio già nella tua lista viene riconosciuto anche se il nome è scritto in modo leggermente diverso: non chiede più di crearlo.
+- Corretto: Oggetti: lo scudo compare come mano secondaria per tutte le classi.
+
 ## 0.4.4
 
 - Nuovo: Il meter cambia modalità da solo: BOSS al boss, PVP contro i giocatori, PVE per tutto il resto.

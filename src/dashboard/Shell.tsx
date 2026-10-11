@@ -319,7 +319,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
       )}
       {diagnosis && <Diagnosis t={t} onClose={() => setDiagnosis(false)} onError={onError} />}
       <AutoCharacter t={t} settings={settings} save={save} capture={capture.data} go={go} onError={onError} />
-      <CaptureSync />
+      <CaptureSync settings={settings} save={save} capture={capture.data} onError={onError} />
     </div>
   );
 }

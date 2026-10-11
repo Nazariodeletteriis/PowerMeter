@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SaveSetting, Settings } from "./App";
-import { activate, activeId, readCharacters } from "./characters";
+import { activate, activeId, findCharacter, readCharacters, saveCharacters } from "./characters";
 import type { T } from "./i18n";
 import type { CaptureStatus } from "./Shell";
 import { Modal } from "./pages/system/Modal";
@@ -12,8 +12,8 @@ const ASKED = new Set<string>();
 
 /**
  * Follows the character being played: once the game says who you are, the matching
- * character of the roster becomes the active one; a character not created yet gets
- * a prompt to create it first.
+ * character of the roster becomes the active one (renamed to the game's spelling when it
+ * was typed slightly differently); only a character missing from the roster gets a prompt to create it.
  */
 export function AutoCharacter({ t, settings, save, capture, go, onError }: {
   t: T;
@@ -27,19 +27,20 @@ export function AutoCharacter({ t, settings, save, capture, go, onError }: {
   // Only a name tied to an in-game entity: before that it may still be the one typed at onboarding.
   const playing = capture?.locked && capture.localPlayerId != null ? capture.characterName?.trim() : undefined;
   const list = readCharacters(settings);
-  const match = playing ? list.find((c) => c.name.trim().toLowerCase() === playing.toLowerCase()) : undefined;
+  const match = playing ? findCharacter(list, playing) : undefined;
   const active = activeId(settings, list);
 
   useEffect(() => {
     if (!playing) return;
     if (match) {
+      if (match.name !== playing) saveCharacters(save, list.map((c) => (c.id === match.id ? { ...c, name: playing } : c))).catch(onError);
       if (match.id !== active) activate(save, match).catch(onError);
     } else if (!ASKED.has(playing)) {
       ASKED.add(playing);
       setMissing(playing);
     }
     // save/onError are new every render: re-running on them would activate twice.
-  }, [playing, match?.id, active]);
+  }, [playing, match?.id, match?.name, active]);
 
   if (!missing) return null;
   return (

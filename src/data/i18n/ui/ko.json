@@ -447,6 +447,8 @@
       "sample": "표본",
       "bosses": "보스 {n}"
     },
-    "resetTip": "미터 초기화 (Ctrl+Alt+R)"
+    "resetTip": "미터 초기화 (Ctrl+Alt+R)",
+    "eventSoon": "{name}까지 {time}",
+    "eventDismiss": "알림 닫기"
   }
 }

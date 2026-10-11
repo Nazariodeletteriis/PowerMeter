@@ -447,6 +447,8 @@
       "sample": "Muestra",
       "bosses": "{n} jefe"
     },
-    "resetTip": "Reiniciar el medidor (Ctrl+Alt+R)"
+    "resetTip": "Reiniciar el medidor (Ctrl+Alt+R)",
+    "eventSoon": "{name} en {time}",
+    "eventDismiss": "Cerrar aviso"
   }
 }

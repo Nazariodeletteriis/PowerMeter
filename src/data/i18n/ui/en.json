@@ -447,6 +447,8 @@
       "sample": "Sample",
       "bosses": "{n} boss"
     },
-    "resetTip": "Reset the meter (Ctrl+Alt+R)"
+    "resetTip": "Reset the meter (Ctrl+Alt+R)",
+    "eventSoon": "{name} in {time}",
+    "eventDismiss": "Dismiss"
   }
 }

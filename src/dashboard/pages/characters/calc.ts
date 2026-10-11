@@ -3,7 +3,7 @@
 // node through picked nodes. Empty cells (kind "None") are layout only: never picked, never a path.
 // Stats are summed in display units: raw values of percent stats (stat_dictionary.percent) are ×100.
 
-import type { BuilderData, GearPiece, Planner, PlannerNodeData } from "../../../data/db/types";
+import type { BuilderData, EnhancementValue, GearPiece, Planner, PlannerNodeData } from "../../../data/db/types";
 
 export type PNode = {
   id: string;
@@ -169,3 +169,59 @@ export function estimates(stats: Record<string, number>, skills: BuilderData["sk
   }
   return { attack: Math.round(attack), dps: Math.round(dps), cp: Math.round(attack + s("ArmorDefense") + s("Defense") + s("HPMax") / 10) };
 }
+
+/** gamedata_tw_gear row: Taiwan item data, keyed by the game's numeric item id. Values are the item card's text. */
+export type TwGearRow = {
+  id: string;
+  name: string | null;
+  slot: string | null;
+  grade: string | null;
+  level: number | null;
+  stats_json: [key: string | null, label: string | null, value: string | null][];
+  /** [level, stats, extra stats] per enhancement level; stats are { key: "10" | "1%" } or []. */
+  enh_json: [level: number, stats: Record<string, string> | [], extra: Record<string, string> | []][];
+};
+
+/** "100,000" → 100000, "40%" → 40 percent, "+250" → 250; anything else (e.g. "20m") is not a number. */
+function twNumber(text: string): { v: number; percent: boolean } | undefined {
+  const m = /^\+?(-?[\d,]+(?:\.\d+)?)(%?)$/.exec(text.trim());
+  return m ? { v: Number(m[1].replace(/,/g, "")), percent: m[2] === "%" } : undefined;
+}
+
+/**
+ * A Taiwan item as a Builder piece: its fixed stats (stats without a key or a value, like attack range or the
+ * Exceed-only lines, are left out; "WeaponMinDamage|WeaponDamage" "203 ~ 261" is two stats) and its enhancement
+ * bonus per level in the archive's shape (percent values raw ×100, as the Global data has them).
+ */
+export function twPiece(row: TwGearRow): { piece: GearPiece; levels: EnhancementValue[] } {
+  const stats: GearPiece["stats_json"] = [];
+  for (const [key, label, value] of row.stats_json ?? []) {
+    if (!key || !value) continue;
+    const keys = key.split("|");
+    const parts = value.split("~");
+    if (parts.length !== keys.length) continue;
+    keys.forEach((k, i) => {
+      const n = twNumber(parts[i]);
+      if (n) stats.push([k, keys.length > 1 ? `${label} ${i ? "max" : "min"}` : label, n.v, n.percent ? "percent" : "number"]);
+    });
+  }
+  const levels: EnhancementValue[] = [];
+  for (const [level, a, b] of row.enh_json ?? []) {
+    if (level < 1) continue;
+    for (const part of [a, b]) {
+      for (const [k, text] of Object.entries(Array.isArray(part) ? {} : part)) {
+        const n = twNumber(text);
+        if (n) levels.push({ level, stat_key: k, value_raw: n.percent ? n.v * 100 : n.v, percent: n.percent ? 1 : 0, value_kind: "enhancement_bonus", status: "published" });
+      }
+    }
+  }
+  const max = levels.reduce((m, v) => Math.max(m, v.level), 0);
+  return { piece: { id: row.id, name: row.name, slot: row.slot, grade: row.grade, level: row.level, icon: null, max_enh: max || null, stats_json: stats }, levels };
+}
+
+/** Builder slot of each game equipment slot (equip_parser.rs). Slots the Builder has no place for are left out. */
+export const GAME_SLOTS: Record<number, string> = {
+  1: "weapon", 2: "offhand", 3: "Helmet", 4: "Shoulder", 5: "Torso", 6: "Pants", 7: "Gloves", 8: "Boots",
+  10: "Necklace", 11: "Earring 1", 12: "Earring 2", 13: "Ring 1", 14: "Ring 2", 15: "Bracelet", 16: "Bracelet 2",
+  17: "Belt", 19: "Cape", 22: "Amulet", 23: "Rune", 24: "Rune 2",
+};

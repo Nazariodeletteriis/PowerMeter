@@ -447,6 +447,8 @@
       "sample": "Échantillon",
       "bosses": "{n} boss"
     },
-    "resetTip": "Réinitialiser le compteur (Ctrl+Alt+R)"
+    "resetTip": "Réinitialiser le compteur (Ctrl+Alt+R)",
+    "eventSoon": "{name} dans {time}",
+    "eventDismiss": "Fermer l’alerte"
   }
 }

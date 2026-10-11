@@ -28,6 +28,29 @@ export function activeId(settings: Settings, list: Character[]): string | undefi
   return list.some((c) => c.id === settings[ACTIVE_KEY]) ? settings[ACTIVE_KEY] : list[0]?.id;
 }
 
+/** Edits (insert, delete, replace one letter) from a to b. */
+function distance(a: string, b: string) {
+  let row = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const next = [i];
+    for (let j = 1; j <= b.length; j++) next[j] = Math.min(row[j] + 1, next[j - 1] + 1, row[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    row = next;
+  }
+  return row[b.length];
+}
+
+/**
+ * The roster character the game name belongs to: the same name, else the only one at most two letters off
+ * (a name typed by hand, e.g. "Agnizska" for "Agniezska"). Undefined when there is none.
+ */
+export function findCharacter(list: Character[], name: string) {
+  const key = (s: string) => s.trim().toLowerCase();
+  const exact = list.find((c) => key(c.name) === key(name));
+  if (exact || key(name).length < 4) return exact;
+  const near = list.filter((c) => distance(key(c.name), key(name)) <= 2);
+  return near.length === 1 ? near[0] : undefined;
+}
+
 export const newId = () => `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
 export const saveCharacters = (save: SaveSetting, list: Character[]) => save(CHARACTERS_KEY, JSON.stringify(list));

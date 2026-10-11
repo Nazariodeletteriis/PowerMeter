@@ -221,6 +221,14 @@ const CLASS_OF: Record<string | number, string> = {
   검성: "Gladiator", 수호성: "Templar", 살성: "Assassin", 궁성: "Ranger", 마도성: "Sorcerer", 정령성: "Spiritmaster", 치유성: "Cleric", 호법성: "Chanter", 권성: "Brawler",
 };
 
+/**
+ * Players of a fight as the log pages show them: actors with a known class. The rest (job 0) are entities the
+ * meter never identified, which used to show up as grey rows named by their actor id.
+ */
+export const playersOf = (rec: FightRecord) => rec.actors.filter((a) => CLASS_OF[a.jobId] ?? CLASS_OF[a.job]);
+/** A player whose name never arrived has the actor id as nickname: the class name reads better than a number. */
+export const playerName = (a: FightActor) => (a.nickname && a.nickname !== String(a.actorId) ? a.nickname : CLASS_OF[a.jobId] ?? CLASS_OF[a.job] ?? a.nickname);
+
 export type FightRow = { key: number; n: string; cls: string; dmg: number; dps: number; hits: number; pct: number; me: boolean; actor: FightActor; raw: FightSkill[]; skills: Skill[]; rates: [string, number][] };
 
 /**
@@ -229,8 +237,8 @@ export type FightRow = { key: number; n: string; cls: string; dmg: number; dps: 
  */
 export function fightParty(rec: FightRecord, me: string, w?: [number, number]): FightRow[] {
   const secs = Math.max(1, w ? w[1] - w[0] : rec.durationMs / 1000);
-  const rows = rec.actors.map((a) => {
-    const cls = CLASS_OF[a.jobId] ?? CLASS_OF[a.job] ?? a.job;
+  const rows = playersOf(rec).map((a) => {
+    const cls = CLASS_OF[a.jobId] ?? CLASS_OF[a.job];
     const raw = rec.details.skills.filter((s) => s.actorId === a.actorId);
     const cut = raw.map((s) => {
       if (!w) return { s, dmg: s.dmg, hits: s.time };
@@ -246,7 +254,7 @@ export function fightParty(rec: FightRecord, me: string, w?: [number, number]): 
       return { n: s.name, j, dmg: d, pct: dmg ? (d / dmg) * 100 : 0, hits: h, crit: r(s.crit), min: s.minDmg, max: s.maxDmg, avg: s.time ? s.dmg / s.time : 0, back: r(s.back), parry: r(s.parry), perfect: r(s.perfect), double: r(s.double), multi: r(s.multiHitCount), init: initials(s.name), sk: findSkill(s.name, cls) };
     });
     const rates: [string, number][] = [["CRIT", rate("crit")], ["BACK", rate("back")], ["PARRY", rate("parry")], ["PERFECT", rate("perfect")], ["DOUBLE", rate("double")]];
-    return { key: a.actorId, n: a.nickname, cls, dmg, dps: dmg / secs, hits, me: !!me && a.nickname === me, actor: a, raw, skills, rates };
+    return { key: a.actorId, n: playerName(a), cls, dmg, dps: dmg / secs, hits, me: !!me && a.nickname === me, actor: a, raw, skills, rates };
   });
   const tot = rows.reduce((x, r) => x + r.dmg, 0) || 1;
   return rows.map((r) => ({ ...r, pct: (r.dmg / tot) * 100 })).sort((a, b) => b.dps - a.dps);

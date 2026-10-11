@@ -47,6 +47,16 @@ export function readMyBuilds(json?: string): BuildSrc[] {
  */
 export const BUILD_DATA_KEY = "pm.buildData";
 export type GearSet = Record<string, { id: string; enh: number }>;
+/** Equipment worn in game, per roster character (CaptureSync): settings["pm.capturedGear"] = { [charId]: { [slot]: game item id } }. */
+export const CAPTURED_GEAR_KEY = "pm.capturedGear";
+export function readCapturedGear(json?: string): Record<string, Record<string, string>> {
+  try {
+    const v = JSON.parse(json ?? "");
+    return v && typeof v === "object" && !Array.isArray(v) ? v : {};
+  } catch {
+    return {}; // missing or hand-edited
+  }
+}
 export type BuildData = { lvl?: number; gear?: GearSet; want?: GearSet };
 export function readBuildData(json?: string): Record<string, BuildData> {
   try {

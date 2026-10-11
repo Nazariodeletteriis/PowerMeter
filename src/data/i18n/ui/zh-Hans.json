@@ -447,6 +447,8 @@
       "sample": "样本",
       "bosses": "{n} 个首领"
     },
-    "resetTip": "重置计量器 (Ctrl+Alt+R)"
+    "resetTip": "重置计量器 (Ctrl+Alt+R)",
+    "eventSoon": "{name} 还有 {time}",
+    "eventDismiss": "关闭提醒"
   }
 }

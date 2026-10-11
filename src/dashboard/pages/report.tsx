@@ -12,7 +12,7 @@ import {
 import { fmt } from "../ui";
 import { invoke } from "@tauri-apps/api/core";
 import { usePoll } from "../usePoll";
-import { Av, Chart, classColor, clock, fightParty, fightSeries, getFights, isBoss, pc, REPORT_FIGHT_KEY, uploadedUrl, useFight, useRuns, type FightRecord, type FightRow, type FightSkill, type FightSummary, type Run, type Skill } from "./combat/parts";
+import { Av, Chart, classColor, clock, fightParty, fightSeries, getFights, isBoss, pc, playerName, playersOf, REPORT_FIGHT_KEY, uploadedUrl, useFight, useRuns, type FightRecord, type FightRow, type FightSkill, type FightSummary, type Run, type Skill } from "./combat/parts";
 import { SkillIcon } from "../skills";
 import { ShareModal } from "./shared/ShareModal";
 import type { PageProps } from "./types";
@@ -110,8 +110,8 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, dungeonRun
     heals.set(s.actorId, { v: h.v + s.dmg, ...(s.dmg > h.topV ? { top: s.name, topV: s.dmg } : { top: h.top, topV: h.topV }) });
   }
   const list = (k: "taken" | "heal") =>
-    rec.actors
-      .map((a) => (k === "taken" ? { a: a.nickname, b: `${t("combat.col.hits")} ${fmt(a.hitsReceived, lang)}`, v: a.damageReceived } : { a: a.nickname, b: heals.get(a.actorId)?.top ?? "", v: heals.get(a.actorId)?.v ?? 0 }))
+    playersOf(rec)
+      .map((a) => (k === "taken" ? { a: playerName(a), b: `${t("combat.col.hits")} ${fmt(a.hitsReceived, lang)}`, v: a.damageReceived } : { a: playerName(a), b: heals.get(a.actorId)?.top ?? "", v: heals.get(a.actorId)?.v ?? 0 }))
       .filter((r) => r.v > 0)
       .sort((x, y) => y.v - x.v);
 

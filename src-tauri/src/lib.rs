@@ -1897,6 +1897,7 @@ pub fn run() {
             gamedata::gamedata_rows,
             gamedata::gamedata_dungeons,
             gamedata::gamedata_gear,
+            gamedata::gamedata_tw_gear,
             gamedata::gamedata_icons,
             gamedata::gamedata_builder,
             powermeter::install_npcap,

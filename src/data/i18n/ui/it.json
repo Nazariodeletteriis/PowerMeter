@@ -447,6 +447,8 @@
       "sample": "Campione",
       "bosses": "{n} boss"
     },
-    "resetTip": "Azzera il meter (Ctrl+Alt+R)"
+    "resetTip": "Azzera il meter (Ctrl+Alt+R)",
+    "eventSoon": "{name} tra {time}",
+    "eventDismiss": "Chiudi avviso"
   }
 }

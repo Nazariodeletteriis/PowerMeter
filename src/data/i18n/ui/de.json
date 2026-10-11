@@ -447,6 +447,8 @@
       "sample": "Stichprobe",
       "bosses": "{n} Boss"
     },
-    "resetTip": "Meter zurücksetzen (Strg+Alt+R)"
+    "resetTip": "Meter zurücksetzen (Strg+Alt+R)",
+    "eventSoon": "{name} in {time}",
+    "eventDismiss": "Hinweis schließen"
   }
 }
