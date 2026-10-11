@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.7
+
+- Nuovo: Report: Ispeziona mostra l'equip degli altri giocatori del combattimento (arma, armatura, collana, orecchini, con potenziamento).
+- Nuovo: Builder: il Daevanion arriva dal gioco, punti per dio; clicca un dio per vedere le sue skill Daevanion.
+- Nuovo: Builder: la scheda Skill mostra la tua barra skill in gioco, per personaggio.
+- Nuovo: Builder: i livelli di potenziamento (+N) vengono letti dal gioco.
+- Nuovo: L'avviso eventi del widget suona con il suono del Timer, se l'hai attivato.
+- Corretto: Widget: «DPS medio per classe» mostra il combattimento sul meter invece di numeri fissi.
+- Corretto: Rune e amuleto ora compaiono nell'equip preso dal gioco.
+- Corretto: Report e Database Skill: icone per molte più skill (danni nel tempo, Theostone, skill rinominate); ci sono tutte le skill del gioco.
+- Corretto: Widget: più spazio tra l'avviso eventi e la barra del boss.
+- Corretto: Icone di Chanter e Templar nei colori della loro classe.
+- Corretto: Il guard del Ranger resta nello slot della mano secondaria.
+
 ## 0.4.6
 
 - Corretto: Builder: l'equip viene letto di nuovo quando entri nel mondo (un pacchetto grande del login veniva scartato e l'equip corrente restava vuoto).

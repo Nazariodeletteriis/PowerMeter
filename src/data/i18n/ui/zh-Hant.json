@@ -442,10 +442,9 @@
     "avg": {
       "button": "各職業平均DPS",
       "title": "各職業平均DPS",
-      "hint": "選擇首領以便公平比較",
-      "error": "職業統計無法取得",
+      "hint": "計量器上的最近一場戰鬥",
       "sample": "樣本",
-      "bosses": "{n} 個首領"
+      "players": "{n} 名玩家"
     },
     "resetTip": "重置計量器 (Ctrl+Alt+R)",
     "eventSoon": "{name} 還有 {time}",

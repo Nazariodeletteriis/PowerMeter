@@ -442,10 +442,9 @@
     "avg": {
       "button": "クラス別平均DPS",
       "title": "クラス別平均DPS",
-      "hint": "公平に比較するにはボスを選んでください",
-      "error": "統計を取得できません",
+      "hint": "メーターの直近の戦闘",
       "sample": "サンプル",
-      "bosses": "ボス{n}体"
+      "players": "{n}人"
     },
     "resetTip": "メーターをリセット (Ctrl+Alt+R)",
     "eventSoon": "{name}まで {time}",

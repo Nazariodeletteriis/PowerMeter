@@ -442,10 +442,9 @@
     "avg": {
       "button": "DPS moyen par classe",
       "title": "DPS moyen par classe",
-      "hint": "Choisis un boss pour une comparaison équitable",
-      "error": "Statistiques indisponibles",
+      "hint": "Dernier combat sur le meter",
       "sample": "Échantillon",
-      "bosses": "{n} boss"
+      "players": "{n} joueurs"
     },
     "resetTip": "Réinitialiser le compteur (Ctrl+Alt+R)",
     "eventSoon": "{name} dans {time}",

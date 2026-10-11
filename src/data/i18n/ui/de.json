@@ -442,10 +442,9 @@
     "avg": {
       "button": "Durchschnitts-DPS pro Klasse",
       "title": "Durchschnitts-DPS pro Klasse",
-      "hint": "Wähle einen Boss für einen fairen Vergleich",
-      "error": "Klassenstatistik nicht verfügbar",
+      "hint": "Letzter Kampf im Meter",
       "sample": "Stichprobe",
-      "bosses": "{n} Boss"
+      "players": "{n} Spieler"
     },
     "resetTip": "Meter zurücksetzen (Strg+Alt+R)",
     "eventSoon": "{name} in {time}",

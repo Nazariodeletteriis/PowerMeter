@@ -24,10 +24,12 @@ import { classSkills, planClass, SkillIcon } from "../skills";
 import { art, ClassAvatar, CLASSES, FactionTag } from "../ui";
 import { activeId, readCharacters } from "../characters";
 import type { BuilderData, EnhancementGroup, EnhancementValue, GearPiece, PlannerBoardData } from "../../data/db/types";
-import { boardMax, buildStats, estimates, GAME_SLOTS, planTotals, plannerNodes, PLAN_KEY, readPlans, savedNodes, statValue, twPiece, type Equipped } from "./characters/calc";
+import { boardMax, buildStats, connected, estimates, GAME_SLOTS, planTotals, plannerNodes, PLAN_KEY, readPlans, savedNodes, statValue, twPiece, type Equipped } from "./characters/calc";
 import {
   BUILD_DATA_KEY,
   BUILD_TAGS,
+  CAPTURED_BAR_KEY,
+  CAPTURED_DAEV_KEY,
   CAPTURED_GEAR_KEY,
   closeBuild,
   DANGER,
@@ -35,6 +37,8 @@ import {
   MY_BUILDS_KEY,
   OWN_BUILD,
   readBuildData,
+  readCapturedBar,
+  readCapturedDaev,
   readCapturedGear,
   readMyBuilds,
   SectionHead,
@@ -112,13 +116,15 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const allData = readBuildData(settings[BUILD_DATA_KEY]);
   const saved = allData[src.t] ?? {};
   const char = chars.find((c) => c.id === (src.char ?? activeId(settings, chars)));
-  // Your builds of the character's class wear what the game shows it wearing (CaptureSync), at the enhancement
-  // level picked here for the same item; slots the game does not send (Arcana) keep what was picked.
+  // Your builds of the character's class wear what the game shows it wearing (CaptureSync), enhancement
+  // included; slots the game does not send (Arcana) keep what was picked.
   const captured = src.own && char?.cls === src.cls ? readCapturedGear(settings[CAPTURED_GEAR_KEY])[char.id] : undefined;
+  // And the skill bar it has in game, in bar order.
+  const gameBar = (src.own && char?.cls === src.cls ? readCapturedBar(settings[CAPTURED_BAR_KEY])[char.id] : undefined)?.flatMap((id) => classSkills(src.cls).find((sk) => sk.id === id) ?? []);
   const wornGear = (g: GearSet = {}): GearSet => {
     if (!captured) return g;
     const kept = Object.entries(g).filter(([s]) => !Object.values(GAME_SLOTS).includes(s));
-    return Object.fromEntries([...kept, ...Object.entries(captured).map(([s, id]) => [s, { id, enh: g[s]?.id === id ? g[s].enh : 0 }])]);
+    return { ...Object.fromEntries(kept), ...captured };
   };
   const [edit, setEdit] = useMem<{ t: string; lvl: number; gear: GearSet; want?: GearSet } | null>("bEdit", null);
   const cur = edit?.t === src.t ? edit : { t: src.t, lvl: saved.lvl ?? char?.level ?? DEFAULT_LEVEL, gear: wornGear(saved.gear), want: saved.want };
@@ -160,7 +166,14 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const worn = equippedOf(cur.gear);
   const equipped = which === "gear" ? worn : equippedOf(shown);
   const nodes = useMemo(() => (planner.data ? plannerNodes(planner.data) : []), [planner.data]);
-  const plan = useMemo(() => planTotals(nodes, savedNodes(readPlans(settings[PLAN_KEY]), src.cls)), [nodes, settings[PLAN_KEY], src.cls]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Your builds of the character's class take the Daevanion nodes it has in game (CaptureSync), others the planner's.
+  const gameDaev = src.own && char?.cls === src.cls ? readCapturedDaev(settings[CAPTURED_DAEV_KEY])[char.id] : undefined;
+  const picked = useMemo(
+    () => (gameDaev ? gameDaev.map((n) => `${src.cls.toLowerCase()}:${n}`) : savedNodes(readPlans(settings[PLAN_KEY]), src.cls)),
+    [JSON.stringify(gameDaev), settings[PLAN_KEY], src.cls], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const plan = useMemo(() => planTotals(nodes, picked), [nodes, picked]);
+  const taken = useMemo(() => new Set(connected(nodes, picked)), [nodes, picked]);
   const totalsOf = (gear: (Equipped & { slot: string })[]) => (calcData.data ? buildStats(calcData.data, cur.lvl, gear, plan) : {});
   const totals = totalsOf(equipped);
   const wornTotals = which === "want" ? totalsOf(worn) : undefined;
@@ -493,13 +506,31 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
               <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 8 }}>
                 {(planner.data?.boards ?? []).map((b) => {
                   const d = b.data_json as unknown as PlannerBoardData;
+                  // The god's Daevanion skills taken on this board, levels added up.
+                  const skills = new Map<string, { title: string; levels: number }>();
+                  for (const n of nodes) {
+                    if (n.board !== d.board || !n.skill || !taken.has(n.id)) continue;
+                    const x = skills.get(n.skill.id) ?? { title: n.title ?? n.skill.id, levels: 0 };
+                    skills.set(n.skill.id, { ...x, levels: x.levels + n.skill.levels });
+                  }
                   return (
-                    <div key={b.id} style={{ display: "flex", gap: 10, alignItems: "center", minHeight: 34, borderBottom: "1px solid var(--pm-line)" }}>
-                      <span style={{ flex: 1 }}>{d.title}</span>
-                      <span className="mono" style={{ fontSize: 12 }}>
-                        {plan.spent[d.board] ?? 0} / {maxByBoard[d.board] ?? 0}
-                      </span>
-                    </div>
+                    <details key={b.id} style={{ borderBottom: "1px solid var(--pm-line)" }}>
+                      <summary style={{ display: "flex", gap: 10, alignItems: "center", minHeight: 34, cursor: "pointer" }}>
+                        <span style={{ flex: 1 }}>{d.title}</span>
+                        <span className="mono" style={{ fontSize: 12 }}>
+                          {plan.spent[d.board] ?? 0} / {maxByBoard[d.board] ?? 0}
+                        </span>
+                      </summary>
+                      <div style={{ padding: "0 0 10px", display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: "var(--pm-t2)" }}>
+                        {skills.size === 0 && <span>{t("characters.builder.daevNoSkills")}</span>}
+                        {[...skills.values()].map((x) => (
+                          <span key={x.title} style={{ display: "flex", gap: 8 }}>
+                            <span style={{ flex: 1, color: "var(--pm-t1)" }}>{x.title}</span>
+                            <span className="mono">+{x.levels}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </details>
                   );
                 })}
                 <div>
@@ -512,14 +543,13 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
             {tab === "skills" && (
               <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                 <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("characters.builder.linkedSkills")}</div>
+                {!gameBar?.length && <div style={{ fontSize: 13, color: "var(--pm-t2)" }}>{t("characters.builder.skillBarNone")}</div>}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {classSkills(src.cls)
-                    .filter((sk) => sk.type === "Active")
-                    .map((sk) => (
-                      <span key={sk.id} title={sk.name} style={{ width: 40, height: 40, borderRadius: 6, background: "var(--pm-s2)", boxShadow: "0 0 0 1px var(--pm-line)", display: "grid", placeItems: "center", fontSize: 10, fontWeight: 600 }}>
-                        <SkillIcon skill={sk} name={sk.name} />
-                      </span>
-                    ))}
+                  {(gameBar ?? []).map((sk) => (
+                    <span key={sk.id} title={sk.name} style={{ width: 40, height: 40, borderRadius: 6, background: "var(--pm-s2)", boxShadow: "0 0 0 1px var(--pm-line)", display: "grid", placeItems: "center", fontSize: 10, fontWeight: 600 }}>
+                      <SkillIcon skill={sk} name={sk.name} />
+                    </span>
+                  ))}
                 </div>
                 <div>
                   <button type="button" className="btn sm" onClick={() => go("skillplan")}>

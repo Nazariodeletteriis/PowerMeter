@@ -20,23 +20,43 @@
 //!   Slots: 1 weapon, 2 off-hand, 3 helmet, 4 pauldrons, 5 top, 6 pants, 7 gloves, 8 boots, 0x0A necklace,
 //!   0x0B-0x0C earrings, 0x0D-0x0E rings, 0x0F-0x10 bracelets, 0x11 belt, 0x13 cape, 0x16 amulet,
 //!   0x17-0x18 runes; 0x29-0x2D hold 810xxxxxx ids missing from the item data.
+//!   Enhancement (+N, both packets): 12 zero bytes after the slot, then the level as one byte; some records carry
+//!   one more zero there, so it is the byte at +12 or else +13 (packets_20261011_183820: Cleric mace 110730048 +10
+//!   and top 210130038 +10 at 18:48:04, Gladiator +10..+14 pieces and +4 runes at 18:40:29). ~14 bytes later a
+//!   u32 holds the item level with the enhancement added (mace 45 + 10 = 0x37).
 //! `93 E2` skill bar, the whole bar, sent again on every change:
 //!   `01 <count u8> { <kind u8> 01 <slot u8> [kind 3: <skill id u32>] 04 <4 × u32> } × count`
 //!   kind 3 = the slot holds a skill, 2 = empty; slots 0-7 and 20-23.
 //!   e.g. `03 01 16 900b0901 04 900b0901 00000000 00000000 00000000` = Lightning Barrage (17370000) in slot 22.
+//! `26 E2` Daevanion nodes taken, all of them, sent once on entering the world (packets_20261011_183820, 4 logins):
+//!   `<boards u8> { <board key u32> <count u8> <node id u32> × count } × boards`; the board key is class digit × 10
+//!   + board (11-16 Gladiator, 71-76 Cleric), the node ids are the archive's (`gladiator:110113`), the Start node
+//!   of each board included. e.g. `05 0b000000 59 21ae0100 d1ad0100 ...` = board 11, 89 nodes, first 110113.
+//! `28 E2` one node taken in game: `00 00 <node id u32>` (18:42:03, 120067 and one more).
+//! `45 36` another player's spawn, `33 36` your own (same layout, packets_20261011_183820): after
+//!   `<entity id varint> <mask1 u32> <mask2 u8> [mask2 & 1: <len u8><name>]` and ~600-700 bytes of stats and
+//!   looks comes the worn list, one ~33-byte record per slot (the weapon's a few bytes longer, and some lists have
+//!   up to ~100 bytes of other data between two records):
+//!   `<tag u8> <item id u32> <enhancement u8> <slot u8> <8 × 00> <u32> 00 03 <~11 × 00>`
+//!   e.g. DrBlacK (entity 8761): `0f c3809306 0c 01 0000000000000000 …` = dagger 110330051 +12 in slot 1,
+//!   `0e c461890c 0a 02 0000000000000000 a71bcb01 0003 …` = helmet 210330052 +10 in slot 2.
+//!   The tag varies (0f, 0e, 0a, bb 0e …), so the records are found by `<id> <enh> <slot> <8 × 00>` with the
+//!   slot counting 1, 2, 3 … Slots: 1 weapon, 2 helmet, 3 pauldrons, 4 top, 5 pants, 6 gloves, 7 boots, 8 cape,
+//!   9 necklace, 10-11 earrings; 12-15 always id 0. An empty slot has id 0 and is left out.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 use std::sync::Mutex;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use super::stream_processor::read_varint;
 
-#[derive(Serialize, Clone, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct WornItem {
     pub slot: u8,
     pub item_id: u32,
+    pub enchant: u8,
 }
 
 #[derive(Serialize, Clone, PartialEq, Debug)]
@@ -55,18 +75,22 @@ pub struct CapturedCharacter {
     pub owner: Option<String>,
     pub equipment: Vec<WornItem>,
     pub skillbar: Vec<BarSkill>,
+    /// Daevanion node ids taken, as in the archive without the class (`110113` of `gladiator:110113`).
+    pub daevanion: Vec<u32>,
 }
 
 struct State {
     /// Last `8D E2` list: (slot, item uid).
     worn: Vec<(u8, u64)>,
-    /// Item uid → item id, from `1B 56`.
-    items: BTreeMap<u64, u32>,
+    /// Item uid → (item id, enhancement), from `1B 56` and `11 56`.
+    items: BTreeMap<u64, (u32, u8)>,
     skillbar: Vec<BarSkill>,
     owner: Option<String>,
+    daevanion: Vec<u32>,
 }
 
-static STATE: Mutex<State> = Mutex::new(State { worn: Vec::new(), items: BTreeMap::new(), skillbar: Vec::new(), owner: None });
+static STATE: Mutex<State> =
+    Mutex::new(State { worn: Vec::new(), items: BTreeMap::new(), skillbar: Vec::new(), owner: None, daevanion: Vec::new() });
 
 /// The self record named the character being played (stream_processor).
 pub fn set_owner(name: &str) {
@@ -80,10 +104,22 @@ pub fn snapshot() -> CapturedCharacter {
         equipment: s
             .worn
             .iter()
-            .filter_map(|&(slot, uid)| s.items.get(&uid).map(|&item_id| WornItem { slot, item_id }))
+            .filter_map(|&(slot, uid)| s.items.get(&uid).map(|&(item_id, enchant)| WornItem { slot, item_id, enchant }))
             .collect(),
         skillbar: s.skillbar.clone(),
+        daevanion: s.daevanion.clone(),
     }
+}
+
+/// Worn lists from player spawns, newest last: entity id → items (slots as in `45 36`).
+/// Entity ids are reissued on every zone change, so only the newest record of an id counts.
+static PLAYER_GEAR: Mutex<VecDeque<(i32, Vec<WornItem>)>> = Mutex::new(VecDeque::new());
+const PLAYER_GEAR_CAP: usize = 2000;
+
+/// Gear last seen on the player with this entity id; empty when their spawn was never read.
+pub fn player_gear(entity_id: i32) -> Vec<WornItem> {
+    let g = PLAYER_GEAR.lock().unwrap_or_else(|e| e.into_inner());
+    g.iter().rev().find(|(id, _)| *id == entity_id).map(|(_, items)| items.clone()).unwrap_or_default()
 }
 
 fn u32_at(p: &[u8], i: usize) -> Option<u32> {
@@ -110,7 +146,26 @@ pub fn parse(packet: &[u8]) {
         (0x1B, 0x56) => parse_item(body),
         (0x11, 0x56) => parse_inventory(body),
         (0x93, 0xE2) => parse_skillbar(body),
+        (0x26, 0xE2) => parse_daevanion(body),
+        (0x45 | 0x33, 0x36) => parse_spawn_gear(body),
+        (0x28, 0xE2) => {
+            if let (Some([0, 0]), Some(node)) = (body.get(..2), u32_at(body, 2)) {
+                let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
+                if !s.daevanion.contains(&node) {
+                    s.daevanion.push(node);
+                }
+            }
+        }
         _ => {}
+    }
+}
+
+/// Enhancement level of the record whose slot byte is at `slot_at`.
+fn enchant_at(b: &[u8], slot_at: usize) -> u8 {
+    match b.get(slot_at + 13) {
+        Some(0) => b.get(slot_at + 14).copied().unwrap_or(0),
+        Some(&e) => e,
+        None => 0,
     }
 }
 
@@ -132,7 +187,7 @@ fn parse_worn(b: &[u8]) {
 
 fn parse_item(b: &[u8]) {
     if let (Some(uid), Some(item)) = (u64_at(b, 3), u32_at(b, 11)) {
-        STATE.lock().unwrap_or_else(|e| e.into_inner()).items.insert(uid, item);
+        STATE.lock().unwrap_or_else(|e| e.into_inner()).items.insert(uid, (item, enchant_at(b, 24)));
     }
 }
 
@@ -145,7 +200,7 @@ fn parse_inventory(b: &[u8]) {
             continue;
         }
         if let (Some(uid), Some(item), Some(&slot)) = (u64_at(b, p - 12), u32_at(b, p - 4), b.get(p + WORN_TAIL.len())) {
-            s.items.insert(uid, item);
+            s.items.insert(uid, (item, enchant_at(b, p + WORN_TAIL.len())));
             worn.push((slot, uid));
         }
     }
@@ -180,6 +235,73 @@ fn parse_skillbar(b: &[u8]) {
     STATE.lock().unwrap_or_else(|e| e.into_inner()).skillbar = bar;
 }
 
+fn parse_daevanion(b: &[u8]) {
+    let mut nodes = Vec::new();
+    let mut o = 1;
+    for _ in 0..*b.first().unwrap_or(&0) {
+        let count = match b.get(o + 4) {
+            Some(&c) => c as usize,
+            None => return, // cut short: keep the last good list
+        };
+        o += 5;
+        for i in 0..count {
+            match u32_at(b, o + i * 4) {
+                Some(node) => nodes.push(node),
+                None => return,
+            }
+        }
+        o += count * 4;
+    }
+    STATE.lock().unwrap_or_else(|e| e.into_inner()).daevanion = nodes;
+}
+
+/// Item ids of wearable families in the archive: 110/115/150 weapons, 210/215/250 armour, 310/311 accessories.
+fn wearable(id: u32) -> bool {
+    matches!(id / 1_000_000, 110 | 115 | 150 | 210 | 215 | 250 | 310 | 311)
+}
+
+/// `<id u32> <enhancement ≤ 30> <slot> <8 × 00>` at `p`, with id 0 (empty) allowed after the weapon slot.
+fn gear_record(b: &[u8], p: usize, slot: u8) -> Option<(u32, u8)> {
+    let id = u32_at(b, p)?;
+    let (&enchant, &at) = (b.get(p + 4)?, b.get(p + 5)?);
+    let ok = at == slot && enchant <= 30 && b.get(p + 6..p + 14)? == [0; 8] && (wearable(id) || (id == 0 && slot > 1));
+    ok.then_some((id, enchant))
+}
+
+fn parse_spawn_gear(b: &[u8]) {
+    let id = read_varint(b, 0);
+    if id.length <= 0 || !(1..=9_999_999).contains(&id.value) {
+        return;
+    }
+    let mask2 = id.length as usize + 4;
+    let mut p = match b.get(mask2) {
+        Some(m) if m & 1 == 1 => mask2 + 2 + *b.get(mask2 + 1).unwrap_or(&0) as usize,
+        Some(_) => mask2 + 1,
+        None => return,
+    };
+    let mut items = Vec::new();
+    let mut window = b.len(); // the weapon: anywhere after the name
+    for slot in 1..=15u8 {
+        let Some((q, item_id, enchant)) = (p..b.len().min(p + window)).find_map(|q| gear_record(b, q, slot).map(|(i, e)| (q, i, e))) else {
+            break;
+        };
+        if item_id != 0 {
+            items.push(WornItem { slot, item_id, enchant });
+        }
+        p = q + 14;
+        window = 160;
+    }
+    if items.is_empty() {
+        return;
+    }
+    let mut g = PLAYER_GEAR.lock().unwrap_or_else(|e| e.into_inner());
+    g.retain(|(e, _)| *e != id.value);
+    g.push_back((id.value, items));
+    if g.len() > PLAYER_GEAR_CAP {
+        g.pop_front();
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -200,9 +322,9 @@ mod tests {
         assert_eq!(
             snapshot().equipment,
             vec![
-                WornItem { slot: 1, item_id: 110730048 },
-                WornItem { slot: 6, item_id: 210240024 },
-                WornItem { slot: 0x13, item_id: 210730038 },
+                WornItem { slot: 1, item_id: 110730048, enchant: 0 },
+                WornItem { slot: 6, item_id: 210240024, enchant: 0 },
+                WornItem { slot: 0x13, item_id: 210730038, enchant: 0 },
             ]
         );
 
@@ -214,15 +336,63 @@ mod tests {
             vec![(0, 17010000), (1, 17370000), (2, 17100000), (3, 17440000), (4, 17410000), (6, 17060000), (7, 17090000), (23, 17400000)]
         );
 
-        // packets_20261011_144836, 14:50:19.263: login inventory, two worn records (claymore, cape).
-        parse(&hex("975811561002ac01000000000001056c1900004b00008373900601000000000000000b0100000000015d00050000f70000457c8f0c01000000000000000b13"));
+        // packets_20261011_144836, 14:50:19.263: login inventory, two worn records (claymore +12, cape +10),
+        // the cape with the extra zero before its enhancement.
+        parse(&hex("975811561002ac0100c9c6130000ae00056c1900004b00008373900601000000000000000b010000000000000000000000000c000000000000000000000000006d000000010403bc7a1e680002035d00050000f70000457c8f0c01000000000000000b13000000000000000000000000000a0000000000000000000000000066000000130403bc7a1ec10003"));
         assert_eq!(
             snapshot().equipment,
-            vec![WornItem { slot: 1, item_id: 110130051 }, WornItem { slot: 0x13, item_id: 210730053 }]
+            vec![WornItem { slot: 1, item_id: 110130051, enchant: 12 }, WornItem { slot: 0x13, item_id: 210730053, enchant: 10 }]
         );
         // The inventory comes before the self record: nobody owns it until the self record names the character.
         assert_eq!(snapshot().owner, None);
         set_owner("Agniezska");
         assert_eq!(snapshot().owner.as_deref(), Some("Agniezska"));
+
+        // packets_20261011_183820, 18:48:04.231: Cleric login, Spiritforged Mace +10 (item level 45 + 10 = 0x37).
+        parse(&hex("9758115610027800e9d8170000e90000e6e2140000f40000409b990601000000000000000b01000000000000000000000000000a0000000000000000000000000037000000010400000000000000"));
+        assert_eq!(snapshot().equipment, vec![WornItem { slot: 1, item_id: 110730048, enchant: 10 }]);
+
+        // Daevanion: two boards (11: Start 110113 + 110033, 12: one node), then one node taken in game.
+        parse(&hex("1626e2020b0000000221ae0100d1ad01000c0000000103d50100"));
+        parse(&hex("0a28e2000004d50100"));
+        assert_eq!(snapshot().daevanion, vec![110113, 110033, 120067, 120068]);
+    }
+    // packets_20261011_183820, 18:38:25: DrBlacK's spawn (entity 8761), cut after the worn list.
+    #[test]
+    fn player_gear_from_spawn() {
+        let hex_str = [
+            "89094536b9441730a00107074472426c61634b13000000020100d24c3eacc72675e4c7d1150147e7d7634306a201cab001cab001a30d0000a30d00000000000000000000c0250100003f0200f0490200f049020002000000a0860100a0860100b8520900",
+            "b852090002a4676502a4676502c0d84f01ff08040100000000ff0809436c6f776e446f67730200010000000000000000000000000000000e11115dc4c901ffffffffffffffff8075d52abb030000b9440100919a70c62bb6744600d052451114844e0000",
+            "c887dc5101000000b199a67da2010000b94406cae3c2c7efb0f6c700610647112c41a93608ffffffffffffffff8075d52abb030000b94405cae3c2c7efb0f6c700610647112de1fa2b08ffffffffffffffff8075d52abb030000b9440fcae3c2c7efb0f6",
+            "c700610647112e81812d08ffffffffffffffff8075d52abb030000b9440ecae3c2c7efb0f6c700610647112f21082f08ffffffffffffffff8075d52abb030000b9440bcae3c2c7efb0f6c7006106471130c18e3008ffffffffffffffff8075d52abb0300",
+            "00b9440fcae3c2c7efb0f6c700610647113161153208ffffffffffffffff8075d52abb030000b94411cae3c2c7efb0f6c7006106471132019c3308ffffffffffffffff8075d52abb030000b9441180cae3c2c7efb0f6c7006106471133a1223508ffffff",
+            "ffffffffff8075d52abb030000b9440fcae3c2c7efb0f6c7006106471134e12f3808ffffffffffffffff8075d52abb030000b94408cae3c2c7efb0f6c700610647113581b63908ffffffffffffffff8075d52abb030000b94410cae3c2c7efb0f6c70061",
+            "0647133f273c5101e09304000000000056bed42ba1010000b9440137b92100f9b5c2c7c9d8f6c7f163064713403b3c5101e0930400000000003dc2d42ba1010000b9440139b9210055dfc1c77b93f7c7ca4706470fc38093060c01000000000000000000",
+            "0000000003000000000000000000000000bb0ec461890c0a020000000000000000a71bcb0100030000000000000000000000000e64e88a0c0a0300000000000000002860ca010003000000000000000000000000bb0e8454860c0a040000000000000000",
+            "9d46cb0100030000000000000000000000000e24db870c0a0500000000000000009e46cb010003000000000000000000000000bb0e056f8c0c0a060000000000000000d144ca0100030000000000000000000000000ea5f58d0c0a070000000000000000",
+            "da19ca010003000000000000000000000000bb0e447c8f0c0a0800000000000000001b2dcc0100030000000000000000000000000e83357c120a090000000000000000000000000003000000000000000000000000bb0e25bc7d120a0a00000000000000",
+            "000000000000030000000000000000000000000e25bc7d120a0b0000000000000000000000000003000000000000000000000000bb0e00000000000c00000000000000000000000000000e00000000000d0000000000000000000000000000bb0e000000",
+            "00000e00000000000000000000000000000e00000000000f00000000000000000000000000001f0e0101194403000000ff0804cd00f7070000ce00",
+        ]
+        .concat();
+        parse(&hex(&hex_str));
+        let gear: Vec<(u8, u32, u8)> = player_gear(8761).iter().map(|w| (w.slot, w.item_id, w.enchant)).collect();
+        assert_eq!(
+            gear,
+            vec![
+                (1, 110330051, 12),
+                (2, 210330052, 10),
+                (3, 210430052, 10),
+                (4, 210130052, 10),
+                (5, 210230052, 10),
+                (6, 210530053, 10),
+                (7, 210630053, 10),
+                (8, 210730052, 10),
+                (9, 310130051, 10),
+                (10, 310230053, 10),
+                (11, 310230053, 10),
+            ]
+        );
+        assert!(player_gear(1).is_empty());
     }
 }

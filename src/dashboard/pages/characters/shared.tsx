@@ -47,9 +47,36 @@ export function readMyBuilds(json?: string): BuildSrc[] {
  */
 export const BUILD_DATA_KEY = "pm.buildData";
 export type GearSet = Record<string, { id: string; enh: number }>;
-/** Equipment worn in game, per roster character (CaptureSync): settings["pm.capturedGear"] = { [charId]: { [slot]: game item id } }. */
+/** Equipment worn in game, per roster character (CaptureSync): settings["pm.capturedGear"] = { [charId]: GearSet of game item ids }. */
 export const CAPTURED_GEAR_KEY = "pm.capturedGear";
-export function readCapturedGear(json?: string): Record<string, Record<string, string>> {
+export function readCapturedGear(json?: string): Record<string, GearSet> {
+  try {
+    const v = JSON.parse(json ?? "");
+    if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+    // Up to 0.4.6 a slot held the bare item id, without the enhancement.
+    return Object.fromEntries(
+      Object.entries(v as Record<string, Record<string, string | GearSet[string]>>).map(([c, g]) => [
+        c,
+        Object.fromEntries(Object.entries(g).map(([s, x]) => [s, typeof x === "string" ? { id: x, enh: 0 } : x])),
+      ]),
+    );
+  } catch {
+    return {}; // missing or hand-edited
+  }
+}
+/** Skill bar of the game, per roster character (CaptureSync): settings["pm.capturedBar"] = { [charId]: skill ids in bar order }. */
+export const CAPTURED_BAR_KEY = "pm.capturedBar";
+export function readCapturedBar(json?: string): Record<string, string[]> {
+  try {
+    const v = JSON.parse(json ?? "");
+    return v && typeof v === "object" && !Array.isArray(v) ? v : {};
+  } catch {
+    return {}; // missing or hand-edited
+  }
+}
+/** Daevanion nodes taken in game, per roster character (CaptureSync): settings["pm.capturedDaev"] = { [charId]: node numbers }. */
+export const CAPTURED_DAEV_KEY = "pm.capturedDaev";
+export function readCapturedDaev(json?: string): Record<string, number[]> {
   try {
     const v = JSON.parse(json ?? "");
     return v && typeof v === "object" && !Array.isArray(v) ? v : {};

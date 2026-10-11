@@ -442,10 +442,9 @@
     "avg": {
       "button": "Medie per classe",
       "title": "DPS medio per classe",
-      "hint": "Scegli un boss per un confronto equo",
-      "error": "Statistiche non disponibili",
+      "hint": "Ultimo combattimento sul meter",
       "sample": "Campione",
-      "bosses": "{n} boss"
+      "players": "{n} giocatori"
     },
     "resetTip": "Azzera il meter (Ctrl+Alt+R)",
     "eventSoon": "{name} tra {time}",

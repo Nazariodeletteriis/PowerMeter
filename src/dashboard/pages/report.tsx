@@ -7,14 +7,18 @@ import {
   ListNumbersIcon,
   ShareNetworkIcon,
   SwordIcon,
+  TShirtIcon,
   WarningOctagonIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import { fmt } from "../ui";
 import { invoke } from "@tauri-apps/api/core";
 import { usePoll } from "../usePoll";
-import { Av, Chart, classColor, clock, fightParty, fightSeries, getFights, isBoss, pc, playerName, playersOf, REPORT_FIGHT_KEY, uploadedUrl, useFight, useRuns, type FightRecord, type FightRow, type FightSkill, type FightSummary, type Run, type Skill } from "./combat/parts";
+import { Av, Chart, classColor, clock, fightParty, fightSeries, getFights, isBoss, pc, playerName, playersOf, REPORT_FIGHT_KEY, uploadedUrl, useFight, useRuns, type FightRecord, type FightRow, type FightSkill, type FightSummary, type GearItem, type Run, type Skill } from "./combat/parts";
 import { SkillIcon } from "../skills";
 import { ShareModal } from "./shared/ShareModal";
+import { Modal } from "./system/Modal";
+import { GameIcon, gd, gradeColor, useGd, useIcons } from "./world/db";
 import type { PageProps } from "./types";
 
 // The latest boss fight (the latest PVE/PvP session is often a few seconds of trash); its attempts are the saved fights on the same boss, oldest first.
@@ -83,6 +87,7 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, dungeonRun
   const drag = useRef<number | null>(null);
   const [sort, setSort] = useState<[keyof Skill, number]>(["dmg", -1]);
   const [share, setShare] = useState(false);
+  const [inspect, setInspect] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
   // The run's bosses in boss order; each chip opens that boss's latest attempt in the run.
   const runBosses = dungeonRun ? [...new Set(dungeonRun.fights.map((f) => f.bossName))].sort((a, b) => dungeonRun.bosses[a] - dungeonRun.bosses[b]) : [];
@@ -187,6 +192,11 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, dungeonRun
         >
           <ListNumbersIcon aria-hidden="true" />
           {t("combat.rotationBtn")}
+        </button>
+        {/* The selected player's gear, read from their spawn in game. */}
+        <button type="button" className="btn" style={outline} disabled={!p?.actor.gear?.length} title={p?.actor.gear?.length ? undefined : t("combat.inspectNone")} onClick={() => setInspect(true)}>
+          <TShirtIcon aria-hidden="true" />
+          {t("combat.inspect")}
         </button>
         <button
           type="button"
@@ -525,6 +535,8 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, dungeonRun
         </>
       )}
 
+      {inspect && p?.actor.gear?.length ? <InspectModal t={t} name={p.n} gear={p.actor.gear} onClose={() => setInspect(false)} /> : null}
+
       {share && (
         <ShareModal
           t={t}
@@ -537,6 +549,51 @@ function FightView({ t, lang, run, onError, name, rec, attempts, att, dungeonRun
         />
       )}
     </>
+  );
+}
+
+// Spawn slot → combat.slot.<key>.
+const GEAR_SLOT = ["", "weapon", "helmet", "pauldrons", "top", "pants", "gloves", "boots", "cape", "necklace", "earring", "earring"];
+
+/** A player's worn items, names and icons from the Taiwan archive (unknown ids show the number). */
+function InspectModal({ t, name, gear, onClose }: { t: PageProps["t"]; name: string; gear: GearItem[]; onClose: () => void }) {
+  const ids = [...new Set(gear.map((g) => String(g.itemId)))].sort();
+  const rows = useGd(() => gd.twGear(ids), ids.join("|")).data ?? [];
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const icons = useIcons(rows.map((r) => r.icon));
+  return (
+    <Modal
+      width={420}
+      onClose={onClose}
+      title={(id) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <h2 id={id} style={{ fontSize: 17, fontWeight: 500, flex: 1 }}>
+            {t("combat.gear", { name })}
+          </h2>
+          <button type="button" className="shareClose" onClick={onClose} title={t("window.close")} aria-label={t("window.close")}>
+            <XIcon aria-hidden="true" />
+          </button>
+        </div>
+      )}
+    >
+      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+        {[...gear]
+          .sort((a, b) => a.slot - b.slot)
+          .map((g) => {
+            const r = byId.get(String(g.itemId));
+            return (
+              <li key={g.slot} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <GameIcon url={r?.icon ? icons[r.icon] : undefined} grade={r?.grade} size={34} />
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: "block", fontSize: 11, color: "var(--pm-t3)" }}>{GEAR_SLOT[g.slot] ? t(`combat.slot.${GEAR_SLOT[g.slot]}`) : g.slot}</span>
+                  <span style={{ display: "block", color: r ? gradeColor(r.grade) : "var(--pm-t2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r?.name ?? g.itemId}</span>
+                </span>
+                {g.enchant > 0 && <span className="mono" style={{ color: "var(--pm-t1)" }}>+{g.enchant}</span>}
+              </li>
+            );
+          })}
+      </ul>
+    </Modal>
   );
 }
 

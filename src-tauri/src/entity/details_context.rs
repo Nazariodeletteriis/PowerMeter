@@ -18,6 +18,9 @@ pub struct DetailsActorSummary {
     pub damage_received: i64,
     #[serde(default)]
     pub hits_received: i32,
+    /// Worn items read from the player's spawn (Report "Inspect"). Empty on old records and unseen players.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub gear: Vec<crate::capture::equip_parser::WornItem>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

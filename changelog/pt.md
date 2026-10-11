@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.7
+
+- Novo: Relatório: Inspecionar mostra o equipamento dos outros jogadores do combate (arma, armadura, colar, brincos, com aprimoramento).
+- Novo: Builder: o teu Daevanion vem do jogo, pontos por deus; clica num deus para ver as suas habilidades Daevanion.
+- Novo: Builder: a aba Habilidades mostra a tua barra de habilidades no jogo, por personagem.
+- Novo: Builder: os níveis de aprimoramento (+N) são lidos do jogo.
+- Novo: O aviso de eventos do widget toca o som do Temporizador, se o ativaste.
+- Corrigido: Widget: «DPS médio por classe» mostra o combate no medidor em vez de números fixos.
+- Corrigido: Runas e amuleto agora aparecem no equipamento lido do jogo.
+- Corrigido: Relatório e Base de habilidades: ícones para muitas mais habilidades (dano ao longo do tempo, Teopedras, habilidades renomeadas); todas as habilidades do jogo estão listadas.
+- Corrigido: Widget: mais espaço entre o aviso de eventos e a barra do chefe.
+- Corrigido: Ícones do Cantor e do Templário nas cores da sua classe.
+- Corrigido: A guarda do Patrulheiro fica no espaço da mão secundária.
+
 ## 0.4.6
 
 - Corrigido: Builder: o equipamento volta a ser lido ao entrar no mundo (um pacote grande do login era descartado e o equipamento atual ficava vazio).

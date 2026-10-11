@@ -1,8 +1,10 @@
 // Widget event notice: from 10 minutes before an event of the Timer (rift, world bosses, Shugo festival,
 // resets) a strip under the widget header names it with a countdown, so whoever keeps only the widget open
 // sees it while playing. It goes at the start, or when closed with its X (that window only).
-// Same event rules and maths as the dashboard's Timer (gamedata_events + organizer/schedule.ts).
+// Same event rules and maths as the dashboard's Timer (gamedata_events + organizer/schedule.ts); rings the
+// Timer's chime when a new notice appears, if the Timer's sound is on.
 import { invoke } from "@tauri-apps/api/core";
+import { chime, SOUND_KEY } from "../dashboard/chime";
 import { upcomingWindows, type GameEvent } from "../dashboard/pages/organizer/schedule";
 
 const LEAD = 10 * 60e3;
@@ -39,6 +41,7 @@ if (strip && w.A2_VIEW === "main") {
       strip.hidden = true;
       return;
     }
+    if (start !== shown) invoke<Record<string, string>>("get_settings").then((s) => s[SOUND_KEY] === "1" && chime(), () => {});
     shown = start;
     const left = Math.ceil((start - now) / 1000);
     const time = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;

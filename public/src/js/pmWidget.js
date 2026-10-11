@@ -144,16 +144,20 @@ const createPmWidget = (app) => {
       .catch((err) => console.error("[PowerMeter] hide failed", err));
   });
 
-  // --- average DPS by class (community public logs; the dashboard's class stats).
-  // For the boss on screen when there is one, else over every boss.
+  // --- average DPS by class of the fight on the meter (the last one until the meter resets).
   const AVG_CLASSES = ["Chanter", "Gladiator", "Ranger", "Spiritmaster", "Sorcerer", "Cleric", "Templar", "Assassin"]; // design order for ties
+  const JOB_CLASS = { 호법성: "Chanter", 검성: "Gladiator", 궁성: "Ranger", 정령성: "Spiritmaster", 마도성: "Sorcerer", 치유성: "Cleric", 수호성: "Templar", 살성: "Assassin" };
   const avgBtn = $(".pmAvgBtn");
   let avgOn = false;
-  let avgKey = null; // boss the shown stats are for ("null" = every boss)
-  let avgStats = null;
-  let avgError = false;
   const renderAvg = () => {
-    const byCls = new Map((avgStats?.classes || []).map((c) => [c.cls, Number(c.avgDps) || 0]));
+    const sums = new Map();
+    for (const r of frame?.rows || []) {
+      const cls = JOB_CLASS[r.job];
+      if (!cls) continue;
+      const [sum, n] = sums.get(cls) || [0, 0];
+      sums.set(cls, [sum + (Number(r.dps) || 0), n + 1]);
+    }
+    const byCls = new Map([...sums].map(([cls, [sum, n]]) => [cls, sum / n]));
     const top = Math.max(1, ...byCls.values());
     $(".pmAvgRows").innerHTML = AVG_CLASSES.map((cls) => ({ cls, avg: byCls.get(cls) || 0 }))
       .sort((a, b) => b.avg - a.avg)
@@ -163,37 +167,15 @@ const createPmWidget = (app) => {
         return `<div class="pmAvgRow" data-cls="${cls.toLowerCase()}"><span>${cls}</span><span class="pmAvgBar">${bar}</span>${value}</div>`;
       })
       .join("");
-    setText(".pmAvgHint", avgError ? t("pmWidget.avg.error", "Stats unavailable") : t("pmWidget.avg.hint", "Pick a boss for a fair comparison"));
-    const bosses = avgKey === "null" ? avgStats?.bosses?.length || 0 : 1;
-    setText(".pmSampleN", avgStats ? tf("pmWidget.avg.bosses", { n: bosses }, `${bosses} boss`) : "-");
-  };
-  const loadAvg = () => {
-    const boss = frame?.targetMode === "bossTargets" && Number(frame.targetId) > 0 ? Number(frame.targetId) : null;
-    const key = String(boss);
-    if (key === avgKey) return;
-    avgKey = key;
-    avgStats = null;
-    avgError = false;
-    renderAvg();
-    invoke("pm_class_stats", { boss, region: null, period: "90" })
-      .then((stats) => {
-        if (avgKey !== key) return;
-        avgStats = stats;
-        renderAvg();
-      })
-      .catch((err) => {
-        console.warn("[PowerMeter] class stats failed", err);
-        if (avgKey !== key) return;
-        avgError = true;
-        renderAvg();
-        avgKey = null; // retried on the next frame or toggle
-      });
+    setText(".pmAvgHint", t("pmWidget.avg.hint", "Last fight on the meter"));
+    const players = [...sums.values()].reduce((n, [, k]) => n + k, 0);
+    setText(".pmSampleN", tf("pmWidget.avg.players", { n: players }, `${players} players`));
   };
   avgBtn?.addEventListener("click", () => {
     avgOn = !avgOn;
     meter.classList.toggle("isPmAvg", avgOn);
     avgBtn.setAttribute("aria-pressed", String(avgOn));
-    if (avgOn) loadAvg();
+    if (avgOn) renderAvg();
   });
 
   // --- mode tabs
@@ -467,6 +449,7 @@ const createPmWidget = (app) => {
   // After each render: title, HP readout, target extras and the sparkline samples.
   const onFrame = (next) => {
     frame = next;
+    if (avgOn) renderAvg();
     setText(".pmModeTitle", app.getDefaultTargetLabel?.(next.targetMode || app.targetSelection) || "");
     // HP as the design writes it ("6.708.921 HP · 68,0%"), same remaining-HP rule as core.js updateBossHpBar.
     const maxHp = Number(next.targetMaxHp) || 0;
@@ -478,7 +461,6 @@ const createPmWidget = (app) => {
       setText(".pmHpText", `${num(left)} HP · ${oneDec((left / maxHp) * 100)}%`);
       $(".bossHpBar")?.classList.toggle("isPmKilled", left <= 0);
     }
-    if (avgOn) loadAvg();
     const berserk = $(".pmBerserk");
     const berserkMs = Number(next.targetBerserkMs);
     const hasBerserk = next.targetBerserkMs != null && Number.isFinite(berserkMs) && berserkMs >= 0;

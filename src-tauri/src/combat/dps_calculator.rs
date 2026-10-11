@@ -827,6 +827,7 @@ impl DpsCalculator {
                     regen,
                     damage_received: dmg_recv,
                     hits_received: hits_recv,
+                    gear: crate::capture::equip_parser::player_gear(id),
                 }
             })
             .collect();
@@ -988,6 +989,7 @@ impl DpsCalculator {
                     regen,
                     damage_received: dmg_recv,
                     hits_received: hits_recv,
+                    gear: crate::capture::equip_parser::player_gear(id),
                 }
             })
             .collect();

@@ -146,7 +146,9 @@ export type FightSkill = {
   multiHitCount: number;
   hitTimestamps: number[];
 };
-export type FightActor = { actorId: number; nickname: string; job: string; jobId: number; partyHeal: number; damageReceived: number; hitsReceived: number };
+/** Worn item read from the player's spawn; slot 1 weapon … 11 earring (src-tauri equip_parser). */
+export type GearItem = { slot: number; itemId: number; enchant: number };
+export type FightActor = { actorId: number; nickname: string; job: string; jobId: number; partyHeal: number; damageReceived: number; hitsReceived: number; gear?: GearItem[] };
 export type FightRecord = {
   id: string;
   bossName: string;

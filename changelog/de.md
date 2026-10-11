@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.7
+
+- Neu: Bericht: Inspizieren zeigt die Ausrüstung der anderen Spieler im Kampf (Waffe, Rüstung, Halskette, Ohrringe, mit Verstärkung).
+- Neu: Builder: dein Daevanion kommt aus dem Spiel, Punkte pro Gott; klicke auf einen Gott, um seine Daevanion-Skills zu sehen.
+- Neu: Builder: der Skills-Tab zeigt deine Skillleiste im Spiel, pro Charakter.
+- Neu: Builder: Verstärkungsstufen (+N) werden aus dem Spiel gelesen.
+- Neu: Der Event-Hinweis im Widget spielt den Timer-Ton, wenn du ihn eingeschaltet hast.
+- Behoben: Widget: „Durchschnittlicher DPS pro Klasse“ zeigt den Kampf im Meter statt fester Zahlen.
+- Behoben: Runen und Amulett erscheinen jetzt in der Ausrüstung aus dem Spiel.
+- Behoben: Bericht und Skill-Datenbank: Icons für viele weitere Skills (Schaden über Zeit, Theosteine, umbenannte Skills); alle Skills des Spiels sind aufgeführt.
+- Behoben: Widget: mehr Abstand zwischen Event-Hinweis und Bossleiste.
+- Behoben: Icons von Kantor und Templer in den Farben ihrer Klasse.
+- Behoben: Der Schutz eines Waldläufers bleibt im Nebenhand-Slot.
+
 ## 0.4.6
 
 - Behoben: Builder: Die Ausrüstung wird beim Betreten der Welt wieder gelesen (ein großes Login-Paket wurde verworfen, die aktuelle Ausrüstung blieb leer).

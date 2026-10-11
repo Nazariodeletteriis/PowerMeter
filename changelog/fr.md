@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.7
+
+- Nouveau : Rapport : Inspecter montre l'équipement des autres joueurs du combat (arme, armure, collier, boucles d'oreilles, avec enchantement).
+- Nouveau : Builder : ton Daevanion vient du jeu, points par dieu ; clique sur un dieu pour voir ses compétences Daevanion.
+- Nouveau : Builder : l'onglet Compétences montre ta barre de compétences en jeu, par personnage.
+- Nouveau : Builder : les niveaux d'enchantement (+N) sont lus depuis le jeu.
+- Nouveau : L'alerte d'événement du widget joue le son du Minuteur, si tu l'as activé.
+- Corrigé : Widget : « DPS moyen par classe » montre le combat sur le meter au lieu de chiffres fixes.
+- Corrigé : Les runes et l'amulette apparaissent désormais dans l'équipement lu depuis le jeu.
+- Corrigé : Rapport et base de compétences : icônes pour beaucoup plus de compétences (dégâts sur la durée, théostones, compétences renommées) ; toutes les compétences du jeu sont listées.
+- Corrigé : Widget : plus d'espace entre l'alerte d'événement et la barre du boss.
+- Corrigé : Icônes de l'Aède et du Templier aux couleurs de leur classe.
+- Corrigé : Le garde d'un Rôdeur reste dans l'emplacement de main secondaire.
+
 ## 0.4.6
 
 - Corrigé : Builder : l’équipement est de nouveau lu à l’entrée dans le monde (un gros paquet de connexion était ignoré et l’équipement actuel restait vide).

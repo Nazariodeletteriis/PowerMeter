@@ -442,10 +442,9 @@
     "avg": {
       "button": "DPS medio por clase",
       "title": "DPS medio por clase",
-      "hint": "Elige un jefe para una comparación justa",
-      "error": "Estadísticas no disponibles",
+      "hint": "Último combate en el medidor",
       "sample": "Muestra",
-      "bosses": "{n} jefe"
+      "players": "{n} jugadores"
     },
     "resetTip": "Reiniciar el medidor (Ctrl+Alt+R)",
     "eventSoon": "{name} en {time}",

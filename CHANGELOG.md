@@ -4,6 +4,20 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.4.7
+
+- New: Report: Inspect shows the gear of the other players in the fight (weapon, armor, necklace, earrings, with enhancement).
+- New: Builder: your Daevanion comes from the game, points per god; click a god to see its Daevanion skills.
+- New: Builder: the Skills tab shows your skill bar in game, per character.
+- New: Builder: enhancement levels (+N) are read from the game.
+- New: The widget event alert plays the Timer sound, if you turned it on.
+- Fixed: Widget: “Average DPS by class” shows the fight on the meter instead of fixed numbers.
+- Fixed: Runes and amulet now show in the gear taken from the game.
+- Fixed: Report and Skill Database: icons for many more skills (damage over time, Theostones, renamed skills); every game skill is listed.
+- Fixed: Widget: more space between the event alert and the boss bar.
+- Fixed: Chanter and Templar icons in their class colors.
+- Fixed: A Ranger's guard is kept in the off-hand slot.
+
 ## 0.4.6
 
 - Fixed: Builder: the gear is read again when you enter the world (a large login packet was being dropped, so the current gear stayed empty).
