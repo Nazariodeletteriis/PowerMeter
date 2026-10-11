@@ -44,7 +44,7 @@
   "characters.builder.remove": "Убрать",
   "characters.builder.linkedSkills": "Панель навыков в игре, как её прочитал метр",
   "characters.builder.skillBarNone": "Ещё не прочитана: войдите в игру этим персонажем, и метр прочитает его панель навыков.",
-  "characters.builder.daevNoSkills": "На этой доске не взято ни одного навыка Даэвания.",
+  "characters.builder.daevZoom": "Увеличить: {name}",
   "characters.builder.openSkillPlanner": "Открыть в Skill Planner",
   "characters.builder.descPlaceholder": "Опиши билд: ротация, приоритет характеристик, варианты…",
   "characters.builder.copySuffix": " (копия)",

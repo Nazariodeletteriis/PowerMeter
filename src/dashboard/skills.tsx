@@ -19,7 +19,7 @@ export type GameSkill = {
   alias?: string[];
 };
 export const GAME_SKILLS = DATA as GameSkill[];
-const ICON_BASE = "https://assets.playnccdn.com/static-aion2-gamedata/resources/";
+export const ICON_BASE = "https://assets.playnccdn.com/static-aion2-gamedata/resources/";
 
 export const classSkills = (cls: string) => GAME_SKILLS.filter((s) => s.class === cls);
 

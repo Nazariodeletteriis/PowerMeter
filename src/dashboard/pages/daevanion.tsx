@@ -13,6 +13,42 @@ import { DataState, gd, useGd, useIcons } from "./world/db";
 const N = 15; // grid side of the Global boards
 const COL = { start: "#4F93EA", skill: "#B377E8", rare: "#F0A63A" };
 const kindOf = (n: PNode) => (n.kind === "Start" ? "start" : n.kind === "SkillLevel" ? "skill" : n.rarity === "Common" ? "stat" : "rare");
+
+/** One board, read only: the nodes taken lit and linked as on the planner (the Builder's Daevanion tab). */
+export function BoardView({ nodes, board, taken, width }: { nodes: PNode[]; board: number; taken: Set<string>; width: number }) {
+  const cells = nodes.filter((n) => n.board === board);
+  const icons = useIcons(cells.map((n) => n.skill?.icon));
+  const lit = (n: PNode) => taken.has(n.id) || n.kind === "Start";
+  const lines: [PNode, PNode][] = [];
+  for (const n of cells)
+    if (lit(n)) for (const m of cells) if (lit(m) && m.id > n.id && Math.abs(m.row - n.row) + Math.abs(m.col - n.col) === 1) lines.push([n, m]);
+  return (
+    <div className="dvBoard" style={{ width, gap: Math.max(1, width / 200) }}>
+      <svg viewBox={`0 0 ${N} ${N}`} aria-hidden="true">
+        {lines.map(([a, b]) => (
+          <line key={a.id + b.id} x1={a.col + 0.5} y1={a.row + 0.5} x2={b.col + 0.5} y2={b.row + 0.5} stroke="#DB0000" strokeWidth={0.09} strokeLinecap="round" />
+        ))}
+      </svg>
+      {cells.map((n) => {
+        if (n.kind === "None") return <span key={n.id} style={{ gridRow: n.row + 1, gridColumn: n.col + 1 }} />;
+        const k = kindOf(n);
+        const img = n.skill?.icon ? icons[n.skill.icon] : undefined;
+        return (
+          <span
+            key={n.id}
+            className="dvCell"
+            title={`${n.title ?? ""} · ${n.cost} pt`}
+            data-kind={k}
+            data-on={lit(n) ? "" : undefined}
+            style={{ gridRow: n.row + 1, gridColumn: n.col + 1, "--c": k === "stat" ? "var(--pm-red)" : COL[k], cursor: "default" } as CSSProperties}
+          >
+            {k === "start" ? "◆" : img ? <img src={img} alt="" /> : k === "skill" ? <SkillIcon skill={GAME_SKILLS.find((s) => s.id === n.skill?.id)} name="SK" /> : ""}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 /** "DaevanionCrystal" → "Daevanion Crystal" (game term, not translated). */
 const spaced = (s: string) => s.replace(/([a-z])([A-Z0-9])/g, "$1 $2");
 const CARD: CSSProperties = { background: "var(--pm-s1)", border: "1px solid var(--pm-line)", borderRadius: 8, padding: 14 };

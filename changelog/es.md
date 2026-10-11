@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.8
+
+- Nuevo: Builder: cada dios de la pestaña Daevanion muestra su tablero en pequeño, con los nodos que tomaste; la lupa lo amplía.
+- Corregido: La barra superior sigue al personaje al que cambias en el juego (el título de la ventana del juego devolvía el anterior).
+- Corregido: Builder: tu barra de habilidades se lee al entrar al mundo, no solo cuando la cambias.
+- Corregido: Base de habilidades y Daevanion: cada habilidad muestra su icono.
+
 ## 0.4.7
 
 - Nuevo: Informe: Inspeccionar muestra el equipo de los demás jugadores del combate (arma, armadura, collar, pendientes, con mejora).

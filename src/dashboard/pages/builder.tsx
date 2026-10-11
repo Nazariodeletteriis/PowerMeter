@@ -10,6 +10,7 @@ import {
   HeartIcon,
   LightningIcon,
   MagnifyingGlassIcon,
+  MagnifyingGlassPlusIcon,
   PencilSimpleIcon,
   PlusCircleIcon,
   PlusIcon,
@@ -48,6 +49,7 @@ import {
   type GearSet,
 } from "./characters/shared";
 import { onePerPiece } from "./gearviewer";
+import { BoardView } from "./daevanion";
 import { DataState, GameIcon, gd, gradeColor, openEntry, useGd, useIcons } from "./world/db";
 import { ShareModal } from "./shared/ShareModal";
 import { Modal } from "./system/Modal";
@@ -174,6 +176,7 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   );
   const plan = useMemo(() => planTotals(nodes, picked), [nodes, picked]);
   const taken = useMemo(() => new Set(connected(nodes, picked)), [nodes, picked]);
+  const [zoom, setZoom] = useState<number | null>(null); // board shown large
   const totalsOf = (gear: (Equipped & { slot: string })[]) => (calcData.data ? buildStats(calcData.data, cur.lvl, gear, plan) : {});
   const totals = totalsOf(equipped);
   const wornTotals = which === "want" ? totalsOf(worn) : undefined;
@@ -506,13 +509,6 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
               <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 8 }}>
                 {(planner.data?.boards ?? []).map((b) => {
                   const d = b.data_json as unknown as PlannerBoardData;
-                  // The god's Daevanion skills taken on this board, levels added up.
-                  const skills = new Map<string, { title: string; levels: number }>();
-                  for (const n of nodes) {
-                    if (n.board !== d.board || !n.skill || !taken.has(n.id)) continue;
-                    const x = skills.get(n.skill.id) ?? { title: n.title ?? n.skill.id, levels: 0 };
-                    skills.set(n.skill.id, { ...x, levels: x.levels + n.skill.levels });
-                  }
                   return (
                     <details key={b.id} style={{ borderBottom: "1px solid var(--pm-line)" }}>
                       <summary style={{ display: "flex", gap: 10, alignItems: "center", minHeight: 34, cursor: "pointer" }}>
@@ -521,14 +517,11 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
                           {plan.spent[d.board] ?? 0} / {maxByBoard[d.board] ?? 0}
                         </span>
                       </summary>
-                      <div style={{ padding: "0 0 10px", display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: "var(--pm-t2)" }}>
-                        {skills.size === 0 && <span>{t("characters.builder.daevNoSkills")}</span>}
-                        {[...skills.values()].map((x) => (
-                          <span key={x.title} style={{ display: "flex", gap: 8 }}>
-                            <span style={{ flex: 1, color: "var(--pm-t1)" }}>{x.title}</span>
-                            <span className="mono">+{x.levels}</span>
-                          </span>
-                        ))}
+                      <div style={{ padding: "4px 0 12px", display: "flex", alignItems: "flex-start", gap: 8 }}>
+                        <BoardView nodes={nodes} board={d.board} taken={taken} width={240} />
+                        <button type="button" className="btn sm" aria-label={t("characters.builder.daevZoom", { name: d.title })} title={t("characters.builder.daevZoom", { name: d.title })} onClick={() => setZoom(d.board)}>
+                          <MagnifyingGlassPlusIcon aria-hidden="true" />
+                        </button>
                       </div>
                     </details>
                   );
@@ -580,6 +573,19 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
         </div>
       </div>
       {calcData.data && <StatsPanel t={t} lang={lang} data={calcData.data} totals={totals} base={wornTotals} />}
+      {zoom !== null && (
+        <Modal
+          width={640}
+          onClose={() => setZoom(null)}
+          title={(id) => (
+            <h2 id={id} style={{ margin: 0, fontSize: 16, fontWeight: 500 }}>
+              {((planner.data?.boards ?? []).find((b) => (b.data_json as unknown as PlannerBoardData).board === zoom)?.data_json as unknown as PlannerBoardData | undefined)?.title}
+            </h2>
+          )}
+        >
+          <BoardView nodes={nodes} board={zoom} taken={taken} width={580} />
+        </Modal>
+      )}
       {noClone && (
         <Modal
           width={420}

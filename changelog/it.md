@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.8
+
+- Nuovo: Builder: ogni dio della scheda Daevanion mostra il suo tabellone in piccolo, con i nodi che hai preso; la lente lo ingrandisce.
+- Corretto: La barra in alto segue il personaggio su cui passi in gioco (il titolo della finestra del gioco riportava quello precedente).
+- Corretto: Builder: la barra skill viene letta quando entri nel mondo, non solo quando la cambi.
+- Corretto: Database Skill e Daevanion: ogni skill mostra la sua icona.
+
 ## 0.4.7
 
 - Nuovo: Report: Ispeziona mostra l'equip degli altri giocatori del combattimento (arma, armatura, collana, orecchini, con potenziamento).

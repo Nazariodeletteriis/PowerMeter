@@ -29,18 +29,19 @@ export function CaptureSync({ settings, save, onError }: { settings: Settings; s
   const key = JSON.stringify(bar ?? []);
   useEffect(() => {
     if (!bar?.length) return;
-    const skills = bar.map((b) => GAME_SKILLS.find((s) => s.id === String(b.skillId)));
+    // Skills missing from our list are left out; skills of another class mean a bar we misread: leave it.
+    const known = bar.flatMap((b) => GAME_SKILLS.filter((s) => s.id === String(b.skillId)).map((s) => ({ slot: b.slot, s })));
+    const skills = known.map((k) => k.s);
     const cls = skills[0]?.class;
-    // A skill missing from our list, or of another class: leave the planner as it is.
-    if (!cls || skills.some((s) => s?.class !== cls)) return;
-    const cells = bar.flatMap((b, i) => {
-      const c = column(b.slot);
-      return c === undefined ? [] : [[`0,${c}`, skills[i]!.id]];
+    if (!cls || skills.some((s) => s.class !== cls)) return;
+    const cells = known.flatMap(({ slot, s }) => {
+      const c = column(slot);
+      return c === undefined ? [] : [[`0,${c}`, s.id]];
     });
     setMem(`skBar:${cls}`, Object.fromEntries(cells));
     // The Builder shows it per character: only when the bar is of the class the game says you play.
     const all = readCapturedBar(settings[CAPTURED_BAR_KEY]);
-    const ids = skills.map((x) => x!.id);
+    const ids = skills.map((x) => x.id);
     if (char?.cls === cls && JSON.stringify(all[char.id]) !== JSON.stringify(ids)) save(CAPTURED_BAR_KEY, JSON.stringify({ ...all, [char.id]: ids })).catch(onError);
   }, [key, char?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 

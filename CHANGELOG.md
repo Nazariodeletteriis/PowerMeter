@@ -4,6 +4,13 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.4.8
+
+- New: Builder: each god of the Daevanion tab shows its board in small, with the nodes you took; the magnifier enlarges it.
+- Fixed: The top bar follows the character you switch to in game (the game window title kept bringing back the previous one).
+- Fixed: Builder: your skill bar is read when you enter the world, not only when you change it.
+- Fixed: Skill Database and Daevanion: every skill shows its icon.
+
 ## 0.4.7
 
 - New: Report: Inspect shows the gear of the other players in the fight (weapon, armor, necklace, earrings, with enhancement).

@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.8
+
+- Nouveau : Builder : chaque dieu de l'onglet Daevanion montre son plateau en petit, avec les nœuds que tu as pris ; la loupe l'agrandit.
+- Corrigé : La barre du haut suit le personnage vers lequel tu passes en jeu (le titre de la fenêtre du jeu ramenait le précédent).
+- Corrigé : Builder : ta barre de compétences est lue à l'entrée dans le monde, pas seulement quand tu la modifies.
+- Corrigé : Base de compétences et Daevanion : chaque compétence affiche son icône.
+
 ## 0.4.7
 
 - Nouveau : Rapport : Inspecter montre l'équipement des autres joueurs du combat (arme, armure, collier, boucles d'oreilles, avec enchantement).

@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.4.8
+
+- Neu: Builder: Jeder Gott im Daevanion-Tab zeigt sein Brett im Kleinen, mit deinen gewählten Knoten; die Lupe vergrößert es.
+- Behoben: Die obere Leiste folgt dem Charakter, zu dem du im Spiel wechselst (der Fenstertitel des Spiels holte den vorherigen zurück).
+- Behoben: Builder: Deine Skillleiste wird beim Betreten der Welt gelesen, nicht nur bei Änderungen.
+- Behoben: Skill-Datenbank und Daevanion: Jeder Skill zeigt sein Icon.
+
 ## 0.4.7
 
 - Neu: Bericht: Inspizieren zeigt die Ausrüstung der anderen Spieler im Kampf (Waffe, Rüstung, Halskette, Ohrringe, mit Verstärkung).

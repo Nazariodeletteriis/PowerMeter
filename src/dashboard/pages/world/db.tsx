@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { ICON_BASE } from "../../skills";
 import { invoke } from "@tauri-apps/api/core";
 import { ArrowLeftIcon, CaretLeftIcon, CaretRightIcon, CloudArrowDownIcon, CubeIcon, MagnifyingGlassIcon, WarningIcon } from "@phosphor-icons/react";
 import type { BuilderData, Category, CategoryCount, Dungeon, DungeonBoss, GameRecord, GearPiece, IconUrls, ListRow, MonsterDrop, Planner, SearchHit } from "../../../data/db/types";
@@ -98,7 +99,10 @@ export function useGd<D>(load: () => Promise<D>, key: string): Loaded<D> {
 /** Image URLs for icon names (missing ones fall back to a glyph). */
 export function useIcons(names: (string | null | undefined)[]): IconUrls {
   const list = [...new Set(names.filter((n): n is string => !!n))].sort();
-  return useGd(() => (list.length ? gd.icons(list) : Promise.resolve({})), list.join("|")).data ?? {};
+  const found = useGd(() => (list.length ? gd.icons(list) : Promise.resolve({})), list.join("|")).data ?? {};
+  // Skill icons the archive has no image for: the game CDN by name, as the meter and the Skill Planner show them.
+  const cdn = Object.fromEntries(list.filter((n) => /^ICON_[A-Z]+_SKILL_/i.test(n)).map((n) => [n, `${ICON_BASE}${n}.png`]));
+  return { ...cdn, ...found };
 }
 
 /** Icon in a square outlined with the grade color; our CDN image, else a glyph. */

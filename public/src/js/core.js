@@ -649,7 +649,11 @@ class DpsApp {
     }
     if (!running) return;
     const detectedName = this.parseCharacterNameFromWindowTitle(title);
-    if (!detectedName || detectedName === this.USER_NAME) return;
+    // Only a title that changed names a new character: the title can stay on the previous one after a
+    // switch in game, and re-sending it would undo the name the game's self record just gave the backend.
+    if (!detectedName || detectedName === this._lastTitleName) return;
+    this._lastTitleName = detectedName;
+    if (detectedName === this.USER_NAME) return;
     const hadPreviousName = !!this.USER_NAME;
     if (hadPreviousName) {
       // Character switch means new TCP connection — full refresh resets

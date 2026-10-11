@@ -44,7 +44,7 @@
   "characters.builder.remove": "移除",
   "characters.builder.linkedSkills": "遊戲內技能欄（計量器最後讀取的狀態）",
   "characters.builder.skillBarNone": "尚未讀取：用此角色進入遊戲，計量器會讀取其技能欄。",
-  "characters.builder.daevNoSkills": "此面板未獲得任何守護力技能。",
+  "characters.builder.daevZoom": "放大 {name}",
   "characters.builder.openSkillPlanner": "在 Skill Planner 中開啟",
   "characters.builder.descPlaceholder": "描述此配置：技能循環、屬性優先順序、變體…",
   "characters.builder.copySuffix": " (複本)",

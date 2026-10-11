@@ -28,6 +28,8 @@
 //!   `01 <count u8> { <kind u8> 01 <slot u8> [kind 3: <skill id u32>] 04 <4 × u32> } × count`
 //!   kind 3 = the slot holds a skill, 2 = empty; slots 0-7 and 20-23.
 //!   e.g. `03 01 16 900b0901 04 900b0901 00000000 00000000 00000000` = Lightning Barrage (17370000) in slot 22.
+//! `8C E2` at login (packets_20261011_183820): the worn sets, then the bar list as in `93 E2` with the bar
+//!   number (1-3) in the entry's second byte: `01 24 { <kind> <bar> <slot> ... }` = 3 bars × 12 slots.
 //! `26 E2` Daevanion nodes taken, all of them, sent once on entering the world (packets_20261011_183820, 4 logins):
 //!   `<boards u8> { <board key u32> <count u8> <node id u32> × count } × boards`; the board key is class digit × 10
 //!   + board (11-16 Gladiator, 71-76 Cleric), the node ids are the archive's (`gladiator:110113`), the Start node
@@ -146,6 +148,7 @@ pub fn parse(packet: &[u8]) {
         (0x1B, 0x56) => parse_item(body),
         (0x11, 0x56) => parse_inventory(body),
         (0x93, 0xE2) => parse_skillbar(body),
+        (0x8C, 0xE2) => parse_login_bars(body),
         (0x26, 0xE2) => parse_daevanion(body),
         (0x45 | 0x33, 0x36) => parse_spawn_gear(body),
         (0x28, 0xE2) => {
@@ -211,28 +214,46 @@ fn parse_inventory(b: &[u8]) {
     }
 }
 
-fn parse_skillbar(b: &[u8]) {
+/// The bar list at `b`; only bar 1 is kept (the login copy has bars 1-3). None when the bytes are not one.
+fn read_skillbar(b: &[u8]) -> Option<Vec<BarSkill>> {
     if b.len() < 2 || b[0] != 1 {
-        return;
+        return None;
     }
     let mut bar = Vec::new();
     let mut o = 2;
     for _ in 0..b[1] {
-        let (kind, slot) = match (b.get(o), b.get(o + 1), b.get(o + 2)) {
-            (Some(&k @ (2 | 3)), Some(1), Some(&s)) => (k, s),
-            _ => return, // unknown layout: keep the last good bar
+        let (kind, n, slot) = match (b.get(o), b.get(o + 1), b.get(o + 2)) {
+            (Some(&k @ (2 | 3)), Some(&n @ 1..=3), Some(&s)) => (k, n, s),
+            _ => return None,
         };
         o += 3;
         if kind == 3 {
-            match u32_at(b, o) {
-                Some(skill_id) => bar.push(BarSkill { slot, skill_id }),
-                None => return,
+            let skill_id = u32_at(b, o)?;
+            if n == 1 {
+                bar.push(BarSkill { slot, skill_id });
             }
             o += 4;
         }
+        if b.get(o) != Some(&4) {
+            return None;
+        }
         o += 1 + 16; // 04 <4 × u32>
     }
-    STATE.lock().unwrap_or_else(|e| e.into_inner()).skillbar = bar;
+    Some(bar)
+}
+
+fn parse_skillbar(b: &[u8]) {
+    // Unknown layout: keep the last good bar.
+    if let Some(bar) = read_skillbar(b) {
+        STATE.lock().unwrap_or_else(|e| e.into_inner()).skillbar = bar;
+    }
+}
+
+/// `8C E2` at login: the worn sets, then the bars as in `93 E2`; the bar list starts where one reads whole.
+fn parse_login_bars(b: &[u8]) {
+    if let Some(bar) = (0..b.len()).filter(|&o| b[o] == 1 && b.get(o + 1).is_some_and(|&n| n >= 12)).find_map(|o| read_skillbar(&b[o..])) {
+        STATE.lock().unwrap_or_else(|e| e.into_inner()).skillbar = bar;
+    }
 }
 
 fn parse_daevanion(b: &[u8]) {
@@ -351,6 +372,15 @@ mod tests {
         // packets_20261011_183820, 18:48:04.231: Cleric login, Spiritforged Mace +10 (item level 45 + 10 = 0x37).
         parse(&hex("9758115610027800e9d8170000e90000e6e2140000f40000409b990601000000000000000b01000000000000000000000000000a0000000000000000000000000037000000010400000000000000"));
         assert_eq!(snapshot().equipment, vec![WornItem { slot: 1, item_id: 110730048, enchant: 10 }]);
+
+        // packets_20261011_183820, 18:48:04.174: the Cleric's bars at login (8C E2, from the bar list on): bar 1 only.
+        STATE.lock().unwrap().skillbar.clear();
+        parse(&hex("7f8ce2010101000124030100508d030104508d0301000000000000000000000000030101900b090104900b0901000000000000000000000000030102e0ec040104e0ec0401003b05010000000000000000030103001d0a0104001d0a01000000000000000000000000030104d0a7090104d0a709010000000000000000000000000201050400000000000000000000000000000000030106a050040104a0500401000000000000000000000000030107d0c5040104d0c50401f0f50901b077040170bd0801020114040000000000000000000000000000000002011504000000000000000000000000000000000201160400000000000000000000000000000000030117c080090104c080090130b00501c09e040180020401020200040000000000000000000000000000000002020104000000000000000000000000000000000202020400000000000000000000000000000000020203040000000000000000000000000000000002020404000000000000000000000000000000000202050400000000000000000000000000000000020206040000000000000000000000000000000002020704000000000000000000000000000000000202140400000000000000000000000000000000020215040000000000000000000000000000000002021604000000000000000000000000000000000202170400000000000000000000000000000000020300040000000000000000000000000000000002030104000000000000000000000000000000000203020400000000000000000000000000000000020303040000000000000000000000000000000002030404000000000000000000000000000000000203050400000000000000000000000000000000020306040000000000000000000000000000000002030704000000000000000000000000000000000203140400000000000000000000000000000000020315040000000000000000000000000000000002031604000000000000000000000000000000000203170400000000000000000000000000000000"));
+        let bar: Vec<(u8, u32)> = snapshot().skillbar.iter().map(|s| (s.slot, s.skill_id)).collect();
+        assert_eq!(
+            bar,
+            vec![(0, 17010000), (1, 17370000), (2, 17100000), (3, 17440000), (4, 17410000), (6, 17060000), (7, 17090000), (23, 17400000)]
+        );
 
         // Daevanion: two boards (11: Start 110113 + 110033, 12: one node), then one node taken in game.
         parse(&hex("1626e2020b0000000221ae0100d1ad01000c0000000103d50100"));

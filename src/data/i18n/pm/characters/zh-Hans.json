@@ -44,7 +44,7 @@
   "characters.builder.remove": "移除",
   "characters.builder.linkedSkills": "游戏内技能栏（计量器最后读取的状态）",
   "characters.builder.skillBarNone": "尚未读取：用此角色进入游戏，计量器会读取其技能栏。",
-  "characters.builder.daevNoSkills": "此面板未获得任何守护力技能。",
+  "characters.builder.daevZoom": "放大 {name}",
   "characters.builder.openSkillPlanner": "在 Skill Planner 中打开",
   "characters.builder.descPlaceholder": "描述配装：技能循环、属性优先级、变体…",
   "characters.builder.copySuffix": " (副本)",

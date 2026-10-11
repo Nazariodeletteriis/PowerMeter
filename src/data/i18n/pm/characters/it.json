@@ -44,7 +44,7 @@
   "characters.builder.remove": "Rimuovi",
   "characters.builder.linkedSkills": "Barra skill in gioco, come letta dal meter",
   "characters.builder.skillBarNone": "Non ancora letta: entra in gioco con questo personaggio e il meter leggerà la sua barra skill.",
-  "characters.builder.daevNoSkills": "Nessuna skill Daevanion presa in questo tabellone.",
+  "characters.builder.daevZoom": "Ingrandisci {name}",
   "characters.builder.openSkillPlanner": "Apri nello Skill Planner",
   "characters.builder.descPlaceholder": "Descrivi la build: rotazione, priorità delle statistiche, varianti…",
   "characters.builder.copySuffix": " (copia)",
