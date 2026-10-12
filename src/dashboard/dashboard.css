@@ -1196,31 +1196,3 @@ button.gridRow:hover {
   margin-top: 2px;
   color: var(--pm-redt);
 }
-/* Admin: one user per row, grant form on the right. */
-.subsUser {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 16px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--pm-line);
-}
-.subsUser .meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--pm-t3);
-}
-.subsGrant {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.subsGrant .input {
-  height: 30px;
-  font-size: 12px;
-}

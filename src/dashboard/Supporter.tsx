@@ -1,11 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
 import { CheckIcon, HeartIcon, WifiSlashIcon } from "@phosphor-icons/react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { PLANS, PLANS_OPEN, refreshEntitlement, useEntitlement, type Entitlement, type PaidTier, type Tier } from "./entitlement";
 import type { Key, T } from "./i18n";
 import { PATREON_URL } from "./Shell";
 
 const A2TOOLS_URL = "https://github.com/taengu/A2Tools-DPS-Meter";
+const ADMIN_URL = "https://powermeter.letrionlabs.it/admin";
 const MANAGE_URL = "https://www.patreon.com/settings/memberships";
 // Same terms the onboarding shows (scripts/sync-legal.mjs); the hash picks the language.
 const TERMS_URL = "https://powermeter.letrionlabs.it/terms.html";
@@ -40,7 +41,7 @@ function origin(t: T, e: Entitlement, signedIn: boolean, fmt: (ms: number) => st
   }
 }
 
-/** Prototype pg.supporter: plan, Patreon link, plan comparison, and the admin grants. */
+/** Prototype pg.supporter: plan, Patreon link, plan comparison, and the admin panel link. */
 export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (e: unknown) => void }) {
   const e = useEntitlement();
   const [account, setAccount] = useState<unknown>(); // undefined until pm_account answers
@@ -52,8 +53,7 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
   const signIn = () => invoke("pm_login").then(setAccount).then(refreshEntitlement).catch(onError);
   const unlink = () => confirm(t("subs.unlinkConfirm")) && invoke("pm_patreon_unlink").then(refreshEntitlement).catch(onError);
   const date = new Intl.DateTimeFormat(lang, { dateStyle: "medium" });
-  // The server sends dates as ISO strings (admin list) or epoch ms (permit): both parse.
-  const fmt = (d: number | string) => date.format(new Date(d));
+  const fmt = (ms: number) => date.format(ms);
   // The trial unlocks what Daeva unlocks.
   const current = e && (e.tier === "trial" ? "daeva" : e.tier);
   const [before, after] = t("about.a2tools").split("{link}");
@@ -191,7 +191,14 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
         </div>
       </section>
 
-      {e?.admin && <Admin t={t} fmt={fmt} onError={onError} />}
+      {/* Admin only (the server checks too): users, grants, roles and bans live in the web panel. */}
+      {e?.admin && (
+        <section className="card">
+          <button type="button" className="btn fill lg" onClick={() => open(ADMIN_URL)}>
+            {t("subs.admin.open")}
+          </button>
+        </section>
+      )}
 
       <p style={{ marginTop: 4, fontSize: 12, color: "var(--pm-t3)" }}>
         {before}
@@ -201,163 +208,5 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
         {after}
       </p>
     </div>
-  );
-}
-
-/** pm_admin_users row (src-tauri/src/pm_account.rs). */
-type AdminUser = {
-  id: string;
-  discordId: string;
-  name: string;
-  lastLoginAt: string | null;
-  grant: { tier: PaidTier; expiresAt: string | null; note: string | null } | null;
-  patreonTier: Tier | null;
-  trialEndsAt: number | null;
-  devices: number;
-  maxDevices: number;
-  /** Debugger role: packet and debug logs in the widget. */
-  debugger: boolean;
-  /** Developer role: everything unlocked, no trial running. */
-  developer: boolean;
-};
-
-/** Roles an admin gives by hand (pm_admin_role); the badge is the role's name, the same in every language. */
-const ROLES = [
-  ["debugger", "Debugger"],
-  ["developer", "Developer"],
-] as const;
-
-const DURATIONS = [7, 30, 90, 365];
-
-/** Admin only (the server checks too): who gets which tier by hand. */
-function Admin({ t, fmt, onError }: { t: T; fmt: (d: number | string) => string; onError: (e: unknown) => void }) {
-  const [q, setQ] = useState("");
-  const [users, setUsers] = useState<AdminUser[]>();
-  const [busy, setBusy] = useState(false);
-  const load = (query = q) => invoke<{ users: AdminUser[] }>("pm_admin_users", { q: query }).then((r) => setUsers(r.users), onError);
-  useEffect(() => {
-    void load("");
-  }, []);
-  const act = (cmd: string, args: Record<string, unknown>) => {
-    setBusy(true);
-    invoke(cmd, args)
-      .then(() => Promise.all([load(), refreshEntitlement()]), onError)
-      .finally(() => setBusy(false));
-  };
-  const grant = (u: AdminUser) => (ev: FormEvent<HTMLFormElement>) => {
-    ev.preventDefault();
-    const f = new FormData(ev.currentTarget);
-    const days = String(f.get("days"));
-    const note = String(f.get("note")).trim();
-    act("pm_admin_grant", { userId: u.id, tier: f.get("tier"), days: days ? Number(days) : null, note: note || null });
-  };
-  const revoke = (u: AdminUser) => confirm(t("subs.admin.revokeConfirm", { name: u.name })) && act("pm_admin_revoke", { userId: u.id });
-  const setRole = (u: AdminUser, role: "debugger" | "developer") =>
-    confirm(t(`subs.admin.${role}${u[role] ? "Off" : "On"}Confirm`, { name: u.name })) && act("pm_admin_role", { userId: u.id, role, on: !u[role] });
-  const resetDevices = (u: AdminUser) =>
-    confirm(t("subs.admin.resetDevicesConfirm", { name: u.name })) && act("pm_admin_reset_devices", { userId: u.id });
-
-  return (
-    <section className="card">
-      <h3 className="kicker">{t("subs.admin.title")}</h3>
-      <form
-        style={{ display: "flex", gap: 8, margin: "10px 0 4px" }}
-        onSubmit={(ev) => {
-          ev.preventDefault();
-          void load();
-        }}
-      >
-        <input
-          className="input sm"
-          type="search"
-          style={{ flex: 1 }}
-          value={q}
-          onChange={(ev) => setQ(ev.target.value)}
-          aria-label={t("subs.admin.search")}
-          placeholder={t("subs.admin.search")}
-        />
-        <button type="submit" className="btn lg">
-          {t("subs.admin.searchBtn")}
-        </button>
-      </form>
-      <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{t("subs.admin.hint")}</div>
-      {users && !users.length && <p style={{ marginTop: 12, color: "var(--pm-t3)" }}>{t("subs.admin.empty")}</p>}
-      <ul>
-        {users?.map((u) => {
-          const patreon = u.patreonTier !== "free" && u.patreonTier;
-          const trial = !!u.trialEndsAt && u.trialEndsAt > Date.now();
-          return (
-            <li key={u.id} className="subsUser">
-              <div style={{ minWidth: 0 }}>
-                <div>
-                  {u.name}{" "}
-                  <span className="mono" style={{ fontSize: 12, color: "var(--pm-t3)" }}>
-                    {u.discordId}
-                  </span>
-                </div>
-                <div className="meta">
-                  {t("subs.admin.lastLogin", { date: u.lastLoginAt ? fmt(u.lastLoginAt) : "-" })}
-                  <span className="mono">{t("subs.admin.devices", { devices: u.devices, max: u.maxDevices })}</span>
-                  {u.grant && (
-                    <span className="badge" style={{ borderColor: "#DB000088", color: "#FF6B6B" }} title={u.grant.note ?? undefined}>
-                      {u.grant.expiresAt
-                        ? t("subs.admin.grantUntil", { tier: PLANS[u.grant.tier].name, date: fmt(u.grant.expiresAt) })
-                        : t("subs.admin.grantForever", { tier: PLANS[u.grant.tier].name })}
-                    </span>
-                  )}
-                  {patreon && <span className="badge">Patreon {tierName(t, patreon)}</span>}
-                  {trial && <span className="badge">{t("subs.admin.trialUntil", { date: fmt(u.trialEndsAt!) })}</span>}
-                  {ROLES.map(([role, label]) => u[role] && <span key={role} className="badge">{label}</span>)}
-                  {!u.grant && !patreon && !trial && <span className="badge">{tierName(t, "free")}</span>}
-                </div>
-              </div>
-              <form className="subsGrant" onSubmit={grant(u)}>
-                <select className="input" name="tier" defaultValue={u.grant?.tier ?? "recluta"} aria-label={t("subs.admin.tier")}>
-                  {(Object.keys(PLANS) as PaidTier[]).map((k) => (
-                    <option key={k} value={k}>
-                      {PLANS[k].name}
-                    </option>
-                  ))}
-                </select>
-                <select className="input" name="days" defaultValue="30" aria-label={t("subs.admin.duration")}>
-                  {DURATIONS.map((n) => (
-                    <option key={n} value={n}>
-                      {t("subs.admin.days", { n })}
-                    </option>
-                  ))}
-                  <option value="">{t("subs.admin.forever")}</option>
-                </select>
-                <input
-                  className="input"
-                  name="note"
-                  maxLength={200}
-                  style={{ width: 150 }}
-                  aria-label={t("subs.admin.note")}
-                  placeholder={t("subs.admin.note")}
-                />
-                <button type="submit" className="btn fill sm" disabled={busy}>
-                  {t("subs.admin.grant")}
-                </button>
-                {u.grant && (
-                  <button type="button" className="btn sm" disabled={busy} onClick={() => revoke(u)}>
-                    {t("subs.admin.revoke")}
-                  </button>
-                )}
-                {ROLES.map(([role]) => (
-                  <button key={role} type="button" className="btn sm" disabled={busy} onClick={() => setRole(u, role)}>
-                    {t(`subs.admin.${role}${u[role] ? "Off" : "On"}`)}
-                  </button>
-                ))}
-                {u.devices > 0 && (
-                  <button type="button" className="btn sm" disabled={busy} onClick={() => resetDevices(u)}>
-                    {t("subs.admin.resetDevices")}
-                  </button>
-                )}
-              </form>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
   );
 }

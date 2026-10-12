@@ -66,7 +66,10 @@ async fn read_json(res: reqwest::Response) -> Result<Value, String> {
 }
 
 async fn call(method: reqwest::Method, url: &str, token: Option<&str>, body: Option<&Value>) -> Result<Value, String> {
-    let mut req = reqwest::Client::new().request(method, url);
+    // The server keeps each account's app version for the admin panel.
+    let mut req = reqwest::Client::new()
+        .request(method, url)
+        .header("X-PM-Version", crate::entity::fight_record::APP_VERSION);
     if let Some(body) = body {
         req = req.header("Content-Type", "application/json").body(body.to_string());
     }
@@ -165,9 +168,27 @@ fn log_path(id: &str) -> Result<String, String> {
     }
 }
 
+/// The dashboard's `account.suspended` text in the meter's language (en when unset).
+fn suspended_text(state: &AppState) -> Option<String> {
+    let dict = match state.settings.get("dpsMeter.language").as_deref() {
+        Some("de") => include_str!("../../src/data/i18n/pm/de.json"),
+        Some("es") => include_str!("../../src/data/i18n/pm/es.json"),
+        Some("fr") => include_str!("../../src/data/i18n/pm/fr.json"),
+        Some("it") => include_str!("../../src/data/i18n/pm/it.json"),
+        Some("ja") => include_str!("../../src/data/i18n/pm/ja.json"),
+        Some("ko") => include_str!("../../src/data/i18n/pm/ko.json"),
+        Some("pt") => include_str!("../../src/data/i18n/pm/pt.json"),
+        Some("ru") => include_str!("../../src/data/i18n/pm/ru.json"),
+        Some("zh-Hans") => include_str!("../../src/data/i18n/pm/zh-Hans.json"),
+        Some("zh-Hant") => include_str!("../../src/data/i18n/pm/zh-Hant.json"),
+        _ => include_str!("../../src/data/i18n/pm/en.json"),
+    };
+    serde_json::from_str::<Value>(dict).ok()?["account.suspended"].as_str().map(str::to_string)
+}
+
 /// Waits for the browser to hit `/callback?code=…` (or `?error=…`) and answers
-/// with a page telling the user to go back to PowerMeter.
-async fn wait_for_code(listener: TcpListener) -> Result<String, String> {
+/// with a page telling the user to go back to PowerMeter (`suspended`: the text for a suspended account).
+async fn wait_for_code(listener: TcpListener, suspended: Option<String>) -> Result<String, String> {
     loop {
         let (mut stream, _) = listener.accept().await.map_err(|e| e.to_string())?;
         let mut buf = vec![0u8; 4096];
@@ -190,10 +211,10 @@ async fn wait_for_code(listener: TcpListener) -> Result<String, String> {
             (_, Some(err)) => Err(err),
             _ => Err("missing code".to_string()),
         };
-        let page = if result.is_ok() {
-            "PowerMeter: login complete. You can close this tab."
-        } else {
-            "PowerMeter: login failed. Close this tab and try again."
+        let page = match (&result, &suspended) {
+            (Ok(_), _) => "PowerMeter: login complete. You can close this tab.",
+            (Err(e), Some(text)) if e == "account_suspended" => text,
+            (Err(_), _) => "PowerMeter: login failed. Close this tab and try again.",
         };
         let html = format!(
             "<!doctype html><meta charset=utf-8><title>PowerMeter</title>\
@@ -225,7 +246,7 @@ pub async fn pm_login(state: tauri::State<'_, AppState>) -> Result<Value, String
     tauri_plugin_opener::open_url(format!("{base}/auth/discord/start?port={port}"), None::<&str>)
         .map_err(|e| e.to_string())?;
 
-    let code = tokio::time::timeout(LOGIN_TIMEOUT, wait_for_code(listener))
+    let code = tokio::time::timeout(LOGIN_TIMEOUT, wait_for_code(listener, suspended_text(&state)))
         .await
         .map_err(|_| "login timed out".to_string())??;
     let res = post_json(&format!("{base}/api/auth/exchange"), None, &json!({ "code": code })).await?;
@@ -525,55 +546,6 @@ pub async fn pm_patreon_link(state: tauri::State<'_, AppState>, waiver: bool) ->
 #[tauri::command]
 pub async fn pm_patreon_unlink(state: tauri::State<'_, AppState>) -> Result<(), String> {
     authed(&state, reqwest::Method::DELETE, "/api/patreon/link", None).await.map(|_| ())
-}
-
-/// Admin only (the server checks): last 50 users, or those matching name / Discord id.
-#[tauri::command]
-pub async fn pm_admin_users(state: tauri::State<'_, AppState>, q: String) -> Result<Value, String> {
-    authed(&state, reqwest::Method::GET, &format!("/api/admin/users?q={}", urlencoding::encode(q.trim())), None).await
-}
-
-fn grant_path(user_id: &str) -> Result<String, String> {
-    if !user_id.is_empty() && user_id.len() <= 20 && user_id.bytes().all(|b| b.is_ascii_digit()) {
-        Ok(format!("/api/admin/grants/{user_id}"))
-    } else {
-        Err("invalid user id".into())
-    }
-}
-
-/// Admin only: gives a tier by hand (`days` None = forever).
-#[tauri::command]
-pub async fn pm_admin_grant(
-    state: tauri::State<'_, AppState>,
-    user_id: String,
-    tier: String,
-    days: Option<u32>,
-    note: Option<String>,
-) -> Result<(), String> {
-    let body = json!({ "tier": tier, "days": days, "note": note });
-    authed(&state, reqwest::Method::PUT, &grant_path(&user_id)?, Some(&body)).await.map(|_| ())
-}
-
-/// Admin only: forgets a user's PCs (new or reinstalled PC over the limit).
-#[tauri::command]
-pub async fn pm_admin_reset_devices(state: tauri::State<'_, AppState>, user_id: String) -> Result<(), String> {
-    authed(&state, reqwest::Method::DELETE, &grant_path(&user_id)?.replace("/grants/", "/devices/"), None).await.map(|_| ())
-}
-
-#[tauri::command]
-pub async fn pm_admin_revoke(state: tauri::State<'_, AppState>, user_id: String) -> Result<(), String> {
-    authed(&state, reqwest::Method::DELETE, &grant_path(&user_id)?, None).await.map(|_| ())
-}
-
-/// Admin only: gives (`on`) or takes a role: `debugger` (packet and debug logs) or `developer`
-/// (everything unlocked; taking it away restarts the trial).
-#[tauri::command]
-pub async fn pm_admin_role(state: tauri::State<'_, AppState>, user_id: String, role: String, on: bool) -> Result<(), String> {
-    if role != "debugger" && role != "developer" {
-        return Err("invalid role".into());
-    }
-    let method = if on { reqwest::Method::PUT } else { reqwest::Method::DELETE };
-    authed(&state, method, &grant_path(&user_id)?.replace("/grants/", &format!("/{role}/")), None).await.map(|_| ())
 }
 
 /// Class stats over the community's public logs; no account needed.

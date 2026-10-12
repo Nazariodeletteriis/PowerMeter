@@ -9,7 +9,7 @@ import {
   XCircleIcon,
 } from "@phosphor-icons/react";
 import type { SaveSetting, Settings } from "./App";
-import { LANGUAGE_SETTING, LANGUAGES, type Key, type T } from "./i18n";
+import { errorText, LANGUAGE_SETTING, LANGUAGES, type Key, type T } from "./i18n";
 import { USER_NAME_KEY } from "./Shell";
 import { CLASSES, Logo } from "./ui";
 import { usePoll } from "./usePoll";
@@ -147,7 +147,7 @@ function Frame({
           {children}
           {error && (
             <p className="error" role="alert">
-              {t("common.error", { message: error })}
+              {errorText(t, error)}
             </p>
           )}
         </div>

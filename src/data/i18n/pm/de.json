@@ -36,6 +36,7 @@
   "account.discord": "Mit Discord anmelden",
   "account.later": "Später",
   "account.browser": "Schließe die Anmeldung auf der eben geöffneten Browserseite ab.",
+  "account.suspended": "Dein PowerMeter-Konto ist gesperrt. Für Informationen schreib an info@letrionlabs.it",
   "disclaimer.title": "Bevor du startest",
   "disclaimer.body": "PowerMeter ist keine offizielle Software von AION 2, sondern eine Amateur-Software für die Aion-2-Community und steht in keiner Verbindung zu NCSoft. PowerMeter liest Kampfdaten passiv aus. Nutzung auf eigene Gefahr.",
   "disclaimer.accept": "Ich habe die Nutzungsbedingungen und die Datenschutzerklärung gelesen und akzeptiere sie",

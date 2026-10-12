@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { initialLanguage, LANGUAGE_SETTING, translator } from "./i18n";
+import { errorText, initialLanguage, LANGUAGE_SETTING, translator } from "./i18n";
 import { Onboarding, TERMS_VERSION } from "./Onboarding";
 import { applyPalette } from "./pages/system/theme";
 import { Shell } from "./Shell";
@@ -59,7 +59,7 @@ export function App() {
       <TitleBar t={t} lang={lang} onError={onError} />
       {error && (
         <p className="error updateBanner" role="alert">
-          {t("common.error", { message: error })}
+          {errorText(t, error)}
           <button type="button" className="close" title={t("window.close")} aria-label={t("window.close")} onClick={() => setError(undefined)}>
             ×
           </button>

@@ -58,3 +58,7 @@ export function translator(lang: string): T {
     return text;
   };
 }
+
+/** Text for an error from a command: a suspended account (pm_login) gets its own message. */
+export const errorText = (t: T, error: string) =>
+  error === "account_suspended" ? t("account.suspended") : t("common.error", { message: error });

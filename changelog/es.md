@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.2
+
+- Nuevo: Los administradores abren el nuevo panel de administración web desde la página Supporter.
+- Nuevo: Una cuenta suspendida ve un mensaje claro al iniciar sesión.
+- Cambiado: La app envía su versión al servidor de PowerMeter, para saber qué versiones se usan.
+
 ## 0.5.1
 
 - Cambiado: Crafting más sencillo: el objeto elegido con sus materiales al lado, debajo solo el paso siguiente con sus materiales y luego la tabla de los materiales necesarios y los que tienes.

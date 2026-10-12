@@ -4,6 +4,12 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.2
+
+- New: Admins open the new web admin panel from the Supporter page.
+- New: A suspended account sees a clear message when signing in.
+- Changed: The app sends its version to the PowerMeter server, to see which versions are in use.
+
 ## 0.5.1
 
 - Changed: Crafting is simpler: the item you pick with its materials beside it, below it only the next step with its materials, then the table of the materials you need and the ones you have.

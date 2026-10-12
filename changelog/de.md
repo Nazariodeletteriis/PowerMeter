@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.2
+
+- Neu: Admins öffnen das neue Web-Adminpanel über die Supporter-Seite.
+- Neu: Ein gesperrtes Konto sieht bei der Anmeldung eine klare Meldung.
+- Geändert: Die App sendet ihre Version an den PowerMeter-Server, um zu sehen, welche Versionen genutzt werden.
+
 ## 0.5.1
 
 - Geändert: Crafting ist einfacher: der gewählte Gegenstand mit seinen Materialien daneben, darunter nur der nächste Schritt mit seinen Materialien, dann die Tabelle der benötigten und vorhandenen Materialien.

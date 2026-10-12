@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.2
+
+- 新增:管理员可从 Supporter 页面打开新的网页管理面板。
+- 新增:被停用的账号登录时会看到明确提示。
+- 变更:应用会向 PowerMeter 服务器发送其版本,以了解正在使用的版本。
+
 ## 0.5.1
 
 - 变更:制作更简单:所选物品旁边显示其材料,下方仅显示下一步及其材料,然后是所需材料与已有材料的表格。

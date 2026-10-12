@@ -36,6 +36,7 @@
   "account.discord": "使用 Discord 登入",
   "account.later": "稍後",
   "account.browser": "請在剛開啟的瀏覽器頁面中完成登入。",
+  "account.suspended": "你的 PowerMeter 帳號已被停用。如需了解詳情，請寄信至 info@letrionlabs.it",
   "disclaimer.title": "開始之前",
   "disclaimer.body": "PowerMeter 不是 AION 2 的官方軟體，而是為 Aion 2 社群製作的業餘軟體，與 NCSoft 無關。它會被動讀取戰鬥資料。使用風險由你自行承擔。",
   "disclaimer.accept": "我已閱讀並同意《使用條款》及《隱私權政策》",
