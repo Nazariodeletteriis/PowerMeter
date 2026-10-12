@@ -455,6 +455,7 @@
       "players": "{n}人"
     },
     "resetTip": "メーターをリセット (Ctrl+Alt+R)",
+    "onlyMe": "自分のDPSのみ",
     "eventSoon": "{name}まで {time}",
     "eventDismiss": "通知を閉じる",
     "pillHint": "クリックで展開 · ドラッグで移動",

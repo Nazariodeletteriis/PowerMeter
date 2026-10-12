@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.4
+
+- Nuovo: DPS Meter: modalità Trainer: conto alla rovescia 3-2-1, poi il tuo DPS solo sul manichino.
+- Nuovo: Flag "Solo il mio DPS" nella footer del widget e nel DPS Meter: nasconde tutti gli altri.
+- Nuovo: Storico combattimenti: i test sul manichino vengono salvati come combattimenti a sé, pochi secondi dopo che smetti.
+- Nuovo: Widget Beta compatta: barre DPS animate, righe più pulite e tasto Reset nella footer.
+- Corretto: Il Reset non trasforma più i compagni in numeri: nomi e classi restano.
+- Corretto: Cambiando layout del widget nomi e classi compaiono subito, mai un numero.
+- Corretto: Layout Classic e storico del widget: mancavano le icone delle classi.
+- Corretto: Report combattimento: cliccando un nome si seleziona quel giocatore, e l'intervallo di tempo non sfarfalla più mentre trascini.
+
 ## 0.5.3
 
 - Nuovo: Pannello admin dentro l'app: gli admin lo aprono dalle Impostazioni. Il pannello web non c'è più.

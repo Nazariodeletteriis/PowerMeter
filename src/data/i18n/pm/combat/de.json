@@ -200,5 +200,13 @@
   "combat.rotationBtn": "Rotation",
   "combat.bossN": "Boss {n}",
   "combat.nBosses": "{n} Bosse",
-  "combat.castOrder": "Cast-Reihenfolge, erste {n} · Treffer einer Fertigkeit im Abstand unter 1,5 s zählen als ein Cast"
+  "combat.castOrder": "Cast-Reihenfolge, erste {n} · Treffer einer Fertigkeit im Abstand unter 1,5 s zählen als ein Cast",
+  "combat.onlyMe": "Nur mein DPS",
+  "combat.trainer": "Trainer",
+  "combat.trainerTitle": "Test an der Trainingspuppe",
+  "combat.trainerReady": "Bei null startet der Meter neu, nur für Trainingspuppen",
+  "combat.trainerHit": "Triff die Trainingspuppe, um die Messung zu starten",
+  "combat.stop": "Stopp",
+  "combat.dummy": "Trainingspuppe",
+  "combat.windowEstimate": "Schaden im Zeitfenster geschätzt: Treffer × Durchschnittstreffer"
 }

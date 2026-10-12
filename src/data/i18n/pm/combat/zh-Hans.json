@@ -200,5 +200,13 @@
   "combat.rotationBtn": "连招",
   "combat.bossN": "首领 {n}",
   "combat.nBosses": "{n} 个首领",
-  "combat.castOrder": "施放顺序，前 {n} 次 · 同一技能间隔不足 1.5 秒的命中计为一次施放"
+  "combat.castOrder": "施放顺序，前 {n} 次 · 同一技能间隔不足 1.5 秒的命中计为一次施放",
+  "combat.onlyMe": "仅我的DPS",
+  "combat.trainer": "训练",
+  "combat.trainerTitle": "木桩测试",
+  "combat.trainerReady": "归零后统计重新开始，仅计算训练木桩",
+  "combat.trainerHit": "攻击木桩即开始测量",
+  "combat.stop": "停止",
+  "combat.dummy": "木桩",
+  "combat.windowEstimate": "区间伤害为估算值：命中数 × 平均伤害"
 }

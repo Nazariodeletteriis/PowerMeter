@@ -30,6 +30,8 @@ pub enum TargetSelectionMode {
     AllTargets,
     PvpTargets,
     PveTargets,
+    /// Training dummies only: the dashboard's Trainer mode.
+    DummyTargets,
 }
 
 impl TargetSelectionMode {
@@ -40,8 +42,9 @@ impl TargetSelectionMode {
             "mostRecent" => Self::MostRecent,
             "lastHitByMe" => Self::LastHitByMe,
             "allTargets" => Self::AllTargets,
-            // Training dummies count as PVE now; an old saved "trainTargets" lands there.
+            // The widget's old "trainTargets" (before 0.4.4) lands in PVE, which still shows dummies.
             "trainTargets" => Self::PveTargets,
+            "dummyTargets" => Self::DummyTargets,
             "pvpTargets" => Self::PvpTargets,
             "pveTargets" => Self::PveTargets,
             _ => Self::LastHitByMe,
@@ -57,6 +60,7 @@ impl TargetSelectionMode {
             Self::AllTargets => "allTargets",
             Self::PvpTargets => "pvpTargets",
             Self::PveTargets => "pveTargets",
+            Self::DummyTargets => "dummyTargets",
         }
     }
 
@@ -67,6 +71,7 @@ impl TargetSelectionMode {
             Self::BossTargets => Some("boss"),
             Self::PvpTargets => Some("pvp"),
             Self::PveTargets => Some("pve"),
+            Self::DummyTargets => Some("train"),
             _ => None,
         }
     }
@@ -204,7 +209,10 @@ impl DpsCalculator {
         // Each target belongs to exactly one exclusive mode. The legacy views
         // keep seeing everything but PvP, as before.
         match self.target_selection_mode.kind() {
-            Some(kind) => combat_data.retain(|&id, _| self.target_kind(id, &mob_data, &pvp_ids) == kind),
+            Some(kind) => combat_data.retain(|&id, _| {
+                let k = self.target_kind(id, &mob_data, &pvp_ids);
+                k == kind || (kind == "pve" && k == "train")
+            }),
             None => combat_data.retain(|id, _| !pvp_ids.contains(id)),
         }
         if self.target_selection_mode == TargetSelectionMode::PveTargets {
@@ -575,6 +583,12 @@ impl DpsCalculator {
             // get_dps already narrowed combat_data to the mode's targets.
             TargetSelectionMode::PvpTargets => (combat_data.keys().cloned().collect(), "PvP".to_string(), 0),
             TargetSelectionMode::PveTargets => (combat_data.keys().cloned().collect(), "PVE".to_string(), 0),
+            // Trainer: every dummy hit since the reset, named after the last one hit.
+            TargetSelectionMode::DummyTargets => {
+                let name = combat_data.iter().max_by_key(|(_, td)| td.last_damage_time)
+                    .map(|(&id, _)| self.resolve_target_name(id)).unwrap_or_default();
+                (combat_data.keys().cloned().collect(), name, 0)
+            }
             TargetSelectionMode::LastHitByMe => {
                 let local_ids = self.resolve_local_ids(summon_data);
                 if let Some(ref ids) = local_ids {
@@ -614,17 +628,16 @@ impl DpsCalculator {
         }
     }
 
-    /// The one meter mode a target's damage belongs to: "pvp" for a player,
-    /// "boss" for an NPC flagged boss in the NPC data, "pve" for everything else
-    /// (training dummies and mobs whose spawn we never saw included).
+    /// The one kind a target's damage belongs to: "pvp" for a player, "train" for a training dummy,
+    /// "boss" for an NPC flagged boss in the NPC data, "pve" for everything else (mobs whose spawn we
+    /// never saw included). The meter's PVE mode shows "train" too; the history saves it apart.
     pub fn target_kind(&self, target_id: i32, mob_data: &HashMap<i32, i32>, pvp_ids: &HashSet<i32>) -> &'static str {
         if pvp_ids.contains(&target_id) {
             return "pvp";
         }
         match mob_data.get(&target_id) {
-            Some(&code) if self.npc_lookup.is_boss(code)
-                && !self.npc_lookup.is_dummy(code)
-                && !TRAIN_MOB_CODES.contains(&code) => "boss",
+            Some(&code) if self.npc_lookup.is_dummy(code) || TRAIN_MOB_CODES.contains(&code) => "train",
+            Some(&code) if self.npc_lookup.is_boss(code) => "boss",
             _ => "pve",
         }
     }
@@ -701,11 +714,11 @@ impl DpsCalculator {
 
         let mut records = Vec::new();
 
-        // Boss and training fights: one record per target, as before.
+        // Boss and training dummy fights: one record per target, saved 10 s after the last hit.
         let boss_target_ids: Vec<i32> = combat_data.keys()
             .filter(|&&tid| {
                 !self.saved_boss_targets.contains(&tid)
-                    && self.target_kind(tid, &mob_data, &pvp_ids) == "boss"
+                    && matches!(self.target_kind(tid, &mob_data, &pvp_ids), "boss" | "train")
             })
             .cloned()
             .collect();
@@ -1536,7 +1549,7 @@ mod mode_tests {
         let pvp = HashSet::from([FOE]);
         assert_eq!(calc.target_kind(WOLF_A, &mob, &pvp), "pve");
         assert_eq!(calc.target_kind(BOSS, &mob, &pvp), "boss");
-        assert_eq!(calc.target_kind(DUMMY, &mob, &pvp), "pve", "a training dummy is PVE");
+        assert_eq!(calc.target_kind(DUMMY, &mob, &pvp), "train");
         assert_eq!(calc.target_kind(FOE, &mob, &pvp), "pvp");
     }
 
@@ -1551,6 +1564,7 @@ mod mode_tests {
         hit_at(&s, ME, DUMMY, 300, t + 1000);
         assert_eq!(mine(&mut calc, "bossTargets"), 0.0, "a training dummy is not a boss");
         assert_eq!(mine(&mut calc, "pveTargets"), 1300.0, "the dummy joins the PVE session");
+        assert_eq!(mine(&mut calc, "dummyTargets"), 300.0, "Trainer: the dummy alone");
     }
 
     #[test]
@@ -1696,8 +1710,9 @@ mod mode_tests {
         let recs = calc.snapshot_boss_fights_force();
         let mode_of = |m: &str| recs.iter().find(|r| r.mode == m).map(|r| r.total_damage);
         assert_eq!(mode_of("boss"), Some(700));
-        assert_eq!(mode_of("train"), None);
-        assert_eq!(mode_of("pve"), Some(105));
+        assert_eq!(mode_of("train"), Some(35), "a dummy test is its own fight");
+        assert!(recs.iter().any(|r| r.mode == "train" && r.is_train));
+        assert_eq!(mode_of("pve"), Some(70));
     }
 
     #[test]

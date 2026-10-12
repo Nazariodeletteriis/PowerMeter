@@ -32,7 +32,8 @@ class DpsApp {
     this.screenshotFolder = "";
     this.storageKeys = {
       userName: "dpsMeter.userName",
-      onlyShowUser: "dpsMeter.onlyShowUser",
+      // "Only my DPS" flag (footer): shared with the dashboard, "1" on / "" off.
+      onlyShowUser: "pm.onlyMe",
       allTargetsWindowMs: "dpsMeter.allTargetsWindowMs",
       trainSelectionMode: "dpsMeter.trainSelectionMode",
       targetSelectionWindowMs: "dpsMeter.targetSelectionWindowMs",
@@ -249,6 +250,7 @@ class DpsApp {
     this.targetModeBtn = document.querySelector(".footerBtns .targetModeBtn");
     this.collapseBtn = document.querySelector(".collapseBtn");
     this.metricToggleBtn = document.querySelector(".metricToggleBtn");
+    this.onlyMeBtn = document.querySelector(".onlyMeBtn");
 
     this.bindHeaderButtons();
     this.bindDragToMoveWindow();
@@ -263,6 +265,7 @@ class DpsApp {
       getSortDirection: () => this.listSortDirection,
       getPinUserToTop: () => this.pinMeToTop,
       getPlayerLimit: () => this.playerLimit,
+      getOnlyUser: () => this.onlyShowUser,
       onHoverUserRow: (row, event) => {
         if (this.shouldSuppressRowInteractions()) return;
         this.openHoverDetailsRow(row, event);
@@ -1037,7 +1040,7 @@ class DpsApp {
     } else if (!isOutOfCombat) {
       this.lastSnapshot = rows;
     } else if (this.lastSnapshot) {
-      const updatedSnapshot = this.updateSnapshotNicknameForUser(rows, this.lastSnapshot);
+      const updatedSnapshot = this.updateSnapshotIdentity(rows, this.lastSnapshot);
       this.lastSnapshot = updatedSnapshot;
       rowsToRender = updatedSnapshot;
     } else {
@@ -1193,9 +1196,12 @@ class DpsApp {
       const job = isObj ? (value.job ?? "") : "";
       const nickname = isObj ? (value.nickname ?? "") : "";
       const idText = String(id);
-      const hasNickname = !!nickname && nickname !== idText;
+      // The local player's own row can arrive before the engine has its nickname:
+      // we already know who "you" are, so show your name rather than "#id".
+      const isLocalId = numericId > 0 && numericId === Number(this.localPlayerId) && !!this.USER_NAME;
+      const hasNickname = (!!nickname && nickname !== idText) || isLocalId;
       const isIdentifying = !hasNickname;
-      const name = hasNickname ? nickname : idText;
+      const name = nickname && nickname !== idText ? nickname : isLocalId ? this.USER_NAME : idText;
 
       const dpsRaw = isObj ? value.dps : value;
       const dps = Math.trunc(Number(dpsRaw));
@@ -1233,6 +1239,10 @@ class DpsApp {
       });
     }
 
+    return this.dedupeRowsByName(rows);
+  }
+
+  dedupeRowsByName(rows) {
     const dedupedByName = new Map();
     for (const row of rows) {
       const key = String(row.name ?? "");
@@ -1272,23 +1282,29 @@ class DpsApp {
     return state === "state-idle" || state === "state-ended";
   }
 
-  updateSnapshotNicknameForUser(rows, snapshot) {
+  // Out of combat the meter holds the fight's last rows, but names and classes
+  // keep resolving after it (party roster, self record, the local id). Copy who
+  // each row is from the latest update onto the held rows, the numbers stay.
+  updateSnapshotIdentity(rows, snapshot) {
     if (!Array.isArray(snapshot) || snapshot.length === 0) return snapshot;
-    const localId = Number(this.localPlayerId);
-    if (!Number.isFinite(localId) || localId <= 0) return snapshot;
-    const incoming = Array.isArray(rows)
-      ? rows.find((row) => Number(row?.id) === localId && !row.isIdentifying)
-      : null;
-    if (!incoming) return snapshot;
-    return snapshot.map((row) => {
-      if (Number(row?.id) !== localId) return row;
+    const incomingById = new Map((rows || []).map((row) => [String(row.id), row]));
+    const merged = snapshot.map((row) => {
+      const incoming = incomingById.get(String(row.id));
+      const isLocalId = !!this.USER_NAME && Number(row.id) === Number(this.localPlayerId);
+      const named = incoming && !incoming.isIdentifying;
+      const name = named ? incoming.name : row.isIdentifying && isLocalId ? this.USER_NAME : row.name;
+      const job = incoming?.job || row.job;
+      const combatPower = incoming?.combatPower || row.combatPower;
       return {
         ...row,
-        name: incoming.name,
-        isIdentifying: false,
-        isUser: incoming.isUser,
+        name,
+        job,
+        combatPower,
+        isIdentifying: row.isIdentifying && !named && !isLocalId,
+        isUser: name === this.USER_NAME,
       };
     });
+    return this.dedupeRowsByName(merged);
   }
 
   getDefaultMeterFillOpacity() {
@@ -1907,6 +1923,9 @@ class DpsApp {
         reason: "header select",
       });
     });
+    this.onlyMeBtn?.addEventListener("click", () => {
+      this.setOnlyShowUser(!this.onlyShowUser, { persist: true });
+    });
     this.metricToggleBtn?.addEventListener("click", () => {
       const nextMode = this.displayMode === "totalDamage" ? "dps" : "totalDamage";
       this.setDisplayMode(nextMode, { persist: true });
@@ -2042,7 +2061,7 @@ class DpsApp {
     const storedTheme = this.safeGetSetting(this.storageKeys.theme);
 
     this.setUserName(storedName, { persist: false, syncBackend: true });
-    this.setOnlyShowUser(false, { persist: false });
+    this.setOnlyShowUser(this.safeGetSetting(this.storageKeys.onlyShowUser) === "1", { persist: false });
     this.setDebugLogging(storedDebugLogging, { persist: false, syncBackend: true });
     this.setPinMeToTop(storedPinMeToTop, { persist: false });
     this.setBetaUi(this.safeGetSetting(this.storageKeys.betaUi) !== "false", { persist: false });
@@ -3438,14 +3457,16 @@ class DpsApp {
     this.refreshSettingsPanelIfOpen();
   }
 
+  // "Only my DPS": the list keeps just your row (meter.js getOnlyUser); its % stays
+  // your share of the whole party's damage and the party total stays the real one.
   setOnlyShowUser(enabled, { persist = false } = {}) {
     this.onlyShowUser = !!enabled;
+    this.onlyMeBtn?.setAttribute("aria-pressed", String(this.onlyShowUser));
+    this.onlyMeBtn?.classList.toggle("isActive", this.onlyShowUser);
     if (persist) {
-      localStorage.setItem(this.storageKeys.onlyShowUser, String(this.onlyShowUser));
+      this.safeSetSetting(this.storageKeys.onlyShowUser, this.onlyShowUser ? "1" : "");
     }
-    if (!this.isCollapse) {
-      this.fetchDps();
-    }
+    this.renderCurrentRows();
   }
 
   applyLogPermission(allowed) {
@@ -3794,6 +3815,15 @@ class DpsApp {
     const slim = String(value).endsWith("Slim");
     this.setBetaUi(beta, { persist });
     this.setSlimMode(slim, { persist });
+    this.redrawFromLatest();
+  }
+
+  // Re-run the latest engine update now (identity merge included) instead of
+  // waiting for the next one: out of combat the backend re-sends the same JSON,
+  // which fetchDps skips, so a layout switch would otherwise keep stale rows.
+  redrawFromLatest() {
+    this.lastJson = null;
+    this.fetchDps();
   }
 
   // Beta UI is the redesigned main window and is the default. Switching it off
@@ -3813,6 +3843,8 @@ class DpsApp {
   setSlimMode(enabled, { persist = false } = {}) {
     this.slimMode = !!enabled;
     document.querySelector(".meter")?.classList.toggle("slim", this.slimMode);
+    // Beta slim keeps the target selector and Reset in its footer (pmWidget.js).
+    this.pmWidget?.syncTheme();
     if (persist) {
       this.safeSetSetting(this.storageKeys.slimMode, String(this.slimMode));
     }
@@ -4047,8 +4079,10 @@ class DpsApp {
     // PowerMeter: "Meter layout" is a dropdown pair (beta/classic + slim), not a
     // form control, so the map below can't reach it and the meter kept its layout
     // until restart. Apply it directly; no persist, so there is no echo.
-    if (key === this.storageKeys.betaUi) return this.setBetaUi(value !== "false");
-    if (key === this.storageKeys.slimMode) return this.setSlimMode(value === "true");
+    if (key === this.storageKeys.betaUi) this.setBetaUi(value !== "false");
+    if (key === this.storageKeys.slimMode) this.setSlimMode(value === "true");
+    if (key === this.storageKeys.betaUi || key === this.storageKeys.slimMode) return this.redrawFromLatest();
+    if (key === this.storageKeys.onlyShowUser) return this.setOnlyShowUser(value === "1");
     if (key === this.storageKeys.theme) return this.applyTheme(value);
     const selector = REMOTE_APPLIED_SETTING_CONTROLS[key];
     if (!selector) return;

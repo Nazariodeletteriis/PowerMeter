@@ -9,10 +9,10 @@ const createMeterUI = ({
   getSortDirection,
   getPinUserToTop,
   getPlayerLimit,
+  getOnlyUser,
 }) => {
   const MAX_CACHE = 32;
   const cjkRegex = /[\u3400-\u9FFF\uF900-\uFAFF]/;
-  const classIconSrcByJob = new Map();
 
   // PowerMeter: the backend names classes in Korean. The row carries a stable
   // English key so the theme can set the class colour and icon in CSS
@@ -28,6 +28,8 @@ const createMeterUI = ({
     \uD638\uBC95\uC131: "chanter",
     \uAD8C\uC131: "brawler",
   };
+  // history.js shows the same CSS icons (its old <img src="./assets/<job>.png"> never reached the build).
+  window.PM_CLASS_KEY_BY_JOB = CLASS_KEY_BY_JOB;
 
   // PowerMeter: one decimal in the UI language ("30,1" in Italian), as the design shows.
   const formatOneDecimal = (n) =>
@@ -70,16 +72,11 @@ const createMeterUI = ({
     const rankEl = document.createElement("span");
     rankEl.className = "rank";
 
+    // The class icon is CSS (--cls-icon from the row's data-cls, see
+    // powermeter-theme.css), in every layout: the old ./assets/<job>.png files
+    // are not in the build, so an <img> here showed a broken image.
     const classIconEl = document.createElement("div");
     classIconEl.className = "classIcon";
-
-    const classIconImg = document.createElement("img");
-    classIconImg.className = "classIconImg";
-    classIconImg.style.visibility = "hidden";
-
-    classIconImg.draggable = false;
-
-    classIconEl.appendChild(classIconImg);
 
     const nameEl = document.createElement("div");
     nameEl.className = "name";
@@ -120,7 +117,6 @@ const createMeterUI = ({
       rankEl,
       dpsContainer,
       classIconEl,
-      classIconImg,
       dpsNumber,
       dpsContribution,
       dpsTotal,
@@ -136,7 +132,6 @@ const createMeterUI = ({
       lastTotalText: "",
       lastRankText: "",
       lastFillRatio: -1,
-      lastClassIconSrc: "",
       lastIsUser: false,
       lastIsIdentifying: false,
       hoverRipplePlayed: false,
@@ -240,7 +235,9 @@ const createMeterUI = ({
 
   let lastOrderKey = "";
 
-  const renderRows = (rows, rankById) => {
+  // shareRows: the rows the share column, the bar and the top value are measured
+  // against. Only my DPS shows one row but keeps them against the whole party.
+  const renderRows = (rows, rankById, shareRows = rows) => {
     const now = nowMs();
     const nextVisibleIds = new Set();
 
@@ -251,14 +248,14 @@ const createMeterUI = ({
     }
 
     let topMetric = 1;
-    for (const row of rows) {
+    for (const row of shareRows) {
       const metricValue = Number(resolveMetric(row)?.value) || 0;
       if (metricValue > topMetric) topMetric = metricValue;
     }
     // The share and total columns follow the metric's own total (healing, damage
     // taken) when it has one, the damage dealt otherwise.
     const totalOf = (row) => Number(resolveMetric(row)?.total ?? row?.totalDamage) || 0;
-    const visibleTotalDamage = rows.reduce((sum, row) => sum + totalOf(row), 0);
+    const visibleTotalDamage = shareRows.reduce((sum, row) => sum + totalOf(row), 0);
 
     // Build order key to detect if DOM reordering is needed
     let orderKey = "";
@@ -335,28 +332,6 @@ const createMeterUI = ({
       const classKey = CLASS_KEY_BY_JOB[row.job] || "";
       if (view.rowEl.dataset.cls !== classKey) view.rowEl.dataset.cls = classKey;
 
-      if (row.job && !!row.job) {
-        if (!classIconSrcByJob.has(row.job)) {
-          classIconSrcByJob.set(row.job, `./assets/${row.job}.png`);
-        }
-        const src = classIconSrcByJob.get(row.job);
-        if (view.lastClassIconSrc !== src) {
-          view.classIconImg.src = src;
-          view.lastClassIconSrc = src;
-        }
-        if (view.classIconImg.style.visibility !== "visible") {
-          view.classIconImg.style.visibility = "visible";
-        }
-      } else {
-        if (view.lastClassIconSrc) {
-          view.lastClassIconSrc = "";
-          view.classIconImg.removeAttribute("src");
-        }
-        if (view.classIconImg.style.visibility !== "hidden") {
-          view.classIconImg.style.visibility = "hidden";
-        }
-      }
-
       const metric = resolveMetric(row) || { value: 0, text: "-" };
       const metricValue = Number(metric.value) || 0;
       const damageContribution =
@@ -388,7 +363,8 @@ const createMeterUI = ({
       if (view.lastContributionText !== contributionText) {
         view.dpsContribution.textContent = contributionText;
         // PowerMeter: the theme fills the row bar to this share (design), not to the top DPS.
-        view.rowEl.style.setProperty("--pm-share", `${damageContribution.toFixed(1)}%`);
+        // On the bar itself (not the row), so only the bar restyles.
+        view.fillEl.style.setProperty("--pm-share", (damageContribution / 100).toFixed(3));
         view.lastContributionText = contributionText;
       }
 
@@ -416,8 +392,11 @@ const createMeterUI = ({
       }
 
       // Only touch DOM order when the sorted list actually changed
+      // moveBefore keeps the row's running bar transition; appendChild (older
+      // WebView2) removes and re-inserts it, which snaps the bar.
       if (needsReorder) {
-        elList.appendChild(view.rowEl);
+        if (elList.moveBefore) elList.moveBefore(view.rowEl, null);
+        else elList.appendChild(view.rowEl);
       }
     }
 
@@ -460,7 +439,11 @@ const createMeterUI = ({
         if (id) rankById.set(id, index + 1);
       });
 
-    renderRows(getDisplayRows(arr), rankById);
+    // Only my DPS: your row alone, measured against everyone. Until the meter
+    // knows which row is yours it cannot pick one, so it shows them all.
+    const onlyUser = typeof getOnlyUser === "function" && getOnlyUser() && arr.some((row) => row.isUser);
+    if (onlyUser) renderRows(arr.filter((row) => row.isUser), rankById, arr);
+    else renderRows(getDisplayRows(arr), rankById);
   };
 
   const updateFromRows = (rows) => {
@@ -486,7 +469,6 @@ const createMeterUI = ({
     }
 
     rowViewById.clear();
-    classIconSrcByJob.clear();
   };
 
   const getRowById = (id) => {

@@ -171,12 +171,10 @@ const createHistoryUI = ({ onOpenFight } = {}) => {
         opt.className = "historyClassOption" + (job === filterPlayer ? " selected" : "");
         opt.dataset.job = job;
         if (CLASS_ICON_JOBS.has(job)) {
-          const img = document.createElement("img");
-          img.src = `./assets/${job}.png`;
-          img.alt = "";
-          img.className = "historyClassDropdownIcon";
-          img.onerror = () => { img.style.display = "none"; };
-          opt.appendChild(img);
+          const icon = document.createElement("span");
+          icon.className = "historyClassDropdownIcon";
+          icon.dataset.cls = window.PM_CLASS_KEY_BY_JOB?.[job] || "";
+          opt.appendChild(icon);
         }
         opt.appendChild(document.createTextNode(getJobLabel(job)));
         opt.addEventListener("click", () => setClassFilter(job));
@@ -270,12 +268,11 @@ const createHistoryUI = ({ onOpenFight } = {}) => {
       const wrap = document.createElement("span");
       wrap.className = "historyIconWrap";
       wrap.setAttribute("data-tip", getJobLabel(job));
-      const img = document.createElement("img");
-      img.src = `./assets/${job}.png`;
-      img.alt = job;
-      img.className = "historyRowClassIcon";
-      img.onerror = () => { wrap.style.display = "none"; };
-      wrap.appendChild(img);
+      const icon = document.createElement("span");
+      icon.className = "historyRowClassIcon";
+      icon.dataset.cls = window.PM_CLASS_KEY_BY_JOB?.[job] || "";
+      icon.setAttribute("aria-label", getJobLabel(job));
+      wrap.appendChild(icon);
       iconsEl.appendChild(wrap);
     });
 

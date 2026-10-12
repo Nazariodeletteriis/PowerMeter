@@ -174,3 +174,24 @@
 .rkMore:hover {
   color: var(--pm-t1);
 }
+
+/* Trainer countdown: each number enters once (state indication), strong ease-out under 300 ms,
+   from a near-full scale; only a fade when motion is reduced (pmfade, system.css). */
+.cbCount {
+  font-size: 88px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--pm-t1);
+  animation: cbCountIn 260ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes cbCountIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cbCount {
+    animation-name: pmfade;
+  }
+}

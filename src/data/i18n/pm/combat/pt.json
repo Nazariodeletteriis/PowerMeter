@@ -200,5 +200,13 @@
   "combat.rotationBtn": "Rotação",
   "combat.bossN": "Chefe {n}",
   "combat.nBosses": "{n} chefes",
-  "combat.castOrder": "Ordem de uso, primeiros {n} · golpes da mesma habilidade com menos de 1,5 s contam como um uso"
+  "combat.castOrder": "Ordem de uso, primeiros {n} · golpes da mesma habilidade com menos de 1,5 s contam como um uso",
+  "combat.onlyMe": "Só o meu DPS",
+  "combat.trainer": "Treino",
+  "combat.trainerTitle": "Teste no boneco",
+  "combat.trainerReady": "No zero o medidor recomeça só nos bonecos de treino",
+  "combat.trainerHit": "Acerte o boneco para começar a medir",
+  "combat.stop": "Parar",
+  "combat.dummy": "Boneco",
+  "combat.windowEstimate": "Dano da janela estimado: golpes × golpe médio"
 }

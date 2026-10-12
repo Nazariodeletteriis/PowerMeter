@@ -455,6 +455,7 @@
       "players": "{n} 名玩家"
     },
     "resetTip": "重置计量器 (Ctrl+Alt+R)",
+    "onlyMe": "仅显示我的DPS",
     "eventSoon": "{name} 还有 {time}",
     "eventDismiss": "关闭提醒",
     "pillHint": "点击展开 · 拖动以移动",

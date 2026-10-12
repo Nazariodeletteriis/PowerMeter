@@ -200,5 +200,13 @@
   "combat.rotationBtn": "Rotazione",
   "combat.bossN": "Boss {n}",
   "combat.nBosses": "{n} boss",
-  "combat.castOrder": "Ordine dei cast, primi {n} · i colpi della stessa skill a meno di 1,5 s contano come un cast"
+  "combat.castOrder": "Ordine dei cast, primi {n} · i colpi della stessa skill a meno di 1,5 s contano come un cast",
+  "combat.onlyMe": "Solo il mio DPS",
+  "combat.trainer": "Trainer",
+  "combat.trainerTitle": "Test sul manichino",
+  "combat.trainerReady": "Allo zero il meter riparte solo sui manichini",
+  "combat.trainerHit": "Colpisci il manichino per iniziare la misura",
+  "combat.stop": "Stop",
+  "combat.dummy": "Manichino",
+  "combat.windowEstimate": "Danno della finestra stimato: colpi × colpo medio"
 }

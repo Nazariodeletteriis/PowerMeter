@@ -12,8 +12,10 @@ const MODES = [
   ["pve", "PVE"],
   ["pvp", "PVP"],
 ] as const;
-/** Training dummy fights saved before 0.4.4 ("train") belong to PVE now. */
-const modeOf = (f: Fight) => (f.mode === "train" || (!f.mode && f.isTrain) ? "pve" : f.mode);
+/** A test on a training dummy: its own fight, named after the dummy (records before modes only carry isTrain). */
+const isDummy = (f: Fight) => f.mode === "train" || (!f.mode && f.isTrain);
+/** Dummy tests filter under PVE, with their own badge. */
+const modeOf = (f: Fight) => (isDummy(f) ? "pve" : f.mode);
 /** Only boss fights go online (the server takes boss logs). */
 const uploadable = (f?: { isTrain?: boolean; mode?: string }) => !f?.isTrain && (!f?.mode || f.mode === "boss");
 
@@ -190,6 +192,11 @@ function History({ t, lang, run, go, settings, retry }: PageProps & { retry: () 
         }}
       >
         {boss != null && <span style={{ fontSize: 11, color: "var(--pm-t3)", marginRight: 8 }}>{t("combat.bossN", { n: boss })}</span>}
+        {isDummy(f) && (
+          <span className="badge" style={{ marginRight: 8 }}>
+            {t("combat.dummy")}
+          </span>
+        )}
         {f.bossName || "—"}
       </button>
       <span style={{ color: "var(--pm-t3)", fontWeight: 500 }}>—</span>

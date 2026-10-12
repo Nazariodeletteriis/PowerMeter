@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.4
+
+- Neu: DPS Meter: Trainer-Modus: Countdown 3-2-1, danach nur dein DPS an der Trainingspuppe.
+- Neu: Schalter „Nur mein DPS“ in der Fußleiste des Widgets und im DPS Meter: blendet alle anderen aus.
+- Neu: Kampfverlauf: Tests an der Trainingspuppe werden als eigene Kämpfe gespeichert, wenige Sekunden nach dem Aufhören.
+- Neu: Widget Beta kompakt: animierte DPS-Balken, aufgeräumtere Zeilen und ein Reset-Knopf in der Fußleiste.
+- Behoben: Reset macht Gruppenmitglieder nicht mehr zu Nummern: Namen und Klassen bleiben.
+- Behoben: Beim Wechsel des Widget-Layouts erscheinen Namen und Klassen sofort, nie eine Nummer.
+- Behoben: Classic-Layout und Widget-Verlauf: Klassensymbole fehlten.
+- Behoben: Kampfbericht: Ein Klick auf einen Namen wählt diesen Spieler, und der Zeitbereich flackert beim Ziehen nicht mehr.
+
 ## 0.5.3
 
 - Neu: Adminpanel direkt in der App: Admins öffnen es in den Einstellungen. Das Web-Panel gibt es nicht mehr.

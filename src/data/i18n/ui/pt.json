@@ -455,6 +455,7 @@
       "players": "{n} jogadores"
     },
     "resetTip": "Zerar o medidor (Ctrl+Alt+R)",
+    "onlyMe": "Só o meu DPS",
     "eventSoon": "{name} em {time}",
     "eventDismiss": "Fechar aviso",
     "pillHint": "Clique para expandir · arraste para mover",

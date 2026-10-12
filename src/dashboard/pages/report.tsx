@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import {
   CaretLeftIcon,
   CaretRightIcon,
@@ -35,6 +35,8 @@ const SKILL_HEAD: (keyof Skill)[] = ["n", "dmg", "pct", "hits", "crit", "min", "
 // The record has hits, not casts: a hit of a skill more than CAST_GAP ms after its previous hit starts a new cast.
 const CAST_GAP = 1500;
 const MAX_CASTS = 60;
+/** A drag shorter than this (seconds of fight) is a click: it clears the window. */
+const MIN_WINDOW_S = 1;
 /** First MAX_CASTS casts in [from, to] ms, in order; `j` is the skill's index in `raw`. */
 const casts = (raw: FightSkill[], from: number, to: number) =>
   raw
@@ -54,6 +56,10 @@ export default function Report(props: PageProps) {
   const all = fights.data ?? [];
   const runs = useRuns(all);
   const cur = all.find((f) => f.id === pick) ?? all.find(isBoss) ?? all[0];
+  // The fight on screen stays on screen: a newer boss arriving with the 10 s poll must not swap it (and reset the view).
+  useEffect(() => {
+    if (cur && cur.id !== pick) setPick(cur.id);
+  }, [cur?.id, pick]);
   const run = cur && runs.get(cur.id);
   const attempts = cur ? all.filter((f) => f.bossName === cur.bossName).reverse() : [];
   const att = attempts.findIndex((f) => f.id === cur?.id);
@@ -87,8 +93,12 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
   const other = useFight(cmp ?? undefined, onError);
   const [sel, setSel] = useState<number>();
   const [tab, setTab] = useState<Tab>("overview");
+  // `range` is the band drawn under the pointer (fractions of the fight), `win` the committed window the numbers follow:
+  // they change once, on release, instead of on every pointer move.
   const [range, setRange] = useState<[number, number] | null>(null);
-  const drag = useRef<number | null>(null);
+  const [win, setWin] = useState<[number, number] | null>(null);
+  const drag = useRef<[number, number] | null>(null);
+  const frame = useRef(0);
   const [sort, setSort] = useState<[keyof Skill, number]>(["dmg", -1]);
   const [share, setShare] = useState(false);
   const [inspect, setInspect] = useState(false);
@@ -100,12 +110,17 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
   // The run's bosses in boss order; each chip opens that boss's latest attempt in the run.
   const runBosses = dungeonRun ? [...new Set(dungeonRun.fights.map((f) => f.bossName))].sort((a, b) => dungeonRun.bosses[a] - dungeonRun.bosses[b]) : [];
 
-  const full = fightParty(rec, name);
-  // Stats below the chart follow the dragged window; the whole fight when there is none.
-  const win: [number, number] | null = range && Math.abs(range[1] - range[0]) >= 0.01 ? [Math.min(...range), Math.max(...range)] : null;
+  const full = useMemo(() => fightParty(rec, name), [rec, name]);
+  const series = useMemo(() => fightSeries(full, rec.durationMs), [full, rec.durationMs]);
+  // Stats below the chart follow the committed window; the whole fight when there is none.
   const t0 = win ? win[0] * dur : 0;
   const secs = win ? (win[1] - win[0]) * dur : dur;
-  const party = win ? fightParty(rec, name, [t0, t0 + secs]) : full;
+  // Rows keep the whole fight's order, so a window never moves a row under the pointer.
+  const party = useMemo(() => {
+    if (!win) return full;
+    const cut = new Map(fightParty(rec, name, [win[0] * dur, win[1] * dur]).map((r) => [r.key, r]));
+    return full.map((r) => cut.get(r.key)!);
+  }, [full, win, rec, name, dur]);
   // Bars are on the whole fight's scale, so a short window reads shorter.
   const dmgMax = Math.max(1, ...full.map((r) => r.dmg));
   const p = party.find((r) => r.key === sel) ?? party.find((r) => r.me) ?? party[0];
@@ -138,9 +153,16 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
     const b = e.currentTarget.getBoundingClientRect();
     return Math.min(1, Math.max(0, (e.clientX - b.left) / b.width));
   };
+  // The band repaints once per frame while dragging; the window is committed on release.
   const endDrag = () => {
+    const r = drag.current;
     drag.current = null;
-    if (range && Math.abs(range[1] - range[0]) < 0.01) setRange(null);
+    cancelAnimationFrame(frame.current);
+    frame.current = 0;
+    if (!r) return;
+    const w: [number, number] | null = Math.abs(r[1] - r[0]) * dur < MIN_WINDOW_S ? null : [Math.min(...r), Math.max(...r)];
+    setRange(w);
+    setWin(w);
   };
   const at = (f: number) => clock(f * dur);
   const outline = { height: 30, padding: "0 12px" };
@@ -264,12 +286,17 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
           <div style={{ flex: 1 }} />
           {range && (
             <>
+              {/* The record keeps hit times but not each hit's damage: a window counts its hits at the skill's average hit. */}
+              {win && <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>{t("combat.windowEstimate")}</span>}
               <span className="mono" style={{ fontSize: 12, color: "var(--pm-redt)" }}>
                 {t("combat.range", { a: at(Math.min(...range)), b: at(Math.max(...range)) })}
               </span>
               <button
                 type="button"
-                onClick={() => setRange(null)}
+                onClick={() => {
+                  setRange(null);
+                  setWin(null);
+                }}
                 style={{ height: 24, padding: "0 8px", borderRadius: 5, border: "1px solid var(--pm-line)", background: "transparent", color: "var(--pm-t2)", cursor: "pointer", fontSize: 11 }}
               >
                 {t("combat.clear")}
@@ -278,18 +305,28 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
           )}
         </div>
         <Chart
-          lines={fightSeries(full, rec.durationMs)}
+          lines={series}
           sel={p?.key ?? -1}
           label={t("combat.dpsOverTime")}
-          style={{ cursor: "crosshair", userSelect: "none" }}
-          onMouseDown={(e) => {
+          style={{ cursor: "crosshair", userSelect: "none", touchAction: "none" }}
+          onPointerDown={(e) => {
+            if (e.button !== 0) return;
+            // Captured: the drag keeps going (and ends) even when the pointer leaves the chart.
+            e.currentTarget.setPointerCapture(e.pointerId);
             const f = pos(e);
-            drag.current = f;
+            drag.current = [f, f];
             setRange([f, f]);
           }}
-          onMouseMove={(e) => drag.current != null && setRange([drag.current, pos(e)])}
-          onMouseUp={endDrag}
-          onMouseLeave={endDrag}
+          onPointerMove={(e) => {
+            if (!drag.current) return;
+            drag.current = [drag.current[0], pos(e)];
+            frame.current ||= requestAnimationFrame(() => {
+              frame.current = 0;
+              if (drag.current) setRange(drag.current);
+            });
+          }}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
           over={
             range && (
               <div
@@ -607,7 +644,10 @@ function InspectModal({ t, name, gear, onClose }: { t: PageProps["t"]; name: str
   );
 }
 
-/** This attempt (a) against another (b), whole fights: duration, party and per-player DPS (players matched by name), delta. */
+/**
+ * This attempt (a) against another (b), whole fights: duration, party and per-player DPS, delta. Players match by their
+ * real nickname; one whose name never arrived (shown by class) matches by actor id, never by the shared class name.
+ */
 function Compare({
   t,
   lang,
@@ -644,7 +684,8 @@ function Compare({
         [t("combat.duration"), clock(aDur), clock(bDur), <span style={{ color: "var(--pm-t2)" }}>{`${aDur >= bDur ? "+" : "-"}${clock(Math.abs(aDur - bDur))}`}</span>],
         [t("combat.partyDps"), fmt(sum(a), lang), fmt(sum(b), lang), delta(sum(a), sum(b))],
         ...a.map((r): [string, string, string, ReactNode] => {
-          const o = b.find((q) => q.n === r.n);
+          const named = r.actor.nickname && r.actor.nickname !== String(r.key);
+          const o = b.find((q) => (named ? q.actor.nickname === r.actor.nickname : q.key === r.key));
           return [`${r.n}${r.me ? ` ${t("combat.you")}` : ""}`, fmt(r.dps, lang), o ? fmt(o.dps, lang) : "—", delta(r.dps, o?.dps)];
         }),
       ]
@@ -669,8 +710,8 @@ function Compare({
         <span style={{ textAlign: "right" }}>Δ</span>
       </div>
       {!b && <div className="skeleton" style={{ height: 30, margin: "4px 0" }} />}
-      {rows.map(([l, x, y, d]) => (
-        <div key={l} style={{ display: "grid", gridTemplateColumns: cols, gap: 10, alignItems: "center", minHeight: 30, fontSize: 12, borderBottom: "1px solid var(--pm-line)" }}>
+      {rows.map(([l, x, y, d], k) => (
+        <div key={k} style={{ display: "grid", gridTemplateColumns: cols, gap: 10, alignItems: "center", minHeight: 30, fontSize: 12, borderBottom: "1px solid var(--pm-line)" }}>
           <span style={{ color: "var(--pm-t2)" }}>{l}</span>
           <span className="num">{x}</span>
           <span className="num" style={{ color: "var(--pm-t2)" }}>

@@ -722,12 +722,6 @@ html:lang(zh-Hant), html:lang(zh-Hant) body {
   align-items: center;
   justify-content: center;
 }
-.list .item .classIcon .classIconImg {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
-}
 
 /* Sized to its text, not to the free space, so the combat power that follows
    sits against the name instead of being pushed out to the readout. Still
@@ -985,6 +979,18 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   background: transparent;
 }
 .footerBtns .collapseBtn svg { width: 13px; height: 13px; }
+/* "Only my DPS": outline flag off, filled flag on (state not by colour alone). */
+.footerBtns .onlyMeBtn {
+  width: 18px;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+}
+.onlyMeBtn svg { width: 12px; height: 12px; }
+.onlyMeBtn .onlyMeOn,
+.onlyMeBtn.isActive .onlyMeOff { display: none; }
+.onlyMeBtn.isActive .onlyMeOn { display: block; }
+.footerBtns .onlyMeBtn.isActive { color: var(--isUser-fill); }
 
 .resizeHandle {
   position: absolute;
@@ -2054,7 +2060,8 @@ body.mainPlayerNamesBold .settingsPanel .themeDropdownMenu .settingsDropdownItem
   width: 24px;
   height: 24px;
   border-radius: 3px;
-  object-fit: contain;
+  display: inline-block;
+  background: var(--cls-icon, none) center / contain no-repeat;
 }
 
 .historyRowInfo {
@@ -2154,7 +2161,8 @@ body.mainPlayerNamesBold .settingsPanel .themeDropdownMenu .settingsDropdownItem
   width: 18px;
   height: 18px;
   border-radius: 2px;
-  object-fit: contain;
+  display: inline-block;
+  background: var(--cls-icon, none) center / contain no-repeat;
   flex-shrink: 0;
 }
 .historyFilters {
@@ -4495,10 +4503,6 @@ body.legacyUi .list {
 
       align-items: center;
       justify-content: center;
-      .classIconImg {
-        width: 100%;
-        height: 100%;
-      }
     }
 
     .name {
@@ -4740,15 +4744,13 @@ body.legacyUi .list .item .content {
   align-items: center;
   gap: 8px;
 }
+/* Class art from data-cls (--cls-icon, powermeter-theme.css), as in the widget. */
 body.legacyUi .list .item .classIcon {
   width: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-body.legacyUi .list .item .classIcon .classIconImg {
-  width: 100%;
-  height: 100%;
+  background: var(--cls-icon, none) center / contain no-repeat;
 }
 body.legacyUi .list .item .name {
   flex: 0 1 auto;
@@ -4858,6 +4860,8 @@ body.legacyUi .meter.slim .footerBtns .footerBtn {
 }
 body.legacyUi .meter.slim .footerBtns .metricToggleBtn,
 body.legacyUi .meter.slim .footerBtns .targetModeBtn {
+  /* Sized to the label: the 16px icon width above cut "BOSS" to "BOS". */
+  width: auto;
   font-size: 13px;
 }
 body.legacyUi .meter.slim .list:has(.item:not([style*="display: none"])) + .meterTotalBar {
@@ -5096,6 +5100,14 @@ body.legacyUi .footerBtns .collapseBtn {
 body.legacyUi .footerBtns .collapseBtn svg {
   width: 20px;
   height: 20px;
+}
+body.legacyUi .onlyMeBtn svg {
+  width: 15px;
+  height: 15px;
+}
+body.legacyUi .meter.slim .onlyMeBtn svg {
+  width: 12px;
+  height: 12px;
 }
 
 /* Header buttons were 20px icons without the dimmed resting state. */

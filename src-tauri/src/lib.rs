@@ -246,12 +246,19 @@ fn bind_local_nickname(state: tauri::State<'_, AppState>, actor_id: i64, nicknam
     state.data_storage.set_permanent_nickname(actor_id as i32, &nickname);
 }
 
+/// The meter's Reset (widget, dashboard, hotkey): new numbers, same people. Names and classes stay, as on a zone
+/// change: the game sends party members' names once, so clearing them left `#id` rows until they re-spawned.
+fn reset_meter(app: &tauri::AppHandle, state: &AppState) {
+    state.dps_calculator.lock().restart_target_selection(false);
+    state.data_storage.flush_combat_only();
+    // Every window clears its view (the one that pressed Reset too: the handler does not call back).
+    let _ = app.emit("combat-reset", ());
+    let _ = app.emit("dps-update", &entity::dps_data::DpsData::new());
+}
+
 #[tauri::command]
-fn reset_combat(state: tauri::State<'_, AppState>) {
-    state.dps_calculator.lock().restart_target_selection(true);
-    // Don't reset port detector or ping — keep the network connection alive
-    // Only clear combat data and re-learn nicknames from future packets
-    state.data_storage.reset_nicknames();
+fn reset_combat(app: tauri::AppHandle, state: tauri::State<'_, AppState>) {
+    reset_meter(&app, &state);
 }
 
 #[tauri::command]
@@ -1601,12 +1608,8 @@ pub fn run() {
                     move || {
                         tracing::info!("Hotkey: reload triggered");
                         if let Some(state) = h.try_state::<AppState>() {
-                            state.dps_calculator.lock().restart_target_selection(true);
-                            state.data_storage.reset_nicknames();
+                            reset_meter(&h, &state);
                         }
-                        // Notify frontend to clear UI
-                        let _ = h.emit("combat-reset", ());
-                        let _ = h.emit("dps-update", &entity::dps_data::DpsData::new());
                     }
                 },
                 {

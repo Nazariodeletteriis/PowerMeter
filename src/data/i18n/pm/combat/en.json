@@ -200,5 +200,13 @@
   "combat.rotationBtn": "Rotation",
   "combat.bossN": "Boss {n}",
   "combat.nBosses": "{n} bosses",
-  "combat.castOrder": "Cast order, first {n} · hits of one skill less than 1.5 s apart count as one cast"
+  "combat.castOrder": "Cast order, first {n} · hits of one skill less than 1.5 s apart count as one cast",
+  "combat.onlyMe": "Only my DPS",
+  "combat.trainer": "Trainer",
+  "combat.trainerTitle": "Training dummy test",
+  "combat.trainerReady": "At zero the meter restarts on training dummies only",
+  "combat.trainerHit": "Hit the training dummy to start measuring",
+  "combat.stop": "Stop",
+  "combat.dummy": "Dummy",
+  "combat.windowEstimate": "Window damage estimated: hits × average hit"
 }

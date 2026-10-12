@@ -4,6 +4,17 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.4
+
+- New: DPS Meter: Trainer mode: a 3-2-1 countdown, then your DPS on the training dummy only.
+- New: "Only my DPS" flag in the widget footer and in the DPS Meter: hides everyone else.
+- New: Fight history: training dummy tests are saved as their own fights, a few seconds after you stop.
+- New: Compact Beta widget: animated DPS bars, cleaner rows and a Reset button in the footer.
+- Fixed: Reset no longer turns party members into numbers: names and classes stay.
+- Fixed: Switching widget layout shows names and classes right away, never a number.
+- Fixed: Classic layout and widget history: class icons were missing.
+- Fixed: Fight report: clicking a name selects that player, and the time range no longer flickers while you drag.
+
 ## 0.5.3
 
 - New: Admin panel inside the app: admins open it from Settings. The web panel is gone.

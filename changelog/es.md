@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.4
+
+- Nuevo: Medidor DPS: modo Entrenador: cuenta atrás 3-2-1 y luego tu DPS solo sobre el muñeco de entrenamiento.
+- Nuevo: Opción "Solo mi DPS" en el pie del widget y en el Medidor DPS: oculta a todos los demás.
+- Nuevo: Historial de combates: las pruebas en el muñeco se guardan como combates propios, pocos segundos después de parar.
+- Nuevo: Widget Beta compacto: barras de DPS animadas, filas más limpias y botón Reset en el pie.
+- Corregido: Reset ya no convierte a los compañeros en números: nombres y clases se mantienen.
+- Corregido: Al cambiar el diseño del widget, nombres y clases aparecen al instante, nunca un número.
+- Corregido: Diseño Classic e historial del widget: faltaban los iconos de clase.
+- Corregido: Informe de combate: al hacer clic en un nombre se selecciona ese jugador, y el intervalo de tiempo ya no parpadea al arrastrar.
+
 ## 0.5.3
 
 - Nuevo: Panel de administración dentro de la app: los administradores lo abren desde Ajustes. El panel web ya no existe.

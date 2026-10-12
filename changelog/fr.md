@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.4
+
+- Nouveau : Compteur DPS : mode Entraîneur : compte à rebours 3-2-1, puis votre DPS sur le mannequin d'entraînement uniquement.
+- Nouveau : Option « Seulement mon DPS » dans le pied du widget et dans le Compteur DPS : masque tous les autres.
+- Nouveau : Historique des combats : les tests sur mannequin sont enregistrés comme combats à part, quelques secondes après l'arrêt.
+- Nouveau : Widget Bêta compact : barres de DPS animées, lignes plus claires et bouton Réinitialiser dans le pied.
+- Corrigé : Réinitialiser ne transforme plus les membres du groupe en numéros : noms et classes restent.
+- Corrigé : En changeant la disposition du widget, noms et classes s'affichent tout de suite, jamais un numéro.
+- Corrigé : Disposition Classic et historique du widget : les icônes de classe manquaient.
+- Corrigé : Rapport de combat : cliquer sur un nom sélectionne ce joueur, et la plage de temps ne clignote plus pendant le glissement.
+
 ## 0.5.3
 
 - Nouveau : Panneau d'administration dans l'application : les admins l'ouvrent depuis les Paramètres. Le panneau web n'existe plus.

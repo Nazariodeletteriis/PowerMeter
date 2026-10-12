@@ -47,19 +47,21 @@ const createPmWidget = (app) => {
 
   // --- widget layout: lift the fight timer into the bar and the target-mode pill into the
   // target row. Moved rather than duplicated so core.js keeps driving them; put
-  // back where A2Tools had them for the Classic UI layout.
+  // back where A2Tools had them for the Classic UI layout. Beta slim hides the target
+  // row, so the selector and Reset stay home there, in its footer (footerHome).
   const moves = [
     [document.querySelector(".battleTime"), $(".pmBarTitle"), "before"],
-    [document.querySelector(".targetModeBtn"), $(".pmBerserk"), "after"],
-    [$(".pmLiveResetBtn"), document.querySelector(".targetModeBtn"), "after"],
+    [document.querySelector(".targetModeBtn"), $(".pmBerserk"), "after", true],
+    [$(".pmLiveResetBtn"), document.querySelector(".targetModeBtn"), "after", true],
     [document.querySelector(".bossName"), $(".pmHpKind"), "after"],
   ]
     .filter(([el, anchor]) => el && anchor)
-    .map(([el, anchor, where]) => ({ el, anchor, where, home: el.parentNode, next: el.nextSibling }));
+    .map(([el, anchor, where, footerHome]) => ({ el, anchor, where, footerHome, home: el.parentNode, next: el.nextSibling }));
   const syncTheme = () => {
     const on = isActive();
+    const slim = meter.classList.contains("slim");
     for (const m of moves) {
-      if (on) m.anchor[m.where](m.el);
+      if (on && !(slim && m.footerHome)) m.anchor[m.where](m.el);
       else m.home.insertBefore(m.el, m.next);
     }
     if (!on) closeDetail();

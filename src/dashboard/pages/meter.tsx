@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { ArrowCounterClockwiseIcon, ArrowSquareOutIcon, FirstAidIcon, FloppyDiskIcon, ShieldWarningIcon, SwordIcon } from "@phosphor-icons/react";
+import { ArrowCounterClockwiseIcon, ArrowSquareOutIcon, FirstAidIcon, FlagIcon, FloppyDiskIcon, ShieldWarningIcon, SwordIcon, TargetIcon, XIcon } from "@phosphor-icons/react";
 import { EmptyState, fmt } from "../ui";
 import { Av, Chart, classColor, clock, pc, path, rank } from "./combat/parts";
+import { Modal } from "./system/Modal";
 import type { PageProps } from "./types";
 
 /** dps-update payload (src-tauri/src/entity/dps_data.rs), the fields shown here. */
@@ -46,8 +47,10 @@ const KIND_LABEL: Record<string, string> = { boss: "BOSS", pve: "PVE", pvp: "PVP
 const TANKS = new Set(["Templar", "Gladiator"]);
 /** Chart window: 60 dps-update samples (500 ms each). */
 const HISTORY = 60;
+/** Setting shared with the widget: "1" shows only the local player's row. */
+const ONLY_ME = "pm.onlyMe";
 
-export default function Meter({ t, lang, run, onError }: PageProps) {
+export default function Meter({ t, lang, run, onError, settings, save }: PageProps) {
   const [data, setData] = useState<Dps>();
   const [ping, setPing] = useState<number>();
   const [sel, setSel] = useState<string | number>();
@@ -55,6 +58,9 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
   const [mode, setMode] = useState("bossTargets");
   const [skills, setSkills] = useState<SkillEntry[]>();
   const history = useRef(new Map<number, number[]>());
+  const [trainer, setTrainer] = useState(false);
+  // Follows the widget too: update_settings broadcasts setting-changed, App folds it into `settings`.
+  const onlyMe = settings[ONLY_ME] === "1";
 
   useEffect(() => {
     const onDps = (d: Dps) => {
@@ -94,7 +100,9 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
       )
     : [];
   const live = rows.length > 0;
-  const selP = rows.find((r) => r.key === sel) ?? rows.find((r) => r.me) ?? rows[0];
+  // Shares and bars stay relative to the whole party; only the list narrows.
+  const shown = onlyMe ? rows.filter((r) => r.me) : rows;
+  const selP = shown.find((r) => r.key === sel) ?? shown.find((r) => r.me) ?? shown[0];
   const selKey = selP?.key;
   const targetId = data?.targetId;
 
@@ -116,7 +124,7 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
   }, [live, selKey, targetId, onError]);
 
   const ymax = Math.max(1, ...rows.flatMap((r) => history.current.get(r.key as number) ?? [])) * 1.1;
-  const series = rows.map((r) => ({ key: r.key, col: classColor(r.cls), d: path(history.current.get(r.key as number) ?? [], ymax) }));
+  const series = shown.map((r) => ({ key: r.key, col: classColor(r.cls), d: path(history.current.get(r.key as number) ?? [], ymax) }));
   const { list: skillList, badges } = liveSkills(skills);
   const btn30: CSSProperties = { height: 30 };
 
@@ -157,6 +165,20 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
         <button
           type="button"
           className="btn"
+          style={{ ...btn30, ...(onlyMe ? { borderColor: "var(--pm-red)", background: "var(--pm-tint)" } : {}) }}
+          aria-pressed={onlyMe}
+          onClick={() => run(() => save(ONLY_ME, onlyMe ? "" : "1"))}
+        >
+          <FlagIcon aria-hidden="true" weight={onlyMe ? "fill" : "regular"} />
+          {t("combat.onlyMe")}
+        </button>
+        <button type="button" className="btn" style={btn30} onClick={() => setTrainer(true)}>
+          <TargetIcon aria-hidden="true" />
+          {t("combat.trainer")}
+        </button>
+        <button
+          type="button"
+          className="btn"
           style={btn30}
           onClick={() =>
             run(() =>
@@ -189,7 +211,7 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.6fr) minmax(0,1fr)", gap: 12 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
             <section className="card" style={{ padding: 8 }} aria-label={t("combat.partyDps")}>
-              {rows.map((p) => (
+              {shown.map((p) => (
                 <button
                   key={p.key}
                   type="button"
@@ -313,7 +335,152 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
         <HealsCard t={t} lang={lang} heals={data?.heals ?? []} />
         <AggroCard t={t} lang={lang} rows={rows.map((r) => ({ ...r, hitsTaken: data?.map[String(r.key)]?.hitsTaken ?? 0 }))} />
       </div>
+
+      {trainer && (
+        <Trainer
+          t={t}
+          lang={lang}
+          onError={onError}
+          prevMode={data?.targetMode || mode}
+          me={data?.localPlayerId != null ? data.map[String(data.localPlayerId)] : undefined}
+          target={data?.targetName ?? ""}
+          battleTime={data?.battleTime ?? 0}
+          onReset={() => {
+            history.current.clear();
+            setData(undefined);
+          }}
+          onClose={() => setTrainer(false)}
+        />
+      )}
     </>
+  );
+}
+
+/** Seconds of the countdown before the trainer starts measuring. */
+const COUNTDOWN = 3;
+
+/**
+ * Trainer: a 3-2-1 countdown, then the meter starts from zero on training dummies only and shows the local
+ * player's numbers. Stop freezes them; closing puts the meter back in the mode it was in (nothing changes when
+ * it closes during the countdown).
+ */
+function Trainer({
+  t,
+  lang,
+  onError,
+  prevMode,
+  me,
+  target,
+  battleTime,
+  onReset,
+  onClose,
+}: {
+  t: PageProps["t"];
+  lang: string;
+  onError: PageProps["onError"];
+  prevMode: string;
+  me?: Dps["map"][string];
+  target: string;
+  battleTime: number;
+  onReset: () => void;
+  onClose: () => void;
+}) {
+  const [n, setN] = useState(COUNTDOWN);
+  // Values are read only once the reset is done: before it the meter still holds the previous fight.
+  const [ready, setReady] = useState(false);
+  const [frozen, setFrozen] = useState<{ dmg: number; dps: number; ms: number }>();
+  // Mount-time values for the timers and the unmount cleanup (props change every dps-update).
+  const first = useRef({ prevMode, onReset, onError });
+  const started = useRef(false);
+
+  useEffect(() => {
+    if (!n) return;
+    const id = setTimeout(() => {
+      if (n === 1) {
+        started.current = true;
+        const { onReset, onError } = first.current;
+        invoke("set_target_mode", { mode: "dummyTargets" })
+          .then(() => invoke("reset_combat"))
+          .then(() => {
+            onReset();
+            setReady(true);
+          }, onError);
+      }
+      setN(n - 1);
+    }, 1000);
+    return () => clearTimeout(id);
+  }, [n]);
+  useEffect(
+    () => () => {
+      if (started.current) invoke("set_target_mode", { mode: first.current.prevMode }).catch(first.current.onError);
+    },
+    [],
+  );
+
+  const cur = frozen ?? (ready && me && me.amount > 0 ? { dmg: me.amount, dps: me.dps, ms: battleTime } : undefined);
+  const stat = (label: string, value: string) => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>{label}</span>
+      <span className="mono" style={{ fontSize: 16 }}>
+        {value}
+      </span>
+    </div>
+  );
+
+  return (
+    <Modal
+      width={360}
+      onClose={onClose}
+      title={(id) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <h2 id={id} style={{ fontSize: 17, fontWeight: 500, flex: 1 }}>
+            {t("combat.trainerTitle")}
+          </h2>
+          <button type="button" className="shareClose" onClick={onClose} title={t("window.close")} aria-label={t("window.close")}>
+            <XIcon aria-hidden="true" />
+          </button>
+        </div>
+      )}
+    >
+      {n > 0 ? (
+        <div aria-live="polite" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "12px 0 8px" }}>
+          {/* Keyed: each number mounts and plays its entrance once. */}
+          <span key={n} className="mono cbCount">
+            {n}
+          </span>
+          <span style={{ fontSize: 12, color: "var(--pm-t2)", textAlign: "center" }}>{t("combat.trainerReady")}</span>
+        </div>
+      ) : (
+        <>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+            <span className="mono" style={{ fontSize: 40, lineHeight: 1.1 }}>
+              {cur ? fmt(cur.dps, lang) : "—"}
+            </span>
+            <span style={{ fontSize: 12, color: "var(--pm-t3)" }}>DPS</span>
+          </div>
+          {cur ? (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              {stat(t("combat.duration"), clock(cur.ms / 1000))}
+              {stat(t("combat.col.totalDmg"), fmt(cur.dmg, lang))}
+            </div>
+          ) : (
+            <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("combat.trainerHit")}</div>
+          )}
+          {cur && target && <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{target}</div>}
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            {frozen ? (
+              <button type="button" className="btn" style={{ height: 30 }} onClick={onClose}>
+                {t("window.close")}
+              </button>
+            ) : (
+              <button type="button" className="btn fill" style={{ height: 30 }} disabled={!cur} onClick={() => setFrozen(cur)}>
+                {t("combat.stop")}
+              </button>
+            )}
+          </div>
+        </>
+      )}
+    </Modal>
   );
 }
 

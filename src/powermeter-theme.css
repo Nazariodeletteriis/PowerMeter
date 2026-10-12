@@ -731,7 +731,11 @@ body.legacyUi .pmOnly {
   .list .item.isUser .fill,
   .list .item.warning .fill,
   .list .item.error .fill {
-    width: var(--pm-share, 0%) !important; /* meter.js: the damage share, as the % column */
+    /* meter.js: the damage share, as the % column. Scaled rather than sized, so each
+       update glides on the compositor; the bar has no lit edge here to squash. */
+    width: 100% !important;
+    transform: scaleX(var(--pm-share, 0));
+    transform-origin: left center;
     background: linear-gradient(
       90deg,
       color-mix(in srgb, var(--cls, #574f4f) var(--cls-g1, 36%), transparent),
@@ -739,7 +743,8 @@ body.legacyUi .pmOnly {
     );
     /* The "Meter bar opacity" setting still scales it; its 80% default = the design. */
     opacity: calc(var(--meter-fill-opacity, 0.8) / 0.8);
-    transition: width 0.3s ease-out;
+    /* Updates land every 500 ms: settle well inside that, strong ease-out. */
+    transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1);
   }
   .list .item .fill::before,
   .list .item .fill::after { content: none; }
@@ -758,7 +763,6 @@ body.legacyUi .pmOnly {
     border-radius: 4px;
     background: var(--cls-icon, none) center / 16px no-repeat, var(--cls-bg, #0f0f0f);
   }
-  .list .item .classIcon .classIconImg { display: none; }
   .list .item .name,
   .list .item .name.isCjk {
     min-width: 0;
@@ -955,25 +959,62 @@ body.legacyUi .pmOnly {
     box-shadow: 0 0 6px var(--dot);
     animation: pmLiveBlink 1.2s ease-in-out infinite;
   }
+  /* Only my DPS, at the right beside the live dot; pressed = white ring, as the averages button. */
+  .footerBtns .onlyMeBtn {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 18px;
+    margin-left: auto;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.75);
+    transition: color 120ms ease, border-color 120ms ease;
+  }
+  .footerBtns .onlyMeBtn.isActive { border-color: #ffffff; color: #ffffff; }
+  .footerBtns .onlyMeBtn:focus-visible { outline: 2px solid #ffffff; outline-offset: 1px; }
+  @media (hover: hover) and (pointer: fine) {
+    .footerBtns .onlyMeBtn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.14); }
+  }
+  .meterFooter:has(.onlyMeBtn) .pmLiveDot { margin-left: 0; }
   .meterFooter:has(.pingDisplay.ping-warn) .pmLiveDot { --dot: #e8b03a; }
   .meterFooter:has(.pingDisplay:is(.ping-high, .ping-bad)) .pmLiveDot { --dot: #ff4d4d; }
 
-  /* --- "Beta slim" layout = the design's Compatto: name, DPS, bar --- */
+  /* --- "Beta slim" layout = the design's Compatto: name, DPS, %, bar; the fight
+     timer in the bar; target, Reset and Only my DPS in a compact footer --- */
   .meter.slim {
     width: 280px;
     min-height: 160px;
   }
-  .meter.slim :is(.header .bossNames, .bossHpBar, .meterFooter, .pmCols) { display: none; }
+  .meter.slim :is(.header .bossNames, .bossHpBar, .pmCols) { display: none; }
   /* The Compact bar is logo and status only; the controls come back on hover
      so the widget stays usable. */
   .meter.slim:not(:hover, :has(:focus-visible)) :is(.pmTabs, .headerBtn) { display: none; }
   .meter.slim :is(.pmTabs, .bossIcon, .suspendBtn, .historyBtn, .resetBtn, .pmAvgBtn) { display: none; }
   .meter.slim .header .settingsBtn { margin-left: 0; }
   .meter.slim .list.hasRows { gap: 4px; padding: 4px 6px; }
-  .meter.slim .list .item .content { grid-template-columns: 22px 1fr auto; }
+  .meter.slim .list .item .content { grid-template-columns: 22px 1fr auto 38px; gap: 6px; }
   .meter.slim .list .item .name::after { content: none; }
-  .meter.slim .list .item .dps .dpsContribution,
   .meter.slim .list .item .dps .dpsTotal { display: none; }
+  .meter.slim .list .item .dps .dpsContribution { font-size: 11px; color: #b0a8a8; }
+  .meter.slim .meterFooter { gap: 6px; height: 26px; padding: 0 8px; }
+  .meter.slim .pmDuration.isVisible { display: none; } /* the timer is already in the bar */
+  .meter.slim .targetModeBtn {
+    height: 20px;
+    padding: 0 20px 0 8px;
+    font-size: 11px;
+    line-height: 18px;
+    background-position: right 7px center;
+  }
+  .meter.slim .pmLiveResetBtn {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    justify-content: center;
+  }
+  .meter.slim .pmLiveResetBtn span { display: none; } /* icon only; named by aria-label */
+  .meter.slim .pmLiveResetBtn svg { width: 11px; height: 11px; }
 
   @media (prefers-reduced-motion: reduce) {
     .list .item .fill { transition: none; }

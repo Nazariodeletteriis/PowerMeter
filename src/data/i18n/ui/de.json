@@ -455,6 +455,7 @@
       "players": "{n} Spieler"
     },
     "resetTip": "Meter zurücksetzen (Strg+Alt+R)",
+    "onlyMe": "Nur mein DPS",
     "eventSoon": "{name} in {time}",
     "eventDismiss": "Hinweis schließen",
     "pillHint": "Klicken zum Erweitern · ziehen zum Verschieben",

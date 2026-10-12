@@ -200,5 +200,13 @@
   "combat.rotationBtn": "連招",
   "combat.bossN": "首領 {n}",
   "combat.nBosses": "{n} 個首領",
-  "combat.castOrder": "施放順序，前 {n} 次 · 同一技能間隔不足 1.5 秒的命中計為一次施放"
+  "combat.castOrder": "施放順序，前 {n} 次 · 同一技能間隔不足 1.5 秒的命中計為一次施放",
+  "combat.onlyMe": "僅我的DPS",
+  "combat.trainer": "訓練",
+  "combat.trainerTitle": "木樁測試",
+  "combat.trainerReady": "歸零後統計重新開始，僅計算訓練木樁",
+  "combat.trainerHit": "攻擊木樁即開始測量",
+  "combat.stop": "停止",
+  "combat.dummy": "木樁",
+  "combat.windowEstimate": "區間傷害為估算值：命中數 × 平均傷害"
 }
