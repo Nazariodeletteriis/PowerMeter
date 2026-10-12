@@ -377,6 +377,14 @@
     "dashboard": "開啟主控台",
     "close": "關閉",
     "back": "返回",
+    "trainer": {
+      "title": "木樁測試",
+      "ready": "歸零後統計重新開始，僅計算訓練木樁",
+      "hit": "攻擊木樁即開始測量",
+      "restart": "重新開始",
+      "stop": "停止",
+      "total": "總傷害"
+    },
     "berserkTip": "狂暴計時器：最後 30 秒會變成紅色",
     "phase": "階段 {n}",
     "sparkLabel": "DPS 時間曲線",

@@ -206,6 +206,7 @@
   "combat.trainerTitle": "Prueba en el muñeco",
   "combat.trainerReady": "En cero el medidor se reinicia solo con muñecos de entrenamiento",
   "combat.trainerHit": "Golpea el muñeco para empezar a medir",
+  "combat.trainerRestart": "Reiniciar",
   "combat.stop": "Detener",
   "combat.dummy": "Muñeco",
   "combat.windowEstimate": "Daño de la ventana estimado: golpes × golpe medio"

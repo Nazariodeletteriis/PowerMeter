@@ -77,6 +77,9 @@ pub struct DetailSkillEntry {
     pub is_dot: bool,
     #[serde(default)]
     pub hit_timestamps: Vec<i64>,
+    /// Damage of each hit, same index as `hit_timestamps`. Empty in records saved before 0.5.5.
+    #[serde(default)]
+    pub hit_damages: Vec<i32>,
     #[serde(default)]
     pub specs: Vec<bool>,
 }

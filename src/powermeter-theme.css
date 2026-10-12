@@ -959,8 +959,9 @@ body.legacyUi .pmOnly {
     box-shadow: 0 0 6px var(--dot);
     animation: pmLiveBlink 1.2s ease-in-out infinite;
   }
-  /* Only my DPS, at the right beside the live dot; pressed = white ring, as the averages button. */
-  .footerBtns .onlyMeBtn {
+  /* Only my DPS, at the right beside the live dot; pressed = white ring, as the averages button.
+     The Trainer button sits beside it, same chip. */
+  .footerBtns :is(.onlyMeBtn, .pmTrainerBtn) {
     flex: none;
     display: grid;
     place-items: center;
@@ -972,10 +973,12 @@ body.legacyUi .pmOnly {
     color: rgba(255, 255, 255, 0.75);
     transition: color 120ms ease, border-color 120ms ease;
   }
+  .footerBtns .pmTrainerBtn { margin-left: 0; }
+  .pmTrainerBtn svg { width: 12px; height: 12px; }
   .footerBtns .onlyMeBtn.isActive { border-color: #ffffff; color: #ffffff; }
-  .footerBtns .onlyMeBtn:focus-visible { outline: 2px solid #ffffff; outline-offset: 1px; }
+  .footerBtns :is(.onlyMeBtn, .pmTrainerBtn):focus-visible { outline: 2px solid #ffffff; outline-offset: 1px; }
   @media (hover: hover) and (pointer: fine) {
-    .footerBtns .onlyMeBtn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.14); }
+    .footerBtns :is(.onlyMeBtn, .pmTrainerBtn):hover { color: #ffffff; background: rgba(255, 255, 255, 0.14); }
   }
   .meterFooter:has(.onlyMeBtn) .pmLiveDot { margin-left: 0; }
   .meterFooter:has(.pingDisplay.ping-warn) .pmLiveDot { --dot: #e8b03a; }
@@ -993,6 +996,11 @@ body.legacyUi .pmOnly {
   .meter.slim:not(:hover, :has(:focus-visible)) :is(.pmTabs, .headerBtn) { display: none; }
   .meter.slim :is(.pmTabs, .bossIcon, .suspendBtn, .historyBtn, .resetBtn, .pmAvgBtn) { display: none; }
   .meter.slim .header .settingsBtn { margin-left: 0; }
+  /* At 280px the six hover controls left the status ~20px ("I" of "Idle", a cut
+     timer): tighter gaps and buttons, and no spacer, give it ~75px. */
+  .meter.slim .header { gap: 0 4px; }
+  .meter.slim .header .pmSpacer { display: none; }
+  .meter.slim .header .headerBtns .headerBtn { width: 24px; }
   .meter.slim .list.hasRows { gap: 4px; padding: 4px 6px; }
   .meter.slim .list .item .content { grid-template-columns: 22px 1fr auto 38px; gap: 6px; }
   .meter.slim .list .item .name::after { content: none; }
@@ -1020,6 +1028,16 @@ body.legacyUi .pmOnly {
     .list .item .fill { transition: none; }
     .pmLiveDot { animation: none; }
   }
+}
+
+@keyframes pmTrainerIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+@keyframes pmTrainerFade {
+  from { opacity: 0; }
 }
 
 @keyframes pmLiveBlink {
@@ -1061,9 +1079,10 @@ body.legacyUi .pmOnly {
   .pmEnd,
   .pmUploaded,
   .pmDetail,
+  .pmTrainer,
   .pmLast { display: none; }
 
-  button:is(.pmBackBtn, .pmDetailReportBtn, .pmPill) {
+  button:is(.pmBackBtn, .pmTrainerClose, .pmDetailReportBtn, .pmPill) {
     padding: 0;
     border: 0;
     background: none;
@@ -1072,7 +1091,7 @@ body.legacyUi .pmOnly {
     text-shadow: inherit;
     cursor: pointer;
   }
-  :is(.pmBackBtn, .pmDetailReportBtn, .pmPill, .pmFillBtn, .pmGhostBtn):focus-visible {
+  :is(.pmBackBtn, .pmTrainerClose, .pmDetailReportBtn, .pmPill, .pmFillBtn, .pmGhostBtn):focus-visible {
     outline: 1px solid var(--pm-redt);
     outline-offset: 2px;
   }
@@ -1131,6 +1150,8 @@ body.legacyUi .pmOnly {
   }
   /* An empty mode still shows what the engine is recording and the mode button, to switch to it. */
   .meter.pmMode-dps.pmView-waiting:not(.isPmAvg) .header .bossNames { display: flex; }
+  /* The footer too: the Trainer starts from the dummy, before any fight is on screen. */
+  .meter.pmMode-dps.pmView-waiting.pmView-waiting:not(.isPmAvg) .meterFooter { display: flex; } /* class doubled: outweighs the :is() hide above */
   .meter.pmMode-dps.pmView-waiting { min-height: 220px; }
   .meter.pmMode-dps.pmView-waiting .pmEmpty {
     display: flex;
@@ -1306,13 +1327,13 @@ body.legacyUi .pmOnly {
     border-radius: 8px 8px 0 0;
     background: var(--pm-wbar);
   }
-  button.pmBackBtn {
+  button:is(.pmBackBtn, .pmTrainerClose) {
     display: grid;
     place-items: center;
     width: 12px;
     height: 12px;
   }
-  .pmBackBtn svg {
+  :is(.pmBackBtn, .pmTrainerClose) svg {
     width: 12px;
     height: 12px;
   }
@@ -1464,6 +1485,98 @@ body.legacyUi .pmOnly {
   .meter.isPmLocked.pmMode-dps:is(.pmView-waiting, .pmView-error, .pmView-ended, .isPmDetail) .list { display: grid; }
   .meter.isPmLocked.pmMode-dps.pmView-ended .pmEnd { display: none; }
   .meter.isPmLocked.pmMode-dps:is(.pmView-waiting, .pmView-ended) { min-height: 0; }
+
+  /* --- Trainer (pmWidget.js): replaces the widget like the breakdown, whatever the view state;
+     !important because the waiting / fight-over / locked rules are more specific. Locked keeps
+     its badge (the unlock hotspot) and the numbers, read through click-through. --- */
+  .meter.isPmTrainer > :not(.pmTrainer, .resizeHandle, .pmGrip, .pmGrabber, .pmLockBadge, .pmLockHint) { display: none !important; }
+  /* The reset puts the meter in the shorter waiting view: keep the layout's size through the test. */
+  .meter.pmMode-dps.isPmTrainer:not(.isPmLocked) { min-height: 420px; }
+  .meter.slim.pmMode-dps.isPmTrainer:not(.isPmLocked) { min-height: 160px; }
+  .meter.isPmTrainer .pmTrainer {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .pmTrainerTitle { font-weight: 600; }
+  .pmTrainerBody {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 12px 12px;
+    text-shadow: none;
+  }
+  /* Fixed height: the numbers swap without moving the hint. */
+  .pmTrainerCount {
+    display: grid;
+    place-items: center;
+    height: 64px;
+  }
+  /* Each number enters once (state indication): strong ease-out under 300 ms from a near-full
+     scale, as the dashboard's countdown (.cbCount); only a fade when motion is reduced. */
+  .pmTrainerN {
+    font-family: var(--pm-mono);
+    font-size: 56px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--pm-t1);
+    animation: pmTrainerIn 260ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .pmTrainerHint {
+    font-size: 11px;
+    color: var(--pm-t2);
+  }
+  .pmTrainerReady { text-align: center; }
+  .pmTrainerDps {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .pmTrainerDpsN {
+    font-family: var(--pm-mono);
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  :is(.pmTrainerUnit, .pmTrainerLabel, .pmTrainerTarget) {
+    font-size: 11px;
+    color: var(--pm-t3);
+  }
+  .pmTrainerStats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .pmTrainerValue {
+    font-family: var(--pm-mono);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .pmTrainerTarget {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pmTrainerActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .pmTrainerActions > button { height: 28px; }
+  .pmTrainer.isCounting :is(.pmTrainerDps, .pmTrainerStats, .pmTrainerHit, .pmTrainerTarget, .pmTrainerActions),
+  .pmTrainer:not(.isCounting) :is(.pmTrainerCount, .pmTrainerReady),
+  .pmTrainer:not(.hasData) .pmTrainerStats,
+  .pmTrainer.hasData .pmTrainerHit,
+  .pmTrainer.isFrozen .pmTrainerStop,
+  .pmTrainer:not(.isFrozen) .pmTrainerDone,
+  .pmTrainerTarget:empty { display: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .pmTrainerN { animation-name: pmTrainerFade; }
+  }
 
   /* --- 8.1 pill: 160x32, your DPS and the timer; click to expand --- */
   .meter.isPmPill {

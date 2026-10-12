@@ -206,6 +206,7 @@
   "combat.trainerTitle": "訓練用人形でテスト",
   "combat.trainerReady": "0になるとメーターは訓練用人形だけを対象に再スタートします",
   "combat.trainerHit": "訓練用人形を攻撃すると計測が始まります",
+  "combat.trainerRestart": "やり直す",
   "combat.stop": "停止",
   "combat.dummy": "訓練用人形",
   "combat.windowEstimate": "範囲内のダメージは推定値：ヒット数 × 平均ダメージ"

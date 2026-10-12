@@ -16,6 +16,7 @@ const createPmWidget = (app) => {
   const oneDec = (n) =>
     (Number(n) || 0).toLocaleString(window.i18n?.getLanguage?.() || "en", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const pct = (n) => `${oneDec(n)}%`;
+  const clock = (sec) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
   // "3,5 M" / "912 K", as meter.js does for the total-damage column.
   const esc = (s) =>
     String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -64,7 +65,10 @@ const createPmWidget = (app) => {
       if (on && !(slim && m.footerHome)) m.anchor[m.where](m.el);
       else m.home.insertBefore(m.el, m.next);
     }
-    if (!on) closeDetail();
+    if (!on) {
+      closeDetail();
+      closeTrainer();
+    }
   };
 
   // --- lock (click-through). Also toggled by the global hotkey, hence the event.
@@ -385,6 +389,101 @@ const createPmWidget = (app) => {
     btn.addEventListener("click", () => app.refreshDamageData({ reason: "fight summary reset" }))
   );
 
+  // --- Trainer (the dashboard's, meter.tsx): a 3-2-1 countdown, then the meter starts from zero on
+  // training dummies only and shows the local player's numbers. Stop freezes them, Restart runs the
+  // countdown and the reset again; closing puts the old mode back (nothing changes during the countdown).
+  // It reads the raw dps-update (tauriBridge.js): core.js's rows carry no localPlayerId or battleTime.
+  const TRAINER_COUNTDOWN = 3;
+  const trainerEl = $(".pmTrainer");
+  const trainerBtn = $(".pmTrainerBtn");
+  let trainer = null; // { n, timer, prevMode, started, ready, raw, cur, frozen } while open
+  // You, or the only player hitting the dummy while the engine does not know you yet.
+  const trainee = (d) => {
+    if (!d?.map) return null;
+    if (d.localPlayerId != null && d.map[d.localPlayerId]) return d.map[d.localPlayerId];
+    const hitting = Object.entries(d.map).filter(([id, v]) => Number(id) > 0 && v?.amount > 0);
+    return hitting.length === 1 ? hitting[0][1] : null;
+  };
+  const renderTrainer = () => {
+    const counting = trainer.n > 0;
+    const cur = trainer.frozen || (trainer.ready ? trainer.cur : null);
+    trainerEl.classList.toggle("isCounting", counting);
+    trainerEl.classList.toggle("hasData", !!cur);
+    trainerEl.classList.toggle("isFrozen", !!trainer.frozen);
+    $(".pmTrainerStop").disabled = !cur;
+    if (counting) return;
+    setText(".pmTrainerDpsN", cur ? num(cur.dps) : "—");
+    setText(".pmTrainerTime", cur ? clock(Math.floor(cur.ms / 1000)) : "");
+    setText(".pmTrainerDmg", cur ? num(cur.dmg) : "");
+    setText(".pmTrainerTarget", cur?.target || "");
+  };
+  const countdown = (n) => {
+    trainer.n = n;
+    if (n) $(".pmTrainerCount").innerHTML = `<span class="pmTrainerN">${n}</span>`;
+    renderTrainer();
+    if (!n) return;
+    trainer.timer = setTimeout(() => {
+      if (n === 1) {
+        const run = trainer;
+        run.started = true;
+        run.ready = false; // until the reset is done the meter still holds the previous fight
+        invoke("set_target_mode", { mode: "dummyTargets" })
+          .then(() => invoke("reset_combat"))
+          .then(() => {
+            run.ready = true;
+            if (trainer === run) renderTrainer();
+          })
+          .catch((err) => console.error("[PowerMeter] trainer start failed", err));
+      }
+      countdown(n - 1);
+    }, 1000);
+  };
+  const openTrainer = () => {
+    const mode = app.safeParseJSON(window.dpsData?.getDpsData?.(), null)?.targetMode;
+    trainer = { prevMode: mode && mode !== "dummyTargets" ? mode : app.targetSelection };
+    meter.classList.add("isPmTrainer");
+    countdown(TRAINER_COUNTDOWN);
+    $(".pmTrainerClose").focus();
+  };
+  function closeTrainer() {
+    if (!trainer) return;
+    clearTimeout(trainer.timer);
+    // Through the bridge: the old mode's numbers at once, and late dummy updates dropped.
+    if (trainer.started) window.javaBridge?.setTargetSelection?.(trainer.prevMode);
+    trainer = null;
+    const hadFocus = trainerEl.contains(document.activeElement);
+    meter.classList.remove("isPmTrainer");
+    if (hadFocus) trainerBtn?.focus();
+  }
+  // Every poll: the latest numbers, parsed only when a new update came in.
+  const tickTrainer = () => {
+    if (!trainer?.ready || trainer.frozen) return;
+    const raw = window.dpsData?.getDpsData?.() ?? null;
+    if (raw === trainer.raw) return;
+    trainer.raw = raw;
+    const d = app.safeParseJSON(raw, null);
+    const me = trainee(d);
+    trainer.cur = me?.amount > 0 ? { dps: me.dps, dmg: me.amount, ms: Number(d.battleTime) || 0, target: d.targetName || "" } : null;
+    renderTrainer();
+  };
+  trainerBtn?.addEventListener("click", openTrainer);
+  meter.querySelectorAll(".pmTrainerClose, .pmTrainerDone").forEach((btn) => btn.addEventListener("click", closeTrainer));
+  trainerEl?.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeTrainer();
+  });
+  $(".pmTrainerStop")?.addEventListener("click", () => {
+    trainer.frozen = trainer.cur;
+    renderTrainer();
+    $(".pmTrainerDone").focus(); // Stop is gone; Close takes its place
+  });
+  $(".pmTrainerRestart")?.addEventListener("click", () => {
+    trainer.frozen = null;
+    trainer.cur = null;
+    trainer.raw = null;
+    countdown(TRAINER_COUNTDOWN);
+    $(".pmTrainerClose").focus(); // the actions hide during the countdown
+  });
+
   // --- render
   const setText = (sel, text) => {
     const el = $(sel);
@@ -448,6 +547,7 @@ const createPmWidget = (app) => {
   // Every poll (100 ms): work out which state the DPS view is in.
   const tick = () => {
     if (!isActive()) return;
+    tickTrainer();
     const state = app.battleTime?.getState?.() || "";
     const fighting = state === "state-fighting" || state === "state-grace";
     if (fighting && !wasFighting) {
@@ -511,7 +611,7 @@ const createPmWidget = (app) => {
       berserk.hidden = !hasBerserk;
       if (hasBerserk) {
         const sec = Math.ceil(berserkMs / 1000);
-        setText(".pmBerserkTime", `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`);
+        setText(".pmBerserkTime", clock(sec));
         berserk.classList.toggle("isUrgent", sec <= 30); // design: red for the last 30 s
       }
     }

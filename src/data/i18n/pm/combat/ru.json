@@ -206,6 +206,7 @@
   "combat.trainerTitle": "Тест на манекене",
   "combat.trainerReady": "На нуле метр начнёт заново, только по манекенам",
   "combat.trainerHit": "Ударьте манекен, чтобы начать замер",
+  "combat.trainerRestart": "Начать заново",
   "combat.stop": "Стоп",
   "combat.dummy": "Манекен",
   "combat.windowEstimate": "Урон в окне оценочный: удары × средний удар"

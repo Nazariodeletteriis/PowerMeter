@@ -377,6 +377,14 @@
     "dashboard": "打开控制台",
     "close": "关闭",
     "back": "返回",
+    "trainer": {
+      "title": "木桩测试",
+      "ready": "归零后统计重新开始，仅计算训练木桩",
+      "hit": "攻击木桩即开始测量",
+      "restart": "重新开始",
+      "stop": "停止",
+      "total": "总伤害"
+    },
     "berserkTip": "狂暴计时器：最后 30 秒变为红色",
     "phase": "阶段 {n}",
     "sparkLabel": "DPS 时间曲线",

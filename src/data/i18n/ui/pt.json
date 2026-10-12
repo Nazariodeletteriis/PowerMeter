@@ -377,6 +377,14 @@
     "dashboard": "Abrir painel",
     "close": "Fechar",
     "back": "Voltar",
+    "trainer": {
+      "title": "Teste no boneco",
+      "ready": "No zero o medidor recomeça só nos bonecos de treino",
+      "hit": "Acerte o boneco para começar a medir",
+      "restart": "Recomeçar",
+      "stop": "Parar",
+      "total": "Dano total"
+    },
     "berserkTip": "Temporizador de berserk: fica vermelho nos últimos 30 s",
     "phase": "Fase {n}",
     "sparkLabel": "DPS ao longo do tempo",

@@ -377,6 +377,14 @@
     "dashboard": "Apri dashboard",
     "close": "Chiudi",
     "back": "Indietro",
+    "trainer": {
+      "title": "Test sul manichino",
+      "ready": "Allo zero il meter riparte solo sui manichini",
+      "hit": "Colpisci il manichino per iniziare la misura",
+      "restart": "Ricomincia",
+      "stop": "Stop",
+      "total": "Danno totale"
+    },
     "berserkTip": "Timer berserk: diventa rosso negli ultimi 30 s",
     "phase": "Fase {n}",
     "sparkLabel": "DPS nel tempo",

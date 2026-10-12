@@ -2,6 +2,16 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.6
+
+- Nouveau : Rapport de combat : les dégâts de chaque coup sont désormais enregistrés, une plage de temps sélectionnée affiche donc les dégâts réels de chaque compétence, pas une estimation (à partir des prochains combats).
+- Nouveau : Entraîneur aussi dans le widget, Bêta compact compris : l'icône cible dans le pied.
+- Nouveau : Entraîneur : le bouton Recommencer relance le compte à rebours et la réinitialisation.
+- Corrigé : Votre personnage est reconnu même si PowerMeter démarre alors que vous êtes déjà en jeu : plus de numéro à la place de votre nom.
+- Corrigé : Entraîneur : il mesure à nouveau (il restait vide) et le widget ne le repasse plus en PVE.
+- Corrigé : « Seulement mon DPS » dans le widget masque désormais les autres joueurs.
+- Corrigé : Widget Bêta compact : la barre du haut reste lisible au survol (elle n'affichait que « I »).
+
 ## 0.5.4
 
 - Nouveau : Compteur DPS : mode Entraîneur : compte à rebours 3-2-1, puis votre DPS sur le mannequin d'entraînement uniquement.

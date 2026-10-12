@@ -377,6 +377,14 @@
     "dashboard": "Ouvrir le tableau de bord",
     "close": "Fermer",
     "back": "Retour",
+    "trainer": {
+      "title": "Test sur mannequin",
+      "ready": "À zéro, le compteur repart sur les mannequins uniquement",
+      "hit": "Frappez le mannequin pour lancer la mesure",
+      "restart": "Recommencer",
+      "stop": "Arrêter",
+      "total": "Dégâts totaux"
+    },
     "berserkTip": "Minuteur de rage : devient rouge dans les 30 dernières s",
     "phase": "Phase {n}",
     "sparkLabel": "DPS dans le temps",

@@ -42,6 +42,22 @@ impl JobClass {
         }
     }
 
+    /// Class as the dashboard stores it on a character (`pm.characters[].cls`).
+    pub fn from_dashboard(cls: &str) -> Option<JobClass> {
+        match cls {
+            "Gladiator" => Some(JobClass::Gladiator),
+            "Templar" => Some(JobClass::Templar),
+            "Assassin" => Some(JobClass::Assassin),
+            "Ranger" => Some(JobClass::Ranger),
+            "Sorcerer" => Some(JobClass::Sorcerer),
+            "Spiritmaster" | "Elementalist" => Some(JobClass::Elementalist),
+            "Cleric" => Some(JobClass::Cleric),
+            "Chanter" => Some(JobClass::Chanter),
+            "Brawler" | "Fighter" => Some(JobClass::Fighter),
+            _ => None,
+        }
+    }
+
     fn from_prefix(prefix: i32) -> Option<JobClass> {
         match prefix {
             11 => Some(JobClass::Gladiator),

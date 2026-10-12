@@ -1102,6 +1102,7 @@ impl DpsCalculator {
                         e.powershard += s.powershard;
                         e.regen = e.regen.saturating_add(s.regen);
                         e.hit_timestamps.extend(s.hit_timestamps);
+                        e.hit_damages.extend(s.hit_damages);
                         for (k, f) in s.specs.iter().enumerate() {
                             if *f && k < e.specs.len() {
                                 e.specs[k] = true;
@@ -1283,6 +1284,7 @@ impl DpsCalculator {
                     job,
                     is_dot,
                     hit_timestamps: Vec::new(),
+                    hit_damages: Vec::new(),
                     specs: skill_data.spec_flags.to_vec(),
                 });
 
@@ -1309,6 +1311,7 @@ impl DpsCalculator {
                 for &ts in &skill_data.hit_timestamps {
                     entry.hit_timestamps.push(ts - fight_start);
                 }
+                entry.hit_damages.extend_from_slice(&skill_data.hit_damages);
                 // Merge spec flags
                 for (i, &flag) in skill_data.spec_flags.iter().enumerate() {
                     if flag && i < entry.specs.len() { entry.specs[i] = true; }
@@ -1366,6 +1369,7 @@ impl DpsCalculator {
                     job,
                     is_dot: is_hot,
                     hit_timestamps: Vec::new(),
+                    hit_damages: Vec::new(),
                     specs: Vec::new(),
                 });
                 entry.dmg = entry.dmg.saturating_add(hd.total_heal.min(i32::MAX as i64) as i32);

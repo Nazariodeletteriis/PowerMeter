@@ -206,6 +206,7 @@
   "combat.trainerTitle": "Test sul manichino",
   "combat.trainerReady": "Allo zero il meter riparte solo sui manichini",
   "combat.trainerHit": "Colpisci il manichino per iniziare la misura",
+  "combat.trainerRestart": "Ricomincia",
   "combat.stop": "Stop",
   "combat.dummy": "Manichino",
   "combat.windowEstimate": "Danno della finestra stimato: colpi × colpo medio"

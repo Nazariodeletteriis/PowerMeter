@@ -377,6 +377,14 @@
     "dashboard": "Open dashboard",
     "close": "Close",
     "back": "Back",
+    "trainer": {
+      "title": "Training dummy test",
+      "ready": "At zero the meter restarts on training dummies only",
+      "hit": "Hit the training dummy to start measuring",
+      "restart": "Restart",
+      "stop": "Stop",
+      "total": "Total damage"
+    },
     "berserkTip": "Berserk timer: turns red in the last 30 s",
     "phase": "Phase {n}",
     "sparkLabel": "DPS over time",

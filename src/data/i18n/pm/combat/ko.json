@@ -206,6 +206,7 @@
   "combat.trainerTitle": "허수아비 테스트",
   "combat.trainerReady": "0이 되면 미터가 허수아비만 대상으로 다시 시작합니다",
   "combat.trainerHit": "허수아비를 공격하면 측정이 시작됩니다",
+  "combat.trainerRestart": "다시 시작",
   "combat.stop": "정지",
   "combat.dummy": "허수아비",
   "combat.windowEstimate": "구간 피해는 추정치: 적중 수 × 평균 피해"

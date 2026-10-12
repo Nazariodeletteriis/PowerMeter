@@ -377,6 +377,14 @@
     "dashboard": "Abrir panel",
     "close": "Cerrar",
     "back": "Atrás",
+    "trainer": {
+      "title": "Prueba en el muñeco",
+      "ready": "En cero el medidor se reinicia solo con muñecos de entrenamiento",
+      "hit": "Golpea el muñeco para empezar a medir",
+      "restart": "Reiniciar",
+      "stop": "Detener",
+      "total": "Daño total"
+    },
     "berserkTip": "Temporizador de furia: se pone rojo en los últimos 30 s",
     "phase": "Fase {n}",
     "sparkLabel": "DPS a lo largo del tiempo",

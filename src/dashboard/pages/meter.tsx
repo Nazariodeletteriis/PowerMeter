@@ -342,7 +342,7 @@ export default function Meter({ t, lang, run, onError, settings, save }: PagePro
           lang={lang}
           onError={onError}
           prevMode={data?.targetMode || mode}
-          me={data?.localPlayerId != null ? data.map[String(data.localPlayerId)] : undefined}
+          me={trainee(data)}
           target={data?.targetName ?? ""}
           battleTime={data?.battleTime ?? 0}
           onReset={() => {
@@ -356,13 +356,21 @@ export default function Meter({ t, lang, run, onError, settings, save }: PagePro
   );
 }
 
+/** Who the trainer measures: you, or the only player hitting the dummy while the engine does not know you yet. */
+function trainee(d?: Dps) {
+  if (!d) return undefined;
+  if (d.localPlayerId != null && d.map[String(d.localPlayerId)]) return d.map[String(d.localPlayerId)];
+  const hitting = Object.entries(d.map).filter(([id, v]) => Number(id) > 0 && v.amount > 0);
+  return hitting.length === 1 ? hitting[0][1] : undefined;
+}
+
 /** Seconds of the countdown before the trainer starts measuring. */
 const COUNTDOWN = 3;
 
 /**
  * Trainer: a 3-2-1 countdown, then the meter starts from zero on training dummies only and shows the local
- * player's numbers. Stop freezes them; closing puts the meter back in the mode it was in (nothing changes when
- * it closes during the countdown).
+ * player's numbers. Stop freezes them, Restart runs the countdown and the reset again; closing puts the meter
+ * back in the mode it was in (nothing changes when it closes during the countdown).
  */
 function Trainer({
   t,
@@ -467,7 +475,19 @@ function Trainer({
             <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t("combat.trainerHit")}</div>
           )}
           {cur && target && <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{target}</div>}
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <button
+              type="button"
+              className="btn"
+              style={{ height: 30 }}
+              onClick={() => {
+                setFrozen(undefined);
+                setReady(false);
+                setN(COUNTDOWN);
+              }}
+            >
+              {t("combat.trainerRestart")}
+            </button>
             {frozen ? (
               <button type="button" className="btn" style={{ height: 30 }} onClick={onClose}>
                 {t("window.close")}

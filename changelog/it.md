@@ -2,6 +2,16 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.6
+
+- Nuovo: Report combattimento: ora viene registrato il danno di ogni colpo, quindi un intervallo di tempo selezionato mostra il danno reale di ogni skill, non una stima (dai prossimi combattimenti).
+- Nuovo: Trainer anche nel widget, Beta compatta compresa: l'icona bersaglio nella footer.
+- Nuovo: Trainer: il pulsante Ricomincia rifà il conto alla rovescia e l'azzeramento.
+- Corretto: Il tuo personaggio viene riconosciuto anche se avvii PowerMeter quando sei già in gioco: niente più numero al posto del nome.
+- Corretto: Trainer: misura di nuovo (restava vuoto) e il widget non lo riporta più in PVE.
+- Corretto: "Solo il mio DPS" nel widget ora nasconde gli altri giocatori.
+- Corretto: Widget Beta compatta: la barra in alto resta leggibile col mouse sopra (mostrava solo "I").
+
 ## 0.5.4
 
 - Nuovo: DPS Meter: modalità Trainer: conto alla rovescia 3-2-1, poi il tuo DPS solo sul manichino.

@@ -2,6 +2,16 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.6
+
+- Neu: Kampfbericht: Der Schaden jedes Treffers wird jetzt gespeichert, ein gewählter Zeitraum zeigt also den echten Schaden jeder Fertigkeit statt einer Schätzung (ab den nächsten Kämpfen).
+- Neu: Trainer auch im Widget, Compact Beta eingeschlossen: das Zielsymbol in der Fußleiste.
+- Neu: Trainer: Die Schaltfläche Neu starten führt Countdown und Zurücksetzen erneut aus.
+- Behoben: Dein Charakter wird erkannt, auch wenn PowerMeter startet, während du schon im Spiel bist: keine Nummer mehr statt deines Namens.
+- Behoben: Trainer: misst wieder (blieb leer), und das Widget stellt ihn nicht mehr auf PVE zurück.
+- Behoben: „Nur mein DPS“ im Widget blendet die anderen Spieler jetzt aus.
+- Behoben: Compact-Beta-Widget: Die obere Leiste bleibt beim Darüberfahren lesbar (sie zeigte nur „I“).
+
 ## 0.5.4
 
 - Neu: DPS Meter: Trainer-Modus: Countdown 3-2-1, danach nur dein DPS an der Trainingspuppe.

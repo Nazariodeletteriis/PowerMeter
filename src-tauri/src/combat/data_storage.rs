@@ -61,11 +61,13 @@ pub struct SkillCombatData {
     pub multi_hit_hits: i32,
     pub heal_amount: i32,
     pub hit_timestamps: Vec<i64>,
+    /// Damage of each hit, parallel to `hit_timestamps` (same index, same length).
+    pub hit_damages: Vec<i32>,
     pub spec_flags: [bool; 5],
 }
 
 impl SkillCombatData {
-    /// Clone every aggregate field but leave `hit_timestamps` empty.
+    /// Clone every aggregate field but leave `hit_timestamps`/`hit_damages` empty.
     /// The timestamp Vec grows by one entry per hit (unbounded over a long
     /// fight) and is only ever consumed by `get_target_details` (the details
     /// panel chart). Every other consumer clones it for nothing, so the hot
@@ -93,6 +95,7 @@ impl SkillCombatData {
             multi_hit_hits: self.multi_hit_hits,
             heal_amount: self.heal_amount,
             hit_timestamps: Vec::new(),
+            hit_damages: Vec::new(),
             spec_flags: self.spec_flags,
         }
     }
@@ -118,6 +121,7 @@ impl SkillCombatData {
             multi_hit_hits: 0,
             heal_amount: 0,
             hit_timestamps: Vec::new(),
+            hit_damages: Vec::new(),
             spec_flags: [false; 5],
         }
     }
@@ -370,6 +374,34 @@ impl DataStorage {
         self.inner.read().local_player_id
     }
 
+    /// Fallback for the local player when the game's self record was missed: `33 36` comes
+    /// only on zone entry, so a meter started after you zoned in never learns who you are.
+    /// The active character's name goes to the one unnamed player of its class seen in
+    /// combat; with none, or several, nothing is bound.
+    pub fn guess_local_player(&self, name: &str, job: JobClass) {
+        let mut inner = self.inner.write();
+        if inner.local_player_id.is_some() || inner.nickname_storage.values().any(|n| n == name) {
+            return;
+        }
+        let mut found = None;
+        for td in inner.target_combat.values() {
+            for (&id, a) in &td.actors {
+                if id <= 0 || a.job != Some(job) || inner.nickname_storage.contains_key(&id) || inner.summon_storage.contains_key(&id) {
+                    continue;
+                }
+                if found.is_some_and(|f| f != id) {
+                    return;
+                }
+                found = Some(id);
+            }
+        }
+        if let Some(id) = found {
+            tracing::info!("guessed local player '{}' -> entity {} (unnamed, same class)", name, id);
+            inner.local_player_id = Some(id as i64);
+            append_nickname_inner(&mut inner, id, name);
+        }
+    }
+
     pub fn append_damage(&self, pdp: ParsedDamagePacket) {
         let mut inner = self.inner.write();
         let skill_code = pdp.skill_code();
@@ -543,6 +575,7 @@ impl DataStorage {
             actor_data.regen += life_steal;
         }
         skill_data.hit_timestamps.push(timestamp);
+        skill_data.hit_damages.push(total_dmg);
         for (i, &flag) in pdp.spec_flags().iter().enumerate() {
             if flag { skill_data.spec_flags[i] = true; }
         }
@@ -1373,5 +1406,41 @@ mod stagger_tests {
         let now = now_ms();
         assert_eq!(s.stagger_at(7, now), Some(Stagger { cur: 0, max: 40, broken: true }));
         assert_eq!(s.stagger_at(7, now + STAGGER_BREAK_MS + 1), Some(Stagger { cur: 40, max: 40, broken: false }));
+    }
+}
+
+#[cfg(test)]
+mod guess_local_tests {
+    use super::*;
+
+    const MOB: i32 = 900;
+
+    fn hit(s: &DataStorage, actor: i32) {
+        let mut p = ParsedDamagePacket::new();
+        p.set_actor_id(actor);
+        p.set_target_id(MOB);
+        p.set_skill_code(11_020_000); // Gladiator
+        p.set_damage(10);
+        s.append_damage(p);
+    }
+
+    #[test]
+    fn binds_the_one_unnamed_player_of_my_class() {
+        let s = DataStorage::new();
+        s.append_nickname_authoritative(300, "Mate");
+        hit(&s, 100);
+        hit(&s, 300);
+        s.guess_local_player("Me", JobClass::Gladiator);
+        assert_eq!(s.local_player_id(), Some(100));
+        assert_eq!(s.get_nickname(100).as_deref(), Some("Me"));
+    }
+
+    #[test]
+    fn binds_nobody_when_two_unnamed_players_share_my_class() {
+        let s = DataStorage::new();
+        hit(&s, 100);
+        hit(&s, 200);
+        s.guess_local_player("Me", JobClass::Gladiator);
+        assert_eq!(s.local_player_id(), None);
     }
 }

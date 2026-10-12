@@ -206,6 +206,7 @@
   "combat.trainerTitle": "Teste no boneco",
   "combat.trainerReady": "No zero o medidor recomeça só nos bonecos de treino",
   "combat.trainerHit": "Acerte o boneco para começar a medir",
+  "combat.trainerRestart": "Recomeçar",
   "combat.stop": "Parar",
   "combat.dummy": "Boneco",
   "combat.windowEstimate": "Dano da janela estimado: golpes × golpe médio"

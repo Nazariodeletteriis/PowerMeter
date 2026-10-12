@@ -206,6 +206,7 @@
   "combat.trainerTitle": "Test sur mannequin",
   "combat.trainerReady": "À zéro, le compteur repart sur les mannequins uniquement",
   "combat.trainerHit": "Frappez le mannequin pour lancer la mesure",
+  "combat.trainerRestart": "Recommencer",
   "combat.stop": "Arrêter",
   "combat.dummy": "Mannequin",
   "combat.windowEstimate": "Dégâts de la fenêtre estimés : coups × coup moyen"

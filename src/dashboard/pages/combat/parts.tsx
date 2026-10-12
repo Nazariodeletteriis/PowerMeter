@@ -130,7 +130,7 @@ export const initials = (n: string) =>
     .slice(0, 2);
 
 // ---------- saved fights (src-tauri/src/entity/fight_record.rs, details_context.rs) ----------
-/** DetailSkillEntry: `time` is the hit count, `hitTimestamps` are ms from the fight start. */
+/** DetailSkillEntry: `time` is the hit count, `hitTimestamps` are ms from the fight start, `hitDamages` the damage of each (empty before 0.5.5). */
 export type FightSkill = {
   actorId: number;
   name: string;
@@ -145,7 +145,11 @@ export type FightSkill = {
   double: number;
   multiHitCount: number;
   hitTimestamps: number[];
+  hitDamages?: number[];
 };
+
+/** Damage of hit `k`: the recorded one, or the skill's average hit for fights saved before 0.5.5. */
+const hitDmg = (s: FightSkill, k: number) => (s.hitDamages?.length === s.hitTimestamps.length ? s.hitDamages[k] : s.dmg / s.hitTimestamps.length);
 /** Worn item read from the player's spawn; slot 1 weapon … 11 earring (src-tauri equip_parser). */
 export type GearItem = { slot: number; itemId: number; enchant: number };
 export type FightActor = { actorId: number; nickname: string; job: string; jobId: number; partyHeal: number; damageReceived: number; hitsReceived: number; gear?: GearItem[] };
@@ -235,7 +239,7 @@ export type FightRow = { key: number; n: string; cls: string; dmg: number; dps: 
 
 /**
  * Party of a fight, sorted by DPS. With a window [from, to] (seconds) each skill keeps the hits
- * whose timestamp falls inside it, at the skill's average hit (the record has no per-hit damage).
+ * whose timestamp falls inside it, each at its own damage (see `hitDmg`).
  */
 export function fightParty(rec: FightRecord, me: string, w?: [number, number]): FightRow[] {
   const secs = Math.max(1, w ? w[1] - w[0] : rec.durationMs / 1000);
@@ -244,8 +248,13 @@ export function fightParty(rec: FightRecord, me: string, w?: [number, number]): 
     const raw = rec.details.skills.filter((s) => s.actorId === a.actorId);
     const cut = raw.map((s) => {
       if (!w) return { s, dmg: s.dmg, hits: s.time };
-      const n = s.hitTimestamps.filter((x) => x >= w[0] * 1000 && x <= w[1] * 1000).length;
-      return { s, dmg: s.hitTimestamps.length ? (s.dmg * n) / s.hitTimestamps.length : 0, hits: n };
+      let dmg = 0, hits = 0;
+      s.hitTimestamps.forEach((x, k) => {
+        if (x < w[0] * 1000 || x > w[1] * 1000) return;
+        dmg += hitDmg(s, k);
+        hits++;
+      });
+      return { s, dmg, hits };
     });
     const dmg = cut.reduce((x, c) => x + c.dmg, 0);
     const hits = cut.reduce((x, c) => x + c.hits, 0);
@@ -262,12 +271,12 @@ export function fightParty(rec: FightRecord, me: string, w?: [number, number]): 
   return rows.map((r) => ({ ...r, pct: (r.dmg / tot) * 100 })).sort((a, b) => b.dps - a.dps);
 }
 
-/** DPS of each row over `n` equal slices of the fight, from hit timestamps at each skill's average hit. */
+/** DPS of each row over `n` equal slices of the fight, from each hit's timestamp and damage. */
 export function fightSeries(rows: FightRow[], durationMs: number, n = 60) {
   const slice = Math.max(1, durationMs) / n;
   const pts = rows.map((r) => {
     const v = new Array<number>(n).fill(0);
-    for (const s of r.raw) for (const x of s.hitTimestamps) v[Math.min(n - 1, Math.max(0, Math.floor(x / slice)))] += s.dmg / s.hitTimestamps.length;
+    for (const s of r.raw) s.hitTimestamps.forEach((x, k) => (v[Math.min(n - 1, Math.max(0, Math.floor(x / slice)))] += hitDmg(s, k)));
     return v.map((d) => d / (slice / 1000));
   });
   const ymax = Math.max(1, ...pts.flat()) * 1.1;

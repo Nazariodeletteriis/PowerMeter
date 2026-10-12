@@ -206,6 +206,7 @@
   "combat.trainerTitle": "Training dummy test",
   "combat.trainerReady": "At zero the meter restarts on training dummies only",
   "combat.trainerHit": "Hit the training dummy to start measuring",
+  "combat.trainerRestart": "Restart",
   "combat.stop": "Stop",
   "combat.dummy": "Dummy",
   "combat.windowEstimate": "Window damage estimated: hits × average hit"

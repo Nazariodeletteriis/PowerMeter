@@ -377,6 +377,14 @@
     "dashboard": "Dashboard öffnen",
     "close": "Schließen",
     "back": "Zurück",
+    "trainer": {
+      "title": "Test an der Trainingspuppe",
+      "ready": "Bei null startet der Meter neu, nur für Trainingspuppen",
+      "hit": "Triff die Trainingspuppe, um die Messung zu starten",
+      "restart": "Neu starten",
+      "stop": "Stopp",
+      "total": "Gesamtschaden"
+    },
     "berserkTip": "Berserker-Timer: wird in den letzten 30 s rot",
     "phase": "Phase {n}",
     "sparkLabel": "DPS im Zeitverlauf",

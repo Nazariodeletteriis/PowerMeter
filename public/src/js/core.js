@@ -980,7 +980,7 @@ class DpsApp {
     this.applyLocalPlayerIdUpdate(localPlayerId, "backend local id update");
     this.updateLocalPlayerIdentity(rows);
     this._lastBattleTimeMs = battleTimeMs;
-    this.followFightMode(recordingKind);
+    this.followFightMode(recordingKind, targetMode);
     this.lastTargetMode = targetMode;
     this.lastTargetName = targetName;
     this.lastTargetId = targetId;
@@ -1198,7 +1198,8 @@ class DpsApp {
       const idText = String(id);
       // The local player's own row can arrive before the engine has its nickname:
       // we already know who "you" are, so show your name rather than "#id".
-      const isLocalId = numericId > 0 && numericId === Number(this.localPlayerId) && !!this.USER_NAME;
+      const isMe = numericId > 0 && numericId === Number(this.localPlayerId);
+      const isLocalId = isMe && !!this.USER_NAME;
       const hasNickname = (!!nickname && nickname !== idText) || isLocalId;
       const isIdentifying = !hasNickname;
       const name = nickname && nickname !== idText ? nickname : isLocalId ? this.USER_NAME : idText;
@@ -1234,7 +1235,8 @@ class DpsApp {
         hps: Number(isObj ? value.hps : 0) || 0,
         hitsTaken: Number(isObj ? value.hitsTaken : 0) || 0,
         damageTaken: Number(isObj ? value.damageTaken : 0) || 0,
-        isUser: name === this.USER_NAME,
+        // By id too: "Only my DPS" and the highlight must not hang on the typed name.
+        isUser: isMe || name === this.USER_NAME,
         isIdentifying,
       });
     }
@@ -1301,7 +1303,7 @@ class DpsApp {
         job,
         combatPower,
         isIdentifying: row.isIdentifying && !named && !isLocalId,
-        isUser: name === this.USER_NAME,
+        isUser: Number(row.id) === Number(this.localPlayerId) || name === this.USER_NAME,
       };
     });
     return this.dedupeRowsByName(merged);
@@ -3876,7 +3878,9 @@ class DpsApp {
   // else (mobs, training dummies) → PVE. It acts only when the activity changes, so a
   // mode picked by hand stays until the next one. BOSS holds for 30 s after the last
   // boss hit, so adds and a quick mob after the kill don't throw the boss view away.
-  followFightMode(kind) {
+  // The Trainer's dummy-only mode is left alone: the Trainer puts the old one back.
+  followFightMode(kind, backendMode) {
+    if (backendMode === "dummyTargets") return;
     const now = Date.now();
     if (kind === "boss") this._lastBossHitAt = now;
     let want = { boss: "bossTargets", pvp: "pvpTargets", pve: "pveTargets" }[kind];

@@ -4,6 +4,16 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.6
+
+- New: Fight report: the damage of every hit is now recorded, so a selected time range shows each skill's real damage, not an estimate (fights from now on).
+- New: Trainer in the widget too, Compact Beta included: the target icon in the footer.
+- New: Trainer: a Restart button runs the countdown and the reset again.
+- Fixed: Your character is recognised even when PowerMeter starts while you are already in the game: no more number instead of your name.
+- Fixed: Trainer: it measures again (it stayed empty), and the widget no longer switches it back to PVE.
+- Fixed: "Only my DPS" in the widget now hides the other players.
+- Fixed: Compact Beta widget: the top bar stays readable on hover (it showed only "I").
+
 ## 0.5.4
 
 - New: DPS Meter: Trainer mode: a 3-2-1 countdown, then your DPS on the training dummy only.
