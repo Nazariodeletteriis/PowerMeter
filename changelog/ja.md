@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.1
+
+- 変更: クラフトをシンプルに: 選んだアイテムの横に必要な素材、その下に次のステップとその素材のみ、最後に必要な素材と所持数の表。
+- 変更: クラフト: アイテムリストを広く、見やすくしました。
+- 変更: クラフト: 所持数はキャラクターごとに1つのインベントリで、すべてのアイテムに共通です。
+
 ## 0.5.0
 
 - 新機能: クラフトを刷新: Alchemy、Blacksmithing、Cooking、Armorsmithing、Handicraftingのタブ。それぞれ専用のサブカテゴリ付き。

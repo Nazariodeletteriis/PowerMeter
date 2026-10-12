@@ -1,5 +1,5 @@
-// Crafting planner logic on the archive's recipes (gamedata_recipes): sections, upgrade chains, the recipe
-// tree of a goal with what the user owns taken off, and the totals. Pure: tests/crafting.test.ts.
+// Crafting planner logic on the archive's recipes (gamedata_recipes): sections, upgrade chains and what each
+// step takes. Pure: tests/crafting.test.ts.
 // Items are keyed by name: the archive repeats one piece under several codes (e.g. two "True Dragon Lord Bow"
 // that a Succession recipe accepts alike), and the user thinks in names.
 
@@ -127,63 +127,18 @@ export function chainOf(name: string, ix: Index): string[] {
   return chain;
 }
 
-export type Node = {
-  name: string;
-  /** Pieces this spot needs. */
-  qty: number;
-  /** Pieces taken from the inventory. */
-  owned: number;
-  /** Times its recipe runs for what is still missing. */
-  crafts: number;
-  recipe?: Recipe;
-  /** Made by crafting its Normal twin (the single kid), see Index.normal. */
-  splendent?: boolean;
-  /** Already on the way up (a recipe that would need itself): not expanded. */
-  loop?: boolean;
-  kids: Node[];
-};
-
-/**
- * Recipe tree for `qty` of `goal`. Owned pieces (`have`, by name) are taken off where they are first met, in
- * tree order, and what they cover is not expanded: an owned step completes its whole branch.
- */
-export function buildTree(goal: string, qty: number, ix: Index, have: Record<string, number>): Node {
-  const pool = { ...have };
-  const grow = (name: string, qty: number, path: string[]): Node => {
-    if (path.includes(name)) return { name, qty, owned: 0, crafts: 0, loop: true, kids: [] };
-    const owned = Math.min(qty, Math.max(0, pool[name] ?? 0));
-    pool[name] = (pool[name] ?? 0) - owned;
-    const node: Node = { name, qty, owned, crafts: 0, recipe: ix.recipe.get(name), kids: [] };
-    const need = qty - owned;
-    if (!need) return node;
-    const up = [...path, name];
-    if (node.recipe) {
-      node.crafts = Math.ceil(need / (node.recipe.data_json.recipe.count || 1));
-      node.kids = inputs(node.recipe).map((p) => grow(p.name, (p.count ?? 1) * node.crafts, up));
-    } else if (ix.normal.has(name)) {
-      node.splendent = true;
-      node.kids = [grow(ix.normal.get(name)!, need, up)];
-    }
-    return node;
-  };
-  return grow(goal, qty, []);
+/** What one craft of an item takes: its recipe's inputs (the Succession base first), or, for a Splendent with
+ * no listed inputs, its Normal twin (see Index.normal). Empty when the archive lists nothing. */
+export function materialsOf(name: string, ix: Index): Part[] {
+  const r = ix.recipe.get(name);
+  if (r) return inputs(r);
+  const twin = ix.normal.get(name);
+  return twin ? [{ ...ix.part.get(twin)!, count: 1 }] : [];
 }
 
-export type Total = { name: string; qty: number; missing: number; crafted: boolean };
-
-/** Every item below the goal summed by name: raw materials first, then crafted parts, each by missing amount. */
-export function totals(root: Node): Total[] {
-  const by = new Map<string, Total>();
-  const walk = (n: Node) => {
-    for (const k of n.kids) {
-      const t = by.get(k.name) ?? { name: k.name, qty: 0, missing: 0, crafted: false };
-      t.qty += k.qty;
-      t.missing += k.qty - k.owned;
-      t.crafted ||= !!k.recipe || !!k.splendent;
-      by.set(k.name, t);
-      walk(k);
-    }
-  };
-  walk(root);
-  return [...by.values()].sort((a, b) => +a.crafted - +b.crafted || b.missing - a.missing || a.name.localeCompare(b.name));
+/** Several material lists summed by name, in first-seen order, without `skip` (the piece one step makes and the next consumes). */
+export function sumMaterials(lists: Part[][], skip: string): { name: string; qty: number }[] {
+  const by = new Map<string, number>();
+  for (const p of lists.flat()) if (p.name !== skip) by.set(p.name, (by.get(p.name) ?? 0) + (p.count ?? 1));
+  return [...by].map(([name, qty]) => ({ name, qty }));
 }

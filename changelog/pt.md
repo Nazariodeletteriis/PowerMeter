@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.1
+
+- Alterado: Crafting mais simples: o item escolhido com os materiais ao lado, abaixo apenas o próximo passo com os seus materiais e depois a tabela dos materiais necessários e dos que você tem.
+- Alterado: Crafting: a lista de itens é mais larga e legível.
+- Alterado: Crafting: as quantidades que você tem são um único inventário por personagem, válido para todos os itens.
+
 ## 0.5.0
 
 - Novo: Criação refeita: separadores Alchemy, Blacksmithing, Cooking, Armorsmithing e Handicrafting, cada um com as suas subcategorias.

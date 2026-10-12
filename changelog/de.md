@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.1
+
+- Geändert: Crafting ist einfacher: der gewählte Gegenstand mit seinen Materialien daneben, darunter nur der nächste Schritt mit seinen Materialien, dann die Tabelle der benötigten und vorhandenen Materialien.
+- Geändert: Crafting: die Gegenstandsliste ist breiter und besser lesbar.
+- Geändert: Crafting: deine vorhandenen Mengen sind ein Inventar pro Charakter, für alle Gegenstände.
+
 ## 0.5.0
 
 - Neu: Handwerk neu gestaltet: Tabs Alchemy, Blacksmithing, Cooking, Armorsmithing und Handicrafting, jeweils mit eigenen Unterkategorien.

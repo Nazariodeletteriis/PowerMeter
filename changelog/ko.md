@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.1
+
+- 변경: 제작이 더 간단해졌습니다: 선택한 아이템 옆에 필요한 재료, 아래에는 다음 단계와 그 재료만, 그 다음에 필요한 재료와 보유 재료 표.
+- 변경: 제작: 아이템 목록이 더 넓어지고 읽기 쉬워졌습니다.
+- 변경: 제작: 보유 수량은 캐릭터별 하나의 인벤토리로 모든 아이템에 공통입니다.
+
 ## 0.5.0
 
 - 신규: 제작 개편: Alchemy, Blacksmithing, Cooking, Armorsmithing, Handicrafting 탭과 각각의 하위 카테고리.

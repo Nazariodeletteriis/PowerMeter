@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.1
+
+- Cambiado: Crafting más sencillo: el objeto elegido con sus materiales al lado, debajo solo el paso siguiente con sus materiales y luego la tabla de los materiales necesarios y los que tienes.
+- Cambiado: Crafting: la lista de objetos es más ancha y legible.
+- Cambiado: Crafting: las cantidades que tienes son un único inventario por personaje, válido para todos los objetos.
+
 ## 0.5.0
 
 - Nuevo: Crafteo rehecho: pestañas Alchemy, Blacksmithing, Cooking, Armorsmithing y Handicrafting, cada una con sus propias subcategorías.

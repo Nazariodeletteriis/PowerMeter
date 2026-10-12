@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.1
+
+- 變更:製作更簡單:所選物品旁邊顯示其材料,下方僅顯示下一步及其材料,接著是所需材料與已有材料的表格。
+- 變更:製作:物品清單更寬、更易讀。
+- 變更:製作:已有數量為每個角色一個庫存,所有物品通用。
+
 ## 0.5.0
 
 - 新增:製作系統重做：Alchemy、Blacksmithing、Cooking、Armorsmithing 和 Handicrafting 分頁，各有獨立的子分類。

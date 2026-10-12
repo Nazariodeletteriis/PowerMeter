@@ -287,6 +287,7 @@ export function TypePage({
   glyph,
   card,
   list,
+  wide,
 }: Pick<PageProps, "t" | "go" | "setHeader"> & {
   category: Category;
   title: string;
@@ -294,6 +295,8 @@ export function TypePage({
   card: (id: string, open: Open) => ReactNode;
   /** Replaces the default list (e.g. dungeons grouped by name). */
   list?: (open: Open) => ReactNode;
+  /** The list takes the whole page width (the Crafting planner), not the reading column. */
+  wide?: boolean;
 }) {
   useEffect(() => setHeader({ title }), [setHeader, title]);
   const [sel, setSel] = useState(() => sessionStorage.getItem(selKey(category)));
@@ -319,7 +322,7 @@ export function TypePage({
         {card(sel, open)}
       </div>
     );
-  return <div style={{ maxWidth: 1100 }}>{list ? list(open) : <CategoryList t={t} category={category} glyph={glyph} onPick={(r) => open(category, r.id)} />}</div>;
+  return <div style={{ maxWidth: wide ? undefined : 1100 }}>{list ? list(open) : <CategoryList t={t} category={category} glyph={glyph} onPick={(r) => open(category, r.id)} />}</div>;
 }
 
 /** Name filter over a list (the whole category is loaded: at most ~9k rows). */

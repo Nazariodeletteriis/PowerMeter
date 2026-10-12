@@ -4,6 +4,12 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.1
+
+- Changed: Crafting is simpler: the item you pick with its materials beside it, below it only the next step with its materials, then the table of the materials you need and the ones you have.
+- Changed: Crafting: the item list is wider and easier to read.
+- Changed: Crafting: the quantities you have are one inventory per character, shared by every item.
+
 ## 0.5.0
 
 - New: Crafting redone: Alchemy, Blacksmithing, Cooking, Armorsmithing and Handicrafting tabs, each with its own sub-categories.

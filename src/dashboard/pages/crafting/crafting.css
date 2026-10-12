@@ -1,0 +1,233 @@
+/* Crafting planner: a wide item list on the left; on the right the picked step, the next step and the
+   materials table. Each step card puts the item and its materials side by side, stacked when narrow. */
+
+.crGrid {
+  display: grid;
+  grid-template-columns: clamp(320px, 28%, 440px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+/* ----- item list ----- */
+.crList {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* Fits under the page header, so the list never runs past the window. */
+  max-height: calc(100vh - 230px);
+  min-height: 320px;
+}
+/* The filter shrinks next to its result count (an input is ~20 characters wide by default). */
+.crList :is(.wDbSearch, .wDbSearch input) {
+  min-width: 0;
+}
+.crChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.crRows {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: -12px -8px 0;
+  padding: 6px 4px 0;
+  border-top: 1px solid var(--pm-line);
+}
+.crRow {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.crRow:hover {
+  background: var(--pm-s2);
+}
+.crRow[aria-current="true"] {
+  background: var(--pm-s3);
+  box-shadow: inset 3px 0 0 var(--pm-red);
+}
+.crRowName {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.crRowMeta {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--pm-t3);
+}
+
+/* ----- steps ----- */
+.crDetail {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.card.crStep {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  padding: 0;
+}
+.crStepItem {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-right: 1px solid var(--pm-line);
+}
+.crStepItem .wLabel {
+  margin: 0;
+}
+.crStepMats {
+  padding: 20px;
+  min-width: 0;
+}
+@container (max-width: 680px) {
+  .card.crStep {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .crStepItem {
+    border-right: 0;
+    border-bottom: 1px solid var(--pm-line);
+  }
+}
+.crHead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  cursor: pointer;
+}
+.crName {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+/* The next step: its head and the "go" button are one control. */
+.crGo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: pointer;
+}
+.crGo .crName {
+  font-size: 17px;
+}
+.crGo:hover .btn {
+  background: var(--pm-s2);
+}
+:is(.crHead, .crGo):hover .crName {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.crMeta {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--pm-t2);
+}
+.crMatsHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.crMats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 8px;
+}
+.crMat {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 12px 8px 8px;
+  border-radius: 6px;
+  background: var(--pm-s2);
+}
+.crMatName {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.crMatName:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.crQty {
+  font-size: 14px;
+  color: var(--pm-t1);
+}
+.crNote {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--pm-t3);
+  max-width: 70ch;
+}
+.crMatsHead .crNote {
+  margin: 0;
+}
+.card.crLast {
+  padding: 16px 20px;
+}
+
+/* ----- materials table ----- */
+.crTableHead {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.crSaved {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  font-size: 12px;
+  color: var(--pm-t3);
+}
+.crCols {
+  grid-template-columns: 28px minmax(0, 1fr) 80px 96px 80px;
+  gap: 12px;
+}
+.gridRow.crCols {
+  min-height: 46px;
+  font-size: 13px;
+}
+.crHave {
+  width: 100%;
+  height: 30px;
+  text-align: right;
+}
+.crOk {
+  display: flex;
+  justify-content: flex-end;
+  color: var(--pm-okt);
+}
+.crTotal {
+  border-bottom: 0;
+  font-weight: 600;
+}
