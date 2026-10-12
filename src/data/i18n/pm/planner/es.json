@@ -28,6 +28,8 @@
   "planner.builder.level": "Nivel",
   "planner.builder.estimate": "Estimación",
   "planner.builder.cpHelp": "Estimación de PowerMeter, no el valor del juego: Ataque + Defensa + PV / 10.",
+  "planner.builder.fromGame": "Del juego",
+  "planner.builder.fromGameHelp": "Leído del juego: el último valor mostrado para este personaje.",
   "planner.builder.dpsHelp": "Estimación: cada habilidad de daño se usa en cuanto está lista, (Ataque x coeficiente + daño fijo) x golpes / reutilización. Ignora críticos, tiempos de lanzamiento y el objetivo.",
   "planner.builder.group.weapons": "Armas",
   "planner.builder.group.armors": "Armadura",

@@ -4,6 +4,20 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.0
+
+- New: Crafting redone: Alchemy, Blacksmithing, Cooking, Armorsmithing and Handicrafting tabs, each with its own sub-categories.
+- New: Crafting tree: pick an item and see its whole chain, from the base to the last step, with every material; start from an intermediate item to see the rest of the chain.
+- New: Crafting inventory: enter the materials you already have and mark the steps you crafted; they come off what is still missing, saved per character.
+- New: Widget: DPS, HEAL and AGGRO tabs: damage, healing done and damage taken by every player.
+- New: Widget: the Copy button copies the fight as an image: paste it on Discord with Ctrl+V.
+- New: Builder: your real Gear Score and Combat Power, read from the game.
+- New: Dungeons: unlocked by your character's Gear Score, with how much is missing for the locked ones.
+- New: Builder: Pet, Wings, Pantheon, Achievements and Closet sections (coming soon).
+- Changed: Fight history (widget and dashboard) shows the last 10 fights, with a button to show 10 more.
+- Changed: Widget: the Build and Lobby tabs are removed.
+- Fixed: Widget: switching tab no longer resizes the widget.
+
 ## 0.4.9
 
 - New: Roles: everyone starts as Player with a full 30-day trial (Discord login and a Discord account at least 8 months old); then Party, rotations and Gear Viewer are for the plans. Patreon plans are coming soon.

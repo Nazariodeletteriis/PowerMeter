@@ -123,6 +123,7 @@
     "viewGrouped": "按首领分组",
     "fightCount": "{n} 场",
     "fightCountOne": "1 场",
+    "showMore": "再显示 10 场",
     "previewUpload": "预览上传内容",
     "previewUploadTip": "把分享这场战斗时会上传的内容写成文件。不会发送。",
     "previewWorking": "正在生成预览…",
@@ -443,7 +444,8 @@
     "unlockHint": "已锁定：点击锁图标或按 {key} 解锁",
     "cols": {
       "name": "名称",
-      "total": "总计"
+      "total": "总计",
+      "hits": "受击"
     },
     "avg": {
       "button": "各职业平均DPS",
@@ -456,7 +458,7 @@
     "eventSoon": "{name} 还有 {time}",
     "eventDismiss": "关闭提醒",
     "pillHint": "点击展开 · 拖动以移动",
-    "copy": "复制战斗摘要",
-    "copied": "已复制"
+    "copy": "复制为图片，用于 Discord",
+    "copied": "已复制，粘贴到 Discord"
   }
 }

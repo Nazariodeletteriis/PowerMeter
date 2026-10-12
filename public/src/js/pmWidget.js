@@ -25,8 +25,10 @@ const createPmWidget = (app) => {
   const NO_TRAFFIC_MS = 60000; // detecting this long with the game open = capture error
   const MODE_KEY = "pm.widgetMode";
 
+  // The tab: what the party list shows (core.js getMetricForRow). The old Build and
+  // Lobby tabs, gone, come back as DPS.
   const storedMode = app.safeGetStorage(MODE_KEY);
-  let mode = ["dps", "build", "lobby"].includes(storedMode) ? storedMode : "dps";
+  let mode = ["dps", "heal", "aggro"].includes(storedMode) ? storedMode : "dps";
   let view = "";
   let locked = false;
   let detailRow = null;
@@ -174,7 +176,7 @@ const createPmWidget = (app) => {
     const sums = new Map();
     for (const r of frame?.rows || []) {
       const cls = JOB_CLASS[r.job];
-      if (!cls) continue;
+      if (!cls || !(r.totalDamage > 0)) continue; // a healer who dealt no damage is not a DPS sample
       const [sum, n] = sums.get(cls) || [0, 0];
       sums.set(cls, [sum + (Number(r.dps) || 0), n + 1]);
     }
@@ -199,20 +201,22 @@ const createPmWidget = (app) => {
     if (avgOn) renderAvg();
   });
 
-  // --- mode tabs
+  // --- tabs: DPS, HEAL, AGGRO. Same list and layout, so the widget keeps its size;
+  // the rows are redrawn at once rather than at the next engine update.
   const setMode = (next) => {
-    if (next === "dps" && mode === "dps" && view === "ended") endDismissed = true; // back to the list
+    if (view === "ended") endDismissed = true; // back to the list
     mode = next;
     app.safeSetStorage(MODE_KEY, mode);
     closeDetail();
     render();
+    if (frame) app.meterUI.updateFromRows(frame.rows);
   };
   meter.querySelectorAll(".pmTab").forEach((tab) => tab.addEventListener("click", () => setMode(tab.dataset.pmMode)));
 
   // --- player breakdown (8.3)
   const detailEl = $(".pmDetail");
   const renderDetail = (row, d) => {
-    const heal = d.totalHeal > d.totalDmg;
+    const heal = mode === "heal" || d.totalHeal > d.totalDmg;
     const list = (heal ? d.healSkills : d.skills).slice().sort((a, b) => b.dmg - a.dmg);
     const total = heal ? d.totalHeal : d.totalDmg;
     const secs = (Number(d.battleTimeMs) || 0) / 1000;
@@ -274,26 +278,10 @@ const createPmWidget = (app) => {
   });
   $(".pmDetailReportBtn")?.addEventListener("click", () => detailRow && app.openRowDetailsWindow(detailRow));
 
-  // --- Build (8.5) and Lobby (8.6)
-  /** Centered title + hint, like the waiting state (8.4). */
-  const emptyCard = (key, title, hintKey, hint) =>
-    `<div class="pmModeEmpty"><div class="pmEmptyTitle">${esc(t(key, title))}</div><div class="pmEmptyHint">${esc(t(hintKey, hint))}</div></div>`;
-  const buildEl = $(".pmBuild");
-  const lobbyEl = $(".pmLobby");
-  // The build view needs the equipment data: official data coming.
-  const renderBuild = () => {
-    buildEl.innerHTML = emptyCard("pmWidget.build.officialTitle", "Coming soon", "pmWidget.build.officialHint", "This view is in the works and will be back soon");
-  };
-  // ponytail: no party roster source yet (the engine doesn't report one): the Lobby is an
-  // empty state until it does; the grid rows (.pmLobbyGrid in the theme CSS) are kept for then.
-  const renderLobby = () => {
-    lobbyEl.innerHTML = emptyCard("pmWidget.lobby.emptyTitle", "No party data yet", "pmWidget.lobby.emptyHint", "The party roster will appear here once the meter can read it");
-  };
-
   // --- fight summary (8.4)
   const summarize = () => {
     if (!frame || frame.targetMode !== "bossTargets" || !(frame.targetMaxHp > 0)) return null;
-    const rows = frame.rows.slice().sort((a, b) => b.dps - a.dps);
+    const rows = frame.rows.filter((r) => r.totalDamage > 0).sort((a, b) => b.dps - a.dps);
     const meIndex = rows.findIndex((r) => r.isUser);
     const kill =
       frame.targetCurrentHp >= 0 ? frame.targetCurrentHp <= 0 : frame.targetTotalDamage >= frame.targetMaxHp;
@@ -352,42 +340,39 @@ const createPmWidget = (app) => {
       })
       .catch((err) => console.error("[PowerMeter] copy link failed", err));
   });
-  // --- Copy: the fight on the meter (live, or the last one until reset) as text for Discord.
-  // A code block keeps the columns lined up and stops names from turning into markdown.
+  // --- Copy: the widget as an image on the clipboard, to paste in Discord. The window
+  // controls and hover marks are left out of the shot (.isPmShot in the theme CSS).
   const summaryBtn = $(".pmCopyBtn");
-  const fightText = () => {
-    const rows = (frame?.rows || []).slice().sort((a, b) => b.dps - a.dps);
-    if (!rows.length) return "";
-    const total = rows.reduce((sum, r) => sum + (Number(r.totalDamage) || 0), 0);
-    const share = (r) => (Number.isFinite(r.damageContribution) ? r.damageContribution : total ? (r.totalDamage / total) * 100 : 0);
-    const name = (r) => String(r.name ?? "").replace(/`/g, "'");
-    const nameW = Math.max(...rows.map((r) => name(r).length));
-    const ended = view === "ended" && lastFight ? outcome(lastFight) : "";
-    const head = [app.elBossName?.textContent, ended, app.battleTime?.getCombatTimeText?.()].filter(Boolean).join(" · ");
-    const lines = rows.map(
-      (r, i) =>
-        `${String(i + 1).padStart(2)}. ${name(r).padEnd(nameW)}  ${(JOB_CLASS[r.job] || r.job || "").padEnd(12)}  ${num(r.dps).padStart(9)} DPS  ${pct(share(r)).padStart(6)}`
-    );
-    return ["```", head, ...lines, "```"].join("\n");
-  };
+  let copied = false;
   let copiedTimer;
   const markCopied = (on) => {
-    const label = on ? t("pmWidget.copied", "Copied") : t("pmWidget.copy", "Copy fight summary");
+    copied = on;
+    const label = on ? t("pmWidget.copied", "Copied, paste it in Discord") : t("pmWidget.copy", "Copy as image for Discord");
     summaryBtn.classList.toggle("isCopied", on);
     summaryBtn.title = label;
     summaryBtn.setAttribute("aria-label", label);
+    render(); // the bar's title slot says it too
   };
-  summaryBtn?.addEventListener("click", () => {
-    const text = fightText();
-    if (!text) return;
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        markCopied(true);
-        clearTimeout(copiedTimer);
-        copiedTimer = setTimeout(() => markCopied(false), 1500);
-      })
-      .catch((err) => console.error("[PowerMeter] copy summary failed", err));
+  summaryBtn?.addEventListener("click", async () => {
+    const r = meter.getBoundingClientRect();
+    const k = window.devicePixelRatio || 1; // the capture is in physical pixels
+    meter.classList.add("isPmShot");
+    await new Promise((painted) => requestAnimationFrame(() => requestAnimationFrame(painted)));
+    try {
+      await invoke("capture_screenshot", {
+        x: Math.round(r.left * k),
+        y: Math.round(r.top * k),
+        width: Math.round(r.width * k),
+        height: Math.round(r.height * k),
+      });
+      markCopied(true);
+      clearTimeout(copiedTimer);
+      copiedTimer = setTimeout(() => markCopied(false), 2500);
+    } catch (err) {
+      console.error("[PowerMeter] copy image failed", err);
+    } finally {
+      meter.classList.remove("isPmShot");
+    }
   });
   $(".pmReportBtn")?.addEventListener("click", () => {
     if (lastFight?.userRow) app.openRowDetailsWindow(lastFight.userRow);
@@ -404,18 +389,15 @@ const createPmWidget = (app) => {
     if (el && el.textContent !== text) el.textContent = text;
   };
   const render = () => {
-    for (const m of ["dps", "build", "lobby"]) meter.classList.toggle(`pmMode-${m}`, mode === m);
     meter.querySelectorAll(".pmTab").forEach((tab) => {
       const on = tab.dataset.pmMode === mode;
       tab.classList.toggle("isActive", on);
       tab.setAttribute("aria-selected", String(on));
-      // Lobby (R2) joins the switch from the Build view on, as in the design.
-      tab.hidden = tab.dataset.pmMode === "lobby" && mode === "dps";
     });
+    setText(".pmColStat", mode === "heal" ? "HPS" : mode === "aggro" ? t("pmWidget.cols.hits", "Hits") : "DPS");
     let title = "";
-    if (mode === "dps" && view === "ended") title = t("pmWidget.end.title", "Ended");
-    if (mode === "build") renderBuild();
-    if (mode === "lobby") renderLobby();
+    if (view === "ended") title = t("pmWidget.end.title", "Ended");
+    if (copied) title = t("pmWidget.copied", "Copied, paste it in Discord");
     setText(".pmBarTitle", title);
     meter.classList.toggle("isPmUploaded", !!upload);
     if (lastFight) {
@@ -559,8 +541,9 @@ const createPmWidget = (app) => {
   };
 
   window.i18n?.onChange?.(() => render());
+  meter.classList.add("pmMode-dps"); // the three tabs share the DPS layout and states
   syncTheme();
   render();
 
-  return { isActive, syncTheme, tick, onFrame, openDetail };
+  return { isActive, syncTheme, tick, onFrame, openDetail, getStat: () => mode };
 };

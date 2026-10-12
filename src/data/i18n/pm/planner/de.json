@@ -28,6 +28,8 @@
   "planner.builder.level": "Stufe",
   "planner.builder.estimate": "Schätzung",
   "planner.builder.cpHelp": "Schätzung von PowerMeter, nicht der Wert im Spiel: Angriff + Verteidigung + LP / 10.",
+  "planner.builder.fromGame": "Aus dem Spiel",
+  "planner.builder.fromGameHelp": "Aus dem Spiel gelesen: der zuletzt für diesen Charakter angezeigte Wert.",
   "planner.builder.dpsHelp": "Schätzung: Jeder Schadens-Skill wird eingesetzt, sobald er bereit ist, (Angriff x Koeffizient + fester Schaden) x Treffer / Abklingzeit. Ignoriert kritische Treffer, Wirkzeiten und das Ziel.",
   "planner.builder.group.weapons": "Waffen",
   "planner.builder.group.armors": "Rüstung",

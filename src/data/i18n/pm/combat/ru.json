@@ -83,6 +83,7 @@
   "combat.nSelected": "{n} выбрано",
   "combat.nextAttempt": "Следующая попытка",
   "combat.noMatch": "Нет боёв, соответствующих этим фильтрам.",
+  "combat.showMore": "Показать ещё {n}",
   "combat.openLog": "Открыть лог",
   "combat.openerHint": "опенер (первые 10 кастов) · APM {apm}",
   "combat.overheal": "Overheal",

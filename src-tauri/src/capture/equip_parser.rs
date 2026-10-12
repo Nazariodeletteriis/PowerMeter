@@ -52,6 +52,14 @@
 //!   The tag varies (0f, 0e, 0a, bb 0e …), so the records are found by `<id> <enh> <slot> <8 × 00>` with the
 //!   slot counting 1, 2, 3 … Slots: 1 weapon, 2 helmet, 3 pauldrons, 4 top, 5 pants, 6 gloves, 7 boots, 8 cape,
 //!   9 necklace, 10-11 earrings; 12-15 always id 0. An empty slot has id 0 and is left out.
+//! Gear score and combat power, your own only (proven against the party roster `02 97`, packets_20261011_032131:
+//!   Allalon item level 836, combat power 49900; packets_20261011_183820: 912 and 52553 in all three):
+//! `1D 56` gear score `<now u32> <best u32>`, `56 36` combat power `<now u64> <best u64>`, sent at login and on every
+//!   gear change. "now" drops while a piece is off or the gear is still loading (Gladiator logins: 82141 of 110579),
+//!   "best" stays on the full set, so "best" is the one kept. e.g. `0e1d56 66030000 8c030000` = 870 of 908.
+//! `33 36` your own record also carries both: after the name `<world u16> <u32> <u8> <level u32> <gs u32> <gs u32>
+//!   <level u32>`, and near its end `02 17 05`, 32 bytes, `<cp u64> <cp u64>` (e.g. `2d000000 44030000 44030000
+//!   2d000000` = level 45, item level 836). It comes on every zone change, so it covers a capture started in game.
 
 use std::collections::{BTreeMap, VecDeque};
 use std::sync::Mutex;
@@ -91,6 +99,9 @@ pub struct CapturedCharacter {
     pub skillbar: Vec<BarSkill>,
     /// Daevanion node ids taken, as in the archive without the class (`110113` of `gladiator:110113`).
     pub daevanion: Vec<u32>,
+    /// Item level and combat power of the character being played; None until the game sends them after a login.
+    pub gear_score: Option<u32>,
+    pub combat_power: Option<u64>,
 }
 
 struct State {
@@ -101,10 +112,39 @@ struct State {
     skillbar: Vec<BarSkill>,
     owner: Option<String>,
     daevanion: Vec<u32>,
+    gear_score: Option<u32>,
+    combat_power: Option<u64>,
 }
 
-static STATE: Mutex<State> =
-    Mutex::new(State { worn: Vec::new(), items: BTreeMap::new(), skillbar: Vec::new(), owner: None, daevanion: Vec::new() });
+static STATE: Mutex<State> = Mutex::new(State {
+    worn: Vec::new(),
+    items: BTreeMap::new(),
+    skillbar: Vec::new(),
+    owner: None,
+    daevanion: Vec::new(),
+    gear_score: None,
+    combat_power: None,
+});
+
+/// Your own item level and combat power: a `now`/`best` pair whose best is kept. Out of range or now above best:
+/// not a pair of these, leave the last good values. Ranges as for the party roster (stream_processor).
+fn set_gear_score(now: u32, best: u32) {
+    if (1..=1_000_000).contains(&best) && now <= best {
+        STATE.lock().unwrap_or_else(|e| e.into_inner()).gear_score = Some(best);
+    }
+}
+
+fn set_combat_power(now: u64, best: u64) {
+    if (1..=100_000_000).contains(&best) && now <= best {
+        STATE.lock().unwrap_or_else(|e| e.into_inner()).combat_power = Some(best);
+    }
+}
+
+/// Your own entry of the party roster (stream_processor), the same figures the game shows there.
+pub fn set_power(gear_score: i32, combat_power: i64) {
+    set_gear_score(gear_score as u32, gear_score as u32);
+    set_combat_power(combat_power as u64, combat_power as u64);
+}
 
 /// The self record named the character being played (stream_processor).
 pub fn set_owner(name: &str) {
@@ -122,6 +162,8 @@ pub fn snapshot() -> CapturedCharacter {
             .collect(),
         skillbar: s.skillbar.clone(),
         daevanion: s.daevanion.clone(),
+        gear_score: s.gear_score,
+        combat_power: s.combat_power,
     }
 }
 
@@ -162,7 +204,13 @@ pub fn parse(packet: &[u8]) {
         (0x93, 0xE2) => parse_skillbar(body),
         (0x8C, 0xE2) => parse_login_bars(body),
         (0x26, 0xE2) => parse_daevanion(body),
-        (0x45 | 0x33, 0x36) => parse_spawn_gear(body),
+        (0x45, 0x36) => parse_spawn_gear(body),
+        (0x33, 0x36) => {
+            parse_spawn_gear(body);
+            parse_self_power(body);
+        }
+        (0x1D, 0x56) if body.len() == 8 => set_gear_score(u32_at(body, 0).unwrap_or(0), u32_at(body, 4).unwrap_or(0)),
+        (0x56, 0x36) if body.len() == 16 => set_combat_power(u64_at(body, 0).unwrap_or(0), u64_at(body, 8).unwrap_or(0)),
         (0x28, 0xE2) => {
             if let (Some([0, 0]), Some(node)) = (body.get(..2), u32_at(body, 2)) {
                 let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
@@ -223,6 +271,8 @@ fn parse_inventory(b: &[u8]) {
     if !worn.is_empty() {
         s.worn = worn;
         s.owner = None; // a login: the character may be another one
+        s.gear_score = None;
+        s.combat_power = None;
     }
 }
 
@@ -310,6 +360,27 @@ fn gear_record(b: &[u8], p: usize, slot: u8) -> Option<(u32, u8)> {
     let (&enchant, &at) = (b.get(p + 4)?, b.get(p + 5)?);
     let ok = at == slot && enchant <= 30 && b.get(p + 6..p + 14)? == [0; 8] && (wearable(id) || (id == 0 && slot > 1));
     ok.then_some((id, enchant))
+}
+
+/// Item level and combat power from your own `33 36` record (layout in the header).
+fn parse_self_power(b: &[u8]) {
+    let id = read_varint(b, 0);
+    let mask2 = id.length.max(0) as usize + 4;
+    if id.length <= 0 || !matches!(b.get(mask2), Some(m) if m & 1 == 1) {
+        return;
+    }
+    let p = mask2 + 2 + *b.get(mask2 + 1).unwrap_or(&0) as usize; // after the name
+    // The level twice around the two item levels: anything else is not this layout.
+    if let (Some(level), Some(gs), Some(best), Some(level2)) = (u32_at(b, p + 7), u32_at(b, p + 11), u32_at(b, p + 15), u32_at(b, p + 19)) {
+        if (1..=200).contains(&level) && level == level2 {
+            set_gear_score(gs, best);
+        }
+    }
+    if let Some(m) = b.windows(3).rposition(|w| w == [0x02, 0x17, 0x05]).filter(|&m| m > p) {
+        if let (Some(cp), Some(best)) = (u64_at(b, m + 35), u64_at(b, m + 43)) {
+            set_combat_power(cp, best);
+        }
+    }
 }
 
 fn parse_spawn_gear(b: &[u8]) {
@@ -427,6 +498,24 @@ mod tests {
         parse(&hex("1626e2020b0000000221ae0100d1ad01000c0000000103d50100"));
         parse(&hex("0a28e2000004d50100"));
         assert_eq!(snapshot().daevanion, vec![110113, 110033, 120067, 120068]);
+
+        // Gear score and combat power. The login inventory above cleared them.
+        assert_eq!((snapshot().gear_score, snapshot().combat_power), (None, None));
+        // packets_20261011_183820, 18:48:11.259: Allalon's own record (start and end, the middle cut), level 45,
+        // item level 912 (0x390), combat power 52553 (0xcd49) as in the party roster.
+        parse(&hex(&[
+            "fd0f3336d04f5e81c1083707416c6c616c6f6eff081f000000022d00000090030000900300002d00",
+            "0000000000000000000021f4cb1fdc05000000000000d4d3aa28a1010000000000e1372900021705000000000000000000000000000000000000000000000000000000000000000049cd00000000000049cd0000000000000501df0002000003000004000005000005015700020000030000040000050000",
+        ]
+        .concat()));
+        assert_eq!((snapshot().gear_score, snapshot().combat_power), (Some(912), Some(52553)));
+        // packets_20261011_121052, 12:11:47.924: a piece taken off, now 870 of 908 and 51858 of 52244: the best is kept.
+        parse(&hex("0e1d56660300008c030000"));
+        parse(&hex("16563692ca00000000000014cc000000000000"));
+        assert_eq!((snapshot().gear_score, snapshot().combat_power), (Some(908), Some(52244)));
+        // Not a now/best pair (now above best): ignored.
+        parse(&hex("16563614cc000000000000ca92000000000000"));
+        assert_eq!(snapshot().combat_power, Some(52244));
     }
     // packets_20261011_183820, 18:38:25: DrBlacK's spawn (entity 8761), cut after the worn list.
     #[test]

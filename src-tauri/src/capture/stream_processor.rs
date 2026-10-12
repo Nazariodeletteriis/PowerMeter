@@ -1012,6 +1012,11 @@ impl StreamProcessor {
                         members.len(),
                         complete
                     );
+                    // Your own entry: the game's item level and combat power for the character being played.
+                    let me = self.data_storage.local_character_name();
+                    if let Some((_, m)) = members.iter().find(|(name, _)| Some(name.trim()) == me.as_deref().map(str::trim)) {
+                        super::equip_parser::set_power(m.gear_score, m.combat_power);
+                    }
                     self.data_storage.set_party_roster(members, complete);
                     i += 2;
                 }

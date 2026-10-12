@@ -83,6 +83,7 @@
   "combat.nSelected": "已選擇 {n} 個",
   "combat.nextAttempt": "下一次嘗試",
   "combat.noMatch": "沒有符合這些篩選條件的戰鬥。",
+  "combat.showMore": "再顯示 {n} 筆",
   "combat.openLog": "開啟記錄",
   "combat.openerHint": "開場（前10次施法） · APM {apm}",
   "combat.overheal": "過量治療",

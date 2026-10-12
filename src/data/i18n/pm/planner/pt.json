@@ -28,6 +28,8 @@
   "planner.builder.level": "Nível",
   "planner.builder.estimate": "Estimativa",
   "planner.builder.cpHelp": "Estimativa do PowerMeter, não o valor do jogo: Ataque + Defesa + PV / 10.",
+  "planner.builder.fromGame": "Do jogo",
+  "planner.builder.fromGameHelp": "Lido do jogo: o último valor mostrado para este personagem.",
   "planner.builder.dpsHelp": "Estimativa: cada habilidade de dano usada assim que fica pronta, (Ataque x coeficiente + dano fixo) x golpes / recarga. Ignora críticos, tempos de conjuração e o alvo.",
   "planner.builder.group.weapons": "Armas",
   "planner.builder.group.armors": "Armaduras",

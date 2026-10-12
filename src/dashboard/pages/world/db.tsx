@@ -25,6 +25,7 @@ export const gd = {
   twGear: (ids: string[]) => invoke<TwGearRow[]>("gamedata_tw_gear", { ids }),
   planner: (cls: string) => invoke<Planner>("gamedata_planner", { class: cls }),
   builder: (cls: string) => invoke<BuilderData>("gamedata_builder", { class: cls }),
+  recipes: () => invoke<Pick<GameRecord, "id" | "data_json">[]>("gamedata_recipes"),
   sync: () => invoke("gamedata_sync"),
 };
 

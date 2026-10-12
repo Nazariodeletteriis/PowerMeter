@@ -198,12 +198,13 @@ const createMeterUI = ({
     const user = sortedAll.find((x) => x.isUser);
 
     if (!user) return topN;
+    // You take the last slot when outside the top, so the list keeps the same
+    // length whatever it is sorted by (the widget's tabs must not resize it).
+    const others = topN.filter((row) => !row.isUser).slice(0, limit - 1);
     const pinUser = typeof getPinUserToTop === "function" && getPinUserToTop();
-    if (pinUser) {
-      return [user, ...topN.filter((row) => !row.isUser)];
-    }
-    if (topN.some((x) => x.isUser)) return topN;
-    return [...topN, user];
+    if (pinUser) return [user, ...others];
+    if (topN.includes(user)) return topN;
+    return [...others, user];
   };
 
   const pruneCache = (keepIds) => {
@@ -254,7 +255,10 @@ const createMeterUI = ({
       const metricValue = Number(resolveMetric(row)?.value) || 0;
       if (metricValue > topMetric) topMetric = metricValue;
     }
-    const visibleTotalDamage = rows.reduce((sum, row) => sum + (Number(row?.totalDamage) || 0), 0);
+    // The share and total columns follow the metric's own total (healing, damage
+    // taken) when it has one, the damage dealt otherwise.
+    const totalOf = (row) => Number(resolveMetric(row)?.total ?? row?.totalDamage) || 0;
+    const visibleTotalDamage = rows.reduce((sum, row) => sum + totalOf(row), 0);
 
     // Build order key to detect if DOM reordering is needed
     let orderKey = "";
@@ -356,7 +360,7 @@ const createMeterUI = ({
       const metric = resolveMetric(row) || { value: 0, text: "-" };
       const metricValue = Number(metric.value) || 0;
       const damageContribution =
-        visibleTotalDamage > 0 ? (Number(row.totalDamage) / visibleTotalDamage) * 100 : 0;
+        visibleTotalDamage > 0 ? (totalOf(row) / visibleTotalDamage) * 100 : 0;
 
       let contributionClass = "";
       if (damageContribution < 3) {
@@ -388,7 +392,7 @@ const createMeterUI = ({
         view.lastContributionText = contributionText;
       }
 
-      const totalText = formatDamage(Number(row.totalDamage) || 0);
+      const totalText = formatDamage(totalOf(row));
       if (view.lastTotalText !== totalText) {
         view.dpsTotal.textContent = totalText;
         view.lastTotalText = totalText;

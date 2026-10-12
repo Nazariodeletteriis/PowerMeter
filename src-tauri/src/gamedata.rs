@@ -342,6 +342,12 @@ pub fn gamedata_item_recipes(state: tauri::State<'_, AppState>, item_code: Strin
     }))
 }
 
+/// Every recipe with its full JSON: the Crafting planner builds its chains and trees from the whole set (~1 MB).
+#[tauri::command]
+pub async fn gamedata_recipes(state: tauri::State<'_, AppState>) -> Result<Vec<Value>, String> {
+    state.gamedata.query("SELECT id, data_json FROM records WHERE category = 'recipe' ORDER BY id", &[])
+}
+
 /// Daevanion boards and nodes of one class (`assassin`, `chanter`, ...).
 #[tauri::command]
 pub fn gamedata_planner(state: tauri::State<'_, AppState>, class: String) -> Result<Value, String> {

@@ -123,6 +123,7 @@
     "viewGrouped": "Grouper par boss",
     "fightCount": "{n} combats",
     "fightCountOne": "1 combat",
+    "showMore": "Afficher 10 de plus",
     "previewUpload": "Aperçu de l'envoi",
     "previewUploadTip": "Écrit ce que le partage de ce combat enverrait. Rien n'est envoyé.",
     "previewWorking": "Création de l'aperçu…",
@@ -443,7 +444,8 @@
     "unlockHint": "Verrouillé : clique sur le cadenas ou appuie sur {key} pour déverrouiller",
     "cols": {
       "name": "Nom",
-      "total": "Total"
+      "total": "Total",
+      "hits": "Coups"
     },
     "avg": {
       "button": "DPS moyen par classe",
@@ -456,7 +458,7 @@
     "eventSoon": "{name} dans {time}",
     "eventDismiss": "Fermer l’alerte",
     "pillHint": "Cliquer pour agrandir · glisser pour déplacer",
-    "copy": "Copier le résumé du combat",
-    "copied": "Copié"
+    "copy": "Copier en image pour Discord",
+    "copied": "Copié, collez-le dans Discord"
   }
 }

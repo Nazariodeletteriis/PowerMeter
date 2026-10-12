@@ -123,6 +123,7 @@
     "viewGrouped": "보스별 그룹",
     "fightCount": "{n}회",
     "fightCountOne": "1회",
+    "showMore": "10개 더 보기",
     "previewUpload": "업로드 미리보기",
     "previewUploadTip": "이 전투를 공유하면 무엇이 올라가는지 파일로 남깁니다. 전송하지 않습니다.",
     "previewWorking": "미리보기를 만드는 중…",
@@ -443,7 +444,8 @@
     "unlockHint": "잠김: 자물쇠를 클릭하거나 {key}를 눌러 잠금 해제",
     "cols": {
       "name": "이름",
-      "total": "합계"
+      "total": "합계",
+      "hits": "피격"
     },
     "avg": {
       "button": "직업별 평균 DPS",
@@ -456,7 +458,7 @@
     "eventSoon": "{name}까지 {time}",
     "eventDismiss": "알림 닫기",
     "pillHint": "클릭하여 펼치기 · 드래그하여 이동",
-    "copy": "전투 요약 복사",
-    "copied": "복사됨"
+    "copy": "Discord용 이미지로 복사",
+    "copied": "복사됨, Discord에 붙여넣으세요"
   }
 }

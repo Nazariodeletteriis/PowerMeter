@@ -28,6 +28,8 @@
   "planner.builder.level": "レベル",
   "planner.builder.estimate": "推定",
   "planner.builder.cpHelp": "PowerMeterによる推定値で、ゲーム内の値ではありません: 攻撃力 + 防御力 + HP / 10。",
+  "planner.builder.fromGame": "ゲーム内",
+  "planner.builder.fromGameHelp": "ゲームから読み取った、このキャラクターの最新の値。",
   "planner.builder.dpsHelp": "推定: すべての攻撃スキルを準備でき次第使用した場合、(攻撃力 x 係数 + 固定ダメージ) x ヒット数 / クールタイム。クリティカル、詠唱時間、対象は考慮しません。",
   "planner.builder.group.weapons": "武器",
   "planner.builder.group.armors": "防具",

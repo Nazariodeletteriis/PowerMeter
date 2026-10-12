@@ -123,6 +123,7 @@
     "viewGrouped": "Raggruppa per boss",
     "fightCount": "{n} combattimenti",
     "fightCountOne": "1 combattimento",
+    "showMore": "Mostra altri 10",
     "previewUpload": "Anteprima upload",
     "previewUploadTip": "Scrive cosa verrebbe caricato condividendo questo combattimento. Non viene inviato nulla.",
     "previewWorking": "Preparazione dell'anteprima…",
@@ -443,7 +444,8 @@
     "unlockHint": "Bloccato: clicca il lucchetto o premi {key} per sbloccare",
     "cols": {
       "name": "Nome",
-      "total": "Totale"
+      "total": "Totale",
+      "hits": "Colpi"
     },
     "avg": {
       "button": "Medie per classe",
@@ -456,7 +458,7 @@
     "eventSoon": "{name} tra {time}",
     "eventDismiss": "Chiudi avviso",
     "pillHint": "Clicca per espandere · trascina per spostare",
-    "copy": "Copia riepilogo del combattimento",
-    "copied": "Copiato"
+    "copy": "Copia come immagine per Discord",
+    "copied": "Copiato, incolla su Discord"
   }
 }

@@ -865,6 +865,10 @@ td[data-mark="lo"] {
   margin-left: auto;
   color: var(--pm-t1);
 }
+/* Above the active character's item level. */
+.dgCard.locked .dgArt {
+  filter: grayscale(1) brightness(0.6);
+}
 @media (hover: hover) and (pointer: fine) {
   .dgCard:hover {
     border-color: var(--pm-t3);

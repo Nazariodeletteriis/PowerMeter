@@ -83,6 +83,7 @@
   "combat.nSelected": "{n}개 선택됨",
   "combat.nextAttempt": "다음 시도",
   "combat.noMatch": "이 필터와 일치하는 전투가 없습니다.",
+  "combat.showMore": "{n}개 더 보기",
   "combat.openLog": "로그 열기",
   "combat.openerHint": "오프너(처음 10회 시전) · APM {apm}",
   "combat.overheal": "Overheal",

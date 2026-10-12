@@ -83,6 +83,7 @@
   "combat.nSelected": "已选择 {n} 个",
   "combat.nextAttempt": "下一次尝试",
   "combat.noMatch": "没有符合这些筛选条件的战斗。",
+  "combat.showMore": "再显示 {n} 条",
   "combat.openLog": "打开日志",
   "combat.openerHint": "开场（前10次施法） · APM {apm}",
   "combat.overheal": "过量治疗",

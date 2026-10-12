@@ -1,16 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeftIcon,
+  BankIcon,
   CaretDownIcon,
   ChatCircleIcon,
+  CoatHangerIcon,
   CopyIcon,
   DatabaseIcon,
+  FeatherIcon,
   FloppyDiskIcon,
   GraphIcon,
   HeartIcon,
   LightningIcon,
   MagnifyingGlassIcon,
   MagnifyingGlassPlusIcon,
+  PawPrintIcon,
   PencilSimpleIcon,
   PlusCircleIcon,
   PlusIcon,
@@ -18,6 +22,7 @@ import {
   TShirtIcon,
   TextAlignLeftIcon,
   TrashIcon,
+  TrophyIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import { REGIONS } from "../Onboarding";
@@ -56,10 +61,17 @@ import { ShareModal } from "./shared/ShareModal";
 import { Modal } from "./system/Modal";
 import type { PageProps } from "./types";
 
+// Pet to Closet: empty until their pages are designed.
+const SOON = ["pet", "wings", "pantheon", "achievements", "closet"];
 const TABS = [
   ["equip", TShirtIcon],
   ["skills", LightningIcon],
   ["daev", GraphIcon],
+  ["pet", PawPrintIcon],
+  ["wings", FeatherIcon],
+  ["pantheon", BankIcon],
+  ["achievements", TrophyIcon],
+  ["closet", CoatHangerIcon],
   ["desc", TextAlignLeftIcon],
   ["comm", ChatCircleIcon],
 ] as const;
@@ -198,6 +210,8 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const wornTotals = which === "want" ? totalsOf(worn) : undefined;
   const wornHere = worn.find((x) => x.slot === slot);
   const est = calcData.data && estimates(totals, calcData.data.skills);
+  // Item level and combat power the game last showed for this character: for its own gear only.
+  const real = src.own && char?.cls === src.cls && which === "gear" ? char : undefined;
   const levels = calcData.data?.base.map((b) => b.level) ?? [];
   const icons = useIcons(equipped.map((e) => e.piece.icon));
   const maxByBoard = useMemo(() => boardMax(nodes), [nodes]);
@@ -431,7 +445,13 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
               ))}
             </select>
           </label>
-          <Estimate t={t} lang={lang} label="Combat Power" value={est?.cp} help={t("planner.builder.cpHelp")} big />
+          {/* The character's own gear: what the game shows for it (CaptureSync), the estimate only until then. */}
+          {real?.gs != null && <Estimate t={t} lang={lang} label="Gear Score" value={real.gs} help={t("planner.builder.fromGameHelp")} game />}
+          {real?.cp != null ? (
+            <Estimate t={t} lang={lang} label="Combat Power" value={real.cp} help={t("planner.builder.fromGameHelp")} game big />
+          ) : (
+            <Estimate t={t} lang={lang} label="Combat Power" value={est?.cp} help={t("planner.builder.cpHelp")} big />
+          )}
           <Estimate t={t} lang={lang} label="DPS" value={est?.dps} help={t("planner.builder.dpsHelp")} />
         </div>
       </div>
@@ -594,6 +614,14 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
                 </div>
               </div>
             )}
+            {SOON.includes(tab) && (
+              <div style={{ padding: 16 }}>
+                <div style={{ padding: "24px 0", color: "var(--pm-t2)", fontSize: 13 }}>
+                  <div style={{ fontSize: 14, color: "var(--pm-t1)", marginBottom: 4 }}>{t(`characters.builder.tab.${tab}`)}</div>
+                  {t("characters.builder.soon")}
+                </div>
+              </div>
+            )}
             {tab === "desc" && (
               <div style={{ padding: 16 }}>
                 <textarea
@@ -662,13 +690,13 @@ function NameTaken({ t }: { t: PageProps["t"] }) {
   );
 }
 
-/** Header figure marked as an estimate (the archive has no Combat Power formula). */
-function Estimate({ t, lang, label, value, help, big }: { t: PageProps["t"]; lang: string; label: string; value?: number; help: string; big?: boolean }) {
+/** Header figure marked as an estimate (the archive has no Combat Power formula) or as read from the game. */
+function Estimate({ t, lang, label, value, help, big, game }: { t: PageProps["t"]; lang: string; label: string; value?: number; help: string; big?: boolean; game?: boolean }) {
   return (
     <div title={help} style={{ paddingLeft: 18, borderLeft: "1px solid var(--pm-line)" }}>
       <div className="kicker" style={{ display: "flex", gap: 6, alignItems: "center" }}>
         {label}
-        <span className="bEst">{t("planner.builder.estimate")}</span>
+        <span className="bEst">{t(game ? "planner.builder.fromGame" : "planner.builder.estimate")}</span>
       </div>
       <div className="mono" style={{ fontSize: big ? 30 : 20, lineHeight: 1.1 }}>
         {value == null ? <span className="wNd">{t("world.db.nd")}</span> : value.toLocaleString(lang)}

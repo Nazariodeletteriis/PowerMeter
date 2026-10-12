@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.0
+
+- 新增:製作系統重做：Alchemy、Blacksmithing、Cooking、Armorsmithing 和 Handicrafting 分頁，各有獨立的子分類。
+- 新增:製作樹：選擇一件物品，即可查看從基礎到最後一步的完整鏈條及所有材料；從中間物品開始可查看鏈條的其餘部分。
+- 新增:製作庫存：輸入你已有的材料並標記已製作的步驟，它們會從仍缺少的部分中扣除，依角色儲存。
+- 新增:小工具:DPS、HEAL 和 AGGRO 分頁：每位玩家的傷害、治療量和承受傷害。
+- 新增:小工具:複製按鈕可將戰鬥複製為圖片：用 Ctrl+V 貼到 Discord。
+- 新增:建構器:從遊戲中讀取的真實 Gear Score 和 Combat Power。
+- 新增:副本：由角色的 Gear Score 解鎖，未解鎖的副本會顯示還差多少。
+- 新增:建構器:Pet、Wings、Pantheon、Achievements 和 Closet 欄目（即將推出）。
+- 變更:戰鬥歷史（小工具和儀表板）顯示最近 10 場戰鬥，可透過按鈕再顯示 10 場。
+- 變更:小工具:移除了 Build 和 Lobby 分頁。
+- 修復:小工具:切換分頁不再改變小工具的大小。
+
 ## 0.4.9
 
 - 新增:角色:所有人都以 Player 身分開始，享有 30 天完整試用（需 Discord 登入且 Discord 帳號至少 8 個月）；之後組隊、技能循環和裝備檢視器歸屬付費方案。Patreon 方案即將推出。

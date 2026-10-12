@@ -1223,6 +1223,11 @@ class DpsApp {
         totalDamage,
         damageContribution,
         combatPower,
+        // PowerMeter: the widget's HEAL and AGGRO tabs (getMetricForRow).
+        healDone: Number(isObj ? value.healDone : 0) || 0,
+        hps: Number(isObj ? value.hps : 0) || 0,
+        hitsTaken: Number(isObj ? value.hitsTaken : 0) || 0,
+        damageTaken: Number(isObj ? value.damageTaken : 0) || 0,
         isUser: name === this.USER_NAME,
         isIdentifying,
       });
@@ -4068,6 +4073,18 @@ class DpsApp {
   }
 
   getMetricForRow(row) {
+    // PowerMeter: the widget's HEAL tab reads healing done (HPS, total healed) and
+    // AGGRO the mobs' hits on the player (hits, total damage taken: the order); `total` also
+    // drives the share column and bar (meter.js).
+    const stat = this.pmWidget?.isActive() ? this.pmWidget.getStat() : "dps";
+    if (stat === "heal") {
+      const hps = Number(row?.hps) || 0;
+      return { value: hps, text: this.formatDpsThousands(hps), total: Number(row?.healDone) || 0 };
+    }
+    if (stat === "aggro") {
+      const taken = Number(row?.damageTaken) || 0;
+      return { value: taken, text: this.dpsFormatter.format(Number(row?.hitsTaken) || 0), total: taken };
+    }
     // PowerMeter: the widget (every theme) and the PowerMeter theme show DPS and total
     // damage side by side and have no DPS/DMG toggle, so the metric column always reads DPS.
     if (this.displayMode === "totalDamage" && this.theme !== "powermeter" && !this.betaUi) {

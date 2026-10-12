@@ -413,12 +413,41 @@ impl DpsCalculator {
                 orphan_merges.push((uid, owners[0]));
             }
         }
-        for (orphan, owner) in orphan_merges {
+        for &(orphan, owner) in &orphan_merges {
             if let Some(orphan_data) = dps_data.map.remove(&orphan) {
                 if let Some(owner_data) = dps_data.map.get_mut(&owner) {
                     owner_data.merge_from(&orphan_data);
                 }
             }
+        }
+
+        // Healing done, on the healer's row: same summon / nickname / orphan
+        // resolution as the damage above. The store holds every heal since the
+        // last reset (it is not split per target). A known player who healed but
+        // dealt no damage here gets a row of their own, so the widget's HEAL view
+        // lists them; their job comes from the cache or their heal skills.
+        let orphan_owner: HashMap<i32, i32> = orphan_merges.into_iter().collect();
+        for (&actor_id, skills) in &self.data_storage.get_heal_snapshot() {
+            let raw_uid = summon_resolver::resolve(actor_id, &summon_data);
+            if raw_uid <= 0 { continue; }
+            let nickname = resolve_nickname(raw_uid, &nickname_data, &summon_data);
+            let uid = *canonical.get(&nickname).unwrap_or(&raw_uid);
+            let uid = *orphan_owner.get(&uid).unwrap_or(&uid);
+            let healed: i64 = skills.values().map(|h| h.total_heal).sum();
+            if let Some(p) = dps_data.map.get_mut(&uid) {
+                p.heal_done += healed;
+                continue;
+            }
+            if !known_players.contains(&uid) && !nickname_data.contains_key(&uid) { continue; }
+            let job = self.cached_job(&nickname).or_else(|| {
+                skills.keys()
+                    .find_map(|&(code, _)| JobClass::convert_from_skill(code))
+                    .map(|j| j.class_name().to_string())
+            });
+            let Some(job) = job else { continue };
+            let mut healer = PersonalData::with_job(nickname, job);
+            healer.heal_done = healed;
+            dps_data.map.insert(uid, healer);
         }
 
         // Filter and compute DPS
@@ -442,6 +471,7 @@ impl DpsCalculator {
                 }
             }
             data.dps = data.amount / bt as f64 * 1000.0;
+            data.hps = data.heal_done as f64 / bt as f64 * 1000.0;
             data.damage_contribution = data.amount / total_damage * 100.0;
         }
         for uid in to_remove {
@@ -1608,6 +1638,28 @@ mod mode_tests {
         let me = d.heals.iter().find(|h| h.id == ME).expect("heal row for me");
         assert_eq!(me.from_self, 150);
         assert_eq!(me.from_others, 400);
+    }
+
+    /// Healing done lands on the healer's row; a healer who dealt no damage
+    /// still gets one, its job read from the heal skill.
+    #[test]
+    fn healing_done_is_counted_per_healer() {
+        let (s, mut calc) = setup();
+        s.append_nickname_authoritative(MATE, "Mate");
+        let t = now() - 30_000;
+        hit_at(&s, ME, WOLF_A, 100, t);
+        hit_at(&s, ME, WOLF_A, 100, t + 10_000);
+        s.append_heal(ME, ME, 17_010_000, 100, false);
+        s.append_heal(MATE, ME, 17_010_000, 400, false);
+        s.append_heal(MATE, ME, 17_010_000, 600, true);
+        calc.set_target_selection_mode("pveTargets");
+        let d = calc.get_dps();
+        assert_eq!(d.map[&ME].heal_done, 100);
+        assert_eq!(d.map[&ME].hps, 10.0, "100 healed over 10 s");
+        let mate = &d.map[&MATE];
+        assert_eq!(mate.heal_done, 1000);
+        assert_eq!(mate.amount, 0.0);
+        assert!(!mate.job.is_empty());
     }
 
     #[test]

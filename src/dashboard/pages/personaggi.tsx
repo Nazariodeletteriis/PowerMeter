@@ -23,6 +23,7 @@ function parse(x: unknown): Character | null {
     faction: FACTIONS.includes(c.faction as Faction) ? c.faction : undefined,
     level: typeof c.level === "number" ? c.level : undefined,
     cp: typeof c.cp === "number" ? c.cp : undefined,
+    gs: typeof c.gs === "number" ? c.gs : undefined,
   };
 }
 

@@ -123,6 +123,7 @@
     "viewGrouped": "Nach Boss gruppieren",
     "fightCount": "{n} Kämpfe",
     "fightCountOne": "1 Kampf",
+    "showMore": "10 weitere anzeigen",
     "previewUpload": "Upload-Vorschau",
     "previewUploadTip": "Schreibt, was das Teilen dieses Kampfes hochladen würde. Es wird nichts gesendet.",
     "previewWorking": "Vorschau wird erstellt…",
@@ -443,7 +444,8 @@
     "unlockHint": "Gesperrt: Schloss anklicken oder {key} drücken zum Entsperren",
     "cols": {
       "name": "Name",
-      "total": "Gesamt"
+      "total": "Gesamt",
+      "hits": "Treffer"
     },
     "avg": {
       "button": "Durchschnitts-DPS pro Klasse",
@@ -456,7 +458,7 @@
     "eventSoon": "{name} in {time}",
     "eventDismiss": "Hinweis schließen",
     "pillHint": "Klicken zum Erweitern · ziehen zum Verschieben",
-    "copy": "Kampfübersicht kopieren",
-    "copied": "Kopiert"
+    "copy": "Als Bild für Discord kopieren",
+    "copied": "Kopiert, in Discord einfügen"
   }
 }

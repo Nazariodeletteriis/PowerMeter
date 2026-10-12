@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.0
+
+- Nuevo: Crafteo rehecho: pestañas Alchemy, Blacksmithing, Cooking, Armorsmithing y Handicrafting, cada una con sus propias subcategorías.
+- Nuevo: Árbol de crafteo: elige un objeto y mira toda su cadena, de la base al último paso, con todos los materiales; empieza desde un objeto intermedio para ver el resto de la cadena.
+- Nuevo: Inventario de crafteo: introduce los materiales que ya tienes y marca los pasos que has fabricado; se descuentan de lo que aún falta y se guardan por personaje.
+- Nuevo: Widget: pestañas DPS, HEAL y AGGRO: daño, curación realizada y daño recibido de cada jugador.
+- Nuevo: Widget: el botón Copiar copia el combate como imagen: pégala en Discord con Ctrl+V.
+- Nuevo: Builder: tu Gear Score y Combat Power reales, leídos del juego.
+- Nuevo: Mazmorras: desbloqueadas por el Gear Score de tu personaje, con lo que falta para las bloqueadas.
+- Nuevo: Builder: secciones Pet, Wings, Pantheon, Achievements y Closet (próximamente).
+- Cambiado: El historial de combates (widget y dashboard) muestra los últimos 10 combates, con un botón para mostrar 10 más.
+- Cambiado: Widget: se eliminan las pestañas Build y Lobby.
+- Corregido: Widget: cambiar de pestaña ya no cambia el tamaño del widget.
+
 ## 0.4.9
 
 - Nuevo: Roles: todos empiezan como Player con una prueba completa de 30 días (inicio de sesión con Discord y una cuenta de Discord de al menos 8 meses); después Party, rotaciones y Gear Viewer son de los planes. Los planes de Patreon llegan pronto.

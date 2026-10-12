@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { CalendarBlankIcon, CastleTurretIcon, CoinsIcon, CrownSimpleIcon, LockSimpleIcon, ShieldChevronIcon, SkullIcon, UsersIcon } from "@phosphor-icons/react";
+import { CalendarBlankIcon, CastleTurretIcon, CoinsIcon, CrownSimpleIcon, LockSimpleIcon, LockSimpleOpenIcon, ShieldChevronIcon, SkullIcon, UsersIcon } from "@phosphor-icons/react";
 import type { Dungeon as DungeonRow, DungeonBoss, IconUrls } from "../../data/db/types";
+import { activeId, readCharacters } from "../characters";
 import type { T } from "../i18n";
 import type { PageProps } from "./types";
 import { DataState, EntryHead, EntryLink, GameIcon, gd, Nd, None, Section, TypePage, useGd, useIcons, type Open } from "./world/db";
@@ -50,7 +51,10 @@ const loadExpeditions = () =>
     Object.fromEntries(rs.flatMap((r) => (r ? [[r.id, r.data_json as Rec]] : []))),
   );
 
-export default function DungeonPage({ t, lang, go, setHeader }: PageProps) {
+export default function DungeonPage({ t, lang, go, setHeader, settings }: PageProps) {
+  // The active character's item level as the game last showed it (CaptureSync): it unlocks what it reaches.
+  const chars = readCharacters(settings);
+  const char = chars.find((c) => c.id === activeId(settings, chars));
   return (
     <TypePage
       t={t}
@@ -58,13 +62,13 @@ export default function DungeonPage({ t, lang, go, setHeader }: PageProps) {
       setHeader={setHeader}
       category="dungeon"
       title={t("world.dungeon.title")}
-      list={(open) => <Expeditions t={t} lang={lang} open={open} />}
+      list={(open) => <Expeditions t={t} lang={lang} open={open} name={char?.name} gs={char?.gs} />}
       card={(id, open) => <DungeonDetail t={t} lang={lang} id={id} open={open} />}
     />
   );
 }
 
-function Expeditions({ t, lang, open }: { t: T; lang: string; open: Open }) {
+function Expeditions({ t, lang, open, name, gs }: { t: T; lang: string; open: Open; name?: string; gs?: number }) {
   const [mode, setMode] = useState<Mode>(() => (sessionStorage.getItem(MODE_KEY) === "conquest" ? "conquest" : "exploration"));
   const recs = useGd(loadExpeditions, "expeditions");
   const conquest = mode === "conquest";
@@ -89,12 +93,16 @@ function Expeditions({ t, lang, open }: { t: T; lang: string; open: Open }) {
         ))}
       </div>
       <div id="dg-panel" role="tabpanel" aria-labelledby={`dg-${mode}`}>
+        <p className="dgText" style={{ marginBottom: 12 }}>
+          <ShieldChevronIcon aria-hidden="true" />
+          {gs != null && name ? t("world.dungeon.yourGs", { name, n: gs.toLocaleString(lang) }) : t("world.dungeon.gsHint")}
+        </p>
         {!cards ? (
           <DataState t={t} error={recs.error} retry={recs.retry} />
         ) : (
           <div className="dgGrid">
             {cards.map((c) => (
-              <ExpeditionCard key={c.id} t={t} lang={lang} conquest={conquest} icons={icons} open={() => open("dungeon", c.id)} {...c} />
+              <ExpeditionCard key={c.id} t={t} lang={lang} conquest={conquest} icons={icons} gs={gs} open={() => open("dungeon", c.id)} {...c} />
             ))}
           </div>
         )}
@@ -111,6 +119,7 @@ function ExpeditionCard({
   locked,
   conquest,
   icons,
+  gs,
   open,
 }: {
   t: T;
@@ -120,12 +129,17 @@ function ExpeditionCard({
   locked?: Rec;
   conquest: boolean;
   icons: IconUrls;
+  gs?: number;
   open: () => void;
 }) {
   const d = rec.dungeon;
   const num = (n: number) => n.toLocaleString(lang);
   const tier = rec.tierName?.match(/\d+/)?.[0];
   const bossLv = rec.bosses?.[0]?.level;
+  // Item level still missing for a requirement: 0 = reached, undefined = item level not known.
+  const short = (need?: number) => (gs == null || need == null ? undefined : Math.max(0, need - gs));
+  const cardShort = short(d.itemLevel);
+  const levelShort = short(locked?.dungeon.itemLevel);
   const ilvl = (n: number) => (
     <>
       <ShieldChevronIcon aria-hidden="true" />
@@ -134,7 +148,7 @@ function ExpeditionCard({
     </>
   );
   return (
-    <article className={`dgCard${conquest ? " conquest" : ""}`}>
+    <article className={`dgCard${conquest ? " conquest" : ""}${cardShort ? " locked" : ""}`}>
       <img className="dgArt" src={e.art} alt="" />
       {tier && <span className="dgTier">{t("world.dungeon.tier", { n: tier })}</span>}
       <div className="dgBody">
@@ -201,10 +215,18 @@ function ExpeditionCard({
           </p>
         )}
 
-        {locked?.dungeon.itemLevel != null && (
+        {!!cardShort && (
           <p className="dgText dgLocked">
             <LockSimpleIcon aria-hidden="true" />
-            {t("world.dungeon.locked")}
+            {t("world.dungeon.missing", { n: num(cardShort) })}
+          </p>
+        )}
+
+        {locked?.dungeon.itemLevel != null && (
+          <p className="dgText dgLocked">
+            {levelShort === 0 ? <LockSimpleOpenIcon aria-hidden="true" /> : <LockSimpleIcon aria-hidden="true" />}
+            {t(levelShort === 0 ? "world.dungeon.unlocked" : "world.dungeon.locked")}
+            {!!levelShort && <span>· {t("world.dungeon.missing", { n: num(levelShort) })}</span>}
             <span className="dgLockedVal">{ilvl(locked.dungeon.itemLevel)}</span>
             {locked.bosses?.[0]?.level != null && <span className="mono">{t("world.db.lv", { n: locked.bosses[0].level })}</span>}
           </p>

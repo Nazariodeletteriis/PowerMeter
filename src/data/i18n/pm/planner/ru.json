@@ -28,6 +28,8 @@
   "planner.builder.level": "Уровень",
   "planner.builder.estimate": "Оценка",
   "planner.builder.cpHelp": "Оценка PowerMeter, а не значение в игре: Атака + Защита + HP / 10.",
+  "planner.builder.fromGame": "Из игры",
+  "planner.builder.fromGameHelp": "Прочитано из игры: последнее значение для этого персонажа.",
   "planner.builder.dpsHelp": "Оценка: каждое атакующее умение используется сразу, как только готово, (Атака x коэффициент + фиксированный урон) x удары / перезарядка. Не учитывает криты, время применения и цель.",
   "planner.builder.group.weapons": "Оружие",
   "planner.builder.group.armors": "Броня",

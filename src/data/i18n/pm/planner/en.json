@@ -28,6 +28,8 @@
   "planner.builder.level": "Level",
   "planner.builder.estimate": "Estimate",
   "planner.builder.cpHelp": "PowerMeter estimate, not the in-game value: Attack + Defense + HP / 10.",
+  "planner.builder.fromGame": "From game",
+  "planner.builder.fromGameHelp": "Read from the game: the last value it showed for this character.",
   "planner.builder.dpsHelp": "Estimate: every damage skill used as soon as it is ready, (Attack x coefficient + flat damage) x hits / cooldown. Ignores critical hits, cast times and the target.",
   "planner.builder.group.weapons": "Weapons",
   "planner.builder.group.armors": "Armor",

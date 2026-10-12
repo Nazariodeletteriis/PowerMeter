@@ -28,6 +28,8 @@
   "planner.builder.level": "Niveau",
   "planner.builder.estimate": "Estimation",
   "planner.builder.cpHelp": "Estimation de PowerMeter, pas la valeur du jeu : Attaque + Défense + PV / 10.",
+  "planner.builder.fromGame": "Du jeu",
+  "planner.builder.fromGameHelp": "Lu dans le jeu : la dernière valeur affichée pour ce personnage.",
   "planner.builder.dpsHelp": "Estimation : chaque compétence de dégâts utilisée dès qu'elle est prête, (Attaque x coefficient + dégâts fixes) x coups / recharge. Ignore les critiques, les temps d'incantation et la cible.",
   "planner.builder.group.weapons": "Armes",
   "planner.builder.group.armors": "Armures",

@@ -123,6 +123,7 @@
     "viewGrouped": "依王分組",
     "fightCount": "{n} 場",
     "fightCountOne": "1 場",
+    "showMore": "再顯示 10 場",
     "previewUpload": "預覽上傳內容",
     "previewUploadTip": "把分享這場戰鬥時會上傳的內容寫成檔案。不會傳送。",
     "previewWorking": "正在產生預覽…",
@@ -443,7 +444,8 @@
     "unlockHint": "已鎖定：點擊鎖圖示或按 {key} 解鎖",
     "cols": {
       "name": "名稱",
-      "total": "總計"
+      "total": "總計",
+      "hits": "受擊"
     },
     "avg": {
       "button": "各職業平均DPS",
@@ -456,7 +458,7 @@
     "eventSoon": "{name} 還有 {time}",
     "eventDismiss": "關閉提醒",
     "pillHint": "點擊展開 · 拖曳以移動",
-    "copy": "複製戰鬥摘要",
-    "copied": "已複製"
+    "copy": "複製為圖片，用於 Discord",
+    "copied": "已複製，貼到 Discord"
   }
 }

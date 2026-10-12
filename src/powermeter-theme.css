@@ -239,11 +239,7 @@ body.legacyUi .pmOnly {
   @media (prefers-reduced-motion: reduce) {
     .pmCopyBtn svg { transition: opacity 150ms ease; transform: none !important; }
   }
-  /* The bar is one row in every mode. Build and Lobby have no title row, so
-     their header never wraps, and the fight-only actions (suspend, class
-     averages, copy) stay out of them. Narrow DPS widgets drop suspend and copy, as slim does. */
-  .meter:is(.pmMode-build, .pmMode-lobby) .header { flex-wrap: nowrap; }
-  .meter:is(.pmMode-build, .pmMode-lobby) :is(.suspendBtn, .pmAvgBtn, .pmCopyBtn) { display: none; }
+  /* Narrow widgets drop suspend and copy, as slim does. */
   @container pmMeter (max-width: 499px) {
     .header :is(.suspendBtn, button.pmCopyBtn) { display: none; }
     .header .settingsBtn { margin-left: 0; }
@@ -316,16 +312,6 @@ body.legacyUi .pmOnly {
     order: 40;
     flex: 1 1 0;
     height: 38px;
-  }
-  .pmBarRight {
-    order: 45;
-    display: block;
-    flex: 0 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    font-size: 12px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
   .header .bossIcon img { display: none; }
   .header .bossIconOverlay svg,
@@ -1002,7 +988,7 @@ body.legacyUi .pmOnly {
 
 /* ---------- 4. widget modes and states (design 8.1-8.7) ----------
    pmWidget.js sets the state classes on .meter:
-   pmMode-dps|build|lobby, pmView-live|waiting|ended|error, isPmDetail,
+   pmMode-dps (every tab), pmView-live|waiting|ended|error, isPmDetail,
    isPmPill, isPmLocked, isPmIdle, isPmUploaded, hasPmLast, hasPmSpark. */
 :root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
   /* Default size 520x420 (DPS Meter design); the list fills the space above the footer. */
@@ -1019,8 +1005,8 @@ body.legacyUi .pmOnly {
   }
 
   /* The design's boxes are border-box throughout. */
-  .meter :is(.pmBuild, .pmLobby, .pmDetail, .pmEnd, .pmError, .pmUploaded, .pmEmpty, .pmLast, .pmSpark),
-  .meter :is(.pmBuild, .pmLobby, .pmDetail, .pmEnd, .pmError, .pmUploaded, .pmEmpty, .pmLast, .pmSpark) * {
+  .meter :is(.pmDetail, .pmEnd, .pmError, .pmUploaded, .pmEmpty, .pmLast, .pmSpark),
+  .meter :is(.pmDetail, .pmEnd, .pmError, .pmUploaded, .pmEmpty, .pmLast, .pmSpark) * {
     box-sizing: border-box;
   }
 
@@ -1033,8 +1019,6 @@ body.legacyUi .pmOnly {
   .pmError,
   .pmEnd,
   .pmUploaded,
-  .pmBuild,
-  .pmLobby,
   .pmDetail,
   .pmLast { display: none; }
 
@@ -1239,77 +1223,13 @@ body.legacyUi .pmOnly {
     .pmGhostBtn:hover { border-color: rgba(255, 255, 255, 0.35); }
   }
 
-  /* --- 8.5 Build: 420x360 --- */
-  .meter.pmMode-build {
-    width: 420px !important; /* the Build card has its own size, whatever the DPS size */
-    min-height: 360px !important;
-    text-shadow: none;
-  }
-  .meter:is(.pmMode-build, .pmMode-lobby) :is(.pmLogo, .header .bossNames, .bossHpBar, .pmCols, .list, .meterFooter, .battleTime) {
-    display: none;
-  }
-  .pmMode-build .pmBarRight {
-    padding: 0 6px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 3px;
-    color: var(--pm-t2);
-    font-size: 10px;
-    line-height: 1.55;
-  }
-  .meter.pmMode-build .pmBuild {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    min-height: 0;
-  }
+  /* Copy as image (pmWidget.js): the shot leaves out the window controls and the
+     hover grips. Opacity, not visibility, so the copy button keeps the focus. */
+  .meter.isPmShot { border-color: #2b2b2b; }
+  .meter.isPmShot .header .headerBtn { opacity: 0; }
+  .meter.isPmShot :is(.resizeHandle, .pmGrip) { visibility: hidden; }
 
-  /* --- 8.6 Lobby --- */
-  .meter.pmMode-lobby { min-height: 0; }
-  .pmMode-lobby .pmBarRight { color: #5fd99a; }
-  .meter.pmMode-lobby .pmLobby { display: block; }
-  /* Build / Lobby with nothing to show yet: same look as the waiting state (8.4). */
-  .pmModeEmpty {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 24px 12px;
-    text-align: center;
-  }
-  .pmMode-build .pmBarRight:empty { display: none; }
-  .pmLobbyGrid {
-    display: grid;
-    grid-template-columns: 1fr 56px 52px 74px;
-    gap: 6px;
-    align-items: center;
-    padding: 0 10px;
-  }
-  .pmLobbyGrid > :not(:first-child) { text-align: right; }
-  .pmLobbyHead {
-    padding-top: 4px;
-    padding-bottom: 4px;
-    font-size: 9px;
-    color: var(--pm-widget-muted);
-    text-shadow: none;
-  }
-  .pmLobbyRow {
-    height: 28px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-  }
-  .pmLobbyRow > :nth-child(2),
-  .pmLobbyRow > :nth-child(3) { font-family: var(--pm-mono); }
-  .pmLobbyRow > :nth-child(3) { color: var(--pm-t2); }
-  .pmLobbyName {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .pmLobbyRow .isReady { color: #5fd99a; }
-  .pmLobbyRow .isNotReady { color: #ffb199; }
-
-  /* Class badge used by the breakdown and the lobby (same as the row's). */
+  /* Class badge used by the breakdown (same as the row's). */
   .pmCls {
     display: grid;
     place-items: center;
@@ -1501,11 +1421,8 @@ body.legacyUi .pmOnly {
      their card. Together that left a locked widget empty until the DPS tab
      dismissed the fight-over card, so a locked widget always keeps its rows. */
   .meter.isPmLocked.pmMode-dps:is(.pmView-waiting, .pmView-error, .pmView-ended, .isPmDetail) .list { display: grid; }
-  /* Same for the Build and Lobby cards: locked keeps the mode's own card. */
   .meter.isPmLocked.pmMode-dps.pmView-ended .pmEnd { display: none; }
   .meter.isPmLocked.pmMode-dps:is(.pmView-waiting, .pmView-ended) { min-height: 0; }
-  .meter.isPmLocked.pmMode-build .pmBuild { display: flex; }
-  .meter.isPmLocked.pmMode-lobby .pmLobby { display: block; }
 
   /* --- 8.1 pill: 160x32, your DPS and the timer; click to expand --- */
   .meter.isPmPill {
@@ -1564,7 +1481,7 @@ body.legacyUi .pmOnly {
   }
 }
 
-/* Class colour, icon, name and row tints per row, breakdown, lobby member and
+/* Class colour, icon, name and row tints per row, breakdown and
    class average. Colours, icon-box tints and bar alphas from the DPS Meter
    design; Assassin (not in it) keeps the app's colour. Icons from the handoff. */
 [data-cls="gladiator"] { --cls: #4da8e0; --cls-bg: #0a1620; --cls-name: "Gladiator"; --cls-icon: url("./assets/pm/gladiator.png"); }

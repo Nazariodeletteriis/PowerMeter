@@ -78,7 +78,8 @@ export default function Meter({ t, lang, run, onError }: PageProps) {
   const rows = data
     ? rank(
         Object.entries(data.map)
-          .filter(([id, v]) => Number(id) > 0 && Number.isFinite(v.dps))
+          // amount 0: a healer with no damage, there only for the widget's HEAL tab
+          .filter(([id, v]) => Number(id) > 0 && Number.isFinite(v.dps) && v.amount > 0)
           .map(([id, v], i) => ({
             key: Number(id),
             n: v.nickname || id,

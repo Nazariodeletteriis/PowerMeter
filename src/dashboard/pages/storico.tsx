@@ -19,6 +19,8 @@ const uploadable = (f?: { isTrain?: boolean; mode?: string }) => !f?.isTrain && 
 
 const COLS = "28px 100px minmax(0,1.6fr) 64px 60px 80px 50px 44px 100px";
 const DAY = 864e5;
+/** Rows shown at first and added by each "show more". */
+const PAGE = 10;
 const UPLOADED = "pm.uploadedFights";
 
 export default function Storico(props: PageProps) {
@@ -65,6 +67,8 @@ function History({ t, lang, run, go, settings, retry }: PageProps & { retry: () 
   const runs = useRuns(all);
   const [dungeon, setDungeon] = useState("");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  // The newest PAGE rows (a dungeon run is one row), PAGE more per "show more".
+  const [limit, setLimit] = useState(PAGE);
   const since = period === "all" ? 0 : Date.now() - Number(period) * DAY;
   const list = all.filter(
     (f) => f.startTimeMs >= since && (!boss || f.bossName === boss) && (!mode || modeOf(f) === mode) && (!dungeon || runs.get(f.id)?.dungeon === dungeon),
@@ -371,7 +375,14 @@ function History({ t, lang, run, go, settings, retry }: PageProps & { retry: () 
             ? [0, 1, 2, 3].map((k) => <div key={k} className="skeleton" style={{ height: 36, margin: "4px 0" }} />)
             : !list.length
               ? <div style={{ padding: "12px 8px", fontSize: 12, color: "var(--pm-t3)" }}>{t("combat.noMatch")}</div>
-              : rows.flatMap((x) => ("fights" in x ? runRow(x) : [fightRow(x)]))}
+              : rows.slice(0, limit).flatMap((x) => ("fights" in x ? runRow(x) : [fightRow(x)]))}
+          {fights.data && rows.length > limit && (
+            <div style={{ display: "flex", justifyContent: "center", padding: 8 }}>
+              <button type="button" className="btn sm" onClick={() => setLimit(limit + PAGE)}>
+                {t("combat.showMore", { n: Math.min(PAGE, rows.length - limit) })}
+              </button>
+            </div>
+          )}
         </div>
       )}
       {upOpen && (

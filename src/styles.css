@@ -1991,6 +1991,32 @@ body.mainPlayerNamesBold .settingsPanel .themeDropdownMenu .settingsDropdownItem
   }
 }
 
+/* "Show 10 more" under the list (history.js), styled as the header's text toggles. */
+.historyMoreBtn {
+  display: block;
+  width: calc(100% - 28px);
+  margin: 8px 14px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  background: none;
+  color: rgba(255, 255, 255, 0.7);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.08);
+  }
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 1px;
+  }
+}
+
 .historyRowIcons {
   display: flex;
   gap: 3px;

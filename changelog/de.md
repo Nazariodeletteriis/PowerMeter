@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.0
+
+- Neu: Handwerk neu gestaltet: Tabs Alchemy, Blacksmithing, Cooking, Armorsmithing und Handicrafting, jeweils mit eigenen Unterkategorien.
+- Neu: Handwerksbaum: Wähle einen Gegenstand und sieh seine ganze Kette von der Basis bis zum letzten Schritt, mit allen Materialien; beginne bei einem Zwischengegenstand, um den Rest der Kette zu sehen.
+- Neu: Handwerksinventar: Gib die Materialien ein, die du schon hast, und markiere die hergestellten Schritte; sie werden von dem abgezogen, was noch fehlt, und pro Charakter gespeichert.
+- Neu: Widget: Tabs DPS, HEAL und AGGRO: Schaden, Heilung und erlittener Schaden jedes Spielers.
+- Neu: Widget: Der Kopieren-Button kopiert den Kampf als Bild: Füge es mit Ctrl+V in Discord ein.
+- Neu: Builder: dein echter Gear Score und Combat Power, aus dem Spiel gelesen.
+- Neu: Dungeons: freigeschaltet durch den Gear Score deines Charakters, mit Anzeige, wie viel für die gesperrten fehlt.
+- Neu: Builder: Bereiche Pet, Wings, Pantheon, Achievements und Closet (bald verfügbar).
+- Geändert: Der Kampfverlauf (Widget und Dashboard) zeigt die letzten 10 Kämpfe, mit einem Button für 10 weitere.
+- Geändert: Widget: Die Tabs Build und Lobby wurden entfernt.
+- Behoben: Widget: Der Tabwechsel ändert die Größe des Widgets nicht mehr.
+
 ## 0.4.9
 
 - Neu: Rollen: Alle starten als Player mit einer vollen 30-Tage-Testphase (Discord-Login und ein mindestens 8 Monate altes Discord-Konto); danach sind Party, Rotationen und Gear Viewer den Plänen vorbehalten. Die Patreon-Pläne kommen bald.

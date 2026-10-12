@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.0
+
+- Novo: Criação refeita: separadores Alchemy, Blacksmithing, Cooking, Armorsmithing e Handicrafting, cada um com as suas subcategorias.
+- Novo: Árvore de criação: escolhe um item e vê toda a sua cadeia, da base ao último passo, com todos os materiais; começa num item intermédio para ver o resto da cadeia.
+- Novo: Inventário de criação: introduz os materiais que já tens e marca os passos que fabricaste; são descontados do que ainda falta e guardados por personagem.
+- Novo: Widget: separadores DPS, HEAL e AGGRO: dano, cura feita e dano sofrido de cada jogador.
+- Novo: Widget: o botão Copiar copia o combate como imagem: cola-a no Discord com Ctrl+V.
+- Novo: Builder: o teu Gear Score e Combat Power reais, lidos do jogo.
+- Novo: Masmorras: desbloqueadas pelo Gear Score do teu personagem, com o que falta para as bloqueadas.
+- Novo: Builder: secções Pet, Wings, Pantheon, Achievements e Closet (em breve).
+- Alterado: O histórico de combates (widget e dashboard) mostra os últimos 10 combates, com um botão para mostrar mais 10.
+- Alterado: Widget: os separadores Build e Lobby foram removidos.
+- Corrigido: Widget: mudar de separador já não altera o tamanho do widget.
+
 ## 0.4.9
 
 - Novo: Funções: todos começam como Player com 30 dias de teste completo (login Discord e uma conta Discord com pelo menos 8 meses); depois Party, rotações e Gear Viewer ficam para os planos. Os planos Patreon chegam em breve.

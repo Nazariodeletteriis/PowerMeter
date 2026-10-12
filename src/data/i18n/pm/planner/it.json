@@ -28,6 +28,8 @@
   "planner.builder.level": "Livello",
   "planner.builder.estimate": "Stima",
   "planner.builder.cpHelp": "Stima di PowerMeter, non il valore del gioco: Attacco + Difesa + HP / 10.",
+  "planner.builder.fromGame": "Dal gioco",
+  "planner.builder.fromGameHelp": "Letto dal gioco: l'ultimo valore mostrato per questo personaggio.",
   "planner.builder.dpsHelp": "Stima: ogni skill di danno usata appena è pronta, (Attacco x coefficiente + danno fisso) x colpi / ricarica. Ignora critici, tempi di lancio e bersaglio.",
   "planner.builder.group.weapons": "Armi",
   "planner.builder.group.armors": "Armature",

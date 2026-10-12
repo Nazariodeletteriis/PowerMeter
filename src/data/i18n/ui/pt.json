@@ -123,6 +123,7 @@
     "viewGrouped": "Agrupar por chefe",
     "fightCount": "{n} combates",
     "fightCountOne": "1 combate",
+    "showMore": "Mostrar mais 10",
     "previewUpload": "Pré-visualizar envio",
     "previewUploadTip": "Escreve o que o compartilhamento deste combate enviaria. Nada é enviado.",
     "previewWorking": "Criando a pré-visualização…",
@@ -443,7 +444,8 @@
     "unlockHint": "Bloqueado: clique no cadeado ou pressione {key} para desbloquear",
     "cols": {
       "name": "Nome",
-      "total": "Total"
+      "total": "Total",
+      "hits": "Golpes"
     },
     "avg": {
       "button": "DPS médio por classe",
@@ -456,7 +458,7 @@
     "eventSoon": "{name} em {time}",
     "eventDismiss": "Fechar aviso",
     "pillHint": "Clique para expandir · arraste para mover",
-    "copy": "Copiar resumo do combate",
-    "copied": "Copiado"
+    "copy": "Copiar como imagem para o Discord",
+    "copied": "Copiado, cole no Discord"
   }
 }

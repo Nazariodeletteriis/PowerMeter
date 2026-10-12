@@ -83,6 +83,7 @@
   "combat.nSelected": "{n}件選択中",
   "combat.nextAttempt": "次の挑戦",
   "combat.noMatch": "これらのフィルターに一致する戦闘はありません。",
+  "combat.showMore": "さらに{n}件表示",
   "combat.openLog": "ログを開く",
   "combat.openerHint": "オープナー(最初の10キャスト) ・ APM {apm}",
   "combat.overheal": "Overheal",

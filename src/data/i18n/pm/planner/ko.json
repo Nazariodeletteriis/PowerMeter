@@ -28,6 +28,8 @@
   "planner.builder.level": "레벨",
   "planner.builder.estimate": "추정",
   "planner.builder.cpHelp": "PowerMeter 추정치이며 게임 내 값이 아닙니다: 공격력 + 방어력 + HP / 10.",
+  "planner.builder.fromGame": "게임 값",
+  "planner.builder.fromGameHelp": "게임에서 읽은 이 캐릭터의 마지막 값.",
   "planner.builder.dpsHelp": "추정: 모든 공격 스킬을 준비되는 즉시 사용한 경우, (공격력 x 계수 + 고정 피해) x 타수 / 재사용 대기시간. 치명타, 시전 시간, 대상은 반영하지 않습니다.",
   "planner.builder.group.weapons": "무기",
   "planner.builder.group.armors": "방어구",

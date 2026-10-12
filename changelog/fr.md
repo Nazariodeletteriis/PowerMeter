@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.0
+
+- Nouveau : Artisanat refait : onglets Alchemy, Blacksmithing, Cooking, Armorsmithing et Handicrafting, chacun avec ses propres sous-catégories.
+- Nouveau : Arbre d'artisanat : choisis un objet et vois toute sa chaîne, de la base à la dernière étape, avec tous les matériaux ; pars d'un objet intermédiaire pour voir le reste de la chaîne.
+- Nouveau : Inventaire d'artisanat : saisis les matériaux que tu possèdes déjà et marque les étapes fabriquées ; ils sont déduits de ce qui manque encore, enregistrés par personnage.
+- Nouveau : Widget : onglets DPS, HEAL et AGGRO : dégâts, soins prodigués et dégâts subis de chaque joueur.
+- Nouveau : Widget : le bouton Copier copie le combat sous forme d'image : colle-la sur Discord avec Ctrl+V.
+- Nouveau : Builder : ton vrai Gear Score et Combat Power, lus depuis le jeu.
+- Nouveau : Donjons : débloqués par le Gear Score de ton personnage, avec ce qui manque pour les verrouillés.
+- Nouveau : Builder : sections Pet, Wings, Pantheon, Achievements et Closet (bientôt disponibles).
+- Modifié : L'historique des combats (widget et dashboard) affiche les 10 derniers combats, avec un bouton pour en afficher 10 de plus.
+- Modifié : Widget : les onglets Build et Lobby sont supprimés.
+- Corrigé : Widget : changer d'onglet ne redimensionne plus le widget.
+
 ## 0.4.9
 
 - Nouveau : Rôles : tout le monde commence en Player avec un essai complet de 30 jours (connexion Discord et compte Discord d'au moins 8 mois) ; ensuite Party, rotations et Gear Viewer sont réservés aux plans. Les plans Patreon arrivent bientôt.

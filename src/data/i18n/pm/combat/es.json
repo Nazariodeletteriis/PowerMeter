@@ -83,6 +83,7 @@
   "combat.nSelected": "{n} seleccionados",
   "combat.nextAttempt": "Siguiente intento",
   "combat.noMatch": "Ningún combate coincide con estos filtros.",
+  "combat.showMore": "Mostrar {n} más",
   "combat.openLog": "Abrir registro",
   "combat.openerHint": "opener (primeros 10 casts) · APM {apm}",
   "combat.overheal": "Overheal",

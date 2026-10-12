@@ -28,6 +28,8 @@
   "planner.builder.level": "等级",
   "planner.builder.estimate": "估算",
   "planner.builder.cpHelp": "PowerMeter 的估算值，并非游戏内数值：攻击 + 防御 + HP / 10。",
+  "planner.builder.fromGame": "游戏数据",
+  "planner.builder.fromGameHelp": "从游戏读取：该角色最近显示的数值。",
   "planner.builder.dpsHelp": "估算：每个伤害技能在就绪后立即使用，(攻击 x 系数 + 固定伤害) x 段数 / 冷却时间。未计入暴击、施法时间和目标。",
   "planner.builder.group.weapons": "武器",
   "planner.builder.group.armors": "防具",

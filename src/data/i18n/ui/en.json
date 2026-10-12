@@ -123,6 +123,7 @@
     "viewGrouped": "Group by boss",
     "fightCount": "{n} fights",
     "fightCountOne": "1 fight",
+    "showMore": "Show 10 more",
     "previewUpload": "Preview upload",
     "previewUploadTip": "Write what sharing this fight would upload. Nothing is sent.",
     "previewWorking": "Building the preview…",
@@ -443,7 +444,8 @@
     "unlockHint": "Locked. Click the lock or press {key} to unlock",
     "cols": {
       "name": "Name",
-      "total": "Total"
+      "total": "Total",
+      "hits": "Hits"
     },
     "avg": {
       "button": "Average DPS by class",
@@ -456,7 +458,7 @@
     "eventSoon": "{name} in {time}",
     "eventDismiss": "Dismiss",
     "pillHint": "Click to expand · drag to move",
-    "copy": "Copy fight summary",
-    "copied": "Copied"
+    "copy": "Copy as image for Discord",
+    "copied": "Copied, paste it in Discord"
   }
 }

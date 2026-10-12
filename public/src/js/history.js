@@ -135,10 +135,9 @@ const createHistoryUI = ({ onOpenFight } = {}) => {
   };
 
   let allFights = [];
-  const PAGE_SIZE = 30;
-  let renderedCount = 0;
-  let lastVisible = [];
-  let loadingMore = false;
+  // The most recent fights first, PAGE_SIZE more per "Show more" click.
+  const PAGE_SIZE = 10;
+  let shownCount = PAGE_SIZE;
 
   const populateDropdowns = (fights) => {
     if (!filterBossEl || !filterPlayerEl || !filterDateEl) return;
@@ -329,17 +328,6 @@ const createHistoryUI = ({ onOpenFight } = {}) => {
     return row;
   };
 
-  const appendPage = () => {
-    if (!listEl || renderedCount >= lastVisible.length) return;
-    const end = Math.min(renderedCount + PAGE_SIZE, lastVisible.length);
-    const frag = document.createDocumentFragment();
-    for (let i = renderedCount; i < end; i++) {
-      frag.appendChild(buildRow(lastVisible[i]));
-    }
-    listEl.appendChild(frag);
-    renderedCount = end;
-  };
-
   const fightCountLabel = (n) =>
     n === 1
       ? t("history.fightCountOne", "1 fight")
@@ -425,25 +413,41 @@ const createHistoryUI = ({ onOpenFight } = {}) => {
   const renderList = (fights) => {
     if (!listEl) return;
     listEl.innerHTML = "";
-    renderedCount = 0;
 
-    lastVisible = applyFilters(fights);
+    const visible = applyFilters(fights).sort((a, b) => startMs(b) - startMs(a));
 
-    if (!lastVisible || lastVisible.length === 0) {
+    if (visible.length === 0) {
       if (emptyEl) emptyEl.style.display = "";
       return;
     }
     if (emptyEl) emptyEl.style.display = "none";
 
+    const shown = visible.slice(0, shownCount);
     if (viewMode === "grouped") {
-      renderGrouped(lastVisible);
+      renderGrouped(shown);
     } else {
-      appendPage();
+      const frag = document.createDocumentFragment();
+      shown.forEach((f) => frag.appendChild(buildRow(f)));
+      listEl.appendChild(frag);
+    }
+    if (visible.length > shownCount) {
+      const more = document.createElement("button");
+      more.type = "button";
+      more.className = "historyMoreBtn";
+      more.textContent = t("history.showMore", "Show 10 more");
+      more.addEventListener("click", () => {
+        const top = listEl.scrollTop;
+        shownCount += PAGE_SIZE;
+        renderList(allFights);
+        listEl.scrollTop = top;
+      });
+      listEl.appendChild(more);
     }
   };
 
   const open = () => {
     panel.classList.add("open");
+    shownCount = PAGE_SIZE;
     syncTrainToggle();
     syncViewToggle();
     const raw = window.javaBridge?.getFightHistory?.();
@@ -455,18 +459,6 @@ const createHistoryUI = ({ onOpenFight } = {}) => {
     populateDropdowns(allFights);
     renderList(allFights);
   };
-
-  // Load more rows when scrolled near the bottom (flat list only; grouped renders sections eagerly)
-  listEl?.addEventListener("scroll", () => {
-    if (viewMode !== "list") return;
-    if (loadingMore || renderedCount >= lastVisible.length) return;
-    const threshold = 80;
-    if (listEl.scrollTop + listEl.clientHeight >= listEl.scrollHeight - threshold) {
-      loadingMore = true;
-      appendPage();
-      loadingMore = false;
-    }
-  });
 
   filterBossEl?.addEventListener("change", () => {
     filterBoss = filterBossEl.value;

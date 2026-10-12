@@ -7,7 +7,8 @@ import { USER_NAME_KEY } from "./Shell";
 // character re-targets builder, skill planner, Daevanion etc. for free.
 export const FACTIONS = ["elyos", "asmodian"] as const;
 export type Faction = (typeof FACTIONS)[number];
-export type Character = { id: string; name: string; cls: string; region: string; faction?: Faction; level?: number; cp?: number };
+// cp and gs (item level): the last ones the game showed for the character (CaptureSync), kept with the game closed.
+export type Character = { id: string; name: string; cls: string; region: string; faction?: Faction; level?: number; cp?: number; gs?: number };
 
 export const CHARACTERS_KEY = "pm.characters";
 export const ACTIVE_KEY = "pm.activeCharacter";

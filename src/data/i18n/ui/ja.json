@@ -123,6 +123,7 @@
     "viewGrouped": "ボスごとにまとめる",
     "fightCount": "{n} 戦",
     "fightCountOne": "1 戦",
+    "showMore": "さらに10件表示",
     "previewUpload": "アップロードのプレビュー",
     "previewUploadTip": "この戦闘を共有した場合に送信される内容を書き出します。送信はされません。",
     "previewWorking": "プレビューを作成中…",
@@ -443,7 +444,8 @@
     "unlockHint": "ロック中：鍵をクリックするか {key} で解除",
     "cols": {
       "name": "名前",
-      "total": "合計"
+      "total": "合計",
+      "hits": "被弾"
     },
     "avg": {
       "button": "クラス別平均DPS",
@@ -456,7 +458,7 @@
     "eventSoon": "{name}まで {time}",
     "eventDismiss": "通知を閉じる",
     "pillHint": "クリックで展開 · ドラッグで移動",
-    "copy": "戦闘サマリーをコピー",
-    "copied": "コピーしました"
+    "copy": "Discord用に画像としてコピー",
+    "copied": "コピーしました。Discordに貼り付けてください"
   }
 }

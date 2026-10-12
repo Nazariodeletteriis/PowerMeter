@@ -1144,19 +1144,22 @@ fn take_pending_details_request(window: tauri::Window) -> Option<serde_json::Val
         .and_then(|mut pending| pending.remove(window.label()))
 }
 
+/// Copies a region of the overlay (physical pixels from its top-left) to the
+/// clipboard as an image. Async: it runs off the main thread, and the caller
+/// learns when it is done (the widget hides its controls until then).
 #[tauri::command]
-fn capture_screenshot(app: tauri::AppHandle, x: i32, y: i32, width: i32, height: i32) {
+async fn capture_screenshot(app: tauri::AppHandle, x: i32, y: i32, width: i32, height: i32) -> Result<(), String> {
     #[cfg(windows)]
     {
-        if let Some(window) = app.get_webview_window("main") {
-            if let Ok(raw) = window.hwnd() {
-                let hwnd_val = raw.0 as isize;
-                std::thread::spawn(move || {
-                    platform::screenshot::capture_to_clipboard(hwnd_val, x, y, width, height);
-                });
-            }
+        let window = app.get_webview_window("main").ok_or("no overlay window")?;
+        let hwnd = window.hwnd().map_err(|e| e.to_string())?.0 as isize;
+        if !platform::screenshot::capture_to_clipboard(hwnd, x, y, width, height) {
+            return Err("clipboard unavailable".into());
         }
     }
+    #[cfg(not(windows))]
+    let _ = (app, x, y, width, height);
+    Ok(())
 }
 
 #[tauri::command]
@@ -1892,6 +1895,7 @@ pub fn run() {
             gamedata::gamedata_search,
             gamedata::gamedata_monster_drops,
             gamedata::gamedata_item_recipes,
+            gamedata::gamedata_recipes,
             gamedata::gamedata_planner,
             gamedata::gamedata_events,
             gamedata::gamedata_counts,

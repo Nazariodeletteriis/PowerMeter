@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { SaveSetting, Settings } from "./App";
-import { findCharacter, readCharacters } from "./characters";
+import { findCharacter, readCharacters, saveCharacters } from "./characters";
 import { GAME_SLOTS } from "./pages/characters/calc";
 import { BAR_SLOTS, CAPTURED_BAR_KEY, CAPTURED_DAEV_KEY, CAPTURED_GEAR_KEY, readCapturedBar, readCapturedDaev, readCapturedGear, setMem } from "./pages/characters/shared";
 import { GAME_SKILLS } from "./skills";
@@ -14,6 +14,8 @@ type Captured = {
   /** Row 0 is skillId, rows 1-3 the chain (0 = empty). */
   skillbar: { bar: number; slot: number; skillId: number; chain: number[] }[];
   daevanion: number[];
+  gearScore: number | null;
+  combatPower: number | null;
 };
 const load = () => invoke<Captured>("get_captured_character");
 
@@ -68,5 +70,13 @@ export function CaptureSync({ settings, save, onError }: { settings: Settings; s
   useEffect(() => {
     if (daevChanged) save(CAPTURED_DAEV_KEY, JSON.stringify({ ...daevAll, [char!.id]: daev })).catch(onError);
   }, [daevChanged, char?.id, JSON.stringify(daev)]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Item level and combat power, same owner rule: kept on the character, so they stay with the game closed.
+  const gs = data?.gearScore ?? undefined;
+  const cp = data?.combatPower ?? undefined;
+  const powerChanged = !!char && ((gs != null && gs !== char.gs) || (cp != null && cp !== char.cp));
+  useEffect(() => {
+    if (powerChanged) saveCharacters(save, readCharacters(settings).map((c) => (c.id === char!.id ? { ...c, gs: gs ?? c.gs, cp: cp ?? c.cp } : c))).catch(onError);
+  }, [powerChanged, char?.id, gs, cp]); // eslint-disable-line react-hooks/exhaustive-deps
   return null;
 }

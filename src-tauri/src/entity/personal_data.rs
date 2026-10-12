@@ -22,6 +22,10 @@ pub struct PersonalData {
     /// attack whoever holds their aggro, so this is the observed aggro signal.
     pub hits_taken: i32,
     pub damage_taken: i64,
+    /// Healing this player (and their summons) did since the last reset, any
+    /// target; `hps` is it over the view's battle time, like `dps`.
+    pub heal_done: i64,
+    pub hps: f64,
 }
 
 impl PersonalData {
@@ -36,6 +40,8 @@ impl PersonalData {
             combat_power: 0,
             hits_taken: 0,
             damage_taken: 0,
+            heal_done: 0,
+            hps: 0.0,
         }
     }
 
@@ -50,6 +56,8 @@ impl PersonalData {
             combat_power: 0,
             hits_taken: 0,
             damage_taken: 0,
+            heal_done: 0,
+            hps: 0.0,
         }
     }
 
