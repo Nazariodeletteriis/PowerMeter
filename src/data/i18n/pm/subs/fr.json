@@ -38,7 +38,6 @@
   "subs.lockedTrial": "Connecte-toi avec Discord et essaie tout gratuitement pendant 30 jours",
   "subs.reminder": "Ton essai gratuit se termine le {date}.",
   "subs.reminderLink": "Voir les offres",
-  "subs.admin.open": "Ouvrir le panneau d'administration",
   "subs.waiver": "Je demande l'accès immédiat aux contenus numériques et je sais que je perds ainsi mon droit de rétractation de 14 jours.",
   "subs.deviceLimit": "Ton abonnement est déjà actif sur un autre PC (maximum {n} ; avec Empyrean 2). Un PC libère sa place après 30 jours sans utilisation, ou demande une réinitialisation sur le Discord de PowerMeter.",
   "subs.comingSoon": "Bientôt disponible",

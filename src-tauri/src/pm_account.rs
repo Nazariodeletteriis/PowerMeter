@@ -440,6 +440,28 @@ pub async fn pm_delete_log(state: tauri::State<'_, AppState>, id: String) -> Res
     authed(&state, reqwest::Method::DELETE, &log_path(&id)?, None).await.map(|_| ())
 }
 
+/// Admin panel (pages/admin.tsx): one call of the server's `/admin/api/*`, which checks admin rights on every request.
+#[tauri::command]
+pub async fn pm_admin(state: tauri::State<'_, AppState>, method: String, path: String, body: Option<Value>) -> Result<Value, String> {
+    if !admin_path_ok(&path) {
+        return Err("invalid admin path".into());
+    }
+    let method = match method.as_str() {
+        "GET" => reqwest::Method::GET,
+        "POST" => reqwest::Method::POST,
+        "PUT" => reqwest::Method::PUT,
+        "DELETE" => reqwest::Method::DELETE,
+        _ => return Err("invalid method".into()),
+    };
+    authed(&state, method, &path, body.as_ref()).await
+}
+
+fn admin_path_ok(path: &str) -> bool {
+    path.starts_with("/admin/api/")
+        && !path.contains("..")
+        && path.chars().all(|c| c.is_ascii_alphanumeric() || "/_-?=&.%".contains(c))
+}
+
 const DEBUG_LOG_KEY: &str = "dpsMeter.debugLoggingEnabled";
 const PACKET_LOG_KEY: &str = "dpsMeter.saveRawPackets";
 
@@ -614,6 +636,15 @@ mod tests {
     #[test]
     fn permit_signed_by_the_server() {
         assert_eq!(permit_payload(PERMIT).unwrap()["tier"], "daeva");
+    }
+
+    #[test]
+    fn admin_calls_stay_on_admin_api() {
+        assert!(admin_path_ok("/admin/api/users?q=ab%20c&page=2"));
+        assert!(admin_path_ok("/admin/api/users/12/ban"));
+        assert!(!admin_path_ok("/api/me"));
+        assert!(!admin_path_ok("/admin/api/../api/logs"));
+        assert!(!admin_path_ok("/admin/api/x#y"));
     }
 
     #[test]

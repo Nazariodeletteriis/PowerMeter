@@ -1,0 +1,608 @@
+/* Admin panel (pages/admin.tsx). Built on the dashboard tokens and components
+   (card, kicker, btn, badge, field, input, orgTabs, chChip, switch). */
+
+.admRoot,
+.admStack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.admRoot {
+  max-width: 1400px;
+  gap: 0;
+}
+.admTop {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+.admTop .orgTabs {
+  flex: 1;
+  margin-bottom: 0;
+}
+.admMe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  font-size: 13px;
+  color: var(--pm-t2);
+}
+/* Success line under the tabs: always takes its height so the page does not jump. */
+.admNotice {
+  min-height: 34px;
+  padding: 8px 0;
+  font-size: 12px;
+  color: var(--pm-okt);
+}
+
+.admMuted {
+  color: var(--pm-t3);
+}
+.admSub {
+  display: block;
+  font-size: 12px;
+  color: var(--pm-t3);
+}
+.admHint {
+  font-size: 12px;
+  color: var(--pm-t3);
+}
+.admGrow {
+  flex: 1;
+  min-width: 0;
+}
+.admHot {
+  color: var(--pm-redt);
+}
+.admDim {
+  opacity: 0.55;
+  transition: opacity 0.15s ease-out;
+}
+.admPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.admSkeleton {
+  display: grid;
+  gap: 8px;
+}
+.admSkeleton .skeleton {
+  height: 34px;
+}
+.admDenied {
+  max-width: 640px;
+  padding: 24px;
+}
+
+/* ---------- badges ---------- */
+.admBadges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.admBadgeAdmin {
+  border-color: var(--pm-red);
+  color: var(--pm-redt);
+}
+.admBadgePlan {
+  border-color: var(--pm-t3);
+  color: var(--pm-t1);
+}
+.admBadgeOk {
+  border-color: var(--pm-ok);
+  color: var(--pm-okt);
+}
+.admBadgeWarn {
+  border-color: var(--pm-warn);
+  color: var(--pm-warn);
+}
+.admBadgeBan {
+  border-color: var(--pm-err);
+  color: var(--pm-err);
+}
+
+/* ---------- dashboard ---------- */
+.admKpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+.admKpi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease-out;
+}
+.admKpi .kicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.admKpi .kicker svg {
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+@media (hover: hover) {
+  .admKpi:hover {
+    border-color: var(--pm-grey);
+  }
+  .admKpi:hover .kicker svg {
+    opacity: 1;
+  }
+}
+.admKpiValue {
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.admGrid2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.admGrid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.admFightNums {
+  display: flex;
+  gap: 28px;
+}
+.admFightNums b {
+  font-size: 20px;
+  font-weight: 500;
+}
+.admBarsWrap {
+  display: flex;
+  gap: 8px;
+}
+.admBarsMax {
+  font-size: 11px;
+  color: var(--pm-t3);
+  min-width: 24px;
+  text-align: right;
+}
+.admBars {
+  flex: 1;
+  height: 140px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  border-bottom: 1px solid var(--pm-line);
+}
+.admBars span {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.admBars i {
+  width: 100%;
+  max-width: 22px;
+  border-radius: 3px 3px 0 0;
+  background: var(--pm-bar);
+}
+@media (hover: hover) {
+  .admBars span:hover i {
+    background: var(--pm-red);
+  }
+}
+.admBarsAxis {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 32px;
+}
+.admDetails summary {
+  font-size: 12px;
+  color: var(--pm-t3);
+  cursor: pointer;
+}
+.admDetails table {
+  margin-top: 8px;
+  max-width: 360px;
+}
+.admList li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--pm-line);
+  font-size: 13px;
+}
+.admList li:first-child {
+  border-top: 0;
+}
+.admScroll {
+  max-height: 290px;
+  overflow-y: auto;
+}
+.admListIcon {
+  font-size: 18px;
+  color: var(--pm-t3);
+  flex: none;
+}
+.admListMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.admListEnd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  font-size: 12px;
+}
+.admRanked {
+  display: grid;
+  gap: 10px;
+}
+.admRanked > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 8px;
+  align-items: center;
+  font-size: 13px;
+}
+.admRankedLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.admMeter {
+  grid-column: 1 / -1;
+  height: 4px;
+}
+.admMeter i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--pm-bar);
+}
+
+/* ---------- tables ---------- */
+.admTableWrap {
+  overflow-x: auto;
+}
+.admTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.admTable th {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--pm-t3);
+  text-align: left;
+  white-space: nowrap;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--pm-line);
+}
+.admTable td {
+  padding: 8px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--pm-line);
+}
+.admTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+.admTable .r,
+.admTable .num {
+  text-align: right;
+}
+.admWide {
+  min-width: 180px;
+}
+.admRows tbody tr {
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .admRows tbody tr:hover td {
+    background: var(--pm-s2);
+  }
+}
+.admSort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.admSort:hover,
+[aria-sort] > .admSort {
+  color: var(--pm-t1);
+}
+.admUserCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.admLink {
+  font-size: inherit;
+  color: var(--pm-t1);
+  text-align: left;
+}
+.admLink:hover {
+  color: var(--pm-redt);
+}
+.admPager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--pm-t3);
+}
+.admPagerBtns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ---------- toolbars ---------- */
+.admToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 12px;
+}
+.admToolbar select {
+  min-width: 130px;
+}
+.admSearch {
+  position: relative;
+  display: flex;
+}
+.admSearch svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--pm-t3);
+  pointer-events: none;
+}
+.admSearch .input {
+  flex: 1;
+  padding-left: 32px;
+}
+.admCheck {
+  height: 36px;
+  font-size: 12px;
+  color: var(--pm-t2);
+}
+.admChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 5px;
+}
+
+/* ---------- account ---------- */
+.admBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+}
+.admProfile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.admProfileName {
+  font-size: 20px;
+  font-weight: 500;
+}
+.admProfile .admBadges {
+  margin-top: 6px;
+}
+.admBanned {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--pm-err);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--pm-err) 8%, transparent);
+  font-size: 13px;
+}
+.admBanned > svg {
+  font-size: 20px;
+  color: var(--pm-err);
+  flex: none;
+}
+.admUserGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.admFacts {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+}
+.admFacts > div {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 10px;
+}
+.admFacts dt {
+  color: var(--pm-t3);
+}
+.admFacts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.admFactsInline {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+}
+.admDivider {
+  height: 1px;
+  background: var(--pm-line);
+  margin: 4px 0;
+}
+.admSubHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.admActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.admRankForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+.admRankForm .field:nth-child(2) {
+  width: 130px;
+}
+.admRankForm .field:nth-child(3) {
+  min-width: 160px;
+}
+.admRankForm .btn {
+  height: 36px;
+}
+.admRankForm .input:disabled {
+  opacity: 0.5;
+}
+.admSwitchRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+}
+.admCls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.admNote {
+  display: flex;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--pm-line);
+}
+.admNoteBody {
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.admNoteForm {
+  display: grid;
+  gap: 8px;
+}
+.admTextarea {
+  height: auto;
+  padding: 8px 10px;
+  resize: vertical;
+  font: inherit;
+  font-size: 13px;
+}
+.admDangerZone {
+  border-color: color-mix(in srgb, var(--pm-err) 45%, var(--pm-line));
+}
+.admDangerItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--pm-line);
+  font-size: 13px;
+}
+.admDangerItem:first-of-type {
+  border-top: 0;
+}
+.admDangerItem > div {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- dialogs ---------- */
+.admDialog {
+  display: grid;
+  gap: 14px;
+  font-size: 13px;
+}
+.admDialogFoot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.admFieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+.admFieldset legend {
+  width: 100%;
+  margin-bottom: 6px;
+}
+.btn.admDanger {
+  border-color: var(--pm-err);
+  color: var(--pm-err);
+}
+.btn.admDanger:not(:disabled):hover {
+  background: color-mix(in srgb, var(--pm-err) 14%, transparent);
+}
+.admDialog .btn.admDanger {
+  background: var(--pm-red);
+  border-color: var(--pm-red);
+  color: var(--pm-filltext);
+}
+
+/* The app's minimum window is 1024x600: with the sidebar open the content is narrow. */
+@media (max-width: 1279px) {
+  .admKpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .admGrid3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admUserGrid,
+  .admGrid2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admDim,
+  .admKpi,
+  .admKpi .kicker svg {
+    transition: none;
+  }
+}

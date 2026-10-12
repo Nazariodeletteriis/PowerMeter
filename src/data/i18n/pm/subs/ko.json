@@ -38,7 +38,6 @@
   "subs.lockedTrial": "Discord로 로그인하고 30일 동안 모두 무료로 체험하기",
   "subs.reminder": "무료 체험이 {date}에 종료됩니다.",
   "subs.reminderLink": "플랜 보기",
-  "subs.admin.open": "관리자 패널 열기",
   "subs.waiver": "디지털 콘텐츠에 즉시 접근하기를 요청하며, 이로 인해 14일 청약 철회권을 잃는다는 것을 이해합니다.",
   "subs.deviceLimit": "플랜이 이미 다른 PC에서 활성화되어 있습니다(최대 {n}대, Empyrean은 2대). 30일 동안 사용하지 않은 PC는 자리가 비워지며, PowerMeter Discord에서 초기화를 요청할 수도 있습니다.",
   "subs.comingSoon": "출시 예정",

@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.3
+
+- Novo: Painel de administração dentro do app: os administradores o abrem em Configurações. O painel web não existe mais.
+- Corrigido: Itens sem ícone (como Wrathful Mind) agora o mostram, a partir dos ícones oficiais do jogo.
+- Corrigido: Masmorras: os cartões de Conquista não ficam mais sempre vermelhos: são desbloqueados com o Gear Score do seu personagem.
+- Alterado: Masmorras: uma masmorra só abre quando seu Gear Score a desbloqueia; as bloqueadas continuam fechadas.
+
 ## 0.5.2
 
 - Novo: Os administradores abrem o novo painel de administração web na página Supporter.

@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.3
+
+- 신규: 앱 안의 관리자 패널: 관리자는 설정에서 엽니다. 웹 패널은 없어졌습니다.
+- 수정: 아이콘이 없던 아이템(예: Wrathful Mind)에 이제 게임 공식 아이콘이 표시됩니다.
+- 수정: 던전: 정복 카드가 더 이상 항상 빨간색이 아닙니다. 캐릭터의 Gear Score로 해금됩니다.
+- 변경: 던전: Gear Score로 해금된 던전만 열 수 있으며, 잠긴 던전은 열리지 않습니다.
+
 ## 0.5.2
 
 - 신규: 관리자는 Supporter 페이지에서 새 웹 관리자 패널을 엽니다.

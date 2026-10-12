@@ -38,7 +38,6 @@
   "subs.lockedTrial": "使用 Discord 登录，免费试用全部功能 30 天",
   "subs.reminder": "你的免费试用将于 {date} 结束。",
   "subs.reminderLink": "查看方案",
-  "subs.admin.open": "打开管理面板",
   "subs.waiver": "我要求立即获取数字内容，并了解我将因此失去 14 天的撤回权。",
   "subs.deviceLimit": "你的方案已在另一台电脑上启用（最多 {n} 台；Empyrean 为 2 台）。30 天未使用的电脑会释放名额，也可以在 PowerMeter 的 Discord 申请重置。",
   "subs.comingSoon": "即将推出",

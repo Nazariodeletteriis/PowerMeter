@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.3
+
+- Nuovo: Pannello admin dentro l'app: gli admin lo aprono dalle Impostazioni. Il pannello web non c'è più.
+- Corretto: Gli oggetti senza icona (come Wrathful Mind) ora la mostrano, dalle icone ufficiali del gioco.
+- Corretto: Dungeon: le card Conquest non sono più sempre rosse: si sbloccano con il Gear Score del personaggio.
+- Modificato: Dungeon: un dungeon si apre solo quando il tuo Gear Score lo sblocca; quelli bloccati restano chiusi.
+
 ## 0.5.2
 
 - Nuovo: Gli admin aprono il nuovo pannello admin web dalla pagina Supporter.

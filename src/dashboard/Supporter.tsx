@@ -6,7 +6,6 @@ import type { Key, T } from "./i18n";
 import { PATREON_URL } from "./Shell";
 
 const A2TOOLS_URL = "https://github.com/taengu/A2Tools-DPS-Meter";
-const ADMIN_URL = "https://powermeter.letrionlabs.it/admin";
 const MANAGE_URL = "https://www.patreon.com/settings/memberships";
 // Same terms the onboarding shows (scripts/sync-legal.mjs); the hash picks the language.
 const TERMS_URL = "https://powermeter.letrionlabs.it/terms.html";
@@ -41,7 +40,7 @@ function origin(t: T, e: Entitlement, signedIn: boolean, fmt: (ms: number) => st
   }
 }
 
-/** Prototype pg.supporter: plan, Patreon link, plan comparison, and the admin panel link. */
+/** Prototype pg.supporter: plan, Patreon link and plan comparison. */
 export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (e: unknown) => void }) {
   const e = useEntitlement();
   const [account, setAccount] = useState<unknown>(); // undefined until pm_account answers
@@ -190,15 +189,6 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
           ))}
         </div>
       </section>
-
-      {/* Admin only (the server checks too): users, grants, roles and bans live in the web panel. */}
-      {e?.admin && (
-        <section className="card">
-          <button type="button" className="btn fill lg" onClick={() => open(ADMIN_URL)}>
-            {t("subs.admin.open")}
-          </button>
-        </section>
-      )}
 
       <p style={{ marginTop: 4, fontSize: 12, color: "var(--pm-t3)" }}>
         {before}

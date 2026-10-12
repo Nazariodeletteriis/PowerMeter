@@ -480,7 +480,8 @@ const CDN_PATH: &str = "/cdn/";
 
 /// Image URL for game icon names (`Icon_...`). The archive lists images per record, not per icon: an icon gets the
 /// image of a record that shows that icon and has exactly one image (unambiguous). Icons without one are left out.
-/// An asset id (`asset_<sha>`, the Taiwan items' icons) is looked up as is.
+/// An asset id (`asset_<sha>`, the Taiwan items' icons) is looked up as is. Icons still without an image come from
+/// `icon_files` (official icons added by the server; an older archive has no such table).
 #[tauri::command]
 pub fn gamedata_icons(state: tauri::State<'_, AppState>, icons: Vec<String>) -> Result<Value, String> {
     let icons: Vec<String> = icons.into_iter().filter(|i| !i.is_empty()).take(500).collect();
@@ -506,6 +507,17 @@ pub fn gamedata_icons(state: tauri::State<'_, AppState>, icons: Vec<String>) -> 
     for r in rows {
         if let (Some(icon), Some(file)) = (r["icon"].as_str(), r["file"].as_str()) {
             out.insert(icon.to_string(), json!(format!("{base}{file}")));
+        }
+    }
+    let missing: Vec<&String> = icons.iter().filter(|i| !out.contains_key(*i)).collect();
+    if !missing.is_empty() {
+        let marks = vec!["?"; missing.len()].join(",");
+        let params: Vec<&dyn ToSql> = missing.iter().map(|i| *i as &dyn ToSql).collect();
+        let sql = format!("SELECT icon, file FROM icon_files WHERE icon IN ({marks})");
+        for r in state.gamedata.query(&sql, &params).unwrap_or_default() {
+            if let (Some(icon), Some(file)) = (r["icon"].as_str(), r["file"].as_str()) {
+                out.insert(icon.to_string(), json!(format!("{base}{file}")));
+            }
         }
     }
     Ok(Value::Object(out))

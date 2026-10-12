@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.3
+
+- 新增：应用内管理面板：管理员可在设置中打开。网页管理面板已移除。
+- 修复：没有图标的物品（如 Wrathful Mind）现在会显示游戏官方图标。
+- 修复：副本：征服卡片不再始终显示为红色，会随角色的 Gear Score 解锁。
+- 变更：副本：只有 Gear Score 解锁后才能打开副本，未解锁的保持关闭。
+
 ## 0.5.2
 
 - 新增:管理员可从 Supporter 页面打开新的网页管理面板。

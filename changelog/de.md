@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.3
+
+- Neu: Adminpanel direkt in der App: Admins öffnen es in den Einstellungen. Das Web-Panel gibt es nicht mehr.
+- Behoben: Gegenstände ohne Symbol (z. B. Wrathful Mind) zeigen es jetzt an, aus den offiziellen Spielsymbolen.
+- Behoben: Dungeons: Eroberungskarten sind nicht mehr immer rot: Sie werden mit dem Gear Score deines Charakters freigeschaltet.
+- Geändert: Dungeons: Ein Dungeon lässt sich erst öffnen, wenn dein Gear Score ihn freischaltet; gesperrte bleiben zu.
+
 ## 0.5.2
 
 - Neu: Admins öffnen das neue Web-Adminpanel über die Supporter-Seite.

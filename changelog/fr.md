@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.3
+
+- Nouveau : Panneau d'administration dans l'application : les admins l'ouvrent depuis les Paramètres. Le panneau web n'existe plus.
+- Corrigé : Les objets sans icône (comme Wrathful Mind) l'affichent désormais, à partir des icônes officielles du jeu.
+- Corrigé : Donjons : les cartes Conquête ne sont plus toujours rouges : elles se débloquent avec le Gear Score de votre personnage.
+- Modifié : Donjons : un donjon ne s'ouvre que lorsque votre Gear Score le débloque ; les donjons verrouillés restent fermés.
+
 ## 0.5.2
 
 - Nouveau : Les admins ouvrent le nouveau panneau d'administration web depuis la page Supporter.

@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.3
+
+- Nuevo: Panel de administración dentro de la app: los administradores lo abren desde Ajustes. El panel web ya no existe.
+- Corregido: Los objetos sin icono (como Wrathful Mind) ahora lo muestran, a partir de los iconos oficiales del juego.
+- Corregido: Mazmorras: las tarjetas de Conquista ya no están siempre en rojo: se desbloquean con el Gear Score de tu personaje.
+- Cambiado: Mazmorras: una mazmorra solo se abre cuando tu Gear Score la desbloquea; las bloqueadas siguen cerradas.
+
 ## 0.5.2
 
 - Nuevo: Los administradores abren el nuevo panel de administración web desde la página Supporter.

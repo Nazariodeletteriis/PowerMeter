@@ -1879,6 +1879,7 @@ pub fn run() {
             pm_account::pm_my_logs,
             pm_account::pm_set_log_visibility,
             pm_account::pm_delete_log,
+            pm_account::pm_admin,
             pm_account::pm_class_stats,
             pm_account::pm_rankings,
             pm_account::pm_entitlement,

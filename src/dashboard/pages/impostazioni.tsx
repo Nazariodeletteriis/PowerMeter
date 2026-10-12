@@ -10,6 +10,7 @@ import {
   InfoIcon,
   KeyboardIcon,
   PictureInPictureIcon,
+  ShieldCheckIcon,
   SlidersIcon,
   TrashIcon,
   UploadSimpleIcon,
@@ -18,6 +19,7 @@ import {
 import { LANGUAGE_SETTING, LANGUAGES, type Key } from "../i18n";
 import { PATREON_URL, USER_NAME_KEY, type CaptureStatus } from "../Shell";
 import { usePoll } from "../usePoll";
+import { useEntitlement } from "../entitlement";
 import { ProfileAvatar } from "../ui";
 import { PALETTE_SETTING, PALETTES } from "./system/theme";
 import "./system/system.css";
@@ -121,6 +123,7 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
   const [signingIn, setSigningIn] = useState(false);
   const [account, setAccount] = useState<Account | null>(); // undefined until pm_account answers
   const capture = usePoll(getCapture, 2000).data;
+  const entitlement = useEntitlement();
 
   useEffect(() => {
     run(() => invoke<boolean>("get_click_through").then(setClickThrough));
@@ -497,6 +500,14 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
             </button>
           )}
         </Row>
+        {entitlement?.admin && (
+          <Row label={t("nav.admin")} desc={t("admin.settingsHint")}>
+            <button type="button" className="btn" onClick={() => go("admin")}>
+              <ShieldCheckIcon aria-hidden="true" />
+              {t("admin.open")}
+            </button>
+          </Row>
+        )}
         {/* Supporter status doesn't exist yet (R6): an honest invitation, no fake "since" date. */}
         <Row label="Patreon" desc={t("organizer.set.patreonHint")}>
           <button type="button" className="btn" onClick={() => open(PATREON_URL)}>

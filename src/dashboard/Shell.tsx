@@ -17,7 +17,7 @@ import { CaptureSync } from "./CaptureSync";
 import { Home } from "./Home";
 import { Locked, TrialReminder } from "./Locked";
 import type { T } from "./i18n";
-import { ALL_PAGES, NAV, NAV_BOTTOM, type NavPage } from "./nav";
+import { ADMIN_PAGE, ALL_PAGES, NAV, NAV_BOTTOM, type NavPage } from "./nav";
 import { Palette } from "./Palette";
 import { Supporter } from "./Supporter";
 import { ClassAvatar, ProfileAvatar } from "./ui";
@@ -157,7 +157,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
   const cls = settings["pm.class"];
   const run = (action: () => Promise<unknown>) => action().catch(onError);
   const openWidget = () => run(() => invoke("show_overlay"));
-  const current = ALL_PAGES.find((x) => x.id === page)!;
+  const current = ALL_PAGES.find((x) => x.id === page) ?? ADMIN_PAGE;
   const group = NAV.find((g) => g.items.includes(current))?.label;
   // Like the prototype, only pages without their own design (the states page)
   // show their group as breadcrumb.

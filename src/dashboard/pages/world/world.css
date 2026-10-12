@@ -692,7 +692,7 @@ td[data-mark="lo"] {
 }
 
 /* ---------- Dungeon page: Expedition cards ---------- */
-/* Exploration reads neutral; Conquest (harder) takes the theme's red. */
+/* Exploration reads neutral; a Conquest still locked for the character takes the theme's red. */
 .dgTab.exploration[aria-selected="true"] {
   border-bottom-color: var(--pm-t2);
 }
@@ -865,20 +865,17 @@ td[data-mark="lo"] {
   margin-left: auto;
   color: var(--pm-t1);
 }
-/* Above the active character's item level. */
+/* Above the active character's item level (or unknown): not clickable. */
 .dgCard.locked .dgArt {
   filter: grayscale(1) brightness(0.6);
 }
 @media (hover: hover) and (pointer: fine) {
-  .dgCard:hover {
+  .dgCard:not(.locked):hover {
     border-color: var(--pm-t3);
-  }
-  .dgCard.conquest:hover {
-    border-color: var(--pm-red);
   }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .dgCard:hover .dgArt {
+  .dgCard:not(.locked):hover .dgArt {
     transform: scale(1.03);
   }
 }

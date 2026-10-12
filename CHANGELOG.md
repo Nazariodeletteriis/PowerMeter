@@ -4,6 +4,13 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.3
+
+- New: Admin panel inside the app: admins open it from Settings. The web panel is gone.
+- Fixed: Items that had no icon (such as Wrathful Mind) now show it, from the official game icons.
+- Fixed: Dungeons: Conquest cards are no longer always red: they unlock with your character's Gear Score.
+- Changed: Dungeons: a dungeon opens only once your Gear Score unlocks it; locked ones stay closed.
+
 ## 0.5.2
 
 - New: Admins open the new web admin panel from the Supporter page.

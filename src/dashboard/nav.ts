@@ -23,6 +23,7 @@ import {
   MagnifyingGlassIcon,
   MapTrifoldIcon,
   ScrollIcon,
+  ShieldCheckIcon,
   SkullIcon,
   SwordIcon,
   TimerIcon,
@@ -115,3 +116,6 @@ export const NAV_BOTTOM: NavPage[] = [
 export const ROTATION_TIER: PaidTier = "recluta";
 
 export const ALL_PAGES = [...NAV.flatMap((g) => g.items), ...NAV_BOTTOM];
+
+/** Admin panel: opened from Settings → Account, never in the sidebar or the palette. */
+export const ADMIN_PAGE = p("admin", "nav.admin", ShieldCheckIcon, "R6");

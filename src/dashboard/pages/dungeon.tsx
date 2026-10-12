@@ -139,6 +139,8 @@ function ExpeditionCard({
   // Item level still missing for a requirement: 0 = reached, undefined = item level not known.
   const short = (need?: number) => (gs == null || need == null ? undefined : Math.max(0, need - gs));
   const cardShort = short(d.itemLevel);
+  // Opens (and loses the Conquest red) only once the character's item level reaches it; unknown item level = locked.
+  const unlocked = cardShort === 0;
   const levelShort = short(locked?.dungeon.itemLevel);
   const ilvl = (n: number) => (
     <>
@@ -148,14 +150,18 @@ function ExpeditionCard({
     </>
   );
   return (
-    <article className={`dgCard${conquest ? " conquest" : ""}${cardShort ? " locked" : ""}`}>
+    <article className={`dgCard${unlocked ? "" : conquest ? " conquest locked" : " locked"}`}>
       <img className="dgArt" src={e.art} alt="" />
       {tier && <span className="dgTier">{t("world.dungeon.tier", { n: tier })}</span>}
       <div className="dgBody">
         <h3 className="dgName">
-          <button type="button" onClick={open}>
-            {e.name}
-          </button>
+          {unlocked ? (
+            <button type="button" onClick={open}>
+              {e.name}
+            </button>
+          ) : (
+            e.name
+          )}
         </h3>
         <ul className="dgChips">
           {d.minLevel != null && <li className="mono">{t("world.db.lv", { n: d.minLevel })}</li>}
@@ -215,10 +221,10 @@ function ExpeditionCard({
           </p>
         )}
 
-        {!!cardShort && (
+        {!unlocked && (
           <p className="dgText dgLocked">
             <LockSimpleIcon aria-hidden="true" />
-            {t("world.dungeon.missing", { n: num(cardShort) })}
+            {cardShort ? t("world.dungeon.missing", { n: num(cardShort) }) : t("world.dungeon.locked")}
           </p>
         )}
 
