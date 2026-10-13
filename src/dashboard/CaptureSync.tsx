@@ -2,8 +2,9 @@ import { useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { SaveSetting, Settings } from "./App";
 import { findCharacter, readCharacters, saveCharacters } from "./characters";
-import { GAME_SLOTS } from "./pages/characters/calc";
-import { BAR_SLOTS, CAPTURED_BAR_KEY, CAPTURED_DAEV_KEY, CAPTURED_GEAR_KEY, readCapturedBar, readCapturedDaev, readCapturedGear, setMem } from "./pages/characters/shared";
+import PET_IDS from "../data/pet_ids.json";
+import { GAME_SLOTS, petsFromGame } from "./pages/characters/calc";
+import { BAR_SLOTS, CAPTURED_BAR_KEY, CAPTURED_DAEV_KEY, CAPTURED_GEAR_KEY, CAPTURED_PETS_KEY, readCapturedBar, readCapturedDaev, readCapturedGear, readPets, setMem } from "./pages/characters/shared";
 import { GAME_SKILLS } from "./skills";
 import { usePoll } from "./usePoll";
 
@@ -16,6 +17,8 @@ type Captured = {
   daevanion: number[];
   gearScore: number | null;
   combatPower: number | null;
+  /** Pet collection, TW pet ids (src/data/pet_ids.json maps them to creature codes). */
+  pets: { id: number; lvl: number; exp: number }[];
 };
 const load = () => invoke<Captured>("get_captured_character");
 
@@ -70,6 +73,14 @@ export function CaptureSync({ settings, save, onError }: { settings: Settings; s
   useEffect(() => {
     if (daevChanged) save(CAPTURED_DAEV_KEY, JSON.stringify({ ...daevAll, [char!.id]: daev })).catch(onError);
   }, [daevChanged, char?.id, JSON.stringify(daev)]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pet collection, sent at login after the inventory: same owner rule; the effects already kept stay.
+  const pets = petsFromGame(data?.pets ?? [], PET_IDS);
+  const petsAll = readPets(settings[CAPTURED_PETS_KEY]);
+  const petsChanged = !!char && Object.keys(pets).length > 0 && JSON.stringify(petsAll[char.id]?.owned) !== JSON.stringify(pets);
+  useEffect(() => {
+    if (petsChanged) save(CAPTURED_PETS_KEY, JSON.stringify({ ...petsAll, [char!.id]: { owned: pets, effects: petsAll[char!.id]?.effects ?? [] } })).catch(onError);
+  }, [petsChanged, char?.id, JSON.stringify(pets)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Item level and combat power, same owner rule: kept on the character, so they stay with the game closed.
   const gs = data?.gearScore ?? undefined;

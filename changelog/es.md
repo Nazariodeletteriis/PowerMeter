@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.7
+
+- Nuevo: Constructor de personaje: pestaña Mascota: tu colección de mascotas como en la ventana Mascota del juego (categorías, nivel, progreso x/75, MAX), abierta con "Mostrar mascotas". PowerMeter la lee del juego al iniciar sesión; también puedes marcar mascotas a mano. El recuento coincide con el juego (sin las mascotas Special).
+- Corregido: Constructor de personaje: un objeto equipado que falta en los datos de objetos (como el escudo del Clérigo) se queda en su ranura en lugar de desaparecer.
+- Corregido: Cambiar de personaje en el juego ahora cambia toda la pestaña Personaje, Constructor incluido, no solo el encabezado.
+
 ## 0.5.6
 
 - Nuevo: Informe de combate: ahora se guarda el daño de cada golpe, así que un intervalo de tiempo seleccionado muestra el daño real de cada habilidad, no una estimación (desde los próximos combates).

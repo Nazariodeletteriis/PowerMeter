@@ -38,6 +38,7 @@ import {
   CAPTURED_BAR_KEY,
   CAPTURED_DAEV_KEY,
   CAPTURED_GEAR_KEY,
+  CAPTURED_PETS_KEY,
   closeBuild,
   DANGER,
   DeleteBuildModal,
@@ -48,12 +49,14 @@ import {
   readCapturedDaev,
   readCapturedGear,
   readMyBuilds,
+  readPets,
   SectionHead,
   useMem,
   useToast,
   type BuildSrc,
   type GearSet,
 } from "./characters/shared";
+import { PetsTab } from "./characters/pets";
 import { onePerPiece } from "./gearviewer";
 import { BoardView } from "./daevanion";
 import { DataState, GameIcon, gd, gradeColor, openEntry, useGd, useIcons } from "./world/db";
@@ -61,8 +64,8 @@ import { ShareModal } from "./shared/ShareModal";
 import { Modal } from "./system/Modal";
 import type { PageProps } from "./types";
 
-// Pet to Closet: empty until their pages are designed.
-const SOON = ["pet", "wings", "pantheon", "achievements", "closet"];
+// Wings to Closet: empty until their pages are designed.
+const SOON = ["wings", "pantheon", "achievements", "closet"];
 const TABS = [
   ["equip", TShirtIcon],
   ["skills", LightningIcon],
@@ -108,16 +111,17 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const chars = readCharacters(settings);
   const [src, setSrc] = useMem<BuildSrc>("bSrc", { t: OWN_BUILD, au: name, cls: myCls, own: true });
   const faction = chars.find((c) => c.id === (src.char ?? activeId(settings, chars)))?.faction;
-  // Your own builds follow the active character: the default one is each character's (level, gear, game data),
-  // and one of your named builds of another class gives way to the new character's default build (its unsaved
-  // edits stay parked, see bEdits). Untouched: a build being created, one opened from a character's card, one of
-  // another class opened since the switch (only a class change seen here or while away counts).
-  const [bFor, setFor] = useMem("bFor", myCls);
+  // Your own builds follow the active character (switched by the game, AutoCharacter): on a switch the Builder
+  // opens the new character's default build (level, gear, game data), whatever of yours was open, a character's
+  // card included; its unsaved edits stay parked (see bEdits). Untouched: a build being created. Its class is the
+  // character's own, as pm.class is saved a moment after the active id.
+  const act = chars.find((c) => c.id === activeId(settings, chars));
+  const [bFor, setFor] = useMem("bForChar", act?.id);
   useEffect(() => {
-    if (bFor === myCls) return;
-    setFor(myCls);
-    if (src.own && !src.isNew && !src.char && src.cls !== myCls) setSrc({ t: OWN_BUILD, au: name, cls: myCls, own: true });
-  }, [myCls]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!act || bFor === act.id) return;
+    setFor(act.id);
+    if (src.own && !src.isNew) setSrc({ t: OWN_BUILD, au: name, cls: planClass(act.cls), own: true });
+  }, [act?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [tab, setTab] = useMem("ctab", "skills");
   const [newName, setNewName] = useMem("newName", "");
   const [newTags, setNewTags] = useMem<string[]>("newTags", []);
@@ -186,9 +190,11 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   );
   const levelsOf = (id: string) => (isGameId(id) ? tw.data?.find((x) => x.piece.id === id)?.levels : enh.data?.[id]);
   const byId = useMemo(() => new Map([...(pieces.data ?? []), ...(tw.data ?? []).map((x) => x.piece)].map((p) => [p.id, p])), [pieces.data, tw.data]);
+  // A worn game item missing from the game data (newer than it) keeps its slot, nameless and without stats.
+  const unknownPiece = (s: string, id: string): GearPiece => ({ id, name: t("planner.builder.unknownItem", { id }), slot: SLOTS.find(([x]) => x === s)?.[1][0] ?? null, grade: null, level: null, icon: null, max_enh: null, stats_json: [] });
   const equippedOf = (gear: GearSet): (Equipped & { slot: string })[] =>
     Object.entries(gear).flatMap(([s, g]) => {
-      const piece = byId.get(g.id);
+      const piece = byId.get(g.id) ?? (isGameId(g.id) && tw.data ? unknownPiece(s, g.id) : undefined);
       if (!piece) return [];
       const bonus = (levelsOf(g.id) ?? []).filter((v) => v.level === g.enh).map((v) => [v.stat_key, statValue(v.value_raw!, v.percent === 1)] as [string, number]);
       return [{ slot: s, piece, enh: g.enh, bonus }];
@@ -205,7 +211,9 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const plan = useMemo(() => planTotals(nodes, picked), [nodes, picked]);
   const taken = useMemo(() => new Set(connected(nodes, picked)), [nodes, picked]);
   const [zoom, setZoom] = useState<number | null>(null); // board shown large
-  const totalsOf = (gear: (Equipped & { slot: string })[]) => (calcData.data ? buildStats(calcData.data, cur.lvl, gear, plan) : {});
+  // The pet collection's effects the game shows for the character (CaptureSync) count in every build of it.
+  const petEffects = (char && readPets(settings[CAPTURED_PETS_KEY])[char.id]?.effects) || [];
+  const totalsOf = (gear: (Equipped & { slot: string })[]) => (calcData.data ? buildStats(calcData.data, cur.lvl, gear, plan, petEffects) : {});
   const totals = totalsOf(equipped);
   const wornTotals = which === "want" ? totalsOf(worn) : undefined;
   const wornHere = worn.find((x) => x.slot === slot);
@@ -614,6 +622,7 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
                 </div>
               </div>
             )}
+            {tab === "pet" && <PetsTab t={t} lang={lang} settings={settings} save={saveSetting} onError={onError} charId={char?.id} stats={calcData.data?.stats} />}
             {SOON.includes(tab) && (
               <div style={{ padding: 16 }}>
                 <div style={{ padding: "24px 0", color: "var(--pm-t2)", fontSize: 13 }}>

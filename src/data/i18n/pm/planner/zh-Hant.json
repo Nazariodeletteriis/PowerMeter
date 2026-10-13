@@ -36,6 +36,7 @@
   "planner.builder.group.accessories": "飾品",
   "planner.builder.group.arcana": "Arcana",
   "planner.builder.empty": "空",
+  "planner.builder.unknownItem": "物品 #{id}（遊戲資料中暫無）",
   "planner.builder.slot.weapon": "武器",
   "planner.builder.slot.offhand": "副手",
   "planner.builder.openPlanner": "在 Daevanion Planner 中開啟",

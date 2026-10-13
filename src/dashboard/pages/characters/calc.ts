@@ -137,9 +137,13 @@ export const statValue = (raw: number, percent: boolean) => (percent ? raw / 100
 
 export type Equipped = { piece: GearPiece; enh: number; bonus: [key: string, value: number][] };
 
-/** Every source added up, in display units: base for the level, gear fixed stats + enhancement bonus, Daevanion nodes. */
-export function buildStats(data: BuilderData, level: number, gear: Equipped[], plan: PlanTotals): Record<string, number> {
+/**
+ * Every source added up, in display units: base for the level, gear fixed stats + enhancement bonus, Daevanion
+ * nodes, pet collection effects (the ones that are character stats, see petStatKey).
+ */
+export function buildStats(data: BuilderData, level: number, gear: Equipped[], plan: PlanTotals, pets: PetEffect[] = []): Record<string, number> {
   const pct = new Set(data.stats.filter((s) => s.percent).map((s) => s.stat_key));
+  const known = new Set(data.stats.map((s) => s.stat_key));
   const out: Record<string, number> = {};
   const add = (k: string, v: number) => (out[k] = (out[k] ?? 0) + v);
   for (const [k, v] of Object.entries(data.base.find((b) => b.level === level)?.stats_json ?? {})) add(k, statValue(v, pct.has(k)));
@@ -148,7 +152,48 @@ export function buildStats(data: BuilderData, level: number, gear: Equipped[], p
     for (const [k, v] of g.bonus) add(k, v);
   }
   for (const [k, v] of Object.entries(plan.stats)) add(k, statValue(v, pct.has(k)));
+  for (const [k, v] of pets) {
+    const key = petStatKey(k, known);
+    if (key && Number.isFinite(v)) add(key, v);
+  }
   return out;
+}
+
+// ---------- Pets ----------
+
+/** A pet of the collection: level 1-3, progress toward the next level (levels 1-2, 0-PET_EXP_MAX), the equipped one. */
+export type PetState = { lvl: 1 | 2 | 3; exp: number; eq?: true };
+/** Owned pets by creature code (records of category "creature"). */
+export type PetSet = Record<string, PetState>;
+/** A collection effect as the game's Pet window lists it: stat key (stat_dictionary), value in display units (4.7 = 4.7%), percent. */
+export type PetEffect = [statKey: string, value: number, percent: boolean];
+export const PET_EXP_MAX = 75;
+
+/** Mount-only stats: the Pet window lists them, but they are no stat of the character. */
+const MOUNT_STATS = new Set(["GroundVehicleSpeed", "VehicleSpeed", "VehicleSprintSpeed", "VehicleSprintCost"]);
+
+/**
+ * The Builder stat a pet effect adds to, or null when it adds to none (mount stats, keys the stat dictionary does
+ * not have). The Builder sums the game's own stat keys, so a known key maps to itself. The capture uses this too.
+ */
+export const petStatKey = (key: string, known: Set<string>) => (known.has(key) && !MOUNT_STATS.has(key) ? key : null);
+
+/** The game's collection (get_captured_character `pets`, TW pet ids) as a PetSet; ids missing from `codes` are left out. */
+export function petsFromGame(pets: { id: number; lvl: number; exp: number }[], codes: Record<string, string>): PetSet {
+  const out: PetSet = {};
+  for (const p of pets) {
+    const code = codes[p.id];
+    if (code && (p.lvl === 1 || p.lvl === 2 || p.lvl === 3)) out[code] = { lvl: p.lvl, exp: p.lvl === 3 ? 0 : Math.min(PET_EXP_MAX, p.exp) };
+  }
+  return out;
+}
+
+/** Pets owned: the ones read from the game win over the ones marked by hand, and so does the game's equipped pet. */
+export function ownedPets(manual: PetSet, game?: PetSet): PetSet {
+  if (!game) return manual;
+  const gameEq = Object.values(game).some((p) => p.eq);
+  const kept = Object.entries(manual).map(([c, p]) => [c, gameEq ? { lvl: p.lvl, exp: p.exp } : p]);
+  return { ...Object.fromEntries(kept), ...game };
 }
 
 /**

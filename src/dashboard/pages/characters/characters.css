@@ -329,7 +329,8 @@
   place-items: center;
   font-size: 17px;
 }
-.chRailBtn[aria-selected="true"] {
+.chRailBtn[aria-selected="true"],
+.chRailBtn[aria-pressed="true"] {
   border-color: var(--pm-red);
   color: var(--pm-t1);
 }
@@ -700,6 +701,148 @@
   .bSlot:hover { border-color: var(--pm-grey); }
   .bSlot[aria-pressed="true"]:hover { border-color: var(--pm-red); }
   .bPick:hover { background: var(--pm-s3); }
+}
+/* Builder Pet tab: the game's Pet window (pets.tsx). Level 3 / MAX in the PowerMeter accent. */
+.petAll {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.petGrid {
+  --petMax: var(--pm-redt);
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); /* 3 columns at 1024px, more when wider */
+  align-content: start;
+  gap: 10px;
+  max-height: calc(90vh - 240px);
+  overflow-y: auto;
+  padding: 4px; /* room for the focus outline */
+}
+.petCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--pm-s2);
+  border: 1px solid var(--pm-line);
+  cursor: pointer;
+  transition: border-color 150ms ease;
+}
+.petCard[data-eq] {
+  box-shadow: inset 0 0 0 1px var(--pm-t2);
+  border-color: var(--pm-t2);
+}
+.petCard[aria-pressed="true"] {
+  border-color: var(--pm-red);
+}
+.petArt {
+  position: relative;
+  aspect-ratio: 16 / 10; /* square portraits, cropped: more rows on screen */
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--pm-s1);
+  overflow: hidden;
+}
+.petArt img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.petCard:not([data-owned]) .petArt img {
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+.petCard:not([data-owned]) .petName {
+  color: var(--pm-t3);
+}
+.petEq {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  translate: 0 -50%;
+  padding: 4px 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pm-t1);
+  background: color-mix(in srgb, var(--pm-bg) 80%, transparent);
+}
+.petName {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.petFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+  font-size: 11px;
+  color: var(--pm-t3);
+}
+.petLvl {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--pm-grey);
+  color: var(--pm-t1);
+  font-family: var(--pm-mono);
+}
+.petLvl[data-max] {
+  border-color: var(--petMax);
+  color: var(--petMax);
+}
+.petMax {
+  color: var(--petMax);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.petExp {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  color: var(--pm-t2);
+  font-variant-numeric: tabular-nums;
+}
+.petBar {
+  width: 56px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--pm-line);
+  overflow: hidden;
+}
+.petBar > span {
+  display: block;
+  height: 100%;
+  background: var(--pm-t2);
+  transform-origin: left;
+}
+.petEdit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 16px;
+  min-height: 60px;
+  padding-top: 12px;
+  border-top: 1px solid var(--pm-line);
+}
+@media (hover: hover) and (pointer: fine) {
+  .petCard:hover { border-color: var(--pm-grey); }
+  .petCard[aria-pressed="true"]:hover { border-color: var(--pm-red); }
 }
 .bEst {
   font-size: 9px;

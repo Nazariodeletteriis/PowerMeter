@@ -36,6 +36,7 @@
   "planner.builder.group.accessories": "Аксессуары",
   "planner.builder.group.arcana": "Arcana",
   "planner.builder.empty": "Пусто",
+  "planner.builder.unknownItem": "Предмет #{id} (ещё нет в игровых данных)",
   "planner.builder.slot.weapon": "Оружие",
   "planner.builder.slot.offhand": "Вторая рука",
   "planner.builder.openPlanner": "Открыть в Daevanion Planner",

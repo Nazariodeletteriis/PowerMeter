@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { CheckCircleIcon, TrashIcon } from "@phosphor-icons/react";
 import type { T } from "../../i18n";
 import { Modal } from "../system/Modal";
+import { PET_EXP_MAX, type PetEffect, type PetSet, type PetState } from "./calc";
 import "./characters.css";
 
 // Page state that survives switching page, like the prototype's single state
@@ -90,6 +91,38 @@ export function readCapturedDaev(json?: string): Record<string, number[]> {
   } catch {
     return {}; // missing or hand-edited
   }
+}
+/** Pets marked by hand, per roster character: settings["pm.pets"] = { [charId]: { owned: { [creature code]: PetState } } }. */
+export const PETS_KEY = "pm.pets";
+/**
+ * Pets read from the game (CaptureSync), per roster character: settings["pm.capturedPets"] = { [charId]: { owned,
+ * effects } }, owned as in pm.pets, effects the Pet window's list (PetEffect). They win over pm.pets (ownedPets).
+ */
+export const CAPTURED_PETS_KEY = "pm.capturedPets";
+export type PetsOf = { owned: PetSet; effects: PetEffect[] };
+/** Reads either key; anything malformed is dropped (missing or hand-edited). */
+export function readPets(json?: string): Record<string, PetsOf> {
+  let v: unknown;
+  try {
+    v = JSON.parse(json ?? "");
+  } catch {
+    return {};
+  }
+  if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+  const out: Record<string, PetsOf> = {};
+  for (const [c, x] of Object.entries(v as Record<string, { owned?: unknown; effects?: unknown }>)) {
+    const owned: PetSet = {};
+    for (const [code, p] of Object.entries(x?.owned && typeof x.owned === "object" ? (x.owned as Record<string, Partial<PetState>>) : {})) {
+      if (p?.lvl !== 1 && p?.lvl !== 2 && p?.lvl !== 3) continue;
+      const exp = p.lvl === 3 ? 0 : Math.min(PET_EXP_MAX, Math.max(0, Math.round(Number(p.exp) || 0)));
+      owned[code] = p.eq ? { lvl: p.lvl, exp, eq: true } : { lvl: p.lvl, exp };
+    }
+    const effects = (Array.isArray(x?.effects) ? (x.effects as unknown[]) : []).filter(
+      (e): e is PetEffect => Array.isArray(e) && typeof e[0] === "string" && typeof e[1] === "number" && Number.isFinite(e[1]),
+    ).map(([k, n, p]) => [k, n, !!p] as PetEffect);
+    out[c] = { owned, effects };
+  }
+  return out;
 }
 export type BuildData = { lvl?: number; gear?: GearSet; want?: GearSet };
 export function readBuildData(json?: string): Record<string, BuildData> {

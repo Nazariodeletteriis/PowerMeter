@@ -36,6 +36,7 @@
   "planner.builder.group.accessories": "アクセサリー",
   "planner.builder.group.arcana": "Arcana",
   "planner.builder.empty": "空き",
+  "planner.builder.unknownItem": "アイテム #{id}（ゲームデータ未収録）",
   "planner.builder.slot.weapon": "武器",
   "planner.builder.slot.offhand": "サブ手",
   "planner.builder.openPlanner": "Daevanion Plannerで開く",

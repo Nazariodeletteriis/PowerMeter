@@ -36,6 +36,7 @@
   "planner.builder.group.accessories": "장신구",
   "planner.builder.group.arcana": "Arcana",
   "planner.builder.empty": "비어 있음",
+  "planner.builder.unknownItem": "아이템 #{id} (아직 게임 데이터에 없음)",
   "planner.builder.slot.weapon": "무기",
   "planner.builder.slot.offhand": "보조 손",
   "planner.builder.openPlanner": "Daevanion Planner에서 열기",

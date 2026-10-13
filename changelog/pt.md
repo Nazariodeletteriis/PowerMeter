@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.7
+
+- Novo: Construtor de personagem: aba Mascote: sua coleção de mascotes como na janela Mascote do jogo (categorias, nível, progresso x/75, MAX), aberta com "Mostrar mascotes". O PowerMeter a lê do jogo no login; você também pode marcar mascotes à mão. A contagem é igual à do jogo (mascotes Special excluídos).
+- Corrigido: Construtor de personagem: um item equipado ausente dos dados de itens (como o escudo do Clérigo) fica no seu slot em vez de sumir.
+- Corrigido: Trocar de personagem no jogo agora troca toda a aba Personagem, construtor incluído, não só o cabeçalho.
+
 ## 0.5.6
 
 - Novo: Relatório de combate: o dano de cada golpe agora é registrado, então um intervalo de tempo selecionado mostra o dano real de cada habilidade, não uma estimativa (a partir dos próximos combates).

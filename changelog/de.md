@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.7
+
+- Neu: Charakter-Builder: Tab Haustier: deine Haustier-Sammlung wie im Haustier-Fenster des Spiels (Kategorien, Stufe, Fortschritt x/75, MAX), geöffnet mit "Pets anzeigen". PowerMeter liest sie beim Login aus dem Spiel; du kannst Pets auch von Hand markieren. Die Zählung entspricht dem Spiel (ohne Special-Pets).
+- Behoben: Charakter-Builder: Ein getragener Gegenstand, der in den Gegenstandsdaten fehlt (wie der Schild des Klerikers), bleibt in seinem Slot, statt zu verschwinden.
+- Behoben: Ein Charakterwechsel im Spiel wechselt jetzt den ganzen Charakter-Tab, Charakter-Builder inklusive, nicht nur die Kopfzeile.
+
 ## 0.5.6
 
 - Neu: Kampfbericht: Der Schaden jedes Treffers wird jetzt gespeichert, ein gewählter Zeitraum zeigt also den echten Schaden jeder Fertigkeit statt einer Schätzung (ab den nächsten Kämpfen).

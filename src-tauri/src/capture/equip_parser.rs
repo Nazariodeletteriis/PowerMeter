@@ -60,6 +60,12 @@
 //! `33 36` your own record also carries both: after the name `<world u16> <u32> <u8> <level u32> <gs u32> <gs u32>
 //!   <level u32>`, and near its end `02 17 05`, 32 bytes, `<cp u64> <cp u64>` (e.g. `2d000000 44030000 44030000
 //!   2d000000` = level 45, item level 836). It comes on every zone change, so it covers a capture started in game.
+//! `00 90` the pet collection, sent once on entering the world (packets_20261013_031645, Allalon login 03:17):
+//!   `<u32> <count varint> { <pet id u32> <pet id u32> <level u32> } × count <count varint> { <pet id u32> <exp u32> }
+//!   × count`. Pet ids are the TW archive's (1001-1325, its icon names the creature code); level 1-3; exp is the
+//!   progress of the level (0-75, missing = 0), the second list also holds unowned pets (their unlock progress).
+//!   e.g. `52040000 a501 | ea030000 ea030000 01000000 | ...` = 165 pets, 1002 at level 1; 163 of the game's 200
+//!   without the 2 Special ones.
 
 use std::collections::{BTreeMap, VecDeque};
 use std::sync::Mutex;
@@ -102,6 +108,15 @@ pub struct CapturedCharacter {
     /// Item level and combat power of the character being played; None until the game sends them after a login.
     pub gear_score: Option<u32>,
     pub combat_power: Option<u64>,
+    /// Pet collection (`00 90`): empty until the game sends it after a login.
+    pub pets: Vec<CapturedPet>,
+}
+
+#[derive(Serialize, Clone, PartialEq, Debug)]
+pub struct CapturedPet {
+    pub id: u32,
+    pub lvl: u8,
+    pub exp: u8,
 }
 
 struct State {
@@ -114,6 +129,7 @@ struct State {
     daevanion: Vec<u32>,
     gear_score: Option<u32>,
     combat_power: Option<u64>,
+    pets: Vec<CapturedPet>,
 }
 
 static STATE: Mutex<State> = Mutex::new(State {
@@ -124,6 +140,7 @@ static STATE: Mutex<State> = Mutex::new(State {
     daevanion: Vec::new(),
     gear_score: None,
     combat_power: None,
+    pets: Vec::new(),
 });
 
 /// Your own item level and combat power: a `now`/`best` pair whose best is kept. Out of range or now above best:
@@ -164,6 +181,7 @@ pub fn snapshot() -> CapturedCharacter {
         daevanion: s.daevanion.clone(),
         gear_score: s.gear_score,
         combat_power: s.combat_power,
+        pets: s.pets.clone(),
     }
 }
 
@@ -204,6 +222,7 @@ pub fn parse(packet: &[u8]) {
         (0x93, 0xE2) => parse_skillbar(body),
         (0x8C, 0xE2) => parse_login_bars(body),
         (0x26, 0xE2) => parse_daevanion(body),
+        (0x00, 0x90) => parse_pets(body),
         (0x45, 0x36) => parse_spawn_gear(body),
         (0x33, 0x36) => {
             parse_spawn_gear(body);
@@ -273,6 +292,7 @@ fn parse_inventory(b: &[u8]) {
         s.owner = None; // a login: the character may be another one
         s.gear_score = None;
         s.combat_power = None;
+        s.pets.clear();
     }
 }
 
@@ -347,6 +367,33 @@ fn parse_daevanion(b: &[u8]) {
         o += count * 4;
     }
     STATE.lock().unwrap_or_else(|e| e.into_inner()).daevanion = nodes;
+}
+
+/// `00 90`: the whole collection replaces the last one; anything out of shape keeps the last good one.
+fn parse_pets(b: &[u8]) {
+    let count = |o: usize| {
+        let v = read_varint(b, o);
+        (v.length > 0 && v.value >= 0).then(|| (v.value as usize, o + v.length as usize))
+    };
+    let Some((n, mut o)) = count(4) else { return };
+    let mut pets = Vec::with_capacity(n);
+    for _ in 0..n {
+        let (Some(id), Some(id2), Some(lvl)) = (u32_at(b, o), u32_at(b, o + 4), u32_at(b, o + 8)) else { return };
+        if id != id2 || !(1000..10_000).contains(&id) || !(1..=3).contains(&lvl) {
+            return;
+        }
+        pets.push(CapturedPet { id, lvl: lvl as u8, exp: 0 });
+        o += 12;
+    }
+    let Some((n, mut o)) = count(o) else { return };
+    for _ in 0..n {
+        let (Some(id), Some(exp)) = (u32_at(b, o), u32_at(b, o + 4)) else { return };
+        if let Some(p) = pets.iter_mut().find(|p| p.id == id && p.lvl < 3) {
+            p.exp = exp.min(75) as u8;
+        }
+        o += 8;
+    }
+    STATE.lock().unwrap_or_else(|e| e.into_inner()).pets = pets;
 }
 
 /// Item ids of wearable families in the archive: 110/115/150 weapons, 210/215/250 armour, 310/311 accessories.
@@ -516,6 +563,15 @@ mod tests {
         // Not a now/best pair (now above best): ignored.
         parse(&hex("16563614cc000000000000ca92000000000000"));
         assert_eq!(snapshot().combat_power, Some(52244));
+
+        // packets_20261013_031645, 03:16:55: the pet collection, three of its 165 pets (1002 level 1 at 16/75,
+        // 1217 level 2 at 16/75, 1299 level 3) and an unowned one (1034) in the exp list.
+        parse(&hex("c12200905204000003ea030000ea03000001000000c1040000c10400000200000013050000130500000300000003ea03000010000000c1040000100000000a04000005000000"));
+        let pets: Vec<(u32, u8, u8)> = snapshot().pets.iter().map(|p| (p.id, p.lvl, p.exp)).collect();
+        assert_eq!(pets, vec![(1002, 1, 16), (1217, 2, 16), (1299, 3, 0)]);
+        // Not a collection (a level out of range): the last one stays.
+        parse(&hex("100000900000000001ea030000ea03000009000000"));
+        assert_eq!(snapshot().pets.len(), 3);
     }
     // packets_20261011_183820, 18:38:25: DrBlacK's spawn (entity 8761), cut after the worn list.
     #[test]

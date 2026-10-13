@@ -385,9 +385,10 @@ const LIST_SQL: &str = "SELECT id, name,
                 json_extract(data_json, '$.quest.level'), json_extract(data_json, '$.recipe.output.level')) AS level,
        coalesce(json_extract(data_json, '$.item.slot'), json_extract(data_json, '$.item.type'),
                 json_extract(data_json, '$.monster.subType'), json_extract(data_json, '$.quest.category'),
-                json_extract(data_json, '$.categoryLabel'), json_extract(data_json, '$.class_name')) AS kind,
+                json_extract(data_json, '$.categoryLabel'), json_extract(data_json, '$.class_name'),
+                json_extract(data_json, '$.creature.genus')) AS kind,
        coalesce(json_extract(data_json, '$.item.icon'), json_extract(data_json, '$.recipe.output.icon'),
-                json_extract(data_json, '$.icon')) AS icon,
+                json_extract(data_json, '$.icon'), json_extract(data_json, '$.creature.icon')) AS icon,
        json_extract(data_json, '$.facts.exchange') AS exchange,
        json_extract(data_json, '$.item.race') AS race,
        (SELECT group_concat(DISTINCT json_extract(s.value, '$.type')) FROM json_each(data_json, '$.sources') s) AS sources
@@ -493,7 +494,8 @@ pub fn gamedata_icons(state: tauri::State<'_, AppState>, icons: Vec<String>) -> 
     let rows = state.gamedata.query(
         &format!(
             "SELECT r.icon, min(a.file) AS file FROM (
-               SELECT coalesce(json_extract(data_json, '$.item.icon'), json_extract(data_json, '$.icon')) AS icon,
+               SELECT coalesce(json_extract(data_json, '$.item.icon'), json_extract(data_json, '$.icon'),
+                               json_extract(data_json, '$.creature.icon')) AS icon,
                       'asset_' || substr(json_extract(image_paths_json, '$[0]'), 8, 64) AS asset_id
                FROM records WHERE json_array_length(image_paths_json) = 1) r
              JOIN asset_files a ON a.asset_id = r.asset_id

@@ -36,6 +36,7 @@
   "planner.builder.group.accessories": "Accesorios",
   "planner.builder.group.arcana": "Arcana",
   "planner.builder.empty": "Vacío",
+  "planner.builder.unknownItem": "Objeto #{id} (aún no está en los datos del juego)",
   "planner.builder.slot.weapon": "Arma",
   "planner.builder.slot.offhand": "Mano secundaria",
   "planner.builder.openPlanner": "Abrir en el Daevanion Planner",

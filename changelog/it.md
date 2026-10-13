@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.7
+
+- Nuovo: Character Builder: scheda Pet: la tua collezione di pet come nella finestra Pet del gioco (categorie, livello, progresso x/75, MAX), aperta con "Mostra pet". PowerMeter la legge dal gioco al login; puoi anche segnare i pet a mano. Il conteggio è uguale al gioco (pet Special esclusi).
+- Corretto: Character Builder: un oggetto indossato assente dai dati degli oggetti (come la guardia del Cleric) resta nel suo slot invece di sparire.
+- Corretto: Cambiando personaggio in gioco ora cambia tutta la scheda Personaggio, Character Builder compreso, non solo l'intestazione.
+
 ## 0.5.6
 
 - Nuovo: Report combattimento: ora viene registrato il danno di ogni colpo, quindi un intervallo di tempo selezionato mostra il danno reale di ogni skill, non una stima (dai prossimi combattimenti).

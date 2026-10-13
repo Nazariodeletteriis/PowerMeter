@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.7
+
+- Nouveau : Constructeur de personnage : onglet Familier : votre collection de familiers comme dans la fenêtre Familier du jeu (catégories, niveau, progression x/75, MAX), ouverte avec « Afficher les familiers ». PowerMeter la lit dans le jeu à la connexion ; vous pouvez aussi marquer les familiers à la main. Le compte correspond au jeu (familiers Special exclus).
+- Corrigé : Constructeur de personnage : un objet porté absent des données d'objets (comme le bouclier du Clerc) reste dans son emplacement au lieu de disparaître.
+- Corrigé : Changer de personnage en jeu change maintenant tout l'onglet Personnage, constructeur compris, pas seulement l'en-tête.
+
 ## 0.5.6
 
 - Nouveau : Rapport de combat : les dégâts de chaque coup sont désormais enregistrés, une plage de temps sélectionnée affiche donc les dégâts réels de chaque compétence, pas une estimation (à partir des prochains combats).

@@ -4,6 +4,12 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.7
+
+- New: Character Builder: Pet tab: your pet collection as in the game's Pet window (categories, level, progress x/75, MAX), opened with "Show pets". PowerMeter reads it from the game at login; you can also mark pets by hand. The count matches the game (Special pets excluded).
+- Fixed: Character Builder: a worn item missing from the item data (like the Cleric's guard) stays in its slot instead of disappearing.
+- Fixed: Switching character in game now switches the whole Character tab, Character Builder included, not just the header.
+
 ## 0.5.6
 
 - New: Fight report: the damage of every hit is now recorded, so a selected time range shows each skill's real damage, not an estimate (fights from now on).
