@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.9
+
+- Nuovo: Quando PowerMeter non riesce a collegarsi al gioco, il widget dice perché (nessun pacchetto dalle schede di rete, nessun pacchetto del gioco, finestra del gioco non riconosciuta…) e "Copia diagnosi" copia un report da incollare su Discord.
+- Corretto: Wi-Fi: le schede di rete non vengono più aperte in modalità promiscua, che su molti driver Wi-Fi non catturava niente.
+- Corretto: Ora vengono lette anche le schede di rete che etichettano i pacchetti (Killer e altre schede da gaming).
+- Corretto: L'avviso "non connesso" non compariva mai: il widget scambiava "nessuna porta" per una porta.
+- Cambiato: Widget: il Reset è nel footer, in basso a sinistra.
+
 ## 0.5.8
 
 - Nuovo: Widget ridisegnato: schede DPS / HEAL / AGGRO, nome del boss con barra HP, righe in classifica con barre DPS nel colore della classe. Il layout Compatta segue lo stesso stile.

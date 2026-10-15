@@ -415,9 +415,15 @@
     },
     "error": {
       "title": "Cattura interrotta",
-      "noTraffic": "Nessun traffico sull’adattatore selezionato",
       "npcap": "Npcap non disponibile",
-      "diagnose": "Diagnosi"
+      "diagnose": "Copia diagnosi",
+      "diagnosisCopied": "Copiata, incollala su Discord",
+      "notConnected": "Non connesso al gioco",
+      "noWindow": "Il gioco è in rete ma la sua finestra non viene riconosciuta",
+      "noAdapter": "Npcap non riesce ad aprire nessuna scheda di rete",
+      "noPackets": "Le schede di rete non ricevono pacchetti: controlla Npcap o riavvia il PC",
+      "noGame": "Arriva traffico ma nessun pacchetto del gioco: VPN, ExitLag o scheda non catturata?",
+      "locking": "Pacchetti del gioco su {device}, aggancio in corso…"
     },
     "build": {
       "slots": "Slot",

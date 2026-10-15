@@ -415,9 +415,15 @@
     },
     "error": {
       "title": "キャプチャ停止",
-      "noTraffic": "選択したアダプターにトラフィックがありません",
       "npcap": "Npcapが利用できません",
-      "diagnose": "診断"
+      "diagnose": "診断をコピー",
+      "diagnosisCopied": "コピーしました。Discordに貼り付けてください",
+      "notConnected": "ゲームに接続されていません",
+      "noWindow": "ゲームはオンラインですが、ウィンドウを認識できません",
+      "noAdapter": "Npcapがネットワークアダプターを開けません",
+      "noPackets": "ネットワークアダプターがパケットを受信していません: Npcapを確認するかPCを再起動してください",
+      "noGame": "通信はありますがゲームのパケットがありません: VPN、ExitLag、またはキャプチャされていないアダプター？",
+      "locking": "{device} でゲームのパケットを検出、接続中…"
     },
     "build": {
       "slots": "スロット",

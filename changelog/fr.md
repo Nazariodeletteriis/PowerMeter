@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.9
+
+- Nouveau : Quand PowerMeter n'arrive pas à se connecter au jeu, le widget dit pourquoi (aucun paquet des cartes réseau, aucun paquet du jeu, fenêtre du jeu non reconnue…) et « Copier le diagnostic » copie un rapport à coller dans Discord.
+- Corrigé : Wi-Fi : les cartes réseau ne sont plus ouvertes en mode promiscuous, qui sur beaucoup de pilotes Wi-Fi ne capturait rien.
+- Corrigé : Les cartes réseau qui étiquettent leurs paquets (Killer et autres cartes gaming) sont désormais lues.
+- Corrigé : L'avertissement « non connecté » n'apparaissait jamais : le widget prenait « pas encore de port » pour un port.
+- Modifié : Widget : Reset est dans le pied, en bas à gauche.
+
 ## 0.5.8
 
 - Nouveau : Widget redessiné : onglets DPS / HEAL / AGGRO, nom du boss avec barre de PV, lignes de classement avec barres de DPS à la couleur de la classe. La disposition Compacte suit le même style.

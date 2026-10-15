@@ -415,9 +415,15 @@
     },
     "error": {
       "title": "擷取已停止",
-      "noTraffic": "所選介面卡上沒有流量",
       "npcap": "Npcap 無法使用",
-      "diagnose": "診斷"
+      "diagnose": "複製診斷",
+      "diagnosisCopied": "已複製，貼到 Discord",
+      "notConnected": "未連線到遊戲",
+      "noWindow": "遊戲已連線，但無法辨識其視窗",
+      "noAdapter": "Npcap 無法開啟任何網路介面卡",
+      "noPackets": "網路介面卡收不到封包：請檢查 Npcap 或重新啟動電腦",
+      "noGame": "有流量但沒有遊戲封包：VPN、ExitLag 或未擷取的介面卡？",
+      "locking": "在 {device} 上發現遊戲封包，正在連線…"
     },
     "build": {
       "slots": "格位",

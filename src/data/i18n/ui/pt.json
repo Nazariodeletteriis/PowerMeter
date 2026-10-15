@@ -415,9 +415,15 @@
     },
     "error": {
       "title": "Captura interrompida",
-      "noTraffic": "Nenhum tráfego no adaptador selecionado",
       "npcap": "Npcap não está disponível",
-      "diagnose": "Diagnosticar"
+      "diagnose": "Copiar diagnóstico",
+      "diagnosisCopied": "Copiado, cole no Discord",
+      "notConnected": "Não conectado ao jogo",
+      "noWindow": "O jogo está online, mas a janela dele não é reconhecida",
+      "noAdapter": "O Npcap não consegue abrir nenhum adaptador de rede",
+      "noPackets": "Os adaptadores de rede não recebem pacotes: verifique o Npcap ou reinicie o PC",
+      "noGame": "Chega tráfego, mas nenhum pacote do jogo: VPN, ExitLag ou adaptador não capturado?",
+      "locking": "Pacotes do jogo em {device}, conectando…"
     },
     "build": {
       "slots": "Slots",

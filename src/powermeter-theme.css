@@ -377,12 +377,12 @@
   .header .headerBtns .suspendBtn.isSuspended { color: var(--pm-redt); }
 
   /* --- Boss row (74px): crest | BOSS badge, name ... HP readout over the HP bar |
-     timer box | Reset. The badge is the target selector and the HP block, timer box
-     and Reset are moved in here by pmWidget.js; the grid places them. --- */
+     timer box. The badge is the target selector and the HP block and timer box are
+     moved in here by pmWidget.js; the grid places them. --- */
   .header .bossNames {
     order: 100;
     display: grid;
-    grid-template-columns: 45px auto minmax(0, 1fr) auto auto auto auto;
+    grid-template-columns: 45px auto minmax(0, 1fr) auto auto auto;
     grid-template-rows: 33px 16px auto;
     column-gap: 11px;
     row-gap: 4px;
@@ -645,27 +645,26 @@
     outline: 2px solid #ffffff;
     outline-offset: 1px;
   }
-  /* Reset: labelled, so nobody has to guess the icon. */
+  /* Reset: labelled, so nobody has to guess the icon; first in the footer, bottom left. */
   .pmLiveResetBtn {
-    grid-area: 1 / 7 / 3 / 8;
     flex: none;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    height: 29px;
-    padding: 0 12px;
+    gap: 6px;
+    height: 20px;
+    padding: 0 8px;
     box-sizing: border-box;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 6px;
+    border-radius: 4px;
     background: rgba(6, 7, 9, 0.85);
     color: #ffffff;
-    font-family: inherit; font-weight: 600; font-size: 12px; line-height: 27px;
+    font-family: inherit; font-weight: 600; font-size: 11px; line-height: 18px;
     letter-spacing: 0.03em;
     text-transform: uppercase;
     cursor: pointer;
     transition: border-color 120ms ease, transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
   }
-  .pmLiveResetBtn svg { width: 14px; height: 14px; }
+  .pmLiveResetBtn svg { width: 12px; height: 12px; }
   @media (hover: hover) and (pointer: fine) {
     .pmLiveResetBtn:hover { border-color: rgba(255, 255, 255, 0.6); }
   }

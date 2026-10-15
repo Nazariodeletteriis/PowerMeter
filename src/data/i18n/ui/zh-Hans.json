@@ -415,9 +415,15 @@
     },
     "error": {
       "title": "捕获已停止",
-      "noTraffic": "所选适配器上没有流量",
       "npcap": "Npcap 不可用",
-      "diagnose": "诊断"
+      "diagnose": "复制诊断",
+      "diagnosisCopied": "已复制，粘贴到 Discord",
+      "notConnected": "未连接到游戏",
+      "noWindow": "游戏已联网，但无法识别其窗口",
+      "noAdapter": "Npcap 无法打开任何网络适配器",
+      "noPackets": "网络适配器收不到数据包：请检查 Npcap 或重启电脑",
+      "noGame": "有流量但没有游戏数据包：VPN、ExitLag 或未捕获的适配器？",
+      "locking": "在 {device} 上发现游戏数据包，正在连接…"
     },
     "build": {
       "slots": "格位",

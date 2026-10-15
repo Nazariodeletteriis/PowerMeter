@@ -415,9 +415,15 @@
     },
     "error": {
       "title": "Captura detenida",
-      "noTraffic": "Sin tráfico en el adaptador seleccionado",
       "npcap": "Npcap no está disponible",
-      "diagnose": "Diagnosticar"
+      "diagnose": "Copiar diagnóstico",
+      "diagnosisCopied": "Copiado, pégalo en Discord",
+      "notConnected": "No conectado al juego",
+      "noWindow": "El juego está en línea, pero su ventana no se reconoce",
+      "noAdapter": "Npcap no puede abrir ningún adaptador de red",
+      "noPackets": "Los adaptadores de red no reciben paquetes: revisa Npcap o reinicia el PC",
+      "noGame": "Llega tráfico, pero ningún paquete del juego: ¿VPN, ExitLag o un adaptador no capturado?",
+      "locking": "Paquetes del juego en {device}, conectando…"
     },
     "build": {
       "slots": "Ranuras",

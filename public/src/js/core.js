@@ -4237,6 +4237,7 @@ class DpsApp {
       return;
     }
     const info = this.safeParseJSON(raw, {});
+    this.captureDevices = Array.isArray(info?.devices) ? info.devices : []; // PowerMeter: widget connection diagnosis
 
     // Show Npcap error if present
     const pcapErr = typeof info?.pcapError === "string" ? info.pcapError.trim() : "";
@@ -4258,7 +4259,7 @@ class DpsApp {
       (rawIp === "127.0.0.1" || rawIp === "::1"
         ? this.i18n?.t("connection.loopback", "Local Loopback") ?? "Local Loopback"
         : rawIp);
-    const hasPort = Number.isFinite(Number(info?.port));
+    const hasPort = info?.port != null && Number.isFinite(Number(info.port)); // unlocked = port null, and Number(null) is 0
     this.isDetectingPort = this.aionRunning && !hasPort;
     const port = hasPort
       ? String(info.port)

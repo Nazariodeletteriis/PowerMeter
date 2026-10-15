@@ -23,7 +23,11 @@ const createPmWidget = (app) => {
 
   const OPACITY_LEVELS = [30, 60, 90]; // design 8.1: the three background levels
   const SPARK_POINTS = 41; // design 8.7: the sparkline's sample count
-  const NO_TRAFFIC_MS = 60000; // detecting this long with the game open = capture error
+  const DIAG_AFTER_MS = 20000; // stuck this long without a connection = say why (capture error card)
+  const RECENT_MS = 15000; // window for "the adapter sees packets / game packets now"
+  // The idle game sends ~19 marked packets a second; random traffic matches the 3-byte
+  // marker a few times a minute at most, so this many in RECENT_MS means the game.
+  const GAME_PACKETS_MIN = 30;
   const MODE_KEY = "pm.widgetMode";
 
   // The tab: what the party list shows (core.js getMetricForRow). The old Build and
@@ -46,14 +50,13 @@ const createPmWidget = (app) => {
   const isActive = () => window.A2_VIEW === "main"; // every theme
 
   // --- widget layout: lift the fight timer into the bar, and the target selector (the BOSS
-  // badge), the HP bar, the timer box and Reset into the boss row. Moved rather than
-  // duplicated so core.js keeps driving them; put back where A2Tools had them outside the
-  // overlay. Compact hides the boss row, so the selector, Reset and the fight time stay
-  // home there, in its footer (footerHome).
+  // badge), the HP bar and the timer box into the boss row. Moved rather than duplicated so
+  // core.js keeps driving them; put back where A2Tools had them outside the overlay. Compact
+  // hides the boss row, so the selector and the fight time stay home there, in its footer
+  // (footerHome). Reset lives in the footer, bottom left, in both layouts.
   const moves = [
     [document.querySelector(".battleTime"), $(".pmBarTitle"), "before"],
     [document.querySelector(".targetModeBtn"), $(".pmBerserk"), "after", true],
-    [$(".pmLiveResetBtn"), document.querySelector(".targetModeBtn"), "after", true],
     [$(".bossHpBar"), $(".bossNames"), "append"],
     [$(".pmDuration"), $(".bossNames"), "append", true],
   ]
@@ -384,7 +387,44 @@ const createPmWidget = (app) => {
   $(".pmReportBtn")?.addEventListener("click", () => {
     if (lastFight?.userRow) app.openRowDetailsWindow(lastFight.userRow);
   });
-  $(".pmDiagnoseBtn")?.addEventListener("click", () => window.javaBridge?.openSettingsWindow?.());
+  // Copy the backend's capture diagnosis (Npcap, game window, every adapter) for Discord.
+  const diagnoseBtn = $(".pmDiagnoseBtn");
+  diagnoseBtn?.addEventListener("click", async () => {
+    try {
+      const report = await invoke("get_capture_diagnosis");
+      const widget = `Widget: game running=${!!app.aionRunning}, detecting=${!!app.isDetectingPort}, shown="${$(".pmErrorText")?.textContent || ""}"`;
+      await navigator.clipboard.writeText(`${report}${widget}\n`);
+      diagnoseBtn.textContent = t("pmWidget.error.diagnosisCopied", "Copied, paste it in Discord");
+      setTimeout(() => (diagnoseBtn.textContent = t("pmWidget.error.diagnose", "Copy diagnosis")), 2500);
+    } catch (err) {
+      console.error("[PowerMeter] copy diagnosis failed", err);
+    }
+  });
+
+  // Game packets per adapter over the last RECENT_MS: [time, count] samples per status poll.
+  const gameSamples = new Map();
+  const gameAdapter = (now) => {
+    let found = null;
+    for (const d of app.captureDevices || []) {
+      const s = gameSamples.get(d.name) || [];
+      if (!s.length || s.at(-1)[1] !== d.gamePackets) s.push([now, d.gamePackets]);
+      while (s.length > 1 && now - s[0][0] > RECENT_MS) s.shift();
+      gameSamples.set(d.name, s);
+      if (d.gamePackets - s[0][1] >= GAME_PACKETS_MIN) found = d;
+    }
+    return found;
+  };
+  // Why there is no game connection, from what each adapter sees; "" = nothing wrong.
+  const connectionProblem = (now) => {
+    const devices = app.captureDevices || [];
+    const game = gameAdapter(now);
+    if (!app.aionRunning) return game ? t("pmWidget.error.noWindow", "The game is online but its window is not recognised") : "";
+    if (!devices.some((d) => d.running)) return t("pmWidget.error.noAdapter", "Npcap cannot open any network adapter");
+    if (!devices.some((d) => d.lastFrameMs > 0 && now - d.lastFrameMs < RECENT_MS))
+      return t("pmWidget.error.noPackets", "The network adapters receive no packets: check Npcap or restart the PC");
+    if (!game) return t("pmWidget.error.noGame", "Traffic arrives, but no game packets: VPN, ExitLag or an adapter not captured?");
+    return tf("pmWidget.error.locking", { device: game.name }, `Game packets on ${game.name}, connecting…`);
+  };
   // Fight over: the summary's Reset clears the meter like the old header reset.
   meter.querySelectorAll(".pmEndResetBtn, .pmLiveResetBtn").forEach((btn) =>
     btn.addEventListener("click", () => app.refreshDamageData({ reason: "fight summary reset" }))
@@ -568,12 +608,18 @@ const createPmWidget = (app) => {
     wasFighting = fighting;
 
     let error = "";
+    const now = Date.now();
+    const problem = connectionProblem(now);
     if (app.pcapError) error = t("pmWidget.error.npcap", "Npcap is not available");
-    else if (app.aionRunning && app.isDetectingPort) {
-      detectingSince ||= Date.now();
-      if (Date.now() - detectingSince > NO_TRAFFIC_MS) error = t("pmWidget.error.noTraffic", "No traffic on the selected adapter");
+    else if (app.aionRunning ? app.isDetectingPort : problem) {
+      detectingSince ||= now;
+      if (now - detectingSince > DIAG_AFTER_MS) error = problem;
     } else detectingSince = 0;
     setText(".pmErrorText", error);
+    setText(
+      ".pmError .pmCardTitle",
+      app.pcapError ? t("pmWidget.error.title", "Capture stopped") : t("pmWidget.error.notConnected", "Not connected to the game")
+    );
 
     const hasRows = !!app.elList?.classList.contains("hasRows");
     let next = "live";

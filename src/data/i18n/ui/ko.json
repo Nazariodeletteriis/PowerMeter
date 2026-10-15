@@ -415,9 +415,15 @@
     },
     "error": {
       "title": "캡처 중지됨",
-      "noTraffic": "선택한 어댑터에 트래픽이 없습니다",
       "npcap": "Npcap을 사용할 수 없습니다",
-      "diagnose": "진단"
+      "diagnose": "진단 복사",
+      "diagnosisCopied": "복사됨, Discord에 붙여넣으세요",
+      "notConnected": "게임에 연결되지 않음",
+      "noWindow": "게임은 온라인이지만 창을 인식할 수 없습니다",
+      "noAdapter": "Npcap이 네트워크 어댑터를 열 수 없습니다",
+      "noPackets": "네트워크 어댑터가 패킷을 받지 못합니다: Npcap을 확인하거나 PC를 다시 시작하세요",
+      "noGame": "트래픽은 있지만 게임 패킷이 없습니다: VPN, ExitLag 또는 캡처되지 않는 어댑터?",
+      "locking": "{device}에서 게임 패킷 감지, 연결 중…"
     },
     "build": {
       "slots": "슬롯",

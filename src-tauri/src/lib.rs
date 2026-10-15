@@ -182,7 +182,47 @@ fn get_capture_status(state: tauri::State<'_, AppState>) -> serde_json::Value {
         "localPlayerId": local_id,
         "characterName": char_name,
         "pcapError": crate::capture::pcap_capturer::start_error(),
+        "devices": crate::capture::pcap_capturer::device_diagnosis(),
     })
+}
+
+/// Plain-text report of why the meter is (not) connected, copied from the widget
+/// so a player can paste it in Discord: Npcap, game window, lock, every adapter.
+#[tauri::command]
+fn get_capture_diagnosis(state: tauri::State<'_, AppState>) -> String {
+    use crate::platform::window_detector;
+    let now = chrono::Utc::now().timestamp_millis();
+    let ago = |ms: i64| if ms > 0 { format!("{} s ago", (now - ms) / 1000) } else { "never".to_string() };
+    let mut out = format!("PowerMeter {} capture diagnosis\n", env!("CARGO_PKG_VERSION"));
+    out += &format!(
+        "Npcap: {}\n",
+        crate::capture::pcap_capturer::start_error().map_or("started".to_string(), |e| format!("FAILED ({e})"))
+    );
+    out += &match window_detector::find_aion2_window_title() {
+        Some(t) => format!("Game window: {t:?}\n"),
+        None => format!("Game window: NOT found; look-alikes: {:?}\n", window_detector::describe_candidates()),
+    };
+    out += &match state.port_detector.current_port() {
+        Some(p) => format!("Locked: port {p} on {:?}\n", state.port_detector.current_device().unwrap_or_default()),
+        None => "Locked: no\n".to_string(),
+    };
+    out += "Adapters:\n";
+    for d in crate::capture::pcap_capturer::device_diagnosis() {
+        let status = match (d["running"].as_bool(), d["error"].as_str()) {
+            (Some(true), _) => "open".to_string(),
+            (_, Some(e)) => format!("not captured: {e}"),
+            _ => "stopped".to_string(),
+        };
+        out += &format!(
+            "- {}: {status}; {} packets (last {}), {} game packets (last {})\n",
+            d["name"].as_str().unwrap_or("?"),
+            d["frames"],
+            ago(d["lastFrameMs"].as_i64().unwrap_or(0)),
+            d["gamePackets"],
+            ago(d["lastGameMs"].as_i64().unwrap_or(0)),
+        );
+    }
+    out
 }
 
 #[tauri::command]
@@ -1855,6 +1895,7 @@ pub fn run() {
             update_settings,
             get_ping,
             get_capture_status,
+            get_capture_diagnosis,
             get_captured_character,
             set_target_mode,
             set_character_name,

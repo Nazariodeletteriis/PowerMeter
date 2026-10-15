@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.9
+
+- Nuevo: Cuando PowerMeter no logra conectarse al juego, el widget dice por qué (sin paquetes de los adaptadores de red, sin paquetes del juego, ventana del juego no reconocida…) y "Copiar diagnóstico" copia un informe para pegar en Discord.
+- Corregido: Wi-Fi: los adaptadores de red ya no se abren en modo promiscuo, que en muchos controladores Wi-Fi no capturaba nada.
+- Corregido: Ahora se leen también los adaptadores de red que etiquetan sus paquetes (Killer y otros adaptadores gaming).
+- Corregido: El aviso "no conectado" no aparecía nunca: el widget tomaba "sin puerto" por un puerto.
+- Cambiado: Widget: Reset está en el pie, abajo a la izquierda.
+
 ## 0.5.8
 
 - Nuevo: Widget rediseñado: pestañas DPS / HEAL / AGGRO, nombre del jefe con barra de HP, filas de clasificación con barras de DPS del color de la clase. El diseño Compacta sigue el mismo estilo.

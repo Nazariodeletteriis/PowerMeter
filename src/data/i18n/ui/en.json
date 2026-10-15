@@ -415,9 +415,15 @@
     },
     "error": {
       "title": "Capture stopped",
-      "noTraffic": "No traffic on the selected adapter",
       "npcap": "Npcap is not available",
-      "diagnose": "Diagnose"
+      "diagnose": "Copy diagnosis",
+      "diagnosisCopied": "Copied, paste it in Discord",
+      "notConnected": "Not connected to the game",
+      "noWindow": "The game is online but its window is not recognised",
+      "noAdapter": "Npcap cannot open any network adapter",
+      "noPackets": "The network adapters receive no packets: check Npcap or restart the PC",
+      "noGame": "Traffic arrives, but no game packets: VPN, ExitLag or an adapter not captured?",
+      "locking": "Game packets on {device}, connecting…"
     },
     "build": {
       "slots": "Slots",

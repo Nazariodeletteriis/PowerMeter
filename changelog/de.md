@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.9
+
+- Neu: Wenn PowerMeter keine Verbindung zum Spiel bekommt, sagt das Widget warum (keine Pakete von den Netzwerkadaptern, keine Spielpakete, Spielfenster nicht erkannt…), und "Diagnose kopieren" kopiert einen Bericht zum Einfügen in Discord.
+- Behoben: WLAN: Netzwerkadapter werden nicht mehr im Promiscuous-Modus geöffnet, der bei vielen WLAN-Treibern gar nichts erfasste.
+- Behoben: Netzwerkadapter, die ihre Pakete markieren (Killer und andere Gaming-Adapter), werden jetzt gelesen.
+- Behoben: Die Warnung "nicht verbunden" erschien nie: Das Widget hielt "noch kein Port" für einen Port.
+- Geändert: Widget: Reset sitzt in der Fußzeile unten links.
+
 ## 0.5.8
 
 - Neu: Neu gestaltetes Widget: Tabs DPS / HEAL / AGGRO, Bossname mit HP-Leiste, Ranglisten-Zeilen mit DPS-Leisten in Klassenfarbe. Das Layout Kompakt folgt demselben Stil.

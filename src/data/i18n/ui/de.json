@@ -415,9 +415,15 @@
     },
     "error": {
       "title": "Aufzeichnung gestoppt",
-      "noTraffic": "Kein Datenverkehr auf dem ausgewählten Adapter",
       "npcap": "Npcap ist nicht verfügbar",
-      "diagnose": "Diagnose"
+      "diagnose": "Diagnose kopieren",
+      "diagnosisCopied": "Kopiert, füge sie in Discord ein",
+      "notConnected": "Nicht mit dem Spiel verbunden",
+      "noWindow": "Das Spiel ist online, aber sein Fenster wird nicht erkannt",
+      "noAdapter": "Npcap kann keinen Netzwerkadapter öffnen",
+      "noPackets": "Die Netzwerkadapter empfangen keine Pakete: prüfe Npcap oder starte den PC neu",
+      "noGame": "Es kommt Verkehr an, aber keine Spielpakete: VPN, ExitLag oder ein nicht erfasster Adapter?",
+      "locking": "Spielpakete auf {device}, verbinde…"
     },
     "build": {
       "slots": "Slots",

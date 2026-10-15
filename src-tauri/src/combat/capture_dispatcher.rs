@@ -25,7 +25,7 @@ use crate::platform::window_detector;
 /// `0E 00 36`), which silently broke the old single-magic port detection while
 /// leaving the parser itself unaffected. We accept both leading bytes so the
 /// gate survives that transition.
-const COMBAT_SIGNATURES: [&[u8]; 2] = [
+pub(crate) const COMBAT_SIGNATURES: [&[u8]; 2] = [
     &[0x0E, 0x00, 0x36], // current (post June 2026) record terminator
     &[0x06, 0x00, 0x36], // legacy terminator (pre June 2026)
 ];
@@ -340,7 +340,7 @@ fn contains_bytes(data: &[u8], needle: &[u8]) -> bool {
     needle.len() <= data.len() && data.windows(needle.len()).any(|w| w == needle)
 }
 
-fn contains_any(data: &[u8], needles: &[&[u8]]) -> bool {
+pub(crate) fn contains_any(data: &[u8], needles: &[&[u8]]) -> bool {
     needles.iter().any(|n| contains_bytes(data, n))
 }
 

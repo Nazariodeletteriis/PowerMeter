@@ -415,9 +415,15 @@
     },
     "error": {
       "title": "Capture arrêtée",
-      "noTraffic": "Aucun trafic sur l'adaptateur sélectionné",
       "npcap": "Npcap n'est pas disponible",
-      "diagnose": "Diagnostiquer"
+      "diagnose": "Copier le diagnostic",
+      "diagnosisCopied": "Copié, collez-le dans Discord",
+      "notConnected": "Non connecté au jeu",
+      "noWindow": "Le jeu est en ligne mais sa fenêtre n'est pas reconnue",
+      "noAdapter": "Npcap ne peut ouvrir aucune carte réseau",
+      "noPackets": "Les cartes réseau ne reçoivent aucun paquet : vérifiez Npcap ou redémarrez le PC",
+      "noGame": "Du trafic arrive, mais aucun paquet du jeu : VPN, ExitLag ou carte non capturée ?",
+      "locking": "Paquets du jeu sur {device}, connexion…"
     },
     "build": {
       "slots": "Emplacements",

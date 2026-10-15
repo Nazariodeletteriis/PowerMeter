@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::ffi::{c_char, c_int, c_uint, CStr, CString};
 use std::ptr;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI64, AtomicU64, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -10,6 +10,7 @@ use tokio::sync::mpsc;
 use tracing::{error, info, warn};
 
 use super::captured_payload::CapturedPayload;
+use crate::combat::capture_dispatcher::{contains_any, COMBAT_SIGNATURES};
 
 fn now_ms() -> i64 {
     SystemTime::now()
@@ -193,7 +194,9 @@ impl PcapLib {
             (self.open_live)(
                 c_name.as_ptr(),
                 65535,  // snaplen
-                1,      // promiscuous
+                // Not promiscuous: the game traffic is our own, and many Wi-Fi drivers
+                // deliver nothing at all to a capture in promiscuous mode.
+                0,      // promiscuous
                 // Npcap hands buffered packets over when this read timeout
                 // expires, so it is a floor on capture latency (was 100 ms).
                 20,     // timeout ms
@@ -263,6 +266,9 @@ impl PcapCapturer {
         };
 
         // Only capture on devices that have addresses
+        for d in devices.iter().filter(|d| !d.has_addresses) {
+            diag_device(d.label(), false, Some("no address, not captured".into()));
+        }
         let devices: Vec<_> = devices.into_iter().filter(|d| d.has_addresses).collect();
 
         if devices.is_empty() {
@@ -337,6 +343,60 @@ impl PcapCapturer {
     }
 }
 
+/// Per adapter, for the connection diagnosis: what Npcap gave us, so a meter stuck on
+/// "detecting" can say whether the adapter opened, sees packets, sees the game.
+#[derive(Default)]
+struct DiagCounters {
+    frames: AtomicU64,
+    game: AtomicU64,
+    last_frame_ms: AtomicI64,
+    last_game_ms: AtomicI64,
+}
+
+struct DeviceDiag {
+    label: String,
+    running: bool,
+    error: Option<String>,
+    counters: Arc<DiagCounters>,
+}
+
+static DEVICES: parking_lot::Mutex<Vec<DeviceDiag>> = parking_lot::const_mutex(Vec::new());
+
+/// Record an adapter's state; returns its counters (kept across reopenings).
+fn diag_device(label: &str, running: bool, error: Option<String>) -> Arc<DiagCounters> {
+    let mut list = DEVICES.lock();
+    let i = match list.iter().position(|d| d.label == label) {
+        Some(i) => i,
+        None => {
+            list.push(DeviceDiag { label: label.to_string(), running, error: None, counters: Arc::default() });
+            list.len() - 1
+        }
+    };
+    list[i].running = running;
+    list[i].error = error;
+    list[i].counters.clone()
+}
+
+/// Every adapter the capture saw, as the widget and the copied diagnosis show it.
+pub fn device_diagnosis() -> Vec<serde_json::Value> {
+    DEVICES
+        .lock()
+        .iter()
+        .map(|d| {
+            let c = &d.counters;
+            serde_json::json!({
+                "name": d.label,
+                "running": d.running,
+                "error": d.error,
+                "frames": c.frames.load(Ordering::Relaxed),
+                "gamePackets": c.game.load(Ordering::Relaxed),
+                "lastFrameMs": c.last_frame_ms.load(Ordering::Relaxed),
+                "lastGameMs": c.last_game_ms.load(Ordering::Relaxed),
+            })
+        })
+        .collect()
+}
+
 /// Set when capture could not start at all; the widget shows it as an Npcap error.
 static START_ERROR: OnceLock<String> = OnceLock::new();
 
@@ -387,11 +447,14 @@ fn start_capture_thread(
             Ok(h) => h,
             Err(e) => {
                 warn!("Failed to open capture on {}: {}", label, e);
+                diag_device(&label, false, Some(e));
                 return;
             }
         };
 
         info!("Capture active on {}", label);
+        let counters = diag_device(&label, true, None);
+        let mut end_error = None;
         let mut dropped: u64 = 0;
 
         while running.load(Ordering::SeqCst) {
@@ -413,8 +476,14 @@ fn start_capture_thread(
                         now_ms()
                     };
                     let frame = unsafe { std::slice::from_raw_parts(data, len) };
+                    counters.frames.fetch_add(1, Ordering::Relaxed);
+                    counters.last_frame_ms.store(ts, Ordering::Relaxed);
                     if let Some(mut payload) = parse_tcp_payload(frame, &label) {
                         payload.captured_at_ms = ts;
+                        if contains_any(&payload.data, &COMBAT_SIGNATURES) {
+                            counters.game.fetch_add(1, Ordering::Relaxed);
+                            counters.last_game_ms.store(ts, Ordering::Relaxed);
+                        }
                         // A full channel drops the segment, a hole in the stream:
                         // say so (first, then every 1000th) instead of losing hits silently.
                         if sender.try_send(payload).is_err() {
@@ -429,12 +498,14 @@ fn start_capture_thread(
                 -2 => break,   // EOF (savefile)
                 _ => {
                     warn!("Capture error on {} (ret={})", label, ret);
+                    end_error = Some(format!("capture error (ret={ret})"));
                     break;
                 }
             }
         }
 
         unsafe { (pcap.close)(handle) };
+        diag_device(&label, false, end_error);
         // Ended (adapter gone or reset): the rescan captures it again if it comes back.
         active.lock().remove(&dev_name);
         info!("Capture stopped on {}", label);
@@ -455,6 +526,8 @@ fn parse_tcp_payload(frame: &[u8], device_name: &str) -> Option<CapturedPayload>
         let ether_type = u16::from_be_bytes([frame[12], frame[13]]);
         if ether_type == 0x0800 {
             14 // Standard Ethernet
+        } else if ether_type == 0x8100 && frame.len() >= 18 && frame[16] == 0x08 && frame[17] == 0x00 {
+            18 // 802.1Q VLAN/priority tag (Killer and other gaming NICs) then IPv4
         } else if frame[0] == 2 && frame[1] == 0 && frame[2] == 0 && frame[3] == 0 {
             4 // NULL/Loopback: AF_INET (little-endian 2) = IPv4
         } else if (frame[0] >> 4) == 4 {
@@ -511,7 +584,7 @@ fn parse_tcp_payload(frame: &[u8], device_name: &str) -> Option<CapturedPayload>
     // a split game packet shifts that packet's bytes. Only a padded frame
     // (IP length < 46) is trimmed, so offloaded segments are left as captured.
     let ip_total = u16::from_be_bytes([ip_header[2], ip_header[3]]) as usize;
-    let end = if ip_offset == 14 && ip_total < 46 { (ip_offset + ip_total).min(frame.len()) } else { frame.len() };
+    let end = if ip_offset >= 14 && ip_total < 46 { (ip_offset + ip_total).min(frame.len()) } else { frame.len() };
     if payload_offset >= end {
         return None;
     }
@@ -556,5 +629,14 @@ mod tests {
         assert_eq!(parse_tcp_payload(&frame(43, &[7, 8, 9, 0, 0, 0]), "eth").unwrap().data, vec![7, 8, 9]);
         // An unpadded frame is untouched.
         assert_eq!(parse_tcp_payload(&frame(48, &[1; 8]), "eth").unwrap().data, vec![1; 8]);
+    }
+
+    #[test]
+    fn vlan_tagged_frames_are_read() {
+        // Killer and other gaming NICs hand Npcap 802.1Q-tagged frames: 4 more bytes before IPv4.
+        let mut f = frame(48, &[1; 8]);
+        f.splice(12..12, [0x81, 0x00, 0x00, 0x00]);
+        let p = parse_tcp_payload(&f, "wifi").unwrap();
+        assert_eq!((p.src_port, p.data), (0x312d, vec![1; 8]));
     }
 }
