@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.15
+
+- Corregido: Cambiar el tamaño del widget ahora escala todo su contenido (texto, filas, iconos), no solo el marco. Arrastrar la altura sigue dando espacio a más filas.
+- Corregido: "Opacidad de la ventana" y "Opacidad de las barras" en la ventana de Ajustes ahora cambian el widget al instante.
+- Corregido: "Tamaño del nombre del objetivo" también cambia el título que se muestra sin jefe.
+
 ## 0.5.14
 
 - Corregido: Arrastrar el control "Tamaño del nombre del objetivo" ya no hace parpadear el medidor hasta llenar la RAM: la ventana de Ajustes y el medidor se reenviaban el valor viejo y el nuevo.

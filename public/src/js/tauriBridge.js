@@ -659,8 +659,10 @@
     let contentW = 396;
     let contentH = 300;
     if (meter) {
-      contentW = Math.ceil(meter.offsetWidth) + 16;
-      const meterH = Math.max(meter.offsetHeight, meter.scrollHeight);
+      // On screen: the meter is scaled with CSS zoom when the user resizes it.
+      const zoom = parseFloat(meter.style.zoom) || 1;
+      contentW = Math.ceil(meter.offsetWidth * zoom) + 16;
+      const meterH = Math.max(meter.offsetHeight, meter.scrollHeight) * zoom;
       contentH = Math.ceil(meterH) + 10;
     }
 

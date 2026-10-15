@@ -8,6 +8,8 @@ const REMOTE_APPLIED_SETTING_CONTROLS = {
   "dpsMeter.mainPlayerDpsBold": ".playerDpsBoldCheckbox",
   "dpsMeter.showPing": ".showPingCheckbox",
   "dpsMeter.bossNameSize": ".bossNameSizeInput",
+  "dpsMeter.windowOpacity": ".windowOpacityInput",
+  "dpsMeter.meterFillOpacity": ".meterOpacityInput",
 };
 
 // Target modes the meter accepts. The first four are exclusive (each hit counts
@@ -4741,16 +4743,26 @@ class DpsApp {
     let startY = 0;
     let startWidth = 0;
     let startHeight = 0;
-    // PowerMeter: the design's minimum widget size is 280x160 (Compact).
-    const minWidth = 280;
+    let startScale = 1;
+    // PowerMeter: dragging the width scales the whole widget (CSS zoom: text, rows,
+    // icons grow with the frame) instead of stretching an empty frame around content
+    // of fixed size. The width itself stays the layout's own (Interface / Compact);
+    // dragging the height adds room for rows. Both kept as { scale, h } (h in screen px).
+    const MIN_SCALE = 0.6;
+    const MAX_SCALE = 2.5;
     const minHeight = 160;
     const SIZE_KEY = "pm.meterSize";
+    const scaleOf = () => parseFloat(this.meterEl.style.zoom) || 1;
+    const applySize = (scale, h) => {
+      this.meterEl.style.zoom = String(scale);
+      if (h > 0) this.meterEl.style.minHeight = `${h / scale}px`;
+    };
 
-    // The size the user left the meter at, clamped to this screen (it may be smaller now).
+    // The size the user left the meter at (older saves had a width: start from scale 1).
     try {
       const saved = JSON.parse(this.safeGetStorage(SIZE_KEY) || "null");
-      if (saved?.w > 0) this.meterEl.style.width = `${Math.min(Math.max(minWidth, saved.w), screen.availWidth)}px`;
-      if (saved?.h > 0) this.meterEl.style.minHeight = `${Math.min(Math.max(minHeight, saved.h), screen.availHeight)}px`;
+      const scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number(saved?.scale) || 1));
+      applySize(scale, Math.min(Math.max(minHeight, Number(saved?.h) || 0), screen.availHeight));
     } catch {
       // unreadable: keep the default size
     }
@@ -4759,21 +4771,21 @@ class DpsApp {
     // fixed height would lose to the CSS min-height (420px) and never shrink.
     const onMove = (event) => {
       if (!isResizing) return;
+      let scale = scaleOf();
       if (axes.includes("x")) {
-        const nextWidth = Math.max(minWidth, startWidth + (event.clientX - startX));
-        this.meterEl.style.width = `${nextWidth}px`;
+        const visualWidth = startWidth + (event.clientX - startX);
+        scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, (startScale * visualWidth) / startWidth));
       }
-      if (axes.includes("y")) {
-        const nextHeight = Math.max(minHeight, startHeight + (event.clientY - startY));
-        this.meterEl.style.minHeight = `${nextHeight}px`;
-      }
+      const h = axes.includes("y") ? Math.max(minHeight, startHeight + (event.clientY - startY)) : 0;
+      applySize(scale, h);
     };
 
     const onEnd = () => {
       if (!isResizing) return;
       isResizing = false;
-      const { width, minHeight: h } = this.meterEl.style;
-      this.safeSetStorage(SIZE_KEY, JSON.stringify({ w: parseFloat(width) || 0, h: parseFloat(h) || 0 }));
+      const scale = scaleOf();
+      const h = (parseFloat(this.meterEl.style.minHeight) || 0) * scale;
+      this.safeSetStorage(SIZE_KEY, JSON.stringify({ scale: Math.round(scale * 1000) / 1000, h: Math.round(h) }));
     };
 
     // PowerMeter: the design's frame has several grips (8.1). Each one says which
@@ -4790,6 +4802,7 @@ class DpsApp {
         axes = handle.dataset.resize || "xy";
         startWidth = rect.width;
         startHeight = rect.height;
+        startScale = scaleOf();
         startX = event.clientX;
         startY = event.clientY;
         isResizing = true;

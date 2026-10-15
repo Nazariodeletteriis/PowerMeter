@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.15
+
+- Corrigé : Redimensionner le widget met maintenant tout son contenu à l'échelle (texte, lignes, icônes), pas seulement le cadre. Tirer la hauteur donne toujours de la place pour plus de lignes.
+- Corrigé : « Opacité de la fenêtre » et « Opacité des barres » dans la fenêtre Paramètres changent maintenant le widget tout de suite.
+- Corrigé : « Taille du nom de la cible » change aussi le titre affiché sans boss.
+
 ## 0.5.14
 
 - Corrigé : Faire glisser le curseur « Taille du nom de la cible » ne fait plus clignoter le meter jusqu'à remplir la RAM : la fenêtre Paramètres et le meter se renvoyaient l'ancienne et la nouvelle valeur.

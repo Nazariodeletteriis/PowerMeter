@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.15
+
+- Corrigido: Redimensionar o widget agora escala todo o conteúdo (texto, linhas, ícones), não só a moldura. Arrastar a altura ainda abre espaço para mais linhas.
+- Corrigido: "Opacidade da janela" e "Opacidade das barras" na janela de Configurações agora mudam o widget na hora.
+- Corrigido: "Tamanho do nome do alvo" também muda o título mostrado quando não há chefe.
+
 ## 0.5.14
 
 - Corrigido: Arrastar o controle "Tamanho do nome do alvo" não faz mais o medidor oscilar até encher a RAM: a janela de Configurações e o medidor reenviavam um ao outro o valor antigo e o novo.

@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.15
+
+- Behoben: Die Größe des Widgets zu ändern skaliert jetzt den ganzen Inhalt (Text, Zeilen, Symbole), nicht nur den Rahmen. Wer die Höhe zieht, bekommt weiterhin Platz für mehr Zeilen.
+- Behoben: "Fenster-Deckkraft" und "Deckkraft der Balken" im Einstellungsfenster ändern das Widget jetzt sofort.
+- Behoben: "Größe des Zielnamens" ändert auch den Titel, der ohne Boss angezeigt wird.
+
 ## 0.5.14
 
 - Behoben: Das Ziehen des Schiebereglers "Größe des Zielnamens" lässt das Meter nicht mehr flackern und den Arbeitsspeicher füllen: Einstellungsfenster und Meter schickten sich gegenseitig den alten und den neuen Wert.

@@ -437,7 +437,7 @@
   /* No boss on the meter: the mode's name sits where the boss name goes. */
   .pmModeTitle,
   .pmAvgTitle {
-    font-size: 16px;
+    font-size: calc(var(--boss-name-size, 15px) * 16 / 15); /* follows "Target name size" too */
     font-weight: 700;
     color: #f3f0ea;
   }

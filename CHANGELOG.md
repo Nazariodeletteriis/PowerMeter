@@ -4,6 +4,12 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.15
+
+- Fixed: Resizing the widget now scales everything inside it (text, rows, icons), not just the frame. Dragging the height still adds room for rows.
+- Fixed: "Window opacity" and "Meter bar opacity" in the Settings window now change the widget right away.
+- Fixed: "Target name size" also changes the title shown when no boss is targeted.
+
 ## 0.5.14
 
 - Fixed: Dragging the "Target name size" slider no longer makes the meter flicker and fill up the RAM: the Settings window and the meter kept sending each other the old and the new value.

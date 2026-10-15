@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.15
+
+- Corretto: Ridimensionare il widget ora ingrandisce o rimpicciolisce tutto il contenuto (testi, righe, icone), non solo la cornice. Trascinando l'altezza si fa ancora spazio a più righe.
+- Corretto: "Opacità della finestra" e "Opacità delle barre" nella finestra Impostazioni ora cambiano subito il widget.
+- Corretto: "Dimensione nome bersaglio" cambia anche il titolo mostrato quando non c'è un boss.
+
 ## 0.5.14
 
 - Corretto: Trascinare lo slider "Dimensione nome bersaglio" non fa più oscillare il meter fino a riempire la RAM: la finestra Impostazioni e il meter si rimandavano a vicenda il valore vecchio e quello nuovo.
