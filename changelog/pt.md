@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.12
+
+- Corrigido: Sua própria linha não mostra mais um número (#6653) no lugar do seu nome depois do reset automático entre dois chefes: o PowerMeter segue seu novo id mesmo quando o jogo não reenvia seu nome.
+- Corrigido: Avisos de eventos: cada Shugo e cada chefe mundial tem seu próprio aviso 10 minutos antes, também quando vários começam com um minuto de diferença (uma linha cada); fechar um aviso não esconde mais os próximos, e se o carregamento falhar tenta de novo após um minuto em vez de uma hora.
+
 ## 0.5.11
 
 - Alterado: Widget: a barra superior, a linha do chefe e o rodapé ficam opacos; a opacidade agora só deixa transparente a lista de jogadores, assim os botões continuam legíveis sobre um jogo claro.

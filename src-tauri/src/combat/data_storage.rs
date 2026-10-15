@@ -374,31 +374,66 @@ impl DataStorage {
         self.inner.read().local_player_id
     }
 
-    /// Fallback for the local player when the game's self record was missed: `33 36` comes
-    /// only on zone entry, so a meter started after you zoned in never learns who you are.
-    /// The active character's name goes to the one unnamed player of its class seen in
-    /// combat; with none, or several, nothing is bound.
-    pub fn guess_local_player(&self, name: &str, job: JobClass) {
+    /// Fallback for the local player when the game's self record was missed. `33 36` comes
+    /// once per zone entry: a meter started after you zoned in never learns who you are, and
+    /// when it is lost your new entity id (ids are reissued with every zone) fights unnamed
+    /// while the local id stays on the old one, so after the reset between two bosses your
+    /// row read `#id`. Run every tick: you are the local id while it fights, else the one
+    /// unnamed player of your class fighting (none, or several: nothing changes). That id
+    /// gets your name if it has none.
+    /// Your name and class: the game's (or the one on your id), else `fallback`, the
+    /// dashboard's active character.
+    pub fn guess_local_player(&self, fallback: Option<(&str, JobClass)>) {
         let mut inner = self.inner.write();
-        if inner.local_player_id.is_some() || inner.nickname_storage.values().any(|n| n == name) {
-            return;
-        }
-        let mut found = None;
-        for td in inner.target_combat.values() {
-            for (&id, a) in &td.actors {
-                if id <= 0 || a.job != Some(job) || inner.nickname_storage.contains_key(&id) || inner.summon_storage.contains_key(&id) {
-                    continue;
+        let local = inner.local_player_id.map(|id| id as i32);
+        let name = inner
+            .local_character_name
+            .clone()
+            .or_else(|| local.and_then(|id| inner.nickname_storage.get(&id).cloned()))
+            .map(|n| n.trim().to_string())
+            .filter(|n| !n.is_empty())
+            .or_else(|| fallback.map(|(n, _)| n.trim().to_string()).filter(|n| !n.is_empty()));
+        let job = local.and_then(|id| inner.actor_jobs.get(&id).copied()).or(fallback.map(|(_, j)| j));
+        // Damage (summons count for their owner) or heals since the last reset.
+        let fighting = |inner: &Inner, id: i32| {
+            inner.heal_storage.contains_key(&id)
+                || inner.target_combat.values().any(|t| {
+                    t.actors.keys().any(|&a| summon_resolver::resolve(a, &inner.summon_storage) == id)
+                })
+        };
+        let me = if let Some(l) = local.filter(|&l| fighting(&inner, l)) {
+            l
+        } else {
+            let Some(job) = job else { return };
+            let mut found = None;
+            for td in inner.target_combat.values() {
+                for (&id, a) in &td.actors {
+                    if id <= 0 || a.job != Some(job) || inner.nickname_storage.contains_key(&id) || inner.summon_storage.contains_key(&id) {
+                        continue;
+                    }
+                    if found.is_some_and(|f| f != id) {
+                        return;
+                    }
+                    found = Some(id);
                 }
-                if found.is_some_and(|f| f != id) {
-                    return;
-                }
-                found = Some(id);
             }
+            match found {
+                Some(id) => id,
+                None => return,
+            }
+        };
+        if local != Some(me) {
+            tracing::info!("local player {:?} -> entity {} ({:?})", local, me, name);
+            inner.local_player_id = Some(me as i64);
         }
-        if let Some(id) = found {
-            tracing::info!("guessed local player '{}' -> entity {} (unnamed, same class)", name, id);
-            inner.local_player_id = Some(id as i64);
-            append_nickname_inner(&mut inner, id, name);
+        if let Some(name) = name {
+            if !inner.nickname_storage.contains_key(&me) {
+                append_nickname_inner(&mut inner, me, &name);
+            }
+            // The widget shows this name on your row whenever your id has none yet.
+            if inner.local_character_name.as_deref().is_none_or(|n| n.trim().is_empty()) {
+                inner.local_character_name = Some(name);
+            }
         }
     }
 
@@ -1430,9 +1465,44 @@ mod guess_local_tests {
         s.append_nickname_authoritative(300, "Mate");
         hit(&s, 100);
         hit(&s, 300);
-        s.guess_local_player("Me", JobClass::Gladiator);
+        s.guess_local_player(Some(("Me", JobClass::Gladiator)));
         assert_eq!(s.local_player_id(), Some(100));
         assert_eq!(s.get_nickname(100).as_deref(), Some("Me"));
+        // The widget reads it to name your row while your id has no name yet.
+        assert_eq!(s.local_character_name().as_deref(), Some("Me"));
+    }
+
+    #[test]
+    fn keeps_me_while_i_fight_next_to_an_unnamed_player_of_my_class() {
+        let s = DataStorage::new();
+        s.set_local_character_name(Some("Me".to_string()));
+        s.append_nickname_authoritative(100, "Me");
+        hit(&s, 100);
+        hit(&s, 200);
+        s.guess_local_player(None);
+        assert_eq!(s.local_player_id(), Some(100));
+        assert_eq!(s.get_nickname(200), None);
+    }
+
+    /// Entity ids are reissued with every zone and `33 36` (your name on your new id) is
+    /// sent once: when it is lost, after the reset between two bosses your new id hit
+    /// unnamed while the local id stayed on the old one, and your row read `#6653`.
+    #[test]
+    fn follows_my_new_id_after_the_reset_between_two_bosses() {
+        let s = DataStorage::new();
+        s.set_local_character_name(Some("Me".to_string()));
+        s.append_nickname_authoritative(100, "Me"); // self record on zone entry
+        s.append_nickname_authoritative(300, "Mate");
+        hit(&s, 100);
+        hit(&s, 300);
+        assert_eq!(s.local_player_id(), Some(100));
+        s.flush_combat_only(); // automatic reset after the boss
+        s.append_nickname_authoritative(301, "Mate"); // the mate's spawn names his new id
+        hit(&s, 6653); // you, new id, self record missed
+        hit(&s, 301);
+        s.guess_local_player(None);
+        assert_eq!(s.local_player_id(), Some(6653));
+        assert_eq!(s.get_nickname(6653).as_deref(), Some("Me"));
     }
 
     #[test]
@@ -1440,7 +1510,7 @@ mod guess_local_tests {
         let s = DataStorage::new();
         hit(&s, 100);
         hit(&s, 200);
-        s.guess_local_player("Me", JobClass::Gladiator);
+        s.guess_local_player(Some(("Me", JobClass::Gladiator)));
         assert_eq!(s.local_player_id(), None);
     }
 }

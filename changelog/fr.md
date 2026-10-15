@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.12
+
+- Corrigé : Votre propre ligne n'affiche plus un numéro (#6653) à la place de votre nom après la réinitialisation automatique entre deux boss : PowerMeter suit votre nouvel id même quand le jeu ne renvoie pas votre nom.
+- Corrigé : Alertes d'événements : chaque Shugo et chaque boss de monde a sa propre alerte 10 minutes avant, même quand plusieurs commencent à une minute d'intervalle (une ligne chacun) ; fermer une alerte ne masque plus les suivantes, et un chargement raté est relancé après une minute au lieu d'une heure.
+
 ## 0.5.11
 
 - Modifié : Widget : la barre du haut, la ligne du boss et le pied restent opaques ; le réglage d'opacité n'éclaircit plus que la liste des joueurs, pour que les boutons restent lisibles sur un jeu clair.

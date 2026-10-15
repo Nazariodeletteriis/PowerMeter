@@ -99,6 +99,24 @@ export const startsBetween = (events: GameEvent[], from: number, to: number) =>
   events.some((e) => upcomingWindows(e, from, 2).some((w) => w.start > from && w.start <= to));
 
 /**
+ * Widget notice at `now`: every start in (now, now + lead], earliest first, with the names of the events
+ * starting then (one line each, so bosses a minute apart each get their own). `fresh` is true when a start
+ * is not in `announced` yet (one ring per start); `announced` is updated. Worked out from the clock alone,
+ * so a late (throttled) tick still announces whatever is in the window.
+ */
+export function eventNotice(events: GameEvent[], now: number, lead: number, announced: Set<number>) {
+  const by = new Map<number, string[]>();
+  for (const e of events)
+    for (const w of upcomingWindows(e, now, 2))
+      if (w.start > now && w.start - now <= lead && !by.get(w.start)?.includes(e.name)) by.set(w.start, [...(by.get(w.start) ?? []), e.name]);
+  const soon = [...by].sort((a, b) => a[0] - b[0]).map(([start, names]) => ({ start, names }));
+  for (const s of announced) if (s <= now) announced.delete(s);
+  const fresh = soon.some((s) => !announced.has(s.start));
+  for (const s of soon) announced.add(s.start);
+  return { soon, fresh };
+}
+
+/**
  * Event rules from the archive; [] when the archive is not downloaded yet (empty state,
  * not an error), undefined while loading. Other failures go to `onError`.
  */

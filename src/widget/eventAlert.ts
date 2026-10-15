@@ -1,11 +1,12 @@
 // Widget event notice: from 10 minutes before an event of the Timer (rift, world bosses, Shugo festival,
 // resets) a strip under the widget header names it with a countdown, so whoever keeps only the widget open
-// sees it while playing. It goes at the start, or when closed with its X (that window only).
+// sees it while playing. One line per start time, so events a minute apart each get their own 10 minutes.
+// A line goes at its start; the X hides the lines shown, a later event brings the strip back.
 // Same event rules and maths as the dashboard's Timer (gamedata_events + organizer/schedule.ts); rings the
 // Timer's chime when a new notice appears, if the Timer's sound is on.
 import { invoke } from "@tauri-apps/api/core";
 import { chime, SOUND_KEY, VOLUME_KEY } from "../dashboard/chime";
-import { upcomingWindows, type GameEvent } from "../dashboard/pages/organizer/schedule";
+import { eventNotice, type GameEvent } from "../dashboard/pages/organizer/schedule";
 
 const LEAD = 10 * 60e3;
 const RELOAD = 60 * 60e3; // the archive can bring new rules while the app runs
@@ -33,11 +34,12 @@ if (strip && w.A2_VIEW === "main") {
   const text = strip.querySelector<HTMLElement>(".pmEventText")!;
   let events: GameEvent[] = [];
   let loadedAt = -RELOAD;
-  let dismissed = 0;
-  let shown = 0;
+  const announced = new Set<number>(); // starts already rung
+  let dismissed = 0; // lines up to this start were closed with the X
+  let last = 0;
 
   strip.querySelector(".pmEventClose")!.addEventListener("click", () => {
-    dismissed = shown;
+    dismissed = last;
     strip.hidden = true;
   });
 
@@ -45,22 +47,23 @@ if (strip && w.A2_VIEW === "main") {
     const now = Date.now();
     if (now - loadedAt >= RELOAD) {
       loadedAt = now;
-      // Not downloaded yet: no notice until the next reload.
-      invoke<GameEvent[]>("gamedata_events").then((e) => (events = e), () => (events = []));
+      // Not downloaded yet or a failed read: keep what we have and retry in a minute, not in an hour.
+      invoke<GameEvent[]>("gamedata_events").then((e) => (events = e), () => (loadedAt = now - RELOAD + 60e3));
     }
-    // Two windows per event: the first can be one still running (Shugo festival lasts 10 minutes).
-    const soon = events.flatMap((e) => upcomingWindows(e, now, 2).map((x) => ({ name: e.name, start: x.start }))).filter((x) => x.start > now && x.start - now <= LEAD);
-    const start = Math.min(...soon.map((x) => x.start));
-    if (!soon.length || start === dismissed) {
+    const { soon, fresh } = eventNotice(events, now, LEAD, announced);
+    const lines = soon.filter((s) => s.start > dismissed);
+    if (!lines.length) {
       strip.hidden = true;
       return;
     }
-    if (start !== shown) invoke<Record<string, string>>("get_settings").then((s) => s[SOUND_KEY] === "1" && chime(s[VOLUME_KEY]), () => {});
-    shown = start;
-    const left = Math.ceil((start - now) / 1000);
-    const time = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
-    const name = [...new Set(soon.filter((x) => x.start === start).map((x) => x.name))].join(", ");
-    text.textContent = w.i18n?.format?.("pmWidget.eventSoon", { name, time }, `${name} in ${time}`) ?? `${name} in ${time}`;
+    if (fresh) invoke<Record<string, string>>("get_settings").then((s) => s[SOUND_KEY] === "1" && chime(s[VOLUME_KEY]), () => {});
+    last = lines[lines.length - 1].start;
+    text.textContent = lines.map(({ start, names }) => {
+      const left = Math.ceil((start - now) / 1000);
+      const time = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+      const name = names.join(", ");
+      return w.i18n?.format?.("pmWidget.eventSoon", { name, time }, `${name} in ${time}`) ?? `${name} in ${time}`;
+    }).join("\n");
     strip.hidden = false;
   };
   tick();

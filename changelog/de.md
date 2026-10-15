@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.12
+
+- Behoben: Deine eigene Zeile zeigt nach dem automatischen Reset zwischen zwei Bossen keine Nummer (#6653) mehr statt deines Namens: PowerMeter folgt deiner neuen ID, auch wenn das Spiel deinen Namen nicht erneut sendet.
+- Behoben: Event-Hinweise: Jeder Shugo und jeder Weltboss bekommt seinen eigenen Hinweis 10 Minuten vorher, auch wenn mehrere im Minutenabstand starten (je eine Zeile); das Schließen eines Hinweises blendet die nächsten nicht mehr aus, und ein fehlgeschlagenes Laden wird nach einer Minute statt nach einer Stunde wiederholt.
+
 ## 0.5.11
 
 - Geändert: Widget: Obere Leiste, Boss-Zeile und Fußzeile bleiben deckend; die Deckkraft-Einstellung macht jetzt nur die Spielerliste durchsichtig, damit die Buttons auch über hellem Spielbild lesbar bleiben.

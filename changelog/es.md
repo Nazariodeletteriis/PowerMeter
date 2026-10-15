@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.12
+
+- Corregido: Tu propia fila ya no muestra un número (#6653) en lugar de tu nombre tras el reinicio automático entre dos jefes: PowerMeter sigue tu nuevo id aunque el juego no vuelva a enviar tu nombre.
+- Corregido: Avisos de eventos: cada Shugo y cada jefe de mundo tiene su propio aviso 10 minutos antes, también cuando varios empiezan con un minuto de diferencia (una línea cada uno); cerrar un aviso ya no oculta los siguientes, y si la carga falla se reintenta al minuto en vez de a la hora.
+
 ## 0.5.11
 
 - Cambiado: Widget: la barra superior, la fila del jefe y el pie quedan opacos; la opacidad ahora solo aclara la lista de jugadores, así los botones se leen bien sobre un juego claro.

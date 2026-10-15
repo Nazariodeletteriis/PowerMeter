@@ -297,19 +297,19 @@ fn reset_meter(app: &tauri::AppHandle, state: &AppState) {
     let _ = app.emit("dps-update", &entity::dps_data::DpsData::new());
 }
 
-/// The dashboard's active character (name and class) for `DataStorage::guess_local_player`.
+/// `DataStorage::guess_local_player`, with the dashboard's active character (name and class) as fallback.
 fn guess_local_player(state: &AppState) {
-    let (Some(list), Some(active)) = (state.settings.get("pm.characters"), state.settings.get("pm.activeCharacter")) else {
-        return;
-    };
-    let chars: Vec<serde_json::Value> = serde_json::from_str(&list).unwrap_or_default();
-    let Some(c) = chars.iter().find(|c| c["id"].as_str() == Some(active.as_str())) else {
-        return;
-    };
-    let name = c["name"].as_str().unwrap_or("").trim();
-    if let (false, Some(job)) = (name.is_empty(), c["cls"].as_str().and_then(entity::job_class::JobClass::from_dashboard)) {
-        state.data_storage.guess_local_player(name, job);
-    }
+    let chars: Vec<serde_json::Value> = state
+        .settings
+        .get("pm.characters")
+        .and_then(|list| serde_json::from_str(&list).ok())
+        .unwrap_or_default();
+    let active = state.settings.get("pm.activeCharacter");
+    let fallback = chars.iter().find(|c| active.is_some() && c["id"].as_str() == active.as_deref()).and_then(|c| {
+        let job = c["cls"].as_str().and_then(entity::job_class::JobClass::from_dashboard)?;
+        Some((c["name"].as_str()?, job))
+    });
+    state.data_storage.guess_local_player(fallback);
 }
 
 #[tauri::command]
@@ -1705,9 +1705,8 @@ pub fn run() {
                     }
 
                     if let Some(state) = handle.try_state::<AppState>() {
-                        if state.data_storage.local_player_id().is_none() {
-                            guess_local_player(&state);
-                        }
+                        // Every tick, not only while unknown: your id changes with every zone.
+                        guess_local_player(&state);
                         let t0 = std::time::Instant::now();
                         let lock_guard = state.dps_calculator.lock();
                         let lock_ms = t0.elapsed().as_millis();

@@ -1,7 +1,7 @@
 // Event timer engine. Run: node --test tests/schedule.test.ts  (Node 22.18+ strips the types)
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { eventStatus, instantAt, startsBetween, upcomingWindows, type GameEvent } from "../src/dashboard/pages/organizer/schedule.ts";
+import { eventNotice, eventStatus, instantAt, startsBetween, upcomingWindows, type GameEvent } from "../src/dashboard/pages/organizer/schedule.ts";
 import { clock } from "../src/dashboard/pages/shugo/events.ts";
 
 const rule = (event_id: string, cadence_json: GameEvent["cadence_json"], duration_minutes = 0): GameEvent => ({
@@ -66,4 +66,53 @@ test("sound alert fires once, on the start", () => {
   assert.equal(startsBetween([shugo], start - 1000, start), true);
   assert.equal(startsBetween([shugo], start, start + 1000), false);
   assert.equal(startsBetween([], start - 1000, start), false);
+});
+
+// Widget notice (src/widget/eventAlert.ts): every event gets its own 10-minute alert.
+const LEAD = 600e3;
+const everyDay = [0, 1, 2, 3, 4, 5, 6];
+const boss = (id: string, minute: number) => rule(id, { kind: "daysAtTime", weekdays: everyDay, hour: 16, minute });
+/** Ticks `step` ms apart over [from, to): when each ring happened and what the strip listed then. */
+function run(events: GameEvent[], from: number, to: number, step: number) {
+  const announced = new Set<number>();
+  const rings: { at: number; soon: ReturnType<typeof eventNotice>["soon"] }[] = [];
+  for (let now = from; now < to; now += step) {
+    const n = eventNotice(events, now, LEAD, announced);
+    if (n.fresh) rings.push({ at: now, soon: n.soon });
+  }
+  return rings;
+}
+
+test("3 world bosses one minute apart: 3 alerts, each 10 minutes ahead", () => {
+  const t0 = at("2026-10-16T07:00:00Z"); // 16:00 KST, 09:00 in Rome
+  const rings = run([boss("a", 0), boss("b", 1), boss("c", 2)], t0 - 12 * 60e3, t0 + 3 * 60e3, 1000);
+  assert.deepEqual(rings.map((r) => r.at), [t0 - LEAD, t0 + 60e3 - LEAD, t0 + 120e3 - LEAD]);
+  // Two minutes later the strip lists all three, each with its own start.
+  const all = run([boss("a", 0), boss("b", 1), boss("c", 2)], t0 - 8 * 60e3, t0 - 8 * 60e3 + 1, 1)[0].soon;
+  assert.deepEqual(all, [{ start: t0, names: ["a"] }, { start: t0 + 60e3, names: ["b"] }, { start: t0 + 120e3, names: ["c"] }]);
+});
+
+test("bosses on the same minute share one line and one ring", () => {
+  const t0 = at("2026-10-16T07:00:00Z");
+  const rings = run([boss("argo", 0), boss("kaira", 0), boss("tamasa", 0)], t0 - 11 * 60e3, t0, 1000);
+  assert.equal(rings.length, 1);
+  assert.deepEqual(rings[0].soon, [{ start: t0, names: ["argo", "kaira", "tamasa"] }]);
+});
+
+test("Shugo Festival rings every hour, also while a round is running", () => {
+  const t0 = at("2026-10-16T07:00:00Z");
+  const rings = run([shugo], t0 - 15 * 60e3, t0 + 3 * 3600e3, 30e3);
+  assert.deepEqual(rings.map((r) => r.soon[0].start), [0, 1, 2, 3].map((h) => t0 + h * 3600e3)); // the last one rings at 2:50
+  for (const r of rings) assert.ok(r.soon[0].start - r.at <= LEAD);
+});
+
+test("a late tick (throttled timer) still alerts; after the start it no longer does", () => {
+  const t0 = at("2026-10-16T07:00:00Z");
+  const announced = new Set<number>();
+  assert.equal(eventNotice([shugo], t0 - 11 * 60e3, LEAD, announced).fresh, false);
+  const late = eventNotice([shugo], t0 - 30e3, LEAD, announced); // next tick 10.5 minutes later
+  assert.equal(late.fresh, true);
+  assert.deepEqual(late.soon, [{ start: t0, names: ["shugo-festival"] }]);
+  assert.equal(eventNotice([shugo], t0 - 29e3, LEAD, announced).fresh, false, "rings once per start");
+  assert.equal(eventNotice([shugo], t0 + 60e3, LEAD, new Set()).soon.length, 0, "already started: nothing to announce");
 });

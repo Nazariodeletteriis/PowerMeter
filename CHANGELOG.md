@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.12
+
+- Fixed: Your own row no longer shows a number (#6653) instead of your name after the automatic reset between two bosses: PowerMeter follows your new id when the game does not resend your name.
+- Fixed: Event alerts: every Shugo and world boss gets its own alert 10 minutes ahead, also when several start a minute apart (one line each); closing an alert no longer hides the next ones, and a failed load retries after a minute instead of an hour.
+
 ## 0.5.11
 
 - Changed: Widget: the top bar, the boss row and the footer stay solid; the opacity setting now only thins the player list, so the buttons stay readable over a bright game.

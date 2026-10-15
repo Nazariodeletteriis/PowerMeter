@@ -529,7 +529,7 @@
   }
   .pmEventStrip[hidden] { display: none; }
   .pmEventStrip > svg { width: 13px; height: 13px; flex: none; color: var(--pm-hot); }
-  .pmEventText { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pmEventText { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: pre; } /* one line per start (\n) */
   .pmEventClose {
     display: grid; place-items: center;
     width: 20px; height: 20px; flex: none;

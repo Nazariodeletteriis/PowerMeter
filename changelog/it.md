@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.12
+
+- Corretto: La tua riga non mostra più un numero (#6653) al posto del tuo nome dopo il reset automatico tra due boss: PowerMeter segue il tuo nuovo id anche quando il gioco non rimanda il nome.
+- Corretto: Avvisi eventi: ogni Shugo e ogni world boss ha il suo avviso 10 minuti prima, anche quando più eventi partono a un minuto di distanza (una riga ciascuno); chiudere un avviso non nasconde più i successivi, e se il caricamento fallisce riprova dopo un minuto invece che dopo un'ora.
+
 ## 0.5.11
 
 - Cambiato: Widget: barra in alto, riga del boss e footer restano pieni; l'opacità ora rende trasparente solo la lista dei giocatori, così i pulsanti si leggono bene anche sopra un gioco chiaro.
