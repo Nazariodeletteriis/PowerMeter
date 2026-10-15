@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.10
+
+- 修正：PowerMeter 已連線到遊戲後，小工具仍停留在「未連線」/「沒有封包」：現在每隔幾秒就會追蹤連線狀態。
+
 ## 0.5.9
 
 - 新增：當 PowerMeter 無法連線到遊戲時，小工具會顯示原因（網路介面卡沒有封包、沒有遊戲封包、無法辨識遊戲視窗……），「複製診斷」可複製一份報告貼到 Discord。

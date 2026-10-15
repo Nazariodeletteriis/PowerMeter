@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.10
+
+- 수정: PowerMeter가 게임에 연결된 뒤에도 위젯이 "연결 안 됨" / "패킷 없음"에 머물던 문제: 이제 몇 초마다 연결 상태를 확인합니다.
+
 ## 0.5.9
 
 - 신규: PowerMeter가 게임에 연결하지 못하면 위젯이 이유(네트워크 어댑터 패킷 없음, 게임 패킷 없음, 게임 창 인식 안 됨…)를 알려 주고, "진단 복사"로 Discord에 붙여넣을 보고서를 복사할 수 있습니다.

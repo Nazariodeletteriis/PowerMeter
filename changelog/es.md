@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.10
+
+- Corregido: El widget se quedaba en "No conectado" / "sin paquetes" incluso después de que PowerMeter se conectara al juego: ahora sigue la conexión cada pocos segundos.
+
 ## 0.5.9
 
 - Nuevo: Cuando PowerMeter no logra conectarse al juego, el widget dice por qué (sin paquetes de los adaptadores de red, sin paquetes del juego, ventana del juego no reconocida…) y "Copiar diagnóstico" copia un informe para pegar en Discord.

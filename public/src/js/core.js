@@ -643,11 +643,13 @@ class DpsApp {
   checkAion2WindowTitle() {
     const title = window.javaBridge?.getAion2WindowTitle?.();
     const running = typeof title === "string" && title.trim().length > 0;
-    if (running !== this.aionRunning) {
-      this.aionRunning = running;
-      this.refreshConnectionInfo();
-      this.updateConnectionStatusUi();
-    }
+    const changed = running !== this.aionRunning;
+    this.aionRunning = running;
+    // Every poll, not only when the window comes or goes: the lock and the adapters move
+    // on while the window stays, and a status read once at "window found" (not locked
+    // yet) left the widget on "detecting" / "no packets" with the meter connected.
+    this.refreshConnectionInfo({ skipSettingsRefresh: !changed });
+    if (changed) this.updateConnectionStatusUi();
     if (!running) return;
     const detectedName = this.parseCharacterNameFromWindowTitle(title);
     // Only a title that changed names a new character: the title can stay on the previous one after a
@@ -4286,7 +4288,7 @@ class DpsApp {
     if (backendName && backendName !== this.USER_NAME) {
       this.setUserName(backendName, { persist: true });
     }
-    if (this.characterNameInput) {
+    if (this.characterNameInput && document.activeElement !== this.characterNameInput) {
       const nickname = String(info?.characterName || this.USER_NAME || "").trim();
       this.characterNameInput.value = nickname;
     }

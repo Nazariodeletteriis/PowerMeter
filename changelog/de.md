@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.10
+
+- Behoben: Das Widget blieb auf "Nicht verbunden" / "keine Pakete", auch nachdem PowerMeter sich mit dem Spiel verbunden hatte: Es verfolgt die Verbindung jetzt alle paar Sekunden.
+
 ## 0.5.9
 
 - Neu: Wenn PowerMeter keine Verbindung zum Spiel bekommt, sagt das Widget warum (keine Pakete von den Netzwerkadaptern, keine Spielpakete, Spielfenster nicht erkannt…), und "Diagnose kopieren" kopiert einen Bericht zum Einfügen in Discord.

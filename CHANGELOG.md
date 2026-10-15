@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.10
+
+- Fixed: The widget stayed on "Not connected" / "no packets" even after PowerMeter had connected to the game: it now follows the connection every few seconds.
+
 ## 0.5.9
 
 - New: When PowerMeter cannot connect to the game, the widget says why (no packets from the network adapters, no game packets, game window not recognised…) and "Copy diagnosis" copies a report to paste in Discord.

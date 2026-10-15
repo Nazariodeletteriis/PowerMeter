@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.10
+
+- 修复：PowerMeter 已连接到游戏后，小组件仍停留在“未连接”/“没有数据包”：现在每隔几秒就会跟进连接状态。
+
 ## 0.5.9
 
 - 新增：当 PowerMeter 无法连接到游戏时，小组件会显示原因（网络适配器没有数据包、没有游戏数据包、无法识别游戏窗口……），“复制诊断”可复制一份报告粘贴到 Discord。
