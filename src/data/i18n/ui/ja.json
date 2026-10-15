@@ -139,10 +139,8 @@
     "slimMode": "スリムモード",
     "meterLayout": {
       "label": "メーターのレイアウト",
-      "beta": "Beta UI",
-      "betaSlim": "ベータ スリム",
-      "classic": "クラシックUI",
-      "classicSlim": "クラシック スリム"
+      "beta": "インターフェース",
+      "betaSlim": "コンパクト"
     },
     "detailsMonitor": {
       "label": "詳細を表示するモニター",

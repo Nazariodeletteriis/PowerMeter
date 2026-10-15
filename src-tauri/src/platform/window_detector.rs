@@ -1,38 +1,106 @@
+//! Finding the AION 2 window. The capture drops every packet while no game window
+//! is found (`CaptureDispatcher::run`), so a miss here means "never connects".
+//!
+//! By title first (`AION2…`), then by the program that owns the window (`AION2.exe`):
+//! not every client is titled `AION2…` ("AION 2" with a space, a localised or
+//! wrapped client), and the title alone left those players with the meter on
+//! "AION2 not running" while the game was open.
+
+fn is_game_title(title: &str) -> bool {
+    title.starts_with("AION2")
+}
+
+fn is_game_exe(path: &str) -> bool {
+    path.rsplit(['\\', '/']).next().is_some_and(|name| name.eq_ignore_ascii_case("AION2.exe"))
+}
+
+#[cfg(windows)]
+mod win {
+    use windows::Win32::Foundation::{CloseHandle, BOOL, HWND, LPARAM};
+    use windows::Win32::System::Threading::{
+        OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_FORMAT, PROCESS_QUERY_LIMITED_INFORMATION,
+    };
+    use windows::Win32::UI::WindowsAndMessaging::{EnumWindows, GetWindowTextW, GetWindowThreadProcessId, IsWindowVisible};
+
+    pub fn title(hwnd: HWND) -> String {
+        let mut buf = [0u16; 256];
+        let len = unsafe { GetWindowTextW(hwnd, &mut buf) } as usize;
+        String::from_utf16_lossy(&buf[..len])
+    }
+
+    pub fn visible(hwnd: HWND) -> bool {
+        unsafe { IsWindowVisible(hwnd) }.as_bool()
+    }
+
+    /// Full path of the program that owns `hwnd`; no elevation needed for the user's own processes.
+    pub fn exe_path(hwnd: HWND) -> Option<String> {
+        unsafe {
+            let mut pid: u32 = 0;
+            GetWindowThreadProcessId(hwnd, Some(&mut pid));
+            if pid == 0 {
+                return None;
+            }
+            let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid).ok()?;
+            let mut buf = [0u16; 512];
+            let mut len = buf.len() as u32;
+            let ok = QueryFullProcessImageNameW(handle, PROCESS_NAME_FORMAT(0), windows::core::PWSTR(buf.as_mut_ptr()), &mut len)
+                .is_ok();
+            let _ = CloseHandle(handle);
+            ok.then(|| String::from_utf16_lossy(&buf[..len as usize]))
+        }
+    }
+
+    pub fn top_level_windows() -> Vec<HWND> {
+        unsafe extern "system" fn collect(hwnd: HWND, lparam: LPARAM) -> BOOL {
+            unsafe { (*(lparam.0 as *mut Vec<HWND>)).push(hwnd) };
+            BOOL(1)
+        }
+        let mut out: Vec<HWND> = Vec::new();
+        unsafe {
+            let _ = EnumWindows(Some(collect), LPARAM(&mut out as *mut Vec<HWND> as isize));
+        }
+        out
+    }
+}
+
 /// Find the AION 2 game window and return its title, or None if not found.
 #[cfg(windows)]
 pub fn find_aion2_window_title() -> Option<String> {
-    use windows::Win32::Foundation::{BOOL, HWND, LPARAM};
-    use windows::Win32::UI::WindowsAndMessaging::{EnumWindows, GetWindowTextW};
-
-    let (tx, rx) = std::sync::mpsc::channel();
-    let tx_ptr = Box::into_raw(Box::new(tx));
-
-    unsafe extern "system" fn callback(hwnd: HWND, lparam: LPARAM) -> BOOL {
-        let mut buf = [0u16; 256];
-        let len = unsafe { GetWindowTextW(hwnd, &mut buf) } as usize;
-        if len >= 5 {
-            let title = String::from_utf16_lossy(&buf[..len]);
-            if title.starts_with("AION2") {
-                let tx = unsafe { &*(lparam.0 as *const std::sync::mpsc::Sender<String>) };
-                let _ = tx.send(title);
-                return BOOL(0);
-            }
+    let windows = win::top_level_windows();
+    if let Some(t) = windows.iter().map(|&h| win::title(h)).find(|t| is_game_title(t)) {
+        return Some(t);
+    }
+    // Titled some other way: a visible, titled window owned by AION2.exe.
+    windows.into_iter().find_map(|h| {
+        if !win::visible(h) {
+            return None;
         }
-        BOOL(1)
-    }
-
-    unsafe {
-        let _ = EnumWindows(Some(callback), LPARAM(tx_ptr as isize));
-        let _ = Box::from_raw(tx_ptr);
-    }
-
-    rx.try_recv().ok()
+        let t = win::title(h);
+        (!t.is_empty() && win::exe_path(h).is_some_and(|p| is_game_exe(&p))).then_some(t)
+    })
 }
 
 /// Check if the AION 2 game window is currently running.
 #[cfg(windows)]
 pub fn find_aion2_window() -> bool {
     find_aion2_window_title().is_some()
+}
+
+/// Windows whose title or program mentions "aion", for the log when none is recognised:
+/// the next log then says what the game is actually called. Never every window title.
+#[cfg(windows)]
+pub fn describe_candidates() -> Vec<String> {
+    win::top_level_windows()
+        .into_iter()
+        .filter_map(|h| {
+            let t = win::title(h);
+            let exe = win::exe_path(h).unwrap_or_default();
+            let exe_name = exe.rsplit(['\\', '/']).next().unwrap_or("").to_string();
+            (t.to_lowercase().contains("aion") || exe_name.to_lowercase().contains("aion"))
+                .then(|| format!("title={t:?} exe={exe_name:?} visible={}", win::visible(h)))
+        })
+        .take(8)
+        .collect()
 }
 
 #[cfg(not(windows))]
@@ -45,59 +113,41 @@ pub fn find_aion2_window() -> bool {
     false
 }
 
-/// Check if the foreground window belongs to AION 2.
-/// Uses window title check first (works without elevated privileges),
-/// falls back to process name check.
-#[cfg(windows)]
-pub fn is_aion2_foreground() -> bool {
-    use windows::Win32::Foundation::HWND;
-    use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, GetWindowTextW};
-
-    unsafe {
-        let hwnd: HWND = GetForegroundWindow();
-        if hwnd.0.is_null() {
-            return false;
-        }
-        let mut buf = [0u16; 256];
-        let len = GetWindowTextW(hwnd, &mut buf) as usize;
-        if len >= 5 {
-            let title = String::from_utf16_lossy(&buf[..len]);
-            if title.starts_with("AION2") {
-                return true;
-            }
-        }
-        // Fallback: check process exe name (may fail without admin)
-        is_aion2_process(hwnd)
-    }
+#[cfg(not(windows))]
+pub fn describe_candidates() -> Vec<String> {
+    Vec::new()
 }
 
+/// Check if the foreground window belongs to AION 2, by title or by program.
 #[cfg(windows)]
-fn is_aion2_process(hwnd: windows::Win32::Foundation::HWND) -> bool {
-    use windows::Win32::System::Threading::{OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_FORMAT, PROCESS_QUERY_LIMITED_INFORMATION};
-    use windows::Win32::UI::WindowsAndMessaging::GetWindowThreadProcessId;
-
-    unsafe {
-        let mut pid: u32 = 0;
-        GetWindowThreadProcessId(hwnd, Some(&mut pid));
-        if pid == 0 {
-            return false;
-        }
-        let Ok(handle) = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid) else {
-            return false;
-        };
-        let mut buf = [0u16; 512];
-        let mut len = buf.len() as u32;
-        let pwstr = windows::core::PWSTR(buf.as_mut_ptr());
-        if QueryFullProcessImageNameW(handle, PROCESS_NAME_FORMAT(0), pwstr, &mut len).is_ok() {
-            let path = String::from_utf16_lossy(&buf[..len as usize]);
-            let exe_name = path.rsplit('\\').next().unwrap_or("");
-            return exe_name.eq_ignore_ascii_case("AION2.exe");
-        }
-        false
+pub fn is_aion2_foreground() -> bool {
+    let hwnd = unsafe { windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow() };
+    if hwnd.0.is_null() {
+        return false;
     }
+    is_game_title(&win::title(hwnd)) || win::exe_path(hwnd).is_some_and(|p| is_game_exe(&p))
 }
 
 #[cfg(not(windows))]
 pub fn is_aion2_foreground() -> bool {
     false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn recognises_the_game_by_title_or_program() {
+        assert!(is_game_title("AION2"));
+        assert!(is_game_title("AION2 | Agniezska"));
+        // These titles are why the program check exists: the title test alone misses them.
+        assert!(!is_game_title("AION 2"));
+        assert!(!is_game_title("아이온2"));
+        assert!(is_game_exe(r"D:\SteamLibrary\steamapps\common\AION2\Aion2\Binaries\Win64\AION2.exe"));
+        assert!(is_game_exe(r"C:\Games\aion2.EXE"));
+        assert!(!is_game_exe(r"C:\Games\AION2Launcher.exe"));
+        assert!(!is_game_exe(r"C:\Program Files\PowerMeter\powermeter.exe"));
+        assert!(!is_game_exe(""));
+    }
 }

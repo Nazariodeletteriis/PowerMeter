@@ -362,9 +362,6 @@ const createMeterUI = ({
       const contributionText = `${formatOneDecimal(damageContribution)}%`;
       if (view.lastContributionText !== contributionText) {
         view.dpsContribution.textContent = contributionText;
-        // PowerMeter: the theme fills the row bar to this share (design), not to the top DPS.
-        // On the bar itself (not the row), so only the bar restyles.
-        view.fillEl.style.setProperty("--pm-share", (damageContribution / 100).toFixed(3));
         view.lastContributionText = contributionText;
       }
 
@@ -377,7 +374,8 @@ const createMeterUI = ({
       const rankText = String(rankById?.get(id) ?? "");
       if (view.lastRankText !== rankText) {
         view.rankEl.textContent = rankText;
-        view.rowEl.classList.toggle("isRankOne", rankText === "1");
+        // The theme colours the rank badge by position (gold, silver, copper).
+        view.rowEl.dataset.rank = rankText;
         view.lastRankText = rankText;
       }
 

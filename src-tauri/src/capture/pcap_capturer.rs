@@ -1,7 +1,8 @@
+use std::collections::HashSet;
 use std::ffi::{c_char, c_int, c_uint, CStr, CString};
 use std::ptr;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use libloading::{Library, Symbol};
@@ -100,14 +101,16 @@ struct PcapLib {
 
 impl PcapLib {
     fn load() -> Result<Self, String> {
-        let lib = unsafe {
-            Library::new("wpcap.dll").map_err(|e| {
+        // Npcap installed without "WinPcap API-compatible mode" puts wpcap.dll only
+        // in System32\Npcap, which is not on the DLL search path: load it from there.
+        let lib = unsafe { Library::new("wpcap.dll") }
+            .or_else(|e| load_from_npcap_dir().ok_or(e))
+            .map_err(|e| {
                 format!(
                     "Failed to load wpcap.dll. Is Npcap installed? Download from https://npcap.com\nError: {}",
                     e
                 )
-            })?
-        };
+            })?;
 
         unsafe {
             let findalldevs: Symbol<unsafe extern "C" fn(*mut PcapIfT, *mut c_char) -> c_int> =
@@ -209,6 +212,12 @@ impl PcapLib {
     }
 }
 
+/// How often to look for network devices that appeared (or came back) after the start.
+const DEVICE_SCAN_MS: u64 = 15_000;
+
+/// Devices with a capture thread, or that failed to open (not retried).
+type ActiveDevices = Arc<parking_lot::Mutex<HashSet<String>>>;
+
 // Safety: PcapLib function pointers are thread-safe (each thread gets its own pcap handle)
 unsafe impl Send for PcapLib {}
 unsafe impl Sync for PcapLib {}
@@ -237,6 +246,7 @@ impl PcapCapturer {
             Ok(p) => Arc::new(p),
             Err(e) => {
                 error!("{}", e);
+                let _ = START_ERROR.set("Npcap".to_string());
                 self.running.store(false, Ordering::SeqCst);
                 return;
             }
@@ -246,6 +256,7 @@ impl PcapCapturer {
             Ok(d) => d,
             Err(e) => {
                 error!("Failed to list devices: {}", e);
+                let _ = START_ERROR.set("Npcap".to_string());
                 self.running.store(false, Ordering::SeqCst);
                 return;
             }
@@ -255,9 +266,8 @@ impl PcapCapturer {
         let devices: Vec<_> = devices.into_iter().filter(|d| d.has_addresses).collect();
 
         if devices.is_empty() {
+            // Not fatal: the rescan below picks a device up once the network is there.
             error!("No capture devices found with addresses");
-            self.running.store(false, Ordering::SeqCst);
-            return;
         }
 
         info!("Found {} capture devices", devices.len());
@@ -271,6 +281,7 @@ impl PcapCapturer {
             );
         }
 
+        let active: ActiveDevices = Arc::default();
         let virtual_devices: Vec<_> = devices.iter().filter(|d| d.is_virtual()).cloned().collect();
         let physical_devices: Vec<_> = devices.iter().filter(|d| !d.is_virtual()).cloned().collect();
 
@@ -281,40 +292,40 @@ impl PcapCapturer {
                 pcap.clone(),
                 self.sender.clone(),
                 self.running.clone(),
+                active.clone(),
             );
         }
 
-        if virtual_devices.is_empty() {
-            // No virtual devices — start physical immediately
-            for device in &physical_devices {
-                start_capture_thread(
-                    device.clone(),
-                    pcap.clone(),
-                    self.sender.clone(),
-                    self.running.clone(),
-                );
-            }
-        } else {
-            // Start physical after delay as fallback
-            let running = self.running.clone();
-            let sender = self.sender.clone();
-            let pcap2 = pcap.clone();
-            std::thread::spawn(move || {
+        let running = self.running.clone();
+        let sender = self.sender.clone();
+        let delay_physical = !virtual_devices.is_empty();
+        std::thread::spawn(move || {
+            // Physical devices start after a delay as fallback when virtual ones exist.
+            if delay_physical {
                 std::thread::sleep(std::time::Duration::from_millis(1500));
+            }
+            for device in &physical_devices {
                 if !running.load(Ordering::SeqCst) {
                     return;
                 }
-                for device in &physical_devices {
-                    info!("Starting capture on physical device: {}", device.label());
-                    start_capture_thread(
-                        device.clone(),
-                        pcap2.clone(),
-                        sender.clone(),
-                        running.clone(),
-                    );
+                info!("Starting capture on physical device: {}", device.label());
+                start_capture_thread(device.clone(), pcap.clone(), sender.clone(), running.clone(), active.clone());
+            }
+            // The list above is read once. A VPN / ping reducer connected after the
+            // meter started, Wi-Fi back after sleep, or an adapter whose capture ended
+            // on an error (unplugged, reset) was never captured again until a restart:
+            // look again every DEVICE_SCAN_MS and capture what is not captured.
+            loop {
+                std::thread::sleep(std::time::Duration::from_millis(DEVICE_SCAN_MS));
+                if !running.load(Ordering::SeqCst) {
+                    return;
                 }
-            });
-        }
+                let Ok(devices) = pcap.find_all_devs() else { continue };
+                for device in devices.into_iter().filter(|d| d.has_addresses) {
+                    start_capture_thread(device, pcap.clone(), sender.clone(), running.clone(), active.clone());
+                }
+            }
+        });
     }
 
     pub fn stop(&self) {
@@ -324,6 +335,26 @@ impl PcapCapturer {
     pub fn is_running(&self) -> bool {
         self.running.load(Ordering::SeqCst)
     }
+}
+
+/// Set when capture could not start at all; the widget shows it as an Npcap error.
+static START_ERROR: OnceLock<String> = OnceLock::new();
+
+pub fn start_error() -> Option<&'static str> {
+    START_ERROR.get().map(String::as_str)
+}
+
+#[cfg(windows)]
+fn load_from_npcap_dir() -> Option<Library> {
+    use libloading::os::windows::{Library as WinLibrary, LOAD_WITH_ALTERED_SEARCH_PATH};
+    let path = crate::powermeter::npcap_dir()?.join("wpcap.dll");
+    // Altered search path: wpcap.dll finds Packet.dll next to it.
+    unsafe { WinLibrary::load_with_flags(path, LOAD_WITH_ALTERED_SEARCH_PATH) }.ok().map(Into::into)
+}
+
+#[cfg(not(windows))]
+fn load_from_npcap_dir() -> Option<Library> {
+    None
 }
 
 /// List available capture device labels (for the settings UI dropdown).
@@ -342,9 +373,14 @@ fn start_capture_thread(
     pcap: Arc<PcapLib>,
     sender: mpsc::Sender<CapturedPayload>,
     running: Arc<AtomicBool>,
+    active: ActiveDevices,
 ) {
     let label = device.label().to_string();
     let dev_name = device.name.clone();
+    // One capture per device; a device that failed to open stays here and is not retried.
+    if !active.lock().insert(dev_name.clone()) {
+        return;
+    }
 
     std::thread::spawn(move || {
         let handle = match pcap.open_live_handle(&dev_name) {
@@ -399,6 +435,8 @@ fn start_capture_thread(
         }
 
         unsafe { (pcap.close)(handle) };
+        // Ended (adapter gone or reset): the rescan captures it again if it comes back.
+        active.lock().remove(&dev_name);
         info!("Capture stopped on {}", label);
     });
 }

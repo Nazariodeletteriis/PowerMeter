@@ -4,6 +4,16 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.8
+
+- New: Redesigned widget: DPS / HEAL / AGGRO tabs, boss name with HP bar, ranked rows with class-coloured DPS bars. The Compact layout follows the same style.
+- Changed: Widget layouts are now just "Interface" and "Compact". The Classic layouts are gone: if you used one, you move to the matching new layout.
+- Fixed: PowerMeter finds the game even when its window has a different title (for example "AION 2"): it recognises it by its program.
+- Fixed: Npcap installed without "WinPcap API-compatible mode" now works; if Npcap cannot start, the widget says so.
+- Fixed: Network adapters turned on after start (VPN, ExitLag, Wi-Fi after sleep) are captured without restarting, and the meter no longer stays stuck on a dead connection.
+- Fixed: World map: markers and zone borders were upside down (Asmodian cubes in the sea). Now they sit on land on every map.
+- Changed: Supporter: the three Patreon plans unlock everything; they differ only in billing period and discount.
+
 ## 0.5.7
 
 - New: Character Builder: Pet tab: your pet collection as in the game's Pet window (categories, level, progress x/75, MAX), opened with "Show pets". PowerMeter reads it from the game at login; you can also mark pets by hand. The count matches the game (Special pets excluded).

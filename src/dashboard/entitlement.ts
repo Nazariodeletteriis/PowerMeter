@@ -6,16 +6,21 @@ import { useSyncExternalStore } from "react";
 
 export type Tier = "free" | "trial" | "recluta" | "daeva" | "empyrean";
 export type PaidTier = "recluta" | "daeva" | "empyrean";
-/** Access level: the trial unlocks what Daeva unlocks. */
+/** Access level: every plan and the trial unlock the same (the locks in nav.ts ask for "recluta", i.e. any
+ *  plan); the order only decides which name is shown when an account has more than one. */
 export const RANK: Record<Tier, number> = { free: 0, recluta: 1, trial: 2, daeva: 2, empyrean: 3 };
-/** Patreon plans: names are the same in every language, prices in €/month. */
-export const PLANS: Record<PaidTier, { name: string; price: number }> = {
-  recluta: { name: "Recluta", price: 3 },
-  daeva: { name: "Daeva", price: 7 },
-  empyrean: { name: "Empyrean", price: 15 },
+/** Patreon plans (Nazario, 2026-10-15): all three unlock everything, they differ only in how often you pay.
+ *  Names are the same in every language; `price` in € for `months` of access, `off` = % saved on monthly Recluta. */
+export const PLANS: Record<PaidTier, { name: string; price: number; months: number; off: number }> = {
+  recluta: { name: "Recluta", price: 2.99, months: 1, off: 0 },
+  daeva: { name: "Daeva", price: 8.07, months: 3, off: 10 },
+  empyrean: { name: "Empyrean", price: 13.99, months: 6, off: 22 },
 };
-/** The Patreon plans are shown but not on sale yet (what they include is still to be decided): no
- *  subscribe or link buttons, "coming soon" instead. Admin grants still work. */
+/** A price in the app's language: 2,99 / 2.99. */
+export const euros = (lang: string, n: number) => n.toLocaleString(lang, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+/** The Patreon plans are shown but not on sale yet: no subscribe or link buttons, "coming soon" instead.
+ *  Contents and prices are decided (PLANS); still waiting on the quarterly/6-month billing on Patreon.
+ *  Admin grants still work. */
 export const PLANS_OPEN = false;
 
 export type Entitlement = {

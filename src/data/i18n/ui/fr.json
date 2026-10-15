@@ -139,10 +139,8 @@
     "slimMode": "Mode compact",
     "meterLayout": {
       "label": "Disposition du meter",
-      "beta": "Beta UI",
-      "betaSlim": "Bêta compact",
-      "classic": "Interface classique",
-      "classicSlim": "Classique compact"
+      "beta": "Interface",
+      "betaSlim": "Compacte"
     },
     "detailsMonitor": {
       "label": "Afficher les détails sur l'écran",

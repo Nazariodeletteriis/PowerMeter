@@ -139,10 +139,8 @@
     "slimMode": "Schlanker Modus",
     "meterLayout": {
       "label": "Meter-Layout",
-      "beta": "Beta UI",
-      "betaSlim": "Beta schlank",
-      "classic": "Klassische UI",
-      "classicSlim": "Klassisch schlank"
+      "beta": "Oberfläche",
+      "betaSlim": "Kompakt"
     },
     "detailsMonitor": {
       "label": "Details auf Monitor anzeigen",

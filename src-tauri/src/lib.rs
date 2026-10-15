@@ -181,6 +181,7 @@ fn get_capture_status(state: tauri::State<'_, AppState>) -> serde_json::Value {
         "ip": device.unwrap_or_else(|| "127.0.0.1".to_string()),
         "localPlayerId": local_id,
         "characterName": char_name,
+        "pcapError": crate::capture::pcap_capturer::start_error(),
     })
 }
 

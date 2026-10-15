@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { CheckIcon, HeartIcon, WifiSlashIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
-import { PLANS, PLANS_OPEN, refreshEntitlement, useEntitlement, type Entitlement, type PaidTier, type Tier } from "./entitlement";
+import { euros, PLANS, PLANS_OPEN, refreshEntitlement, useEntitlement, type Entitlement, type PaidTier, type Tier } from "./entitlement";
 import type { Key, T } from "./i18n";
 import { PATREON_URL } from "./Shell";
 
@@ -13,14 +13,21 @@ const DAY = 86_400_000;
 
 const tierName = (t: T, tier: Tier) => (tier === "free" || tier === "trial" ? t(`subs.tier.${tier}`) : PLANS[tier].name);
 
-// What each plan adds to the one before (notes/patreon-tiers-plan.md, section 0). The paid plans'
-// contents are still to be decided (PLANS_OPEN): they show "coming soon".
+// What each plan includes: every Patreon plan unlocks the same, only the billing period changes (PLANS).
 const PERKS: ["free" | PaidTier, Key[]][] = [
   ["free", ["subs.free.meter", "subs.free.rest"]],
-  ["recluta", []],
-  ["daeva", []],
-  ["empyrean", []],
+  ["recluta", ["subs.paid.all"]],
+  ["daeva", ["subs.paid.all"]],
+  ["empyrean", ["subs.paid.all"]],
 ];
+
+/** "2,99 €/mese", or "8,07 € ogni 3 mesi · 2,69 €/mese" for the longer periods. */
+function price(t: T, lang: string, tier: "free" | PaidTier) {
+  if (tier === "free") return t("subs.perMonth", { price: 0 });
+  const { price: p, months } = PLANS[tier];
+  if (months === 1) return t("subs.perMonth", { price: euros(lang, p) });
+  return `${t("subs.perMonths", { price: euros(lang, p), n: months })} · ${t("subs.perMonth", { price: euros(lang, p / months) })}`;
+}
 
 /** Where the current tier comes from. */
 function origin(t: T, e: Entitlement, signedIn: boolean, fmt: (ms: number) => string) {
@@ -53,8 +60,8 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
   const unlink = () => confirm(t("subs.unlinkConfirm")) && invoke("pm_patreon_unlink").then(refreshEntitlement).catch(onError);
   const date = new Intl.DateTimeFormat(lang, { dateStyle: "medium" });
   const fmt = (ms: number) => date.format(ms);
-  // The trial unlocks what Daeva unlocks.
-  const current = e && (e.tier === "trial" ? "daeva" : e.tier);
+  // The trial unlocks everything too, but it is not one of the plans below.
+  const current = e?.tier;
   const [before, after] = t("about.a2tools").split("{link}");
   return (
     <div style={{ maxWidth: 960, display: "grid", gap: 12 }}>
@@ -81,7 +88,9 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
         <h2 style={{ fontSize: 24, fontWeight: 500, margin: "10px 0 8px", letterSpacing: "-.015em", color: "#FAF7F7" }}>
           {t("supporter.title")}
         </h2>
-        <p style={{ lineHeight: 1.6, maxWidth: 600, color: "#E8E1E1" }}>{t("subs.heroText")}</p>
+        <p style={{ lineHeight: 1.6, maxWidth: 600, color: "#E8E1E1" }}>
+          {t("subs.heroText")} {!PLANS_OPEN && t("subs.plansSoon")}
+        </p>
       </div>
 
       {e && (
@@ -165,19 +174,18 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
       <section className="card">
         <h3 className="kicker">{t("subs.plans")}</h3>
         <div className="subsPlans">
-          {PERKS.map(([tier, perks], i) => (
+          {PERKS.map(([tier, perks]) => (
             <div key={tier} className="subsPlan" aria-current={tier === current || undefined}>
               <h4>
                 {tierName(t, tier)}
-                {tier === current && <span className="badge">{e?.tier === "trial" ? tierName(t, "trial") : t("subs.current")}</span>}
+                {tier === current && <span className="badge">{t("subs.current")}</span>}
+                {tier !== "free" && PLANS[tier].off > 0 && <span className="badge">−{PLANS[tier].off}%</span>}
                 {tier !== "free" && !PLANS_OPEN && <span className="badge">{t("subs.comingSoon")}</span>}
               </h4>
               <div className="mono" style={{ color: "var(--pm-t3)" }}>
-                {t("subs.perMonth", { price: tier === "free" ? 0 : PLANS[tier].price })}
+                {price(t, lang, tier)}
               </div>
               <ul>
-                {i > 0 && !PLANS_OPEN && <li>{t("subs.plansSoon")}</li>}
-                {i > 0 && PLANS_OPEN && <li>{t("subs.everythingIn", { tier: tierName(t, PERKS[i - 1][0]) })}</li>}
                 {perks.map((k) => (
                   <li key={k}>
                     <CheckIcon aria-hidden="true" />
@@ -188,6 +196,7 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
             </div>
           ))}
         </div>
+        <p style={{ marginTop: 10, fontSize: 12, color: "var(--pm-t2)" }}>{t("subs.plansNote")}</p>
       </section>
 
       <p style={{ marginTop: 4, fontSize: 12, color: "var(--pm-t3)" }}>

@@ -107,18 +107,24 @@ for (const id of MAPS) {
     get(`locales/en/markers/${id}.yaml`),
     get(`locales/en/regions/${id}.yaml`),
   ]);
-  const regs = regions.map((r) => ({
-    key: r.name,
-    name: regionNames[r.name]?.name ?? r.name,
-    at: centroid(r.borders),
-    poly: r.borders.map((ring) => ring.flatMap(([x, y]) => [Math.round(x), Math.round(y)])),
-    rings: r.borders,
-  }));
+  // The source is drawn with Leaflet's CRS.Simple, where y grows upward from the
+  // bottom edge; our map uses image pixels (y down from the top).
+  const H = m.tilesCountY * m.tileHeight;
+  const regs = regions.map((r) => {
+    const rings = r.borders.map((ring) => ring.map(([x, y]) => [x, H - y]));
+    return {
+      key: r.name,
+      name: regionNames[r.name]?.name ?? r.name,
+      at: centroid(rings),
+      poly: rings.map((ring) => ring.flatMap(([x, y]) => [Math.round(x), Math.round(y)])),
+      rings,
+    };
+  });
   const ids = new Set();
   const out = [];
   for (const k of markers) {
     if (!TYPES.includes(k.subtype)) continue;
-    const xy = [Math.round(k.x), Math.round(k.y)];
+    const xy = [Math.round(k.x), Math.round(H - k.y)];
     let region = regs.findIndex((r) => r.key === k.region);
     if (region < 0) region = regs.findIndex((r) => inside(xy, r.rings));
     const label = NAMED.has(k.subtype) ? (markerNames[k.id]?.name ?? "") : k.subtype === "monolithMaterial" ? String(k.name) : "";

@@ -2,6 +2,16 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.8
+
+- Neu: Neu gestaltetes Widget: Tabs DPS / HEAL / AGGRO, Bossname mit HP-Leiste, Ranglisten-Zeilen mit DPS-Leisten in Klassenfarbe. Das Layout Kompakt folgt demselben Stil.
+- Geändert: Die Widget-Layouts heißen jetzt nur noch "Oberfläche" und "Kompakt". Die klassischen Layouts wurden entfernt: Wer eines nutzte, wechselt zum passenden neuen Layout.
+- Behoben: PowerMeter findet das Spiel auch, wenn sein Fenster anders heißt (zum Beispiel "AION 2"): Es erkennt es am Programm.
+- Behoben: Npcap ohne "WinPcap API-compatible mode" funktioniert jetzt; startet Npcap nicht, zeigt das Widget es an.
+- Behoben: Netzwerkadapter, die nach dem Start eingeschaltet werden (VPN, ExitLag, WLAN nach dem Standby), werden ohne Neustart erfasst, und das Meter bleibt nicht mehr an einer toten Verbindung hängen.
+- Behoben: Weltkarte: Markierungen und Zonengrenzen standen auf dem Kopf (Asmodier-Würfel im Meer). Jetzt liegen sie auf jeder Karte an Land.
+- Geändert: Supporter: Die drei Patreon-Pläne schalten alles frei; sie unterscheiden sich nur in Abrechnungszeitraum und Rabatt.
+
 ## 0.5.7
 
 - Neu: Charakter-Builder: Tab Haustier: deine Haustier-Sammlung wie im Haustier-Fenster des Spiels (Kategorien, Stufe, Fortschritt x/75, MAX), geöffnet mit "Pets anzeigen". PowerMeter liest sie beim Login aus dem Spiel; du kannst Pets auch von Hand markieren. Die Zählung entspricht dem Spiel (ohne Special-Pets).

@@ -2,6 +2,16 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.8
+
+- Nuovo: Widget ridisegnato: schede DPS / HEAL / AGGRO, nome del boss con barra HP, righe in classifica con barre DPS nel colore della classe. Il layout Compatta segue lo stesso stile.
+- Cambiato: I layout del widget ora sono solo "Interfaccia" e "Compatta". I layout Classici sono stati tolti: se ne usavi uno, passi al nuovo layout corrispondente.
+- Corretto: PowerMeter trova il gioco anche quando la sua finestra ha un titolo diverso (per esempio "AION 2"): lo riconosce dal programma.
+- Corretto: Npcap installato senza la modalità "WinPcap API-compatible" ora funziona; se Npcap non parte, il widget lo dice.
+- Corretto: Le schede di rete accese dopo l'avvio (VPN, ExitLag, Wi-Fi dopo lo standby) vengono catturate senza riavviare, e il meter non resta più bloccato su una connessione morta.
+- Corretto: Mappa del mondo: marker e confini delle zone erano capovolti (cubi Asmodiani in mare). Ora sono a terra su ogni mappa.
+- Cambiato: Supporter: i tre piani Patreon sbloccano tutto; cambiano solo periodo di pagamento e sconto.
+
 ## 0.5.7
 
 - Nuovo: Character Builder: scheda Pet: la tua collezione di pet come nella finestra Pet del gioco (categorie, livello, progresso x/75, MAX), aperta con "Mostra pet". PowerMeter la legge dal gioco al login; puoi anche segnare i pet a mano. Il conteggio è uguale al gioco (pet Special esclusi).

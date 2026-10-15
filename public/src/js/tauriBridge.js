@@ -661,15 +661,7 @@
     if (meter) {
       contentW = Math.ceil(meter.offsetWidth) + 16;
       const meterH = Math.max(meter.offsetHeight, meter.scrollHeight);
-      // In the beta UI the ping sits inside the footer row, so it is already
-      // part of offsetHeight. The legacy skin hangs it below the window, where
-      // it still needs its own allowance.
-      let pingH = 0;
-      if (document.body.classList.contains("legacyUi")) {
-        const ping = document.querySelector(".pingDisplay");
-        pingH = ping ? ping.offsetHeight + 8 : 0;
-      }
-      contentH = Math.ceil(meterH + pingH) + 10;
+      contentH = Math.ceil(meterH) + 10;
     }
 
     const w = fullPanel ? PANEL_WIDTH : tooltipOnly ? TOOLTIP_WIDTH : contentW;

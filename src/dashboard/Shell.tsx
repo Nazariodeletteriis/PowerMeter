@@ -11,7 +11,7 @@ import {
   PictureInPictureIcon,
 } from "@phosphor-icons/react";
 import type { SaveSetting, Settings } from "./App";
-import { canOpen, PLANS, PLANS_OPEN, useEntitlement } from "./entitlement";
+import { canOpen, PLANS_OPEN, useEntitlement } from "./entitlement";
 import { AutoCharacter } from "./AutoCharacter";
 import { CaptureSync } from "./CaptureSync";
 import { Home } from "./Home";
@@ -165,7 +165,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
 
   // Locked tabs stay in the menu and open to what unlocks them (Locked.tsx).
   const item = (x: NavPage, indent: boolean) => {
-    const locked = !canOpen(entitlement, x.tier) && (PLANS_OPEN ? t("subs.requires", { tier: PLANS[x.tier!].name }) : t("subs.lockedSoon"));
+    const locked = !canOpen(entitlement, x.tier) && (PLANS_OPEN ? t("subs.requires") : t("subs.lockedSoon"));
     return (
       <button
         key={x.id}
@@ -320,7 +320,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
               // Preview only: the page can't navigate, save or report errors.
               const none = () => {};
               return (
-                <Locked t={t} tier={current.tier!} go={go} onError={onError}>
+                <Locked t={t} lang={lang} tier={current.tier!} go={go} onError={onError}>
                   <Page t={t} lang={lang} settings={settings} save={async () => {}} name={name} go={none} run={none} onError={none} setHeader={none} />
                 </Locked>
               );

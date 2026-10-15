@@ -1,21 +1,21 @@
 import { invoke } from "@tauri-apps/api/core";
 import { HourglassIcon, LockSimpleIcon } from "@phosphor-icons/react";
 import { useEffect, useState, type ReactNode } from "react";
-import { PLANS, PLANS_OPEN, refreshEntitlement, useEntitlement, type PaidTier } from "./entitlement";
+import { euros, PLANS, PLANS_OPEN, refreshEntitlement, useEntitlement, type PaidTier } from "./entitlement";
 import type { T } from "./i18n";
 import { PATREON_URL } from "./Shell";
 
-type Props = { t: T; tier: PaidTier; go: (page: string) => void; onError: (e: unknown) => void; children: ReactNode };
+type Props = { t: T; lang: string; tier: PaidTier; go: (page: string) => void; onError: (e: unknown) => void; children: ReactNode };
 
-/** A tab the plan doesn't include: the real page, blurred and inert, under what unlocks it (plans not on sale yet: "coming soon"). */
-export function Locked({ t, tier, go, onError, children }: Props) {
+/** A tab the Player plan doesn't include: the real page, blurred and inert, under what unlocks it (any Patreon plan;
+ *  not on sale yet: "coming soon"). */
+export function Locked({ t, lang, tier, go, onError, children }: Props) {
   const e = useEntitlement();
   const [account, setAccount] = useState<unknown>(); // undefined until pm_account answers
   useEffect(() => {
     invoke("pm_account").then(setAccount, onError);
   }, []);
   const signIn = () => invoke("pm_login").then(setAccount).then(refreshEntitlement).catch(onError);
-  const name = PLANS[tier].name;
   return (
     <div className="locked">
       <div className="lockedPreview" inert aria-hidden="true">
@@ -23,9 +23,9 @@ export function Locked({ t, tier, go, onError, children }: Props) {
       </div>
       <section className="card lockedCard" aria-labelledby="lockedTitle">
         <LockSimpleIcon weight="fill" className="lockedIcon" aria-hidden="true" />
-        <h2 id="lockedTitle">{PLANS_OPEN ? t("subs.requires", { tier: name }) : t("subs.lockedSoon")}</h2>
+        <h2 id="lockedTitle">{PLANS_OPEN ? t("subs.requires") : t("subs.lockedSoon")}</h2>
         {PLANS_OPEN ? (
-          <div className="mono lockedPrice">{t("subs.perMonth", { price: PLANS[tier].price })}</div>
+          <div className="mono lockedPrice">{t("subs.perMonth", { price: euros(lang, PLANS[tier].price) })}</div>
         ) : (
           <span className="badge">{t("subs.comingSoon")}</span>
         )}
@@ -33,7 +33,7 @@ export function Locked({ t, tier, go, onError, children }: Props) {
           <p className="notice">{t("subs.deviceLimit", { n: e?.maxDevices ?? 1 })}</p>
         ) : account !== undefined && (
           <>
-            <p>{account === null ? t("subs.lockedSignedOut") : PLANS_OPEN ? t("subs.lockedText", { tier: name }) : t("subs.lockedSoonText")}</p>
+            <p>{account === null ? t("subs.lockedSignedOut") : PLANS_OPEN ? t("subs.lockedText") : t("subs.lockedSoonText")}</p>
             <div className="lockedActions">
               {account === null ? (
                 <button type="button" className="btn fill lg" onClick={signIn}>

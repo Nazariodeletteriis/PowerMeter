@@ -139,10 +139,8 @@
     "slimMode": "精簡模式",
     "meterLayout": {
       "label": "儀表佈局",
-      "beta": "Beta 介面",
-      "betaSlim": "Beta 精簡",
-      "classic": "經典介面",
-      "classicSlim": "經典精簡"
+      "beta": "介面",
+      "betaSlim": "精簡"
     },
     "detailsMonitor": {
       "label": "在螢幕上顯示詳情",

@@ -139,10 +139,8 @@
     "slimMode": "슬림 모드",
     "meterLayout": {
       "label": "미터 레이아웃",
-      "beta": "베타 UI",
-      "betaSlim": "베타 슬림",
-      "classic": "클래식 UI",
-      "classicSlim": "클래식 슬림"
+      "beta": "인터페이스",
+      "betaSlim": "컴팩트"
     },
     "detailsMonitor": {
       "label": "상세 정보를 표시할 모니터",

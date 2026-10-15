@@ -1,7 +1,7 @@
 // PowerMeter: the widget's chrome and modes from the design handoff
 // (docs/design/claude-design/videogame-tool-design-system/project/PowerMeter Widget.dc.html,
-// sections 8.1-8.7). Active only in the powermeter theme, beta layout, overlay window;
-// every other theme keeps the A2Tools meter as it was (the .pmOnly markup stays hidden).
+// sections 8.1-8.7), restyled in October 2026 after the "Interface" reference. Active in
+// the overlay window only; the tool windows reuse this document with the .pmOnly markup hidden.
 //
 // core.js drives it: tick() from the poll loop, onFrame() after each render,
 // openDetail() on a row click, syncTheme() when the theme or layout changes.
@@ -43,18 +43,19 @@ const createPmWidget = (app) => {
   let lastSparkAt = 0;
   let detectingSince = 0;
 
-  const isActive = () =>
-    window.A2_VIEW === "main" && !document.body.classList.contains("legacyUi"); // every theme, Classic UI excluded
+  const isActive = () => window.A2_VIEW === "main"; // every theme
 
-  // --- widget layout: lift the fight timer into the bar and the target-mode pill into the
-  // target row. Moved rather than duplicated so core.js keeps driving them; put
-  // back where A2Tools had them for the Classic UI layout. Beta slim hides the target
-  // row, so the selector and Reset stay home there, in its footer (footerHome).
+  // --- widget layout: lift the fight timer into the bar, and the target selector (the BOSS
+  // badge), the HP bar, the timer box and Reset into the boss row. Moved rather than
+  // duplicated so core.js keeps driving them; put back where A2Tools had them outside the
+  // overlay. Compact hides the boss row, so the selector, Reset and the fight time stay
+  // home there, in its footer (footerHome).
   const moves = [
     [document.querySelector(".battleTime"), $(".pmBarTitle"), "before"],
     [document.querySelector(".targetModeBtn"), $(".pmBerserk"), "after", true],
     [$(".pmLiveResetBtn"), document.querySelector(".targetModeBtn"), "after", true],
-    [document.querySelector(".bossName"), $(".pmHpKind"), "after"],
+    [$(".bossHpBar"), $(".bossNames"), "append"],
+    [$(".pmDuration"), $(".bossNames"), "append", true],
   ]
     .filter(([el, anchor]) => el && anchor)
     .map(([el, anchor, where, footerHome]) => ({ el, anchor, where, footerHome, home: el.parentNode, next: el.nextSibling }));
@@ -588,20 +589,18 @@ const createPmWidget = (app) => {
     setText(".pmPillTime", app.battleTime?.getCombatTimeText?.() || "0:00");
   };
 
-  const HP_KIND = { bossTargets: "BOSS", trainTargets: "TRAIN", pveTargets: "PVE", pvpTargets: "PVP" };
   // After each render: title, HP readout, target extras and the sparkline samples.
   const onFrame = (next) => {
     frame = next;
     if (avgOn) renderAvg();
     setText(".pmModeTitle", app.getDefaultTargetLabel?.(next.targetMode || app.targetSelection) || "");
-    // HP as the design writes it ("6.708.921 HP · 68,0%"), same remaining-HP rule as core.js updateBossHpBar.
+    // HP as the design writes it ("5.076.235 HP - 61,8%"), same remaining-HP rule as core.js updateBossHpBar.
     const maxHp = Number(next.targetMaxHp) || 0;
     meter.classList.toggle("hasPmHp", maxHp > 0);
     if (maxHp > 0) {
       const live = Number(next.targetCurrentHp);
       const left = live >= 0 ? Math.min(maxHp, live) : Math.max(0, maxHp - (Number(next.targetTotalDamage) || 0));
-      setText(".pmHpKind", HP_KIND[next.targetMode] || "");
-      setText(".pmHpText", `${num(left)} HP · ${oneDec((left / maxHp) * 100)}%`);
+      setText(".pmHpText", `${num(left)} HP - ${oneDec((left / maxHp) * 100)}%`);
       $(".bossHpBar")?.classList.toggle("isPmKilled", left <= 0);
     }
     const berserk = $(".pmBerserk");

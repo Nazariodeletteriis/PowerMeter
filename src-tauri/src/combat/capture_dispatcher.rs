@@ -46,6 +46,52 @@ const TLS_VERSIONS: [u8; 5] = [0x00, 0x01, 0x02, 0x03, 0x04];
 const WINDOW_CHECK_STOPPED_MS: i64 = 10_000;
 const WINDOW_CHECK_RUNNING_MS: i64 = 60_000;
 const STALE_CONNECTION_MS: i64 = 120_000;
+/// While no port is locked, how often to log what the capture sees. Before the lock
+/// every gate is silent, so a meter that never connects left a log that could not
+/// say why (no game window? no packets? packets without game markers? which device?).
+const UNLOCKED_REPORT_MS: i64 = 30_000;
+
+/// Packets seen while unlocked, for the periodic report: per device (packets, with
+/// a game marker), and those dropped because no AION2 window was found.
+#[derive(Default)]
+struct UnlockedStats {
+    by_device: HashMap<String, (u64, u64)>,
+    no_window: u64,
+}
+
+impl UnlockedStats {
+    fn note(&mut self, cap: &CapturedPayload) {
+        let e = self.by_device.entry(cap.device_name.clone().unwrap_or_else(|| "?".into())).or_default();
+        e.0 += 1;
+        if contains_any(&cap.data, &COMBAT_SIGNATURES) {
+            e.1 += 1;
+        }
+    }
+
+    fn report(&self, window_found: bool, look_alikes: &[String]) -> String {
+        let mut out = format!(
+            "Not locked yet (last {} s): AION2 window {}",
+            UNLOCKED_REPORT_MS / 1000,
+            if window_found { "found" } else { "NOT found" }
+        );
+        if self.no_window > 0 {
+            out += &format!(", {} packets ignored for that", self.no_window);
+        }
+        if !window_found {
+            out += &if look_alikes.is_empty() {
+                " (no window or program mentions \"aion\")".to_string()
+            } else {
+                format!(" (look-alikes: {})", look_alikes.join(" | "))
+            };
+        }
+        let mut devices: Vec<_> = self.by_device.iter().collect();
+        devices.sort_by(|a, b| b.1 .0.cmp(&a.1 .0));
+        for (device, (packets, marked)) in devices.into_iter().take(8) {
+            out += &format!("; {}: {} packets, {} with game markers", device, packets, marked);
+        }
+        out
+    }
+}
 
 fn now_ms() -> i64 {
     SystemTime::now()
@@ -101,6 +147,9 @@ impl CaptureDispatcher {
         let mut sig_hits: HashMap<(u16, u16), (u32, i64)> = HashMap::new();
         let mut last_window_check_ms: i64 = 0;
         let mut is_aion_running = false;
+        let mut window_logged: Option<bool> = None;
+        let mut unlocked_stats = UnlockedStats::default();
+        let mut last_unlocked_report_ms = now_ms();
 
         while let Some(cap) = receiver.recv().await {
             if self.suspended.load(Ordering::SeqCst) {
@@ -112,7 +161,15 @@ impl CaptureDispatcher {
             let interval = if is_aion_running { WINDOW_CHECK_RUNNING_MS } else { WINDOW_CHECK_STOPPED_MS };
             if now - last_window_check_ms >= interval {
                 last_window_check_ms = now;
-                let running = window_detector::find_aion2_window();
+                let title = window_detector::find_aion2_window_title();
+                let running = title.is_some();
+                if window_logged != Some(running) {
+                    match title {
+                        Some(t) => info!("AION2 window found: {:?}", t),
+                        None => info!("No AION2 window found (title starting with \"AION2\", or a window of AION2.exe): packets are ignored until there is one"),
+                    }
+                    window_logged = Some(running);
+                }
                 if !running && is_aion_running {
                     self.port_detector.reset();
                     self.ping_tracker.reset();
@@ -120,6 +177,20 @@ impl CaptureDispatcher {
                     sig_hits.clear();
                 }
                 is_aion_running = running;
+            }
+
+            if self.port_detector.current_port().is_none() {
+                if is_aion_running {
+                    unlocked_stats.note(&cap);
+                } else {
+                    unlocked_stats.no_window += 1;
+                }
+                if now - last_unlocked_report_ms >= UNLOCKED_REPORT_MS {
+                    let look_alikes = if is_aion_running { Vec::new() } else { window_detector::describe_candidates() };
+                    info!("{}", unlocked_stats.report(is_aion_running, &look_alikes));
+                    unlocked_stats = UnlockedStats::default();
+                    last_unlocked_report_ms = now;
+                }
             }
 
             if !is_aion_running {
@@ -277,5 +348,40 @@ fn device_matches(locked: &str, packet_device: Option<&str>) -> bool {
     match packet_device {
         Some(d) if !d.trim().is_empty() => d.trim().eq_ignore_ascii_case(locked),
         _ => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn cap(device: &str, data: &[u8]) -> CapturedPayload {
+        CapturedPayload {
+            src_port: 13328,
+            dst_port: 52000,
+            data: data.to_vec(),
+            device_name: Some(device.into()),
+            captured_at_ms: 0,
+            src_ip: None,
+            dst_ip: None,
+            tcp_seq: 0,
+            tcp_ack: 0,
+        }
+    }
+
+    #[test]
+    fn unlocked_report_says_why_the_meter_is_not_connected() {
+        // The case players hit: game packets arriving, all dropped for want of a recognised window.
+        let mut s = UnlockedStats::default();
+        s.no_window = 600;
+        let line = s.report(false, &["title=\"AION 2\" exe=\"AION2.exe\" visible=true".into()]);
+        assert!(line.contains("AION2 window NOT found, 600 packets ignored for that"), "{line}");
+        assert!(line.contains("look-alikes: title=\"AION 2\""), "{line}");
+
+        let mut s = UnlockedStats::default();
+        s.note(&cap("Wi-Fi", &[0x0E, 0x00, 0x36, 1]));
+        s.note(&cap("Wi-Fi", &[1, 2, 3]));
+        let line = s.report(true, &[]);
+        assert!(line.contains("AION2 window found; Wi-Fi: 2 packets, 1 with game markers"), "{line}");
     }
 }

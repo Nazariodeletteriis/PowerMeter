@@ -2,6 +2,16 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.8
+
+- Novo: Widget redesenhado: abas DPS / HEAL / AGGRO, nome do chefe com barra de HP, linhas de classificação com barras de DPS na cor da classe. O layout Compacta segue o mesmo estilo.
+- Alterado: Os layouts do widget agora são apenas "Interface" e "Compacta". Os layouts Clássicos foram removidos: se você usava um, passa para o novo layout correspondente.
+- Corrigido: O PowerMeter encontra o jogo mesmo quando a janela tem outro título (por exemplo "AION 2"): reconhece-o pelo programa.
+- Corrigido: Npcap instalado sem o modo "WinPcap API-compatible" agora funciona; se o Npcap não iniciar, o widget avisa.
+- Corrigido: Adaptadores de rede ligados depois do início (VPN, ExitLag, Wi-Fi após suspensão) são capturados sem reiniciar, e o medidor não fica mais preso numa conexão morta.
+- Corrigido: Mapa do mundo: marcadores e limites de zona estavam de cabeça para baixo (cubos asmodianos no mar). Agora ficam em terra em todos os mapas.
+- Alterado: Supporter: os três planos do Patreon desbloqueiam tudo; mudam apenas o período de cobrança e o desconto.
+
 ## 0.5.7
 
 - Novo: Construtor de personagem: aba Mascote: sua coleção de mascotes como na janela Mascote do jogo (categorias, nível, progresso x/75, MAX), aberta com "Mostrar mascotes". O PowerMeter a lê do jogo no login; você também pode marcar mascotes à mão. A contagem é igual à do jogo (mascotes Special excluídos).

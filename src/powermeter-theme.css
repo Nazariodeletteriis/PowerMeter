@@ -28,9 +28,8 @@
 @import "@fontsource/noto-sans/700.css";
 @import "@fontsource/noto-sans/800.css";
 
-/* Elements added for the widget. The tool windows and the Classic UI layout keep the old one. */
-:root:is(.detailsWindow, .historyWindow, .settingsWindow) .pmOnly,
-body.legacyUi .pmOnly {
+/* Elements added for the widget. The tool windows keep the old meter (hidden there). */
+:root:is(.detailsWindow, .historyWindow, .settingsWindow) .pmOnly {
   display: none !important;
 }
 .pmLogo,
@@ -88,7 +87,7 @@ body.legacyUi .pmOnly {
   --pm-deep: #7f1112;
   --pm-fill: #7f1112;
   /* Widget surfaces (DPS Meter design) */
-  --pm-wsurf: #0a0a0a;
+  --pm-wsurf: #0f1114;
   --pm-wbar: #821113;
 
   /* The app's own variables, re-pointed at the palette */
@@ -128,21 +127,32 @@ body.legacyUi .pmOnly {
   font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-/* ---------- 2. the meter overlay (DPS Meter design, 520x420) ---------- */
+/* ---------- 2. the meter overlay ("Interface" layout, 810x367) ---------- */
 
-/* Main overlay window only, beta layout only: the tool windows reuse this
-   document with the meter hidden, and the classic layout has its own skin.
-   Sizes, colours and type are the design's (DPS Meter Main / Killed / Medie). */
+/* Main overlay window only: the tool windows reuse this document with the meter
+   hidden. Sizes, colours and type are the October 2026 reference (the widget at
+   2x in a 1672x941 render, so every value here is the reference's pixel / 2).
+   Compact ("slim") overrides the layout further down. */
 :root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
   .meter {
-    width: 520px;
+    /* Reference tokens: cool greys over the dark panel, azure for your row. */
+    --pm-ui-line: rgba(255, 255, 255, 0.09);
+    --pm-ui-icon: #d3d8e6;
+    --pm-ui-muted: #a3acc2;
+    --pm-ui-head: #8a93ab;
+    --pm-ui-pct: #a9b7d6;
+    --pm-you: #5fc0d6;
+    /* The rows' columns, shared by the heads: rank, gap, class, gap, name, bar,
+       DPS, %, total. The name keeps 110px; past that the bar gives way. */
+    --pm-row-cols: 28px 20px 28px 19px minmax(110px, 1fr) minmax(0, 216px) 79px minmax(60px, 112px) 92px;
+    width: 810px;
     /* Room for the grips that sit 4px outside the top and left edges: the window
        starts at the meter's corner and clipped them to half a hit area. The window
        is meter + 16 x meter + 10 (tauriBridge.js updateWindowSize), so they fit. */
     margin: 4px 0 0 4px;
     box-sizing: border-box;
-    border: 1px solid #2b2b2b;
-    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
     background: color-mix(in srgb, var(--pm-wsurf) calc(var(--window-opacity) * 100%), transparent);
     box-shadow: none;
     color: #ffffff;
@@ -167,34 +177,39 @@ body.legacyUi .pmOnly {
   .resizeHandle::before { content: none; }
   .meter:hover .resizeHandle { opacity: 1; }
 
-  /* --- Title bar (38px) + title row ---
-     The header wraps: row one is the 38px bar, row two the title row. The bar
-     colour is painted only behind row one. .headerBtns is flattened so its
-     buttons line up with the rest of the bar by `order`: logo, DPS | Build,
-     status, spacer, then the controls (settings, class averages, lock,
-     contrast, pill, dashboard, close). */
+  /* --- Bar (42px) + boss row ---
+     The header wraps: row one is the bar, row two the boss row (.bossNames).
+     .headerBtns is flattened so its buttons line up with the rest of the bar by
+     `order`: logo, DPS | HEAL | AGGRO, timer (centred), then the controls
+     (settings, class averages, copy, lock, opacity | pill, dashboard, close). */
   .header {
     flex-wrap: wrap;
     align-items: center;
-    gap: 0 8px;
-    padding: 0 8px;
-    border-radius: 5px 5px 0 0;
-    background: linear-gradient(var(--pm-wbar), var(--pm-wbar)) top / 100% 38px no-repeat;
+    gap: 0 9px;
+    padding: 0;
+    border-radius: 9px 9px 0 0;
+    /* The bar's bottom rule. */
+    background: linear-gradient(var(--pm-ui-line), var(--pm-ui-line)) 0 41px / 100% 1px no-repeat;
   }
   .pmLogo {
     display: block;
     flex: none;
     order: 0;
+    width: 18px;
+    height: 18px;
+    padding: 5px 12px 5px 11px;
+    border-right: 1px solid var(--pm-ui-line);
   }
   .header .headerBtns { display: contents; }
   .header .bossIcon,
   .header .headerBtns .headerBtn {
+    position: relative;
     flex: none;
-    width: 26px;
-    height: 26px;
-    color: #ffffff;
-    border-radius: 4px;
-    transition: background-color 120ms ease;
+    width: 28px;
+    height: 28px;
+    color: var(--pm-ui-icon);
+    border-radius: 6px;
+    transition: background-color 120ms ease, color 120ms ease;
   }
   .header button.headerBtn {
     display: grid;
@@ -204,31 +219,47 @@ body.legacyUi .pmOnly {
     background: transparent;
     cursor: pointer;
   }
+  /* Hairlines between the tool icons; the window controls stand apart, wider spaced. */
+  .header :is(.settingsBtn, .pmAvgBtn, .pmCopyBtn, .pmLockBtn, .pmOpacityBtn)::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: -5px;
+    bottom: 6px;
+    width: 1px;
+    background: var(--pm-ui-line);
+  }
+  .header :is(.pmPillBtn, .dashboardBtn, .pmCloseBtn) { margin-left: 5px; }
   /* The A2Tools small actions are left out of the widget: the screenshot is
-     dropped, history lives in the dashboard, reset comes back as the big
-     button of the fight summary (and Ctrl+Alt+R). Settings stays, always
-     shown, beside the class averages; suspend only when turned on in Settings. */
+     dropped, history lives in the dashboard, reset is the boss row's button
+     (and Ctrl+Alt+R). Suspend shows only when turned on in Settings. */
   .header :is(.bossIcon, .historyBtn, .resetBtn, .pmSep) { display: none; }
   .header .suspendBtn { order: 51; }
   .header .settingsBtn { order: 61; }
-  .header button.pmAvgBtn {
-    order: 61;
-    width: 28px;
-    border: 1px solid transparent;
-  }
+  .header button.pmAvgBtn { order: 61; }
   .header button.pmAvgBtn[aria-pressed="true"] {
-    border-color: #ffffff;
-    background: var(--pm-wbar);
+    background: color-mix(in srgb, var(--pm-deep) 75%, #000000);
+    box-shadow: inset 0 0 0 1px var(--pm-hot);
+    color: #ffffff;
   }
   .header .pmLockBtn { order: 62; }
   .header .pmOpacityBtn { order: 63; }
   .header .pmPillBtn { order: 64; }
   .header .dashboardBtn { order: 65; }
   .header .pmCloseBtn { order: 66; }
-  /* Copy fight summary: order 61 with the other fight actions; nothing to copy = dimmed.
-     The check fades in over the copy icon for 1.5 s (pmWidget.js). */
+  /* Copy as image: order 61 with the other fight actions; nothing to copy = dimmed.
+     The check fades in over the camera for 1.5 s (pmWidget.js). */
   .header .pmCopyBtn { order: 61; }
-  .header .pmCopyBtn:disabled { opacity: 0.35; cursor: default; }
+  .header .pmCopyBtn:disabled { cursor: default; }
+  .header .pmCopyBtn:disabled svg { opacity: 0.35; }
+  .header .headerBtns .headerBtn svg {
+    width: 15px;
+    height: 15px;
+  }
+  .header .headerBtns :is(.pmPillBtn, .dashboardBtn, .pmCloseBtn) svg {
+    width: 14px;
+    height: 14px;
+  }
   .pmCopyBtn svg {
     grid-area: 1 / 1;
     transition: opacity 150ms cubic-bezier(0.23, 1, 0.32, 1), transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
@@ -242,32 +273,58 @@ body.legacyUi .pmOnly {
   /* Narrow widgets drop suspend and copy, as slim does. */
   @container pmMeter (max-width: 499px) {
     .header :is(.suspendBtn, button.pmCopyBtn) { display: none; }
-    .header .settingsBtn { margin-left: 0; }
   }
+
+  /* Tabs: icon + label; the active one is the red pill with its glow. */
   .pmTabs {
     order: 10;
     display: flex;
     flex: none;
-    gap: 8px;
+    gap: 0;
   }
   .pmTab {
-    height: 24px;
-    padding: 0 10px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    height: 31px;
+    padding: 0 12px;
     border: 1px solid transparent;
-    border-radius: 4px;
+    border-radius: 6px;
     background: transparent;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--pm-ui-muted);
     font-family: inherit; font-weight: 600; font-size: 12px; line-height: normal;
+    letter-spacing: 0;
     cursor: pointer;
-    transition: color 120ms ease;
+    transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+  }
+  .pmTab svg {
+    flex: none;
+    width: 17px;
+    height: 17px;
+  }
+  .pmTab + .pmTab { margin-left: 10px; }
+  .pmTab + .pmTab::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: -6px;
+    width: 1px;
+    background: var(--pm-ui-line);
   }
   .pmTab:hover { color: #ffffff; }
   .pmTab.isActive {
-    border-color: #ffffff;
-    background: var(--pm-wbar);
+    gap: 8px;
+    border-color: var(--pm-hot);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--pm-deep) 82%, #ffffff 4%), color-mix(in srgb, var(--pm-deep) 62%, #000000));
+    box-shadow:
+      0 0 10px color-mix(in srgb, var(--pm-red) 55%, transparent),
+      inset 0 0 8px color-mix(in srgb, var(--pm-hot) 30%, transparent);
     color: #ffffff;
-    font-weight: 700;
+    font-size: 14px;
   }
+  .pmTab.isActive svg { width: 18px; height: 18px; color: color-mix(in srgb, var(--pm-redt) 45%, #ffffff); }
   .pmTab[hidden] { display: none; }
   .pmTab:focus-visible,
   .header :is(.headerBtn, .bossIcon):focus-visible {
@@ -275,25 +332,23 @@ body.legacyUi .pmOnly {
     outline-offset: 1px;
   }
   @media (hover: hover) and (pointer: fine) {
-    .header :is(.headerBtn, .bossIcon):hover { background-color: rgba(255, 255, 255, 0.14); }
-    .header .pmAvgBtn[aria-pressed="true"]:hover { background-color: color-mix(in srgb, var(--pm-wbar), #ffffff 14%); }
+    .header :is(.headerBtn, .bossIcon):hover { background-color: rgba(255, 255, 255, 0.1); color: #ffffff; }
   }
-  /* Status / state title take the free space (basis 0), so a long status text
-     is cut short instead of pushing the icons onto a second row. */
+  /* State title ("Ended", "Copied") takes the timer's place, centred. */
   .pmBarTitle {
     order: 30;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    flex: 3 1 0;
+    flex: 1 1 0;
     min-width: 0;
-    margin-left: 4px;
     overflow: hidden;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 600;
     white-space: nowrap;
   }
   .pmBarTitle:empty { display: none; }
-  .pmBarTitle:not(:empty) ~ .pmSpacer { flex-grow: 0; }
   /* "Ended": the design's red status dot. */
   .pmView-ended .pmBarTitle::before {
     content: "";
@@ -311,70 +366,113 @@ body.legacyUi .pmOnly {
   .header .pmSpacer {
     order: 40;
     flex: 1 1 0;
-    height: 38px;
+    height: 42px;
   }
   .header .bossIcon img { display: none; }
   .header .bossIconOverlay svg,
   .header .headerBtns .headerBtn .phIcon {
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
   }
   .header .headerBtns .suspendBtn.isSuspended { color: var(--pm-redt); }
 
-  /* Title row: the mode's name, what the engine is recording, the berserk
-     countdown and the target selector ("Boss ▾"). */
+  /* --- Boss row (74px): crest | BOSS badge, name ... HP readout over the HP bar |
+     timer box | Reset. The badge is the target selector and the HP block, timer box
+     and Reset are moved in here by pmWidget.js; the grid places them. --- */
   .header .bossNames {
     order: 100;
-    display: flex;
+    display: grid;
+    grid-template-columns: 45px auto minmax(0, 1fr) auto auto auto auto;
+    grid-template-rows: 33px 16px auto;
+    column-gap: 11px;
+    row-gap: 4px;
     align-items: center;
-    gap: 8px;
-    flex: 0 0 calc(100% + 16px);
-    margin: 0 -8px;
-    padding: 12px 14px 8px;
+    flex: 0 0 100%;
+    margin: 0;
+    padding: 8px 10px 8px 16px;
     box-sizing: border-box;
+    border-bottom: 1px solid var(--pm-ui-line);
+  }
+  /* The crest: the reference's emblem as a mask, painted in the theme's red. */
+  .pmEmblem {
+    grid-area: 1 / 1 / 3 / 2;
+    align-self: start;
+    width: 54px;
+    height: 60px;
+    margin: 0 0 0 -3px;
+  }
+  .pmEmblem::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, var(--pm-hot), var(--pm-red) 70%);
+    mask: url("./assets/pm/boss-emblem.png") center / contain no-repeat;
   }
   .pmModeTitle,
-  .pmAvgTitle {
-    flex: 1;
+  .pmAvgTitle,
+  .header .bossNames .bossName {
+    grid-area: 1 / 3;
     min-width: 0;
     overflow: hidden;
-    font-size: 14px;
-    font-weight: 700;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  /* The boss name in the reference's serif. System faces on purpose: Palatino ships
+     with Windows, so no font file is bundled for one line. Its size follows the
+     "Target name size" setting (15px default = the reference's 25px). */
+  .header .bossNames .bossName {
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif, var(--cjk-font-stack);
+    font-weight: 700;
+    font-size: calc(var(--boss-name-size, 15px) * 5 / 3);
+    line-height: 1.15;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #f3f0ea;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+  /* No boss on the meter: the mode's name sits where the boss name goes. */
+  .pmModeTitle,
+  .pmAvgTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #f3f0ea;
+  }
   .pmAvgTitle { display: none; }
-  /* Berserk countdown, red for the last 30 s. */
+  .meter.hasPmHp :is(.pmModeTitle, .recBadge) { display: none; }
+  .meter:not(.hasPmHp) .header .bossNames .bossName { display: none; }
+  /* Berserk countdown (hidden until the engine reports it), red for the last 30 s. */
   .pmBerserk {
+    grid-area: 1 / 5 / 3 / 6;
     display: inline-flex;
     align-items: center;
     gap: 0.3em;
-    flex: none;
-    font-size: 11px;
+    font-size: 13px;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
-  .pmBerserk svg { width: 11px; height: 11px; }
+  .pmBerserk svg { width: 13px; height: 13px; }
   .pmBerserk.isUrgent { color: #ff4d4d; }
   .pmBerserk[hidden] { display: none; }
-  /* What the engine is counting now: kind chip + target name (core.js). */
+  /* What the engine is counting now (kind chip + target), under the title when
+     no boss is on the meter (core.js updateRecordingBadge). */
   .recBadge {
+    grid-area: 2 / 2 / 3 / 5;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    flex: 0 1 auto;
+    gap: 6px;
     min-width: 0;
-    max-width: 45%;
-    font-size: 11px;
-    color: #b0a8a8;
+    font-size: 12px;
+    color: var(--pm-ui-muted);
   }
   .recBadge[hidden] { display: none; }
   .recKind {
     flex: none;
-    padding: 0 4px;
+    padding: 0 5px;
     border-radius: 3px;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
     color: #fff;
     background: #6c6464;
   }
@@ -420,7 +518,7 @@ body.legacyUi .pmOnly {
     color: #ffffff;
     font-weight: 600; font-size: 11px; line-height: 1.4;
     font-variant-numeric: tabular-nums;
-    margin-bottom: 6px; /* keeps the boss bar below off the strip */
+    margin-bottom: 6px; /* keeps the table below off the strip */
     transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1), transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
   }
   @starting-style {
@@ -447,21 +545,34 @@ body.legacyUi .pmOnly {
     }
   }
 
-  /* Fight timer / status, in the bar after the tabs (moved there by
-     pmWidget.js, and back for the Classic UI). In a fight it shows the timer;
-     out of it the grey dot and the status ("Idle"). */
+  /* Fight timer / status, centred in the bar (moved there by pmWidget.js). In a
+     fight it shows the timer; out of it the grey dot and the status ("Idle"). */
   .battleTime {
     order: 20;
-    position: static;
-    flex: 3 1 0;
-    height: 38px;
+    /* Centred on the widget, not on the gap between tabs and controls. */
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    justify-content: center;
+    height: 42px;
+    max-width: 170px;
     min-width: 0;
     gap: 6px;
-    margin: 0 0 0 4px;
-    font-size: 12px;
+    margin: 0;
+    font-size: 15px;
     color: #ffffff;
   }
-  .battleTime.isVisible { margin: 0 0 0 4px; }
+  /* Too narrow to centre over the free gap: back in the flow, sharing the space. */
+  @container pmMeter (max-width: 699px) {
+    .battleTime {
+      position: static;
+      flex: 1 1 0;
+      max-width: none;
+      transform: none;
+    }
+  }
+  .battleTime.isVisible { margin: 0; }
   .battleTime .status {
     flex: none;
     width: 7px;
@@ -475,8 +586,10 @@ body.legacyUi .pmOnly {
   .battleTime.state-fighting .status { display: none; }
   .battleTime.state-ended .tick,
   .battleTime.state-idle .tick { display: none; }
+  /* In a fight the bar is the timer alone, as in the reference; the status comes back after. */
+  .battleTime.state-fighting .analysisStatus { display: none; }
   .battleTime .tick {
-    font-family: inherit; font-weight: 700; font-size: 12px; line-height: normal;
+    font-family: inherit; font-weight: 600; font-size: 15px; line-height: normal;
     font-variant-numeric: tabular-nums;
     color: #ffffff;
   }
@@ -485,131 +598,127 @@ body.legacyUi .pmOnly {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-family: inherit; font-weight: 400; font-size: 12px; line-height: normal;
+    font-family: inherit; font-weight: 500; font-size: 13px; line-height: normal;
     letter-spacing: 0;
     text-transform: none;
-    color: #ffffff;
+    color: var(--pm-ui-muted);
   }
 
-  /* Target selector ("Boss ▾"), at the end of the title row (moved there by
-     pmWidget.js). A native select (BOSS / TRAIN / PVE / PVP, core.js); its open
-     list is the OS one, dark to match the widget. The caret is the old 8x5
-     triangle, drawn as a background since a select has no ::after. */
+  /* Target selector = the boss row's BOSS badge (moved there by pmWidget.js). A
+     native select (Boss / PVE / PVP, core.js): keyboard, screen readers and the OS
+     list come for free. Sized to the chosen option, no caret, as in the reference. */
   .footerBtns { display: contents; }
   .footerBtns .metricToggleBtn,
   .footerBtns .collapseBtn { display: none; }
   .targetModeBtn {
+    grid-area: 1 / 2;
     position: static;
-    flex: none;
+    justify-self: start;
     display: inline-block;
-    height: 24px;
+    field-sizing: content;
+    height: 18px;
     min-width: 0;
-    padding: 0 24px 0 10px;
+    padding: 0 8px;
     box-sizing: border-box;
-    border: 1px solid #574f4f;
+    border: 0;
     border-radius: 4px;
-    background: #000000 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23fff'/%3E%3C/svg%3E") no-repeat right 10px center;
-    color: #ffffff;
+    background: color-mix(in srgb, var(--pm-deep) 78%, #000000);
+    color: #f6dfe1;
     color-scheme: dark;
-    font-family: inherit; font-weight: 400; font-size: 12px; line-height: 22px;
-    letter-spacing: 0;
-    text-transform: none;
+    font-family: inherit; font-weight: 600; font-size: 11px; line-height: 18px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
     text-shadow: none;
     appearance: none;
     cursor: pointer;
-    transition: border-color 120ms ease;
+    transition: background-color 120ms ease;
   }
   .targetModeBtn option {
     background: #000000;
     color: #ffffff;
+    text-transform: none;
   }
-  .targetModeBtn:hover {
-    background-color: #000000;
-    color: #ffffff;
-    border-color: #8a8181;
+  @media (hover: hover) and (pointer: fine) {
+    .targetModeBtn:hover { background-color: color-mix(in srgb, var(--pm-deep) 92%, #ffffff); }
   }
   :is(.targetModeBtn, .pmLiveResetBtn):focus-visible {
     outline: 2px solid #ffffff;
     outline-offset: 1px;
   }
-  /* Reset beside the selector: labelled, so nobody has to guess the icon. */
+  /* Reset: labelled, so nobody has to guess the icon. */
   .pmLiveResetBtn {
+    grid-area: 1 / 7 / 3 / 8;
     flex: none;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    height: 24px;
-    padding: 0 10px;
+    gap: 8px;
+    height: 29px;
+    padding: 0 12px;
     box-sizing: border-box;
-    border: 1px solid #574f4f;
-    border-radius: 4px;
-    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(6, 7, 9, 0.85);
     color: #ffffff;
-    font-family: inherit; font-weight: 600; font-size: 12px; line-height: 22px;
+    font-family: inherit; font-weight: 600; font-size: 12px; line-height: 27px;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: border-color 120ms ease;
+    transition: border-color 120ms ease, transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
   }
-  .pmLiveResetBtn svg { width: 12px; height: 12px; }
-  @media (hover: hover) {
-    .pmLiveResetBtn:hover { border-color: #8a8181; }
+  .pmLiveResetBtn svg { width: 14px; height: 14px; }
+  @media (hover: hover) and (pointer: fine) {
+    .pmLiveResetBtn:hover { border-color: rgba(255, 255, 255, 0.6); }
   }
   .pmLiveResetBtn:active { transform: scale(0.97); }
-
-
-  /* --- Boss HP: "BOSS name" | "HP · %", then a 16px bar with notches at
-     25/50/75%. Killed: a 22px empty bar reading KILLED. --- */
-  .bossHpBar {
-    flex-direction: column;
-    gap: 5px;
-    height: auto;
-    padding: 0 14px 10px;
-    overflow: visible;
-    background: none;
-    border: 0;
-  }
-  .bossHpBar:not([style*="none"]) { display: flex; }
-  .pmHpHead {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-  }
-  .pmHpLabel {
-    display: flex;
+  /* Timer box: the fight time again (battleTime.js mirrors it), stopwatch first. */
+  .pmDuration.isVisible {
+    grid-area: 1 / 6 / 3 / 7;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-width: 0;
+    height: 41px;
+    padding: 0 13px 0 12px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.035);
+    font-size: 16px;
+    font-weight: 600;
   }
-  .pmHpKind {
-    flex: none;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    color: #b0a8a8;
-  }
-  .pmHpKind:empty { display: none; }
-  .pmHpHead .bossName {
-    min-width: 0;
+  .pmDuration svg { flex: none; width: 21px; height: 21px; }
+  .pmDuration .tick { font-variant-numeric: tabular-nums; }
+  /* Kept for screen readers: the box reads "Duration 0:48". */
+  .pmDurationLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
     overflow: hidden;
-    font-family: inherit; font-weight: 700; font-size: 11px; line-height: normal;
-    letter-spacing: 0;
-    text-transform: none;
-    text-overflow: ellipsis;
+    clip-path: inset(50%);
     white-space: nowrap;
-    color: #ffffff;
-    text-shadow: none;
   }
-  .pmHpText { flex: none; }
+
+  /* --- Boss HP: readout over a 16px bar with notches at 25/50/75%, the fill lit
+     at its leading edge. Killed: an empty bar reading KILLED. --- */
+  .bossHpBar:not([style*="none"]) { display: contents; }
+  .pmHpText {
+    grid-area: 1 / 4;
+    align-self: end;
+    padding: 0 4px 3px 0;
+    font-size: 13px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: #eef0f5;
+  }
   .pmHpTrack {
+    grid-area: 2 / 2 / 3 / 5;
     position: relative;
     height: 16px;
-    border: 1px solid #574f4f;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.42);
     border-radius: 8px;
     overflow: hidden;
-    background: #0f0f0f;
+    background: #070708;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
   }
   .bossHpFill,
@@ -618,19 +727,35 @@ body.legacyUi .pmOnly {
     top: 0;
     bottom: 0;
     height: auto;
-    border-radius: 8px;
-    background: linear-gradient(90deg, #821113 0%, #db0000 70%, #ff3b3b 100%);
-    box-shadow: 0 0 10px rgba(219, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    border-radius: 8px 2px 2px 8px;
+    background: linear-gradient(
+      90deg,
+      oklch(from var(--pm-red) calc(l * 0.8) c calc(h - 12)) 0%,
+      oklch(from var(--pm-red) calc(l * 0.92) c calc(h - 6)) 40%,
+      var(--pm-red) 70%,
+      oklch(from var(--pm-hot) calc(l + 0.05) c h) 100%
+    );
+    box-shadow: 0 0 10px color-mix(in srgb, var(--pm-red) 55%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     opacity: 1;
     transition: none;
   }
-  .bossHpFill::after { content: none; }
+  /* The lit leading edge. */
+  .bossHpFill::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 3px;
+    background: #ffe9ea;
+    box-shadow: 0 0 8px 2px color-mix(in srgb, var(--pm-hot) 80%, transparent);
+  }
   .pmHpNotch {
     position: absolute;
     top: 0;
     bottom: 0;
     width: 2px;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(20, 0, 0, 0.4);
   }
   .pmHpKilled {
     display: none;
@@ -639,26 +764,22 @@ body.legacyUi .pmOnly {
     top: 50%;
     transform: translate(-50%, -50%);
     white-space: nowrap;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.42em;
     text-shadow: 0 0 10px rgba(219, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.8);
-  }
-  .bossHpBar.isPmKilled .pmHpTrack {
-    height: 22px;
-    border-radius: 11px;
   }
   .bossHpBar.isPmKilled :is(.bossHpFill, .pmHpNotch) { display: none; }
   .bossHpBar.isPmKilled .pmHpKilled { display: block; }
   .bossHpText,
   .pmPhase { display: none; }
-  /* Stagger: a 4px gauge and "STAGGER | %" under the HP bar (10px below it,
-     as in the design's separate block). Broken = empty gauge, label in the fill colour. */
+  /* Stagger: a 4px gauge and "STAGGER | %" under the HP bar.
+     Broken = empty gauge, label in the fill colour. */
   .pmStagger {
+    grid-area: 3 / 2 / 4 / 5;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-top: 5px;
+    gap: 4px;
   }
   .pmStagger[hidden],
   .bossHpBar.isPmKilled .pmStagger { display: none; }
@@ -681,96 +802,135 @@ body.legacyUi .pmOnly {
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.08em;
-    color: #b0a8a8;
+    color: var(--pm-ui-muted);
   }
   .pmStaggerPct { font-variant-numeric: tabular-nums; }
   .pmStagger.isBroken .pmStaggerLabel { color: #7fd8ff; }
 
-  /* --- Party table: heads, then one bordered row per player in the class
-     colour, the bar filled to the player's share of the damage. --- */
+  /* --- Party table: heads, then one rounded card per player: rank badge, class
+     icon, name + class, DPS bar, DPS, %, total. --- */
   .pmCols,
-  .list .item .content {
+  .list .item {
     display: grid;
-    grid-template-columns: 34px 1fr 72px 64px 104px;
-    gap: 8px;
+    grid-template-columns: var(--pm-row-cols);
     align-items: center;
   }
   .pmCols {
     flex: none;
-    padding: 0 14px 6px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: #b0a8a8;
+    height: 27px;
+    margin: 0 10px;
+    padding: 0 11px 0 11px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--pm-ui-head);
   }
-  .pmCols > :nth-child(n + 3) { text-align: right; }
+  .pmCols > * { position: relative; grid-row: 1; align-self: stretch; line-height: 27px; white-space: nowrap; }
+  .pmCols > :nth-child(1) { grid-column: 1; text-align: center; }
+  .pmCols > :nth-child(2) { grid-column: 3; }
+  .pmCols > :nth-child(3) { grid-column: 5 / 7; }
+  .pmCols > :nth-child(4) { grid-column: 7; text-align: right; }
+  .pmCols > :nth-child(5) { grid-column: 8; text-align: center; }
+  .pmCols > :nth-child(6) { grid-column: 9; text-align: right; }
+  /* The list is sorted by the stat, highest first. */
+  .pmColStat::after {
+    content: "\25BC";
+    margin-left: 6px;
+    font-size: 0.75em;
+    vertical-align: 1px;
+  }
+  /* Hairlines between the heads. */
+  .pmCols > :nth-child(n + 2)::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: -10px;
+    width: 1px;
+    background: var(--pm-ui-line);
+  }
+  .pmCols > :nth-child(n + 4)::before { left: 6px; }
   .meter:not(:has(.list.hasRows)) .pmCols { display: none; }
   .list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 4px;
     padding: 0 10px;
     overflow: hidden;
   }
-  .list.hasRows { padding: 12px 10px; }
+  .list.hasRows { padding: 0 10px 10px; }
   .list .item {
     flex: none;
-    height: auto;
-    padding: 0;
-    border: 1px solid var(--cls, #574f4f);
-    border-radius: 4px;
-    background: #0f0f0f;
+    height: 31px;
+    padding: 0 11px 0 10px;
+    box-sizing: border-box;
+    border: 1px solid color-mix(in srgb, var(--cls, #8a93ab) 16%, rgba(255, 255, 255, 0.13));
+    border-radius: 6px;
+    overflow: visible;
+    background: rgba(255, 255, 255, 0.03);
   }
   @media (hover: hover) and (pointer: fine) {
-    .list .item:hover { background: #171717; }
+    .list .item:hover { background: rgba(255, 255, 255, 0.06); }
   }
-  /* You: a white ring outside your row (the design has no "you" marker). */
-  .list .item.isUser { outline: 1px solid rgba(255, 255, 255, 0.55); outline-offset: 1px; }
+  /* You: the azure-ringed, lit card. */
+  .list .item.isUser {
+    border-color: var(--pm-you);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--pm-you) 20%, transparent), color-mix(in srgb, var(--pm-you) 9%, transparent));
+    box-shadow: 0 0 10px color-mix(in srgb, var(--pm-you) 35%, transparent), inset 0 0 12px color-mix(in srgb, var(--pm-you) 10%, transparent);
+  }
   .list .item.isUser::before { content: none; }
-  .list .item .fill,
-  .list .item.isUser .fill,
-  .list .item.warning .fill,
-  .list .item.error .fill {
-    /* meter.js: the damage share, as the % column. Scaled rather than sized, so each
-       update glides on the compositor; the bar has no lit edge here to squash. */
-    width: 100% !important;
-    transform: scaleX(var(--pm-share, 0));
-    transform-origin: left center;
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--cls, #574f4f) var(--cls-g1, 36%), transparent),
-      color-mix(in srgb, var(--cls, #574f4f) var(--cls-g2, 14%), transparent)
-    );
-    /* The "Meter bar opacity" setting still scales it; its 80% default = the design. */
-    opacity: calc(var(--meter-fill-opacity, 0.8) / 0.8);
-    /* Updates land every 500 ms: settle well inside that, strong ease-out. */
-    transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1);
-  }
-  .list .item .fill::before,
-  .list .item .fill::after { content: none; }
-  .list .item .content {
-    height: auto;
-    min-height: 24px;
-    padding: 2px 6px;
-  }
-  .list .item .rank,
+  .list .item .content { display: contents; }
+  .list .item :is(.rank, .classIcon, .name, .fillTrack, .dps > p) { grid-row: 1; }
   .list .item .combatPower { display: none; }
+  /* Rank badge: the reference's frame (points top and bottom, scooped corners) in
+     gold, silver and copper for the podium, steel for the rest. */
+  .list .item .rank {
+    --rank: #b6bdca;
+    grid-column: 1;
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 26px;
+    font-family: inherit;
+    font-variation-settings: normal;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    color: #ffffff;
+    text-shadow: none;
+    filter: drop-shadow(0 0 2px color-mix(in srgb, var(--rank) 55%, transparent));
+  }
+  .list .item .rank::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--rank);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 26'%3E%3Cpath d='M7 3.5H11.5L14 1.2L16.5 3.5H21Q21 6 24.5 6V11L26.6 13L24.5 15V20Q21 20 21 22.5H16.5L14 24.8L11.5 22.5H7Q7 20 3.5 20V15L1.4 13L3.5 11V6Q7 6 7 3.5Z' fill='none' stroke='%23000' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  }
+  .list .item[data-rank="1"] .rank { --rank: #f2b23e; color: #ffffff; }
+  .list .item[data-rank="2"] .rank { --rank: #d4dae5; }
+  .list .item[data-rank="3"] .rank { --rank: #ee8346; }
   .list .item .classIcon {
+    grid-column: 3;
     display: block;
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
+    box-sizing: border-box;
     border: 1px solid var(--cls, #574f4f);
     border-radius: 4px;
-    background: var(--cls-icon, none) center / 16px no-repeat, var(--cls-bg, #0f0f0f);
+    background: var(--cls-icon, none) center / 20px no-repeat, var(--cls-bg, #0f0f0f);
+    box-shadow: inset 0 0 6px color-mix(in srgb, var(--cls, #574f4f) 30%, transparent);
   }
   .list .item .name,
   .list .item .name.isCjk {
+    grid-column: 5;
     min-width: 0;
     overflow: hidden;
+    padding-right: 8px;
     font-family: inherit;
     font-variation-settings: normal;
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     line-height: normal;
     letter-spacing: 0;
     text-overflow: ellipsis;
@@ -781,42 +941,78 @@ body.legacyUi .pmOnly {
   /* The class name after the player's, in the class colour. */
   .list .item .name::after {
     content: var(--cls-name, "");
-    margin-left: 7px;
-    font-size: 11px;
+    margin-left: 10px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--cls-text, var(--cls));
   }
   .list .item.isIdentifying .content .name {
-    font-size: 13px;
-    color: #b0a8a8;
+    font-size: 14px;
+    color: var(--pm-ui-muted);
   }
+  /* DPS bar: meter.js sizes the fill to the stat against the top player's; the top
+     one fills the whole track. */
+  .list .item .fillTrack {
+    grid-column: 6;
+    position: relative;
+    height: 11px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.07);
+    contain: layout paint; /* the fill's width changes stay inside the track */
+  }
+  .list .item .fill,
+  .list .item.isUser .fill,
+  .list .item.warning .fill,
+  .list .item.error .fill {
+    position: relative;
+    display: block;
+    height: 100%;
+    max-width: 100%;
+    border-radius: 4px;
+    background: linear-gradient(
+      90deg,
+      oklch(from var(--cls, #8a93ab) calc(l + 0.04) calc(c * 1.2) h),
+      oklch(from var(--cls, #8a93ab) calc(l + 0.18) calc(c * 0.85) h)
+    );
+    /* The "Meter bar opacity" setting still scales it; its 80% default = the reference. */
+    opacity: calc(var(--meter-fill-opacity, 0.8) / 0.8);
+    /* Updates land every 500 ms: settle well inside that, strong ease-out. */
+    transition: width 250ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .list .item .fill::before,
+  .list .item .fill::after { content: none; }
   .list .item .dps { display: contents; }
   .list .item .dps > p {
+    min-width: 0;
     margin: 0;
     padding: 0;
     overflow: hidden;
     font-family: inherit;
     font-variation-settings: normal;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 400;
     font-variant-numeric: tabular-nums;
     line-height: normal;
     letter-spacing: 0;
     text-align: right;
     white-space: nowrap;
-    color: #ffffff;
+    color: #eef0f4;
     text-shadow: none;
   }
   .list .item .dps > p:first-child {
-    font-size: 13px;
+    grid-column: 7;
+    font-size: 15px;
     font-weight: 700;
+    color: #ffffff;
   }
   .list .item .dps .dpsContribution,
-  .list .item .dps .dpsTotal {
-    display: block;
-    width: auto;
-    min-width: 0;
+  .list .item .dps .dpsTotal { display: block; }
+  .list .item .dps .dpsContribution {
+    grid-column: 8;
+    text-align: center;
+    color: var(--pm-ui-pct);
   }
+  .list .item .dps .dpsTotal { grid-column: 9; }
 
   /* --- Average DPS by class (the Medie button). With a boss on screen it
      replaces the party table under the HP bar (Main); without one it takes
@@ -925,33 +1121,29 @@ body.legacyUi .pmOnly {
     .pmSample { display: inline; }
   }
 
-  /* --- Footer (22px): Duration, then the live dot --- */
+  /* --- Footer (26px): Only my DPS, Trainer and the live dot. Not in the
+     reference, which has no footer; kept so those two functions stay reachable. --- */
   .meterFooter {
     justify-content: space-between;
-    gap: 10px;
-    height: 22px;
-    padding: 0 14px;
-    border-top: 0;
-    border-radius: 0 0 5px 5px;
-    background: var(--pm-wbar);
+    gap: 8px;
+    height: 26px;
+    padding: 0 12px;
+    border-top: 1px solid var(--pm-ui-line);
+    border-radius: 0 0 9px 9px;
+    background: transparent;
     font-size: 12px;
     color: #ffffff;
   }
   .pingDisplay,
   .meterTotalBar,
   .meterTotalBar[style] { display: none !important; }
-  .pmDuration.isVisible { display: inline; }
-  .pmDuration .tick {
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-  }
   .pmSample { display: none; }
   /* Live: blinks while the meter runs; amber / red when the ping is high. */
   .pmLiveDot {
     display: block;
     flex: none;
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     margin-left: auto;
     border-radius: 50%;
     --dot: #46c46e;
@@ -959,70 +1151,104 @@ body.legacyUi .pmOnly {
     box-shadow: 0 0 6px var(--dot);
     animation: pmLiveBlink 1.2s ease-in-out infinite;
   }
-  /* Only my DPS, at the right beside the live dot; pressed = white ring, as the averages button.
+  /* Only my DPS, at the right beside the live dot; pressed = white ring.
      The Trainer button sits beside it, same chip. */
   .footerBtns :is(.onlyMeBtn, .pmTrainerBtn) {
     flex: none;
     display: grid;
     place-items: center;
-    width: 20px;
-    height: 18px;
+    width: 22px;
+    height: 20px;
     margin-left: auto;
     border: 1px solid transparent;
     border-radius: 4px;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--pm-ui-icon);
     transition: color 120ms ease, border-color 120ms ease;
   }
   .footerBtns .pmTrainerBtn { margin-left: 0; }
-  .pmTrainerBtn svg { width: 12px; height: 12px; }
+  .footerBtns :is(.onlyMeBtn, .pmTrainerBtn) svg { width: 13px; height: 13px; }
   .footerBtns .onlyMeBtn.isActive { border-color: #ffffff; color: #ffffff; }
   .footerBtns :is(.onlyMeBtn, .pmTrainerBtn):focus-visible { outline: 2px solid #ffffff; outline-offset: 1px; }
   @media (hover: hover) and (pointer: fine) {
-    .footerBtns :is(.onlyMeBtn, .pmTrainerBtn):hover { color: #ffffff; background: rgba(255, 255, 255, 0.14); }
+    .footerBtns :is(.onlyMeBtn, .pmTrainerBtn):hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
   }
   .meterFooter:has(.onlyMeBtn) .pmLiveDot { margin-left: 0; }
   .meterFooter:has(.pingDisplay.ping-warn) .pmLiveDot { --dot: #e8b03a; }
   .meterFooter:has(.pingDisplay:is(.ping-high, .ping-bad)) .pmLiveDot { --dot: #ff4d4d; }
 
-  /* --- "Beta slim" layout = the design's Compatto: name, DPS, %, bar; the fight
-     timer in the bar; target, Reset and Only my DPS in a compact footer --- */
+  /* --- Compact ("betaSlim"): the same language at 280px. Bar with logo and the
+     centred timer (controls on hover); rows of rank badge, class icon, name, DPS
+     and %, the DPS bar drawn as a 2px line under them; target badge, Reset, Only
+     my DPS and Trainer in the footer. --- */
   .meter.slim {
+    --pm-row-cols: 20px 6px 20px 7px minmax(0, 1fr) 0 auto 42px 0;
     width: 280px;
     min-height: 160px;
   }
   .meter.slim :is(.header .bossNames, .bossHpBar, .pmCols) { display: none; }
-  /* The Compact bar is logo and status only; the controls come back on hover
+  /* The Compact bar is logo and timer only; the controls come back on hover
      so the widget stays usable. */
   .meter.slim:not(:hover, :has(:focus-visible)) :is(.pmTabs, .headerBtn) { display: none; }
   .meter.slim :is(.pmTabs, .bossIcon, .suspendBtn, .historyBtn, .resetBtn, .pmAvgBtn) { display: none; }
-  .meter.slim .header .settingsBtn { margin-left: 0; }
-  /* At 280px the six hover controls left the status ~20px ("I" of "Idle", a cut
-     timer): tighter gaps and buttons, and no spacer, give it ~75px. */
-  .meter.slim .header { gap: 0 4px; }
-  .meter.slim .header .pmSpacer { display: none; }
-  .meter.slim .header .headerBtns .headerBtn { width: 24px; }
-  .meter.slim .list.hasRows { gap: 4px; padding: 4px 6px; }
-  .meter.slim .list .item .content { grid-template-columns: 22px 1fr auto 38px; gap: 6px; }
-  .meter.slim .list .item .name::after { content: none; }
-  .meter.slim .list .item .dps .dpsTotal { display: none; }
-  .meter.slim .list .item .dps .dpsContribution { font-size: 11px; color: #b0a8a8; }
-  .meter.slim .meterFooter { gap: 6px; height: 26px; padding: 0 8px; }
-  .meter.slim .pmDuration.isVisible { display: none; } /* the timer is already in the bar */
-  .meter.slim .targetModeBtn {
-    height: 20px;
-    padding: 0 20px 0 8px;
-    font-size: 11px;
-    line-height: 18px;
-    background-position: right 7px center;
+  .meter.slim .header {
+    gap: 0 2px;
+    background-position: 0 33px;
   }
-  .meter.slim .pmLiveResetBtn {
+  .meter.slim .pmLogo {
+    width: 14px;
+    height: 14px;
+    padding: 4px 9px 4px 8px;
+  }
+  .meter.slim .header .pmSpacer { display: none; }
+  .meter.slim .battleTime { height: 34px; font-size: 13px; }
+  .meter.slim .battleTime .tick { font-size: 13px; }
+  .meter.slim .battleTime .analysisStatus { font-size: 12px; }
+  .meter.slim .header .headerBtns .headerBtn { width: 24px; height: 24px; }
+  .meter.slim .header :is(.pmPillBtn, .dashboardBtn, .pmCloseBtn) { margin-left: 0; }
+  .meter.slim .header :is(.settingsBtn, .pmAvgBtn, .pmCopyBtn, .pmLockBtn, .pmOpacityBtn)::after { content: none; }
+  .meter.slim .header .headerBtns .headerBtn svg { width: 13px; height: 13px; }
+  .meter.slim .list.hasRows { gap: 3px; padding: 6px 6px 6px; }
+  .meter.slim .list .item {
+    height: 26px;
+    padding: 0 8px 0 5px;
+    border-radius: 5px;
+  }
+  .meter.slim .list .item .rank {
     width: 20px;
+    height: 19px;
+    font-size: 11px;
+  }
+  .meter.slim .list .item .classIcon {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    background-size: 14px, auto;
+  }
+  .meter.slim .list .item .name { padding-right: 6px; font-size: 12px; }
+  .meter.slim .list .item .name::after { content: none; }
+  .meter.slim .list .item .fillTrack {
+    grid-column: 5 / 9;
+    align-self: end;
+    height: 2px;
+    margin-bottom: 2px;
+    padding-right: 0;
+    border-radius: 1px;
+  }
+  .meter.slim .list .item .fill { border-radius: 1px; }
+  .meter.slim .list .item .dps > p:first-child { font-size: 12px; }
+  .meter.slim .list .item .dps .dpsTotal { display: none; }
+  .meter.slim .list .item .dps .dpsContribution { font-size: 11px; text-align: right; }
+  .meter.slim .meterFooter { gap: 6px; padding: 0 8px; }
+  .meter.slim .pmDuration { display: none; } /* the timer is already in the bar */
+  .meter.slim .pmLiveResetBtn {
+    width: 22px;
     height: 20px;
     padding: 0;
     justify-content: center;
+    border-radius: 4px;
   }
   .meter.slim .pmLiveResetBtn span { display: none; } /* icon only; named by aria-label */
-  .meter.slim .pmLiveResetBtn svg { width: 11px; height: 11px; }
+  .meter.slim .pmLiveResetBtn svg { width: 12px; height: 12px; }
 
   @media (prefers-reduced-motion: reduce) {
     .list .item .fill { transition: none; }
@@ -1050,12 +1276,12 @@ body.legacyUi .pmOnly {
    pmMode-dps (every tab), pmView-live|waiting|ended|error, isPmDetail,
    isPmPill, isPmLocked, isPmIdle, isPmUploaded, hasPmLast, hasPmSpark. */
 :root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
-  /* Default size 520x420 (DPS Meter design); the list fills the space above the footer. */
+  /* Default size 810x367 (the Interface reference); the list fills the space above the footer. */
   .meter {
     display: flex;
     flex-direction: column;
     min-width: 0; /* the 280px minimum is enforced by the resize grips */
-    min-height: 420px;
+    min-height: 367px;
     container: pmMeter / inline-size;
   }
   .list {
@@ -1149,7 +1375,15 @@ body.legacyUi .pmOnly {
     display: none;
   }
   /* An empty mode still shows what the engine is recording and the mode button, to switch to it. */
-  .meter.pmMode-dps.pmView-waiting:not(.isPmAvg) .header .bossNames { display: flex; }
+  .meter.pmMode-dps.pmView-waiting:not(.isPmAvg) .header .bossNames { display: grid; }
+  /* Compact has no boss row: the mode's name and the recording chip on one line. */
+  .meter.slim.pmMode-dps.pmView-waiting:not(.isPmAvg) .header .bossNames {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+  .meter.slim .pmEmblem { display: none; }
   /* The footer too: the Trainer starts from the dummy, before any fight is on screen. */
   .meter.pmMode-dps.pmView-waiting.pmView-waiting:not(.isPmAvg) .meterFooter { display: flex; } /* class doubled: outweighs the :is() hide above */
   .meter.pmMode-dps.pmView-waiting { min-height: 220px; }
@@ -1469,15 +1703,16 @@ body.legacyUi .pmOnly {
     gap: 2px;
     padding: 0;
   }
-  .meter.isPmLocked .list .item { outline: 0; }
-  .meter.isPmLocked .list .item .content {
-    grid-template-columns: 1fr auto;
-    min-height: 0;
-    height: 18px;
+  .meter.isPmLocked .list .item {
+    --pm-row-cols: 0 0 0 0 minmax(0, 1fr) 0 auto 0 0;
+    height: 20px;
+    padding: 0 8px;
+    box-shadow: none;
   }
   .meter.isPmLocked .list .item .name::after { content: none; }
-  .meter.isPmLocked .list .item .name { font-weight: 400; }
-  .meter.isPmLocked .list .item :is(.classIcon, .dpsContribution, .dpsTotal) { display: none; }
+  .meter.isPmLocked .list .item .name { font-weight: 400; font-size: 13px; }
+  .meter.isPmLocked .list .item .dps > p:first-child { font-size: 13px; }
+  .meter.isPmLocked .list .item :is(.rank, .classIcon, .fillTrack, .dpsContribution, .dpsTotal) { display: none; }
   /* Locked hides every card but the list, while the waiting / fight-over /
      error views (and an open player breakdown) hide the list in favour of
      their card. Together that left a locked widget empty until the DPS tab
@@ -1491,7 +1726,7 @@ body.legacyUi .pmOnly {
      its badge (the unlock hotspot) and the numbers, read through click-through. --- */
   .meter.isPmTrainer > :not(.pmTrainer, .resizeHandle, .pmGrip, .pmGrabber, .pmLockBadge, .pmLockHint) { display: none !important; }
   /* The reset puts the meter in the shorter waiting view: keep the layout's size through the test. */
-  .meter.pmMode-dps.isPmTrainer:not(.isPmLocked) { min-height: 420px; }
+  .meter.pmMode-dps.isPmTrainer:not(.isPmLocked) { min-height: 367px; }
   .meter.slim.pmMode-dps.isPmTrainer:not(.isPmLocked) { min-height: 160px; }
   .meter.isPmTrainer .pmTrainer {
     display: flex;

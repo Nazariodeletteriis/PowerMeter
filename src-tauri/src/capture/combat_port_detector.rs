@@ -126,32 +126,26 @@ impl CombatPortDetector {
         // A loopback flow is the relay/ping-reducer's local tunnel — the exact
         // stream the game client consumes — so lock it the instant it produces
         // combat, ahead of any external session.
-        if is_loopback_opt(&device_for_lock) {
-            Self::lock_inner(&mut inner, port, device_for_lock);
-            return;
-        }
-
         // Physical/external flow: hold off briefly. With a ping-reducer the same
         // combat arrives on several external sessions and is relayed to a
         // loopback tunnel a moment later; this grace lets that loopback flow
         // appear and win. If none shows up, commit to the physical port (direct
         // connection / no relay).
         let waited = now_ms() - inner.first_candidate_ms;
-        if inner.first_candidate_ms != 0 && waited < LOOPBACK_GRACE_MS {
+        if !is_loopback_opt(&device_for_lock) && inner.first_candidate_ms != 0 && waited < LOOPBACK_GRACE_MS {
             return;
         }
 
-        Self::lock_inner(&mut inner, port, device_for_lock);
-    }
-
-    fn lock_inner(inner: &mut Inner, port: u16, device: Option<String>) {
-        if inner.locked_port.is_none() {
-            inner.locked_port = Some(port);
-            inner.locked_device = device.clone();
-            info!("Combat port locked: {}", port);
-            inner.candidates.clear();
-            inner.device_flows.clear();
-        }
+        inner.locked_port = Some(port);
+        info!("Combat port locked: {} on {:?}", port, device_for_lock);
+        inner.locked_device = device_for_lock;
+        inner.candidates.clear();
+        inner.device_flows.clear();
+        // The stale-lock reset (CaptureDispatcher) only runs once something was
+        // marked parsed. A lock on a flow that never parses (the wrong flow, or the
+        // game moved) left it at 0 and the meter stuck on a dead port until the
+        // game was closed; counting from the lock lets that reset happen.
+        self.mark_packet_parsed();
     }
 
     pub fn mark_packet_parsed(&self) {
@@ -179,4 +173,23 @@ fn is_loopback(name: &str) -> bool {
 
 fn is_loopback_opt(name: &Option<String>) -> bool {
     name.as_ref().is_some_and(|n| is_loopback(n))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::CombatPortDetector;
+
+    #[test]
+    fn a_lock_starts_the_stale_clock() {
+        // Without this a lock on a flow that never parses kept last_parsed at 0,
+        // and the dispatcher's stale reset (`last_parsed > 0 && ...`) never fired.
+        let d = CombatPortDetector::new();
+        d.register_candidate(13328, (13328, 52000), Some("Adapter for loopback traffic capture"));
+        assert_eq!(d.last_parsed_at_ms(), 0);
+        d.confirm_candidate(13328, 52000, Some("Adapter for loopback traffic capture"));
+        assert_eq!(d.current_port(), Some(13328));
+        assert!(d.last_parsed_at_ms() > 0);
+        d.reset();
+        assert_eq!((d.current_port(), d.last_parsed_at_ms()), (None, 0));
+    }
 }

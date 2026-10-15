@@ -65,7 +65,6 @@ class DpsApp {
       saveRawPackets: "dpsMeter.saveRawPackets",
       windowOpacity: "dpsMeter.windowOpacity",
       bossNameSize: "dpsMeter.bossNameSize",
-      betaUi: "dpsMeter.betaUi",
       detailsMonitor: "dpsMeter.detailsMonitor",
       showSuspendBtn: "dpsMeter.showSuspendBtn",
     };
@@ -86,7 +85,6 @@ class DpsApp {
     this.isCollapse = false;
     this._windowHidden = false;
     this.displayMode = "dps";
-    this.betaUi = true;
     // PowerMeter: the design's own theme is the default.
     this.theme = "powermeter";
     this.availableThemes = [
@@ -2066,7 +2064,6 @@ class DpsApp {
     this.setOnlyShowUser(this.safeGetSetting(this.storageKeys.onlyShowUser) === "1", { persist: false });
     this.setDebugLogging(storedDebugLogging, { persist: false, syncBackend: true });
     this.setPinMeToTop(storedPinMeToTop, { persist: false });
-    this.setBetaUi(this.safeGetSetting(this.storageKeys.betaUi) !== "false", { persist: false });
     const storedSlimMode = this.safeGetSetting(this.storageKeys.slimMode) === "true";
     this.setSlimMode(storedSlimMode, { persist: false });
     this.setMainPlayerNamesBold(storedMainPlayerNamesBold, { persist: false });
@@ -2855,10 +2852,8 @@ class DpsApp {
     // They were two separate toggles, which made four states the user had to
     // assemble themselves.
     const meterLayoutOptions = [
-      { value: "beta", label: this.i18n?.t?.("settings.meterLayout.beta", "Beta UI") ?? "Beta UI" },
-      { value: "betaSlim", label: this.i18n?.t?.("settings.meterLayout.betaSlim", "Beta Slim") ?? "Beta Slim" },
-      { value: "classic", label: this.i18n?.t?.("settings.meterLayout.classic", "Classic UI") ?? "Classic UI" },
-      { value: "classicSlim", label: this.i18n?.t?.("settings.meterLayout.classicSlim", "Classic Slim") ?? "Classic Slim" },
+      { value: "beta", label: this.i18n?.t?.("settings.meterLayout.beta", "Interface") ?? "Interface" },
+      { value: "betaSlim", label: this.i18n?.t?.("settings.meterLayout.betaSlim", "Compact") ?? "Compact" },
     ];
     setupDropdown(
       this.meterLayoutDropdownBtn,
@@ -3807,16 +3802,15 @@ class DpsApp {
     }
   }
 
+  // Two layouts: Interface ("beta") and Compact ("betaSlim"). The Classic pair is
+  // gone; its old dpsMeter.betaUi setting is no longer read, so a saved Classic
+  // lands on Interface and Classic Slim on Compact (dpsMeter.slimMode is kept).
   getMeterLayout() {
-    const base = this.betaUi ? "beta" : "classic";
-    return this.slimMode ? `${base}Slim` : base;
+    return this.slimMode ? "betaSlim" : "beta";
   }
 
   setMeterLayout(value, { persist = false } = {}) {
-    const beta = String(value).startsWith("beta");
-    const slim = String(value).endsWith("Slim");
-    this.setBetaUi(beta, { persist });
-    this.setSlimMode(slim, { persist });
+    this.setSlimMode(value === "betaSlim", { persist });
     this.redrawFromLatest();
   }
 
@@ -3828,25 +3822,13 @@ class DpsApp {
     this.fetchDps();
   }
 
-  // Beta UI is the redesigned main window and is the default. Switching it off
-  // adds body.legacyUi, which activates the pre-redesign skin in styles.css.
-  setBetaUi(enabled, { persist = false } = {}) {
-    this.betaUi = !!enabled;
-    document.body.classList.toggle("legacyUi", !this.betaUi);
-    this.pmWidget?.syncTheme();
-    // Both skins show the same placeholder text; only the type scale and the
-    // uppercase transform differ, so the fitted size has to be recomputed.
-    this.fitBossName();
-    if (persist) {
-      this.safeSetSetting(this.storageKeys.betaUi, String(this.betaUi));
-    }
-  }
-
   setSlimMode(enabled, { persist = false } = {}) {
     this.slimMode = !!enabled;
     document.querySelector(".meter")?.classList.toggle("slim", this.slimMode);
-    // Beta slim keeps the target selector and Reset in its footer (pmWidget.js).
+    // Compact keeps the target selector and Reset in its footer (pmWidget.js).
     this.pmWidget?.syncTheme();
+    // Compact hides the boss row, so the name is fitted again on the way back.
+    this.fitBossName();
     if (persist) {
       this.safeSetSetting(this.storageKeys.slimMode, String(this.slimMode));
     }
@@ -4080,12 +4062,13 @@ class DpsApp {
   // dropdowns (theme, layout, player limit) are not native inputs and need
   // their own handling, so they are deliberately absent.
   applyRemoteSettingChange(key, value) {
-    // PowerMeter: "Meter layout" is a dropdown pair (beta/classic + slim), not a
-    // form control, so the map below can't reach it and the meter kept its layout
+    // PowerMeter: "Meter layout" (Interface / Compact) is a dropdown, not a form
+    // control, so the map below can't reach it and the meter kept its layout
     // until restart. Apply it directly; no persist, so there is no echo.
-    if (key === this.storageKeys.betaUi) this.setBetaUi(value !== "false");
-    if (key === this.storageKeys.slimMode) this.setSlimMode(value === "true");
-    if (key === this.storageKeys.betaUi || key === this.storageKeys.slimMode) return this.redrawFromLatest();
+    if (key === this.storageKeys.slimMode) {
+      this.setSlimMode(value === "true");
+      return this.redrawFromLatest();
+    }
     if (key === this.storageKeys.onlyShowUser) return this.setOnlyShowUser(value === "1");
     if (key === this.storageKeys.theme) return this.applyTheme(value);
     const selector = REMOTE_APPLIED_SETTING_CONTROLS[key];
@@ -4123,27 +4106,15 @@ class DpsApp {
       const taken = Number(row?.damageTaken) || 0;
       return { value: taken, text: this.dpsFormatter.format(Number(row?.hitsTaken) || 0), total: taken };
     }
-    // PowerMeter: the widget (every theme) and the PowerMeter theme show DPS and total
-    // damage side by side and have no DPS/DMG toggle, so the metric column always reads DPS.
-    if (this.displayMode === "totalDamage" && this.theme !== "powermeter" && !this.betaUi) {
-      const totalDamage = Number(row?.totalDamage) || 0;
-      return {
-        value: totalDamage,
-        text: this.formatAbbreviatedNumber(totalDamage),
-      };
-    }
+    // PowerMeter: the widget shows DPS and total damage side by side and has no
+    // DPS/DMG toggle, so the metric column always reads DPS, as a bare number (no "/s").
     const dps = Number(row?.dps) || 0;
     return {
       value: dps,
-      text: `${this.formatDpsThousands(dps)}${this.getDpsSuffix()}`,
+      text: `${this.formatDpsThousands(dps)}`,
     };
   }
 
-  // PowerMeter: the design prints DPS as a bare number, so the widget drops the "/s".
-  getDpsSuffix() {
-    if (this.theme === "powermeter" || this.betaUi) return "";
-    return this.i18n?.t("meter.dpsSuffix", "/s") ?? "/s";
-  }
 
   updateMeterTotalBar(rows) {
     if (!this.meterTotalBar) return;
@@ -4157,7 +4128,7 @@ class DpsApp {
     if (this.meterTotalDpsEl) {
       // Matches the per-row readout directly above it; a full-precision total
       // over abbreviated rows reads as two different units.
-      this.meterTotalDpsEl.textContent = `${this.formatDpsThousands(totalDps)}${this.getDpsSuffix()}`;
+      this.meterTotalDpsEl.textContent = `${this.formatDpsThousands(totalDps)}`;
     }
     if (this.meterTotalDmgEl) {
       this.meterTotalDmgEl.textContent = this.formatAbbreviatedNumber(totalDmg);

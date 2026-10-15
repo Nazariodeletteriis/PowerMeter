@@ -106,7 +106,7 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
   // Rotations lock with Party once a Player's trial ends (nav.ts): blurred, under the Locked card.
   const rotLocked = !canOpen(useEntitlement(), ROTATION_TIER);
   const lock = rotLocked && <LockSimpleIcon weight="fill" role="img" aria-label={t("subs.lockedSoon")} style={{ marginLeft: 4, color: "var(--pm-t3)" }} />;
-  const gateRot = (node: ReactNode) => (rotLocked ? <Locked t={t} tier={ROTATION_TIER} go={go} onError={onError}>{node}</Locked> : node);
+  const gateRot = (node: ReactNode) => (rotLocked ? <Locked t={t} lang={lang} tier={ROTATION_TIER} go={go} onError={onError}>{node}</Locked> : node);
   // The run's bosses in boss order; each chip opens that boss's latest attempt in the run.
   const runBosses = dungeonRun ? [...new Set(dungeonRun.fights.map((f) => f.bossName))].sort((a, b) => dungeonRun.bosses[a] - dungeonRun.bosses[b]) : [];
 

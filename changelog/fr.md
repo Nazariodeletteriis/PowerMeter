@@ -2,6 +2,16 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.8
+
+- Nouveau : Widget redessiné : onglets DPS / HEAL / AGGRO, nom du boss avec barre de PV, lignes de classement avec barres de DPS à la couleur de la classe. La disposition Compacte suit le même style.
+- Modifié : Les dispositions du widget sont désormais seulement « Interface » et « Compacte ». Les dispositions Classiques ont été retirées : si vous en utilisiez une, vous passez à la nouvelle disposition correspondante.
+- Corrigé : PowerMeter trouve le jeu même quand sa fenêtre porte un autre titre (par exemple « AION 2 ») : il le reconnaît à son programme.
+- Corrigé : Npcap installé sans le mode « WinPcap API-compatible » fonctionne désormais ; si Npcap ne peut pas démarrer, le widget l'indique.
+- Corrigé : Les cartes réseau activées après le démarrage (VPN, ExitLag, Wi-Fi après la veille) sont capturées sans redémarrer, et le meter ne reste plus bloqué sur une connexion morte.
+- Corrigé : Carte du monde : les marqueurs et les limites de zone étaient à l'envers (cubes asmodiens dans la mer). Ils sont maintenant sur la terre ferme sur toutes les cartes.
+- Modifié : Supporter : les trois offres Patreon débloquent tout ; seules la période de facturation et la remise changent.
+
 ## 0.5.7
 
 - Nouveau : Constructeur de personnage : onglet Familier : votre collection de familiers comme dans la fenêtre Familier du jeu (catégories, niveau, progression x/75, MAX), ouverte avec « Afficher les familiers ». PowerMeter la lit dans le jeu à la connexion ; vous pouvez aussi marquer les familiers à la main. Le compte correspond au jeu (familiers Special exclus).

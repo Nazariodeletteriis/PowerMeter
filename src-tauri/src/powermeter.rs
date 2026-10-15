@@ -231,7 +231,7 @@ pub fn npcap_installed() -> bool {
 }
 
 /// `%SystemRoot%\System32\Npcap`, where Npcap always puts its DLLs.
-fn npcap_dir() -> Option<std::path::PathBuf> {
+pub(crate) fn npcap_dir() -> Option<std::path::PathBuf> {
     std::env::var_os("SystemRoot").map(|root| std::path::Path::new(&root).join("System32").join("Npcap"))
 }
 
