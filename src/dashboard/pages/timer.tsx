@@ -1,124 +1,228 @@
-import { useEffect, useRef } from "react";
-import { BellIcon, CalendarBlankIcon, DiscordLogoIcon, PlusIcon } from "@phosphor-icons/react";
-import { chime, SOUND_KEY as SOUND, VOLUME_KEY } from "../chime";
-import { REGIONS } from "../Onboarding";
+import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import {
+  ArrowCounterClockwiseIcon,
+  CalendarBlankIcon,
+  ConfettiIcon,
+  GlobeHemisphereEastIcon,
+  HourglassIcon,
+  SkullIcon,
+  SpeakerHighIcon,
+} from "@phosphor-icons/react";
+import { chime, LEAD_KEY, leadMinutes, LEADS, SOUND_KEY as SOUND, VOLUME_KEY } from "../chime";
 import { Card, EmptyState } from "../ui";
-import { nextDailyReset, nextWeeklyReset, resetTime } from "./organizer/resets";
-import { eventStatus, startsBetween, useGameEvents } from "./organizer/schedule";
-import { clock, countdown, dayLabel, useNow } from "./shugo/events";
+import { cadenceText, upcomingWindows, useGameEvents, type EventWindow } from "./organizer/schedule";
+import { clock, countdown, dayLabel, HOUR, useNow } from "./shugo/events";
+import "./characters/characters.css";
 import "./organizer/organizer.css";
 import "./shugo/events.css";
 import "./system/system.css";
 import type { PageProps } from "./types";
 
-const DAY = 86400;
+// Windows in the list: everything in the next 24 hours, and at least the next one of each event
+// (the weekly reset and twice-a-week bosses would drop out otherwise).
+const HORIZON = 24 * HOUR;
+const PER_EVENT = 26; // the hourly Shugo Festival: 24 windows plus the one running
 
+/** Categories of the `events` table, in tab order. Unknown ones still show under "All". */
+const CATS: { id: string; icon: ReactNode; tab: string; label: string; next: string }[] = [
+  { id: "rift", icon: <HourglassIcon aria-hidden="true" />, tab: "events.timer.tabRift", label: "events.cat.rift", next: "events.rift.next" },
+  { id: "event", icon: <ConfettiIcon aria-hidden="true" />, tab: "events.timer.tabEvent", label: "events.cat.event", next: "events.timer.nextEvent" },
+  { id: "boss", icon: <SkullIcon aria-hidden="true" />, tab: "events.timer.tabBoss", label: "events.cat.boss", next: "events.timer.nextBoss" },
+  { id: "reset", icon: <ArrowCounterClockwiseIcon aria-hidden="true" />, tab: "events.timer.tabReset", label: "events.cat.reset", next: "events.timer.nextReset" },
+];
+const TABS = ["all", ...CATS.map((c) => c.id)];
+const ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-/** Prototype pg.timer: the two resets (custom timers wait for R5 storage) and the archive's event rules. */
+/** Prototype pg.timer: next of each kind, alert settings, and every window of the archive's event rules. */
 export default function Timer({ t, lang, settings, save, run, onError }: PageProps) {
   const now = useNow();
   const events = useGameEvents(onError);
+  const [tab, setTab] = useState("all");
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const sound = settings[SOUND] === "1";
+  const lead = leadMinutes(settings[LEAD_KEY]);
 
-  // ponytail: rings only while this page is open; app-wide alerts need the shell.
-  const last = useRef(now);
-  useEffect(() => {
-    if (sound && events && startsBetween(events, last.current, now)) chime(settings[VOLUME_KEY]);
-    last.current = now;
-  }, [now]);
+  const rows = (events ?? [])
+    .flatMap((e) => {
+      const all = upcomingWindows(e, now, PER_EVENT);
+      const near = all.filter((w) => w.start < now + HORIZON);
+      return (near.length ? near : all.slice(0, 1)).map((w) => ({ e, w }));
+    })
+    .sort((a, b) => a.w.start - b.w.start || a.e.name.localeCompare(b.e.name));
+  const shown = tab === "all" ? rows : rows.filter((r) => r.e.category === tab);
 
-  const rows = (events ?? []).map((e) => ({ e, ...eventStatus(e, now) })).sort((a, b) => a.window.start - b.window.start);
+  // The next window of each kind; events starting together (bosses at 21:30) share the card.
+  const next = CATS.flatMap((cat) => {
+    const first = rows.find((r) => r.e.category === cat.id);
+    if (!first) return [];
+    const names = rows.filter((r) => r.e.category === cat.id && r.w.start === first.w.start).map((r) => r.e.name);
+    return [{ cat, ...first, names }];
+  });
 
-  const region = (REGIONS.find((r) => r.value === settings["pm.region"]) ?? REGIONS[0]).label;
-  const left = (to: Date) => Math.max(0, Math.round((to.getTime() - now) / 1000));
-  const timers = [
-    { name: t("organizer.dailyReset"), sub: t("organizer.dailyResetSub", { region, time: resetTime(new Date(now)) }), left: left(nextDailyReset(new Date(now))), period: DAY, win: true, discord: false },
-    { name: t("organizer.weeklyReset"), sub: t("organizer.weeklyResetSub", { time: resetTime(new Date(now)) }), left: left(nextWeeklyReset(new Date(now))), period: 7 * DAY, win: true, discord: true },
-  ];
+  const span = (w: EventWindow) => (w.end > w.start ? `${clock(w.start, lang)} - ${clock(w.end, lang)}` : clock(w.start, lang));
+  const left = (w: EventWindow) => (w.active ? w.end : w.start) - now;
+  const soon = (w: EventWindow) => !w.active && w.start - now <= lead * 60e3;
+  const catOf = (id: string) => CATS.find((c) => c.id === id);
 
+  // Tabs pattern (WAI-ARIA APG): one tab stop, arrows move and select.
+  const onTabKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    const i = TABS.indexOf(tab);
+    const to = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: TABS.length - 1 }[e.key];
+    if (to === undefined) return;
+    e.preventDefault();
+    const id = TABS[(to + TABS.length) % TABS.length];
+    setTab(id);
+    tabRefs.current[id]?.focus();
+  };
+
+  if (events === undefined) return null;
+  if (rows.length === 0)
+    return (
+      <Card title={t("events.timer.title")} style={{ maxWidth: 760 }}>
+        <EmptyState icon={<CalendarBlankIcon aria-hidden="true" />} title={t("events.timer.emptyTitle")} text={t("events.timer.emptyText")} />
+      </Card>
+    );
+
+  let lastDay = "";
   return (
     <>
-      <div style={{ display: "flex", gap: 8, margin: "-8px 0 14px" }}>
-        {/* ponytail: inert like the prototype until R5 stores custom timers. */}
-        <button type="button" className="btn fill">
-          <PlusIcon aria-hidden="true" />
-          {t("organizer.newTimer")}
-        </button>
-      </div>
-      <div className="orgTimers">
-        {timers.map((x) => {
-          const soon = x.left < 900;
-          return (
-            <section key={x.name} className="card" style={{ padding: 14, display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ display: "flex", alignItems: "flex-start" }}>
-                <div style={{ flex: 1 }}>
-                  <h2 style={{ fontWeight: 500 }}>{x.name}</h2>
-                  <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>{x.sub}</div>
-                </div>
-                <div style={{ display: "flex", gap: 6, color: "var(--pm-t3)" }}>
-                  {x.win && <BellIcon role="img" alt={t("organizer.notifyWindows")} />}
-                  {x.discord && <DiscordLogoIcon role="img" alt={t("organizer.notifyDiscord")} />}
-                </div>
+      <div className="evNextGrid">
+        {next.map(({ cat, e, w, names }) => (
+          <section key={cat.id} className="card evNext" data-cat={cat.id}>
+            <h2 className="kicker evNextHead">
+              {cat.icon}
+              {w.active && cat.id === "rift" ? t("events.rift.running") : t(cat.next)}
+            </h2>
+            {w.active ? (
+              <div className="evState" data-live="true">
+                <span className="dot" aria-hidden="true" />
+                {t("events.endsIn")}
               </div>
-              <div className="mono" role="timer" style={{ fontSize: 26, color: soon ? "var(--pm-redt)" : "var(--pm-t1)" }}>
-                {countdown(x.left * 1000, t)}
-              </div>
-              <div style={{ height: 3, background: "var(--pm-s3)", borderRadius: 2 }}>
-                <div
-                  style={{ height: "100%", width: `${(100 - (x.left / x.period) * 100).toFixed(1)}%`, background: "var(--pm-red)", borderRadius: 2 }}
-                />
-              </div>
-            </section>
-          );
-        })}
+            ) : (
+              <div className="evState">{t("events.startsIn")}</div>
+            )}
+            <div className="evNextCount" role="timer" data-soon={soon(w)}>
+              {countdown(left(w), t)}
+            </div>
+            <div className="evNextName">
+              {names[0]}
+              {names.length > 1 && <span className="evMore"> +{names.length - 1}</span>}
+            </div>
+            <div className="evNextMeta">
+              {[`${dayLabel(w.start, now, lang)} ${span(w)}`, e.location].filter(Boolean).join(" · ")}
+            </div>
+          </section>
+        ))}
       </div>
 
-      <Card
-        title={t("events.timer.title")}
-        style={{ marginTop: 14, maxWidth: 760 }}
-        aside={
-          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--pm-t2)" }}>
-            {t("events.timer.sound")}
-            <button
-              type="button"
-              role="switch"
-              aria-checked={sound}
-              aria-label={t("events.timer.sound")}
-              className="switch"
-              onClick={() => run(() => save(SOUND, sound ? "0" : "1"))}
-            >
-              <span />
-            </button>
-          </label>
-        }
-      >
-        {events === undefined ? null : rows.length === 0 ? (
-          <EmptyState icon={<CalendarBlankIcon aria-hidden="true" />} title={t("events.timer.emptyTitle")} text={t("events.timer.emptyText")} />
-        ) : (
-          <div className="evList" style={{ marginTop: 8 }}>
-            {rows.map(({ e, window: w, remaining }, i) => (
-              <div key={e.event_id} className="evRow" data-first={i === 0}>
-                <span className="mono">{clock(w.start, lang)}</span>
-                <span>
-                  {e.name}
-                  <small>{[dayLabel(w.start, now, lang), e.location].filter(Boolean).join(" · ")}</small>
-                </span>
-                <span className="evLeft" role="timer">
-                  {w.active ? (
-                    <span className="evState" data-live="true">
-                      <span className="dot" aria-hidden="true" />
-                      {t("events.endsIn")} {countdown(remaining, t)}
-                    </span>
-                  ) : (
-                    countdown(remaining, t)
-                  )}
-                </span>
-              </div>
+      <div className="evGrid" style={{ marginTop: 12 }}>
+        <section className="card evTl">
+          <div className="orgTabs evTabs" role="tablist" aria-label={t("events.timer.filter")} onKeyDown={onTabKey}>
+            {TABS.map((id) => (
+              <button
+                key={id}
+                id={`evTab-${id}`}
+                ref={(b) => {
+                  tabRefs.current[id] = b;
+                }}
+                type="button"
+                role="tab"
+                className="orgTab"
+                aria-selected={id === tab}
+                aria-controls="evPanel"
+                tabIndex={id === tab ? 0 : -1}
+                onClick={() => setTab(id)}
+              >
+                {id === "all" ? t("events.timer.tabAll") : t(catOf(id)!.tab)}
+              </button>
             ))}
           </div>
-        )}
-        <p className="evNote" style={{ marginTop: 8 }}>{t("events.timer.note")}</p>
-      </Card>
+          <div id="evPanel" role="tabpanel" aria-labelledby={`evTab-${tab}`}>
+            {shown.length === 0 ? (
+              <p className="evNote" style={{ padding: "12px 0" }}>{t("events.timer.emptyTab")}</p>
+            ) : (
+              <ul className="evTlList">
+                {shown.map(({ e, w }) => {
+                  const day = dayLabel(w.start, now, lang);
+                  const head = day !== lastDay && day;
+                  lastDay = day;
+                  const cat = catOf(e.category);
+                  return (
+                    <li key={`${e.event_id}-${w.start}`}>
+                      {head && <h3 className="evTlDay">{head}</h3>}
+                      <div className="evTlRow" data-live={w.active}>
+                        <span className="evTlTime">
+                          {clock(w.start, lang)}
+                          {w.end > w.start && <small>{clock(w.end, lang)}</small>}
+                        </span>
+                        <span className="evTlMain">
+                          <span className="evTlName">
+                            {e.name}
+                            <span className="badge evCat" data-cat={e.category}>
+                              {cat?.icon}
+                              {cat ? t(cat.label) : e.category}
+                            </span>
+                          </span>
+                          <small>{[cadenceText(e, now, t, lang), e.location].filter(Boolean).join(" · ")}</small>
+                        </span>
+                        <span className="evTlLeft" role="timer" data-soon={soon(w)}>
+                          {w.active ? (
+                            <span className="evState" data-live="true">
+                              <span className="dot" aria-hidden="true" />
+                              {t("events.endsIn")} {countdown(left(w), t)}
+                            </span>
+                          ) : (
+                            countdown(left(w), t)
+                          )}
+                        </span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </section>
+
+        <div className="evStack">
+          <Card title={t("events.timer.alerts")}>
+            <div className="evAlerts">
+              <label className="evAlertRow">
+                {t("events.timer.sound")}
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={sound}
+                  aria-label={t("events.timer.sound")}
+                  className="switch"
+                  onClick={() => run(() => save(SOUND, sound ? "0" : "1"))}
+                >
+                  <span />
+                </button>
+              </label>
+              <div role="group" aria-labelledby="evLeadLabel">
+                <div id="evLeadLabel" className="evAlertLabel">{t("events.timer.lead")}</div>
+                <div className="evLeads">
+                  {LEADS.map((n) => (
+                    <button key={n} type="button" className="chChip mono" aria-pressed={n === lead} onClick={() => run(() => save(LEAD_KEY, String(n)))}>
+                      {t("events.timer.leadMin", { n })}
+                    </button>
+                  ))}
+                </div>
+                <p className="evNote" style={{ marginTop: 6 }}>{t("events.timer.leadHint", { n: lead })}</p>
+              </div>
+              <button type="button" className="btn sm" style={{ alignSelf: "flex-start" }} onClick={() => chime(settings[VOLUME_KEY])}>
+                <SpeakerHighIcon aria-hidden="true" />
+                {t("events.timer.test")}
+              </button>
+            </div>
+          </Card>
+          <p className="evNote evZone">
+            <GlobeHemisphereEastIcon aria-hidden="true" />
+            {t("events.timer.zone", { zone: ZONE })}
+          </p>
+        </div>
+      </div>
     </>
   );
 }

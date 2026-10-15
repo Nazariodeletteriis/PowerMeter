@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
+import type { T } from "../../i18n";
 
 // Event timer: the `events` table of the game data archive (rules in the event's own
 // time zone, Asia/Seoul). Instants are UTC ms; pages show them in the PC's local time
@@ -92,6 +93,33 @@ export function upcomingWindows(e: GameEvent, now: number, count = 8): EventWind
 export function eventStatus(e: GameEvent, now: number) {
   const window = upcomingWindows(e, now, 1)[0];
   return { window, remaining: (window.active ? window.end : window.start) - now };
+}
+
+/**
+ * The rule in words for the Timer list ("Every 3 hours, 8 times a day"). Weekdays are the PC's own (a Seoul
+ * evening can be another day elsewhere), read off the next windows.
+ */
+export function cadenceText(e: GameEvent, now: number, t: T, lang: string) {
+  const c = e.cadence_json;
+  if (c.kind === "minuteOfHour")
+    return c.minutes.length === 1 && c.minutes[0] === 0
+      ? t("events.cad.hourly")
+      : t("events.cad.hourlyAt", { list: c.minutes.map((m) => `:${String(m).padStart(2, "0")}`).join(", ") });
+  if (c.kind === "hourOfDay") {
+    if (c.hours.length === 1) return t("events.cad.daily");
+    const h = [...c.hours].sort((a, b) => a - b);
+    const step = h[1] - h[0];
+    return step * h.length === 24 && h.every((x, i) => x === h[0] + i * step)
+      ? t("events.cad.everyHours", { h: step, n: h.length })
+      : t("events.cad.timesDay", { n: h.length });
+  }
+  const n = c.weekdays.length;
+  const days = upcomingWindows(e, now, n)
+    .map((w) => new Date(w.start))
+    .sort((a, b) => ((a.getDay() + 6) % 7) - ((b.getDay() + 6) % 7)) // Monday first
+    .map((d) => d.toLocaleDateString(lang, { weekday: "short" }))
+    .join(", ");
+  return t(n === 1 ? "events.cad.weekly" : "events.cad.timesWeek", { n, days });
 }
 
 /** True if any event starts in (from, to]: the ring for the sound alert. */

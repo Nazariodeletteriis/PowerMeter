@@ -4,6 +4,12 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.13
+
+- New: Timer page redesigned: countdowns for the next Rift, event, field boss and reset; tabs All / Rift / Events / Field bosses / Resets; a timeline by day with each window's start, end and countdown.
+- New: Choose when event alerts arrive: 1, 3, 5 or 10 minutes ahead. The widget alert follows the same setting.
+- Changed: The event sound now plays only from the widget, so it never rings twice.
+
 ## 0.5.12
 
 - Fixed: Your own row no longer shows a number (#6653) instead of your name after the automatic reset between two bosses: PowerMeter follows your new id when the game does not resend your name.

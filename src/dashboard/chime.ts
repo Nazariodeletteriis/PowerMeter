@@ -1,5 +1,9 @@
 export const SOUND_KEY = "pm.eventSound"; // "1" = the user turned the event alert on; off by default
 export const VOLUME_KEY = "pm.eventVolume"; // 0-100, set in the widget's Settings; 50 when unset
+export const LEAD_KEY = "pm.eventLead"; // minutes before a start the widget notice opens and rings, set on the Timer page
+export const LEADS = [1, 3, 5, 10];
+/** The lead setting in minutes: one of LEADS, 10 when unset or unknown. */
+export const leadMinutes = (value?: string) => (LEADS.includes(Number(value)) ? Number(value) : 10);
 
 /** Short two-tone chime, no audio file. `volume` is the 0-100 setting: 50 is the original level, 100 twice it. */
 export function chime(volume: string | number = 50) {

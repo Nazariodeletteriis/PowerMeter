@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.13
+
+- Nouveau : Page Minuteur redessinée : comptes à rebours pour la prochaine Faille, le prochain événement, boss de terrain et réinitialisation ; onglets Tout / Failles / Événements / Boss de terrain / Réinitialisations ; une liste par jour avec début, fin et compte à rebours de chaque créneau.
+- Nouveau : Choisissez quand arrivent les alertes d'événements : 1, 3, 5 ou 10 minutes avant. L'alerte du widget suit le même réglage.
+- Modifié : Le son des événements ne vient plus que du widget, il ne sonne donc jamais deux fois.
+
 ## 0.5.12
 
 - Corrigé : Votre propre ligne n'affiche plus un numéro (#6653) à la place de votre nom après la réinitialisation automatique entre deux boss : PowerMeter suit votre nouvel id même quand le jeu ne renvoie pas votre nom.

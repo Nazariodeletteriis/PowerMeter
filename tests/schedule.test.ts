@@ -1,7 +1,7 @@
 // Event timer engine. Run: node --test tests/schedule.test.ts  (Node 22.18+ strips the types)
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { eventNotice, eventStatus, instantAt, startsBetween, upcomingWindows, type GameEvent } from "../src/dashboard/pages/organizer/schedule.ts";
+import { cadenceText, eventNotice, eventStatus, instantAt, startsBetween, upcomingWindows, type GameEvent } from "../src/dashboard/pages/organizer/schedule.ts";
 import { clock } from "../src/dashboard/pages/shugo/events.ts";
 
 const rule = (event_id: string, cadence_json: GameEvent["cadence_json"], duration_minutes = 0): GameEvent => ({
@@ -115,4 +115,19 @@ test("a late tick (throttled timer) still alerts; after the start it no longer d
   assert.deepEqual(late.soon, [{ start: t0, names: ["shugo-festival"] }]);
   assert.equal(eventNotice([shugo], t0 - 29e3, LEAD, announced).fresh, false, "rings once per start");
   assert.equal(eventNotice([shugo], t0 + 60e3, LEAD, new Set()).soon.length, 0, "already started: nothing to announce");
+});
+
+// Timer list: the rule in words. Fake t: key plus its vars.
+test("cadence in words", () => {
+  const t = (key: string, vars?: Record<string, string | number>) => `${key} ${JSON.stringify(vars ?? {})}`;
+  const now = at("2026-10-15T10:00:00Z");
+  assert.equal(cadenceText(shugo, now, t, "en-GB"), "events.cad.hourly {}");
+  assert.equal(cadenceText(rift, now, t, "en-GB"), 'events.cad.everyHours {"h":3,"n":8}');
+  assert.equal(cadenceText(daily, now, t, "en-GB"), "events.cad.daily {}");
+  assert.equal(cadenceText(rule("x", { kind: "hourOfDay", hours: [12, 20] }), now, t, "en-GB"), 'events.cad.timesDay {"n":2}');
+  assert.equal(cadenceText(rule("x", { kind: "minuteOfHour", minutes: [0, 30] }), now, t, "en-GB"), 'events.cad.hourlyAt {"list":":00, :30"}');
+  // 21:00 KST is 12:00 UTC: the same weekday on any PC from UTC-12 to UTC+11. Monday first.
+  const nahma = rule("nahma", { kind: "daysAtTime", weekdays: [0, 5], hour: 21, minute: 0 });
+  assert.equal(cadenceText(nahma, now, t, "en-GB"), 'events.cad.timesWeek {"n":2,"days":"Fri, Sun"}');
+  assert.match(cadenceText(weekly, now, t, "en-GB"), /^events\.cad\.weekly \{"n":1,/); // 07:00 UTC: Tuesday west of UTC-7
 });

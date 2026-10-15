@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.13
+
+- Novo: Página Timer redesenhada: contagens regressivas para a próxima Fenda, evento, chefe de campo e reset; abas Tudo / Fendas / Eventos / Chefes de campo / Resets; uma lista por dia com início, fim e contagem de cada janela.
+- Novo: Escolha quando chegam os avisos de eventos: 1, 3, 5 ou 10 minutos antes. O aviso do widget segue a mesma configuração.
+- Alterado: O som dos eventos agora toca só pelo widget, então nunca toca duas vezes.
+
 ## 0.5.12
 
 - Corrigido: Sua própria linha não mostra mais um número (#6653) no lugar do seu nome depois do reset automático entre dois chefes: o PowerMeter segue seu novo id mesmo quando o jogo não reenvia seu nome.

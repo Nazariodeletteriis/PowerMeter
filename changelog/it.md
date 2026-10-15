@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.13
+
+- Nuovo: Pagina Timer ridisegnata: conto alla rovescia per prossimo Rift, evento, field boss e reset; tab Tutti / Rift / Eventi / Field boss / Reset; lista per giorno con inizio, fine e conto alla rovescia di ogni finestra.
+- Nuovo: Scegli quando arrivano gli avvisi degli eventi: 1, 3, 5 o 10 minuti prima. L'avviso del widget segue la stessa impostazione.
+- Cambiato: Il suono degli eventi ora parte solo dal widget, così non suona mai due volte.
+
 ## 0.5.12
 
 - Corretto: La tua riga non mostra più un numero (#6653) al posto del tuo nome dopo il reset automatico tra due boss: PowerMeter segue il tuo nuovo id anche quando il gioco non rimanda il nome.

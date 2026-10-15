@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.13
+
+- Neu: Timer-Seite neu gestaltet: Countdowns für den nächsten Riss, das nächste Event, den nächsten Feldboss und Reset; Tabs Alle / Riss / Events / Feldbosse / Resets; eine Zeitleiste nach Tagen mit Beginn, Ende und Countdown jedes Zeitfensters.
+- Neu: Wähle, wann Event-Hinweise kommen: 1, 3, 5 oder 10 Minuten vorher. Der Hinweis im Widget folgt derselben Einstellung.
+- Geändert: Der Event-Ton kommt jetzt nur noch vom Widget und klingelt nie doppelt.
+
 ## 0.5.12
 
 - Behoben: Deine eigene Zeile zeigt nach dem automatischen Reset zwischen zwei Bossen keine Nummer (#6653) mehr statt deines Namens: PowerMeter folgt deiner neuen ID, auch wenn das Spiel deinen Namen nicht erneut sendet.

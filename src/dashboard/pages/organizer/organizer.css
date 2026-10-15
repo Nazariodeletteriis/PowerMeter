@@ -108,3 +108,189 @@
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 12px;
 }
+
+/* Timer page (pg.timer): the next window of each kind, then the timetable. */
+.evNextGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+.evNext {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 14px;
+}
+.evNextHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.evNextHead svg {
+  font-size: 14px;
+  color: var(--c);
+}
+.evNextCount {
+  font-family: var(--pm-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 26px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.evNextCount[data-soon="true"] {
+  color: var(--pm-redt);
+}
+.evNextName {
+  margin-top: 6px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.evMore {
+  font-weight: 400;
+  color: var(--pm-t3);
+}
+.evNextMeta {
+  font-size: 11px;
+  color: var(--pm-t3);
+}
+
+/* Category colour: rift amber, bosses red, events and resets neutral; the icon and the word carry it too. */
+.evNext,
+.evCat {
+  --c: var(--pm-t3);
+}
+[data-cat="rift"] {
+  --c: var(--pm-warn);
+}
+[data-cat="boss"] {
+  --c: var(--pm-redt);
+}
+[data-cat="event"] {
+  --c: var(--pm-t2);
+}
+/* Chiaro has no dark amber / green of its own: the brace ones read about 1.8:1 on its light cards. */
+html[data-pm-palette="chiaro"] [data-cat="rift"] {
+  --c: #8a5a00;
+}
+html[data-pm-palette="chiaro"] :is(.evNext, .evTlRow) {
+  --pm-okt: #1d7244;
+}
+.evCat {
+  border-color: color-mix(in srgb, var(--c) 55%, transparent);
+  color: var(--c);
+}
+
+/* Timetable. */
+.evTl {
+  padding-top: 4px;
+  min-width: 0;
+}
+.evTabs {
+  margin: 0 -16px 4px;
+  padding: 0 8px;
+}
+.evTlDay {
+  padding: 14px 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pm-t3);
+}
+.evTlRow {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 48px;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+/* Hairline between rows of the same day; a day heading starts a new group instead. */
+.evTlList li + li:not(:has(.evTlDay)) .evTlRow {
+  border-top: 1px solid var(--pm-line);
+}
+.evTlRow[data-live="true"] {
+  background: var(--pm-s2);
+  box-shadow: inset 2px 0 0 var(--pm-ok);
+}
+.evTlTime {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--pm-mono);
+  color: var(--pm-t1);
+  line-height: 1.3;
+}
+.evTl small {
+  display: block;
+  font-size: 11px;
+  color: var(--pm-t3);
+}
+.evTlName {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-weight: 500;
+}
+.evTlName .badge {
+  font-weight: 400;
+}
+.evTlLeft {
+  font-family: var(--pm-mono);
+  color: var(--pm-t3);
+  white-space: nowrap;
+}
+.evTlLeft[data-soon="true"] {
+  color: var(--pm-redt);
+}
+
+/* Alerts card: stays in view beside the long timetable. */
+.evTl + .evStack {
+  position: sticky;
+  top: 12px;
+}
+.evAlerts {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+}
+.evAlertRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--pm-t2);
+}
+.evAlertLabel {
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--pm-t2);
+}
+.evLeads {
+  display: flex;
+  gap: 6px;
+}
+.evLeads .chChip {
+  height: 30px;
+  min-width: 52px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.evZone {
+  display: flex;
+  gap: 6px;
+  padding: 0 4px;
+}
+.evZone svg {
+  flex: none;
+  margin-top: 2px;
+}

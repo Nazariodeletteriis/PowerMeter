@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.13
+
+- Nuevo: Página Temporizador rediseñada: cuentas atrás para la próxima Grieta, evento, jefe de campo y reinicio; pestañas Todo / Grietas / Eventos / Jefes de campo / Reinicios; una lista por día con inicio, fin y cuenta atrás de cada ventana.
+- Nuevo: Elige cuándo llegan los avisos de eventos: 1, 3, 5 o 10 minutos antes. El aviso del widget sigue el mismo ajuste.
+- Cambiado: El sonido de los eventos ahora suena solo desde el widget, así nunca suena dos veces.
+
 ## 0.5.12
 
 - Corregido: Tu propia fila ya no muestra un número (#6653) en lugar de tu nombre tras el reinicio automático entre dos jefes: PowerMeter sigue tu nuevo id aunque el juego no vuelva a enviar tu nombre.

@@ -1,14 +1,15 @@
-// Widget event notice: from 10 minutes before an event of the Timer (rift, world bosses, Shugo festival,
-// resets) a strip under the widget header names it with a countdown, so whoever keeps only the widget open
-// sees it while playing. One line per start time, so events a minute apart each get their own 10 minutes.
-// A line goes at its start; the X hides the lines shown, a later event brings the strip back.
+// Widget event notice: from the Timer's lead (1, 3, 5 or 10 minutes, default 10) before an event of the Timer
+// (rift, world bosses, Shugo festival, resets) a strip under the widget header names it with a countdown, so
+// whoever keeps only the widget open sees it while playing. One line per start time, so events a minute apart
+// each get their own lead. A line goes at its start; the X hides the lines shown, a later event brings the
+// strip back.
 // Same event rules and maths as the dashboard's Timer (gamedata_events + organizer/schedule.ts); rings the
 // Timer's chime when a new notice appears, if the Timer's sound is on.
 import { invoke } from "@tauri-apps/api/core";
-import { chime, SOUND_KEY, VOLUME_KEY } from "../dashboard/chime";
+import { listen } from "@tauri-apps/api/event";
+import { chime, LEAD_KEY, leadMinutes, SOUND_KEY, VOLUME_KEY } from "../dashboard/chime";
 import { eventNotice, type GameEvent } from "../dashboard/pages/organizer/schedule";
 
-const LEAD = 10 * 60e3;
 const RELOAD = 60 * 60e3; // the archive can bring new rules while the app runs
 
 type I18n = { format?: (key: string, vars: Record<string, string>, fallback: string) => string };
@@ -37,6 +38,11 @@ if (strip && w.A2_VIEW === "main") {
   const announced = new Set<number>(); // starts already rung
   let dismissed = 0; // lines up to this start were closed with the X
   let last = 0;
+  // The lead follows the Timer page live: update_settings broadcasts setting-changed to every window.
+  let lead = leadMinutes() * 60e3;
+  const setLead = (value?: string) => (lead = leadMinutes(value) * 60e3);
+  invoke<Record<string, string>>("get_settings").then((s) => setLead(s[LEAD_KEY]), () => {});
+  listen<{ key: string; value: string }>("setting-changed", ({ payload }) => payload.key === LEAD_KEY && setLead(String(payload.value))).catch(() => {});
 
   strip.querySelector(".pmEventClose")!.addEventListener("click", () => {
     dismissed = last;
@@ -50,7 +56,7 @@ if (strip && w.A2_VIEW === "main") {
       // Not downloaded yet or a failed read: keep what we have and retry in a minute, not in an hour.
       invoke<GameEvent[]>("gamedata_events").then((e) => (events = e), () => (loadedAt = now - RELOAD + 60e3));
     }
-    const { soon, fresh } = eventNotice(events, now, LEAD, announced);
+    const { soon, fresh } = eventNotice(events, now, lead, announced);
     const lines = soon.filter((s) => s.start > dismissed);
     if (!lines.length) {
       strip.hidden = true;
