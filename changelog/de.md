@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.14
+
+- Behoben: Das Ziehen des Schiebereglers "Größe des Zielnamens" lässt das Meter nicht mehr flackern und den Arbeitsspeicher füllen: Einstellungsfenster und Meter schickten sich gegenseitig den alten und den neuen Wert.
+- Geändert: Organizer: Die Seite Timer heißt jetzt Events; die Seiten Shugo-Festival und Raum-Zeit-Riss entfallen (beide sind in Events).
+
 ## 0.5.13
 
 - Neu: Timer-Seite neu gestaltet: Countdowns für den nächsten Riss, das nächste Event, den nächsten Feldboss und Reset; Tabs Alle / Riss / Events / Feldbosse / Resets; eine Zeitleiste nach Tagen mit Beginn, Ende und Countdown jedes Zeitfensters.

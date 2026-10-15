@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.14
+
+- Corrigé : Faire glisser le curseur « Taille du nom de la cible » ne fait plus clignoter le meter jusqu'à remplir la RAM : la fenêtre Paramètres et le meter se renvoyaient l'ancienne et la nouvelle valeur.
+- Modifié : Organiseur : la page Minuteur s'appelle désormais Événements ; les pages Festival Shugo et Faille spatio-temporelle sont retirées (les deux sont dans Événements).
+
 ## 0.5.13
 
 - Nouveau : Page Minuteur redessinée : comptes à rebours pour la prochaine Faille, le prochain événement, boss de terrain et réinitialisation ; onglets Tout / Failles / Événements / Boss de terrain / Réinitialisations ; une liste par jour avec début, fin et compte à rebours de chaque créneau.

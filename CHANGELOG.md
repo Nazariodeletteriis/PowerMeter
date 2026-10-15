@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.14
+
+- Fixed: Dragging the "Target name size" slider no longer makes the meter flicker and fill up the RAM: the Settings window and the meter kept sending each other the old and the new value.
+- Changed: Organizer: the Timer page is now called Events; the Shugo Festival and Spacetime Rift pages are gone (both are in Events).
+
 ## 0.5.13
 
 - New: Timer page redesigned: countdowns for the next Rift, event, field boss and reset; tabs All / Rift / Events / Field bosses / Resets; a timeline by day with each window's start, end and countdown.

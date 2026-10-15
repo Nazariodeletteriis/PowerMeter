@@ -71,7 +71,7 @@
   "nav.crafting": "Крафт",
   "nav.organizer": "Организатор",
   "nav.tasks": "Задачи",
-  "nav.timers": "Таймеры",
+  "nav.timers": "События",
   "nav.supporter": "Спонсор",
   "nav.settings": "Настройки",
   "nav.admin": "Панель администратора",
@@ -107,7 +107,7 @@
   "home.checkRequirements": "Проверить требования",
   "home.notSet": "Не задано",
   "home.buildProgress": "Прогресс сборки",
-  "home.timers": "Таймеры",
+  "home.timers": "События",
   "home.days": "{n}д",
   "home.fights": "Недавние бои",
   "home.seeHistory": "Смотреть историю",
@@ -125,7 +125,5 @@
   "about.a2tools": "Движок захвата основан на {link} от taengu (GPL-3.0). Спасибо!",
   "home.noCharacterTitle": "Нет активного персонажа",
   "home.noCharacterText": "Добавь персонажа, чтобы видеть здесь класс, регион и билд.",
-  "nav.shugoFestival": "Фестиваль Шуго",
-  "nav.spacetimeRift": "Пространственно-временной разлом",
   "nav.gearViewer": "Просмотр снаряжения"
 }

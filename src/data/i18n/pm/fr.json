@@ -71,7 +71,7 @@
   "nav.crafting": "Artisanat",
   "nav.organizer": "Organiseur",
   "nav.tasks": "Tâches",
-  "nav.timers": "Minuteurs",
+  "nav.timers": "Événements",
   "nav.supporter": "Soutien",
   "nav.settings": "Paramètres",
   "nav.admin": "Panneau d'administration",
@@ -107,7 +107,7 @@
   "home.checkRequirements": "Vérifier les prérequis",
   "home.notSet": "Non défini",
   "home.buildProgress": "Progression de la build",
-  "home.timers": "Minuteurs",
+  "home.timers": "Événements",
   "home.days": "{n}j",
   "home.fights": "Combats récents",
   "home.seeHistory": "Voir l'historique",
@@ -125,7 +125,5 @@
   "about.a2tools": "Le moteur de capture est basé sur {link} de taengu (GPL-3.0). Merci !",
   "home.noCharacterTitle": "Aucun personnage actif",
   "home.noCharacterText": "Ajoute ton personnage pour voir ici classe, région et build.",
-  "nav.shugoFestival": "Festival Shugo",
-  "nav.spacetimeRift": "Faille spatio-temporelle",
   "nav.gearViewer": "Visionneuse d'équipement"
 }

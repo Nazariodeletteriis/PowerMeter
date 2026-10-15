@@ -213,6 +213,10 @@ class DpsApp {
   }
 
   safeSetSetting(key, value) {
+    // A remote change being applied (applyRemoteSettingChange) is already stored:
+    // writing it back raced the user's next value while dragging a slider, and the
+    // two windows bounced the old and new values forever (meter growing in RAM).
+    if (this._applyingRemoteSetting) return this.safeSetStorage(key, value);
     try {
       window.javaBridge?.setSetting?.(key, value);
     } catch (e) {
@@ -4087,11 +4091,18 @@ class DpsApp {
       control.checked = next;
     } else {
       if (String(control.value) === String(value)) return;
+      // The echo of a value this window sent a moment ago, while the user is still on the control.
+      if (document.activeElement === control) return;
       control.value = value;
     }
-    control.dispatchEvent(new Event("change", { bubbles: true }));
-    if (control.type === "range") {
-      control.dispatchEvent(new Event("input", { bubbles: true }));
+    this._applyingRemoteSetting = true;
+    try {
+      control.dispatchEvent(new Event("change", { bubbles: true }));
+      if (control.type === "range") {
+        control.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    } finally {
+      this._applyingRemoteSetting = false;
     }
   }
 

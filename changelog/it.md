@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.14
+
+- Corretto: Trascinare lo slider "Dimensione nome bersaglio" non fa più oscillare il meter fino a riempire la RAM: la finestra Impostazioni e il meter si rimandavano a vicenda il valore vecchio e quello nuovo.
+- Cambiato: Organizer: la pagina Timer ora si chiama Eventi; tolte le pagine Festival Shugo e Faglia Spaziotemporale (sono entrambe in Eventi).
+
 ## 0.5.13
 
 - Nuovo: Pagina Timer ridisegnata: conto alla rovescia per prossimo Rift, evento, field boss e reset; tab Tutti / Rift / Eventi / Field boss / Reset; lista per giorno con inizio, fine e conto alla rovescia di ogni finestra.

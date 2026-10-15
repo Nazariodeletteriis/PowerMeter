@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.14
+
+- Corregido: Arrastrar el control "Tamaño del nombre del objetivo" ya no hace parpadear el medidor hasta llenar la RAM: la ventana de Ajustes y el medidor se reenviaban el valor viejo y el nuevo.
+- Cambiado: Organizador: la página Temporizador ahora se llama Eventos; se quitan las páginas Festival Shugo y Grieta espaciotemporal (ambas están en Eventos).
+
 ## 0.5.13
 
 - Nuevo: Página Temporizador rediseñada: cuentas atrás para la próxima Grieta, evento, jefe de campo y reinicio; pestañas Todo / Grietas / Eventos / Jefes de campo / Reinicios; una lista por día con inicio, fin y cuenta atrás de cada ventana.

@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.14
+
+- Corrigido: Arrastar o controle "Tamanho do nome do alvo" não faz mais o medidor oscilar até encher a RAM: a janela de Configurações e o medidor reenviavam um ao outro o valor antigo e o novo.
+- Alterado: Organizador: a página Timer agora se chama Eventos; as páginas Festival Shugo e Fenda espaço-temporal foram removidas (as duas estão em Eventos).
+
 ## 0.5.13
 
 - Novo: Página Timer redesenhada: contagens regressivas para a próxima Fenda, evento, chefe de campo e reset; abas Tudo / Fendas / Eventos / Chefes de campo / Resets; uma lista por dia com início, fim e contagem de cada janela.

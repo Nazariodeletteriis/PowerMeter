@@ -71,7 +71,7 @@
   "nav.crafting": "製作",
   "nav.organizer": "整理工具",
   "nav.tasks": "待辦事項",
-  "nav.timers": "計時器",
+  "nav.timers": "活動",
   "nav.supporter": "贊助者",
   "nav.settings": "設定",
   "nav.admin": "管理面板",
@@ -107,7 +107,7 @@
   "home.checkRequirements": "檢查系統需求",
   "home.notSet": "未設定",
   "home.buildProgress": "配裝進度",
-  "home.timers": "計時器",
+  "home.timers": "活動",
   "home.days": "{n} 天",
   "home.fights": "最近戰鬥",
   "home.seeHistory": "查看歷史",
@@ -125,7 +125,5 @@
   "about.a2tools": "擷取引擎基於 taengu 的 {link}（GPL-3.0）打造，謝謝！",
   "home.noCharacterTitle": "沒有目前角色",
   "home.noCharacterText": "新增角色後，這裡會顯示職業、地區和配裝。",
-  "nav.shugoFestival": "修果節",
-  "nav.spacetimeRift": "時空裂隙",
   "nav.gearViewer": "裝備檢視器"
 }

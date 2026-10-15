@@ -71,7 +71,7 @@
   "nav.crafting": "制作",
   "nav.organizer": "整理器",
   "nav.tasks": "待办事项",
-  "nav.timers": "计时器",
+  "nav.timers": "活动",
   "nav.supporter": "赞助者",
   "nav.settings": "设置",
   "nav.admin": "管理面板",
@@ -107,7 +107,7 @@
   "home.checkRequirements": "检查系统要求",
   "home.notSet": "未设置",
   "home.buildProgress": "配装进度",
-  "home.timers": "计时器",
+  "home.timers": "活动",
   "home.days": "{n} 天",
   "home.fights": "最近战斗",
   "home.seeHistory": "查看历史",
@@ -125,7 +125,5 @@
   "about.a2tools": "捕获引擎基于 taengu 的 {link}（GPL-3.0）构建，谢谢！",
   "home.noCharacterTitle": "没有当前角色",
   "home.noCharacterText": "添加角色后，这里会显示职业、地区和配装。",
-  "nav.shugoFestival": "修果节",
-  "nav.spacetimeRift": "时空裂隙",
   "nav.gearViewer": "装备查看器"
 }

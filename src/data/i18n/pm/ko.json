@@ -71,7 +71,7 @@
   "nav.crafting": "제작",
   "nav.organizer": "정리함",
   "nav.tasks": "작업",
-  "nav.timers": "타이머",
+  "nav.timers": "이벤트",
   "nav.supporter": "후원자",
   "nav.settings": "설정",
   "nav.admin": "관리자 패널",
@@ -107,7 +107,7 @@
   "home.checkRequirements": "요구 사항 확인",
   "home.notSet": "설정되지 않음",
   "home.buildProgress": "빌드 진행률",
-  "home.timers": "타이머",
+  "home.timers": "이벤트",
   "home.days": "{n}일",
   "home.fights": "최근 전투",
   "home.seeHistory": "기록 보기",
@@ -125,7 +125,5 @@
   "about.a2tools": "캡처 엔진은 taengu의 {link}(GPL-3.0)를 기반으로 합니다. 감사합니다!",
   "home.noCharacterTitle": "활성 캐릭터가 없습니다",
   "home.noCharacterText": "캐릭터를 추가하면 여기에서 클래스, 지역, 빌드를 볼 수 있습니다.",
-  "nav.shugoFestival": "슈고 페스티벌",
-  "nav.spacetimeRift": "시공의 균열",
   "nav.gearViewer": "장비 뷰어"
 }
