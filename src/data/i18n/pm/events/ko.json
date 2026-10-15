@@ -52,5 +52,11 @@
   "events.cad.everyHours": "{h}시간마다, 하루 {n}회",
   "events.cad.timesDay": "하루 {n}회",
   "events.cad.weekly": "주 1회 ({days})",
-  "events.cad.timesWeek": "주 {n}회 ({days})"
+  "events.cad.timesWeek": "주 {n}회 ({days})",
+  "events.fb.title": "내 처치 기준 리스폰",
+  "events.fb.empty": "PowerMeter를 켠 상태로 필드 보스를 처치하면 여기에 다시 나타나는 시간이 표시됩니다.",
+  "events.fb.killed": "{time} 처치",
+  "events.fb.every": "{d}마다",
+  "events.fb.up": "출현했을 것",
+  "events.fb.hint": "눈앞에서 보스가 쓰러진 시각에 리스폰 시간을 더해 계산합니다. 간격은 추정치이며, 그사이 다른 플레이어가 처치했을 수 있습니다."
 }

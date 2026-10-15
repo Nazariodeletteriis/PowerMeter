@@ -52,5 +52,11 @@
   "events.cad.everyHours": "Ogni {h} ore, {n} volte al giorno",
   "events.cad.timesDay": "{n} volte al giorno",
   "events.cad.weekly": "Una volta a settimana ({days})",
-  "events.cad.timesWeek": "{n} volte a settimana ({days})"
+  "events.cad.timesWeek": "{n} volte a settimana ({days})",
+  "events.fb.title": "Respawn dalle tue kill",
+  "events.fb.empty": "Uccidi un field boss con PowerMeter attivo e qui vedrai quando torna.",
+  "events.fb.killed": "Ucciso alle {time}",
+  "events.fb.every": "ogni {d}",
+  "events.fb.up": "Dovrebbe essere vivo",
+  "events.fb.hint": "Calcolato dall'ora in cui il boss è morto davanti a te più il suo tempo di respawn. Gli intervalli sono stimati; nel frattempo un altro giocatore potrebbe averlo ucciso."
 }

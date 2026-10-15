@@ -52,5 +52,11 @@
   "events.cad.everyHours": "Каждые {h} ч, раз в день: {n}",
   "events.cad.timesDay": "Раз в день: {n}",
   "events.cad.weekly": "Раз в неделю ({days})",
-  "events.cad.timesWeek": "Раз в неделю: {n} ({days})"
+  "events.cad.timesWeek": "Раз в неделю: {n} ({days})",
+  "events.fb.title": "Возрождение по вашим убийствам",
+  "events.fb.empty": "Убейте полевого босса с запущенным PowerMeter, и здесь появится время его возвращения.",
+  "events.fb.killed": "Убит в {time}",
+  "events.fb.every": "каждые {d}",
+  "events.fb.up": "Должен быть жив",
+  "events.fb.hint": "Рассчитано по времени, когда босс погиб у вас на глазах, плюс время его возрождения. Интервалы приблизительные; за это время его мог убить другой игрок."
 }

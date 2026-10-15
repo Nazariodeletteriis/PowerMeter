@@ -52,5 +52,11 @@
   "events.cad.everyHours": "Cada {h} horas, {n} veces al día",
   "events.cad.timesDay": "{n} veces al día",
   "events.cad.weekly": "Una vez por semana ({days})",
-  "events.cad.timesWeek": "{n} veces por semana ({days})"
+  "events.cad.timesWeek": "{n} veces por semana ({days})",
+  "events.fb.title": "Reapariciones según tus kills",
+  "events.fb.empty": "Derrota a un jefe de campo con PowerMeter activo y aquí verás cuándo vuelve.",
+  "events.fb.killed": "Derrotado a las {time}",
+  "events.fb.every": "cada {d}",
+  "events.fb.up": "Debería estar vivo",
+  "events.fb.hint": "Calculado a partir de la hora en que el jefe murió delante de ti más su tiempo de reaparición. Los intervalos son estimados; otro jugador puede haberlo derrotado desde entonces."
 }

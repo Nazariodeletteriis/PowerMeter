@@ -52,5 +52,11 @@
   "events.cad.everyHours": "每 {h} 小时，每天 {n} 次",
   "events.cad.timesDay": "每天 {n} 次",
   "events.cad.weekly": "每周一次（{days}）",
-  "events.cad.timesWeek": "每周 {n} 次（{days}）"
+  "events.cad.timesWeek": "每周 {n} 次（{days}）",
+  "events.fb.title": "根据你的击杀计算的刷新",
+  "events.fb.empty": "在 PowerMeter 运行时击杀野外首领，这里会显示它何时回来。",
+  "events.fb.killed": "{time} 击杀",
+  "events.fb.every": "每 {d}",
+  "events.fb.up": "应该已刷新",
+  "events.fb.hint": "根据首领在你面前死亡的时间加上刷新时间计算。间隔为估计值；其间可能已被其他玩家击杀。"
 }

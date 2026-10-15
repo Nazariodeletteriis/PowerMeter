@@ -63,4 +63,7 @@ pub struct FightSummary {
     /// Empty on records saved before modes existed (boss, or train if is_train).
     #[serde(default)]
     pub mode: String,
+    /// Boss fights: the game reported the boss's death (see FightRecord). Feeds the field boss respawns.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub killed: Option<bool>,
 }

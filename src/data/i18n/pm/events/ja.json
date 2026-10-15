@@ -52,5 +52,11 @@
   "events.cad.everyHours": "{h}時間ごと、1日{n}回",
   "events.cad.timesDay": "1日{n}回",
   "events.cad.weekly": "週1回（{days}）",
-  "events.cad.timesWeek": "週{n}回（{days}）"
+  "events.cad.timesWeek": "週{n}回（{days}）",
+  "events.fb.title": "あなたの討伐からのリスポーン",
+  "events.fb.empty": "PowerMeter を起動したままフィールドボスを倒すと、ここに再出現の時刻が表示されます。",
+  "events.fb.killed": "{time} に討伐",
+  "events.fb.every": "{d}ごと",
+  "events.fb.up": "出現しているはず",
+  "events.fb.hint": "目の前でボスが倒れた時刻に再出現時間を足して計算しています。間隔は推定値です。その後、他のプレイヤーが倒している可能性があります。"
 }

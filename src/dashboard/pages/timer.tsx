@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import {
   ArrowCounterClockwiseIcon,
   CalendarBlankIcon,
@@ -10,6 +10,8 @@ import {
 } from "@phosphor-icons/react";
 import { chime, LEAD_KEY, leadMinutes, LEADS, SOUND_KEY as SOUND, VOLUME_KEY } from "../chime";
 import { Card, EmptyState } from "../ui";
+import { getFights, type FightSummary } from "./combat/parts";
+import { fieldBossRespawns, interval } from "./organizer/fieldbosses";
 import { cadenceText, upcomingWindows, useGameEvents, type EventWindow } from "./organizer/schedule";
 import { clock, countdown, dayLabel, HOUR, useNow } from "./shugo/events";
 import "./characters/characters.css";
@@ -41,6 +43,15 @@ export default function Timer({ t, lang, settings, save, run, onError }: PagePro
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const sound = settings[SOUND] === "1";
   const lead = leadMinutes(settings[LEAD_KEY]);
+  // Field boss kills: the history saves finished boss fights every 30 s, so read it as often.
+  const [fights, setFights] = useState<FightSummary[]>([]);
+  useEffect(() => {
+    const load = () => getFights().then(setFights, () => {});
+    load();
+    const id = setInterval(load, 30e3);
+    return () => clearInterval(id);
+  }, []);
+  const respawns = fieldBossRespawns(fights, now);
 
   const rows = (events ?? [])
     .flatMap((e) => {
@@ -185,6 +196,44 @@ export default function Timer({ t, lang, settings, save, run, onError }: PagePro
                   );
                 })}
               </ul>
+            )}
+            {tab === "boss" && (
+              <section className="evFb" aria-labelledby="evFbTitle">
+                <h3 id="evFbTitle" className="evTlDay">{t("events.fb.title")}</h3>
+                {respawns.length === 0 ? (
+                  <p className="evNote">{t("events.fb.empty")}</p>
+                ) : (
+                  <ul className="evTlList">
+                    {respawns.map((r) => {
+                      const up = r.respawnAt <= now;
+                      return (
+                        <li key={r.code}>
+                          <div className="evTlRow" data-live={up}>
+                            <span className="evTlTime">{clock(r.respawnAt, lang)}</span>
+                            <span className="evTlMain">
+                              <span className="evTlName">{r.name}</span>
+                              <small>
+                                {[r.zone, t("events.fb.killed", { time: clock(r.killedAt, lang) }), t("events.fb.every", { d: interval(r.every, lang) })].join(" · ")}
+                              </small>
+                            </span>
+                            <span className="evTlLeft" role="timer" data-soon={!up && r.respawnAt - now <= lead * 60e3}>
+                              {up ? (
+                                <span className="evState" data-live="true">
+                                  <span className="dot" aria-hidden="true" />
+                                  {t("events.fb.up")}
+                                </span>
+                              ) : (
+                                countdown(r.respawnAt - now, t)
+                              )}
+                            </span>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                <p className="evNote" style={{ marginTop: 8 }}>{t("events.fb.hint")}</p>
+              </section>
             )}
           </div>
         </section>

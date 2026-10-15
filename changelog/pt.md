@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.17
+
+- Novo: Eventos, aba Chefes de campo: "Respawns das suas kills". Quando um chefe de campo morre com o PowerMeter ativo, você vê quando ele volta (hora da kill + o tempo de respawn), com contagem regressiva e "Deve estar vivo" quando o timer acaba. Cobre os 48 chefes de Verteron e Altgard; os tempos de respawn são estimados.
+
 ## 0.5.16
 
 - Alterado: Eventos: a aba "Tudo" mostra só o próximo Festival Shugo, assim fendas e chefes não ficam mais soterrados por 24 linhas por dia; a aba Eventos ainda lista todos.

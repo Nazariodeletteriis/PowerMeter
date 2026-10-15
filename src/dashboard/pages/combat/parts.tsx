@@ -163,7 +163,7 @@ export type FightRecord = {
   details: { skills: FightSkill[]; healSkills?: FightSkill[] };
 };
 /** FightSummary, the fields used here. Newest first (the backend sorts by start time). */
-export type FightSummary = { id: string; bossName: string; startTimeMs: number; durationMs: number; jobs: string[]; isTrain: boolean; mode: string; mobCode: number };
+export type FightSummary = { id: string; bossName: string; startTimeMs: number; durationMs: number; jobs: string[]; isTrain: boolean; mode: string; mobCode: number; killed?: boolean };
 export const getFights = () => invoke<FightSummary[]>("get_fight_history");
 /** Boss-mode fight; records saved before modes existed have no mode (boss, or train if isTrain). */
 export const isBoss = (f: FightSummary) => (f.mode ? f.mode === "boss" : !f.isTrain);

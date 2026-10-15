@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.17
+
+- Nuevo: Eventos, pestaña Jefes de campo: "Reapariciones según tus kills". Cuando un jefe de campo muere con PowerMeter activo, ves cuándo vuelve (hora del kill + su tiempo de reaparición), con cuenta atrás y "Debería estar vivo" cuando termina el temporizador. Cubre los 48 jefes de Verteron y Altgard; los tiempos de reaparición son estimados.
+
 ## 0.5.16
 
 - Cambiado: Eventos: la pestaña "Todo" muestra solo el próximo Festival Shugo, así las grietas y los jefes ya no quedan bajo 24 filas al día; la pestaña Eventos los sigue mostrando todos.

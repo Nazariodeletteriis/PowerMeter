@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.17
+
+- Nouveau : Événements, onglet Boss de terrain : « Réapparitions d'après vos kills ». Quand un boss de terrain meurt avec PowerMeter lancé, vous voyez quand il revient (heure du kill + son délai de réapparition), avec un compte à rebours et « Devrait être là » une fois le minuteur écoulé. Couvre les 48 boss de Verteron et d'Altgard ; les délais de réapparition sont estimés.
+
 ## 0.5.16
 
 - Modifié : Événements : l'onglet « Tout » n'affiche que le prochain Festival Shugo, pour que les failles et les boss ne soient plus noyés sous 24 lignes par jour ; l'onglet Événements les liste toujours tous.

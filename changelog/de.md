@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.17
+
+- Neu: Events, Tab Feldbosse: "Respawns aus deinen Kills". Stirbt ein Feldboss bei laufendem PowerMeter, siehst du, wann er zurückkommt (Kill-Zeit + seine Respawnzeit), mit Countdown und "Sollte da sein", sobald der Timer abläuft. Umfasst die 48 Bosse in Verteron und Altgard; die Respawnzeiten sind geschätzt.
+
 ## 0.5.16
 
 - Geändert: Events: Der Tab "Alle" zeigt nur das nächste Shugo-Festival, damit Risse und Bosse nicht mehr unter 24 Zeilen am Tag verschwinden; der Tab Events listet weiterhin alle.

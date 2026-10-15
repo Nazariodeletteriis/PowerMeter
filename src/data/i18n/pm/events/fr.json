@@ -52,5 +52,11 @@
   "events.cad.everyHours": "Toutes les {h} heures, {n} fois par jour",
   "events.cad.timesDay": "{n} fois par jour",
   "events.cad.weekly": "Une fois par semaine ({days})",
-  "events.cad.timesWeek": "{n} fois par semaine ({days})"
+  "events.cad.timesWeek": "{n} fois par semaine ({days})",
+  "events.fb.title": "Réapparitions d'après vos kills",
+  "events.fb.empty": "Tuez un boss de terrain avec PowerMeter lancé et vous verrez ici quand il revient.",
+  "events.fb.killed": "Tué à {time}",
+  "events.fb.every": "toutes les {d}",
+  "events.fb.up": "Devrait être là",
+  "events.fb.hint": "Calculé à partir de l'heure où le boss est mort devant vous plus son délai de réapparition. Les intervalles sont estimés ; un autre joueur a pu le tuer entre-temps."
 }

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.17
+
+- Nuovo: Eventi, tab Field boss: "Respawn dalle tue kill". Quando un field boss muore con PowerMeter attivo, vedi quando torna (ora della kill + il suo tempo di respawn), con conto alla rovescia e "Dovrebbe essere vivo" quando il timer scade. Copre i 48 boss di Verteron e Altgard; i tempi di respawn sono stimati.
+
 ## 0.5.16
 
 - Cambiato: Eventi: la tab "Tutti" mostra solo il prossimo Festival Shugo, così rift e boss non finiscono più sotto 24 righe al giorno; la tab Eventi li elenca ancora tutti.

@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.17
+
+- New: Events, Field bosses tab: "Respawns from your kills". When a field boss dies with PowerMeter running, you see when it comes back (kill time + its respawn time), with a countdown and "Should be up" once the timer runs out. Covers the 48 Verteron and Altgard bosses; respawn times are estimates.
+
 ## 0.5.16
 
 - Changed: Events: the "All" tab shows only the next Shugo Festival, so rifts and bosses are no longer buried under 24 rows a day; the Events tab still lists every one.

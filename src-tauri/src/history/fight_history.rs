@@ -138,6 +138,7 @@ impl FightHistoryManager {
                             app_version: record.app_version,
                             mob_code: record.mob_code,
                             mode,
+                            killed: record.killed,
                         });
                     }
                 }
