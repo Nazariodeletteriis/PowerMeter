@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.16
+
+- Alterado: Eventos: a aba "Tudo" mostra só o próximo Festival Shugo, assim fendas e chefes não ficam mais soterrados por 24 linhas por dia; a aba Eventos ainda lista todos.
+
 ## 0.5.15
 
 - Corrigido: Redimensionar o widget agora escala todo o conteúdo (texto, linhas, ícones), não só a moldura. Arrastar a altura ainda abre espaço para mais linhas.

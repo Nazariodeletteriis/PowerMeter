@@ -49,7 +49,12 @@ export default function Timer({ t, lang, settings, save, run, onError }: PagePro
       return (near.length ? near : all.slice(0, 1)).map((w) => ({ e, w }));
     })
     .sort((a, b) => a.w.start - b.w.start || a.e.name.localeCompare(b.e.name));
-  const shown = tab === "all" ? rows : rows.filter((r) => r.e.category === tab);
+  // "All" keeps an hourly event (the Shugo Festival) to its next window: its 24 rows a day
+  // buried the rifts and bosses. Its own tab still lists every one.
+  const shown =
+    tab === "all"
+      ? rows.filter((r) => r.e.cadence_json.kind !== "minuteOfHour" || rows.find((x) => x.e === r.e) === r)
+      : rows.filter((r) => r.e.category === tab);
 
   // The next window of each kind; events starting together (bosses at 21:30) share the card.
   const next = CATS.flatMap((cat) => {

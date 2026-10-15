@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.16
+
+- Changed: Events: the "All" tab shows only the next Shugo Festival, so rifts and bosses are no longer buried under 24 rows a day; the Events tab still lists every one.
+
 ## 0.5.15
 
 - Fixed: Resizing the widget now scales everything inside it (text, rows, icons), not just the frame. Dragging the height still adds room for rows.

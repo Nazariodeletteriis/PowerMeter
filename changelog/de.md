@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.16
+
+- Geändert: Events: Der Tab "Alle" zeigt nur das nächste Shugo-Festival, damit Risse und Bosse nicht mehr unter 24 Zeilen am Tag verschwinden; der Tab Events listet weiterhin alle.
+
 ## 0.5.15
 
 - Behoben: Die Größe des Widgets zu ändern skaliert jetzt den ganzen Inhalt (Text, Zeilen, Symbole), nicht nur den Rahmen. Wer die Höhe zieht, bekommt weiterhin Platz für mehr Zeilen.

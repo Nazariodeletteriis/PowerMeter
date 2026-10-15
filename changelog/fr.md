@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.16
+
+- Modifié : Événements : l'onglet « Tout » n'affiche que le prochain Festival Shugo, pour que les failles et les boss ne soient plus noyés sous 24 lignes par jour ; l'onglet Événements les liste toujours tous.
+
 ## 0.5.15
 
 - Corrigé : Redimensionner le widget met maintenant tout son contenu à l'échelle (texte, lignes, icônes), pas seulement le cadre. Tirer la hauteur donne toujours de la place pour plus de lignes.

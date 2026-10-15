@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.16
+
+- Cambiado: Eventos: la pestaña "Todo" muestra solo el próximo Festival Shugo, así las grietas y los jefes ya no quedan bajo 24 filas al día; la pestaña Eventos los sigue mostrando todos.
+
 ## 0.5.15
 
 - Corregido: Cambiar el tamaño del widget ahora escala todo su contenido (texto, filas, iconos), no solo el marco. Arrastrar la altura sigue dando espacio a más filas.

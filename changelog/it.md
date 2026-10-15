@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.16
+
+- Cambiato: Eventi: la tab "Tutti" mostra solo il prossimo Festival Shugo, così rift e boss non finiscono più sotto 24 righe al giorno; la tab Eventi li elenca ancora tutti.
+
 ## 0.5.15
 
 - Corretto: Ridimensionare il widget ora ingrandisce o rimpicciolisce tutto il contenuto (testi, righe, icone), non solo la cornice. Trascinando l'altezza si fa ancora spazio a più righe.
