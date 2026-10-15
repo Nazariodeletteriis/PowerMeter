@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.11
+
+- Cambiato: Widget: barra in alto, riga del boss e footer restano pieni; l'opacità ora rende trasparente solo la lista dei giocatori, così i pulsanti si leggono bene anche sopra un gioco chiaro.
+
 ## 0.5.10
 
 - Corretto: Il widget restava su "Non connesso" / "nessun pacchetto" anche dopo che PowerMeter si era collegato al gioco: ora segue la connessione ogni pochi secondi.

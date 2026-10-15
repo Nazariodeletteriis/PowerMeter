@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.11
+
+- Alterado: Widget: a barra superior, a linha do chefe e o rodapé ficam opacos; a opacidade agora só deixa transparente a lista de jogadores, assim os botões continuam legíveis sobre um jogo claro.
+
 ## 0.5.10
 
 - Corrigido: O widget ficava em "Não conectado" / "nenhum pacote" mesmo depois que o PowerMeter se conectava ao jogo: agora acompanha a conexão a cada poucos segundos.

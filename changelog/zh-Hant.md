@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.11
+
+- 變更：小工具：頂列、首領列與底列保持不透明；透明度設定現在只作用於玩家列表，在明亮的遊戲畫面上按鈕也清楚可讀。
+
 ## 0.5.10
 
 - 修正：PowerMeter 已連線到遊戲後，小工具仍停留在「未連線」/「沒有封包」：現在每隔幾秒就會追蹤連線狀態。

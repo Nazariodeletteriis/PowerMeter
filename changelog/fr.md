@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.11
+
+- Modifié : Widget : la barre du haut, la ligne du boss et le pied restent opaques ; le réglage d'opacité n'éclaircit plus que la liste des joueurs, pour que les boutons restent lisibles sur un jeu clair.
+
 ## 0.5.10
 
 - Corrigé : Le widget restait sur « Non connecté » / « aucun paquet » même après la connexion de PowerMeter au jeu : il suit désormais la connexion toutes les quelques secondes.

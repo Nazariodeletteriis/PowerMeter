@@ -188,8 +188,11 @@
     gap: 0 9px;
     padding: 0;
     border-radius: 9px 9px 0 0;
-    /* The bar's bottom rule. */
-    background: linear-gradient(var(--pm-ui-line), var(--pm-ui-line)) 0 41px / 100% 1px no-repeat;
+    /* The bar's bottom rule, over a solid surface: the opacity setting only thins the
+       list, so the bar and boss row stay readable over a bright game. */
+    background:
+      linear-gradient(var(--pm-ui-line), var(--pm-ui-line)) 0 41px / 100% 1px no-repeat,
+      var(--pm-wsurf);
   }
   .pmLogo {
     display: block;
@@ -1129,7 +1132,7 @@
     padding: 0 12px;
     border-top: 1px solid var(--pm-ui-line);
     border-radius: 0 0 9px 9px;
-    background: transparent;
+    background: var(--pm-wsurf); /* solid like the header; only the list follows the opacity */
     font-size: 12px;
     color: #ffffff;
   }

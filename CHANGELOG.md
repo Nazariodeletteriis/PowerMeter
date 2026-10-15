@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.11
+
+- Changed: Widget: the top bar, the boss row and the footer stay solid; the opacity setting now only thins the player list, so the buttons stay readable over a bright game.
+
 ## 0.5.10
 
 - Fixed: The widget stayed on "Not connected" / "no packets" even after PowerMeter had connected to the game: it now follows the connection every few seconds.

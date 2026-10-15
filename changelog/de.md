@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.11
+
+- Geändert: Widget: Obere Leiste, Boss-Zeile und Fußzeile bleiben deckend; die Deckkraft-Einstellung macht jetzt nur die Spielerliste durchsichtig, damit die Buttons auch über hellem Spielbild lesbar bleiben.
+
 ## 0.5.10
 
 - Behoben: Das Widget blieb auf "Nicht verbunden" / "keine Pakete", auch nachdem PowerMeter sich mit dem Spiel verbunden hatte: Es verfolgt die Verbindung jetzt alle paar Sekunden.
