@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.22
+
+- Behoben: Die Minikarte lässt sich wieder verschieben: Seit 0.5.20 blieb sie, wo sie war.
+
 ## 0.5.21
 
 - Behoben: Alt+Tab aus dem Spiel lässt die Maus nicht mehr hängen: Bei offener Minikarte verlor die Anwendung, zu der du gewechselt hast, alle anderthalb Sekunden den Fokus an sie.

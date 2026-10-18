@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.22
+
+- Fixed: The minimap can be moved again: since 0.5.20 it stayed where it was.
+
 ## 0.5.21
 
 - Fixed: Alt+Tab out of the game no longer freezes the mouse: with the minimap open, the app you switched to kept losing focus to it every second and a half.

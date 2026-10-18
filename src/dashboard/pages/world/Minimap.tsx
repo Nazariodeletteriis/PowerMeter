@@ -119,7 +119,7 @@ export function MiniChrome({
       busy = true;
       origin
         .then((o) => win.setPosition(new PhysicalPosition(Math.round(o.x + (p.x - from.x) * scale), Math.round(o.y + (p.y - from.y) * scale))))
-        .catch(() => {})
+        .catch((err) => run(() => Promise.reject(err)))
         .finally(() => {
           busy = false;
           push();

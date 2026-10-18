@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.22
+
+- Corretto: La minimappa si può di nuovo spostare: dalla 0.5.20 restava ferma dov'era.
+
 ## 0.5.21
 
 - Corretto: Alt+Tab dal gioco non blocca più il mouse: con la minimappa aperta, l'app su cui passavi perdeva il focus a favore della minimappa ogni secondo e mezzo.

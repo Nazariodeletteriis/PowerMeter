@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.22
+
+- Corrigé : La mini-carte peut de nouveau être déplacée : depuis la 0.5.20, elle restait où elle était.
+
 ## 0.5.21
 
 - Corrigé : Alt+Tab depuis le jeu ne bloque plus la souris : avec la mini-carte ouverte, l'application vers laquelle vous basculiez perdait le focus au profit de la mini-carte toutes les secondes et demie.

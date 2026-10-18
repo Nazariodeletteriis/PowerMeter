@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.22
+
+- 修复：小地图可以再次移动：自 0.5.20 起它一直停在原处。
+
 ## 0.5.21
 
 - 修复：从游戏 Alt+Tab 切出后鼠标不再卡住：打开小地图时，切换到的应用每隔一秒半就会被小地图抢走焦点。
