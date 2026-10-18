@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.21
+
+- Behoben: Alt+Tab aus dem Spiel lässt die Maus nicht mehr hängen: Bei offener Minikarte verlor die Anwendung, zu der du gewechselt hast, alle anderthalb Sekunden den Fokus an sie.
+
 ## 0.5.20
 
 - Behoben: Minikarte: Beim Verschieben rastet sie nicht mehr an Bildschirmrändern oder -ecken ein und wird per Doppelklick nicht mehr maximiert, sie bleibt also, wo du sie hinlegst, auch über der Minikarte des Spiels.

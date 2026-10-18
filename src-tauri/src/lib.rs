@@ -1793,7 +1793,10 @@ pub fn run() {
                                                         0, 0, 0, 0,
                                                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
                                                     );
-                                                    let _ = ShowWindow(hwnd, SW_MINIMIZE);
+                                                    // Not SW_MINIMIZE: that activates the next window, the
+                                                    // topmost minimap, stealing focus from the app you
+                                                    // alt-tabbed to (and bringing the meter back) every 1.5s.
+                                                    let _ = ShowWindow(hwnd, SW_SHOWMINNOACTIVE);
                                                 }
                                             }
                                         }

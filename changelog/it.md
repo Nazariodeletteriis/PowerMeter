@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.21
+
+- Corretto: Alt+Tab dal gioco non blocca più il mouse: con la minimappa aperta, l'app su cui passavi perdeva il focus a favore della minimappa ogni secondo e mezzo.
+
 ## 0.5.20
 
 - Corretto: Minimappa: spostandola non si aggancia più ai bordi o agli angoli dello schermo e non si ingrandisce col doppio clic, così resta dove la metti, anche sopra la minimappa del gioco.

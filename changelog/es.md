@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.21
+
+- Corregido: Alt+Tab desde el juego ya no bloquea el ratón: con el minimapa abierto, la aplicación a la que cambiabas perdía el foco a favor del minimapa cada segundo y medio.
+
 ## 0.5.20
 
 - Corregido: Minimapa: al moverlo ya no se acopla a los bordes o esquinas de la pantalla ni se maximiza con doble clic, así que se queda donde lo pones, también sobre el minimapa del juego.
