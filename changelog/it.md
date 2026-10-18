@@ -2,6 +2,21 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.18
+
+- Nuovo: Widget Mappa: la mappa interattiva si apre in una finestra tutta sua sopra il gioco (bottone nella pagina Mappa), con un bottone a schermo intero sia sul widget sia sulla pagina (Esc per uscire).
+- Nuovo: Livelli della mappa per la raccolta (Od, gemme, metalli, erbe, molluschi, ortaggi, legno, bacche) accanto ai cubi nascosti e agli altri segnalini, ognuno attivabile o disattivabile e ricordato.
+- Nuovo: Mappa, pannello Pet: scegli i pet (per esempio Kuru Overseer e Kuru Worker) e la mappa mostra esattamente dove sono i loro mostri, con il nome al passaggio del mouse. I pet completati (livello 3) non compaiono mai, così vedi solo quello che ti manca; "Mostra tutti i pet che mi mancano" li mette tutti sulla mappa.
+- Nuovo: Character Builder, Pet: ogni pet mostra dove vive, con "Mostra sulla mappa" che apre il widget Mappa su di lui. Le icone delle famiglie sono quelle del gioco, con il nome della famiglia al passaggio del mouse.
+- Nuovo: Character Builder, Pet: gli effetti posseduti vengono letti dal gioco al login e conteggiati nelle statistiche (24 opzioni del gioco; le poche il cui valore non è ancora certo sono escluse).
+- Nuovo: Character Builder: un oggetto che i dati del gioco non hanno ancora (per esempio Spiritforged Guard) può essere identificato una volta dalla lista; viene ricordato e condiviso, quindi risulta noto a tutti.
+- Corretto: Character Builder: gli Arcana che indossi vengono letti dal gioco e conteggiati nelle statistiche.
+- Corretto: Character Builder: il potenziamento oltre +15 (da +16 a +20) è mostrato al suo livello reale e i suoi bonus extra sono elencati; dove i valori pubblicati si fermano a +15, si usa il bonus del +15 e il pannello lo indica.
+- Corretto: Widget DPS: niente sesto giocatore in più in un'istanza da 5 (healer o buffer vicini, oppure lo stesso giocatore con un nuovo id dopo la morte).
+- Corretto: Widget DPS: un giocatore che ha cambiato id (morte, riconnessione) mantiene il suo danno e il suo nome invece di ripartire da 0 o comparire come #id; un nome mancante viene preso dalla lista del gruppo.
+- Corretto: Widget DPS: il meter si azzera in modo pulito tra due boss, anche quando riattacchi lo stesso boss o cambi zona.
+- Corretto: Chiudere PowerMeter ora lo chiude davvero: il widget nascosto non resta più in esecuzione in background bloccando l'avvio successivo.
+
 ## 0.5.17
 
 - Nuovo: Eventi, tab Field boss: "Respawn dalle tue kill". Quando un field boss muore con PowerMeter attivo, vedi quando torna (ora della kill + il suo tempo di respawn), con conto alla rovescia e "Dovrebbe essere vivo" quando il timer scade. Copre i 48 boss di Verteron e Altgard; i tempi di respawn sono stimati.

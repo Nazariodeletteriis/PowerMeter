@@ -64,5 +64,7 @@
   "planner.grp.Conqueror": "정복자",
   "planner.grp.PVP": "PvP",
   "planner.grp.Special": "특수",
-  "planner.grp.Other": "기타"
+  "planner.grp.Other": "기타",
+  "planner.builder.enhPastPublished": "수치는 +{n}까지 공개되어 있습니다. 그 이상은 +{n}의 보너스를 표시합니다.",
+  "planner.builder.identifyNote": "이 아이템은 아직 게임 데이터에 없습니다. 아래에서 어떤 아이템인지 선택하세요. 이후로 기억됩니다."
 }

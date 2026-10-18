@@ -139,5 +139,9 @@
   "characters.builder.set.wantHint": "Your goal. Slots that differ from current: {n}",
   "characters.builder.set.differs": "Differs from current gear",
   "characters.builder.set.wornIs": "Now wearing: {item}",
-  "characters.builder.set.deltaNote": "Change against current gear"
+  "characters.builder.set.deltaNote": "Change against current gear",
+  "characters.builder.pets.location": "Location",
+  "characters.builder.pets.showOnMap": "Show on map",
+  "characters.builder.pets.noLocation": "No known location",
+  "characters.builder.pets.noCoords": "No map coordinates for its monsters: only the zones are known."
 }

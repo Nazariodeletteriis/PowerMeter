@@ -4,6 +4,21 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.18
+
+- New: Map widget: the interactive map opens in its own window over the game (button on the Map page), with a full screen button on both the widget and the page (Esc leaves).
+- New: Map layers for gathering (Od, gems, metals, herbs, shellfish, vegetables, wood, berries) next to hidden cubes and the other markers, each one on or off and remembered.
+- New: Map, Pet panel: pick pets (for example Kuru Overseer and Kuru Worker) and the map shows exactly where their monsters are, with the name on hover. Completed pets (level 3) never show, so you only see what you still miss; "Show every pet I miss" puts them all on the map.
+- New: Character Builder, Pets: each pet shows where it lives, with "Show on map" opening the Map widget on it. Family icons are the game's own, with the family name on hover.
+- New: Character Builder, Pets: owned effects are read from the game at login and counted in the stats (24 of the game's options; the few whose stat is not certain yet are left out).
+- New: Character Builder: an item the game data does not have yet (for example Spiritforged Guard) can be identified once from the list; it is remembered and shared, so it is known for everyone.
+- Fixed: Character Builder: Arcana you wear are read from the game and counted in the stats.
+- Fixed: Character Builder: enhancement above +15 (+16 to +20) is shown at its real level and its extra bonuses are listed; where the published values stop at +15, the +15 bonus is used and the panel says so.
+- Fixed: DPS widget: no extra 6th player in a 5-player instance (healers or buffers nearby, or the same player on a new id after dying).
+- Fixed: DPS widget: a player who changed id (death, reconnect) keeps their damage and their name instead of restarting from 0 or showing as #id; a missing name is taken from the party list.
+- Fixed: DPS widget: the meter resets cleanly between two bosses, also when you pull the same boss again or change zone.
+- Fixed: Closing PowerMeter now closes it for good: the hidden widget no longer stays running in the background and blocking the next start.
+
 ## 0.5.17
 
 - New: Events, Field bosses tab: "Respawns from your kills". When a field boss dies with PowerMeter running, you see when it comes back (kill time + its respawn time), with a countdown and "Should be up" once the timer runs out. Covers the 48 Verteron and Altgard bosses; respawn times are estimates.

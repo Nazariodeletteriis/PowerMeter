@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type { SaveSetting, Settings } from "./App";
 import { findCharacter, readCharacters, saveCharacters } from "./characters";
 import PET_IDS from "../data/pet_ids.json";
-import { GAME_SLOTS, petsFromGame } from "./pages/characters/calc";
+import { GAME_SLOTS, petsFromGame, type PetEffect } from "./pages/characters/calc";
 import { BAR_SLOTS, CAPTURED_BAR_KEY, CAPTURED_DAEV_KEY, CAPTURED_GEAR_KEY, CAPTURED_PETS_KEY, readCapturedBar, readCapturedDaev, readCapturedGear, readPets, setMem } from "./pages/characters/shared";
 import { GAME_SKILLS } from "./skills";
 import { usePoll } from "./usePoll";
@@ -19,6 +19,8 @@ type Captured = {
   combatPower: number | null;
   /** Pet collection, TW pet ids (src/data/pet_ids.json maps them to creature codes). */
   pets: { id: number; lvl: number; exp: number }[];
+  /** Owned effects (genus insight), raw values: every stat the parser maps is a flat one. */
+  petEffects?: { stat: string; value: number }[];
 };
 const load = () => invoke<Captured>("get_captured_character");
 
@@ -58,7 +60,13 @@ export function CaptureSync({ settings, save, onError }: { settings: Settings; s
   }, [key, char?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A guard (1150xxxxx) on a slot number not seen yet still is the off-hand (a Ranger's guard went missing, no log yet).
-  const slotOf = (e: { slot: number; itemId: number }) => GAME_SLOTS[e.slot] ?? (String(e.itemId).startsWith("1150") ? "offhand" : undefined);
+  // Arcana (game slots 41-45, order unknown) by their id: 810 + type digit (1 Grail ... 5 Mirror).
+  const ARCANA = ["ArcanaGrail", "ArcanaParchment", "ArcanaCompass", "ArcanaBell", "ArcanaMirror"];
+  const slotOf = (e: { slot: number; itemId: number }) => {
+    const id = String(e.itemId);
+    const arcana = /^810([1-5])/.exec(id);
+    return arcana ? ARCANA[Number(arcana[1]) - 1] : GAME_SLOTS[e.slot] ?? (id.startsWith("1150") ? "offhand" : undefined);
+  };
   const gear = Object.fromEntries((data?.equipment ?? []).flatMap((e) => (slotOf(e) ? [[slotOf(e)!, { id: String(e.itemId), enh: e.enchant }]] : [])));
   const all = readCapturedGear(settings[CAPTURED_GEAR_KEY]);
   const changed = !!char && Object.keys(gear).length > 0 && JSON.stringify(all[char.id]) !== JSON.stringify(gear);
@@ -74,13 +82,17 @@ export function CaptureSync({ settings, save, onError }: { settings: Settings; s
     if (daevChanged) save(CAPTURED_DAEV_KEY, JSON.stringify({ ...daevAll, [char!.id]: daev })).catch(onError);
   }, [daevChanged, char?.id, JSON.stringify(daev)]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Pet collection, sent at login after the inventory: same owner rule; the effects already kept stay.
+  // Pet collection and its owned effects, sent at login after the inventory: same owner rule. No effects read
+  // (an older capture): the ones already kept stay.
   const pets = petsFromGame(data?.pets ?? [], PET_IDS);
   const petsAll = readPets(settings[CAPTURED_PETS_KEY]);
-  const petsChanged = !!char && Object.keys(pets).length > 0 && JSON.stringify(petsAll[char.id]?.owned) !== JSON.stringify(pets);
+  const readFx: PetEffect[] = (data?.petEffects ?? []).map((e) => [e.stat, e.value, false]);
+  const effects = readFx.length ? readFx : (char && petsAll[char.id]?.effects) || [];
+  const petsChanged =
+    !!char && Object.keys(pets).length > 0 && JSON.stringify(petsAll[char.id]) !== JSON.stringify({ owned: pets, effects });
   useEffect(() => {
-    if (petsChanged) save(CAPTURED_PETS_KEY, JSON.stringify({ ...petsAll, [char!.id]: { owned: pets, effects: petsAll[char!.id]?.effects ?? [] } })).catch(onError);
-  }, [petsChanged, char?.id, JSON.stringify(pets)]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (petsChanged) save(CAPTURED_PETS_KEY, JSON.stringify({ ...petsAll, [char!.id]: { owned: pets, effects } })).catch(onError);
+  }, [petsChanged, char?.id, JSON.stringify(pets), JSON.stringify(effects)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Item level and combat power, same owner rule: kept on the character, so they stay with the game closed.
   const gs = data?.gearScore ?? undefined;

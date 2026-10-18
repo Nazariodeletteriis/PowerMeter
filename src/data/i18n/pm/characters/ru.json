@@ -131,5 +131,9 @@
   "characters.builds.noneText": "Создайте первую сборку или клонируйте её в Character Builder.",
   "characters.builder.defaultBuild": "Основная сборка",
   "characters.builder.commentsEmptyTitle": "Комментариев пока нет",
-  "characters.builder.commentsEmptyText": "Комментарии станут доступны, когда заработает онлайн-обмен сборками."
+  "characters.builder.commentsEmptyText": "Комментарии станут доступны, когда заработает онлайн-обмен сборками.",
+  "characters.builder.pets.location": "Где найти",
+  "characters.builder.pets.showOnMap": "Показать на карте",
+  "characters.builder.pets.noLocation": "Место неизвестно",
+  "characters.builder.pets.noCoords": "Нет координат его монстров на карте: известны только зоны."
 }

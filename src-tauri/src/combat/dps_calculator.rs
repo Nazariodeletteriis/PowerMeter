@@ -87,6 +87,8 @@ pub struct DpsCalculator {
     last_damage_gen: i64,
     target_selection_mode: TargetSelectionMode,
     last_known_local_id: Option<i64>,
+    /// A zone change reset was consumed by `get_dps`: the tick loop tells the windows, then clears it.
+    pub zone_reset: bool,
     all_targets_window_ms: i64,
     nickname_job_cache: HashMap<String, String>,
     saved_boss_targets: HashSet<i32>,
@@ -111,6 +113,7 @@ impl DpsCalculator {
             last_damage_gen: -1,
             target_selection_mode: TargetSelectionMode::BossTargets,
             last_known_local_id: None,
+            zone_reset: false,
             all_targets_window_ms: 120_000,
             nickname_job_cache: HashMap::new(),
             saved_boss_targets: HashSet::new(),
@@ -153,6 +156,7 @@ impl DpsCalculator {
         // A zone change flushed combat data; drop our cached snapshot and saved-target
         // state so the meter resets this cycle instead of returning the stale snapshot.
         if self.data_storage.take_combat_reset_requested() {
+            self.zone_reset = true;
             self.last_dps_snapshot = None;
             self.saved_boss_targets.clear();
             self.last_damage_gen = -1;
@@ -435,6 +439,8 @@ impl DpsCalculator {
         // dealt no damage here gets a row of their own, so the widget's HEAL view
         // lists them; their job comes from the cache or their heal skills.
         let orphan_owner: HashMap<i32, i32> = orphan_merges.into_iter().collect();
+        let heal_party = self.data_storage.get_party_members();
+        let local_ids = self.resolve_local_ids(&summon_data);
         for (&actor_id, skills) in &self.data_storage.get_heal_snapshot() {
             let raw_uid = summon_resolver::resolve(actor_id, &summon_data);
             if raw_uid <= 0 { continue; }
@@ -447,6 +453,9 @@ impl DpsCalculator {
                 continue;
             }
             if !known_players.contains(&uid) && !nickname_data.contains_key(&uid) { continue; }
+            // A heal-only row is for your party (and you): a stranger who healed or buffed
+            // nearby was the 6th row in a 5-man instance.
+            if !heal_party.is_empty() && !heal_party.contains_key(&nickname) && !local_ids.as_ref().is_some_and(|l| l.contains(&uid)) { continue; }
             let job = self.cached_job(&nickname).or_else(|| {
                 skills.keys()
                     .find_map(|&(code, _)| JobClass::convert_from_skill(code))
@@ -459,7 +468,6 @@ impl DpsCalculator {
         }
 
         // Filter and compute DPS
-        let local_ids = self.resolve_local_ids(&summon_data);
         let party_members = self.data_storage.get_party_members();
         let bt = battle_time.max(1000);
         let mut to_remove = Vec::new();

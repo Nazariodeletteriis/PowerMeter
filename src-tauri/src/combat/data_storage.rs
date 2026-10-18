@@ -333,11 +333,15 @@ impl DataStorage {
         }
         {
             let inner = self.inner.read();
-            if inner.target_combat.is_empty() {
+            // Heals count too: strangers healing in town otherwise rode into the
+            // instance as an extra 0-DPS row.
+            if inner.target_combat.is_empty() && inner.heal_storage.is_empty() {
                 return false; // nothing to clear
             }
         }
         self.last_zone_reset_ms.store(now, Ordering::Relaxed);
+        // Ids are reissued with the zone: a name still waiting for its id's first hit is stale.
+        self.inner.write().pending_nicknames.clear();
         // Preserve identity across the reset: a teleport within the same instance
         // keeps everyone's entity ids, so wiping nicknames/known-players/summons
         // would drop your party (and you) to raw ids until they happen to be
@@ -353,6 +357,7 @@ impl DataStorage {
     pub fn take_combat_reset_requested(&self) -> bool {
         self.combat_reset_requested.swap(false, Ordering::Relaxed)
     }
+
 
     pub fn damage_generation(&self) -> i64 {
         self.damage_generation.load(Ordering::Relaxed)
@@ -408,7 +413,16 @@ impl DataStorage {
             let mut found = None;
             for td in inner.target_combat.values() {
                 for (&id, a) in &td.actors {
-                    if id <= 0 || a.job != Some(job) || inner.nickname_storage.contains_key(&id) || inner.summon_storage.contains_key(&id) {
+                    // A summon (Divine Aura) or a same-class teammate's first hit is no rotation:
+                    // you need three distinct skills before your name moves.
+                    if id <= 0
+                        || a.job != Some(job)
+                        || inner.nickname_storage.contains_key(&id)
+                        || inner.summon_storage.contains_key(&id)
+                        || inner.summon_spawn_ids.contains(&id)
+                        || inner.confirmed_summon_ids.contains(&id)
+                        || distinct_skills(a) < 3
+                    {
                         continue;
                     }
                     if found.is_some_and(|f| f != id) {
@@ -435,6 +449,64 @@ impl DataStorage {
                 inner.local_character_name = Some(name);
             }
         }
+    }
+
+    /// The game sends a party member's name once per zone; when it is missed (or their id
+    /// changed: death, reconnect) they fight as `#id` while the name sits on a dead id.
+    /// The party roster has every name: if exactly one unnamed player is fighting and
+    /// exactly one party name is not on anyone fighting, that name is theirs.
+    pub fn name_unnamed_from_party(&self) {
+        let mut inner = self.inner.write();
+        if inner.party_members.is_empty() {
+            return;
+        }
+        let in_combat: HashSet<i32> = inner
+            .target_combat
+            .values()
+            .flat_map(|t| t.actors.keys().map(|&a| summon_resolver::resolve(a, &inner.summon_storage)))
+            .collect();
+        let mut unnamed = HashSet::new();
+        for td in inner.target_combat.values() {
+            for (&id, a) in &td.actors {
+                if id > 0
+                    && inner.known_player_ids.contains(&id)
+                    && !inner.nickname_storage.contains_key(&id)
+                    && !inner.summon_storage.contains_key(&id)
+                    && !inner.summon_spawn_ids.contains(&id)
+                    && !inner.confirmed_summon_ids.contains(&id)
+                    && distinct_skills(a) >= 3
+                {
+                    unnamed.insert(id);
+                }
+            }
+        }
+        // More players fighting than the party holds: open world, the unnamed one may be a stranger.
+        let players_fighting = in_combat.iter().filter(|id| inner.known_player_ids.contains(id)).count();
+        if unnamed.len() != 1 || players_fighting > inner.party_members.len() {
+            return;
+        }
+        // Everyone else fighting must be a named party member (or you): an open-world stranger then
+        // can't take an absent member's name.
+        let local = inner.local_character_name.as_deref().map(str::trim).unwrap_or("");
+        let others_in_party = in_combat.iter().filter(|&&id| inner.known_player_ids.contains(&id) && !unnamed.contains(&id)).all(|id| {
+            inner.nickname_storage.get(id).is_some_and(|n| inner.party_members.contains_key(n) || n.trim() == local)
+        });
+        if !others_in_party {
+            return;
+        }
+        let free: Vec<String> = inner
+            .party_members
+            .keys()
+            .filter(|n| n.trim() != local)
+            .filter(|n| !inner.nickname_storage.iter().any(|(id, nn)| nn == *n && in_combat.contains(id)))
+            .cloned()
+            .collect();
+        if free.len() != 1 {
+            return;
+        }
+        let id = *unnamed.iter().next().unwrap();
+        tracing::info!("party roster: entity {} named '{}'", id, free[0]);
+        append_nickname_inner(&mut inner, id, &free[0]);
     }
 
     pub fn append_damage(&self, pdp: ParsedDamagePacket) {
@@ -628,6 +700,12 @@ impl DataStorage {
 
     pub fn append_mob(&self, mid: i32, code: i32) {
         let mut inner = self.inner.write();
+        // The embedded-spawn scan can land on a player's id: a protocol-named player
+        // fighting right now is never a mob, and filing them as one deleted their damage
+        // and pinned them at 0. (An id from an earlier zone may be a mob now: that one passes.)
+        if named_player_in_combat(&inner, mid) {
+            return;
+        }
         inner.mob_storage.insert(mid, code);
 
         // NPC unclassification: if this entity was previously classified as a player
@@ -690,7 +768,10 @@ impl DataStorage {
     /// spawn). Used to keep summon / spell-effect entities out of the known-player
     /// set and make them attributable to their same-class player.
     pub fn note_summon_spawn(&self, id: i32) {
-        self.inner.write().summon_spawn_ids.insert(id);
+        let mut inner = self.inner.write();
+        if !named_player_in_combat(&inner, id) {
+            inner.summon_spawn_ids.insert(id);
+        }
     }
 
     pub fn get_summon_spawn_ids(&self) -> HashSet<i32> {
@@ -798,6 +879,15 @@ impl DataStorage {
     ///     different id.
     pub fn append_nickname(&self, uid: i32, nickname: &str) {
         let mut inner = self.inner.write();
+        // A name that arrives before the id's first hit waits for it (applied by
+        // `append_damage`, gated again then) instead of leaving the row as `#id`.
+        if uid > 0 && !is_real_entity(&inner, uid) {
+            if inner.pending_nicknames.len() >= 512 {
+                inner.pending_nicknames.clear();
+            }
+            inner.pending_nicknames.insert(uid, nickname.to_string());
+            return;
+        }
         if !fuzzy_bind_allowed(&inner, uid, nickname) {
             return;
         }
@@ -1104,13 +1194,21 @@ impl DataStorage {
     }
 }
 
-/// Gate for lower-confidence nickname bindings (see `append_nickname`).
-fn fuzzy_bind_allowed(inner: &Inner, uid: i32, nickname: &str) -> bool {
-    // (1) The id must already be a real entity. A counter/terminator-derived
-    // junk id (e.g. `0E 00 36 <counter>`) never appears in combat, is never a
-    // known player/summon, was never spawned, and has no name yet — so it is
-    // rejected here, and can no longer evict a correct spawn name.
-    let is_real_entity = inner.nickname_storage.contains_key(&uid)
+/// A rotation, not a summon's one or two abilities: distinct skill codes, DoT or not.
+fn distinct_skills(a: &ActorCombatData) -> usize {
+    a.skills.keys().map(|&(c, _)| c).collect::<HashSet<_>>().len()
+}
+
+fn named_player_in_combat(inner: &Inner, id: i32) -> bool {
+    inner.authoritative_name_ids.contains(&id)
+        && inner.known_player_ids.contains(&id)
+        && inner.target_combat.values().any(|t| t.actors.contains_key(&id))
+}
+
+/// A counter/terminator-derived junk id (e.g. `0E 00 36 <counter>`) never appears
+/// in combat, is never a known player/summon, was never spawned, and has no name yet.
+fn is_real_entity(inner: &Inner, uid: i32) -> bool {
+    inner.nickname_storage.contains_key(&uid)
         || inner.known_player_ids.contains(&uid)
         || inner.authoritative_name_ids.contains(&uid)
         || inner.summon_storage.contains_key(&uid)
@@ -1118,8 +1216,14 @@ fn fuzzy_bind_allowed(inner: &Inner, uid: i32, nickname: &str) -> bool {
         || inner
             .target_combat
             .values()
-            .any(|t| t.actors.contains_key(&uid));
-    if !is_real_entity {
+            .any(|t| t.actors.contains_key(&uid))
+}
+
+/// Gate for lower-confidence nickname bindings (see `append_nickname`).
+fn fuzzy_bind_allowed(inner: &Inner, uid: i32, nickname: &str) -> bool {
+    // (1) The id must already be a real entity, so a junk id can no longer evict
+    // a correct spawn name.
+    if !is_real_entity(inner, uid) {
         return false;
     }
     // (1b) Never name a mob. An entity that spawned as an NPC (`41 36` with a
@@ -1211,13 +1315,49 @@ fn append_nickname_inner_with_force(inner: &mut Inner, uid: i32, nickname: &str,
         inner.known_player_ids.remove(&old_id);
         inner.authoritative_name_ids.remove(&old_id);
         inner.pending_nicknames.remove(&old_id);
-        // Remove summon mappings pointing to the stale owner
-        inner.summon_storage.retain(|_, &mut owner| owner != old_id);
-        // Also scrub the stale entity's damage from all target aggregates
-        for target_data in inner.target_combat.values_mut() {
-            if let Some(actor_data) = target_data.actors.remove(&old_id) {
-                target_data.total_damage -= actor_data.total_damage;
+        if !force {
+            // A fuzzy source can be wrong: never hand someone else's numbers to it.
+            inner.summon_storage.retain(|_, &mut owner| owner != old_id);
+            for target_data in inner.target_combat.values_mut() {
+                if let Some(actor_data) = target_data.actors.remove(&old_id) {
+                    target_data.total_damage -= actor_data.total_damage;
+                }
             }
+            continue;
+        }
+        // The protocol says it is the same person on a new id: carry what they did (and
+        // their summons) onto it. Deleting it restarted them from 0 mid-boss, and left a
+        // name-only row behind for the healing.
+        for owner in inner.summon_storage.values_mut() {
+            if *owner == old_id {
+                *owner = uid;
+            }
+        }
+        for target_data in inner.target_combat.values_mut() {
+            if let Some(old) = target_data.actors.remove(&old_id) {
+                match target_data.actors.get_mut(&uid) {
+                    Some(cur) => merge_actor(cur, old),
+                    None => {
+                        target_data.actors.insert(uid, old);
+                    }
+                }
+            }
+        }
+        if let Some(old) = inner.heal_storage.remove(&old_id) {
+            let cur = inner.heal_storage.entry(uid).or_default();
+            for (k, h) in old {
+                let e = cur.entry(k).or_default();
+                e.total_heal += h.total_heal;
+                e.tick_count += h.tick_count;
+            }
+        }
+        if let Some(old) = inner.heal_received.remove(&old_id) {
+            let e = inner.heal_received.entry(uid).or_default();
+            e.0 += old.0;
+            e.1 += old.1;
+        }
+        if inner.local_player_id == Some(old_id as i64) {
+            inner.local_player_id = Some(uid as i64);
         }
     }
 
@@ -1256,7 +1396,9 @@ fn note_heal_received(inner: &mut Inner, healer: i32, receiver: i32, amount: i64
 fn apply_pending_nickname(inner: &mut Inner, uid: i32) {
     if inner.nickname_storage.contains_key(&uid) { return; }
     if let Some(pending) = inner.pending_nicknames.remove(&uid) {
-        append_nickname_inner(inner, uid, &pending);
+        if fuzzy_bind_allowed(inner, uid, &pending) {
+            append_nickname_inner(inner, uid, &pending);
+        }
     }
 }
 
@@ -1292,6 +1434,43 @@ fn is_pvp_hit(inner: &Inner, actor_id: i32, target_id: i32) -> bool {
 }
 
 /// Remove friendly-fire damage from aggregates when a new player is identified.
+fn merge_actor(dst: &mut ActorCombatData, src: ActorCombatData) {
+    dst.total_damage += src.total_damage;
+    dst.party_heal += src.party_heal;
+    dst.regen += src.regen;
+    dst.damage_received += src.damage_received;
+    dst.hits_received += src.hits_received;
+    dst.last_damage_time = dst.last_damage_time.max(src.last_damage_time);
+    dst.job = dst.job.or(src.job);
+    for (key, s) in src.skills {
+        let Some(d) = dst.skills.get_mut(&key) else {
+            dst.skills.insert(key, s);
+            continue;
+        };
+        d.hit_count += s.hit_count;
+        d.total_damage = d.total_damage.saturating_add(s.total_damage);
+        d.min_damage = d.min_damage.min(s.min_damage);
+        d.max_damage = d.max_damage.max(s.max_damage);
+        d.crit_count += s.crit_count;
+        d.back_count += s.back_count;
+        d.frontal_count += s.frontal_count;
+        d.parry_count += s.parry_count;
+        d.perfect_count += s.perfect_count;
+        d.double_count += s.double_count;
+        d.smite_count += s.smite_count;
+        d.powershard_count += s.powershard_count;
+        d.multi_hit_count += s.multi_hit_count;
+        d.multi_hit_damage = d.multi_hit_damage.saturating_add(s.multi_hit_damage);
+        d.multi_hit_hits += s.multi_hit_hits;
+        d.heal_amount = d.heal_amount.saturating_add(s.heal_amount);
+        d.hit_timestamps.extend(s.hit_timestamps);
+        d.hit_damages.extend(s.hit_damages);
+        for (i, f) in s.spec_flags.into_iter().enumerate() {
+            d.spec_flags[i] |= f;
+        }
+    }
+}
+
 fn purge_friendly_damage(inner: &mut Inner, _uid: i32) {
     let mut to_remove: Vec<(i32, Vec<i32>)> = Vec::new();
     let mut pvp_targets = Vec::new();
@@ -1450,13 +1629,29 @@ mod guess_local_tests {
 
     const MOB: i32 = 900;
 
+    /// A rotation: three distinct Gladiator skills (one skill alone looks like a summon).
     fn hit(s: &DataStorage, actor: i32) {
+        for code in [11_020_000, 11_030_000, 11_040_000] {
+            let mut p = ParsedDamagePacket::new();
+            p.set_actor_id(actor);
+            p.set_target_id(MOB);
+            p.set_skill_code(code);
+            p.set_damage(10);
+            s.append_damage(p);
+        }
+    }
+
+    #[test]
+    fn a_single_skill_entity_does_not_take_my_name() {
+        let s = DataStorage::new();
         let mut p = ParsedDamagePacket::new();
-        p.set_actor_id(actor);
+        p.set_actor_id(100);
         p.set_target_id(MOB);
-        p.set_skill_code(11_020_000); // Gladiator
+        p.set_skill_code(11_020_000);
         p.set_damage(10);
         s.append_damage(p);
+        s.guess_local_player(Some(("Me", JobClass::Gladiator)));
+        assert_eq!(s.local_player_id(), None);
     }
 
     #[test]
@@ -1503,6 +1698,42 @@ mod guess_local_tests {
         s.guess_local_player(None);
         assert_eq!(s.local_player_id(), Some(6653));
         assert_eq!(s.get_nickname(6653).as_deref(), Some("Me"));
+    }
+
+    #[test]
+    fn a_name_moving_to_a_new_id_keeps_the_damage() {
+        let s = DataStorage::new();
+        s.append_nickname_authoritative(300, "Mate");
+        hit(&s, 300);
+        s.append_nickname_authoritative(301, "Mate"); // died, came back on a new id
+        let t = s.get_combat_snapshot();
+        let actors = &t[&MOB].actors;
+        assert!(!actors.contains_key(&300));
+        assert_eq!(actors[&301].total_damage, 30);
+    }
+
+    #[test]
+    fn a_name_before_the_first_hit_waits_for_it() {
+        let s = DataStorage::new();
+        s.append_nickname(500, "Early");
+        assert_eq!(s.get_nickname(500), None);
+        hit(&s, 500);
+        assert_eq!(s.get_nickname(500).as_deref(), Some("Early"));
+    }
+
+    #[test]
+    fn the_party_roster_names_the_one_unnamed_fighter() {
+        let s = DataStorage::new();
+        s.set_local_character_name(Some("Me".to_string()));
+        s.append_nickname_authoritative(100, "Me");
+        hit(&s, 100);
+        hit(&s, 400);
+        s.set_party_roster(
+            vec![("Me".to_string(), PartyMember::default()), ("Mate".to_string(), PartyMember::default())],
+            true,
+        );
+        s.name_unnamed_from_party();
+        assert_eq!(s.get_nickname(400).as_deref(), Some("Mate"));
     }
 
     #[test]

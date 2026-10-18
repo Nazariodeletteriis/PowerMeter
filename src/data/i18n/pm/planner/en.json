@@ -64,5 +64,7 @@
   "planner.grp.Conqueror": "Conqueror",
   "planner.grp.PVP": "PvP",
   "planner.grp.Special": "Special",
-  "planner.grp.Other": "Other"
+  "planner.grp.Other": "Other",
+  "planner.builder.enhPastPublished": "Values are published up to +{n}: above it the bonus shown is the +{n} one.",
+  "planner.builder.identifyNote": "This item is not in the game data yet: pick below which one it is. It is remembered from then on."
 }

@@ -131,5 +131,9 @@
   "characters.builds.noneText": "最初のビルドを作成するか、Character Builderでクローンしてください。",
   "characters.builder.defaultBuild": "メインビルド",
   "characters.builder.commentsEmptyTitle": "コメントはまだありません",
-  "characters.builder.commentsEmptyText": "ビルドのオンライン共有が始まるとコメントを利用できます。"
+  "characters.builder.commentsEmptyText": "ビルドのオンライン共有が始まるとコメントを利用できます。",
+  "characters.builder.pets.location": "生息地",
+  "characters.builder.pets.showOnMap": "マップで表示",
+  "characters.builder.pets.noLocation": "生息地不明",
+  "characters.builder.pets.noCoords": "モンスターのマップ座標がありません：ゾーンのみ判明しています。"
 }

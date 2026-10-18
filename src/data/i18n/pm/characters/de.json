@@ -131,5 +131,9 @@
   "characters.builds.noneText": "Erstelle deinen ersten Build oder klone einen im Character Builder.",
   "characters.builder.defaultBuild": "Haupt-Build",
   "characters.builder.commentsEmptyTitle": "Noch keine Kommentare",
-  "characters.builder.commentsEmptyText": "Kommentare sind verfügbar, sobald das Online-Teilen von Builds live ist."
+  "characters.builder.commentsEmptyText": "Kommentare sind verfügbar, sobald das Online-Teilen von Builds live ist.",
+  "characters.builder.pets.location": "Fundort",
+  "characters.builder.pets.showOnMap": "Auf der Karte zeigen",
+  "characters.builder.pets.noLocation": "Kein bekannter Fundort",
+  "characters.builder.pets.noCoords": "Keine Kartenkoordinaten für seine Monster: Nur die Zonen sind bekannt."
 }

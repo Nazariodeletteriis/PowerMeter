@@ -131,5 +131,9 @@
   "characters.builds.noneText": "첫 빌드를 만들거나 Character Builder에서 복제하세요.",
   "characters.builder.defaultBuild": "메인 빌드",
   "characters.builder.commentsEmptyTitle": "아직 댓글이 없습니다",
-  "characters.builder.commentsEmptyText": "빌드 온라인 공유가 시작되면 댓글을 사용할 수 있습니다."
+  "characters.builder.commentsEmptyText": "빌드 온라인 공유가 시작되면 댓글을 사용할 수 있습니다.",
+  "characters.builder.pets.location": "위치",
+  "characters.builder.pets.showOnMap": "지도에서 보기",
+  "characters.builder.pets.noLocation": "알려진 위치 없음",
+  "characters.builder.pets.noCoords": "몬스터의 지도 좌표가 없습니다: 지역만 알려져 있습니다."
 }

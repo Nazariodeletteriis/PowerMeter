@@ -985,6 +985,7 @@ class DpsApp {
     this.lastJson = raw;
     this.applyLocalPlayerIdUpdate(localPlayerId, "backend local id update");
     this.updateLocalPlayerIdentity(rows);
+    const prevBattleTimeMs = this._lastBattleTimeMs;
     this._lastBattleTimeMs = battleTimeMs;
     this.followFightMode(recordingKind, targetMode);
     this.lastTargetMode = targetMode;
@@ -1060,13 +1061,21 @@ class DpsApp {
     const showBattleTime = this.BATTLE_TIME_BASIS === "server" ? showByServer : showByRender;
 
     let nextBattleTimeMs = battleTimeMs;
+    // Hold small backward jitter only. A drop of seconds is a new fight on the same id
+    // (PVE is always id 0, a re-pull keeps the boss id): holding it froze the timer, the
+    // meter read "ended" and kept the previous boss's rows.
     if (
       Number.isFinite(Number(nextBattleTimeMs)) &&
-      Number.isFinite(Number(this._lastBattleTimeMs)) &&
+      Number.isFinite(Number(prevBattleTimeMs)) &&
       targetId === previousTargetId &&
-      Number(nextBattleTimeMs) < Number(this._lastBattleTimeMs)
+      Number(nextBattleTimeMs) < Number(prevBattleTimeMs)
     ) {
-      nextBattleTimeMs = this._lastBattleTimeMs;
+      if (Number(prevBattleTimeMs) - Number(nextBattleTimeMs) < 3000) {
+        nextBattleTimeMs = prevBattleTimeMs;
+      } else if (rows.length > 0) {
+        this.lastSnapshot = rows;
+        rowsToRender = rows;
+      }
     }
 
     const eligible = showBattleTime && Number.isFinite(Number(nextBattleTimeMs));
@@ -1476,7 +1485,10 @@ class DpsApp {
     this.localPlayerId = actorId;
     window.javaBridge?.bindLocalActorId?.(String(actorId));
     window.javaBridge?.setLocalPlayerId?.(String(actorId));
-    if (this.USER_NAME) {
+    // The backend's own pick is a guess it can still correct: binding your name to it
+    // permanently made a wrong guess (a summon, a same-class teammate) stick as `#id` on you.
+    // The same for a row the backend already named after you.
+    if (this.USER_NAME && reason !== "backend local id update" && reason !== "local id update") {
       window.javaBridge?.bindLocalNickname?.(String(actorId), this.USER_NAME);
       this.setUserName(this.USER_NAME, { persist: true, syncBackend: true });
       this.rememberLocalIdForName(this.USER_NAME, actorId);

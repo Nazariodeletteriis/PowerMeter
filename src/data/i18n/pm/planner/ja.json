@@ -64,5 +64,7 @@
   "planner.grp.Conqueror": "征服者",
   "planner.grp.PVP": "PvP",
   "planner.grp.Special": "特殊",
-  "planner.grp.Other": "その他"
+  "planner.grp.Other": "その他",
+  "planner.builder.enhPastPublished": "数値は+{n}まで公開されています。それを超える場合は+{n}のボーナスを表示します。",
+  "planner.builder.identifyNote": "このアイテムはまだゲームデータにありません。下からどのアイテムか選んでください。以後は記憶されます。"
 }

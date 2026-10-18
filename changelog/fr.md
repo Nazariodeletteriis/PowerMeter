@@ -2,6 +2,21 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.18
+
+- Nouveau : Widget Carte : la carte interactive s'ouvre dans sa propre fenêtre par-dessus le jeu (bouton sur la page Carte), avec un bouton plein écran sur le widget comme sur la page (Échap pour quitter).
+- Nouveau : Calques de la carte pour la récolte (Od, gemmes, métaux, herbes, coquillages, légumes, bois, baies) à côté des cubes cachés et des autres marqueurs, chacun activable ou désactivable et mémorisé.
+- Nouveau : Carte, panneau Pet : choisissez des pets (par exemple Kuru Overseer et Kuru Worker) et la carte montre exactement où se trouvent leurs monstres, avec le nom au survol. Les pets terminés (niveau 3) n'apparaissent jamais, vous ne voyez donc que ce qu'il vous manque ; « Afficher tous les pets qui me manquent » les met tous sur la carte.
+- Nouveau : Character Builder, Pets : chaque pet indique où il vit, et « Afficher sur la carte » ouvre le widget Carte sur lui. Les icônes de famille sont celles du jeu, avec le nom de la famille au survol.
+- Nouveau : Character Builder, Pets : les effets possédés sont lus depuis le jeu à la connexion et comptés dans les stats (24 options du jeu ; les quelques-unes dont la valeur n'est pas encore certaine sont laissées de côté).
+- Nouveau : Character Builder : un objet que les données du jeu n'ont pas encore (par exemple Spiritforged Guard) peut être identifié une fois depuis la liste ; il est mémorisé et partagé, donc connu de tous.
+- Corrigé : Character Builder : les Arcana que vous portez sont lus depuis le jeu et comptés dans les stats.
+- Corrigé : Character Builder : l'amélioration au-delà de +15 (de +16 à +20) s'affiche à son vrai niveau et ses bonus supplémentaires sont listés ; là où les valeurs publiées s'arrêtent à +15, le bonus +15 est utilisé et le panneau l'indique.
+- Corrigé : Widget DPS : plus de 6e joueur en trop dans une instance à 5 (soigneurs ou buffeurs à proximité, ou le même joueur avec un nouvel id après sa mort).
+- Corrigé : Widget DPS : un joueur qui a changé d'id (mort, reconnexion) garde ses dégâts et son nom au lieu de repartir de 0 ou d'apparaître comme #id ; un nom manquant est repris de la liste du groupe.
+- Corrigé : Widget DPS : le meter se réinitialise proprement entre deux boss, aussi quand vous réengagez le même boss ou changez de zone.
+- Corrigé : Fermer PowerMeter le ferme maintenant pour de bon : le widget caché ne reste plus actif en arrière-plan et ne bloque plus le démarrage suivant.
+
 ## 0.5.17
 
 - Nouveau : Événements, onglet Boss de terrain : « Réapparitions d'après vos kills ». Quand un boss de terrain meurt avec PowerMeter lancé, vous voyez quand il revient (heure du kill + son délai de réapparition), avec un compte à rebours et « Devrait être là » une fois le minuteur écoulé. Couvre les 48 boss de Verteron et d'Altgard ; les délais de réapparition sont estimés.

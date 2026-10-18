@@ -253,7 +253,8 @@
   gap: 6px;
   align-items: center;
 }
-.wRouteBtn[aria-pressed="false"] {
+.wRouteBtn[aria-pressed="false"],
+.wRouteBtn.plain {
   border-color: var(--pm-line);
   background: var(--pm-s1);
   color: var(--pm-t1);
@@ -283,6 +284,173 @@
 .wZoom button:disabled {
   color: var(--pm-t3);
   cursor: default;
+}
+
+/* ---------- map explorer (MapExplorer.tsx: Map page and Map window) ---------- */
+.wFill {
+  flex: 1;
+  min-height: 0;
+}
+.wFill .wMap,
+.wExplorer[data-full] .wMap {
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+/* Full screen: the window goes full screen, the map covers it (title bar and shell included). */
+.wExplorer[data-full] {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--pm-bg);
+}
+/* Top-right tools: right of the layer panel, wrapping on narrow windows instead of covering it. */
+.wMapTools {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  left: 264px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  pointer-events: none; /* the gaps still drag the map */
+}
+.wMapTools > * {
+  pointer-events: auto;
+}
+.wMapTools .wMapSearch {
+  width: 200px;
+}
+.wIconBtn {
+  width: 34px;
+  padding: 0;
+  justify-content: center;
+  font-size: 16px;
+}
+/* Gathering nodes: the game icon, at screen size like the markers; not interactive. */
+.wWorld > img.wGather {
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%) scale(var(--k));
+}
+/* Pet spots: small dots that keep a screen size (r follows --k), hover shows the monster. */
+.wPetDots circle {
+  r: calc(5px * var(--k));
+  fill: #e86fb8;
+  stroke: #141111;
+  stroke-width: 1.5;
+  pointer-events: visiblePainted;
+  cursor: help;
+}
+.wPetDots circle:hover {
+  r: calc(7px * var(--k));
+}
+.wTip {
+  position: absolute;
+  transform-origin: 0 0;
+  transform: scale(var(--kp)) translate(-50%, calc(-100% - 12px));
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: var(--pm-s3);
+  box-shadow: 0 0 0 1px var(--pm-line), 0 6px 16px rgba(0, 0, 0, 0.45);
+  color: var(--pm-t1);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 6; /* above the side panels (layers 5, pets 5) */
+}
+.wTip span {
+  margin-left: 6px;
+  color: var(--pm-t3);
+}
+/* Side panel of the pets: enters from the right edge it is anchored to. */
+.wPetPanel {
+  position: absolute;
+  right: 12px;
+  top: 58px;
+  bottom: 92px; /* above the zoom buttons */
+  width: min(460px, calc(100% - 290px));
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: var(--pm-s1);
+  border: 1px solid var(--pm-line);
+  border-radius: 8px;
+  overflow-y: auto;
+  cursor: auto;
+  z-index: 5;
+  transition:
+    opacity 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    translate 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@starting-style {
+  .wPetPanel {
+    opacity: 0;
+    translate: 16px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wPetPanel {
+    transition: opacity 150ms ease;
+  }
+  @starting-style {
+    .wPetPanel {
+      translate: 0 0;
+    }
+  }
+}
+.wPetPanel .petGrid {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  max-height: none;
+  overflow: visible;
+}
+.wPetPanel .petArt {
+  aspect-ratio: 2 / 1;
+}
+/* The panel scrolls as a whole: the genus menu stays in view. */
+.wPetPanel .petRail {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+.wPetPanel .close {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--pm-t2);
+  cursor: pointer;
+}
+.wPetPanel .close:hover {
+  background: var(--pm-s2);
+  color: var(--pm-t1);
+}
+.wPetPicked {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.wPetPicked li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 2px 4px 2px 10px;
+  border-radius: 6px;
+  background: var(--pm-s2);
+  font-size: 13px;
 }
 
 /* ---------- database (prototype pg.database / pg.item) ---------- */

@@ -53,7 +53,7 @@ export function translator(lang: string): T {
   return (key, vars) => {
     let text = dict[key] ?? DICTS.en[key] ?? key;
     for (const [name, value] of Object.entries(vars ?? {})) {
-      text = text.replace(`{${name}}`, String(value));
+      text = text.split(`{${name}}`).join(String(value)); // every occurrence
     }
     return text;
   };

@@ -2,6 +2,21 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.18
+
+- Novo: Widget do Mapa: o mapa interativo abre em uma janela própria sobre o jogo (botão na página Mapa), com um botão de tela cheia tanto no widget quanto na página (Esc para sair).
+- Novo: Camadas do mapa para coleta (Od, gemas, metais, ervas, mariscos, legumes, madeira, frutas silvestres) ao lado dos cubos ocultos e dos demais marcadores, cada uma ativável ou desativável e lembrada.
+- Novo: Mapa, painel Pet: escolha pets (por exemplo Kuru Overseer e Kuru Worker) e o mapa mostra exatamente onde estão os monstros deles, com o nome ao passar o mouse. Pets completos (nível 3) nunca aparecem, então você só vê o que ainda falta; "Mostrar todos os pets que faltam" coloca todos no mapa.
+- Novo: Character Builder, Pets: cada pet mostra onde vive, e "Ver no mapa" abre o widget do Mapa nele. Os ícones de família são os do jogo, com o nome da família ao passar o mouse.
+- Novo: Character Builder, Pets: os efeitos que você possui são lidos do jogo no login e contados nos atributos (24 opções do jogo; as poucas cujo valor ainda não é certo ficam de fora).
+- Novo: Character Builder: um item que os dados do jogo ainda não têm (por exemplo Spiritforged Guard) pode ser identificado uma vez pela lista; ele é lembrado e compartilhado, então fica conhecido por todos.
+- Corrigido: Character Builder: os Arcana que você veste são lidos do jogo e contados nos atributos.
+- Corrigido: Character Builder: o aprimoramento acima de +15 (de +16 a +20) aparece no nível real e seus bônus extras são listados; onde os valores publicados terminam em +15, usa-se o bônus de +15 e o painel avisa.
+- Corrigido: Widget de DPS: sem um 6º jogador a mais em uma instância de 5 (curandeiros ou buffers por perto, ou o mesmo jogador com um novo id após morrer).
+- Corrigido: Widget de DPS: um jogador que mudou de id (morte, reconexão) mantém seu dano e seu nome em vez de recomeçar do 0 ou aparecer como #id; um nome ausente é tirado da lista do grupo.
+- Corrigido: Widget de DPS: o medidor reinicia de forma limpa entre dois chefes, também ao puxar o mesmo chefe de novo ou mudar de zona.
+- Corrigido: Fechar o PowerMeter agora o fecha de vez: o widget oculto não fica mais rodando em segundo plano e bloqueando a próxima abertura.
+
 ## 0.5.17
 
 - Novo: Eventos, aba Chefes de campo: "Respawns das suas kills". Quando um chefe de campo morre com o PowerMeter ativo, você vê quando ele volta (hora da kill + o tempo de respawn), com contagem regressiva e "Deve estar vivo" quando o timer acaba. Cobre os 48 chefes de Verteron e Altgard; os tempos de respawn são estimados.

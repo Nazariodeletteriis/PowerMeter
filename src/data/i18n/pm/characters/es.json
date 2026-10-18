@@ -131,5 +131,9 @@
   "characters.builds.noneText": "Crea tu primera build o clona una en el Character Builder.",
   "characters.builder.defaultBuild": "Build principal",
   "characters.builder.commentsEmptyTitle": "Aún no hay comentarios",
-  "characters.builder.commentsEmptyText": "Los comentarios estarán disponibles cuando el uso compartido de builds en línea esté activo."
+  "characters.builder.commentsEmptyText": "Los comentarios estarán disponibles cuando el uso compartido de builds en línea esté activo.",
+  "characters.builder.pets.location": "Ubicación",
+  "characters.builder.pets.showOnMap": "Mostrar en el mapa",
+  "characters.builder.pets.noLocation": "Ubicación desconocida",
+  "characters.builder.pets.noCoords": "Sin coordenadas de mapa para sus monstruos: solo se conocen las zonas."
 }

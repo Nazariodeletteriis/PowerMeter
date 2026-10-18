@@ -2,6 +2,21 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.18
+
+- Nuevo: Widget del Mapa: el mapa interactivo se abre en su propia ventana sobre el juego (botón en la página Mapa), con un botón de pantalla completa tanto en el widget como en la página (Esc para salir).
+- Nuevo: Capas del mapa para la recolección (Od, gemas, metales, hierbas, mariscos, verduras, madera, bayas) junto a los cubos ocultos y los demás marcadores, cada una activable o desactivable y recordada.
+- Nuevo: Mapa, panel Pet: elige mascotas (por ejemplo Kuru Overseer y Kuru Worker) y el mapa muestra exactamente dónde están sus monstruos, con el nombre al pasar el ratón. Las mascotas completadas (nivel 3) nunca aparecen, así solo ves lo que aún te falta; "Mostrar todas las mascotas que me faltan" las pone todas en el mapa.
+- Nuevo: Character Builder, Pets: cada mascota muestra dónde vive, y "Ver en el mapa" abre el widget del Mapa sobre ella. Los iconos de familia son los del juego, con el nombre de la familia al pasar el ratón.
+- Nuevo: Character Builder, Pets: los efectos que posees se leen del juego al iniciar sesión y se cuentan en las estadísticas (24 opciones del juego; las pocas cuyo valor aún no es seguro quedan fuera).
+- Nuevo: Character Builder: un objeto que los datos del juego aún no tienen (por ejemplo Spiritforged Guard) se puede identificar una vez desde la lista; se recuerda y se comparte, así que queda conocido para todos.
+- Corregido: Character Builder: los Arcana que llevas puestos se leen del juego y se cuentan en las estadísticas.
+- Corregido: Character Builder: la mejora por encima de +15 (de +16 a +20) se muestra en su nivel real y se listan sus bonos extra; donde los valores publicados terminan en +15, se usa el bono de +15 y el panel lo indica.
+- Corregido: Widget de DPS: ya no aparece un sexto jugador de más en una instancia de 5 (sanadores o potenciadores cerca, o el mismo jugador con un id nuevo tras morir).
+- Corregido: Widget de DPS: un jugador que cambió de id (muerte, reconexión) conserva su daño y su nombre en lugar de reiniciarse a 0 o aparecer como #id; un nombre que falta se toma de la lista del grupo.
+- Corregido: Widget de DPS: el medidor se reinicia limpiamente entre dos jefes, también al volver a atacar al mismo jefe o al cambiar de zona.
+- Corregido: Cerrar PowerMeter ahora lo cierra de verdad: el widget oculto ya no sigue ejecutándose en segundo plano e impidiendo el siguiente inicio.
+
 ## 0.5.17
 
 - Nuevo: Eventos, pestaña Jefes de campo: "Reapariciones según tus kills". Cuando un jefe de campo muere con PowerMeter activo, ves cuándo vuelve (hora del kill + su tiempo de reaparición), con cuenta atrás y "Debería estar vivo" cuando termina el temporizador. Cubre los 48 jefes de Verteron y Altgard; los tiempos de reaparición son estimados.

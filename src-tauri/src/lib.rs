@@ -1476,6 +1476,12 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_process::init())
+        // The dashboard is the app: closing it must not leave the hidden overlay alive with no tray to quit from.
+        .on_window_event(|window, event| {
+            if window.label() == "dashboard" && matches!(event, tauri::WindowEvent::CloseRequested { .. }) {
+                window.app_handle().exit(0);
+            }
+        })
         .setup(|app| {
             // Resolve data directory
             let app_data_dir = app.path().app_data_dir()
@@ -1707,14 +1713,21 @@ pub fn run() {
                     if let Some(state) = handle.try_state::<AppState>() {
                         // Every tick, not only while unknown: your id changes with every zone.
                         guess_local_player(&state);
+                        state.data_storage.name_unnamed_from_party();
                         let t0 = std::time::Instant::now();
                         let lock_guard = state.dps_calculator.lock();
                         let lock_ms = t0.elapsed().as_millis();
-                        let dps = {
+                        // A zone change cleared combat: the windows must drop their held rows too,
+                        // or the previous boss's numbers stayed up until the new fight outlasted it.
+                        let (dps, zone_reset) = {
                             let mut calc = lock_guard;
-                            calc.get_dps()
+                            let dps = calc.get_dps();
+                            (dps, std::mem::take(&mut calc.zone_reset))
                         };
                         let calc_ms = t0.elapsed().as_millis();
+                        if zone_reset {
+                            let _ = handle.emit("combat-reset", ());
+                        }
                         let _ = handle.emit("dps-update", &dps);
                         let total_ms = t0.elapsed().as_millis();
                         if total_ms > 200 {
@@ -1943,6 +1956,8 @@ pub fn run() {
             pm_account::pm_delete_log,
             pm_account::pm_admin,
             pm_account::pm_class_stats,
+            pm_account::pm_item_map,
+            pm_account::pm_item_map_vote,
             pm_account::pm_rankings,
             pm_account::pm_entitlement,
             pm_account::pm_patreon_link,
@@ -1966,6 +1981,7 @@ pub fn run() {
             gamedata::gamedata_builder,
             powermeter::install_npcap,
             powermeter::open_dashboard_window,
+            powermeter::open_map_window,
             powermeter::take_update_prompt,
             powermeter::show_overlay,
             powermeter::hide_overlay,
@@ -1973,6 +1989,15 @@ pub fn run() {
             powermeter::set_lock_hotspot,
             powermeter::get_click_through,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|_app, event| {
+            // A WebView2 teardown that hangs left a zombie PowerMeter.exe that then blocked every relaunch.
+            if let tauri::RunEvent::ExitRequested { .. } = event {
+                std::thread::spawn(|| {
+                    std::thread::sleep(Duration::from_secs(3));
+                    std::process::exit(0);
+                });
+            }
+        });
 }

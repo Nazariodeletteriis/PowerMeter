@@ -64,5 +64,7 @@
   "planner.grp.Conqueror": "征服者",
   "planner.grp.PVP": "PvP",
   "planner.grp.Special": "特殊",
-  "planner.grp.Other": "其他"
+  "planner.grp.Other": "其他",
+  "planner.builder.enhPastPublished": "数值公布到+{n}：超过时显示+{n}的加成。",
+  "planner.builder.identifyNote": "此物品尚未收录在游戏数据中：请在下方选择它是哪件物品。之后会被记住。"
 }

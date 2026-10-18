@@ -343,6 +343,62 @@ fn show_dashboard(app: &tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+/// The Map window: the dashboard page with only the map (MapWindow.tsx), a
+/// widget of its own next to the game. Async for the same reason as
+/// `open_dashboard_window`. Its place and size are remembered like the tool
+/// windows' (`window.map.*`), saved when it loses focus or closes rather than
+/// on every move event, since each save writes the settings file.
+#[tauri::command]
+pub async fn open_map_window(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(existing) = app.get_webview_window("map") {
+        let _ = existing.show();
+        let _ = existing.unminimize();
+        let _ = existing.set_focus();
+        return Ok(());
+    }
+    let window = tauri::WebviewWindowBuilder::new(&app, "map", tauri::WebviewUrl::App("dashboard.html".into()))
+        // WebviewUrl::App is a path (a ?query is percent-encoded): see build_settings_window.
+        .initialization_script("window.__PM_VIEW__ = 'map';")
+        .title("PowerMeter — Map")
+        .decorations(false)
+        // Over the game, like the meter and the tool windows.
+        .always_on_top(true)
+        .resizable(true)
+        .inner_size(900.0, 700.0)
+        .min_inner_size(640.0, 420.0)
+        .background_color(tauri::window::Color(10, 14, 22, 255))
+        .build()
+        .map_err(|e| e.to_string())?;
+    if !crate::restore_window_geometry(&app, &window, "map") {
+        let _ = window.center();
+    }
+    let handle = window.clone();
+    window.on_window_event(move |event| {
+        if matches!(event, tauri::WindowEvent::Focused(false) | tauri::WindowEvent::CloseRequested { .. }) {
+            save_map_geometry(&handle);
+        }
+    });
+    Ok(())
+}
+
+/// Full screen, minimized or maximized is not a place the user chose: kept out.
+fn save_map_geometry(window: &tauri::WebviewWindow) {
+    let Some(state) = window.app_handle().try_state::<AppState>() else { return };
+    let placed = !window.is_fullscreen().unwrap_or(true)
+        && !window.is_minimized().unwrap_or(true)
+        && !window.is_maximized().unwrap_or(true);
+    if !placed {
+        return;
+    }
+    if let (Ok(pos), Ok(size)) = (window.outer_position(), window.outer_size()) {
+        if pos.x > -10000 && pos.y > -10000 && size.width > 100 && size.height > 100 {
+            for (key, value) in [("x", pos.x), ("y", pos.y), ("w", size.width as i32), ("h", size.height as i32)] {
+                state.settings.set(&format!("window.map.{key}"), &value.to_string());
+            }
+        }
+    }
+}
+
 /// True only for the first caller in this process: the dashboard's update
 /// popup shows once per launch, even if the dashboard window is reopened.
 static UPDATE_PROMPTED: AtomicBool = AtomicBool::new(false);

@@ -18,6 +18,8 @@ export const MAPS = DATA.maps;
 export const MAP_TYPES = DATA.types;
 export type MapData = (typeof DATA.maps)[number];
 type View = { x: number; y: number; s: number };
+/** A rectangle of the map (x0, y0, x1, y1 in map pixels) to frame; a new `key` frames it again. */
+export type MapFocus = { key: string; box: [number, number, number, number] };
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
@@ -25,19 +27,21 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
  * A map's tiles with pan (drag) and zoom (wheel, +/- buttons). `world` is drawn
  * in map pixels on top of the tiles (markers, borders, popups: --k and --kp keep
  * them at screen size); `children` float over the viewport (panels, credits).
- * Opens on the whole map. Only the tiles that have been in view load.
+ * Opens on the whole map, or on `focus`. Only the tiles that have been in view load.
  */
 export function MapView({
   t,
   map,
   onBareClick,
   world,
+  focus,
   children,
 }: {
   t: T;
   map: MapData;
   onBareClick?: () => void;
   world?: ReactNode;
+  focus?: MapFocus;
   children?: ReactNode;
 }) {
   const [view, setView] = useState<View>({ x: 0, y: 0, s: 0.1 });
@@ -61,24 +65,34 @@ export function MapView({
     return place({ s, x: cx - ((cx - v.x) * s) / v.s, y: cy - ((cy - v.y) * s) / v.s });
   };
 
-  // New map or resized window: fit the map in the viewport.
+  // New map, resized window or new focus: fit the map (or the focus box, with a margin) in the viewport.
+  const framing = useRef(focus);
+  framing.current = focus;
+  const frame = () => {
+    const r = box.current!.getBoundingClientRect();
+    size.current = { w: r.width, h: r.height };
+    const s = Math.min(r.width / w, r.height / h);
+    fit.current = s;
+    const f = framing.current?.box;
+    if (!f) return setView({ s, x: (r.width - w * s) / 2, y: (r.height - h * s) / 2 });
+    const pad = 120 / MAX_SCALE; // keeps lone spots from zooming in all the way
+    const fs = clamp(Math.min(r.width / (f[2] - f[0] + 2 * pad), r.height / (f[3] - f[1] + 2 * pad)), s, MAX_SCALE / 2);
+    setView(place({ s: fs, x: r.width / 2 - ((f[0] + f[2]) / 2) * fs, y: r.height / 2 - ((f[1] + f[3]) / 2) * fs }));
+  };
   useLayoutEffect(() => {
-    const fitMap = () => {
-      const r = box.current!.getBoundingClientRect();
-      size.current = { w: r.width, h: r.height };
-      const s = Math.min(r.width / w, r.height / h);
-      fit.current = s;
-      setView({ s, x: (r.width - w * s) / 2, y: (r.height - h * s) / 2 });
-    };
-    const ro = new ResizeObserver(fitMap);
+    const ro = new ResizeObserver(frame);
     ro.observe(box.current!);
     return () => ro.disconnect();
   }, [map.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    if (focus && size.current.w) frame();
+  }, [focus?.key]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // React's onWheel is passive: preventDefault needs a native listener.
   useEffect(() => {
     const el = box.current!;
     const wheel = (e: WheelEvent) => {
+      if ((e.target as HTMLElement).closest(".wPanel, .wPetPanel")) return; // the panels scroll
       e.preventDefault();
       const r = el.getBoundingClientRect();
       setView((v) => zoomAt(v, Math.exp(-e.deltaY * 0.002), e.clientX - r.left, e.clientY - r.top));
@@ -93,7 +107,7 @@ export function MapView({
   };
 
   const down = (e: PointerEvent) => {
-    if ((e.target as HTMLElement).closest("button, a, input, select, .wPopup, .wPanel")) return;
+    if ((e.target as HTMLElement).closest("button, a, input, select, .wPopup, .wPanel, .wPetPanel")) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     drag.current = { x: e.clientX, y: e.clientY, moved: false };
   };

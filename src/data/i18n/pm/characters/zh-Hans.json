@@ -131,5 +131,9 @@
   "characters.builds.noneText": "创建你的第一个构筑，或在 Character Builder 中克隆一个。",
   "characters.builder.defaultBuild": "主构筑",
   "characters.builder.commentsEmptyTitle": "还没有评论",
-  "characters.builder.commentsEmptyText": "构筑在线分享上线后即可使用评论。"
+  "characters.builder.commentsEmptyText": "构筑在线分享上线后即可使用评论。",
+  "characters.builder.pets.location": "位置",
+  "characters.builder.pets.showOnMap": "在地图上显示",
+  "characters.builder.pets.noLocation": "位置未知",
+  "characters.builder.pets.noCoords": "其怪物没有地图坐标：只知道所在区域。"
 }

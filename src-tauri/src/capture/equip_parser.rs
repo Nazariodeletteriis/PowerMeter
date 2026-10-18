@@ -110,6 +110,14 @@ pub struct CapturedCharacter {
     pub combat_power: Option<u64>,
     /// Pet collection (`00 90`): empty until the game sends it after a login.
     pub pets: Vec<CapturedPet>,
+    /// The collection's owned effects (genus insight, tail of `00 90`), raw stat values.
+    pub pet_effects: Vec<CapturedPetEffect>,
+}
+
+#[derive(Serialize, Clone, PartialEq, Debug)]
+pub struct CapturedPetEffect {
+    pub stat: &'static str,
+    pub value: u32,
 }
 
 #[derive(Serialize, Clone, PartialEq, Debug)]
@@ -130,6 +138,7 @@ struct State {
     gear_score: Option<u32>,
     combat_power: Option<u64>,
     pets: Vec<CapturedPet>,
+    pet_effects: Vec<CapturedPetEffect>,
 }
 
 static STATE: Mutex<State> = Mutex::new(State {
@@ -141,6 +150,7 @@ static STATE: Mutex<State> = Mutex::new(State {
     gear_score: None,
     combat_power: None,
     pets: Vec::new(),
+    pet_effects: Vec::new(),
 });
 
 /// Your own item level and combat power: a `now`/`best` pair whose best is kept. Out of range or now above best:
@@ -182,6 +192,7 @@ pub fn snapshot() -> CapturedCharacter {
         gear_score: s.gear_score,
         combat_power: s.combat_power,
         pets: s.pets.clone(),
+        pet_effects: s.pet_effects.clone(),
     }
 }
 
@@ -393,7 +404,76 @@ fn parse_pets(b: &[u8]) {
         }
         o += 8;
     }
-    STATE.lock().unwrap_or_else(|e| e.into_inner()).pets = pets;
+    let effects = pet_insight(b, o);
+    let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
+    s.pets = pets;
+    // A tail out of shape keeps the last good effects.
+    if let Some(effects) = effects {
+        s.pet_effects = effects;
+    }
+}
+
+/// Stat ids of the insight options, as far as they are certain (ranges of pet-insight + the character's own values)
+/// or follow from the race blocks (8 ids per genus: Damage, Defense, Accuracy, Evasion, Critical, CriticalResist, ?,
+/// Block). Ids still open (44, 52, 100, 587, 588, 591: several stats fit their ranges) are not counted.
+fn insight_stat(id: u16) -> Option<&'static str> {
+    const RACE: [[Option<&str>; 8]; 4] = [
+        [Some("IntellectDamage"), Some("IntellectDefense"), Some("IntellectAccuracy"), Some("IntellectEvasion"), Some("IntellectCritical"), Some("IntellectCriticalResist"), None, Some("IntellectBlock")],
+        [Some("FeralDamage"), Some("FeralDefense"), Some("FeralAccuracy"), Some("FeralEvasion"), Some("FeralCritical"), Some("FeralCriticalResist"), None, Some("FeralBlock")],
+        [Some("NatureDamage"), Some("NatureDefense"), Some("NatureAccuracy"), Some("NatureEvasion"), Some("NatureCritical"), Some("NatureCriticalResist"), None, Some("NatureBlock")],
+        [Some("TransDamage"), Some("TransDefense"), Some("TransAccuracy"), Some("TransEvasion"), Some("TransCritical"), Some("TransCriticalResist"), None, Some("TransBlock")],
+    ];
+    match id {
+        56 => Some("PvEAddDamage"),
+        57 => Some("PvEDamageDefense"),
+        193 => Some("HPMax"),
+        199 => Some("MPMax"),
+        393..=424 => RACE[(id as usize - 393) / 8][(id as usize - 393) % 8],
+        _ => None,
+    }
+}
+
+/// Tail of `00 90` after the two pet lists (packets_20261013_031645, Allalon login; same in 5 captures):
+///   `<n u8> { <u8> <u32> } × n  00  <genera u8> { <genus u8> <genus u8> <level u32> <exp u32> <u32>
+///    <sets u8> { <set u8> <n u8> { <slot u8> <grade u8> <stat u16> <value u16> <6 × 00> } × n } × sets } × genera`
+/// After the 1st, 5th, 9th... option (counted across all genera) the game inserts a byte of 2-bit flags for that
+/// option and the next three (bit 0: option locked). Only set 1 is in use (2 and 3 are all zeros).
+fn pet_insight(b: &[u8], mut o: usize) -> Option<Vec<CapturedPetEffect>> {
+    let u8_at = |i: usize| b.get(i).copied();
+    let nh = u8_at(o)? as usize;
+    o += 1 + nh * 5 + 1;
+    let genera = u8_at(o)?;
+    o += 1;
+    let mut flags_left = 0;
+    let mut out = Vec::new();
+    for _ in 0..genera {
+        u32_at(b, o + 10)?;
+        o += 14;
+        let sets = u8_at(o)?;
+        o += 1;
+        for _ in 0..sets {
+            let (set, n) = (u8_at(o)?, u8_at(o + 1)?);
+            o += 2;
+            for _ in 0..n {
+                let rec = b.get(o..o + 12)?;
+                let stat = u16::from_le_bytes([rec[2], rec[3]]);
+                let value = u16::from_le_bytes([rec[4], rec[5]]);
+                o += 12;
+                if flags_left == 0 {
+                    u8_at(o)?;
+                    o += 1;
+                    flags_left = 4;
+                }
+                flags_left -= 1;
+                if set == 1 && value > 0 {
+                    if let Some(stat) = insight_stat(stat) {
+                        out.push(CapturedPetEffect { stat, value: value as u32 });
+                    }
+                }
+            }
+        }
+    }
+    Some(out)
 }
 
 /// Item ids of wearable families in the archive: 110/115/150 weapons, 210/215/250 armour, 310/311 accessories.
@@ -572,6 +652,20 @@ mod tests {
         // Not a collection (a level out of range): the last one stays.
         parse(&hex("100000900000000001ea030000ea03000009000000"));
         assert_eq!(snapshot().pets.len(), 3);
+    }
+
+    /// packets_20261013_031645, 03:17:02.495: Allalon's full `00 90` (body), 31 insight options; the 7 on stat ids
+    /// still open are left out.
+    #[test]
+    fn reads_the_pet_insight_effects() {
+        let body = hex(include_str!("testdata/pets_0090_20261013_031702.hex").trim());
+        parse_pets(&body);
+        let fx: Vec<(&str, u32)> = snapshot().pet_effects.iter().map(|e| (e.stat, e.value)).collect();
+        assert_eq!(fx.len(), 24);
+        assert_eq!(fx[0], ("PvEAddDamage", 10));
+        assert!(fx.contains(&("FeralDefense", 48)));
+        assert!(fx.contains(&("PvEDamageDefense", 80)));
+        assert_eq!(fx.last(), Some(&("MPMax", 10)));
     }
     // packets_20261011_183820, 18:38:25: DrBlacK's spawn (entity 8761), cut after the worn list.
     #[test]

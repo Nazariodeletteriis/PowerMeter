@@ -64,5 +64,7 @@
   "planner.grp.Conqueror": "Conquérant",
   "planner.grp.PVP": "JcJ",
   "planner.grp.Special": "Spéciales",
-  "planner.grp.Other": "Autres"
+  "planner.grp.Other": "Autres",
+  "planner.builder.enhPastPublished": "Les valeurs sont publiées jusqu'à +{n} : au-delà, le bonus affiché est celui de +{n}.",
+  "planner.builder.identifyNote": "Cet objet n'est pas encore dans les données du jeu : choisis ci-dessous lequel c'est. Il sera mémorisé ensuite."
 }

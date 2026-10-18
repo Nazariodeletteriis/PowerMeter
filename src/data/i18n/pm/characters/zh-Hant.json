@@ -131,5 +131,9 @@
   "characters.builds.noneText": "建立你的第一個配置，或在 Character Builder 中複製一個。",
   "characters.builder.defaultBuild": "主要配置",
   "characters.builder.commentsEmptyTitle": "還沒有留言",
-  "characters.builder.commentsEmptyText": "配置線上分享上線後即可使用留言。"
+  "characters.builder.commentsEmptyText": "配置線上分享上線後即可使用留言。",
+  "characters.builder.pets.location": "位置",
+  "characters.builder.pets.showOnMap": "在地圖上顯示",
+  "characters.builder.pets.noLocation": "位置未知",
+  "characters.builder.pets.noCoords": "其怪物沒有地圖座標：只知道所在區域。"
 }

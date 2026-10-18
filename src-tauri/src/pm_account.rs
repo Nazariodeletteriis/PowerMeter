@@ -570,6 +570,18 @@ pub async fn pm_patreon_unlink(state: tauri::State<'_, AppState>) -> Result<(), 
     authed(&state, reqwest::Method::DELETE, "/api/patreon/link", None).await.map(|_| ())
 }
 
+/// Game item ids the community tied to an archive item (`{map: {gameId: code}}`); no account needed.
+#[tauri::command]
+pub async fn pm_item_map(state: tauri::State<'_, AppState>) -> Result<Value, String> {
+    call(reqwest::Method::GET, &format!("{}/api/item-map", server_url(&state)), None, None).await
+}
+
+/// Your vote for which archive item a game id is.
+#[tauri::command]
+pub async fn pm_item_map_vote(state: tauri::State<'_, AppState>, game_id: String, code: String) -> Result<Value, String> {
+    authed(&state, reqwest::Method::POST, "/api/item-map", Some(&json!({ "gameId": game_id, "code": code }))).await
+}
+
 /// Class stats over the community's public logs; no account needed.
 #[tauri::command]
 pub async fn pm_class_stats(

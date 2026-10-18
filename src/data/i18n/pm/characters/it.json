@@ -139,5 +139,9 @@
   "characters.builder.set.wantHint": "Il tuo obiettivo. Slot diversi dal corrente: {n}",
   "characters.builder.set.differs": "Diverso dall'equip corrente",
   "characters.builder.set.wornIs": "Ora indossi: {item}",
-  "characters.builder.set.deltaNote": "Differenza rispetto all'equip corrente"
+  "characters.builder.set.deltaNote": "Differenza rispetto all'equip corrente",
+  "characters.builder.pets.location": "Posizione",
+  "characters.builder.pets.showOnMap": "Mostra sulla mappa",
+  "characters.builder.pets.noLocation": "Nessuna posizione nota",
+  "characters.builder.pets.noCoords": "Nessuna coordinata per i suoi mostri: si conoscono solo le zone."
 }

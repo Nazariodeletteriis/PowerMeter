@@ -64,5 +64,7 @@
   "planner.grp.Conqueror": "Eroberer",
   "planner.grp.PVP": "PvP",
   "planner.grp.Special": "Spezial",
-  "planner.grp.Other": "Sonstige"
+  "planner.grp.Other": "Sonstige",
+  "planner.builder.enhPastPublished": "Werte sind bis +{n} veröffentlicht: darüber wird der Bonus von +{n} angezeigt.",
+  "planner.builder.identifyNote": "Dieser Gegenstand ist noch nicht in den Spieldaten: wähle unten aus, welcher es ist. Ab dann wird er gespeichert."
 }

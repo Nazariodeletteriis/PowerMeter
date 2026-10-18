@@ -64,5 +64,7 @@
   "planner.grp.Conqueror": "Conquistador",
   "planner.grp.PVP": "PvP",
   "planner.grp.Special": "Especiales",
-  "planner.grp.Other": "Otras"
+  "planner.grp.Other": "Otras",
+  "planner.builder.enhPastPublished": "Los valores están publicados hasta +{n}: por encima se muestra la bonificación de +{n}.",
+  "planner.builder.identifyNote": "Este objeto aún no está en los datos del juego: elige abajo cuál es. Se recordará a partir de ahora."
 }

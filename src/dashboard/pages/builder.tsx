@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import {
   ArrowLeftIcon,
   BankIcon,
@@ -94,6 +95,21 @@ type BuildEdit = { lvl: number; gear: GearSet; want?: GearSet };
 
 /** Game item ids (numeric, from the packets) are Taiwan data; the Builder's own pieces have string codes. */
 const isGameId = (id: string) => /^\d+$/.test(id);
+/** Game ids missing from the Taiwan data (Global-only items, Arcana), each tied once by you to the archive's item. */
+const ITEM_MAP_KEY = "pm.itemMap";
+/** Only game id → archive code pairs of the expected shape (the server's answer and the setting alike). */
+const validItemMap = (m: unknown): Record<string, string> =>
+  m && typeof m === "object" && !Array.isArray(m)
+    ? Object.fromEntries(Object.entries(m).filter(([k, v]) => /^\d{6,12}$/.test(k) && typeof v === "string" && /^[A-Za-z0-9_]{1,100}$/.test(v)))
+    : {};
+const readItemMap = (raw?: string): Record<string, string> => {
+  try {
+    const m: unknown = JSON.parse(raw ?? "{}");
+    return validItemMap(m);
+  } catch {
+    return {};
+  }
+};
 
 /** Published enhancement bonuses of an item (first group; never extrapolated past max_published_level). */
 async function enhancementOf(id: string): Promise<EnhancementValue[]> {
@@ -145,7 +161,7 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const key = dataKey(src.t);
   const saved = allData[key] ?? (key !== src.t && char?.id === chars[0]?.id ? allData[src.t] : undefined) ?? {};
   // Your builds of the character's class wear what the game shows it wearing (CaptureSync), enhancement
-  // included; slots the game does not send (Arcana) keep what was picked.
+  // and Arcana included; slots the game does not send keep what was picked.
   const captured = src.own && char?.cls === src.cls ? readCapturedGear(settings[CAPTURED_GEAR_KEY])[char.id] : undefined;
   // And the skill bar it has in game, every set ("set,row,column" → skill id).
   const gameBar = (src.own && char?.cls === src.cls ? readCapturedBar(settings[CAPTURED_BAR_KEY])[char.id] : undefined) ?? {};
@@ -181,22 +197,35 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const pieces = useGd(gd.gear, "gear");
   const calcData = useGd(() => gd.builder(clsKey), clsKey);
   const planner = useGd(() => gd.planner(clsKey), clsKey);
-  const ids = [...new Set([...Object.values(cur.gear), ...Object.values(want)].map((g) => g.id))].sort();
+  // The community's ties (server), yours on top.
+  const [sharedMap, setSharedMap] = useState<Record<string, string>>({});
+  useEffect(() => {
+    invoke<{ map?: unknown }>("pm_item_map").then((r) => setSharedMap(validItemMap(r?.map)), () => {});
+  }, []);
+  const itemMap = { ...sharedMap, ...readItemMap(settings[ITEM_MAP_KEY]) };
+  const rid = (id: string) => itemMap[id] ?? id; // a game id you identified reads as that archive item
+  const ids = [...new Set([...Object.values(cur.gear), ...Object.values(want)].map((g) => rid(g.id)))].sort();
   const gameIds = ids.filter(isGameId);
   const tw = useGd(() => (gameIds.length ? gd.twGear(gameIds) : Promise.resolve([])).then((rows) => rows.map(twPiece)), gameIds.join("|"));
   const enh = useGd(
     () => Promise.all(ids.map((id) => (isGameId(id) ? [] : enhancementOf(id)))).then((l) => Object.fromEntries(ids.map((id, i) => [id, l[i]]))),
     ids.join("|"),
   );
-  const levelsOf = (id: string) => (isGameId(id) ? tw.data?.find((x) => x.piece.id === id)?.levels : enh.data?.[id]);
+  const levelsOf = (raw: string) => {
+    const id = rid(raw);
+    return isGameId(id) ? tw.data?.find((x) => x.piece.id === id)?.levels : enh.data?.[id];
+  };
   const byId = useMemo(() => new Map([...(pieces.data ?? []), ...(tw.data ?? []).map((x) => x.piece)].map((p) => [p.id, p])), [pieces.data, tw.data]);
   // A worn game item missing from the game data (newer than it) keeps its slot, nameless and without stats.
   const unknownPiece = (s: string, id: string): GearPiece => ({ id, name: t("planner.builder.unknownItem", { id }), slot: SLOTS.find(([x]) => x === s)?.[1][0] ?? null, grade: null, level: null, icon: null, max_enh: null, stats_json: [] });
   const equippedOf = (gear: GearSet): (Equipped & { slot: string })[] =>
     Object.entries(gear).flatMap(([s, g]) => {
-      const piece = byId.get(g.id) ?? (isGameId(g.id) && tw.data ? unknownPiece(s, g.id) : undefined);
+      const piece = byId.get(rid(g.id)) ?? (isGameId(rid(g.id)) && tw.data ? unknownPiece(s, g.id) : undefined);
       if (!piece) return [];
-      const bonus = (levelsOf(g.id) ?? []).filter((v) => v.level === g.enh).map((v) => [v.stat_key, statValue(v.value_raw!, v.percent === 1)] as [string, number]);
+      // Past the last published level (archive data stops at +15) the item keeps that level's bonus, flagged in
+      // the panel: a +18 read as +0 before.
+      const lv = (levelsOf(g.id) ?? []).reduce((m, v) => (v.level <= g.enh && v.level > m ? v.level : m), 0);
+      const bonus = (levelsOf(g.id) ?? []).filter((v) => v.level === lv).map((v) => [v.stat_key, statValue(v.value_raw!, v.percent === 1)] as [string, number]);
       return [{ slot: s, piece, enh: g.enh, bonus }];
     });
   const worn = equippedOf(cur.gear);
@@ -548,6 +577,14 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
                   else delete next[slot];
                   update(which === "gear" ? { gear: next } : { want: next });
                 }}
+                // Only once the game data has loaded: before it, every game id looks unknown.
+                gameId={tw.data && shown[slot] && isGameId(rid(shown[slot].id)) && !byId.has(rid(shown[slot].id)) ? shown[slot].id : undefined}
+                identify={(gameId, code) => {
+                  saveSetting(ITEM_MAP_KEY, JSON.stringify({ ...readItemMap(settings[ITEM_MAP_KEY]), [gameId]: code })).catch(onError);
+                  // Shared so it is known for everyone; signed out it stays yours only.
+                  invoke("pm_item_map_vote", { gameId, code }).catch(() => {});
+                }}
+                statName={(k) => calcData.data?.stats.find((x) => x.stat_key === k)?.name ?? k}
                 openItem={(id) => openEntry(go, "item", id)}
               />
             )}
@@ -726,6 +763,9 @@ function EquipPanel({
   levels,
   wornNote,
   set,
+  gameId,
+  identify,
+  statName,
   openItem,
 }: {
   t: PageProps["t"];
@@ -737,6 +777,10 @@ function EquipPanel({
   /** Target set only, when the slot differs: what you wear there now. */
   wornNote?: string;
   set: (g: { id: string; enh: number } | null) => void;
+  /** The worn game item is in no game data: picking from the list ties its id to that item. */
+  gameId?: string;
+  identify: (gameId: string, code: string) => void;
+  statName: (key: string) => string;
   openItem: (id: string) => void;
 }) {
   const [q, setQ] = useState("");
@@ -746,7 +790,10 @@ function EquipPanel({
   const found = list.filter((p) => words.every((w) => `${p.name ?? ""} ${p.slot ?? ""}`.toLowerCase().includes(w))).slice(0, 30);
   const p = equipped?.piece;
   const icons = useIcons([...found.map((x) => x.icon), p?.icon]);
-  const steps = [0, ...new Set((levels ?? []).map((v) => v.level))].sort((a, b) => a - b);
+  const published = [0, ...new Set((levels ?? []).map((v) => v.level))].sort((a, b) => a - b);
+  const lastPublished = published[published.length - 1];
+  // The game's level is always offered, also past the published ones (+16 to +20 read as +15 values).
+  const steps = equipped && !published.includes(equipped.enh) ? [...published, equipped.enh] : published;
   const fmt = (v: number) => v.toLocaleString(lang, { maximumFractionDigits: 2 });
 
   return (
@@ -799,6 +846,9 @@ function EquipPanel({
             ) : (
               <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{t("planner.builder.noEnh")}</div>
             )}
+            {published.length > 1 && equipped.enh > lastPublished && (
+              <div style={{ fontSize: 11, color: "var(--pm-t2)", marginTop: 6 }}>{t("planner.builder.enhPastPublished", { n: lastPublished })}</div>
+            )}
           </div>
           <div>
             <div style={{ fontSize: 11, color: "var(--pm-t3)", marginBottom: 6 }}>{t("planner.builder.mainStats")}</div>
@@ -815,6 +865,15 @@ function EquipPanel({
                   </span>
                 );
               })}
+              {/* Bonuses on stats the item has no fixed value for (past +15: fixed damage, damage %, ...). */}
+              {equipped.bonus
+                .filter(([k]) => !(p.stats_json ?? []).some(([sk]) => sk === k))
+                .map(([k, v]) => (
+                  <span key={`b-${k}`} style={{ display: "contents" }}>
+                    <span style={{ color: "var(--pm-t2)" }}>{statName(k)}</span>
+                    <span className="mono" style={{ color: "#5FD99A" }}>+{fmt(v)}</span>
+                  </span>
+                ))}
             </div>
             <div style={{ fontSize: 11, color: "var(--pm-t3)", marginTop: 8 }}>{t("planner.builder.rolledNote")}</div>
           </div>
@@ -822,13 +881,18 @@ function EquipPanel({
       )}
 
       <div style={{ borderTop: "1px solid var(--pm-line)", paddingTop: 12 }}>
+        {gameId && (
+          <div role="note" style={{ fontSize: 12, color: "var(--pm-t1)", marginBottom: 8, padding: "8px 10px", borderRadius: 6, border: "1px solid var(--pm-line)", background: "var(--pm-s2)" }}>
+            {t("planner.builder.identifyNote")}
+          </div>
+        )}
         <label className="chSearch" style={{ marginBottom: 6 }}>
           <MagnifyingGlassIcon aria-hidden="true" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("planner.builder.pick")} aria-label={t("planner.builder.pick")} />
         </label>
         <div style={{ display: "flex", flexDirection: "column", gap: 2, maxHeight: 320, overflow: "auto" }}>
           {found.map((x) => (
-            <button key={x.id} type="button" className="chBtnReset bPick" aria-pressed={x.id === p?.id} onClick={() => set({ id: x.id, enh: 0 })}>
+            <button key={x.id} type="button" className="chBtnReset bPick" aria-pressed={x.id === p?.id} onClick={() => (gameId ? identify(gameId, x.id) : set({ id: x.id, enh: 0 }))}>
               <GameIcon url={x.icon ? icons[x.icon] : undefined} grade={x.grade} size={24} />
               <span style={{ flex: 1, minWidth: 0, color: gradeColor(x.grade), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{x.name ?? x.id}</span>
               <span className="mono" style={{ fontSize: 11, color: "var(--pm-t3)" }}>

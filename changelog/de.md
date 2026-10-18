@@ -2,6 +2,21 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.18
+
+- Neu: Karten-Widget: Die interaktive Karte öffnet sich in einem eigenen Fenster über dem Spiel (Schaltfläche auf der Karten-Seite), mit einer Vollbild-Schaltfläche am Widget und auf der Seite (Esc beendet).
+- Neu: Kartenebenen fürs Sammeln (Od, Edelsteine, Metalle, Kräuter, Schalentiere, Gemüse, Holz, Beeren) neben den versteckten Würfeln und den anderen Markern, jede einzeln ein- oder ausschaltbar und gemerkt.
+- Neu: Karte, Pet-Panel: Wähle Pets (zum Beispiel Kuru Overseer und Kuru Worker), und die Karte zeigt genau, wo ihre Monster sind, mit dem Namen beim Überfahren. Abgeschlossene Pets (Stufe 3) erscheinen nie, du siehst also nur, was dir noch fehlt; "Alle fehlenden Pets anzeigen" legt sie alle auf die Karte.
+- Neu: Character Builder, Pets: Jedes Pet zeigt, wo es lebt, und "Auf der Karte zeigen" öffnet das Karten-Widget bei ihm. Die Familiensymbole stammen aus dem Spiel, mit dem Familiennamen beim Überfahren.
+- Neu: Character Builder, Pets: Besessene Effekte werden beim Login aus dem Spiel gelesen und in den Werten mitgezählt (24 der Spieloptionen; die wenigen, deren Wert noch nicht sicher ist, fehlen).
+- Neu: Character Builder: Ein Gegenstand, den die Spieldaten noch nicht kennen (zum Beispiel Spiritforged Guard), kann einmal aus der Liste identifiziert werden; er wird gemerkt und geteilt, ist also für alle bekannt.
+- Behoben: Character Builder: Getragene Arcana werden aus dem Spiel gelesen und in den Werten mitgezählt.
+- Behoben: Character Builder: Verstärkung über +15 (+16 bis +20) wird mit ihrer echten Stufe angezeigt und ihre Zusatzboni aufgelistet; wo die veröffentlichten Werte bei +15 enden, wird der +15-Bonus verwendet und das Panel weist darauf hin.
+- Behoben: DPS-Widget: Kein zusätzlicher 6. Spieler in einer 5-Spieler-Instanz (Heiler oder Buffer in der Nähe oder derselbe Spieler mit neuer ID nach dem Tod).
+- Behoben: DPS-Widget: Ein Spieler, der die ID gewechselt hat (Tod, Reconnect), behält Schaden und Namen, statt bei 0 neu zu starten oder als #id zu erscheinen; ein fehlender Name wird aus der Gruppenliste übernommen.
+- Behoben: DPS-Widget: Das Meter setzt sich zwischen zwei Bossen sauber zurück, auch wenn du denselben Boss erneut ziehst oder die Zone wechselst.
+- Behoben: PowerMeter zu schließen beendet es jetzt endgültig: Das versteckte Widget läuft nicht mehr im Hintergrund weiter und blockiert den nächsten Start.
+
 ## 0.5.17
 
 - Neu: Events, Tab Feldbosse: "Respawns aus deinen Kills". Stirbt ein Feldboss bei laufendem PowerMeter, siehst du, wann er zurückkommt (Kill-Zeit + seine Respawnzeit), mit Countdown und "Sollte da sein", sobald der Timer abläuft. Umfasst die 48 Bosse in Verteron und Altgard; die Respawnzeiten sind geschätzt.

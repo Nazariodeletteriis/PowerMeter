@@ -4,22 +4,20 @@
 // no stats per pet and level.
 
 import { useRef, useState, type KeyboardEvent } from "react";
-import { BrainIcon, DnaIcon, LeafIcon, PawPrintIcon, SparkleIcon, XIcon } from "@phosphor-icons/react";
-import type { BuilderData } from "../../../data/db/types";
+import { MapTrifoldIcon, PawPrintIcon, XIcon } from "@phosphor-icons/react";
+import type { BuilderData, IconUrls, ListRow, MonsterRegion } from "../../../data/db/types";
+import type { T } from "../../i18n";
 import type { PageProps } from "../types";
 import { Modal } from "../system/Modal";
 import { DataState, gd, useGd, useIcons } from "../world/db";
+import { loadPoints, petSpots, showOnMap } from "../world/points";
 import { ownedPets, PET_EXP_MAX, petStatKey, type PetEffect, type PetSet, type PetState } from "./calc";
 import { CAPTURED_PETS_KEY, PETS_KEY, readPets } from "./shared";
 
-/** Genus menu of the Pet window: the records' creature.genus, in the game's order. */
-const GENUS = [
-  ["Intellect", BrainIcon],
-  ["Feral", PawPrintIcon],
-  ["Nature", LeafIcon],
-  ["Trans", DnaIcon],
-  ["Special", SparkleIcon],
-] as const;
+/** Genus menu of the Pet window: the records' creature.genus, in the game's order, with the game's Soul Crystal icons. */
+const GENUS = ["Intellect", "Feral", "Nature", "Trans", "Special"] as const;
+const GENUS_ART = import.meta.glob<string>("../../../assets/pm/genus/*.png", { eager: true, import: "default" });
+const genusArt = (g: string) => GENUS_ART[`../../../assets/pm/genus/${g}.png`];
 
 /** Pets the game counts (163/200): the Special ones are listed but left out of the count. */
 const counted = (rows: { id: string; kind?: string | null }[] | undefined, owned: PetSet) => {
@@ -66,6 +64,7 @@ export function PetsTab({ t, lang, settings, save, onError, charId, stats }: Pro
           game={game?.owned}
           effects={game?.effects ?? []}
           stats={stats}
+          charId={charId}
           setManual={setManual}
           onClose={() => setOpen(false)}
         />
@@ -82,9 +81,10 @@ function PetsModal({
   game,
   effects,
   stats,
+  charId,
   setManual,
   onClose,
-}: Pick<Props, "t" | "lang" | "stats"> & {
+}: Pick<Props, "t" | "lang" | "stats" | "charId"> & {
   manual: PetSet;
   owned: PetSet;
   game?: PetSet;
@@ -95,29 +95,8 @@ function PetsModal({
   const list = useGd(() => gd.list("creature"), "creature");
   const icons = useIcons(list.data?.map((r) => r.icon) ?? []);
   const [view, setView] = useState<"pets" | "effects">("pets");
-  const [genus, setGenus] = useState("");
   const [sel, setSel] = useState<string>();
-  const grid = useRef<HTMLDivElement>(null);
-  const shown = (list.data ?? []).filter((r) => !genus || r.kind === genus);
-  // One card in the Tab order (the selected one, else the first); arrows move between cards.
-  const tabStop = shown.some((r) => r.id === sel) ? sel : shown[0]?.id;
   const genusLabel = (g: string) => t(`characters.builder.pets.genus.${g}`);
-  const statusOf = (p?: PetState) =>
-    !p
-      ? t("characters.builder.pets.notOwned")
-      : [t("characters.builder.pets.level", { n: p.lvl }), p.lvl < 3 ? `${p.exp}/${PET_EXP_MAX}` : "MAX", p.eq ? t("characters.builder.pets.equipped") : ""].filter(Boolean).join(", ");
-
-  const move = (e: KeyboardEvent<HTMLDivElement>) => {
-    const cards = [...(grid.current?.querySelectorAll<HTMLButtonElement>(".petCard") ?? [])];
-    const i = cards.indexOf(document.activeElement as HTMLButtonElement);
-    if (i < 0 || !grid.current) return;
-    const cols = getComputedStyle(grid.current).gridTemplateColumns.split(" ").length;
-    const step: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -cols, ArrowDown: cols, Home: -i, End: cards.length - 1 - i };
-    const to = cards[i + (step[e.key] ?? NaN)];
-    if (!to) return;
-    e.preventDefault();
-    to.focus();
-  };
 
   // Hand edits: one equipped pet at most; pets read from the game are not edited here (they would win anyway).
   const row = list.data?.find((r) => r.id === sel);
@@ -200,66 +179,7 @@ function PetsModal({
       {view === "pets" && !list.data && <DataState t={t} error={list.error} retry={list.retry} />}
       {view === "pets" && list.data && (
         <>
-          <div style={{ display: "flex", gap: 12, minHeight: 0 }}>
-            <div role="group" aria-label={t("characters.builder.pets.genusLabel")} style={{ display: "flex", flexDirection: "column", gap: 4, flex: "none" }}>
-              <button type="button" className="chRailBtn petAll" aria-pressed={!genus} onClick={() => setGenus("")}>
-                {t("characters.builder.pets.all")}
-              </button>
-              {GENUS.map(([g, Icon]) => (
-                <button key={g} type="button" className="chRailBtn" aria-pressed={genus === g} aria-label={genusLabel(g)} title={genusLabel(g)} onClick={() => setGenus(g)}>
-                  <Icon aria-hidden="true" />
-                </button>
-              ))}
-            </div>
-            <div ref={grid} className="petGrid" role="group" aria-label={genus ? genusLabel(genus) : t("characters.builder.pets.all")} onKeyDown={move}>
-              {shown.map((r) => {
-                const p = owned[r.id];
-                const url = r.icon ? icons[r.icon] : undefined;
-                return (
-                  <button
-                    key={r.id}
-                    type="button"
-                    className="chBtnReset petCard"
-                    data-owned={p ? "" : undefined}
-                    data-eq={p?.eq ? "" : undefined}
-                    aria-pressed={sel === r.id}
-                    aria-label={`${r.name ?? r.id}: ${statusOf(p)}`}
-                    tabIndex={r.id === tabStop ? 0 : -1}
-                    onClick={() => setSel(r.id)}
-                  >
-                    <span className="petArt">
-                      {url ? <img src={url} alt="" loading="lazy" /> : <PawPrintIcon aria-hidden="true" style={{ fontSize: 28, color: "var(--pm-grey)" }} />}
-                      {p?.eq && <span className="petEq">{t("characters.builder.pets.equipped")}</span>}
-                    </span>
-                    <span className="petName">{r.name ?? r.id}</span>
-                    <span className="petFoot">
-                      {p ? (
-                        <>
-                          <span className="petLvl" data-max={p.lvl === 3 ? "" : undefined}>
-                            {p.lvl}
-                          </span>
-                          {p.lvl === 3 ? (
-                            <span className="petMax">MAX</span>
-                          ) : (
-                            <span className="petExp">
-                              <span className="mono">
-                                {p.exp}/{PET_EXP_MAX}
-                              </span>
-                              <span className="petBar">
-                                <span style={{ transform: `scaleX(${p.exp / PET_EXP_MAX})` }} />
-                              </span>
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        <span>{t("characters.builder.pets.notOwned")}</span>
-                      )}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <PetGrid t={t} rows={list.data} icons={icons} owned={owned} isOn={(id) => sel === id} onPick={setSel} />
 
           {/* Editor of the selected card: under the grid, Tab reaches it after one card. */}
           <div className="petEdit">
@@ -307,11 +227,163 @@ function PetsModal({
                 {(fromGame || (gameEq && mine)) && (
                   <span style={{ fontSize: 12, color: "var(--pm-t3)", alignSelf: "center", flexBasis: "100%" }}>{t("characters.builder.pets.gameNote")}</span>
                 )}
+                <PetLocation key={row.id} t={t} code={row.id} charId={charId} />
               </>
             )}
           </div>
         </>
       )}
     </Modal>
+  );
+}
+
+/**
+ * Genus menu and pet cards of the game's Pet window, shared by the Builder's Pet modal (one card picked, to edit)
+ * and the Map's pet panel (several picked, to show on the map). `isOn`: whether a card is pressed.
+ */
+export function PetGrid({
+  t,
+  rows,
+  icons,
+  owned,
+  isOn,
+  onPick,
+}: {
+  t: T;
+  rows: ListRow[];
+  icons: IconUrls;
+  owned: PetSet;
+  isOn: (id: string) => boolean;
+  onPick: (id: string) => void;
+}) {
+  const [genus, setGenus] = useState("");
+  const grid = useRef<HTMLDivElement>(null);
+  const shown = rows.filter((r) => !genus || r.kind === genus);
+  // One card in the Tab order (the first pressed one, else the first); arrows move between cards.
+  const tabStop = (shown.find((r) => isOn(r.id)) ?? shown[0])?.id;
+  const genusLabel = (g: string) => t(`characters.builder.pets.genus.${g}`);
+  const statusOf = (p?: PetState) =>
+    !p
+      ? t("characters.builder.pets.notOwned")
+      : [t("characters.builder.pets.level", { n: p.lvl }), p.lvl < 3 ? `${p.exp}/${PET_EXP_MAX}` : "MAX", p.eq ? t("characters.builder.pets.equipped") : ""].filter(Boolean).join(", ");
+
+  const move = (e: KeyboardEvent<HTMLDivElement>) => {
+    const cards = [...(grid.current?.querySelectorAll<HTMLButtonElement>(".petCard") ?? [])];
+    const i = cards.indexOf(document.activeElement as HTMLButtonElement);
+    if (i < 0 || !grid.current) return;
+    const cols = getComputedStyle(grid.current).gridTemplateColumns.split(" ").length;
+    const step: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -cols, ArrowDown: cols, Home: -i, End: cards.length - 1 - i };
+    const to = cards[i + (step[e.key] ?? NaN)];
+    if (!to) return;
+    e.preventDefault();
+    to.focus();
+  };
+
+  return (
+    <div style={{ display: "flex", gap: 12, minHeight: 0 }}>
+      <div className="petRail" role="group" aria-label={t("characters.builder.pets.genusLabel")} style={{ display: "flex", flexDirection: "column", gap: 4, flex: "none" }}>
+        <button type="button" className="chRailBtn petAll" aria-pressed={!genus} onClick={() => setGenus("")}>
+          {t("characters.builder.pets.all")}
+        </button>
+        {GENUS.map((g) => (
+          <button key={g} type="button" className="chRailBtn petGenus" aria-pressed={genus === g} aria-label={genusLabel(g)} data-tip={genusLabel(g)} onClick={() => setGenus(g)}>
+            <img src={genusArt(g)} alt="" />
+          </button>
+        ))}
+      </div>
+      <div ref={grid} className="petGrid" role="group" aria-label={genus ? genusLabel(genus) : t("characters.builder.pets.all")} onKeyDown={move}>
+        {shown.map((r) => {
+          const p = owned[r.id];
+          const url = r.icon ? icons[r.icon] : undefined;
+          return (
+            <button
+              key={r.id}
+              type="button"
+              className="chBtnReset petCard"
+              data-owned={p ? "" : undefined}
+              data-eq={p?.eq ? "" : undefined}
+              aria-pressed={isOn(r.id)}
+              aria-label={`${r.name ?? r.id}: ${statusOf(p)}`}
+              tabIndex={r.id === tabStop ? 0 : -1}
+              onClick={() => onPick(r.id)}
+            >
+              <span className="petArt">
+                {url ? <img src={url} alt="" loading="lazy" /> : <PawPrintIcon aria-hidden="true" style={{ fontSize: 28, color: "var(--pm-grey)" }} />}
+                {p?.eq && <span className="petEq">{t("characters.builder.pets.equipped")}</span>}
+              </span>
+              <span className="petName">{r.name ?? r.id}</span>
+              <span className="petFoot">
+                {p ? (
+                  <>
+                    <span className="petLvl" data-max={p.lvl === 3 ? "" : undefined}>
+                      {p.lvl}
+                    </span>
+                    {p.lvl === 3 ? (
+                      <span className="petMax">MAX</span>
+                    ) : (
+                      <span className="petExp">
+                        <span className="mono">
+                          {p.exp}/{PET_EXP_MAX}
+                        </span>
+                        <span className="petBar">
+                          <span style={{ transform: `scaleX(${p.exp / PET_EXP_MAX})` }} />
+                        </span>
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span>{t("characters.builder.pets.notOwned")}</span>
+                )}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** Where a pet lives: zones of its monsters (archive monster_regions), and the Map window on its spots. */
+function PetLocation({ t, code, charId }: { t: T; code: string; charId?: string }) {
+  const points = useGd(loadPoints, "points").data;
+  const monsters = points?.pets[code] ?? [];
+  const ids = monsters.map(([id]) => String(id));
+  const rows = useGd(() => Promise.all(ids.map((id) => gd.rows<MonsterRegion>("monster_regions", "monster_id", id))).then((r) => r.flat()), ids.join("|"));
+  const byMap = new Map<string, Set<string>>();
+  for (const r of rows.data ?? []) if (r.map_name) {
+    const set = byMap.get(r.map_name) ?? new Set<string>();
+    if (r.region) set.add(r.region);
+    byMap.set(r.map_name, set);
+  }
+  const spots = !!points && Object.keys(petSpots(points, code)).length > 0;
+  const [error, setError] = useState<string>();
+
+  const status = !points || (ids.length > 0 && rows.data === undefined && !rows.error) ? t("world.db.loading") : byMap.size === 0 ? t("characters.builder.pets.noLocation") : "";
+
+  // One wrapped row under the editor: the grid above keeps its height.
+  return (
+    <div style={{ flexBasis: "100%", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, borderTop: "1px solid var(--pm-line)", paddingTop: 8, fontSize: 13 }}>
+      <span style={{ fontSize: 12, color: "var(--pm-t2)", marginRight: 4 }}>{t("characters.builder.pets.location")}</span>
+      {status && <span style={{ color: "var(--pm-t3)" }}>{status}</span>}
+      {!status &&
+        [...byMap].map(([map, regions]) => (
+          <span key={map} style={{ display: "inline-flex", flexWrap: "wrap", alignItems: "center", gap: 5, marginRight: 8 }}>
+            <span style={{ fontWeight: 500 }}>{map}</span>
+            {[...regions].map((r) => (
+              <span key={r} className="wTag">
+                {r}
+              </span>
+            ))}
+          </span>
+        ))}
+      {points && !spots && byMap.size > 0 && <span style={{ fontSize: 12, color: "var(--pm-t3)" }}>{t("characters.builder.pets.noCoords")}</span>}
+      {(rows.error || error) && <span className="error">{rows.error ?? error}</span>}
+      {spots && (
+        <button type="button" className="btn sm" style={{ marginLeft: "auto" }} onClick={() => showOnMap({ pet: code, char: charId }).catch((e) => setError(String(e)))}>
+          <MapTrifoldIcon aria-hidden="true" />
+          {t("characters.builder.pets.showOnMap")}
+        </button>
+      )}
+    </div>
   );
 }

@@ -64,5 +64,7 @@
   "planner.grp.Conqueror": "Завоеватель",
   "planner.grp.PVP": "PvP",
   "planner.grp.Special": "Особые",
-  "planner.grp.Other": "Прочие"
+  "planner.grp.Other": "Прочие",
+  "planner.builder.enhPastPublished": "Значения опубликованы до +{n}: выше показан бонус +{n}.",
+  "planner.builder.identifyNote": "Этого предмета ещё нет в игровых данных: выберите ниже, какой это предмет. Выбор будет запомнен."
 }
