@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type ReactNode, type SyntheticEvent } from "react";
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type SyntheticEvent } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWindow, PhysicalPosition } from "@tauri-apps/api/window";
 import { ArrowsOutCardinalIcon, ArrowsOutIcon, CaretDownIcon, FunnelIcon, LockSimpleIcon, LockSimpleOpenIcon, PawPrintIcon, XIcon } from "@phosphor-icons/react";
 import "@fontsource/noto-sans/600.css";
 import type { T } from "../../i18n";
@@ -100,6 +100,45 @@ export function MiniChrome({
     return () => window.removeEventListener("resize", report);
   }, [locked]);
 
+  // The window follows the pointer by hand, not with the native drag: that one let Windows snap it (Aero Snap) to the
+  // screen's top edge or corners, where the game's minimap sits, and a double-click on the bar maximized it.
+  // One setPosition in flight at a time, always to the latest pointer.
+  const startMove = (e: ReactPointerEvent<HTMLElement>) => {
+    if (e.button !== 0) return;
+    const el = e.currentTarget;
+    el.setPointerCapture(e.pointerId);
+    const from = { x: e.screenX, y: e.screenY };
+    const scale = window.devicePixelRatio;
+    const origin = win.outerPosition();
+    let to: { x: number; y: number } | undefined;
+    let busy = false;
+    const push = () => {
+      if (busy || !to) return;
+      const p = to;
+      to = undefined;
+      busy = true;
+      origin
+        .then((o) => win.setPosition(new PhysicalPosition(Math.round(o.x + (p.x - from.x) * scale), Math.round(o.y + (p.y - from.y) * scale))))
+        .catch(() => {})
+        .finally(() => {
+          busy = false;
+          push();
+        });
+    };
+    const move = (ev: PointerEvent) => {
+      to = { x: ev.screenX, y: ev.screenY };
+      push();
+    };
+    const end = () => {
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", end);
+      el.removeEventListener("pointercancel", end);
+    };
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", end);
+    el.addEventListener("pointercancel", end);
+  };
+
   const setLock = (enabled: boolean) => run(() => invoke("set_click_through", { enabled, label: MAP_LABEL }).then(() => setLocked(enabled)));
   // A mouse press on the locked button is Rust's (it unlocks), and so is the click that follows it. Keyboard: both ways.
   const lockClick = (keyboard: boolean) => {
@@ -160,7 +199,7 @@ export function MiniChrome({
 
   return (
     <>
-      <div className="mmBar" data-tauri-drag-region>
+      <div className="mmBar" onPointerDown={(e) => e.target === e.currentTarget && startMove(e)}>
         {slider(t("world.map.mapOpacity"), undefined, mapOpacity, 0, setMapOpacity)}
         {slider(t("world.map.pathOpacity"), t("world.map.pathOpacityHint"), pathOpacity, 0.1, setPathOpacity)}
         {railBtn(t("window.close"), <XIcon aria-hidden="true" />, { className: "mmBtn mmClose", onClick: () => run(() => win.close()) })}
@@ -169,7 +208,7 @@ export function MiniChrome({
       <div className="mmRail">
         {railBtn(t("world.map.move"), <ArrowsOutCardinalIcon aria-hidden="true" />, {
           className: "mmBtn mmMove",
-          onPointerDown: (e) => e.button === 0 && run(() => win.startDragging()),
+          onPointerDown: startMove,
         })}
         {railBtn(t("world.map.filter"), <FunnelIcon aria-hidden="true" />, {
           className: "mmBtn mmFilterBtn",

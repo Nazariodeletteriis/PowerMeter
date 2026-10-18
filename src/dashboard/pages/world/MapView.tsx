@@ -65,7 +65,7 @@ export function MapView({
     return place({ s, x: cx - ((cx - v.x) * s) / v.s, y: cy - ((cy - v.y) * s) / v.s });
   };
 
-  // New map, resized window or new focus: fit the map (or the focus box, with a margin) in the viewport.
+  // New map or new focus: fit the map (or the focus box, with a margin) in the viewport.
   const framing = useRef(focus);
   framing.current = focus;
   const frame = () => {
@@ -79,8 +79,24 @@ export function MapView({
     const fs = clamp(Math.min(r.width / (f[2] - f[0] + 2 * pad), r.height / (f[3] - f[1] + 2 * pad)), s, MAX_SCALE / 2);
     setView(place({ s: fs, x: r.width / 2 - ((f[0] + f[2]) / 2) * fs, y: r.height / 2 - ((f[1] + f[3]) / 2) * fs }));
   };
+  // A resized viewport (the minimap resized, full screen) keeps the view on the same center, at no less than the fit.
+  const resized = () => {
+    const r = box.current!.getBoundingClientRect();
+    const prev = size.current;
+    size.current = { w: r.width, h: r.height };
+    fit.current = Math.min(r.width / w, r.height / h);
+    setView((v) => {
+      const s = Math.max(v.s, fit.current);
+      return place({ s, x: r.width / 2 - ((prev.w / 2 - v.x) / v.s) * s, y: r.height / 2 - ((prev.h / 2 - v.y) / v.s) * s });
+    });
+  };
   useLayoutEffect(() => {
-    const ro = new ResizeObserver(frame);
+    let first = true;
+    const ro = new ResizeObserver(() => {
+      if (!first) return resized();
+      first = false;
+      frame();
+    });
     ro.observe(box.current!);
     return () => ro.disconnect();
   }, [map.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -107,7 +123,7 @@ export function MapView({
   };
 
   const down = (e: PointerEvent) => {
-    if ((e.target as HTMLElement).closest("button, a, input, select, label, .wPopup, .wPanel, .wPetPanel, .mmPop, [data-tauri-drag-region]")) return;
+    if ((e.target as HTMLElement).closest("button, a, input, select, label, .wPopup, .wPanel, .wPetPanel, .mmPop, .mmBar")) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     drag.current = { x: e.clientX, y: e.clientY, moved: false };
   };

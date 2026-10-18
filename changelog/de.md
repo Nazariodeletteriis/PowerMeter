@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.20
+
+- Behoben: Minikarte: Beim Verschieben rastet sie nicht mehr an Bildschirmrändern oder -ecken ein und wird per Doppelklick nicht mehr maximiert, sie bleibt also, wo du sie hinlegst, auch über der Minikarte des Spiels.
+- Behoben: Minikarte: Beim Ändern der Größe behält die Karte Zoom und Mitte, statt wieder die ganze Karte zu zeigen.
+- Behoben: Die Minikarte zu benutzen blendet das DPS-Widget nicht mehr aus und lässt die Maus nicht mehr hängen.
+- Behoben: Minikarten-Pets: Die Pet-Liste ist kompakt, mit einem kleinen Vorschaubild neben Name und Stufe; die Kartenseite behält die großen Karten.
+
 ## 0.5.19
 
 - Neu: Minikarte: Das Karten-Widget ist jetzt eine durchsichtige Minikarte über dem Spiel, im Stil der Minikarte des Spiels, mit Schiebereglern für Kartendeckkraft und Pfaddeckkraft, Seitenschaltflächen (verschieben, Filter, Pets, Vollbild, Zoom) und einer Sperre, die Klicks zum Spiel durchlässt.

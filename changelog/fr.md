@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.20
+
+- Corrigé : Mini-carte : en la déplaçant, elle ne s'aimante plus aux bords ou aux coins de l'écran et ne s'agrandit plus au double-clic, elle reste donc là où vous la placez, même sur la mini-carte du jeu.
+- Corrigé : Mini-carte : la redimensionner garde le zoom et le centre de la carte au lieu de repartir de la carte entière.
+- Corrigé : Utiliser la mini-carte ne masque plus le widget DPS et ne bloque plus la souris.
+- Corrigé : Familiers de la mini-carte : la liste est compacte, avec une petite vignette à côté du nom et du niveau ; la page Carte garde les grandes cartes.
+
 ## 0.5.19
 
 - Nouveau : Mini-carte : le widget Carte est maintenant une mini-carte transparente par-dessus le jeu, dans le style de celle du jeu, avec des curseurs Opacité de la carte et Opacité du tracé, des boutons latéraux (déplacer, filtre, pets, plein écran, zoom) et un verrou qui laisse passer les clics vers le jeu.

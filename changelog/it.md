@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.20
+
+- Corretto: Minimappa: spostandola non si aggancia più ai bordi o agli angoli dello schermo e non si ingrandisce col doppio clic, così resta dove la metti, anche sopra la minimappa del gioco.
+- Corretto: Minimappa: ridimensionandola la mappa mantiene zoom e centro invece di ripartire dalla mappa intera.
+- Corretto: Usare la minimappa non nasconde più il widget DPS e non blocca più il mouse.
+- Corretto: Pet della minimappa: l'elenco dei pet è compatto, con una piccola miniatura accanto a nome e livello; la pagina Mappa mantiene le schede grandi.
+
 ## 0.5.19
 
 - Nuovo: Minimappa: il widget Mappa ora è una minimappa trasparente sopra il gioco, nello stile di quella del gioco, con cursori Opacità mappa e Opacità percorso, bottoni laterali (sposta, filtro, pet, schermo intero, zoom) e un lucchetto che lascia passare i clic al gioco.

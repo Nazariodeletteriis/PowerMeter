@@ -1751,7 +1751,9 @@ pub fn run() {
                         if auto_hide {
                             if let Some(window) = handle.get_webview_window("main") {
                                 let aion_fg = platform::window_detector::is_aion2_foreground();
-                                let is_self_fg = window.is_focused().unwrap_or(false);
+                                // The minimap is over the game too: using it must not hide the meter.
+                                let is_self_fg = window.is_focused().unwrap_or(false)
+                                    || handle.get_webview_window("map").is_some_and(|m| m.is_focused().unwrap_or(false));
                                 let is_visible = window.is_visible().unwrap_or(true);
                                 let is_minimized = window.is_minimized().unwrap_or(false);
                                 if tick_count % 4 == 0 {

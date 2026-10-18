@@ -4,6 +4,13 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.20
+
+- Fixed: Minimap: moving it no longer snaps it to the screen edges or corners or maximizes it on a double-click, so it stays where you put it, also over the game's own minimap.
+- Fixed: Minimap: resizing it keeps the map's zoom and center instead of starting over from the whole map.
+- Fixed: Using the minimap no longer hides the DPS widget, and no longer stalls the mouse.
+- Fixed: Minimap pets: the pet list is compact, with a small thumbnail next to the name and level; the Map page keeps the big cards.
+
 ## 0.5.19
 
 - New: Minimap: the Map widget is now a see-through minimap over the game, styled like the in-game one, with Map opacity and Path opacity sliders, side buttons (move, filter, pets, full screen, zoom) and a lock that lets clicks pass through to the game.

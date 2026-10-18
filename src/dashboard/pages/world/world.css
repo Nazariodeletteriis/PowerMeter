@@ -890,19 +890,59 @@
 .mm .wPetPanel h2 {
   font-size: 13px !important;
 }
-.mm .wPetPanel .petGrid {
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: 6px;
+/* A small window: each pet a compact row, a small thumbnail beside its name and level (the Map page keeps the cards). */
+.mm .wPetPanel .chRailBtn {
+  width: 28px;
+  height: 28px;
 }
-.mm .wPetPanel .petCard {
-  padding: 6px;
+.mm .wPetPanel .petGenus img {
+  width: 18px;
+  height: 18px;
+}
+.mm .wPetPanel .petGrid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 4px;
 }
+.mm .wPetPanel .petCard {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+  gap: 1px 8px;
+  padding: 4px 6px 4px 4px;
+  border-radius: 6px;
+}
 .mm .wPetPanel .petArt {
-  aspect-ratio: 2 / 1;
+  grid-row: span 2;
+  width: 32px;
+  aspect-ratio: 1;
+  border-radius: 4px;
+}
+.mm .wPetPanel .petArt svg {
+  font-size: 16px !important; /* the placeholder paw's inline size is the card's */
+}
+/* "Equipped" can't fit a thumbnail: the card's border says it (and its label). */
+.mm .wPetPanel .petEq {
+  display: none;
+}
+.mm .wPetPanel .petName {
+  font-size: 11px;
 }
 .mm .wPetPanel .petFoot {
+  min-height: 0;
+  gap: 4px;
   font-size: 10px;
+}
+.mm .wPetPanel .petLvl {
+  width: 16px;
+  height: 16px;
+}
+.mm .wPetPanel .petExp {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+.mm .wPetPanel .petBar {
+  width: 28px;
 }
 
 /* Locked: the window lets the mouse through to the game. Only the map and the lock stay. */

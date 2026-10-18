@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.20
+
+- Corregido: Minimapa: al moverlo ya no se acopla a los bordes o esquinas de la pantalla ni se maximiza con doble clic, así que se queda donde lo pones, también sobre el minimapa del juego.
+- Corregido: Minimapa: al cambiar su tamaño, el mapa conserva el zoom y el centro en lugar de volver al mapa completo.
+- Corregido: Usar el minimapa ya no oculta el widget de DPS ni bloquea el ratón.
+- Corregido: Mascotas del minimapa: la lista es compacta, con una miniatura pequeña junto al nombre y el nivel; la página Mapa mantiene las tarjetas grandes.
+
 ## 0.5.19
 
 - Nuevo: Minimapa: el widget del Mapa es ahora un minimapa transparente sobre el juego, con el estilo del del juego, con controles deslizantes de Opacidad del mapa y Opacidad del camino, botones laterales (mover, filtro, mascotas, pantalla completa, zoom) y un candado que deja pasar los clics al juego.
