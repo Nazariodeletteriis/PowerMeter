@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.23
+
+- Cambiato: Il widget DPS resta visibile quando esci dal gioco (Alt+Tab) invece di finire nella barra delle applicazioni. Per nasconderlo fuori dal gioco, attiva "Nascondi automaticamente il meter" in Impostazioni > Widget DPS.
+
 ## 0.5.22
 
 - Corretto: La minimappa si può di nuovo spostare: dalla 0.5.20 restava ferma dov'era.

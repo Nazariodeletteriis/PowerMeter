@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.23
+
+- Geändert: Das DPS-Widget bleibt sichtbar, wenn du das Spiel verlässt (Alt+Tab), statt in die Taskleiste zu wandern. Um es außerhalb des Spiels auszublenden, aktiviere „Meter automatisch ausblenden“ unter Einstellungen > DPS-Widget.
+
 ## 0.5.22
 
 - Behoben: Die Minikarte lässt sich wieder verschieben: Seit 0.5.20 blieb sie, wo sie war.

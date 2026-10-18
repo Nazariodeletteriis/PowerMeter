@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.23
+
+- Modifié : Le widget DPS reste visible quand vous quittez le jeu (Alt+Tab) au lieu de passer dans la barre des tâches. Pour le masquer hors du jeu, activez « Masquer le meter automatiquement » dans Paramètres > Widget DPS.
+
 ## 0.5.22
 
 - Corrigé : La mini-carte peut de nouveau être déplacée : depuis la 0.5.20, elle restait où elle était.

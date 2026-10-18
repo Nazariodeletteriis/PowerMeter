@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.23
+
+- 变更：离开游戏（Alt+Tab）时 DPS 小组件保持可见，不再缩到任务栏。若要在游戏外隐藏，请在 设置 > DPS 小组件 中开启“自动隐藏面板”。
+
 ## 0.5.22
 
 - 修复：小地图可以再次移动：自 0.5.20 起它一直停在原处。

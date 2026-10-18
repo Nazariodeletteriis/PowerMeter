@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.23
+
+- 變更：離開遊戲（Alt+Tab）時 DPS 小工具保持可見，不再縮到工作列。若要在遊戲外隱藏，請在 設定 > DPS 小工具 中開啟「自動隱藏面板」。
+
 ## 0.5.22
 
 - 修正：小地圖可以再次移動：自 0.5.20 起它一直停在原處。

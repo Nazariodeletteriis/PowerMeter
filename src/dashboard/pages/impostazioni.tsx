@@ -73,7 +73,7 @@ const WIDGET_DEFAULTS: Record<string, string> = {
   "dpsMeter.playerLimit": "6",
   "dpsMeter.defaultMeterMode": "bossTargets",
   "dpsMeter.pinMeToTop": "false",
-  "dpsMeter.autoHideMeter": "true",
+  "dpsMeter.autoHideMeter": "false",
   "dpsMeter.showPing": "true",
   "dpsMeter.showTotalDps": "true",
   "dpsMeter.roundDps": "false",

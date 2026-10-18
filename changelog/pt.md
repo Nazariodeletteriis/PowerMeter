@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.23
+
+- Alterado: O widget de DPS continua visível quando você sai do jogo (Alt+Tab) em vez de ir para a barra de tarefas. Para ocultá-lo fora do jogo, ative "Ocultar o medidor automaticamente" em Configurações > Widget de DPS.
+
 ## 0.5.22
 
 - Corrigido: O minimapa pode ser movido de novo: desde a 0.5.20 ele ficava onde estava.

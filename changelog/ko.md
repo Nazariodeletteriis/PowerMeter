@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.23
+
+- 변경: 게임에서 나가도(Alt+Tab) DPS 위젯이 작업 표시줄로 가지 않고 계속 보입니다. 게임 밖에서 숨기려면 설정 > DPS 위젯에서 '미터 자동 숨기기'를 켜세요.
+
 ## 0.5.22
 
 - 수정: 미니맵을 다시 옮길 수 있습니다. 0.5.20부터 제자리에서 움직이지 않았습니다.

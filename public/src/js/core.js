@@ -2204,7 +2204,7 @@ class DpsApp {
     }
     this.autoHideMeterCheckbox = document.querySelector(".autoHideMeterCheckbox");
     if (this.autoHideMeterCheckbox) {
-      const storedAutoHide = this.safeGetSetting(this.storageKeys.autoHideMeter) !== "false";
+      const storedAutoHide = this.safeGetSetting(this.storageKeys.autoHideMeter) === "true";
       this.autoHideMeterCheckbox.checked = storedAutoHide;
       this.autoHideMeterCheckbox.addEventListener("change", (event) => {
         const isChecked = !!event.target?.checked;

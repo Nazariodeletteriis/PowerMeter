@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.23
+
+- Changed: The DPS widget stays visible when you leave the game (Alt+Tab) instead of going to the taskbar. To hide it outside the game, turn on "Auto-hide meter" in Settings > DPS Widget.
+
 ## 0.5.22
 
 - Fixed: The minimap can be moved again: since 0.5.20 it stayed where it was.
