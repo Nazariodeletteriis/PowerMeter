@@ -196,7 +196,7 @@
   "world.map.pathOpacityHint": "Markers, gathering nodes, pet spots and zone borders",
   "world.map.move": "Move",
   "world.map.filter": "Filter",
-  "world.map.lock": "Lock: clicks go through to the game",
-  "world.map.unlock": "Locked: click to unlock",
+  "world.map.lock": "Lock position",
+  "world.map.unlock": "Position locked: click to unlock",
   "world.map.petMonsters": "Monsters: {list}"
 }

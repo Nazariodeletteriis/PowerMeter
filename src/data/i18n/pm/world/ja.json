@@ -196,7 +196,7 @@
   "world.map.pathOpacityHint": "マーカー、採集ポイント、ペットの出現地点、ゾーン境界",
   "world.map.move": "移動",
   "world.map.filter": "フィルター",
-  "world.map.lock": "ロック：クリックがゲームに届きます",
-  "world.map.unlock": "ロック中：クリックで解除",
+  "world.map.lock": "位置をロック",
+  "world.map.unlock": "位置ロック中: クリックで解除",
   "world.map.petMonsters": "モンスター：{list}"
 }

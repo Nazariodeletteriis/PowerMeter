@@ -368,8 +368,7 @@
     "targetMode": "Target mode",
     "expand": "Click to expand",
     "ready": "Ready",
-    "locked": "Locked",
-    "lock": "Lock (click-through)",
+    "lock": "Lock position",
     "opacity": "Opacity",
     "pill": "Minimise to pill",
     "dashboard": "Open dashboard",
@@ -453,7 +452,6 @@
     },
     "updateAvailable": "Update available",
     "updateNotes": "Release notes",
-    "unlockHint": "Locked. Click the lock or press {key} to unlock",
     "cols": {
       "name": "Name",
       "total": "Total",

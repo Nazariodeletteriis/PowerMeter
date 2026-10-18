@@ -368,8 +368,7 @@
     "targetMode": "ターゲットモード",
     "expand": "クリックで展開",
     "ready": "準備完了",
-    "locked": "ロック中",
-    "lock": "ロック（クリック透過）",
+    "lock": "位置をロック",
     "opacity": "不透明度",
     "pill": "ピルに最小化",
     "dashboard": "ダッシュボードを開く",
@@ -453,7 +452,6 @@
     },
     "updateAvailable": "アップデートがあります",
     "updateNotes": "リリースノート",
-    "unlockHint": "ロック中：鍵をクリックするか {key} で解除",
     "cols": {
       "name": "名前",
       "total": "合計",

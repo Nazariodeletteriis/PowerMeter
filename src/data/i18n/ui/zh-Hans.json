@@ -368,8 +368,7 @@
     "targetMode": "目标模式",
     "expand": "点击展开",
     "ready": "已就绪",
-    "locked": "已锁定",
-    "lock": "锁定（点击穿透）",
+    "lock": "锁定位置",
     "opacity": "不透明度",
     "pill": "缩小为胶囊条",
     "dashboard": "打开控制台",
@@ -453,7 +452,6 @@
     },
     "updateAvailable": "有可用更新",
     "updateNotes": "发行说明",
-    "unlockHint": "已锁定：点击锁图标或按 {key} 解锁",
     "cols": {
       "name": "名称",
       "total": "总计",

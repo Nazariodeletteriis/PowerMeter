@@ -196,7 +196,7 @@
   "world.map.pathOpacityHint": "Marcadores, pontos de coleta, locais de mascotes e limites de zona",
   "world.map.move": "Mover",
   "world.map.filter": "Filtro",
-  "world.map.lock": "Bloquear: os cliques passam para o jogo",
-  "world.map.unlock": "Bloqueado: clique para desbloquear",
+  "world.map.lock": "Travar posição",
+  "world.map.unlock": "Posição travada: clique para destravar",
   "world.map.petMonsters": "Monstros: {list}"
 }

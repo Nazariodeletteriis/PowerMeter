@@ -196,7 +196,7 @@
   "world.map.pathOpacityHint": "Markierungen, Sammelpunkte, Haustier-Fundorte und Zonengrenzen",
   "world.map.move": "Verschieben",
   "world.map.filter": "Filter",
-  "world.map.lock": "Sperren: Klicks gehen ans Spiel",
-  "world.map.unlock": "Gesperrt: zum Entsperren klicken",
+  "world.map.lock": "Position sperren",
+  "world.map.unlock": "Position gesperrt: klicken zum Entsperren",
   "world.map.petMonsters": "Monster: {list}"
 }

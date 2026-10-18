@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.24
+
+- Cambiato: Il lucchetto del widget DPS e della minimappa ora blocca solo la posizione della finestra: tutti i pulsanti restano visibili e cliccabili, e i clic non passano più al gioco. Lo stesso vale per l'interruttore nelle impostazioni e per Ctrl+Alt+L.
+- Nuovo: Widget DPS: il segnale in alto a sinistra mostra il tuo ping reale nel gioco, verde con le barre piene, arancione quando sale e rosso quando è alto, con il valore accanto.
+- Cambiato: Il widget DPS e la minimappa hanno gli angoli squadrati, nello stile delle icone del gioco.
+- Corretto: Impostazioni: l'interruttore del lucchetto del widget DPS ora segue il lucchetto quando lo cambi dal widget o con la scorciatoia.
+
 ## 0.5.23
 
 - Cambiato: Il widget DPS resta visibile quando esci dal gioco (Alt+Tab) invece di finire nella barra delle applicazioni. Per nasconderlo fuori dal gioco, attiva "Nascondi automaticamente il meter" in Impostazioni > Widget DPS.

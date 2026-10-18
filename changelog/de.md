@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.24
+
+- Geändert: Die Sperre des DPS-Widgets und der Minikarte hält das Fenster jetzt nur noch an seinem Platz: Alle Schaltflächen bleiben sichtbar und anklickbar, und Klicks gehen nicht mehr ans Spiel durch. Der Schalter in den Einstellungen und Strg+Alt+L tun dasselbe.
+- Neu: DPS-Widget: Das Signal oben links zeigt deinen echten Ping im Spiel, grün mit vollen Balken, orange wenn er steigt und rot wenn er hoch ist, mit dem Wert daneben.
+- Geändert: Das DPS-Widget und die Minikarte haben eckige Ecken, im Stil der Symbole des Spiels.
+- Behoben: Einstellungen: Der Sperrschalter des DPS-Widgets folgt jetzt der Sperre, wenn du sie im Widget oder per Tastenkürzel änderst.
+
 ## 0.5.23
 
 - Geändert: Das DPS-Widget bleibt sichtbar, wenn du das Spiel verlässt (Alt+Tab), statt in die Taskleiste zu wandern. Um es außerhalb des Spiels auszublenden, aktiviere „Meter automatisch ausblenden“ unter Einstellungen > DPS-Widget.

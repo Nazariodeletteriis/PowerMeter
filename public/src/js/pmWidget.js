@@ -75,46 +75,13 @@ const createPmWidget = (app) => {
     }
   };
 
-  // --- lock (click-through). Also toggled by the global hotkey, hence the event.
+  // --- lock: keeps the meter in place (start_drag does nothing), everything else stays clickable.
+  // Also toggled by the global hotkey, hence the event.
   const lockBtn = $(".pmLockBtn");
-  // A locked meter ignores the mouse, so say how to unlock it for a few seconds.
-  const lockHint = $(".pmLockHint");
-  let lockHintTimer;
   const setLocked = (on) => {
-    const wasLocked = locked;
     locked = !!on;
-    meter.classList.toggle("isPmLocked", locked);
     lockBtn?.setAttribute("aria-pressed", String(locked));
-    if (locked) reportLockHotspot();
-    else meter.classList.remove("isPmLockHot");
-    clearTimeout(lockHintTimer);
-    if (!lockHint || !locked || wasLocked) {
-      if (lockHint && !locked) lockHint.hidden = true;
-      return;
-    }
-    invoke("get_settings")
-      .then((all) => all?.["pm.clickThroughHotkey"] || "Ctrl+Alt+L")
-      .catch(() => "Ctrl+Alt+L")
-      .then((key) => {
-        lockHint.textContent = t("pmWidget.unlockHint", "Locked. Click the lock or press {key} to unlock").replace("{key}", key);
-        lockHint.hidden = false;
-        lockHintTimer = setTimeout(() => (lockHint.hidden = true), 5000);
-      });
   };
-  // Locked: Rust watches the cursor over the badge and unlocks on click
-  // (watch_lock_corner in powermeter.rs); it needs the badge's current rect.
-  const reportLockHotspot = () =>
-    requestAnimationFrame(() => {
-      const r = $(".pmLockBadge")?.getBoundingClientRect();
-      if (!r?.width) return;
-      const pad = 6;
-      invoke("set_lock_hotspot", { x: r.left - pad, y: r.top - pad, w: r.width + 2 * pad, h: r.height + 2 * pad }).catch((err) =>
-        console.error("[PowerMeter] set_lock_hotspot failed", err)
-      );
-    });
-  window.__TAURI__.event
-    .listen("pm-lock-hot", (event) => meter.classList.toggle("isPmLockHot", !!event?.payload))
-    .catch((err) => console.error("[PowerMeter] pm-lock-hot listener failed", err));
   lockBtn?.addEventListener("click", () => {
     const next = !locked;
     invoke("set_click_through", { enabled: next })

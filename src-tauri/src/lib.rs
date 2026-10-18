@@ -1227,6 +1227,9 @@ async fn capture_screenshot(app: tauri::AppHandle, x: i32, y: i32, width: i32, h
 
 #[tauri::command]
 fn start_drag(app: tauri::AppHandle) {
+    if powermeter::meter_locked() {
+        return; // the lock keeps the meter in place
+    }
     #[cfg(windows)]
     {
         use windows::Win32::Foundation::{HWND, WPARAM, LPARAM};
@@ -1993,7 +1996,6 @@ pub fn run() {
             powermeter::show_overlay,
             powermeter::hide_overlay,
             powermeter::set_click_through,
-            powermeter::set_lock_hotspot,
             powermeter::get_click_through,
         ])
         .build(tauri::generate_context!())

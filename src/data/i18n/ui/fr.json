@@ -368,8 +368,7 @@
     "targetMode": "Mode de cible",
     "expand": "Cliquer pour développer",
     "ready": "Prêt",
-    "locked": "Verrouillé",
-    "lock": "Verrouiller (clic traversant)",
+    "lock": "Verrouiller la position",
     "opacity": "Opacité",
     "pill": "Réduire en pilule",
     "dashboard": "Ouvrir le tableau de bord",
@@ -453,7 +452,6 @@
     },
     "updateAvailable": "Mise à jour disponible",
     "updateNotes": "Notes de version",
-    "unlockHint": "Verrouillé : clique sur le cadenas ou appuie sur {key} pour déverrouiller",
     "cols": {
       "name": "Nom",
       "total": "Total",

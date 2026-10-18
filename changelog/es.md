@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.24
+
+- Cambiado: El candado del widget de DPS y del minimapa ahora solo mantiene la ventana en su sitio: todos los botones siguen visibles y se pueden pulsar, y los clics ya no pasan al juego. El interruptor de los ajustes y Ctrl+Alt+L hacen lo mismo.
+- Nuevo: Widget de DPS: la señal arriba a la izquierda muestra tu ping real en el juego, verde con las barras llenas, naranja cuando sube y rojo cuando es alto, con el valor al lado.
+- Cambiado: El widget de DPS y el minimapa tienen esquinas rectas, al estilo de los iconos del juego.
+- Corregido: Ajustes: el interruptor del candado del widget de DPS ahora sigue al candado cuando lo cambias desde el widget o con el atajo.
+
 ## 0.5.23
 
 - Cambiado: El widget de DPS sigue visible al salir del juego (Alt+Tab) en lugar de ir a la barra de tareas. Para ocultarlo fuera del juego, activa "Ocultar el medidor automáticamente" en Ajustes > Widget de DPS.

@@ -376,6 +376,7 @@ class DpsApp {
     this.updateConnectionStatusUi();
 
     this.pingEl = document.querySelector(".pingDisplay");
+    this.signalEl = document.querySelector(".pmSignal");
     this.showPing = this.safeGetSetting(this.storageKeys.showPing) !== "false";
     // Ping is pushed immediately from PingTracker via window._dpsApp.updatePing().
     // A slow fallback poll handles edge cases (e.g. push not wired yet on startup).
@@ -4435,13 +4436,16 @@ class DpsApp {
   }
 
   updatePing(pushedMs) {
-    if (!this.pingEl) return;
-    if (!this.showPing) {
-      this.pingEl.classList.remove("isVisible");
-      return;
-    }
     const ms = typeof pushedMs === "number" ? pushedMs : window.javaBridge?.getPingMs?.();
-    if (typeof ms !== "number" || ms < 0) {
+    const known = this.showPing && typeof ms === "number" && ms >= 0;
+    // PowerMeter: the signal at the head of the bar (index.html .pmSignal).
+    if (this.signalEl) {
+      this.signalEl.dataset.level = known ? (ms < 100 ? "good" : ms < 200 ? "warn" : "bad") : "";
+      this.signalEl.setAttribute("aria-label", known ? `Ping ${ms} ms` : "Ping");
+      this.signalEl.querySelector(".pmSignalMs").textContent = known ? String(ms) : ""; // the bars say it's the ping; the label says ms
+    }
+    if (!this.pingEl) return;
+    if (!known) {
       this.pingEl.classList.remove("isVisible");
       return;
     }

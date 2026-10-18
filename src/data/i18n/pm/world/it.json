@@ -196,7 +196,7 @@
   "world.map.pathOpacityHint": "Segnalini, punti di raccolta, punti dei pet e confini delle zone",
   "world.map.move": "Sposta",
   "world.map.filter": "Filtri",
-  "world.map.lock": "Blocca: i clic passano al gioco",
-  "world.map.unlock": "Bloccata: clicca per sbloccare",
+  "world.map.lock": "Blocca posizione",
+  "world.map.unlock": "Posizione bloccata: clicca per sbloccare",
   "world.map.petMonsters": "Mostri: {list}"
 }

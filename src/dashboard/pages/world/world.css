@@ -648,8 +648,7 @@
 .mm .wZoom button:not(:disabled):active {
   scale: 0.94;
 }
-.mmBtn[aria-pressed="true"],
-.mmLock[data-hot] {
+.mmBtn[aria-pressed="true"] {
   background: linear-gradient(180deg, color-mix(in srgb, var(--pm-deep) 82%, #ffffff 4%), color-mix(in srgb, var(--pm-deep) 62%, #000000));
   box-shadow: inset 0 0 0 1px var(--mm-hot), 0 0 8px color-mix(in srgb, var(--pm-red) 45%, transparent);
   color: #ffffff;
@@ -945,19 +944,8 @@
   width: 28px;
 }
 
-/* Locked: the window lets the mouse through to the game. Only the map and the lock stay. */
-.mm:has(.mmLock[aria-pressed="true"]) :is(.mmBar, .mmRail, .wZoom, .mmZone, .mmPop, .wPetPanel, .wPopup) {
-  opacity: 0;
-  visibility: hidden;
-}
 .mm:has(.wPetPanel) .mmZone {
   visibility: hidden;
-}
-.mm:has(.mmLock[aria-pressed="true"]) .wMap {
-  border-color: transparent;
-}
-.mm:has(.mmLock[aria-pressed="true"]) .mmLock:not([data-hot]) {
-  opacity: 0.55;
 }
 
 .mmError {
@@ -1579,4 +1567,15 @@ td[data-mark="lo"] {
   .dgCard:not(.locked):hover .dgArt {
     transform: scale(1.03);
   }
+}
+
+/* Square corners, like the game's own icons: 1px at most on the minimap. Map pins and level badges stay round. */
+.mm,
+.mm *,
+.mm *::before,
+.mm *::after {
+  border-radius: 1px !important;
+}
+.mm :is(.wMarker, .petLvl) {
+  border-radius: 50% !important;
 }

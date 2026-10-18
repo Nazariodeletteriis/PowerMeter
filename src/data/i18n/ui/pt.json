@@ -368,8 +368,7 @@
     "targetMode": "Modo de alvo",
     "expand": "Clique para expandir",
     "ready": "Pronto",
-    "locked": "Bloqueado",
-    "lock": "Bloquear (click-through)",
+    "lock": "Travar posição",
     "opacity": "Opacidade",
     "pill": "Minimizar para pílula",
     "dashboard": "Abrir painel",
@@ -453,7 +452,6 @@
     },
     "updateAvailable": "Atualização disponível",
     "updateNotes": "Notas da versão",
-    "unlockHint": "Bloqueado: clique no cadeado ou pressione {key} para desbloquear",
     "cols": {
       "name": "Nome",
       "total": "Total",

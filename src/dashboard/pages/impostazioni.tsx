@@ -1,6 +1,6 @@
 import { useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { emit } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import {
   BellIcon,
   CheckIcon,
@@ -187,6 +187,12 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
     run(() => invoke<string[]>("get_available_devices").then(setDevices));
     run(() => invoke<string>("get_app_version").then(setVersion));
   }, []); // once per visit: `run` is a new function every render
+
+  // The meter's lock also changes from its own button and the hotkey.
+  useEffect(() => {
+    const stop = listen<boolean>("pm-click-through", ({ payload }) => setClickThrough(payload));
+    return () => void stop.then((s) => s(), () => {});
+  }, []);
 
   // Options the engine has no setting for: a disabled switch. `always` = what the engine
   // already does unconditionally (autosave, window position); the rest is not built yet.

@@ -45,25 +45,20 @@ pub fn start_capture_after_terms(app: &tauri::AppHandle, start: impl FnOnce() + 
     });
 }
 
-/// A window that can be locked: it lets mouse input pass through to the game
-/// underneath. The meter overlay and the minimap (Map window). Not persisted on
-/// purpose: both always start clickable, so a user who forgot how to unlock is
-/// never locked out.
+/// A window that can be locked in place: the meter overlay and the minimap (Map
+/// window). Locked, it can't be moved; its buttons keep working. Not persisted.
+/// (The commands keep their old click-through names: the lock used to let the
+/// mouse through to the game.)
 struct Lock {
     label: &'static str,
     /// Emitted with the state, so the window's lock button reflects it.
     event: &'static str,
-    /// Emitted while the cursor is over the lock button, for its hover style.
-    hot_event: &'static str,
     on: AtomicBool,
-    /// Lock button rect in CSS px of the window's viewport, reported by the
-    /// window whenever it locks (the button moves with the window's layout).
-    spot: std::sync::Mutex<Option<[f64; 4]>>,
 }
 
 static LOCKS: [Lock; 2] = [
-    Lock { label: "main", event: "pm-click-through", hot_event: "pm-lock-hot", on: AtomicBool::new(false), spot: std::sync::Mutex::new(None) },
-    Lock { label: "map", event: "pm-map-click-through", hot_event: "pm-map-lock-hot", on: AtomicBool::new(false), spot: std::sync::Mutex::new(None) },
+    Lock { label: "main", event: "pm-click-through", on: AtomicBool::new(false) },
+    Lock { label: "map", event: "pm-map-click-through", on: AtomicBool::new(false) },
 ];
 static METER: &Lock = &LOCKS[0];
 
@@ -71,77 +66,21 @@ fn lock_of(label: &str) -> Result<&'static Lock, String> {
     LOCKS.iter().find(|l| l.label == label).ok_or_else(|| format!("window {label} has no lock"))
 }
 
-fn apply_click_through(app: &tauri::AppHandle, lock: &Lock, enabled: bool) -> Result<(), String> {
-    let window = app.get_webview_window(lock.label).ok_or_else(|| format!("{} window not found", lock.label))?;
-    window.set_ignore_cursor_events(enabled).map_err(|e| e.to_string())?;
+fn apply_lock(app: &tauri::AppHandle, lock: &Lock, enabled: bool) {
     lock.on.store(enabled, Ordering::SeqCst);
     let _ = app.emit(lock.event, enabled);
-    Ok(())
 }
 
-/// Reported by the calling window (pmWidget.js for the meter, Minimap.tsx for the map).
-#[tauri::command]
-pub fn set_lock_hotspot(window: tauri::WebviewWindow, x: f64, y: f64, w: f64, h: f64) {
-    if let Ok(lock) = lock_of(window.label()) {
-        *lock.spot.lock().unwrap_or_else(|e| e.into_inner()) = Some([x, y, w, h]);
-    }
+/// The meter's start_drag (lib.rs) does nothing while it is locked.
+pub fn meter_locked() -> bool {
+    METER.on.load(Ordering::SeqCst)
 }
-
-/// While locked, the whole window ignores the mouse, so its lock button can't
-/// be clicked through the webview. This loop polls the cursor: over the button
-/// the window takes the mouse (so the click doesn't reach the game) and emits
-/// the lock's hot event for the hover style; a left-button press there unlocks.
-/// Detecting the press here keeps it working whatever the webview does.
-#[cfg(windows)]
-fn watch_lock_corner(app: tauri::AppHandle) {
-    use windows::Win32::Foundation::POINT;
-    use windows::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_LBUTTON};
-    use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
-
-    std::thread::spawn(move || {
-        let (mut hot, mut was_down) = (vec![false; LOCKS.len()], false);
-        loop {
-            std::thread::sleep(std::time::Duration::from_millis(30));
-            let down = unsafe { GetAsyncKeyState(VK_LBUTTON.0 as i32) } as u16 & 0x8000 != 0;
-            for (lock, hot) in LOCKS.iter().zip(hot.iter_mut()) {
-                let Some(window) = app.get_webview_window(lock.label) else { continue };
-                let spot = *lock.spot.lock().unwrap_or_else(|e| e.into_inner());
-                let over = lock.on.load(Ordering::SeqCst)
-                    && (|| {
-                        let [x, y, w, h] = spot?;
-                        let mut cursor = POINT::default();
-                        unsafe { GetCursorPos(&mut cursor) }.ok()?;
-                        let origin = window.inner_position().ok()?;
-                        let scale = window.scale_factor().ok()?;
-                        let (cx, cy) = ((cursor.x - origin.x) as f64 / scale, (cursor.y - origin.y) as f64 / scale);
-                        Some(cx >= x && cx <= x + w && cy >= y && cy <= y + h)
-                    })()
-                    .unwrap_or(false);
-                if over != *hot {
-                    *hot = over;
-                    let _ = window.set_ignore_cursor_events(!over && lock.on.load(Ordering::SeqCst));
-                    let _ = app.emit(lock.hot_event, over);
-                }
-                if over && down && !was_down {
-                    *hot = false;
-                    let _ = app.emit(lock.hot_event, false);
-                    if let Err(e) = apply_click_through(&app, lock, false) {
-                        tracing::warn!("Unlock from the {} lock button failed: {}", lock.label, e);
-                    }
-                }
-            }
-            was_down = down;
-        }
-    });
-}
-
-#[cfg(not(windows))]
-fn watch_lock_corner(_app: tauri::AppHandle) {}
 
 /// The lock buttons: the meter's (no label, design: widget header) and the minimap's (label "map").
 #[tauri::command]
 pub fn set_click_through(app: tauri::AppHandle, enabled: bool, label: Option<String>) -> Result<(), String> {
-    apply_click_through(&app, lock_of(label.as_deref().unwrap_or("main"))?, enabled)
+    apply_lock(&app, lock_of(label.as_deref().unwrap_or("main"))?, enabled);
+    Ok(())
 }
 
 #[tauri::command]
@@ -174,15 +113,13 @@ pub fn hide_overlay(app: tauri::AppHandle) -> Result<(), String> {
 pub fn show_overlay(app: tauri::AppHandle) -> Result<(), String> {
     let window = app.get_webview_window("main").ok_or("overlay window not found")?;
     set_user_hidden(false);
-    // "Open widget" is also the mouse way out of a locked (click-through) meter.
-    apply_click_through(&app, METER, false)?;
     window.show().map_err(|e| e.to_string())?;
     let _ = window.unminimize();
     let _ = window.set_always_on_top(true);
     Ok(())
 }
 
-/// Global hotkey toggling click-through (default Ctrl+Alt+L). Uses a second
+/// Global hotkey toggling the meter's lock (default Ctrl+Alt+L). Uses a second
 /// A2Tools `HotkeyManager` with only its first slot bound, so the engine's own
 /// reload/toggle hotkeys and its hotkeys.rs stay untouched.
 pub fn start_click_through_hotkey(app: &tauri::AppHandle) {
@@ -191,7 +128,6 @@ pub fn start_click_through_hotkey(app: &tauri::AppHandle) {
         .and_then(|state| state.settings.get(CLICK_THROUGH_HOTKEY_KEY))
         .unwrap_or_default();
     let (mods, vk) = parse_hotkey_label(&label).unwrap_or((0x0002 | 0x0001, 0x4C)); // Ctrl+Alt+L
-    watch_lock_corner(app.clone());
     let app = app.clone();
     // The listener thread keeps running after the manager is dropped, as the
     // engine's own manager in lib.rs does.
@@ -201,10 +137,7 @@ pub fn start_click_through_hotkey(app: &tauri::AppHandle) {
         0,
         0,
         move || {
-            let next = !METER.on.load(Ordering::SeqCst);
-            if let Err(e) = apply_click_through(&app, METER, next) {
-                tracing::warn!("Click-through toggle failed: {}", e);
-            }
+            apply_lock(&app, METER, !meter_locked());
         },
         || {},
     );
@@ -370,19 +303,17 @@ fn show_dashboard(app: &tauri::AppHandle) -> Result<(), String> {
 /// reason as `open_dashboard_window`. Its place and size are remembered like
 /// the tool windows' (`window.minimap.*`: the old `window.map.*` was the size of
 /// a full map window), saved when it loses focus or closes rather than on every
-/// move event, since each save writes the settings file. Opening it again also
-/// unlocks it: the mouse way out of a locked minimap.
+/// move event, since each save writes the settings file.
 #[tauri::command]
 pub async fn open_map_window(app: tauri::AppHandle) -> Result<(), String> {
     let lock = lock_of("map")?;
     if let Some(existing) = app.get_webview_window("map") {
-        apply_click_through(&app, lock, false)?;
         let _ = existing.show();
         let _ = existing.unminimize();
         let _ = existing.set_focus();
         return Ok(());
     }
-    lock.on.store(false, Ordering::SeqCst); // a new window takes the mouse
+    lock.on.store(false, Ordering::SeqCst); // a new window starts unlocked
     let window = tauri::WebviewWindowBuilder::new(&app, "map", tauri::WebviewUrl::App("dashboard.html".into()))
         // WebviewUrl::App is a path (a ?query is percent-encoded): see build_settings_window.
         .initialization_script("window.__PM_VIEW__ = 'map';")

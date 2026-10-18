@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type SyntheticEvent } from "react";
+import { useEffect, useState, type ButtonHTMLAttributes, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type SyntheticEvent } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow, PhysicalPosition } from "@tauri-apps/api/window";
@@ -29,8 +29,8 @@ const MAP_LABEL = "map"; // the window's label, for its lock (powermeter.rs LOCK
 /**
  * The minimap's controls over the map, as the game's minimap: Map and Path Opacity on top with the close button,
  * the icon column on the right (move, filter, pets, full screen; zoom and lock at the bottom), the zone at the
- * bottom left. The filter holds the two dropdowns, Gathering and Layers. Locked, the window lets the mouse through
- * to the game and only the lock stays: Rust unlocks it on a press over it (watch_lock_corner).
+ * bottom left. The filter holds the two dropdowns, Gathering and Layers. Locked, the window can't be moved; its controls
+ * keep working.
  */
 export function MiniChrome({
   t,
@@ -71,40 +71,19 @@ export function MiniChrome({
 }) {
   const [filter, setFilter] = useState(false);
   const [locked, setLocked] = useState(false);
-  const [hot, setHot] = useState(false);
-  const lockBtn = useRef<HTMLButtonElement>(null);
-  const unlockedAt = useRef(0);
   const win = getCurrentWindow();
 
   useEffect(() => {
     invoke<boolean>("get_click_through", { label: MAP_LABEL }).then(setLocked, () => {});
-    const stops = [
-      listen<boolean>("pm-map-click-through", ({ payload }) => {
-        if (!payload) unlockedAt.current = Date.now();
-        setLocked(payload);
-      }),
-      listen<boolean>("pm-map-lock-hot", ({ payload }) => setHot(payload)),
-    ];
-    return () => stops.forEach((s) => s.then((stop) => stop(), () => {}));
+    const stop = listen<boolean>("pm-map-click-through", ({ payload }) => setLocked(payload));
+    return () => void stop.then((s) => s(), () => {});
   }, []);
-
-  // Locked: Rust needs the lock's rect to watch the cursor over it.
-  useEffect(() => {
-    if (!locked) return;
-    const report = () => {
-      const r = lockBtn.current?.getBoundingClientRect();
-      if (r?.width) void invoke("set_lock_hotspot", { x: r.left - 4, y: r.top - 4, w: r.width + 8, h: r.height + 8 }).catch(() => {});
-    };
-    report();
-    window.addEventListener("resize", report);
-    return () => window.removeEventListener("resize", report);
-  }, [locked]);
 
   // The window follows the pointer by hand, not with the native drag: that one let Windows snap it (Aero Snap) to the
   // screen's top edge or corners, where the game's minimap sits, and a double-click on the bar maximized it.
   // One setPosition in flight at a time, always to the latest pointer.
   const startMove = (e: ReactPointerEvent<HTMLElement>) => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || locked) return; // the lock keeps the window in place
     const el = e.currentTarget;
     el.setPointerCapture(e.pointerId);
     const from = { x: e.screenX, y: e.screenY };
@@ -139,12 +118,7 @@ export function MiniChrome({
     el.addEventListener("pointercancel", end);
   };
 
-  const setLock = (enabled: boolean) => run(() => invoke("set_click_through", { enabled, label: MAP_LABEL }).then(() => setLocked(enabled)));
-  // A mouse press on the locked button is Rust's (it unlocks), and so is the click that follows it. Keyboard: both ways.
-  const lockClick = (keyboard: boolean) => {
-    if (keyboard) return setLock(!locked);
-    if (!locked && Date.now() - unlockedAt.current > 500) setLock(true);
-  };
+  const toggleLock = () => run(() => invoke("set_click_through", { enabled: !locked, label: MAP_LABEL }).then(() => setLocked(!locked)));
 
   // The filter closes on Esc or a press outside it.
   useEffect(() => {
@@ -230,14 +204,12 @@ export function MiniChrome({
       </div>
 
       <button
-        ref={lockBtn}
         type="button"
         className="mmBtn mmLock"
-        data-hot={hot || undefined}
         aria-pressed={locked}
         title={t(locked ? "world.map.unlock" : "world.map.lock")}
         aria-label={t(locked ? "world.map.unlock" : "world.map.lock")}
-        onClick={(e) => lockClick(e.detail === 0)}
+        onClick={toggleLock}
       >
         {locked ? <LockSimpleIcon aria-hidden="true" weight="fill" /> : <LockSimpleOpenIcon aria-hidden="true" />}
       </button>

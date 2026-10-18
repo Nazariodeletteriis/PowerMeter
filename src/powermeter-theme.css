@@ -194,15 +194,35 @@
       linear-gradient(var(--pm-ui-line), var(--pm-ui-line)) 0 41px / 100% 1px no-repeat,
       var(--pm-wsurf);
   }
-  .pmLogo {
-    display: block;
+  /* The signal: grey bars until the first ping, then green (all 4), amber (2) or red (1). */
+  .pmSignal {
+    display: flex;
     flex: none;
     order: 0;
-    width: 18px;
-    height: 18px;
-    padding: 5px 12px 5px 11px;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 8px 7px 9px;
     border-right: 1px solid var(--pm-ui-line);
+    color: var(--pm-ui-icon);
   }
+  .pmSignal[data-level="good"] { color: #46c46e; }
+  .pmSignal[data-level="warn"] { color: #e8b03a; }
+  .pmSignal[data-level="bad"] { color: #ff4d4d; }
+  .pmLogo {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
+  .pmLogo rect { fill: currentColor; }
+  .pmSignal[data-level="warn"] rect:nth-child(n + 3),
+  .pmSignal[data-level="bad"] rect:nth-child(n + 2) { opacity: 0.25; }
+  .pmSignalMs {
+    font: 600 10px/1 var(--pm-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--pm-widget-text);
+    white-space: nowrap;
+  }
+  .pmSignalMs:empty { display: none; }
   .header .headerBtns { display: contents; }
   .header .bossIcon,
   .header .headerBtns .headerBtn {
@@ -1155,7 +1175,7 @@
     font-variant-numeric: tabular-nums;
   }
   .pmAvgRow > .isNone { color: #7a7373; }
-  .meter.pmMode-dps.isPmAvg:not(.isPmDetail, .isPmLocked) .pmAvg { display: flex; }
+  .meter.pmMode-dps.isPmAvg:not(.isPmDetail) .pmAvg { display: flex; }
   .meter.pmMode-dps.isPmAvg :is(.pmCols, .list, .pmSpark, .pmEmpty, .pmEnd, .pmUploaded, .pmLast) { display: none !important; }
   /* Medie: no boss on screen, so the averages are the widget. */
   .meter.pmMode-dps.isPmAvg:not(.hasPmHp) {
@@ -1270,11 +1290,12 @@
     gap: 0 2px;
     background-position: 0 33px;
   }
+  .meter.slim .pmSignal { gap: 4px; padding: 4px 8px; }
   .meter.slim .pmLogo {
     width: 14px;
     height: 14px;
-    padding: 4px 9px 4px 8px;
   }
+  .meter.slim .pmSignalMs { font-size: 10px; }
   .meter.slim .header .pmSpacer { display: none; }
   .meter.slim .battleTime { height: 34px; font-size: 13px; }
   .meter.slim .battleTime .tick { font-size: 13px; }
@@ -1350,7 +1371,7 @@
 /* ---------- 4. widget modes and states (design 8.1-8.7) ----------
    pmWidget.js sets the state classes on .meter:
    pmMode-dps (every tab), pmView-live|waiting|ended|error, isPmDetail,
-   isPmPill, isPmLocked, isPmIdle, isPmUploaded, hasPmLast, hasPmSpark. */
+   isPmPill, isPmIdle, isPmUploaded, hasPmLast, hasPmSpark. */
 :root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
   /* Default size 810x367 (the Interface reference); the list fills the space above the footer. */
   .meter {
@@ -1373,8 +1394,6 @@
 
   /* Everything a state does not use starts hidden. */
   .pmPill,
-  .pmGrabber,
-  .pmLockBadge,
   .pmSpark,
   .pmEmpty,
   .pmError,
@@ -1728,82 +1747,13 @@
     opacity: 0.3;
   }
 
-  /* --- 8.1 locked (click-through): bar reduced to a grabber and a lock --- */
-  .meter.isPmLocked {
-    min-height: 0;
-    padding: 4px 6px 6px;
-    box-shadow: none;
-  }
-  .meter.isPmLocked > :not(.list, .pmGrabber, .pmLockBadge, .pmLockHint) { display: none; }
-  .pmLockHint {
-    display: block;
-    margin: 0 18px 5px;
-    font-size: 11px;
-    line-height: 1.4;
-    text-align: center;
-    color: var(--pm-widget-text);
-  }
-  .pmLockHint[hidden] { display: none; }
-  .meter.isPmLocked .pmGrabber {
-    display: block;
-    width: 40px;
-    height: 3px;
-    margin: 0 auto 5px;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.25);
-  }
-  .meter.isPmLocked .pmLockBadge {
-    display: block;
-    position: absolute;
-    top: 4px;
-    right: 6px;
-    color: var(--pm-t2);
-    line-height: 0;
-  }
-  .pmLockBadge svg {
-    width: 10px;
-    height: 10px;
-  }
-  /* Clickable while locked: padding widens the hit area, hover shows it's live. */
-  .meter.isPmLocked .pmLockBadge {
-    top: 0;
-    right: 0;
-    padding: 4px 6px 8px 14px;
-    cursor: pointer;
-  }
-  .meter.isPmLocked.isPmLockHot .pmLockBadge { color: var(--pm-hot); }
-  .meter.isPmLocked.isPmLockHot .pmLockBadge svg { transform: scale(1.3); }
-  .pmLockBadge svg { transition: transform 120ms ease-out; }
-  .meter.isPmLocked .list,
-  .meter.isPmLocked .list.hasRows {
-    gap: 2px;
-    padding: 0;
-  }
-  .meter.isPmLocked .list .item {
-    --pm-row-cols: 0 0 0 0 minmax(0, 1fr) 0 auto 0 0;
-    height: 20px;
-    padding: 0 8px;
-    box-shadow: none;
-  }
-  .meter.isPmLocked .list .item .name::after { content: none; }
-  .meter.isPmLocked .list .item .name { font-weight: 400; font-size: 13px; }
-  .meter.isPmLocked .list .item .dps > p:first-child { font-size: 13px; }
-  .meter.isPmLocked .list .item :is(.rank, .classIcon, .fillTrack, .dpsContribution, .dpsTotal) { display: none; }
-  /* Locked hides every card but the list, while the waiting / fight-over /
-     error views (and an open player breakdown) hide the list in favour of
-     their card. Together that left a locked widget empty until the DPS tab
-     dismissed the fight-over card, so a locked widget always keeps its rows. */
-  .meter.isPmLocked.pmMode-dps:is(.pmView-waiting, .pmView-error, .pmView-ended, .isPmDetail) .list { display: grid; }
-  .meter.isPmLocked.pmMode-dps.pmView-ended .pmEnd { display: none; }
-  .meter.isPmLocked.pmMode-dps:is(.pmView-waiting, .pmView-ended) { min-height: 0; }
-
   /* --- Trainer (pmWidget.js): replaces the widget like the breakdown, whatever the view state;
      !important because the waiting / fight-over / locked rules are more specific. Locked keeps
      its badge (the unlock hotspot) and the numbers, read through click-through. --- */
-  .meter.isPmTrainer > :not(.pmTrainer, .resizeHandle, .pmGrip, .pmGrabber, .pmLockBadge, .pmLockHint) { display: none !important; }
+  .meter.isPmTrainer > :not(.pmTrainer, .resizeHandle, .pmGrip) { display: none !important; }
   /* The reset puts the meter in the shorter waiting view: keep the layout's size through the test. */
-  .meter.pmMode-dps.isPmTrainer:not(.isPmLocked) { min-height: 367px; }
-  .meter.slim.pmMode-dps.isPmTrainer:not(.isPmLocked) { min-height: 160px; }
+  .meter.pmMode-dps.isPmTrainer { min-height: 367px; }
+  .meter.slim.pmMode-dps.isPmTrainer { min-height: 160px; }
   .meter.isPmTrainer .pmTrainer {
     display: flex;
     flex: 1;
@@ -2032,4 +1982,16 @@ body:not(.legacyUi) [data-cls="brawler"] :is(.classIcon, .pmCls)::before,
   .supportModal .supportIconButton[data-support="kofi"] { background: var(--pm-deep); }
 
   .hoverDetailsTooltip { background: rgba(20, 17, 17, 0.92); }
+}
+
+/* Square corners, like the game's own icons: 1px at most on every part of the widget
+   (meter only: the details, history and settings windows keep theirs). Status dots stay round. */
+:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) *,
+:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) *::before,
+:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) *::after {
+  border-radius: 1px !important;
+}
+:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) :is(.pmLiveDot, .pmPillDot, .battleTime .status),
+:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) .pmBarTitle::before {
+  border-radius: 50% !important;
 }

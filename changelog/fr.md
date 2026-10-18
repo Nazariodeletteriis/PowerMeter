@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.24
+
+- Modifié : Le verrou du widget DPS et de la mini-carte se contente désormais de garder la fenêtre en place : tous les boutons restent visibles et cliquables, et les clics ne passent plus au jeu. L'interrupteur des paramètres et Ctrl+Alt+L font de même.
+- Nouveau : Widget DPS : le signal en haut à gauche affiche votre vrai ping en jeu, vert avec toutes les barres, orange quand il monte et rouge quand il est élevé, avec la valeur à côté.
+- Modifié : Le widget DPS et la mini-carte ont des coins carrés, dans le style des icônes du jeu.
+- Corrigé : Paramètres : l'interrupteur du verrou du widget DPS suit maintenant le verrou quand vous le changez depuis le widget ou au raccourci.
+
 ## 0.5.23
 
 - Modifié : Le widget DPS reste visible quand vous quittez le jeu (Alt+Tab) au lieu de passer dans la barre des tâches. Pour le masquer hors du jeu, activez « Masquer le meter automatiquement » dans Paramètres > Widget DPS.

@@ -196,7 +196,7 @@
   "world.map.pathOpacityHint": "마커, 채집 지점, 펫 위치, 지역 경계",
   "world.map.move": "이동",
   "world.map.filter": "필터",
-  "world.map.lock": "잠금: 클릭이 게임으로 전달됩니다",
-  "world.map.unlock": "잠김: 클릭하여 잠금 해제",
+  "world.map.lock": "위치 잠금",
+  "world.map.unlock": "위치 잠김: 클릭하면 해제",
   "world.map.petMonsters": "몬스터: {list}"
 }

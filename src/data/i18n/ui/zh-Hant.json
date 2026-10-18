@@ -368,8 +368,7 @@
     "targetMode": "目標模式",
     "expand": "點擊展開",
     "ready": "已就緒",
-    "locked": "已鎖定",
-    "lock": "鎖定（點擊穿透）",
+    "lock": "鎖定位置",
     "opacity": "不透明度",
     "pill": "縮小為膠囊條",
     "dashboard": "開啟主控台",
@@ -453,7 +452,6 @@
     },
     "updateAvailable": "有可用更新",
     "updateNotes": "版本資訊",
-    "unlockHint": "已鎖定：點擊鎖圖示或按 {key} 解鎖",
     "cols": {
       "name": "名稱",
       "total": "總計",

@@ -196,7 +196,7 @@
   "world.map.pathOpacityHint": "標記、採集點、寵物位置和區域邊界",
   "world.map.move": "移動",
   "world.map.filter": "篩選",
-  "world.map.lock": "鎖定：點擊會傳到遊戲",
-  "world.map.unlock": "已鎖定：點擊解鎖",
+  "world.map.lock": "鎖定位置",
+  "world.map.unlock": "位置已鎖定：點擊解鎖",
   "world.map.petMonsters": "怪物：{list}"
 }

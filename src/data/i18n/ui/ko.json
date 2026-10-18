@@ -368,8 +368,7 @@
     "targetMode": "대상 모드",
     "expand": "클릭하여 확장",
     "ready": "준비 완료",
-    "locked": "잠김",
-    "lock": "잠금 (클릭 통과)",
+    "lock": "위치 잠금",
     "opacity": "불투명도",
     "pill": "미니 바로 축소",
     "dashboard": "대시보드 열기",
@@ -453,7 +452,6 @@
     },
     "updateAvailable": "업데이트 가능",
     "updateNotes": "릴리스 노트",
-    "unlockHint": "잠김: 자물쇠를 클릭하거나 {key}를 눌러 잠금 해제",
     "cols": {
       "name": "이름",
       "total": "합계",

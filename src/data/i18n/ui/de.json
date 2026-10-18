@@ -368,8 +368,7 @@
     "targetMode": "Zielmodus",
     "expand": "Klicken zum Erweitern",
     "ready": "Bereit",
-    "locked": "Gesperrt",
-    "lock": "Sperren (Klicks durchlassen)",
+    "lock": "Position sperren",
     "opacity": "Deckkraft",
     "pill": "Auf Pille minimieren",
     "dashboard": "Dashboard öffnen",
@@ -453,7 +452,6 @@
     },
     "updateAvailable": "Update verfügbar",
     "updateNotes": "Versionshinweise",
-    "unlockHint": "Gesperrt: Schloss anklicken oder {key} drücken zum Entsperren",
     "cols": {
       "name": "Name",
       "total": "Gesamt",

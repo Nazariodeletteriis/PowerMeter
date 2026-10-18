@@ -196,7 +196,7 @@
   "world.map.pathOpacityHint": "Метки, точки сбора, места питомцев и границы зон",
   "world.map.move": "Переместить",
   "world.map.filter": "Фильтр",
-  "world.map.lock": "Заблокировать: клики проходят в игру",
-  "world.map.unlock": "Заблокировано: нажмите, чтобы разблокировать",
+  "world.map.lock": "Закрепить положение",
+  "world.map.unlock": "Положение закреплено: нажмите, чтобы открепить",
   "world.map.petMonsters": "Монстры: {list}"
 }
