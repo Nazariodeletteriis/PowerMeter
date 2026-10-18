@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.25
+
+- Fixed: The ping on the DPS widget (signal bars, value and the colour of the live dot) works again: the game changed how it times its ping, so the app never got a value; it now measures it from your request to the server's answer.
+
 ## 0.5.24
 
 - Changed: The lock of the DPS widget and of the minimap now only keeps the window in place: every button stays visible and clickable, and clicks no longer pass through to the game. The settings switch and Ctrl+Alt+L do the same.

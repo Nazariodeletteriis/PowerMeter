@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.25
+
+- Corretto: Il ping del widget DPS (barre del segnale, valore e colore del pallino live) funziona di nuovo: il gioco aveva cambiato il modo in cui misura il ping e l'app non riceveva più nessun valore; ora lo misura dalla tua richiesta alla risposta del server.
+
 ## 0.5.24
 
 - Cambiato: Il lucchetto del widget DPS e della minimappa ora blocca solo la posizione della finestra: tutti i pulsanti restano visibili e cliccabili, e i clic non passano più al gioco. Lo stesso vale per l'interruttore nelle impostazioni e per Ctrl+Alt+L.

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.25
+
+- Behoben: Der Ping im DPS-Widget (Signalbalken, Wert und Farbe des Live-Punkts) funktioniert wieder: Das Spiel misst seinen Ping jetzt anders, daher bekam die App keinen Wert mehr; sie misst ihn nun von deiner Anfrage bis zur Antwort des Servers.
+
 ## 0.5.24
 
 - Geändert: Die Sperre des DPS-Widgets und der Minikarte hält das Fenster jetzt nur noch an seinem Platz: Alle Schaltflächen bleiben sichtbar und anklickbar, und Klicks gehen nicht mehr ans Spiel durch. Der Schalter in den Einstellungen und Strg+Alt+L tun dasselbe.

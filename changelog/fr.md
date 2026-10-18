@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.25
+
+- Corrigé : Le ping du widget DPS (barres du signal, valeur et couleur du point live) fonctionne de nouveau : le jeu avait changé sa façon de mesurer le ping et l'app ne recevait plus aucune valeur ; elle le mesure désormais de votre requête à la réponse du serveur.
+
 ## 0.5.24
 
 - Modifié : Le verrou du widget DPS et de la mini-carte se contente désormais de garder la fenêtre en place : tous les boutons restent visibles et cliquables, et les clics ne passent plus au jeu. L'interrupteur des paramètres et Ctrl+Alt+L font de même.
