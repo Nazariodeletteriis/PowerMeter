@@ -31,7 +31,7 @@ import { classSkills, planClass, SkillIcon } from "../skills";
 import { art, ClassAvatar, CLASSES, FactionTag } from "../ui";
 import { activeId, readCharacters } from "../characters";
 import type { BuilderData, EnhancementGroup, EnhancementValue, GearPiece, PlannerBoardData } from "../../data/db/types";
-import { boardMax, buildStats, connected, estimates, GAME_SLOTS, planTotals, plannerNodes, PLAN_KEY, readPlans, savedNodes, statValue, twPiece, type Equipped } from "./characters/calc";
+import { arcanaCode, boardMax, buildStats, connected, derivedStats, estimates, GAME_SLOTS, ownedPets, petCollection, planTotals, plannerNodes, PLAN_KEY, readPlans, savedNodes, statValue, twPiece, type Equipped } from "./characters/calc";
 import {
   BAR_SLOTS,
   BUILD_DATA_KEY,
@@ -45,6 +45,7 @@ import {
   DeleteBuildModal,
   MY_BUILDS_KEY,
   OWN_BUILD,
+  PETS_KEY,
   readBuildData,
   readCapturedBar,
   readCapturedDaev,
@@ -203,7 +204,12 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
     invoke<{ map?: unknown }>("pm_item_map").then((r) => setSharedMap(validItemMap(r?.map)), () => {});
   }, []);
   const itemMap = { ...sharedMap, ...readItemMap(settings[ITEM_MAP_KEY]) };
-  const rid = (id: string) => itemMap[id] ?? id; // a game id you identified reads as that archive item
+  const pieceIds = useMemo(() => new Set((pieces.data ?? []).map((p) => p.id)), [pieces.data]);
+  // A game id you identified reads as that archive item; an Arcana as its archive one, when the archive has it.
+  const rid = (id: string) => {
+    const arcana = arcanaCode(id);
+    return itemMap[id] ?? (arcana && pieceIds.has(arcana) ? arcana : id);
+  };
   const ids = [...new Set([...Object.values(cur.gear), ...Object.values(want)].map((g) => rid(g.id)))].sort();
   const gameIds = ids.filter(isGameId);
   const tw = useGd(() => (gameIds.length ? gd.twGear(gameIds) : Promise.resolve([])).then((rows) => rows.map(twPiece)), gameIds.join("|"));
@@ -215,6 +221,7 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
     const id = rid(raw);
     return isGameId(id) ? tw.data?.find((x) => x.piece.id === id)?.levels : enh.data?.[id];
   };
+  const pctKeys = useMemo(() => new Set((calcData.data?.stats ?? []).filter((x) => x.percent).map((x) => x.stat_key)), [calcData.data]);
   const byId = useMemo(() => new Map([...(pieces.data ?? []), ...(tw.data ?? []).map((x) => x.piece)].map((p) => [p.id, p])), [pieces.data, tw.data]);
   // A worn game item missing from the game data (newer than it) keeps its slot, nameless and without stats.
   const unknownPiece = (s: string, id: string): GearPiece => ({ id, name: t("planner.builder.unknownItem", { id }), slot: SLOTS.find(([x]) => x === s)?.[1][0] ?? null, grade: null, level: null, icon: null, max_enh: null, stats_json: [] });
@@ -226,7 +233,17 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
       // the panel: a +18 read as +0 before.
       const lv = (levelsOf(g.id) ?? []).reduce((m, v) => (v.level <= g.enh && v.level > m ? v.level : m), 0);
       const bonus = (levelsOf(g.id) ?? []).filter((v) => v.level === lv).map((v) => [v.stat_key, statValue(v.value_raw!, v.percent === 1)] as [string, number]);
-      return [{ slot: s, piece, enh: g.enh, bonus }];
+      // The game's own bonus stats, the ones of a stat id identified ("#id" ones are shown, not added). An Arcana's
+      // is its main stat with the enhancement in: the part over the fixed value is its enhancement bonus.
+      const extra: [string, number][] = [];
+      for (const [k, raw] of Array.isArray(g.bonus) ? g.bonus : []) {
+        if (typeof k !== "string" || k.startsWith("#") || !Number.isFinite(raw)) continue;
+        const v = statValue(raw, pctKeys.has(k));
+        const fixed = s.startsWith("Arcana") ? piece.stats_json?.find(([sk]) => sk === k)?.[2] : undefined;
+        if (fixed == null) extra.push([k, v]);
+        else if (v > fixed) bonus.push([k, v - fixed]);
+      }
+      return [{ slot: s, piece, enh: g.enh, bonus, extra }];
     });
   const worn = equippedOf(cur.gear);
   const equipped = which === "gear" ? worn : equippedOf(shown);
@@ -240,8 +257,10 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const plan = useMemo(() => planTotals(nodes, picked), [nodes, picked]);
   const taken = useMemo(() => new Set(connected(nodes, picked)), [nodes, picked]);
   const [zoom, setZoom] = useState<number | null>(null); // board shown large
-  // The pet collection's effects the game shows for the character (CaptureSync) count in every build of it.
-  const petEffects = (char && readPets(settings[CAPTURED_PETS_KEY])[char.id]?.effects) || [];
+  // The pet collection counts in every build of the character: the insight effects the game shows (CaptureSync),
+  // plus each owned pet's effects at its level (game pets over hand-marked ones).
+  const gamePets = char ? readPets(settings[CAPTURED_PETS_KEY])[char.id] : undefined;
+  const petEffects = char ? [...(gamePets?.effects ?? []), ...petCollection(ownedPets(readPets(settings[PETS_KEY])[char.id]?.owned ?? {}, gamePets?.owned))] : [];
   const totalsOf = (gear: (Equipped & { slot: string })[]) => (calcData.data ? buildStats(calcData.data, cur.lvl, gear, plan, petEffects) : {});
   const totals = totalsOf(equipped);
   const wornTotals = which === "want" ? totalsOf(worn) : undefined;
@@ -414,8 +433,8 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
       {/* Only the decoration is clipped (the prototype clipped the whole band, cutting off the "my builds" menu). */}
       <div style={{ position: "relative", borderRadius: 10, marginBottom: 12, background: "linear-gradient(100deg,var(--pm-s2) 0%,var(--pm-s1) 55%,var(--pm-bg) 100%)", border: "1px solid var(--pm-line)" }}>
         <div aria-hidden="true" style={{ position: "absolute", inset: 0, borderRadius: "inherit", overflow: "hidden", pointerEvents: "none" }}>
-          <div style={{ position: "absolute", inset: "0 0 auto 0", height: 2, background: "linear-gradient(90deg,transparent,#DB0000 20%,#DB0000 60%,transparent)" }} />
-          <div style={{ position: "absolute", right: -60, top: -80, width: 360, height: 360, background: "radial-gradient(circle,rgba(219,0,0,.16),transparent 65%)" }} />
+          <div style={{ position: "absolute", inset: "0 0 auto 0", height: 2, background: "linear-gradient(90deg,transparent,var(--pm-red) 20%,var(--pm-red) 60%,transparent)" }} />
+          <div style={{ position: "absolute", right: -60, top: -80, width: 360, height: 360, background: "radial-gradient(circle,color-mix(in srgb,var(--pm-red) 16%,transparent),transparent 65%)" }} />
         </div>
         <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 18, padding: "16px 20px", flexWrap: "wrap" }}>
           <div style={{ width: 56, height: 56, transform: "rotate(45deg)", borderRadius: 10, border: `1.5px solid ${clsCol}`, background: `${clsCol}1a`, display: "grid", placeItems: "center", flex: "none" }}>
@@ -565,6 +584,8 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
                 slot={slot}
                 pieces={pieces.data ?? []}
                 equipped={equipped.find((x) => x.slot === slot)}
+                game={shown[slot]}
+                pct={pctKeys}
                 levels={shown[slot] ? levelsOf(shown[slot].id) : undefined}
                 wornNote={
                   which === "want" && differs(slot)
@@ -573,7 +594,9 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
                 }
                 set={(g) => {
                   const next = { ...shown };
-                  if (g) next[slot] = g;
+                  // Same item, another enhancement: its options stay, the game's item level no longer holds.
+                  const was = shown[slot];
+                  if (g) next[slot] = was && (g.id === was.id || g.id === rid(was.id)) ? { ...was, enh: g.enh, lvl: g.enh === was.enh ? was.lvl : undefined } : g;
                   else delete next[slot];
                   update(which === "gear" ? { gear: next } : { want: next });
                 }}
@@ -760,6 +783,8 @@ function EquipPanel({
   slot,
   pieces,
   equipped,
+  game,
+  pct,
   levels,
   wornNote,
   set,
@@ -773,6 +798,10 @@ function EquipPanel({
   slot: string;
   pieces: GearPiece[];
   equipped?: Equipped;
+  /** The slot's entry of the gear set: from the game, with its item level, bonus stats and manastones. */
+  game?: GearSet[string];
+  /** Percent stat keys. */
+  pct: Set<string>;
   levels?: EnhancementValue[];
   /** Target set only, when the slot differs: what you wear there now. */
   wornNote?: string;
@@ -795,6 +824,16 @@ function EquipPanel({
   // The game's level is always offered, also past the published ones (+16 to +20 read as +15 values).
   const steps = equipped && !published.includes(equipped.enh) ? [...published, equipped.enh] : published;
   const fmt = (v: number) => v.toLocaleString(lang, { maximumFractionDigits: 2 });
+  const fmtStat = (k: string, v: number) => fmt(v) + (pct.has(k) ? "%" : "");
+  const nameOf = (k: string) => (k.startsWith("#") ? t("planner.builder.unknownStat", { id: k.slice(1) }) : statName(k));
+  const gameBonus = Array.isArray(game?.bonus) ? game.bonus.filter(([k, v]) => typeof k === "string" && Number.isFinite(v)) : [];
+  const stones = Array.isArray(game?.stones) ? game.stones.filter(([k, n]) => typeof k === "string" && Number.isFinite(n)) : [];
+  // What the item's attribute points give (Arcana main stats, Might ...), enhancement and bonus stats in.
+  const points: Record<string, number> = {};
+  for (const [k, , v] of p?.stats_json ?? []) if (v != null) points[k] = (points[k] ?? 0) + v;
+  for (const [k, v] of [...(equipped?.bonus ?? []), ...(equipped?.extra ?? [])]) points[k] = (points[k] ?? 0) + v;
+  const derived = derivedStats(points, pct);
+  const level = typeof game?.lvl === "number" ? game.lvl : p?.level;
 
   return (
     <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 16 }}>
@@ -807,7 +846,7 @@ function EquipPanel({
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ color: gradeColor(p.grade), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name ?? p.id}</div>
                 <div style={{ fontSize: 10, color: "var(--pm-t3)" }}>
-                  {p.grade} · {t("world.db.lv", { n: p.level ?? "-" })}
+                  {p.grade} · {t("world.db.lv", { n: level ?? "-" })}
                 </div>
               </div>
             </div>
@@ -875,8 +914,50 @@ function EquipPanel({
                   </span>
                 ))}
             </div>
-            <div style={{ fontSize: 11, color: "var(--pm-t3)", marginTop: 8 }}>{t("planner.builder.rolledNote")}</div>
+            {derived.length > 0 && (
+              <>
+                <div style={{ fontSize: 11, color: "var(--pm-t3)", margin: "10px 0 6px" }}>{t("planner.builder.derived")}</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "4px 12px", fontSize: 12 }}>
+                  {derived.map(([k, v]) => (
+                    <span key={`d-${k}`} style={{ display: "contents" }}>
+                      <span style={{ color: "var(--pm-t2)" }}>{statName(k)}</span>
+                      <span className="mono">{fmtStat(k, v)}</span>
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
+            {gameBonus.length === 0 && <div style={{ fontSize: 11, color: "var(--pm-t3)", marginTop: 8 }}>{t("planner.builder.rolledNote")}</div>}
           </div>
+          {gameBonus.length > 0 && !slot.startsWith("Arcana") && (
+            <div>
+              <div style={{ fontSize: 11, color: "var(--pm-t3)", marginBottom: 6 }}>{t("planner.builder.bonusStats")}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "4px 12px", fontSize: 12 }}>
+                {gameBonus.map(([k, raw], i) => (
+                  <span key={`g-${k}-${i}`} style={{ display: "contents" }}>
+                    <span style={{ color: "var(--pm-t2)" }}>{nameOf(k)}</span>
+                    <span className="mono" style={{ color: k.startsWith("#") ? "var(--pm-t3)" : "#5FD99A" }}>
+                      {k.startsWith("#") ? raw.toLocaleString(lang) : `+${fmtStat(k, statValue(raw, pct.has(k)))}`}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {stones.length > 0 && (
+            <div>
+              <div style={{ fontSize: 11, color: "var(--pm-t3)", marginBottom: 6 }}>{t("planner.builder.manastones")}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "4px 12px", fontSize: 12 }}>
+                {stones.map(([k, tier], i) => (
+                  <span key={`s-${k}-${i}`} style={{ display: "contents" }}>
+                    <span style={{ color: "var(--pm-t2)" }}>{nameOf(k)}</span>
+                    <span className="mono">{t("planner.builder.stoneTier", { n: tier })}</span>
+                  </span>
+                ))}
+              </div>
+              <div style={{ fontSize: 11, color: "var(--pm-t3)", marginTop: 8 }}>{t("planner.builder.stoneNote")}</div>
+            </div>
+          )}
         </>
       )}
 

@@ -47,7 +47,11 @@ export function readMyBuilds(json?: string): BuildSrc[] {
  * `want`: the target set, filled by hand; missing until first edited, and then it starts from `gear`.
  */
 export const BUILD_DATA_KEY = "pm.buildData";
-export type GearSet = Record<string, { id: string; enh: number }>;
+/**
+ * Item per slot. From the game only (CaptureSync): `lvl` the item level it shows, `bonus` its bonus stats and `stones`
+ * its manastones (stat key, or "#id" for a stat id not identified yet; raw value / tier 1-3).
+ */
+export type GearSet = Record<string, { id: string; enh: number; lvl?: number; bonus?: [stat: string, raw: number][]; stones?: [stat: string, tier: number][] }>;
 /** Equipment worn in game, per roster character (CaptureSync): settings["pm.capturedGear"] = { [charId]: GearSet of game item ids }. */
 export const CAPTURED_GEAR_KEY = "pm.capturedGear";
 export function readCapturedGear(json?: string): Record<string, GearSet> {
@@ -163,7 +167,7 @@ export function SectionHead({ title, children, style }: { title: string; childre
 }
 
 /** Red outline for destructive buttons ("Elimina"): no such variant in the prototype's .btn. */
-export const DANGER: CSSProperties = { color: "var(--pm-redt)", borderColor: "var(--pm-red)" };
+export const DANGER: CSSProperties = { color: "var(--pm-err)", borderColor: "var(--pm-err)" }; // red in every theme
 
 /** "Delete this build?" with Cancel / Delete: an in-app modal, not window.confirm. */
 export function DeleteBuildModal({ t, build, onDelete, onClose }: { t: T; build: string; onDelete: () => void; onClose: () => void }) {

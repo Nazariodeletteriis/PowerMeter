@@ -317,7 +317,7 @@ button.statusPill {
   width: 16px;
   height: 16px;
   margin: 0;
-  accent-color: #db0000;
+  accent-color: var(--pm-red);
 }
 
 /* Grid tables: set grid-template-columns inline, rows share it. */
@@ -433,7 +433,7 @@ button.gridRow:hover {
   color: #faf7f7;
 }
 .brandName span {
-  color: #ff6b6b;
+  color: var(--pm-redt);
 }
 .brandBy {
   font-size: 11px;
@@ -1170,7 +1170,7 @@ button.gridRow:hover {
   font-size: 12px;
 }
 .subsPlan[aria-current] {
-  border-color: #db000088;
+  border-color: color-mix(in srgb, var(--pm-red) 53%, transparent);
   background: var(--pm-tint);
 }
 .subsPlan h4 {

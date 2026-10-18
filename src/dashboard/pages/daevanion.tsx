@@ -26,7 +26,7 @@ export function BoardView({ nodes, board, taken, width }: { nodes: PNode[]; boar
     <div className="dvBoard" style={{ width, gap: Math.max(1, width / 200) }}>
       <svg viewBox={`0 0 ${N} ${N}`} aria-hidden="true">
         {lines.map(([a, b]) => (
-          <line key={a.id + b.id} x1={a.col + 0.5} y1={a.row + 0.5} x2={b.col + 0.5} y2={b.row + 0.5} stroke="#DB0000" strokeWidth={0.09} strokeLinecap="round" />
+          <line key={a.id + b.id} x1={a.col + 0.5} y1={a.row + 0.5} x2={b.col + 0.5} y2={b.row + 0.5} style={{ stroke: "var(--pm-red)" }} strokeWidth={0.09} strokeLinecap="round" />
         ))}
       </svg>
       {cells.map((n) => {
@@ -184,7 +184,7 @@ export default function Daevanion({ t, lang, name, go, settings, save, onError, 
           <div className="dvBoard">
             <svg viewBox={`0 0 ${N} ${N}`} aria-hidden="true">
               {lines.map(([a, b]) => (
-                <line key={a.id + b.id} x1={a.col + 0.5} y1={a.row + 0.5} x2={b.col + 0.5} y2={b.row + 0.5} stroke="#DB0000" strokeWidth={0.09} strokeLinecap="round" />
+                <line key={a.id + b.id} x1={a.col + 0.5} y1={a.row + 0.5} x2={b.col + 0.5} y2={b.row + 0.5} style={{ stroke: "var(--pm-red)" }} strokeWidth={0.09} strokeLinecap="round" />
               ))}
             </svg>
             {cells.map((n) => {

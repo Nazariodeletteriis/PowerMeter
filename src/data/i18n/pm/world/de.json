@@ -188,5 +188,15 @@
   "world.layer.shellfish": "Muscheln",
   "world.layer.vegetable": "Gemüse",
   "world.layer.wood": "Holz",
-  "world.layer.berry": "Beeren"
+  "world.layer.berry": "Beeren",
+  "world.map.selectAll": "Alle auswählen",
+  "world.map.selectNone": "Alle abwählen",
+  "world.map.mapOpacity": "Kartendeckkraft",
+  "world.map.pathOpacity": "Wegdeckkraft",
+  "world.map.pathOpacityHint": "Markierungen, Sammelpunkte, Haustier-Fundorte und Zonengrenzen",
+  "world.map.move": "Verschieben",
+  "world.map.filter": "Filter",
+  "world.map.lock": "Sperren: Klicks gehen ans Spiel",
+  "world.map.unlock": "Gesperrt: zum Entsperren klicken",
+  "world.map.petMonsters": "Monster: {list}"
 }

@@ -1,48 +1,41 @@
-/* Dashboard palettes (prototype THEMES a / b / c, "Palette: Brace / Carbonio /
-   Chiaro"). Brace is the :root default in dashboard.css; the other two override
-   the same --pm-* tokens. Set by applyPalette() in theme.ts. */
-html[data-pm-palette="carbonio"] {
-  --pm-bg: #0a0909;
-  --pm-s1: #121010;
-  --pm-s2: #1a1717;
-  --pm-s3: #242020;
-  --pm-line: #2e2929;
-  --pm-t1: #f5f2f2;
-  --pm-t2: #b3abab;
-  --pm-t3: #8a8181;
-  --pm-red: #db0000;
-  --pm-redt: #ff4d4d;
-  --pm-deep: #7f1112;
-  --pm-grey: #564f4f;
-  --pm-navon: #1f1b1b;
-  --pm-navfg: #ff4d4d;
-  --pm-bar: #0a0909;
-  --pm-fill: transparent;
-  --pm-filltext: #ff4d4d;
-  --pm-band: #121010;
-  --pm-tint: rgba(219, 0, 0, 0.12);
-}
+/* PowerMeter themes in the dashboard: the widget's themes (core.js availableThemes), one choice for
+   all of PowerMeter (theme.ts). PowerMeter is the :root default in dashboard.css; every other theme
+   is built from its swatch, the --row-fill of the same theme in src/styles.css, by the rules the
+   widget uses (powermeter-theme.css): the accent takes the swatch's hue and chroma, lightness is
+   pinned so contrast holds for every theme.
+   - --pm-red  L 0.55: 4.5:1 under white text (filled buttons), 3:1+ over every surface.
+   - --pm-redt L 0.8:  accent text, 8:1+ on the cards.
+   - --pm-deep L 0.35-0.45, as the widget's bar: fills and the active nav item, white text AAA.
+   - Surfaces and text: PowerMeter's lightness steps with a trace of the theme's hue. */
+html[data-theme="aion2"] { --pm-swatch: #5a47b0; }
+html[data-theme="asmodian"] { --pm-swatch: #6a4a8a; }
+html[data-theme="cogni"] { --pm-swatch: #2f567a; }
+html[data-theme="elyos"] { --pm-swatch: #9bbef6; }
+html[data-theme="ember"] { --pm-swatch: #d9772a; }
+html[data-theme="fera"] { --pm-swatch: #7a2f3a; }
+html[data-theme="frost"] { --pm-swatch: #5fa3b5; }
+html[data-theme="natura"] { --pm-swatch: #4f9b6a; }
+html[data-theme="obsidian"] { --pm-swatch: #3f3f46; }
+html[data-theme="varian"] { --pm-swatch: #a2862b; }
 
-html[data-pm-palette="chiaro"] {
-  --pm-bg: #e4e0da;
-  --pm-s1: #edeae5;
-  --pm-s2: #ddd8d1;
-  --pm-s3: #d1cbc3;
-  --pm-line: #c2bbb2;
-  --pm-t1: #140f0f;
-  --pm-t2: #453e3b;
-  --pm-t3: #5e5652;
-  --pm-red: #db0000;
-  --pm-redt: #b00000;
-  --pm-deep: #7f1112;
-  --pm-grey: #948b83;
-  --pm-navon: #7f1112;
-  --pm-navfg: #ffffff;
-  --pm-bar: #7f1112;
-  --pm-fill: #7f1112;
-  --pm-filltext: #ffffff;
-  --pm-band: #7f1112;
-  --pm-tint: rgba(219, 0, 0, 0.1);
-  /* Native controls (select popups, scrollbars) follow the light surface. */
-  color-scheme: light;
+html[data-theme]:not([data-theme="powermeter"]) {
+  --pm-bg: oklch(from var(--pm-swatch) 0.135 min(calc(c * 0.12), 0.012) h);
+  --pm-s1: oklch(from var(--pm-swatch) 0.17 min(calc(c * 0.12), 0.012) h);
+  --pm-s2: oklch(from var(--pm-swatch) 0.205 min(calc(c * 0.14), 0.014) h);
+  --pm-s3: oklch(from var(--pm-swatch) 0.255 min(calc(c * 0.14), 0.016) h);
+  --pm-line: oklch(from var(--pm-swatch) 0.32 min(calc(c * 0.14), 0.016) h);
+  --pm-t1: oklch(from var(--pm-swatch) 0.975 min(calc(c * 0.05), 0.006) h);
+  --pm-t2: oklch(from var(--pm-swatch) 0.85 min(calc(c * 0.1), 0.014) h);
+  --pm-t3: oklch(from var(--pm-swatch) 0.72 min(calc(c * 0.12), 0.018) h);
+  --pm-grey: oklch(from var(--pm-swatch) 0.43 min(calc(c * 0.12), 0.014) h);
+  --pm-red: oklch(from var(--pm-swatch) 0.55 c h);
+  --pm-redt: oklch(from var(--pm-swatch) 0.8 c h);
+  --pm-deep: oklch(from var(--pm-swatch) calc(0.3 + l * 0.15) c h);
+  --pm-navon: var(--pm-deep);
+  --pm-navfg: var(--pm-t1);
+  --pm-bar: var(--pm-deep);
+  --pm-fill: var(--pm-deep);
+  --pm-filltext: var(--pm-t1);
+  --pm-band: var(--pm-deep);
+  --pm-tint: color-mix(in srgb, var(--pm-red) 20%, transparent);
 }

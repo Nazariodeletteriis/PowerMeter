@@ -2,6 +2,13 @@ export const SOUND_KEY = "pm.eventSound"; // "1" = the user turned the event ale
 export const VOLUME_KEY = "pm.eventVolume"; // 0-100, set in the widget's Settings; 50 when unset
 export const LEAD_KEY = "pm.eventLead"; // minutes before a start the widget notice opens and rings, set on the Timer page
 export const LEADS = [1, 3, 5, 10];
+export const POPUP_KEY = "pm.eventPopup"; // "0" = no popup over the widget when an event notice opens; on when unset
+export const POPUP_SECONDS_KEY = "pm.eventPopupSeconds"; // how long the popup stays, 3-30 s
+/** The popup's seconds: 3-30, 8 when unset or out of range. */
+export const popupSeconds = (value?: string) => {
+  const n = Math.round(Number(value));
+  return n >= 3 && n <= 30 ? n : 8;
+};
 /** The lead setting in minutes: one of LEADS, 10 when unset or unknown. */
 export const leadMinutes = (value?: string) => (LEADS.includes(Number(value)) ? Number(value) : 10);
 

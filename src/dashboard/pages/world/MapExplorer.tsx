@@ -26,11 +26,17 @@ import { PetGrid } from "../characters/pets";
 import { CAPTURED_PETS_KEY, PETS_KEY, readPets } from "../characters/shared";
 import { gd, useGd, useIcons } from "./db";
 import { MAP_LICENSE, MAP_SOURCE, MAP_TYPES, MAPS, MapView, type MapData, type MapFocus } from "./MapView";
-import { GATHER_GROUPS, gatherIcon, loadPoints, MAP_FOCUS_KEY, petSpots, takeMapFocus, type PetFocus } from "./points";
+import { AllNone, MiniChrome, type GatherGroup, type LayerRow } from "./Minimap";
+import { gatherIcon, loadPoints, MAP_FOCUS_KEY, petSpots, takeMapFocus, type PetFocus } from "./points";
 
 const FOUND_KEY = "pm.map.found";
-/** Layers switched off (layer key → true); gathering starts off: thousands of nodes. */
+/** Layers switched off (layer key → true). */
 const HIDDEN_KEY = "pm.map.hidden";
+/** Gathering resources switched on (resource keys): they start off, thousands of nodes. */
+const GATHER_ON_KEY = "pm.map.gather";
+/** Minimap: the map's opacity, and the markers' ("Path Opacity", the game's name for its roads layer). */
+const MAP_OPACITY_KEY = "pm.map.mapOpacity";
+const PATH_OPACITY_KEY = "pm.map.pathOpacity";
 /** Pets picked in the pet panel (creature codes), and "every pet I'm missing" when none is picked. */
 const PETS_PICKED_KEY = "pm.map.pets";
 const PETS_ALL_KEY = "pm.map.petsAll";
@@ -85,6 +91,7 @@ const label: CSSProperties = { fontSize: 10, letterSpacing: ".1em", textTransfor
  * The world map with its layers (aion2-interactive-map markers, gathering nodes, pet spots), the pet panel and
  * full screen. Used by the Map page and by the Map window. `takeFocus`: this one answers "Show on map" (showOnMap).
  * `fill`: the map takes its parent's height instead of the page's. `extra`: more buttons in the top-right row.
+ * `mini`: the minimap (Map window), with its own controls (Minimap.tsx) until it goes full screen.
  */
 export function MapExplorer({
   t,
@@ -93,6 +100,7 @@ export function MapExplorer({
   takeFocus,
   fill,
   extra,
+  mini,
 }: {
   t: T;
   settings: Settings;
@@ -100,11 +108,15 @@ export function MapExplorer({
   takeFocus?: boolean;
   fill?: boolean;
   extra?: ReactNode;
+  mini?: boolean;
 }) {
   const [mapId, setMapId] = useState(MAPS[0].id);
   const map = MAPS.find((m) => m.id === mapId)!;
   const markers = useMemo(() => markersOf(map), [map]);
-  const [hidden, setHidden] = useStored<Record<string, boolean>>(HIDDEN_KEY, Object.fromEntries(GATHER_GROUPS.map((g) => [g, true])));
+  const [hidden, setHidden] = useStored<Record<string, boolean>>(HIDDEN_KEY, {});
+  const [gatherOn, setGatherOn] = useStored<string[]>(GATHER_ON_KEY, []);
+  const [mapOpacity, setMapOpacity] = useStored<number>(MAP_OPACITY_KEY, 0.85);
+  const [pathOpacity, setPathOpacity] = useStored<number>(PATH_OPACITY_KEY, 1);
   const [marker, setMarker] = useState<Marker | null>(null);
   const [borders, setBorders] = useState(true);
   const [found, setFound] = useStored<string[]>(FOUND_KEY, []);
@@ -204,13 +216,11 @@ export function MapExplorer({
   const monoliths = markers.filter((m) => m.type === "monolithMaterial");
   const monolithsFound = monoliths.filter((m) => found.includes(m.id)).length;
 
-  // Gathering nodes of this map, by group.
+  // Gathering nodes of this map, by resource.
   const gather = points?.maps[map.id]?.gather ?? [];
-  const gatherCounts: Record<string, number> = {};
-  for (let i = 0; i < gather.length; i += 3) {
-    const g = points!.groups[gather[i]];
-    gatherCounts[g] = (gatherCounts[g] ?? 0) + 1;
-  }
+  const gatherCounts: number[] = [];
+  for (let i = 0; i < gather.length; i += 3) gatherCounts[gather[i]] = (gatherCounts[gather[i]] ?? 0) + 1;
+  const gathered = new Set(gatherOn);
 
   // Pet spots: the picked pets, else (if asked) every pet; completed ones (level 3) never.
   const petCodes = points ? (picked.length ? picked : allMissing ? Object.keys(points.pets) : []).filter((c) => !done(c)) : [];
@@ -233,21 +243,88 @@ export function MapExplorer({
     setTip(i === null ? undefined : dots[Number(i)]);
   };
 
+  // The toggles, shared by the Map page's panel and the minimap's dropdowns.
+  const layerRows: LayerRow[] = [
+    ...Object.entries(LAYERS)
+      .filter(([id]) => counts[id])
+      .map(([id, [Ic, c]]) => ({
+        id,
+        icon: <Ic aria-hidden="true" style={{ color: c, fontSize: 15 }} />,
+        name: t(`world.layer.${id}`),
+        n: counts[id],
+        on: !hidden[id],
+        toggle: () => toggleLayer(id),
+      })),
+    { id: "pet", icon: <PawPrintIcon aria-hidden="true" style={{ color: PET_COLOR, fontSize: 15 }} />, name: t("world.layer.pet"), n: dots.length, on: !hidden.pet, toggle: () => toggleLayer("pet") },
+  ];
+  const setLayers = (rows: LayerRow[], on: boolean) => setHidden({ ...hidden, ...Object.fromEntries(rows.map((r) => [r.id, !on])) });
+  const toggleGather = (key: string) => setGatherOn(gathered.has(key) ? gatherOn.filter((k) => k !== key) : [...gatherOn, key]);
+  const setGather = (rows: LayerRow[], on: boolean) => {
+    const ids = new Set(rows.map((r) => r.id));
+    setGatherOn([...gatherOn.filter((k) => !ids.has(k)), ...(on ? ids : [])]);
+  };
+  // Resources of this map by group; the names are the game's, never translated.
+  const gatherGroups: GatherGroup[] = (points?.groups ?? [])
+    .map((group) => ({
+      group,
+      rows: (points?.resources ?? []).flatMap(([key, name, g], i) =>
+        g === group && gatherCounts[i]
+          ? [{ id: key, icon: <img src={gatherIcon(key)} alt="" width={18} height={18} />, name, n: gatherCounts[i], on: gathered.has(key), toggle: () => toggleGather(key) }]
+          : [],
+      ),
+    }))
+    .filter((g) => g.rows.length);
+  const gatherRows = gatherGroups.flatMap((g) => g.rows);
+  const layerButton = (r: LayerRow) => (
+    <button key={r.id} type="button" className="wBtn wLayer" aria-pressed={r.on} onClick={r.toggle}>
+      {r.icon}
+      <span style={{ flex: 1 }}>{r.name}</span>
+      <span className="mono" style={{ fontSize: 11, color: "var(--pm-t3)" }}>
+        {r.n}
+      </span>
+    </button>
+  );
+
   // Status of a picked pet in the panel.
-  const petStatus = (code: string) => {
+  const petStatus = (code: string): { text: string; frame?: boolean; monsters?: string } => {
     if (done(code)) return { text: t("world.map.petDone") };
+    const monsters = [...new Set((points?.pets[code] ?? []).map((m) => m[1]))].join(", ") || undefined;
     const spots = points ? petSpots(points, code) : {};
     if (!Object.keys(spots).length) return { text: t("world.map.petNoCoords") };
-    if (spots[map.id]) return { text: t("world.map.petHere", { n: spots[map.id].length }), frame: true };
+    if (spots[map.id]) return { text: t("world.map.petHere", { n: spots[map.id].length }), frame: true, monsters };
     const other = Object.keys(spots).sort((a, b) => spots[b].length - spots[a].length)[0];
-    return { text: t("world.map.petElsewhere", { map: MAPS.find((m) => m.id === other)?.name ?? other }), frame: true };
+    return { text: t("world.map.petElsewhere", { map: MAPS.find((m) => m.id === other)?.name ?? other }), frame: true, monsters };
   };
   const togglePick = (code: string) => setPicked(picked.includes(code) ? picked.filter((c) => c !== code) : [...picked, code]);
 
   const fullLabel = t(full ? "world.map.exitFullscreen" : "world.map.fullscreen");
+  const compact = mini && !full;
+  const pickZone = (id: string) => {
+    setMapId(id);
+    setMarker(null);
+    setFocus(undefined);
+  };
+  const credit = (
+    <>
+      {t("world.map.credit")}{" "}
+      <a href={MAP_SOURCE} onClick={link(MAP_SOURCE)}>
+        aion2-interactive-map
+      </a>
+      {" · "}
+      <a href={MAP_LICENSE} onClick={link(MAP_LICENSE)}>
+        CC BY-NC 4.0
+      </a>
+      {" · "}
+      {t("world.map.creditGame")}
+    </>
+  );
 
   return (
-    <div className={fill ? "wExplorer wFill" : "wExplorer"} data-full={full || undefined}>
+    <div
+      className={["wExplorer", fill && "wFill", compact && "mm"].filter(Boolean).join(" ")}
+      data-full={full || undefined}
+      style={compact ? ({ "--mm-map": mapOpacity, "--mm-path": pathOpacity } as CSSProperties) : undefined}
+    >
       <MapView
         t={t}
         map={map}
@@ -270,8 +347,8 @@ export function MapExplorer({
             {points &&
               gather.map((_, i) => {
                 if (i % 3) return null;
-                const g = points.groups[gather[i]];
-                return hidden[g] ? null : <img key={i} className="wGather" src={gatherIcon(g)} alt="" style={{ left: gather[i + 1], top: gather[i + 2] }} />;
+                const key = points.resources[gather[i]][0];
+                return gathered.has(key) ? <img key={i} className="wGather" src={gatherIcon(key)} alt="" style={{ left: gather[i + 1], top: gather[i + 2] }} /> : null;
               })}
             {shown.map((m) => {
               const [Ic, c] = LAYERS[m.type];
@@ -330,90 +407,100 @@ export function MapExplorer({
           </>
         }
       >
-        <div className="wPanel">
-          <select
-            value={mapId}
-            onChange={(e) => {
-              setMapId(e.target.value);
-              setMarker(null);
-              setFocus(undefined);
+        {compact ? (
+          <MiniChrome
+            t={t}
+            run={run}
+            zone={mapId}
+            zones={MAPS}
+            onZone={pickZone}
+            layers={[
+              ...layerRows,
+              ...(map.regions.length > 0
+                ? [{ id: "borders", icon: <PolygonIcon aria-hidden="true" style={{ fontSize: 15 }} />, name: t("world.map.regions"), on: borders, toggle: () => setBorders(!borders) }]
+                : []),
+            ]}
+            setLayers={(on) => {
+              setLayers(layerRows, on);
+              setBorders(on);
             }}
-            aria-label={t("world.map.zone")}
-          >
-            {MAPS.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
-          <div style={{ ...label, marginTop: 4 }}>{t("world.map.layers")}</div>
-          {Object.entries(LAYERS)
-            .filter(([id]) => counts[id])
-            .map(([id, [Ic, c]]) => (
-              <button key={id} type="button" className="wBtn wLayer" aria-pressed={!hidden[id]} onClick={() => toggleLayer(id)}>
-                <Ic aria-hidden="true" style={{ color: c, fontSize: 15 }} />
-                <span style={{ flex: 1 }}>{t(`world.layer.${id}`)}</span>
-                <span className="mono" style={{ fontSize: 11, color: "var(--pm-t3)" }}>
-                  {counts[id]}
-                </span>
-              </button>
-            ))}
-          <button type="button" className="wBtn wLayer" aria-pressed={!hidden.pet} onClick={() => toggleLayer("pet")}>
-            <PawPrintIcon aria-hidden="true" style={{ color: PET_COLOR, fontSize: 15 }} />
-            <span style={{ flex: 1 }}>{t("world.layer.pet")}</span>
-            <span className="mono" style={{ fontSize: 11, color: "var(--pm-t3)" }}>
-              {dots.length}
-            </span>
-          </button>
-          {gather.length > 0 && (
-            <>
-              <div style={label}>{t("world.map.gathering")}</div>
-              {GATHER_GROUPS.filter((g) => gatherCounts[g]).map((g) => (
-                <button key={g} type="button" className="wBtn wLayer" aria-pressed={!hidden[g]} onClick={() => toggleLayer(g)}>
-                  <img src={gatherIcon(g)} alt="" width={18} height={18} />
-                  <span style={{ flex: 1 }}>{t(`world.layer.${g}`)}</span>
-                  <span className="mono" style={{ fontSize: 11, color: "var(--pm-t3)" }}>
-                    {gatherCounts[g]}
-                  </span>
-                </button>
-              ))}
-            </>
-          )}
-          {monoliths.length > 0 && (
-            <div style={{ borderTop: "1px solid var(--pm-line)", marginTop: 8, paddingTop: 10 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
-                <span>{t("world.map.monolithsFound")}</span>
-                <span className="mono">
-                  {monolithsFound}/{monoliths.length}
-                </span>
+            gather={gatherGroups}
+            setGather={setGather}
+            mapOpacity={mapOpacity}
+            setMapOpacity={setMapOpacity}
+            pathOpacity={pathOpacity}
+            setPathOpacity={setPathOpacity}
+            pets={panel}
+            setPets={setPanel}
+            onFullscreen={() => setFullscreen(true)}
+            credit={credit}
+          />
+        ) : (
+          <>
+            <div className="wPanel">
+              <select value={mapId} onChange={(e) => pickZone(e.target.value)} aria-label={t("world.map.zone")}>
+                {MAPS.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+              <div className="wPanelHead" style={{ ...label, marginTop: 4 }}>
+                <span>{t("world.map.layers")}</span>
+                <AllNone t={t} rows={layerRows} set={(on) => setLayers(layerRows, on)} />
               </div>
-              <div style={{ height: 4, background: "var(--pm-s3)", borderRadius: 2 }} aria-hidden="true">
-                <div style={{ height: "100%", width: `${(monolithsFound / monoliths.length) * 100}%`, background: "#4F93EA", borderRadius: 2 }} />
-              </div>
+              {layerRows.map(layerButton)}
+              {gatherRows.length > 0 && (
+                <>
+                  <div className="wPanelHead" style={label}>
+                    <span>{t("world.map.gathering")}</span>
+                    <AllNone t={t} rows={gatherRows} set={(on) => setGather(gatherRows, on)} />
+                  </div>
+                  {gatherGroups.map((g) => (
+                    <div key={g.group} role="group" aria-label={t(`world.layer.${g.group}`)} style={{ display: "contents" }}>
+                      <div className="wPanelSub">{t(`world.layer.${g.group}`)}</div>
+                      {g.rows.map(layerButton)}
+                    </div>
+                  ))}
+                </>
+              )}
+              {monoliths.length > 0 && (
+                <div style={{ borderTop: "1px solid var(--pm-line)", marginTop: 8, paddingTop: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
+                    <span>{t("world.map.monolithsFound")}</span>
+                    <span className="mono">
+                      {monolithsFound}/{monoliths.length}
+                    </span>
+                  </div>
+                  <div style={{ height: 4, background: "var(--pm-s3)", borderRadius: 2 }} aria-hidden="true">
+                    <div style={{ height: "100%", width: `${(monolithsFound / monoliths.length) * 100}%`, background: "#4F93EA", borderRadius: 2 }} />
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="wMapTools">
-          <label className="wMapSearch">
-            <MagnifyingGlassIcon aria-hidden="true" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("world.map.search")} aria-label={t("world.map.search")} />
-          </label>
-          {map.regions.length > 0 && (
-            <button type="button" className="wRouteBtn" aria-pressed={borders} onClick={() => setBorders(!borders)}>
-              <PolygonIcon aria-hidden="true" />
-              {t("world.map.regions")}
-            </button>
-          )}
-          <button type="button" className="wRouteBtn" aria-pressed={panel} onClick={() => setPanel(!panel)}>
-            <PawPrintIcon aria-hidden="true" />
-            {t("world.map.pets")}
-          </button>
-          {extra}
-          <button type="button" className="wRouteBtn wIconBtn" aria-pressed={full} title={fullLabel} aria-label={fullLabel} onClick={() => setFullscreen(!full)}>
-            {full ? <ArrowsInIcon aria-hidden="true" /> : <ArrowsOutIcon aria-hidden="true" />}
-          </button>
-        </div>
+            <div className="wMapTools">
+              <label className="wMapSearch">
+                <MagnifyingGlassIcon aria-hidden="true" />
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("world.map.search")} aria-label={t("world.map.search")} />
+              </label>
+              {map.regions.length > 0 && (
+                <button type="button" className="wRouteBtn" aria-pressed={borders} onClick={() => setBorders(!borders)}>
+                  <PolygonIcon aria-hidden="true" />
+                  {t("world.map.regions")}
+                </button>
+              )}
+              <button type="button" className="wRouteBtn" aria-pressed={panel} onClick={() => setPanel(!panel)}>
+                <PawPrintIcon aria-hidden="true" />
+                {t("world.map.pets")}
+              </button>
+              {extra}
+              <button type="button" className="wRouteBtn wIconBtn" aria-pressed={full} title={fullLabel} aria-label={fullLabel} onClick={() => setFullscreen(!full)}>
+                {full ? <ArrowsInIcon aria-hidden="true" /> : <ArrowsOutIcon aria-hidden="true" />}
+              </button>
+            </div>
+          </>
+        )}
 
         {panel && (
           <section className="wPetPanel" aria-label={t("world.map.pets")}>
@@ -443,6 +530,11 @@ export function MapExplorer({
                       <span style={{ flex: 1, minWidth: 0 }}>
                         <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nameOf(code)}</span>
                         <span style={{ fontSize: 11, color: "var(--pm-t3)" }}>{s.text}</span>
+                        {s.monsters && (
+                          <span className="wPetMonsters" title={s.monsters}>
+                            {t("world.map.petMonsters", { list: s.monsters })}
+                          </span>
+                        )}
                       </span>
                       {s.frame && (
                         <button type="button" className="close" title={t("world.map.petFrame")} aria-label={`${t("world.map.petFrame")}: ${nameOf(code)}`} onClick={() => setFrameOn(code)}>
@@ -465,19 +557,8 @@ export function MapExplorer({
           </section>
         )}
 
-        {query && shown.length === 0 && <div className="wMapLabel">{t("world.map.noResults", { q: q.trim() })}</div>}
-        <div className="wCredit">
-          {t("world.map.credit")}{" "}
-          <a href={MAP_SOURCE} onClick={link(MAP_SOURCE)}>
-            aion2-interactive-map
-          </a>
-          {" · "}
-          <a href={MAP_LICENSE} onClick={link(MAP_LICENSE)}>
-            CC BY-NC 4.0
-          </a>
-          {" · "}
-          {t("world.map.creditGame")}
-        </div>
+        {!compact && query && shown.length === 0 && <div className="wMapLabel">{t("world.map.noResults", { q: q.trim() })}</div>}
+        {!compact && <div className="wCredit">{credit}</div>}
       </MapView>
     </div>
   );

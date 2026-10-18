@@ -1,7 +1,7 @@
 // Character Builder "Pet" tab: the creature collection as the game's Pet window shows it (genus menu, cards with
 // level and progress, the equipped pet) and the collection's effects. Pets are per roster character: marked here
-// (pm.pets) or read from the game (pm.capturedPets, which wins). Effects come only from the game: the archive has
-// no stats per pet and level.
+// (pm.pets) or read from the game (pm.capturedPets, which wins). Effects: each pet's by level (genus tiers of the
+// datamine, src/data/pet_genus_effects.json) summed over the collection, and the insight ones read from the game.
 
 import { useRef, useState, type KeyboardEvent } from "react";
 import { MapTrifoldIcon, PawPrintIcon, XIcon } from "@phosphor-icons/react";
@@ -11,7 +11,7 @@ import type { PageProps } from "../types";
 import { Modal } from "../system/Modal";
 import { DataState, gd, useGd, useIcons } from "../world/db";
 import { loadPoints, petSpots, showOnMap } from "../world/points";
-import { ownedPets, PET_EXP_MAX, petStatKey, type PetEffect, type PetSet, type PetState } from "./calc";
+import { ownedPets, petCollection, PET_EXP_MAX, petLevelEffects, petStatKey, type PetEffect, type PetSet, type PetState } from "./calc";
 import { CAPTURED_PETS_KEY, PETS_KEY, readPets } from "./shared";
 
 /** Genus menu of the Pet window: the records' creature.genus, in the game's order, with the game's Soul Crystal icons. */
@@ -114,10 +114,9 @@ function PetsModal({
   const withEq = (p: PetState, eq: boolean): PetState => (eq ? { ...p, eq: true } : { lvl: p.lvl, exp: p.exp });
   const shownPet = sel ? owned[sel] : undefined; // the edited values, or the game's
 
-  // Effects the Builder does not add to the character's stats (mount ones), listed apart.
   const names = new Map((stats ?? []).map((s) => [s.stat_key, s.name]));
   const known = new Set(names.keys());
-  const apart = effects.filter(([k]) => !petStatKey(k, known));
+  const collection = petCollection(owned);
   const effectRows = (rows: PetEffect[]) =>
     rows.map(([k, v, pct], i) => (
       <div key={k + i} className="dvRow" style={{ minHeight: 28, fontSize: 13 }}>
@@ -128,6 +127,21 @@ function PetsModal({
         </span>
       </div>
     ));
+  // Effects the Builder does not add to the character's stats (mount ones), listed apart.
+  const summedRows = (rows: PetEffect[]) => {
+    const apart = rows.filter(([k]) => !petStatKey(k, known));
+    return (
+      <>
+        {effectRows(rows.filter((e) => !apart.includes(e)))}
+        {apart.length > 0 && (
+          <>
+            <div style={{ fontSize: 12, color: "var(--pm-t3)", margin: "16px 0 4px" }}>{t("characters.builder.pets.notSummed")}</div>
+            {effectRows(apart)}
+          </>
+        )}
+      </>
+    );
+  };
 
   return (
     <Modal
@@ -158,23 +172,48 @@ function PetsModal({
         ))}
       </div>
 
-      {view === "effects" &&
-        (effects.length === 0 ? (
-          <div style={{ padding: "24px 0", color: "var(--pm-t2)", maxWidth: 520 }}>
-            <div style={{ fontSize: 14, color: "var(--pm-t1)", marginBottom: 4 }}>{t("characters.builder.pets.effectsEmptyTitle")}</div>
-            {t("characters.builder.pets.effectsEmpty")}
-          </div>
-        ) : (
-          <div style={{ maxWidth: 520, maxHeight: "calc(90vh - 160px)", overflowY: "auto" }}>
-            {effectRows(effects.filter((e) => !apart.includes(e)))}
-            {apart.length > 0 && (
+      {view === "effects" && (
+        <div className="petFx">
+          <section aria-labelledby="petFxCollection">
+            <h3 id="petFxCollection">{t("characters.builder.pets.collection")}</h3>
+            <p>{t("characters.builder.pets.collectionNote")}</p>
+            {collection.length === 0 ? (
+              <p style={{ color: "var(--pm-t2)" }}>{t("characters.builder.pets.collectionEmpty")}</p>
+            ) : (
               <>
-                <div style={{ fontSize: 12, color: "var(--pm-t3)", margin: "16px 0 4px" }}>{t("characters.builder.pets.notSummed")}</div>
-                {effectRows(apart)}
+                <h4>{t("characters.builder.pets.total")}</h4>
+                {summedRows(collection)}
+                {GENUS.map((g) => {
+                  const rows = petCollection(owned, g);
+                  return (
+                    rows.length > 0 && (
+                      <div key={g}>
+                        <h4>
+                          <img src={genusArt(g)} alt="" />
+                          {genusLabel(g)}
+                        </h4>
+                        {effectRows(rows)}
+                      </div>
+                    )
+                  );
+                })}
               </>
             )}
-          </div>
-        ))}
+          </section>
+          <section aria-labelledby="petFxInsight">
+            <h3 id="petFxInsight">{t("characters.builder.pets.insight")}</h3>
+            <p>{t("characters.builder.pets.insightNote")}</p>
+            {effects.length === 0 ? (
+              <div style={{ color: "var(--pm-t2)" }}>
+                <div style={{ fontSize: 14, color: "var(--pm-t1)", marginBottom: 4 }}>{t("characters.builder.pets.effectsEmptyTitle")}</div>
+                {t("characters.builder.pets.effectsEmpty")}
+              </div>
+            ) : (
+              summedRows(effects)
+            )}
+          </section>
+        </div>
+      )}
 
       {view === "pets" && !list.data && <DataState t={t} error={list.error} retry={list.retry} />}
       {view === "pets" && list.data && (
@@ -227,6 +266,29 @@ function PetsModal({
                 {(fromGame || (gameEq && mine)) && (
                   <span style={{ fontSize: 12, color: "var(--pm-t3)", alignSelf: "center", flexBasis: "100%" }}>{t("characters.builder.pets.gameNote")}</span>
                 )}
+                <div className="petTiers" role="list" aria-label={t("characters.builder.pets.levelEffects")}>
+                  {([1, 2, 3] as const).map((l) => {
+                    const fx = petLevelEffects(row.id, l);
+                    const on = shownPet?.lvl === l;
+                    return (
+                      <div key={l} role="listitem" className="petTier" aria-current={on || undefined}>
+                        <div className="petTierHead">
+                          {t("characters.builder.pets.level", { n: l })}
+                          {on && <span className="srOnly"> ({t("characters.builder.pets.reached")})</span>}
+                        </div>
+                        {fx.length ? (
+                          fx.map(([k, v, pct]) => (
+                            <span key={k}>
+                              {names.get(k) ?? k} <span className="mono">{v.toLocaleString(lang, { maximumFractionDigits: 2 })}{pct ? "%" : ""}</span>
+                            </span>
+                          ))
+                        ) : (
+                          <span>{t("characters.builder.pets.noEffects")}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
                 <PetLocation key={row.id} t={t} code={row.id} charId={charId} />
               </>
             )}

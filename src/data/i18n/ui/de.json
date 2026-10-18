@@ -470,6 +470,9 @@
     "onlyMe": "Nur mein DPS",
     "eventSoon": "{name} in {time}",
     "eventDismiss": "Hinweis schließen",
+    "eventPopupTitle": "Event in Kürze",
+    "eventStartsIn": "beginnt in {time}",
+    "eventPopupTest": "Test-Popup",
     "pillHint": "Klicken zum Erweitern · ziehen zum Verschieben",
     "copy": "Als Bild für Discord kopieren",
     "copied": "Kopiert, in Discord einfügen"

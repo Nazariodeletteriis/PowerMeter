@@ -188,5 +188,15 @@
   "world.layer.shellfish": "Coquillages",
   "world.layer.vegetable": "Légumes",
   "world.layer.wood": "Bois",
-  "world.layer.berry": "Baies"
+  "world.layer.berry": "Baies",
+  "world.map.selectAll": "Tout sélectionner",
+  "world.map.selectNone": "Tout désélectionner",
+  "world.map.mapOpacity": "Opacité de la carte",
+  "world.map.pathOpacity": "Opacité des chemins",
+  "world.map.pathOpacityHint": "Repères, points de récolte, emplacements des familiers et limites de zone",
+  "world.map.move": "Déplacer",
+  "world.map.filter": "Filtre",
+  "world.map.lock": "Verrouiller : les clics passent au jeu",
+  "world.map.unlock": "Verrouillée : cliquez pour déverrouiller",
+  "world.map.petMonsters": "Monstres : {list}"
 }

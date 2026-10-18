@@ -1,0 +1,16 @@
+{
+  "database.gear.tune.note": "Chaque statistique compte le niveau d'enchantement et les bonus que tu fixes pour la pièce. Tes choix sont enregistrés sur ce PC.",
+  "database.gear.tune.enh": "Enchantement",
+  "database.gear.tune.enhFor": "Enchantement de {name}",
+  "database.gear.tune.bonus": "Bonus",
+  "database.gear.tune.add": "Ajouter un bonus",
+  "database.gear.tune.addFor": "Ajouter un bonus à {name}",
+  "database.gear.tune.remove": "Retirer {stat}",
+  "database.gear.tune.valueOf": "Valeur de {stat}",
+  "database.gear.tune.range": "Plage {range}",
+  "database.gear.tune.between": "Saisis une valeur dans {range}",
+  "database.gear.tune.number": "Saisis un nombre",
+  "database.gear.tune.manual": "manuel",
+  "database.gear.tune.manualNote": "Les données du jeu ne listent aucun bonus pour cette pièce : ajoute-les à la main depuis la liste des statistiques.",
+  "database.gear.tune.none": "Aucun bonus"
+}

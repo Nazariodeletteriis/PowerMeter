@@ -1,0 +1,16 @@
+{
+  "database.gear.tune.note": "Each stat counts the enhancement level and the bonuses you set for the piece. Your choices are saved on this PC.",
+  "database.gear.tune.enh": "Enhancement",
+  "database.gear.tune.enhFor": "Enhancement of {name}",
+  "database.gear.tune.bonus": "Bonuses",
+  "database.gear.tune.add": "Add a bonus",
+  "database.gear.tune.addFor": "Add a bonus to {name}",
+  "database.gear.tune.remove": "Remove {stat}",
+  "database.gear.tune.valueOf": "{stat} value",
+  "database.gear.tune.range": "Range {range}",
+  "database.gear.tune.between": "Enter a value in {range}",
+  "database.gear.tune.number": "Enter a number",
+  "database.gear.tune.manual": "manual",
+  "database.gear.tune.manualNote": "The game data lists no bonuses for this piece: add them by hand from the stat list.",
+  "database.gear.tune.none": "No bonuses"
+}

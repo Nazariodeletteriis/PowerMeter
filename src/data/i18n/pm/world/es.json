@@ -188,5 +188,15 @@
   "world.layer.shellfish": "Mariscos",
   "world.layer.vegetable": "Verduras",
   "world.layer.wood": "Madera",
-  "world.layer.berry": "Bayas"
+  "world.layer.berry": "Bayas",
+  "world.map.selectAll": "Seleccionar todo",
+  "world.map.selectNone": "Deseleccionar todo",
+  "world.map.mapOpacity": "Opacidad del mapa",
+  "world.map.pathOpacity": "Opacidad de rutas",
+  "world.map.pathOpacityHint": "Marcadores, puntos de recolección, puntos de mascotas y límites de zona",
+  "world.map.move": "Mover",
+  "world.map.filter": "Filtro",
+  "world.map.lock": "Bloquear: los clics pasan al juego",
+  "world.map.unlock": "Bloqueado: haz clic para desbloquear",
+  "world.map.petMonsters": "Monstruos: {list}"
 }

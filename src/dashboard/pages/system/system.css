@@ -109,7 +109,7 @@
 }
 .setRange input {
   width: 180px;
-  accent-color: #db0000;
+  accent-color: var(--pm-red);
 }
 .setRange span {
   font-family: var(--pm-mono);

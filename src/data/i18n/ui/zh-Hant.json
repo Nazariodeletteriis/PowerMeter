@@ -470,6 +470,9 @@
     "onlyMe": "僅顯示我的DPS",
     "eventSoon": "{name} 還有 {time}",
     "eventDismiss": "關閉提醒",
+    "eventPopupTitle": "活動即將開始",
+    "eventStartsIn": "{time} 後開始",
+    "eventPopupTest": "測試彈窗",
     "pillHint": "點擊展開 · 拖曳以移動",
     "copy": "複製為圖片，用於 Discord",
     "copied": "已複製，貼到 Discord"

@@ -60,6 +60,18 @@
 //! `33 36` your own record also carries both: after the name `<world u16> <u32> <u8> <level u32> <gs u32> <gs u32>
 //!   <level u32>`, and near its end `02 17 05`, 32 bytes, `<cp u64> <cp u64>` (e.g. `2d000000 44030000 44030000
 //!   2d000000` = level 45, item level 836). It comes on every zone change, so it covers a capture started in game.
+//! Item options, own items only (`11 56` worn records and `1B 56`, packets_20261013_031645 Allalon login and
+//!   packets_20261011_183820 Gladiator logins). After the enhancement, ~13 zero bytes (one fewer in some `11 56`
+//!   records, as before the enhancement) and then:
+//!   `<level u32> <worn slot u8> <n u8> { <manastone item id u32> <stat u16> <tier u8> } × n <9 bytes> 03 <13 bytes>
+//!    <n u8> { <stat u16> <value u32> } × n ...` (the 13 bytes are 12 in some records, like the zeros above).
+//!   level: the item level the game shows, enhancement and manastones in (Spiritforged Mace 45 +10 = 55 with empty
+//!   sockets on 10/11, 63 with 4 stones of tier 1+3+2+2 on 10/13; the Global archive's level is the base 45, the
+//!   Taiwan one says 57). Manastone: the stone (531360001 = 下級魔石) and its rolled stat; the record carries no
+//!   value, only the tier (1-3). The second list holds the bonus stats as raw values (percent ×100), on an Arcana its
+//!   main stat with the enhancement in (810130001 Grail of Vigor +2: `0b00 16000000` = Time 22, 20 at +0).
+//!   e.g. Judicator Greaves `26000000 06 03 <3 × 7 zeros> 690804000000ff0801 03 <13 × 00> 03 8000 14000000
+//!   3e01 19000000 c800 10000000` = level 38, 3 empty sockets, Critical 20, Accuracy 25, MP Regen 16.
 //! `00 90` the pet collection, sent once on entering the world (packets_20261013_031645, Allalon login 03:17):
 //!   `<u32> <count varint> { <pet id u32> <pet id u32> <level u32> } × count <count varint> { <pet id u32> <exp u32> }
 //!   × count`. Pet ids are the TW archive's (1001-1325, its icon names the creature code); level 1-3; exp is the
@@ -82,6 +94,41 @@ pub struct WornItem {
     pub enchant: u8,
 }
 
+/// A stat of an own item: the game's stat id, its stat key when certain (see item_stat), the raw value.
+#[derive(Serialize, Clone, PartialEq, Debug)]
+pub struct ItemStat {
+    pub id: u16,
+    pub stat: Option<&'static str>,
+    pub value: u32,
+}
+
+/// A manastone set in an own item: the stone's item id, its stat (id, key when certain) and tier 1-3.
+#[derive(Serialize, Clone, PartialEq, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Manastone {
+    pub item_id: u32,
+    pub id: u16,
+    pub stat: Option<&'static str>,
+    pub tier: u8,
+}
+
+/// What the game sends only for your own items (layout in the header). Default: a record out of shape.
+#[derive(Serialize, Clone, PartialEq, Debug, Default)]
+pub struct ItemExtras {
+    pub level: Option<u32>,
+    pub bonus: Vec<ItemStat>,
+    pub manastones: Vec<Manastone>,
+}
+
+/// One of your worn items: the item and its options.
+#[derive(Serialize, Clone, PartialEq, Debug)]
+pub struct OwnItem {
+    #[serde(flatten)]
+    pub item: WornItem,
+    #[serde(flatten)]
+    pub extras: ItemExtras,
+}
+
 #[derive(Serialize, Clone, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct BarSkill {
@@ -101,7 +148,7 @@ pub struct CapturedCharacter {
     /// Who wears `equipment`: the self record's name after the last login inventory. None until the game says it
     /// (on a character switch the inventory comes ~7 s before the self record, packets_20261011_183820).
     pub owner: Option<String>,
-    pub equipment: Vec<WornItem>,
+    pub equipment: Vec<OwnItem>,
     pub skillbar: Vec<BarSkill>,
     /// Daevanion node ids taken, as in the archive without the class (`110113` of `gladiator:110113`).
     pub daevanion: Vec<u32>,
@@ -130,8 +177,8 @@ pub struct CapturedPet {
 struct State {
     /// Last `8D E2` list: (slot, item uid).
     worn: Vec<(u8, u64)>,
-    /// Item uid → (item id, enhancement), from `1B 56` and `11 56`.
-    items: BTreeMap<u64, (u32, u8)>,
+    /// Item uid → (item id, enhancement, options), from `1B 56` and `11 56`.
+    items: BTreeMap<u64, (u32, u8, ItemExtras)>,
     skillbar: Vec<BarSkill>,
     owner: Option<String>,
     daevanion: Vec<u32>,
@@ -185,7 +232,9 @@ pub fn snapshot() -> CapturedCharacter {
         equipment: s
             .worn
             .iter()
-            .filter_map(|&(slot, uid)| s.items.get(&uid).map(|&(item_id, enchant)| WornItem { slot, item_id, enchant }))
+            .filter_map(|&(slot, uid)| {
+                s.items.get(&uid).map(|(item_id, enchant, extras)| OwnItem { item: WornItem { slot, item_id: *item_id, enchant: *enchant }, extras: extras.clone() })
+            })
             .collect(),
         skillbar: s.skillbar.clone(),
         daevanion: s.daevanion.clone(),
@@ -278,9 +327,47 @@ fn parse_worn(b: &[u8]) {
     STATE.lock().unwrap_or_else(|e| e.into_inner()).worn = worn;
 }
 
+/// Options of the worn record whose slot byte is at `slot_at` (layout in the header); default when out of shape.
+fn item_extras(b: &[u8], slot_at: usize) -> ItemExtras {
+    let slot = b.get(slot_at).copied().unwrap_or(0);
+    let level = |e: usize| u32_at(b, e - 4).filter(|&l| l > 0).or_else(|| u32_at(b, e - 5).filter(|&l| l > 0));
+    // The worn slot again, then the socket count: the level is the u32 before it (one byte earlier in some records).
+    let Some(e) = (slot_at + 29..slot_at + 36).find(|&e| b.get(e) == Some(&slot) && b.get(e + 1).is_some_and(|&n| n <= 6) && level(e).is_some()) else {
+        return ItemExtras::default();
+    };
+    let mut out = ItemExtras { level: level(e), ..Default::default() };
+    let n = b[e + 1] as usize;
+    for k in 0..n {
+        let o = e + 2 + 7 * k;
+        let (Some(item_id), Some(id), Some(&tier)) = (u32_at(b, o), b.get(o + 4..o + 6), b.get(o + 6)) else { return out };
+        let id = u16::from_le_bytes([id[0], id[1]]);
+        if item_id != 0 {
+            out.manastones.push(Manastone { item_id, id, stat: item_stat(id), tier });
+        }
+    }
+    let q = e + 2 + 7 * n + 10;
+    if b.get(q - 1) != Some(&3) {
+        return out;
+    }
+    let q = if b.get(q + 12).is_some_and(|&c| c > 0) { q + 12 } else { q + 13 };
+    let count = b.get(q).copied().unwrap_or(0) as usize;
+    let mut bonus = Vec::new();
+    for k in 0..count.min(8) {
+        let o = q + 1 + 6 * k;
+        let (Some(id), Some(value)) = (b.get(o..o + 2), u32_at(b, o + 2)) else { return out };
+        let id = u16::from_le_bytes([id[0], id[1]]);
+        bonus.push(ItemStat { id, stat: item_stat(id), value });
+    }
+    if count <= 8 {
+        out.bonus = bonus;
+    }
+    out
+}
+
 fn parse_item(b: &[u8]) {
     if let (Some(uid), Some(item)) = (u64_at(b, 3), u32_at(b, 11)) {
-        STATE.lock().unwrap_or_else(|e| e.into_inner()).items.insert(uid, (item, enchant_at(b, 24)));
+        let extras = if b.get(23) == Some(&0x0B) { item_extras(b, 24) } else { ItemExtras::default() };
+        STATE.lock().unwrap_or_else(|e| e.into_inner()).items.insert(uid, (item, enchant_at(b, 24), extras));
     }
 }
 
@@ -293,7 +380,8 @@ fn parse_inventory(b: &[u8]) {
             continue;
         }
         if let (Some(uid), Some(item), Some(&slot)) = (u64_at(b, p - 12), u32_at(b, p - 4), b.get(p + WORN_TAIL.len())) {
-            s.items.insert(uid, (item, enchant_at(b, p + WORN_TAIL.len())));
+            let at = p + WORN_TAIL.len();
+            s.items.insert(uid, (item, enchant_at(b, at), item_extras(b, at)));
             worn.push((slot, uid));
         }
     }
@@ -433,6 +521,31 @@ fn insight_stat(id: u16) -> Option<&'static str> {
     }
 }
 
+/// Stat ids of item options and manastones (same ids as the pet insight), as far as certain: the Arcana main stats
+/// (810xxxxxx records against the archive's Arcana, 5 of them), and ids whose value fits a single stat of the Global
+/// item's rolled ranges in every capture (~25 items) or is left with one stat once those are taken (3 INT, 200 MPRegen).
+/// Ids still open, not counted: 1 and 5 (STR or AGI), 2 (DEX or WIS), 133 and 194 (CriticalResist or HPRegen), 255
+/// and 312 (ArmorEvasion or Block), 146, 147, 41, 99, 588 (several defenses), 104 and 116 (manastones only).
+fn item_stat(id: u16) -> Option<&'static str> {
+    match id {
+        3 => Some("INT"),
+        4 => Some("CON"),
+        8 => Some("Freedom"),
+        9 => Some("Illusion"),
+        10 => Some("Life"),
+        11 => Some("Time"),
+        13 => Some("Destruction"),
+        44 => Some("AmplifyCriticalDamage"),
+        128 => Some("Critical"),
+        200 => Some("MPRegen"),
+        307 => Some("ArmorDefense"),
+        317 => Some("WeaponFixingDamage"),
+        318 => Some("WeaponAccuracy"),
+        445 => Some("IronWall"),
+        _ => insight_stat(id),
+    }
+}
+
 /// Tail of `00 90` after the two pet lists (packets_20261013_031645, Allalon login; same in 5 captures):
 ///   `<n u8> { <u8> <u32> } × n  00  <genera u8> { <genus u8> <genus u8> <level u32> <exp u32> <u32>
 ///    <sets u8> { <set u8> <n u8> { <slot u8> <grade u8> <stat u16> <value u16> <6 × 00> } × n } × sets } × genera`
@@ -552,6 +665,10 @@ mod tests {
         (0..s.len()).step_by(2).map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap()).collect()
     }
 
+    fn worn() -> Vec<WornItem> {
+        snapshot().equipment.into_iter().map(|e| e.item).collect()
+    }
+
     // One test: the parser keeps global state.
     #[test]
     fn equipment_and_skillbar_from_capture() {
@@ -562,7 +679,7 @@ mod tests {
         parse(&hex("a7011b56010101f7da1a00003f0000367c8f0c01000000000000000b1300000000000000"));
         parse(&hex("7d1b56010101e12b110000ca0000409b990601000000000000000b0100000000000000"));
         assert_eq!(
-            snapshot().equipment,
+            worn(),
             vec![
                 WornItem { slot: 1, item_id: 110730048, enchant: 0 },
                 WornItem { slot: 6, item_id: 210240024, enchant: 0 },
@@ -584,10 +701,7 @@ mod tests {
         // packets_20261011_144836, 14:50:19.263: login inventory, two worn records (claymore +12, cape +10),
         // the cape with the extra zero before its enhancement.
         parse(&hex("975811561002ac0100c9c6130000ae00056c1900004b00008373900601000000000000000b010000000000000000000000000c000000000000000000000000006d000000010403bc7a1e680002035d00050000f70000457c8f0c01000000000000000b13000000000000000000000000000a0000000000000000000000000066000000130403bc7a1ec10003"));
-        assert_eq!(
-            snapshot().equipment,
-            vec![WornItem { slot: 1, item_id: 110130051, enchant: 12 }, WornItem { slot: 0x13, item_id: 210730053, enchant: 10 }]
-        );
+        assert_eq!(worn(), vec![WornItem { slot: 1, item_id: 110130051, enchant: 12 }, WornItem { slot: 0x13, item_id: 210730053, enchant: 10 }]);
         // The inventory comes before the self record: nobody owns it until the self record names the character.
         assert_eq!(snapshot().owner, None);
         set_owner("Agniezska");
@@ -595,7 +709,10 @@ mod tests {
 
         // packets_20261011_183820, 18:48:04.231: Cleric login, Spiritforged Mace +10 (item level 45 + 10 = 0x37).
         parse(&hex("9758115610027800e9d8170000e90000e6e2140000f40000409b990601000000000000000b01000000000000000000000000000a0000000000000000000000000037000000010400000000000000"));
-        assert_eq!(snapshot().equipment, vec![WornItem { slot: 1, item_id: 110730048, enchant: 10 }]);
+        assert_eq!(worn(), vec![WornItem { slot: 1, item_id: 110730048, enchant: 10 }]);
+        // Its item level as the game shows it (45 + 10), 4 empty sockets, no bonus stats.
+        let mace = snapshot().equipment.remove(0).extras;
+        assert_eq!((mace.level, mace.manastones.len(), mace.bonus.len()), (Some(55), 0, 0));
 
         // packets_20261011_183820, 18:48:56.278: the Gladiator's bars at login (8C E2, from the bar list on), sets 1
         // and 2 filled, 3 empty: they replace the Cleric's set 1 above.
@@ -652,6 +769,33 @@ mod tests {
         // Not a collection (a level out of range): the last one stays.
         parse(&hex("100000900000000001ea030000ea03000009000000"));
         assert_eq!(snapshot().pets.len(), 3);
+
+        // packets_20261013_031645, 03:16:55.558: Allalon's login inventory (body), 19 worn items with their options.
+        parse_inventory(&hex(include_str!("testdata/inventory_1156_20261013_031655.hex").trim()));
+        let eq = snapshot().equipment;
+        assert_eq!(eq.len(), 19);
+        let at = |slot: u8| eq.iter().find(|e| e.item.slot == slot).unwrap().extras.clone();
+        // Spiritforged Mace +10: 55 on 10/11, now 4 stones of tier 1+3+2+2 more.
+        let mace = at(1);
+        assert_eq!(mace.level, Some(63));
+        let stones: Vec<(u32, Option<&str>, u8)> = mace.manastones.iter().map(|m| (m.item_id, m.stat, m.tier)).collect();
+        assert_eq!(stones, vec![(511360003, Some("WeaponFixingDamage"), 1), (511360003, Some("HPMax"), 3), (511360003, Some("HPMax"), 2), (511360003, Some("HPMax"), 2)]);
+        // Judicator Greaves: 3 empty sockets, 3 bonus stats (the same as on 10/11).
+        let pants = at(6);
+        let bonus: Vec<(u16, Option<&str>, u32)> = pants.bonus.iter().map(|b| (b.id, b.stat, b.value)).collect();
+        assert_eq!((pants.level, pants.manastones.len()), (Some(38), 0));
+        assert_eq!(bonus, vec![(128, Some("Critical"), 20), (318, Some("WeaponAccuracy"), 25), (200, Some("MPRegen"), 16)]);
+        // Bakarma Breastplate: an id still open (41) keeps its raw value, with no key.
+        assert_eq!(at(5).bonus.last(), Some(&ItemStat { id: 41, stat: None, value: 223 }));
+        // Liberator Helm: the record with its level one byte earlier.
+        assert_eq!((at(3).level, at(3).manastones.len()), (Some(45), 3));
+
+        // packets_20261011_144836, 14:50:19.263: the Gladiator's Grail of Vigor (810130001) +2, Arcana slot 0x29,
+        // one record of the login inventory: its main stat with the enhancement in, Time 22 (20 at +0).
+        parse_inventory(&hex("852b0e0000b50000519a493001000000000000000b2900000000000000000000000002600900000000000000000000005200000000290000000000000000000003000000000000000000000000010b0016000000000004d070aa000100e6aa000160d0ab0001605fa9000104d070aa000000e6aa000160d0ab0001605fa9000000000001"));
+        let arcana = snapshot().equipment.remove(0);
+        assert_eq!(arcana.item, WornItem { slot: 0x29, item_id: 810130001, enchant: 2 });
+        assert_eq!((arcana.extras.level, arcana.extras.bonus), (Some(82), vec![ItemStat { id: 11, stat: Some("Time"), value: 22 }]));
     }
 
     /// packets_20261013_031645, 03:17:02.495: Allalon's full `00 90` (body), 31 insight options; the 7 on stat ids

@@ -1,0 +1,16 @@
+{
+  "database.gear.tune.note": "Каждая характеристика учитывает уровень усиления и бонусы, заданные для предмета. Выбор сохраняется на этом ПК.",
+  "database.gear.tune.enh": "Усиление",
+  "database.gear.tune.enhFor": "Усиление: {name}",
+  "database.gear.tune.bonus": "Бонусы",
+  "database.gear.tune.add": "Добавить бонус",
+  "database.gear.tune.addFor": "Добавить бонус: {name}",
+  "database.gear.tune.remove": "Убрать {stat}",
+  "database.gear.tune.valueOf": "Значение: {stat}",
+  "database.gear.tune.range": "Диапазон {range}",
+  "database.gear.tune.between": "Введите значение в диапазоне {range}",
+  "database.gear.tune.number": "Введите число",
+  "database.gear.tune.manual": "вручную",
+  "database.gear.tune.manualNote": "В игровых данных нет бонусов для этого предмета: добавьте их вручную из списка характеристик.",
+  "database.gear.tune.none": "Нет бонусов"
+}

@@ -5,23 +5,25 @@ import { invoke } from "@tauri-apps/api/core";
 
 /** monster id, English Global name, level. */
 export type PetMonster = [id: number, name: string, level: number | null];
+/** A gathering resource: key (Global item Material_Gather_<key>_f, icon file), English Global name, group. */
+export type GatherResource = [key: string, name: string, group: string];
 export type MapPoints = {
+  /** Gathering groups, in panel order (world.layer.<group> labels them). */
   groups: string[];
+  /** By group, then name. The name is the game's, never translated. */
+  resources: GatherResource[];
   /** Creature code → the monsters that give it. */
   pets: Record<string, PetMonster[]>;
-  /** Flat [group index | monster id, x, y, ...] in map pixels. */
+  /** Flat [resource index | monster id, x, y, ...] in map pixels. */
   maps: Record<string, { gather: number[]; monsters: number[] }>;
 };
 
 let loading: Promise<MapPoints> | undefined;
 export const loadPoints = () => (loading ??= import("../../../data/map/points.json").then((m) => m.default as unknown as MapPoints));
 
-/** Gathering layers, in panel order (same keys as points.json groups). */
-export const GATHER_GROUPS = ["od", "gem", "metal", "herb", "shellfish", "vegetable", "wood", "berry"];
-
-// Game icons of the gathering layers (one per group, copied from the datamine).
+// Game icon of each resource (src/assets/pm/map/<key>.png, from the datamine).
 const GATHER = import.meta.glob<string>("../../../assets/pm/map/*.png", { eager: true, import: "default" });
-export const gatherIcon = (group: string) => GATHER[`../../../assets/pm/map/${group}.png`];
+export const gatherIcon = (key: string) => GATHER[`../../../assets/pm/map/${key}.png`];
 
 /** Spots of a pet's monsters per map: map id → [monster id, x, y][]. */
 export function petSpots(points: MapPoints, code: string) {

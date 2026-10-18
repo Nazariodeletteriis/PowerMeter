@@ -1,5 +1,6 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { emit } from "@tauri-apps/api/event";
 import {
   BellIcon,
   CheckIcon,
@@ -17,11 +18,12 @@ import {
   UserCircleIcon,
 } from "@phosphor-icons/react";
 import { LANGUAGE_SETTING, LANGUAGES, type Key } from "../i18n";
-import { PATREON_URL, USER_NAME_KEY, type CaptureStatus } from "../Shell";
+import { PATREON_URL, USER_NAME_KEY, WIDGET_SETTINGS, type CaptureStatus } from "../Shell";
+import { chime, POPUP_KEY, POPUP_SECONDS_KEY, popupSeconds, VOLUME_KEY } from "../chime";
 import { usePoll } from "../usePoll";
 import { useEntitlement } from "../entitlement";
 import { ProfileAvatar } from "../ui";
-import { PALETTE_SETTING, PALETTES } from "./system/theme";
+import { THEME_SETTING, THEMES, themeOf } from "./system/theme";
 import "./system/system.css";
 import type { PageProps } from "./types";
 
@@ -39,7 +41,7 @@ type Account = { id: string; name: string; avatarUrl: string | null };
 const TABS = [
   ["generale", "organizer.set.general", SlidersIcon],
   ["meter", "organizer.set.meter", GaugeIcon],
-  ["widget", "organizer.set.widget", PictureInPictureIcon],
+  ["widget", "widgetset.tab", PictureInPictureIcon],
   ["scorciatoie", "organizer.set.shortcuts", KeyboardIcon],
   ["account", "organizer.set.account", UserCircleIcon],
   ["dati", "organizer.set.data", DatabaseIcon],
@@ -52,7 +54,47 @@ const TARGET_MODES = [
   ["bossTargets", "BOSS"],
   ["pveTargets", "PVE"],
   ["pvpTargets", "PVP"],
+  // The widget's other two modes (core.js TARGET_MODES).
+  ["lastHitByMe", "TARGET"],
+  ["allTargets", "ALL"],
 ] as const;
+
+// The DPS widget's options (the meter window's settings, public/src/js/core.js), with the defaults
+// it uses when unset: what the Widget DPS tab shows and what its reset writes back. Each one reaches
+// the meter live: update_settings broadcasts it and core.js applyRemoteSettingChange applies it.
+const WIDGET_DEFAULTS: Record<string, string> = {
+  "dpsMeter.windowOpacity": "60",
+  "dpsMeter.meterFillOpacity": "80",
+  "dpsMeter.bossNameSize": "15",
+  "dpsMeter.slimMode": "false",
+  "dpsMeter.detailsMonitor": "off",
+  "dpsMeter.mainPlayerNamesBold": "true",
+  "dpsMeter.mainPlayerDpsBold": "true",
+  "dpsMeter.playerLimit": "6",
+  "dpsMeter.defaultMeterMode": "bossTargets",
+  "dpsMeter.pinMeToTop": "false",
+  "dpsMeter.autoHideMeter": "true",
+  "dpsMeter.showPing": "true",
+  "dpsMeter.showTotalDps": "true",
+  "dpsMeter.roundDps": "false",
+  "dpsMeter.showSuspendBtn": "false",
+  [VOLUME_KEY]: "50",
+  [POPUP_KEY]: "1",
+  [POPUP_SECONDS_KEY]: "8",
+};
+const MONITOR = "dpsMeter.detailsMonitor";
+const LOGS = { debug: ["dpsMeter.debugLoggingEnabled", "set_debug_logging"], packets: ["dpsMeter.saveRawPackets", "set_packet_logging"] } as const;
+/** list_monitors (src-tauri/src/lib.rs). */
+type Monitor = { index: number; width: number; height: number; isPrimary?: boolean; side?: string };
+
+/** A key the backend's hotkey parser registers (platform/hotkeys.rs parse_hotkey_label), as it names it; null otherwise. */
+function hotkeyName(code: string): string | null {
+  if (/^Key[A-Z]$/.test(code)) return code.slice(3);
+  if (/^Digit\d$/.test(code)) return code.slice(5);
+  if (/^F([1-9]|1[0-2])$/.test(code)) return code;
+  if (code.startsWith("Arrow")) return code.slice(5);
+  return ["PageUp", "PageDown", "Home", "End", "Insert", "Delete", "Space", "Enter", "Backspace"].includes(code) ? code : null;
+}
 
 const getCapture = () => invoke<CaptureStatus>("get_capture_status");
 
@@ -122,10 +164,23 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
   const [saving, setSaving] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
   const [account, setAccount] = useState<Account | null>(); // undefined until pm_account answers
+  const [monitors, setMonitors] = useState<Monitor[]>();
+  const [mayLog, setMayLog] = useState(false);
+  const [recording, setRecording] = useState<string>(); // hotkey setting being recorded
+  const [keyHint, setKeyHint] = useState("");
   const capture = usePoll(getCapture, 2000).data;
   const entitlement = useEntitlement();
 
+  // The widget's Settings button while this page is already open (Shell.tsx).
   useEffect(() => {
+    const show = () => setTab("widget");
+    window.addEventListener(WIDGET_SETTINGS, show);
+    return () => window.removeEventListener(WIDGET_SETTINGS, show);
+  }, []);
+
+  useEffect(() => {
+    run(() => invoke<Monitor[]>("list_monitors").then(setMonitors));
+    run(() => invoke<boolean>("pm_may_log").then(setMayLog));
     run(() => invoke<boolean>("get_click_through").then(setClickThrough));
     // On failure: treat as signed out so "Sign in" stays usable.
     run(() => invoke<Account | null>("pm_account").then(setAccount, (e) => (setAccount(null), Promise.reject(e))));
@@ -147,24 +202,96 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
       {text}
     </button>
   );
-  const range = (label: string, value: number, min: number, max: number, set: (v: number) => void) => (
+  const range = (
+    label: string,
+    value: number,
+    min: number,
+    max: number,
+    set: (v: number) => void,
+    { step = 1, format = (v: number) => `${v}%` } = {},
+  ) => (
     <div className="setRange">
-      <input type="range" aria-label={label} min={min} max={max} value={value} onChange={(e) => set(Number(e.target.value))} />
-      <span>{value}%</span>
+      <input type="range" aria-label={label} aria-valuetext={format(value)} min={min} max={max} step={step} value={value} onChange={(e) => set(Number(e.target.value))} />
+      <span>{format(value)}</span>
     </div>
   );
-  const hotkey = (label: Key, keys: string, real?: boolean) => (
-    <Row key={label} label={t(label)}>
-      {/* The engine's own settings window records hotkeys; sample ones are inert. */}
-      {real ? (
-        <button type="button" className="keyChip" title={t("organizer.set.clickToEdit")} onClick={() => run(() => invoke("open_settings_window"))}>
-          {keys}
+  // Hotkeys are recorded here and saved as the label the backend parses at start (it registers them once).
+  const recordKey = (e: KeyboardEvent, key: string) => {
+    if (e.key === "Tab") return; // keyboard users can still leave; blur stops the recording
+    e.preventDefault();
+    if (e.key === "Escape") return setRecording(undefined);
+    const name = hotkeyName(e.code);
+    if (!name) return; // a modifier on its own so far, or a key that can't be registered
+    const mods = [e.ctrlKey && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift"].filter(Boolean);
+    if (!mods.length) return setKeyHint(t("widgetset.needModifier"));
+    setRecording(undefined);
+    setting(key, [...mods, name].join("+"));
+  };
+  const hotkey = (label: Key, keys: string, settingKey?: string) => (
+    <Row key={label} label={t(label)} desc={settingKey && t("widgetset.restartHint")}>
+      {/* The widget's two global hotkeys are real; the prototype's others are inert. */}
+      {settingKey ? (
+        <button
+          type="button"
+          className="keyChip"
+          aria-pressed={recording === settingKey}
+          title={t("organizer.set.clickToEdit")}
+          onClick={() => {
+            setKeyHint("");
+            setRecording(recording === settingKey ? undefined : settingKey);
+          }}
+          onBlur={() => setRecording(undefined)}
+          onKeyDown={(e) => recording === settingKey && recordKey(e, settingKey)}
+        >
+          <span aria-live="polite">{recording === settingKey ? keyHint || t("widgetset.pressKeys") : keys}</span>
         </button>
       ) : (
         <span className="keyChip">{keys}</span>
       )}
     </Row>
   );
+
+  // Widget DPS tab.
+  const widgetValue = (key: string) => settings[key] || WIDGET_DEFAULTS[key];
+  const widgetNumber = (key: string) => {
+    const n = Number(widgetValue(key));
+    return Number.isFinite(n) ? n : Number(WIDGET_DEFAULTS[key]);
+  };
+  const widgetSwitch = (key: string, label: string, desc?: string) => (
+    <Row label={label} desc={desc}>
+      <Switch label={label} on={widgetValue(key) === "true"} set={(on) => setting(key, String(on))} />
+    </Row>
+  );
+  const savedMonitor = widgetValue(MONITOR);
+  const monitorFound = savedMonitor === "off" || !monitors || monitors.some((m) => String(m.index) === savedMonitor);
+  const setMonitor = (value: string) =>
+    run(async () => {
+      await save(MONITOR, value);
+      await (value === "off" ? invoke("close_details_window") : invoke("open_details_window", { monitorIndex: Number(value) }));
+    });
+  const monitorLabel = (m: Monitor, i: number) => {
+    const notes = [m.isPrimary && t("widgetset.monitor.primary"), m.side && t(`widgetset.monitor.side.${m.side}`)].filter(Boolean);
+    return `${i + 1} · ${Math.round(m.width)}×${Math.round(m.height)}${notes.length ? ` (${notes.join(", ")})` : ""}`;
+  };
+  const setLog = (which: keyof typeof LOGS, enabled: boolean) =>
+    run(async () => {
+      const [key, command] = LOGS[which];
+      await invoke(command, { enabled }); // refused without the Debugger or Admin role; it stores the setting
+      await save(key, String(enabled));
+    });
+  const bindActor = (raw: string) => {
+    const id = Number(raw) || 0; // empty = back to auto-detection
+    if (id !== (capture?.localPlayerId ?? 0)) run(() => invoke("bind_local_actor_id", { actorId: id }));
+  };
+  const resetWidget = () => {
+    if (!window.confirm(t("widgetset.resetConfirm"))) return;
+    run(async () => {
+      for (const [key, value] of Object.entries(WIDGET_DEFAULTS)) await save(key, value);
+      await invoke("close_details_window");
+    });
+  };
+  const volume = widgetNumber(VOLUME_KEY);
+  const seconds = popupSeconds(widgetValue(POPUP_SECONDS_KEY));
 
   const edit = (patch: Partial<typeof draft>) => {
     setDraft((d) => ({ ...d, ...patch }));
@@ -242,7 +369,20 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
     run(() => invoke("set_manual_device", { device: d }).then(() => invoke("reset_auto_detection")));
   };
 
-  const palette = PALETTES.find((p) => p === settings[PALETTE_SETTING]) ?? "brace";
+  // One theme for the dashboard and every widget window: the same control in General and Widget DPS.
+  const themeRow = (label: string) => (
+    <Row label={label} desc={t("widgetset.themeHint")}>
+      <Select
+        label={label}
+        value={themeOf(settings)}
+        // The design's own first, the others by name (as the widget's old dropdown).
+        options={THEMES.map((id) => [id, t(`widgetset.theme.${id}`)] as const).sort((a, b) =>
+          a[0] === "powermeter" ? -1 : b[0] === "powermeter" ? 1 : a[1].localeCompare(b[1]),
+        )}
+        set={(id) => setting(THEME_SETTING, id)}
+      />
+    </Row>
+  );
   const playerLimit = settings["dpsMeter.playerLimit"] || "6";
   const actor = capture?.localPlayerId ? ` · 0x${capture.localPlayerId.toString(16).toUpperCase()}` : "";
   const displayName = `${draft.first.trim()} ${draft.last.trim()}`.trim() || pg || name;
@@ -274,14 +414,7 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
             }
           />
         </Row>
-        <Row label={t("organizer.set.theme")} desc={t("organizer.set.themeHint")}>
-          <Select
-            label={t("organizer.set.theme")}
-            value={palette}
-            options={PALETTES.map((p) => [p, t(`organizer.palette.${p}`)])}
-            set={(p) => setting(PALETTE_SETTING, p)}
-          />
-        </Row>
+        {themeRow(t("organizer.set.theme"))}
         {fixed("organizer.set.startWithWindows")}
         {fixed("organizer.set.trayOnClose")}
       </>
@@ -320,9 +453,9 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
     widget: (
       <>
         <Row label={t("organizer.set.opacity")}>
-          {range(t("organizer.set.opacity"), Number(settings["dpsMeter.windowOpacity"] ?? 60), 0, 100, (v) =>
-            setting("dpsMeter.windowOpacity", String(v)),
-          )}
+          {range(t("organizer.set.opacity"), widgetNumber("dpsMeter.windowOpacity"), 0, 100, (v) => setting("dpsMeter.windowOpacity", String(v)), {
+            step: 5,
+          })}
         </Row>
         <Row label={t("organizer.set.scale")} desc={t("organizer.set.scaleHint")}>
           {range(t("organizer.set.scale"), scale, 75, 150, setScale)}
@@ -344,25 +477,128 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
           <Select
             label={t("organizer.set.maxRows")}
             value={playerLimit}
-            // Keep a value set in the meter that is not in the prototype's list.
-            options={same([...new Set([playerLimit, "6", "8", "12", "24"])].sort((a, b) => +a - +b))}
+            // The widget's own list (4-12), and any other saved value.
+            options={same([...new Set([playerLimit, "4", "5", "6", "7", "8", "10", "12"])].sort((a, b) => +a - +b))}
             set={(v) => setting("dpsMeter.playerLimit", v)}
           />
         </Row>
-        <Row label={t("organizer.set.widgetTheme")}>
+        {themeRow(t("organizer.set.widgetTheme"))}
+        {fixed("organizer.set.rememberPosition", true)}
+
+        <h3 className="acctSection">{t("widgetset.appearance")}</h3>
+        <Row label={t("widgetset.layout")}>
           <Select
-            label={t("organizer.set.widgetTheme")}
-            options={["followApp", "highContrast", "minimal"].map((v) => [v, t(`organizer.set.${v}`)])}
+            label={t("widgetset.layout")}
+            value={widgetValue("dpsMeter.slimMode") === "true" ? "betaSlim" : "beta"}
+            options={["beta", "betaSlim"].map((v) => [v, t(`widgetset.layout.${v}`)])}
+            set={(v) => setting("dpsMeter.slimMode", String(v === "betaSlim"))}
           />
         </Row>
-        {fixed("organizer.set.rememberPosition", true)}
+        <Row
+          label={t("widgetset.monitor")}
+          desc={!monitorFound ? t("widgetset.monitor.missing") : monitors && monitors.length <= 1 ? t("widgetset.monitor.single") : undefined}
+        >
+          <Select
+            label={t("widgetset.monitor")}
+            value={monitorFound ? savedMonitor : "off"}
+            options={[["off", t("widgetset.monitor.off")], ...(monitors ?? []).map((m, i) => [String(m.index), monitorLabel(m, i)] as const)]}
+            set={setMonitor}
+          />
+        </Row>
+        <Row label={t("widgetset.barOpacity")}>
+          {range(t("widgetset.barOpacity"), widgetNumber("dpsMeter.meterFillOpacity"), 10, 100, (v) => setting("dpsMeter.meterFillOpacity", String(v)), {
+            step: 5,
+          })}
+        </Row>
+        <Row label={t("widgetset.nameSize")}>
+          {range(t("widgetset.nameSize"), widgetNumber("dpsMeter.bossNameSize"), 8, 20, (v) => setting("dpsMeter.bossNameSize", String(v)), {
+            step: 0.5,
+            format: (v) => `${v}px`,
+          })}
+        </Row>
+        {widgetSwitch("dpsMeter.mainPlayerNamesBold", `${t("widgetset.bold")} · ${t("widgetset.boldNames")}`)}
+        {widgetSwitch("dpsMeter.mainPlayerDpsBold", `${t("widgetset.bold")} · ${t("widgetset.boldDps")}`)}
+
+        <h3 className="acctSection">{t("widgetset.meter")}</h3>
+        {widgetSwitch("dpsMeter.pinMeToTop", t("widgetset.pinMeToTop"))}
+        {widgetSwitch("dpsMeter.autoHideMeter", t("widgetset.autoHideMeter"))}
+        {widgetSwitch("dpsMeter.showPing", t("widgetset.showPing"))}
+        {widgetSwitch("dpsMeter.showTotalDps", t("widgetset.showTotalDps"))}
+        {widgetSwitch("dpsMeter.roundDps", t("widgetset.roundDps"))}
+        {widgetSwitch("dpsMeter.showSuspendBtn", t("widgetset.showSuspendBtn"))}
+
+        <h3 className="acctSection">{t("widgetset.events")}</h3>
+        <Row label={t("widgetset.volume")} desc={t("widgetset.volumeHint", { page: t("nav.timers") })}>
+          {range(t("widgetset.volume"), volume, 0, 100, (v) => setting(VOLUME_KEY, String(v)), { step: 5 })}
+          {button(t("widgetset.test"), () => chime(volume))}
+        </Row>
+        <Row label={t("widgetset.popup")} desc={t("widgetset.popupHint")}>
+          <Switch label={t("widgetset.popup")} on={widgetValue(POPUP_KEY) !== "0"} set={(on) => setting(POPUP_KEY, on ? "1" : "0")} />
+        </Row>
+        <Row label={t("widgetset.popupDuration")} desc={t("widgetset.popupDurationHint")}>
+          {range(t("widgetset.popupDuration"), seconds, 3, 30, (v) => setting(POPUP_SECONDS_KEY, String(v)), {
+            format: (n) => t("widgetset.seconds", { n }),
+          })}
+          {button(t("widgetset.preview"), () => run(() => emit("pm-event-popup-test", { seconds })))}
+        </Row>
+
+        <h3 className="acctSection">{t("widgetset.connection")}</h3>
+        <Row label={t("widgetset.character")} desc={t("widgetset.actorHint")}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span>{capture?.characterName || t("widgetset.notDetected")}</span>
+            <span aria-hidden="true" style={{ color: "var(--pm-t3)" }}>
+              #
+            </span>
+            <input
+              // Follows detection until the user binds one: a new id from the backend redraws it.
+              key={capture?.localPlayerId ?? 0}
+              className="setInput"
+              style={{ width: 120, fontFamily: "var(--pm-mono)" }}
+              inputMode="numeric"
+              aria-label={t("widgetset.actorId")}
+              placeholder="1234"
+              defaultValue={capture?.localPlayerId ?? ""}
+              onChange={(e) => (e.target.value = e.target.value.replace(/\D/g, ""))}
+              onBlur={(e) => bindActor(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+            />
+          </div>
+        </Row>
+        <Row
+          label={t("widgetset.port")}
+          desc={capture?.locked ? `${capture.device || "-"} · ${capture.ip || "-"}:${capture.port ?? "-"}` : t("widgetset.notDetected")}
+        >
+          {button(t("widgetset.reset"), () => run(() => invoke("reset_auto_detection")))}
+        </Row>
+
+        <h3 className="acctSection">{t("widgetset.diagnostics")}</h3>
+        <Row label={t("widgetset.debugLogging")} desc={mayLog ? undefined : t("widgetset.logsRestricted")}>
+          <Switch
+            label={t("widgetset.debugLogging")}
+            on={mayLog && settings[LOGS.debug[0]] === "true"}
+            set={mayLog ? (on) => setLog("debug", on) : undefined}
+          />
+        </Row>
+        <Row label={t("widgetset.saveRawPackets")} desc={mayLog ? undefined : t("widgetset.logsRestricted")}>
+          <Switch
+            label={t("widgetset.saveRawPackets")}
+            on={mayLog && settings[LOGS.packets[0]] === "true"}
+            set={mayLog ? (on) => setLog("packets", on) : undefined}
+          />
+        </Row>
+
+        <h3 className="acctSection">{t("widgetset.advanced")}</h3>
+        <Row label={t("widgetset.resetWidget")} desc={t("widgetset.resetHint")}>
+          {button(t("widgetset.reset"), resetWidget)}
+        </Row>
       </>
     ),
     scorciatoie: (
       <>
-        {hotkey("organizer.set.keyToggle", settings["dpsMeter.toggleWindowHotkey"] || "Ctrl+Alt+Up", true)}
+        {hotkey("organizer.set.keyToggle", settings["dpsMeter.toggleWindowHotkey"] || "Ctrl+Alt+Up", "dpsMeter.toggleWindowHotkey")}
         {hotkey("organizer.set.keyLock", settings["pm.clickThroughHotkey"] || "Ctrl+Alt+L")}
-        {hotkey("organizer.set.keyReset", settings["dpsMeter.hotkey"] || "Ctrl+Alt+Shift+R", true)}
+        {/* Unset, the backend registers Ctrl+Alt+R (lib.rs). */}
+        {hotkey("organizer.set.keyReset", settings["dpsMeter.hotkey"] || "Ctrl+Alt+R", "dpsMeter.hotkey")}
         {hotkey("organizer.set.keyMode", "Ctrl+Shift+M")}
         {hotkey("organizer.set.keyScreenshot", "Ctrl+Shift+S")}
       </>

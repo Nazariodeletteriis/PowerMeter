@@ -42,9 +42,14 @@
   transform-origin: 0 0;
 }
 .wWorld > img,
-.wWorld > svg {
+.wWorld > svg,
+.wTiles,
+.wTiles > img {
   position: absolute;
   pointer-events: none;
+}
+.wTiles {
+  inset: 0;
 }
 .wWorld > svg {
   left: 0;
@@ -453,6 +458,494 @@
   font-size: 13px;
 }
 
+/* Layer panel headings with their "Select all / Deselect all", and the gathering groups. */
+.wPanelHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+}
+.wPanelHead > span:first-child {
+  flex: 1;
+}
+.wPanelSub {
+  margin: 6px 6px 2px;
+  font-size: 11px;
+  color: var(--pm-t3);
+}
+.wAllNone {
+  display: inline-flex;
+  gap: 2px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.wAllNone button {
+  height: 22px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--pm-t2);
+  font: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.wAllNone button:disabled {
+  color: var(--pm-grey);
+  cursor: default;
+}
+@media (hover: hover) and (pointer: fine) {
+  .wAllNone button:not(:disabled):hover {
+    background: var(--pm-s2);
+    color: var(--pm-t1);
+  }
+}
+.wPetMonsters {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--pm-t3);
+}
+
+/* ---------- minimap (Minimap.tsx in the Map window) ----------
+   The game's minimap in the DPS widget's dress: its dark surface, hairlines,
+   icon colour and red accent (powermeter-theme.css, .meter). The window is
+   transparent: --mm-map fades the map, --mm-path the markers, gathering nodes,
+   pet spots and zone borders drawn over it. */
+.mmDoc,
+.mmDoc body {
+  background: transparent;
+}
+.mmWin {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.mm {
+  --mm-surf: rgba(15, 17, 20, 0.82);
+  --mm-solid: rgba(15, 17, 20, 0.95);
+  --mm-line: rgba(255, 255, 255, 0.12);
+  --mm-icon: #d3d8e6;
+  --mm-muted: #a3acc2;
+  --mm-hot: #ff4d4d;
+  --mm-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  color-scheme: dark;
+  font-family: "Noto Sans", Inter, system-ui, sans-serif;
+}
+.mm .wMap {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  background: transparent;
+  transition: border-color 120ms ease;
+}
+.mm .wMap:hover {
+  border-color: color-mix(in srgb, var(--mm-hot) 70%, transparent);
+}
+.mm .wTiles {
+  opacity: var(--mm-map);
+}
+.mm .wWorld > :is(svg, .wRegion, .wGather, .wMarker:not([data-found])) {
+  opacity: var(--mm-path);
+}
+.mm .wWorld > .wMarker[data-found] {
+  opacity: calc(var(--mm-path) * 0.4);
+}
+/* A small window: smaller markers and nodes than the Map page's. */
+.mm .wMarker {
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+}
+.mm .wWorld > img.wGather {
+  width: 18px;
+  height: 18px;
+}
+
+/* Top bar: Map Opacity, Path Opacity, close. The gaps drag the window. */
+.mmBar {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 4;
+}
+.mmSlider {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 4px 8px 5px;
+  border-radius: 6px;
+  background: var(--mm-surf);
+  box-shadow: inset 0 0 0 1px var(--mm-line);
+}
+.mmSlider span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--mm-icon);
+}
+.mmSlider input {
+  --v: 50%;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.mmSlider input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--pm-deep), var(--pm-red)) 0 / var(--v) 100% no-repeat, rgba(255, 255, 255, 0.14);
+}
+.mmSlider input::-webkit-slider-thumb {
+  appearance: none;
+  width: 9px;
+  height: 9px;
+  margin-top: -2.5px;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px var(--pm-red);
+  rotate: 45deg;
+}
+.mmSlider input:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* The icon column (and the zoom and lock under it): 28px squares like the widget's header buttons. */
+.mmBtn,
+.mm .wZoom button {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: var(--mm-surf);
+  box-shadow: inset 0 0 0 1px var(--mm-line);
+  color: var(--mm-icon);
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease, scale 100ms var(--mm-ease);
+}
+.mmBtn:active,
+.mm .wZoom button:not(:disabled):active {
+  scale: 0.94;
+}
+.mmBtn[aria-pressed="true"],
+.mmLock[data-hot] {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--pm-deep) 82%, #ffffff 4%), color-mix(in srgb, var(--pm-deep) 62%, #000000));
+  box-shadow: inset 0 0 0 1px var(--mm-hot), 0 0 8px color-mix(in srgb, var(--pm-red) 45%, transparent);
+  color: #ffffff;
+}
+.mmBtn:focus-visible,
+.mm .wZoom button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mmBtn:not([aria-pressed="true"]):hover,
+  .mm .wZoom button:not(:disabled):hover {
+    background: color-mix(in srgb, var(--mm-surf) 70%, #ffffff 18%);
+    color: #ffffff;
+  }
+  .mmBtn.mmClose:hover {
+    color: var(--mm-hot);
+  }
+}
+.mmMove {
+  cursor: move;
+}
+.mmRail {
+  position: absolute;
+  top: 46px;
+  right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 4;
+}
+.mm .wZoom {
+  right: 6px;
+  bottom: 40px;
+  gap: 4px;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  z-index: 4;
+}
+.mm .wZoom button + button {
+  border-top: 0;
+}
+.mm .wZoom button:disabled {
+  color: var(--mm-muted);
+  opacity: 0.5;
+  cursor: default;
+}
+.mmLock {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  z-index: 4;
+}
+
+/* Zone, bottom left: a select dressed as the game's place name. */
+.mmZone {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  max-width: calc(100% - 52px);
+  display: flex;
+  align-items: center;
+  z-index: 4;
+}
+.mmZone select {
+  appearance: none;
+  min-width: 0;
+  max-width: 100%;
+  height: 24px;
+  padding: 0 22px 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--mm-surf);
+  box-shadow: inset 0 0 0 1px var(--mm-line);
+  color: #f5f2f2;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.mmZone select:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+}
+.mmZone svg {
+  position: absolute;
+  right: 7px;
+  font-size: 11px;
+  color: var(--mm-icon);
+  pointer-events: none;
+}
+
+/* Filter: the Gathering and Layers dropdowns, opening from the funnel (top right). */
+.mmPop {
+  position: absolute;
+  top: 46px;
+  right: 40px;
+  width: min(250px, calc(100% - 52px));
+  max-height: calc(100% - 88px);
+  overflow-y: auto;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--mm-solid);
+  box-shadow: inset 0 0 0 1px var(--mm-line), 0 10px 28px rgba(0, 0, 0, 0.5);
+  color: #f5f2f2;
+  font-size: 12px;
+  cursor: auto;
+  z-index: 5;
+  transform-origin: top right;
+  transition: opacity 150ms var(--mm-ease), scale 150ms var(--mm-ease);
+}
+@starting-style {
+  .mmPop {
+    opacity: 0;
+    scale: 0.97;
+  }
+}
+.mmPop details + details {
+  margin-top: 2px;
+  border-top: 1px solid var(--mm-line);
+  padding-top: 2px;
+}
+.mmPop summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 6px;
+  list-style: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mmPop summary::-webkit-details-marker {
+  display: none;
+}
+.mmPop summary > span:first-child {
+  flex: 1;
+}
+.mmPop summary svg {
+  color: var(--mm-icon);
+  transition: rotate 150ms var(--mm-ease);
+}
+.mmPop details[open] summary svg {
+  rotate: 180deg;
+}
+.mmPop summary:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: -2px;
+}
+.mmPop .wAllNone {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 4px 2px;
+}
+.mmPop .wAllNone button {
+  color: var(--mm-muted);
+}
+.mmPop .wAllNone button:disabled {
+  color: rgba(255, 255, 255, 0.28);
+}
+.mmGroup {
+  margin: 6px 8px 2px;
+  font-size: 10px;
+  color: var(--mm-muted);
+}
+.mmRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.mmRow input {
+  flex: none;
+  margin: 0;
+  accent-color: var(--pm-red);
+}
+.mmRowIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 18px;
+}
+.mmRowName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mmRowN {
+  font-family: var(--pm-mono);
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--mm-muted);
+}
+.mmRow:has(input:not(:checked)) :is(.mmRowIcon, .mmRowName) {
+  opacity: 0.55;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mmPop summary:hover,
+  .mmRow:hover {
+    background: rgba(255, 255, 255, 0.07);
+  }
+}
+.mmCredit {
+  margin-top: 2px;
+  padding: 6px 8px 4px;
+  border-top: 1px solid var(--mm-line);
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--mm-muted);
+}
+.mmCredit a {
+  color: var(--mm-icon);
+}
+
+/* Pets: the Map page's panel, filling the minimap left of the icon column. */
+.mm .wPetPanel {
+  top: 46px;
+  right: 40px;
+  left: 6px;
+  bottom: 6px;
+  width: auto;
+  min-width: 0;
+  gap: 8px;
+  padding: 10px;
+  background: var(--mm-solid);
+  border-color: var(--mm-line);
+  color: #f5f2f2;
+  font-size: 12px;
+}
+.mm .wPetPanel h2 {
+  font-size: 13px !important;
+}
+.mm .wPetPanel .petGrid {
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 6px;
+}
+.mm .wPetPanel .petCard {
+  padding: 6px;
+  gap: 4px;
+}
+.mm .wPetPanel .petArt {
+  aspect-ratio: 2 / 1;
+}
+.mm .wPetPanel .petFoot {
+  font-size: 10px;
+}
+
+/* Locked: the window lets the mouse through to the game. Only the map and the lock stay. */
+.mm:has(.mmLock[aria-pressed="true"]) :is(.mmBar, .mmRail, .wZoom, .mmZone, .mmPop, .wPetPanel, .wPopup) {
+  opacity: 0;
+  visibility: hidden;
+}
+.mm:has(.wPetPanel) .mmZone {
+  visibility: hidden;
+}
+.mm:has(.mmLock[aria-pressed="true"]) .wMap {
+  border-color: transparent;
+}
+.mm:has(.mmLock[aria-pressed="true"]) .mmLock:not([data-hot]) {
+  opacity: 0.55;
+}
+
+.mmError {
+  position: absolute;
+  left: 6px;
+  right: 40px;
+  top: 46px;
+  z-index: 6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mmPop {
+    transition: opacity 150ms ease;
+  }
+  @starting-style {
+    .mmPop {
+      scale: 1;
+    }
+  }
+  .mmBtn:active,
+  .mm .wZoom button:not(:disabled):active {
+    scale: 1;
+  }
+  .mmPop summary svg {
+    transition: none;
+  }
+}
+
 /* ---------- database (prototype pg.database / pg.item) ---------- */
 .wDbHint {
   color: var(--pm-t2);
@@ -469,7 +962,7 @@
   background: var(--pm-s1);
   margin-bottom: 22px;
   max-width: 720px;
-  box-shadow: 0 0 40px rgba(219, 0, 0, 0.08);
+  box-shadow: 0 0 40px color-mix(in srgb, var(--pm-red) 8%, transparent);
 }
 .wDbSearch > svg {
   font-size: 22px;
@@ -741,7 +1234,7 @@ button.wLinkName:hover span {
   width: 16px;
   height: 16px;
   margin: 0;
-  accent-color: #db0000;
+  accent-color: var(--pm-red);
   cursor: pointer;
 }
 .gvTable tr[data-selected] td {
@@ -820,7 +1313,7 @@ td[data-mark="hi"] {
   color: var(--pm-okt);
 }
 td[data-mark="lo"] {
-  color: var(--pm-redt);
+  color: var(--pm-err); /* "worse" stays red in every theme, not the theme accent */
 }
 
 /* Item list with its filter panel on the right. */

@@ -188,5 +188,15 @@
   "world.layer.shellfish": "조개",
   "world.layer.vegetable": "채소",
   "world.layer.wood": "목재",
-  "world.layer.berry": "베리"
+  "world.layer.berry": "베리",
+  "world.map.selectAll": "모두 선택",
+  "world.map.selectNone": "모두 해제",
+  "world.map.mapOpacity": "지도 불투명도",
+  "world.map.pathOpacity": "경로 불투명도",
+  "world.map.pathOpacityHint": "마커, 채집 지점, 펫 위치, 지역 경계",
+  "world.map.move": "이동",
+  "world.map.filter": "필터",
+  "world.map.lock": "잠금: 클릭이 게임으로 전달됩니다",
+  "world.map.unlock": "잠김: 클릭하여 잠금 해제",
+  "world.map.petMonsters": "몬스터: {list}"
 }

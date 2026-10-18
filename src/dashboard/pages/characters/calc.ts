@@ -4,6 +4,7 @@
 // Stats are summed in display units: raw values of percent stats (stat_dictionary.percent) are ×100.
 
 import type { BuilderData, EnhancementValue, GearPiece, Planner, PlannerNodeData } from "../../../data/db/types";
+import PET_GENUS from "../../../data/pet_genus_effects.json" with { type: "json" };
 
 export type PNode = {
   id: string;
@@ -135,11 +136,44 @@ export const savedNodes = (plans: SavedPlans, cls: string) => {
 /** Raw archive value → display value (percent stats are ×100). */
 export const statValue = (raw: number, percent: boolean) => (percent ? raw / 100 : raw);
 
-export type Equipped = { piece: GearPiece; enh: number; bonus: [key: string, value: number][] };
+/** `bonus`: enhancement bonus; `extra`: the item's own bonus stats read from the game (display units). */
+export type Equipped = { piece: GearPiece; enh: number; bonus: [key: string, value: number][]; extra?: [key: string, value: number][] };
 
 /**
- * Every source added up, in display units: base for the level, gear fixed stats + enhancement bonus, Daevanion
- * nodes, pet collection effects (the ones that are character stats, see petStatKey).
+ * What one point of each attribute gives (raw, percent stats ×100), up to maxPoints points: the archive's
+ * stat-conversion.json (global_204, planner_collections), as the game's character window explains each attribute.
+ */
+const STAT_CONVERSION: [attr: string, maxPoints: number, perPoint: [stat: string, raw: number][]][] = [
+  ["STR", 1000, [["DamageRatio", 10]]],
+  ["DEX", 1000, [["EvasionRatio", 10], ["BlockRatio", 10], ["CriticalResistRatio", 10]]],
+  ["INT", 1000, [["AbnormalAccuracy", 10]]],
+  ["CON", 1000, [["MaxHPRatio", 10]]],
+  ["AGI", 1000, [["AccuracyRatio", 10], ["CriticalRatio", 10]]],
+  ["WIS", 1000, [["AbnormalResistance", 10]]],
+  ["Justice", 1000, [["DefenseRatio", 10], ["Perfect", 10]]],
+  ["Destruction", 1000, [["DamageRatio", 10], ["PerfectResist", 10]]],
+  ["Freedom", 1000, [["AccuracyRatio", 10], ["EvasionRatio", 10]]],
+  ["Death", 1000, [["CriticalRatio", 10], ["IgnoreRestoration", 10]]],
+  ["Illusion", 1000, [["CoolTimeIncrease", -10], ["IgnoreIronWall", 10]]],
+  ["Wisdom", 1000, [["MPUseIncrease", -10], ["HardHit", 10]]],
+  ["Life", 1000, [["MaxHPRatio", 10], ["Restoration", 10]]],
+  ["Destiny", 1000, [["MaxMPRatio", 10], ["IronWall", 10]]],
+  ["Time", 1000, [["CombatSpeed", 10], ["HardHitResist", 10]]],
+  ["Space", 1000, [["MoveSpeed", 10], ["BlockRatio", 10]]],
+];
+
+/** The stats some attribute points give (display units): `points` by attribute, `pct` the percent stat keys. */
+export function derivedStats(points: Record<string, number>, pct: Set<string>): [key: string, value: number][] {
+  return STAT_CONVERSION.flatMap(([attr, max, per]) => {
+    const n = Math.min(points[attr] ?? 0, max);
+    return n > 0 ? per.map(([k, raw]) => [k, statValue(raw * n, pct.has(k))] as [string, number]) : [];
+  });
+}
+
+/**
+ * Every source added up, in display units: base for the level, gear fixed stats + enhancement bonus + its own bonus
+ * stats, Daevanion nodes, pet collection effects (the ones that are character stats, see petStatKey), then what the
+ * attribute points give (STAT_CONVERSION).
  */
 export function buildStats(data: BuilderData, level: number, gear: Equipped[], plan: PlanTotals, pets: PetEffect[] = []): Record<string, number> {
   const pct = new Set(data.stats.filter((s) => s.percent).map((s) => s.stat_key));
@@ -150,12 +184,14 @@ export function buildStats(data: BuilderData, level: number, gear: Equipped[], p
   for (const g of gear) {
     for (const [k, , v] of g.piece.stats_json ?? []) if (v != null) add(k, v);
     for (const [k, v] of g.bonus) add(k, v);
+    for (const [k, v] of g.extra ?? []) add(k, v);
   }
   for (const [k, v] of Object.entries(plan.stats)) add(k, statValue(v, pct.has(k)));
   for (const [k, v] of pets) {
     const key = petStatKey(k, known);
     if (key && Number.isFinite(v)) add(key, v);
   }
+  for (const [k, v] of derivedStats(out, pct)) add(k, v);
   return out;
 }
 
@@ -186,6 +222,22 @@ export function petsFromGame(pets: { id: number; lvl: number; exp: number }[], c
     if (code && (p.lvl === 1 || p.lvl === 2 || p.lvl === 3)) out[code] = { lvl: p.lvl, exp: p.lvl === 3 ? 0 : Math.min(PET_EXP_MAX, p.exp) };
   }
   return out;
+}
+
+/** What one pet of each genus gives at levels 1-3, and each creature's genus (scripts/build-pet-effects.mjs). */
+const PET_FX = PET_GENUS as unknown as { levels: Record<string, PetEffect[][]>; genus: Record<string, string> };
+
+/** What a pet gives at its level: each level replaces the one before (level 3 = tier 3 alone); Special pets give none. */
+export const petLevelEffects = (code: string, lvl: number): PetEffect[] => PET_FX.levels[PET_FX.genus[code]]?.[lvl - 1] ?? [];
+
+/** The collection effects of the owned pets (of one genus, if given), summed by stat, as the game's Pet window lists them. */
+export function petCollection(owned: PetSet, genus?: string): PetEffect[] {
+  const sum = new Map<string, PetEffect>();
+  for (const [code, p] of Object.entries(owned)) {
+    if (genus && PET_FX.genus[code] !== genus) continue;
+    for (const [k, v, pct] of petLevelEffects(code, p.lvl)) sum.set(k, [k, Math.round(((sum.get(k)?.[1] ?? 0) + v) * 100) / 100, pct]);
+  }
+  return [...sum.values()];
 }
 
 /** Pets owned: the ones read from the game win over the ones marked by hand, and so does the game's equipped pet. */
@@ -264,6 +316,16 @@ export function twPiece(row: TwGearRow): { piece: GearPiece; levels: Enhancement
   }
   const max = levels.reduce((m, v) => Math.max(m, v.level), 0);
   return { piece: { id: row.id, name: row.name, slot: row.slot, grade: row.grade, level: row.level, icon: row.icon ?? null, max_enh: max || null, stats_json: stats }, levels };
+}
+
+/**
+ * Arcana game id → the archive's Arcana: 810 <type 1 Grail, 2 Parchment, 3 Compass, 4 Bell, 5 Mirror> <grade 3 Unique,
+ * 4 Legend, 5 Rare, 6 Common> <set, 4 digits> (NCSOFT TW item data: 810130001 is the Unique Grail of set
+ * Arcana_A_set_001, Time 20, as Arcana_Grail_A_u_set_001_b).
+ */
+export function arcanaCode(id: string): string | undefined {
+  const m = /^810([1-5])([3-6])0(\d{3})$/.exec(id);
+  return m ? `Arcana_${["Grail", "Parchment", "Compass", "Bell", "Mirror"][Number(m[1]) - 1]}_A_${"ulrc"[Number(m[2]) - 3]}_set_${m[3]}_b` : undefined;
 }
 
 /** Builder slot of each game equipment slot (equip_parser.rs). Slots the Builder has no place for are left out. */

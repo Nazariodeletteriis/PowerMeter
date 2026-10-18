@@ -547,6 +547,80 @@
       .pmEventStrip { transform: none; }
     }
   }
+  /* Event popup (src/widget/eventAlert.ts): over the list, under the bar, for the set seconds.
+     Drops in from the bar (ease-out 200ms), leaves the same way faster; the bar underneath is the
+     time left (its animation is the timer, paused while the pointer is on the popup). */
+  .pmEventPopup {
+    position: absolute;
+    top: 48px;
+    left: 10px;
+    right: 10px;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 10px;
+    padding: 10px 8px 12px 12px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--pm-red) 60%, transparent);
+    border-radius: 8px;
+    background: var(--pm-wsurf);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    color: #ffffff;
+    transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1), transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  @starting-style {
+    .pmEventPopup { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  }
+  .pmEventPopup[hidden] { display: none; }
+  .pmEventPopup.isLeaving {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+    transition-duration: 150ms;
+    pointer-events: none;
+  }
+  .pmEventPopup > svg { width: 18px; height: 18px; margin-top: 1px; color: var(--pm-hot); }
+  .pmEventPopupTitle { color: var(--pm-redt); font-weight: 600; font-size: 11px; line-height: 1.4; }
+  .pmEventPopupName {
+    overflow: hidden;
+    font-weight: 700; font-size: 14px; line-height: 1.35;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
+  .pmEventPopupTime { color: var(--pm-widget-muted); font-weight: 600; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .pmEventPopupAlert {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .pmEventPopupClose {
+    display: grid; place-items: center;
+    width: 24px; height: 24px;
+    padding: 0; border: 0; border-radius: 4px;
+    background: transparent; color: var(--pm-redt);
+    cursor: pointer;
+  }
+  .pmEventPopupClose:focus-visible { outline: 2px solid var(--pm-hot); outline-offset: -2px; }
+  @media (hover: hover) and (pointer: fine) {
+    .pmEventPopupClose:hover { background: color-mix(in srgb, var(--pm-red) 22%, transparent); }
+  }
+  .pmEventPopupBar {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 2px;
+    background: var(--pm-red);
+    transform-origin: left;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pmEventPopup { transition: opacity 200ms ease; }
+    .pmEventPopup.isLeaving { transform: none; }
+    @starting-style {
+      .pmEventPopup { transform: none; }
+    }
+    /* Still the timer, not drawn: the countdown text says the same. */
+    .pmEventPopupBar { opacity: 0; }
+  }
 
   /* Fight timer / status, centred in the bar (moved there by pmWidget.js). In a
      fight it shows the timer; out of it the grey dot and the status ("Idle"). */

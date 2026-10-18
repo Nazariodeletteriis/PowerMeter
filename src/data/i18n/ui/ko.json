@@ -470,6 +470,9 @@
     "onlyMe": "내 DPS만",
     "eventSoon": "{name}까지 {time}",
     "eventDismiss": "알림 닫기",
+    "eventPopupTitle": "곧 이벤트 시작",
+    "eventStartsIn": "{time} 후 시작",
+    "eventPopupTest": "테스트 팝업",
     "pillHint": "클릭하여 펼치기 · 드래그하여 이동",
     "copy": "Discord용 이미지로 복사",
     "copied": "복사됨, Discord에 붙여넣으세요"

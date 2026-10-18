@@ -1,0 +1,16 @@
+{
+  "database.gear.tune.note": "各ステータスには、装備に設定した強化レベルとボーナスが含まれます。選択はこのPCに保存されます。",
+  "database.gear.tune.enh": "強化",
+  "database.gear.tune.enhFor": "{name}の強化",
+  "database.gear.tune.bonus": "ボーナス",
+  "database.gear.tune.add": "ボーナスを追加",
+  "database.gear.tune.addFor": "{name}にボーナスを追加",
+  "database.gear.tune.remove": "{stat}を削除",
+  "database.gear.tune.valueOf": "{stat}の値",
+  "database.gear.tune.range": "範囲 {range}",
+  "database.gear.tune.between": "{range}の値を入力してください",
+  "database.gear.tune.number": "数値を入力してください",
+  "database.gear.tune.manual": "手動",
+  "database.gear.tune.manualNote": "ゲームデータにこの装備のボーナスがありません。ステータス一覧から手動で追加してください。",
+  "database.gear.tune.none": "ボーナスなし"
+}

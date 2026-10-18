@@ -1,0 +1,16 @@
+{
+  "database.gear.tune.note": "Jeder Wert zählt die Verstärkungsstufe und die Boni, die du für das Teil festlegst. Deine Auswahl wird auf diesem PC gespeichert.",
+  "database.gear.tune.enh": "Verstärkung",
+  "database.gear.tune.enhFor": "Verstärkung von {name}",
+  "database.gear.tune.bonus": "Boni",
+  "database.gear.tune.add": "Bonus hinzufügen",
+  "database.gear.tune.addFor": "Bonus zu {name} hinzufügen",
+  "database.gear.tune.remove": "{stat} entfernen",
+  "database.gear.tune.valueOf": "Wert von {stat}",
+  "database.gear.tune.range": "Bereich {range}",
+  "database.gear.tune.between": "Gib einen Wert in {range} ein",
+  "database.gear.tune.number": "Gib eine Zahl ein",
+  "database.gear.tune.manual": "manuell",
+  "database.gear.tune.manualNote": "Die Spieldaten nennen keine Boni für dieses Teil: füge sie von Hand aus der Werteliste hinzu.",
+  "database.gear.tune.none": "Keine Boni"
+}

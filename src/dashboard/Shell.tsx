@@ -1,6 +1,7 @@
 import { Component, useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { REPORT_FIGHT_KEY } from "./pages/combat/parts";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import {
   CaretDoubleLeftIcon,
   CaretDoubleRightIcon,
@@ -49,6 +50,9 @@ const STATUS_COLOR: Record<MeterStatus, string> = {
 
 export const PATREON_URL = "https://www.patreon.com/c/powermeter";
 export const USER_NAME_KEY = "dpsMeter.userName";
+/** The widget's Settings button (tauriBridge.js openWidgetSettings): a localStorage flag for a dashboard it just opened,
+ * the Tauri event for one already open. Also the window event that tells an open Settings page to show the tab. */
+export const WIDGET_SETTINGS = "pm.openWidgetSettings";
 
 const getCaptureStatus = () => invoke<CaptureStatus>("get_capture_status");
 const getGameTitle = () => invoke<string | null>("get_aion2_window_title");
@@ -112,6 +116,19 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
     setHeader({});
     setPage(id);
   };
+
+  useEffect(() => {
+    const open = () => {
+      localStorage.removeItem(WIDGET_SETTINGS);
+      go("impostazioni");
+      window.dispatchEvent(new Event(WIDGET_SETTINGS));
+    };
+    if (localStorage.getItem(WIDGET_SETTINGS)) open();
+    const stop = listen("pm-open-widget-settings", open);
+    return () => {
+      stop.then((f) => f(), () => {});
+    };
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

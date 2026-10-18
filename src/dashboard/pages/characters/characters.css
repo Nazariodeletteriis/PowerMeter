@@ -350,7 +350,7 @@
 }
 .chSkillRow[aria-pressed="true"] {
   background: var(--pm-s3);
-  box-shadow: inset 2px 0 0 #db0000;
+  box-shadow: inset 2px 0 0 var(--pm-red);
 }
 /* Skill Planner: library | stigma, bars, rotation | detail. Under 1100 px of
    main column the detail column moves under the library (container "main"). */
@@ -516,7 +516,7 @@
   position: relative;
   border-radius: 10px;
   border: 1px solid var(--pm-line);
-  background: radial-gradient(circle at 50% 45%, rgba(219, 0, 0, 0.1), transparent 60%), var(--pm-bg);
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--pm-red) 10%, transparent), transparent 60%), var(--pm-bg);
   padding: 18px 18px 64px;
   min-width: 0;
 }
@@ -619,7 +619,7 @@
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: conic-gradient(#db0000 var(--p), var(--pm-s3) 0);
+  background: conic-gradient(var(--pm-red) var(--p), var(--pm-s3) 0);
   display: grid;
   place-items: center;
 }
@@ -756,7 +756,7 @@
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); /* 3 columns at 1024px, more when wider */
   align-content: start;
   gap: 10px;
-  max-height: calc(90vh - 290px); /* the editor and the pet's location row under it */
+  max-height: calc(90vh - 346px); /* the editor, the pet's levels and location rows under it */
   overflow-y: auto;
   padding: 4px; /* room for the focus outline */
 }
@@ -892,3 +892,46 @@
   border: 1px solid var(--pm-grey);
   color: var(--pm-t2);
 }
+/* Pet effects: one pet's levels under the editor (the reached one marked), the collection and insight lists. */
+.petTiers {
+  flex-basis: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.petTier {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-s2);
+  font-size: 12px;
+  color: var(--pm-t2);
+}
+.petTier .mono { color: var(--pm-t1); font-variant-numeric: tabular-nums; }
+.petTier[aria-current] { border-color: var(--pm-red); }
+.petTierHead { color: var(--pm-t3); }
+.petTier[aria-current] .petTierHead { color: var(--pm-t1); font-weight: 500; }
+.petFx {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px 40px;
+  align-items: start;
+  max-height: calc(90vh - 160px);
+  overflow-y: auto;
+}
+.petFx h3 { font-size: 14px; font-weight: 500; color: var(--pm-t1); }
+.petFx p { margin: 2px 0 8px; font-size: 12px; color: var(--pm-t3); }
+.petFx h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 16px 0 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--pm-t2);
+}
+.petFx h4 img { width: 18px; height: 18px; }

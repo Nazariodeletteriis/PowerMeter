@@ -2,6 +2,21 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.19
+
+- Neu: Minikarte: Das Karten-Widget ist jetzt eine durchsichtige Minikarte über dem Spiel, im Stil der Minikarte des Spiels, mit Schiebereglern für Kartendeckkraft und Pfaddeckkraft, Seitenschaltflächen (verschieben, Filter, Pets, Vollbild, Zoom) und einer Sperre, die Klicks zum Spiel durchlässt.
+- Neu: Minikarten-Filter: Ein Menü „Sammeln“ mit jeder Ressource unter ihrem Spielnamen (Asvata, Calendula, Azpha, Odyle...) und eigenem Symbol und ein Menü „Ebenen“ mit den anderen Markern; beide haben Alle auswählen / Alle abwählen. Die große Karte hat sie auch.
+- Neu: Minikarten-Pets: Wähle eine Familie und ein Pet, und seine Monster erscheinen als Punkte auf der Minikarte, mit dem Namen beim Überfahren; abgeschlossene Pets erscheinen nie.
+- Neu: Themes: Die Farbthemen des Widgets (PowerMeter, AION2, Asmodian, Elyos, Ember, Frost, Obsidian, Cogni, Fera, Natura, Varian) gestalten jetzt die ganze App, eine Wahl für das Widget, das Dashboard und alle Fenster.
+- Neu: Die Einstellungen des DPS-Widgets sind jetzt in der App, unter Einstellungen > DPS-Widget; die Zahnrad-Schaltfläche des Widgets öffnet sie dort.
+- Neu: Ereignis-Benachrichtigungen können auch ein Popup am Widget mit dem Ereignis und seinem Countdown zeigen, für 3 bis 30 Sekunden (standardmäßig 8); in den Einstellungen ein- oder ausschaltbar.
+- Neu: Character Builder: Jeder Gegenstand zeigt seine Zusatzwerte und Manasteine, aus dem Spiel gelesen, und die Zusatzwerte zählen in den Summen (die wenigen, deren Wert noch nicht sicher ist, werden als #id angezeigt und nicht mitgezählt; Manasteine zeigen nur ihre Stufe, da das Spiel keinen Wert sendet).
+- Neu: Character Builder: Arcana-Werte zählen in den Summen, und Hauptwerte (Time, Life, Freedom, Justice, Illusion und die Attribute) fügen ihre abgeleiteten Werte laut Umrechnungstabelle des Spiels hinzu.
+- Neu: Character Builder, Pets: Jedes Pet zeigt seine Effekte auf Stufe 1, 2 und 3, und Besessene Effekte zeigt die Sammlungssumme nach Familie neben den Insight-Optionen; die Sammlung zählt jetzt in den Werten.
+- Neu: Gear Viewer: Stelle die Verstärkung jedes verglichenen Gegenstands ein und wähle seine Zusatzwerte (oder tippe sie ein), damit der Vergleich der echte ist.
+- Behoben: Character Builder: Gegenstandsstufen entsprechen dem Spiel (Basis + Verstärkung + Manasteine).
+- Behoben: Character Builder: Im Spiel getragene Arcana werden erkannt und wie die übrige Ausrüstung automatisch eingetragen.
+
 ## 0.5.18
 
 - Neu: Karten-Widget: Die interaktive Karte öffnet sich in einem eigenen Fenster über dem Spiel (Schaltfläche auf der Karten-Seite), mit einer Vollbild-Schaltfläche am Widget und auf der Seite (Esc beendet).

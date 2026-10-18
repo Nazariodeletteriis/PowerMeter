@@ -677,7 +677,7 @@ function Compare({
   const delta = (x: number, y?: number) => {
     if (!y) return <span style={{ color: "var(--pm-t3)" }}>—</span>;
     const d = ((x - y) / y) * 100;
-    return <span style={{ color: Math.abs(d) < 0.05 ? "var(--pm-t3)" : d > 0 ? "#5FD99A" : "var(--pm-redt)" }}>{`${d > 0 ? "+" : ""}${pc(d, lang)}`}</span>;
+    return <span style={{ color: Math.abs(d) < 0.05 ? "var(--pm-t3)" : d > 0 ? "#5FD99A" : "var(--pm-err)" }}>{`${d > 0 ? "+" : ""}${pc(d, lang)}`}</span>;
   };
   const rows: [string, string, string, ReactNode][] = b
     ? [

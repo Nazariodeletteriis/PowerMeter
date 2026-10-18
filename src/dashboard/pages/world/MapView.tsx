@@ -92,7 +92,7 @@ export function MapView({
   useEffect(() => {
     const el = box.current!;
     const wheel = (e: WheelEvent) => {
-      if ((e.target as HTMLElement).closest(".wPanel, .wPetPanel")) return; // the panels scroll
+      if ((e.target as HTMLElement).closest(".wPanel, .wPetPanel, .mmPop")) return; // the panels scroll
       e.preventDefault();
       const r = el.getBoundingClientRect();
       setView((v) => zoomAt(v, Math.exp(-e.deltaY * 0.002), e.clientX - r.left, e.clientY - r.top));
@@ -107,7 +107,7 @@ export function MapView({
   };
 
   const down = (e: PointerEvent) => {
-    if ((e.target as HTMLElement).closest("button, a, input, select, .wPopup, .wPanel, .wPetPanel")) return;
+    if ((e.target as HTMLElement).closest("button, a, input, select, label, .wPopup, .wPanel, .wPetPanel, .mmPop, [data-tauri-drag-region]")) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     drag.current = { x: e.clientX, y: e.clientY, moved: false };
   };
@@ -147,20 +147,23 @@ export function MapView({
         className="wWorld"
         style={{ width: w, height: h, transform: `translate(${view.x}px, ${view.y}px) scale(${view.s})`, "--k": k, "--kp": 1 / view.s } as CSSProperties}
       >
-        {[...seen.current.tiles].map((i) => {
-          const col = i % cols;
-          const row = Math.floor(i / cols);
-          return (
-            <img
-              key={i}
-              src={`${TILES}${map.id}/Res/${map.id}_${pad(col)}_${pad(row)}.webp`}
-              alt=""
-              draggable={false}
-              decoding="async"
-              style={{ left: col * map.tile, top: row * map.tile, width: map.tile, height: map.tile }}
-            />
-          );
-        })}
+        {/* One layer, so a see-through map (the minimap's opacity) has no seams where tiles meet. */}
+        <div className="wTiles">
+          {[...seen.current.tiles].map((i) => {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            return (
+              <img
+                key={i}
+                src={`${TILES}${map.id}/Res/${map.id}_${pad(col)}_${pad(row)}.webp`}
+                alt=""
+                draggable={false}
+                decoding="async"
+                style={{ left: col * map.tile, top: row * map.tile, width: map.tile, height: map.tile }}
+              />
+            );
+          })}
+        </div>
         {world}
       </div>
       {children}

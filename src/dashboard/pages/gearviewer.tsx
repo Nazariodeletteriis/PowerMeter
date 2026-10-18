@@ -1,11 +1,14 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { ArrowDownIcon, ArrowUpIcon, CaretDownIcon, CaretUpIcon, PushPinIcon, ScalesIcon, XIcon } from "@phosphor-icons/react";
-import type { GearPiece } from "../../data/db/types";
+import type { BuilderData, GearPiece, ItemStat } from "../../data/db/types";
 import type { T } from "../i18n";
+import { planClass } from "../skills";
+import { enhancementOf, enhBonus, enhSteps, fitOpts, inRange, manualValue, readTunes, TUNE_KEY, type Opt, type Tune } from "./gear/enh";
 import { Modal } from "./system/Modal";
 import type { PageProps } from "./types";
 import { DataState, FilterBox, GameIcon, gd, gradeColor, Nd, None, openEntry, Pager, useGd, useIcons } from "./world/db";
 import "./world/world.css";
+import "./gear/gear.css";
 
 // Equipment of the archive with its fixed stats and highest published enhancement level.
 // Gauntlets are Brawler gear: the class is not out yet, so they are left out.
@@ -49,7 +52,7 @@ export function onePerPiece(pieces: GearPiece[]): GearPiece[] {
   });
 }
 
-export default function GearViewer({ t, lang, go, setHeader }: PageProps) {
+export default function GearViewer({ t, lang, go, setHeader, settings, save, onError }: PageProps) {
   const title = t("world.gear.title");
   useEffect(() => setHeader({ title }), [setHeader, title]);
   const data = useGd(gd.gear, "gear");
@@ -79,6 +82,9 @@ export default function GearViewer({ t, lang, go, setHeader }: PageProps) {
   const [selected, setSelected] = useState<string[]>([]);
   const [pins, setPins] = useState(readPins);
   const [comparing, setComparing] = useState(false);
+  // Enhancement and bonuses chosen per piece in the compare, kept in the settings.
+  const tunes = useMemo(() => readTunes(settings[TUNE_KEY]), [settings[TUNE_KEY]]); // eslint-disable-line react-hooks/exhaustive-deps
+  const setTune = (id: string, tune: Tune) => save(TUNE_KEY, JSON.stringify({ ...tunes, [id]: tune })).catch(onError);
   const body = useRef<HTMLTableSectionElement>(null);
   const before = useRef<Map<string, number>>(undefined);
 
@@ -318,37 +324,112 @@ export default function GearViewer({ t, lang, go, setHeader }: PageProps) {
         </button>
       </div>
 
-      {comparing && <Compare t={t} lang={lang} rows={selected.map((id) => byId.get(id)).filter((r): r is Row => !!r)} labels={labels} onClose={() => setComparing(false)} />}
+      {comparing && (
+        <Compare
+          t={t}
+          lang={lang}
+          rows={selected.map((id) => byId.get(id)).filter((r): r is Row => !!r)}
+          labels={labels}
+          cls={planClass(settings["pm.class"]).toLowerCase()}
+          tunes={tunes}
+          setTune={setTune}
+          onClose={() => setComparing(false)}
+        />
+      )}
     </div>
   );
 }
 
-// A compare line: label, value to rank (null = not on the piece), text shown, whether less is better.
-type Line = [string, (r: Row) => number | null, (r: Row) => string, boolean?];
+// A compare line: label, value to rank (null = not on the piece), text shown and where it comes from, whether less is better.
+type Line = [string, (r: Row) => number | null, (r: Row) => [text: string, from?: string], boolean?];
 
 // Stats where less is better (stat_dictionary keys): the green arrow goes on the lowest value.
 // CombatSpeed stays out: on gear it is a +% speed bonus, so more is faster.
 const LOWER_IS_BETTER = new Set(["CoolTimeIncrease", "CastingTime"]);
 
-/** Selected pieces side by side: per line, an up arrow on the highest value and a down arrow on the lowest, green on the better one. */
-function Compare({ t, lang, rows, labels, onClose }: { t: T; lang: string; rows: Row[]; labels: Record<string, string>; onClose: () => void }) {
+/** What the archive has for a piece beyond its fixed stats: enhancement bonus per level, rolled options with their range. */
+type Extra = { levels: Awaited<ReturnType<typeof enhancementOf>>; rolled: ItemStat[] };
+
+/**
+ * Selected pieces side by side: per line, an up arrow on the highest value and a down arrow on the lowest, green on
+ * the better one. Each piece takes an enhancement level and its bonuses, and every stat counts them in.
+ */
+function Compare({
+  t,
+  lang,
+  rows,
+  labels,
+  cls,
+  tunes,
+  setTune,
+  onClose,
+}: {
+  t: T;
+  lang: string;
+  rows: Row[];
+  labels: Record<string, string>;
+  /** Any class: only the stat dictionary of gamedata_builder is read. */
+  cls: string;
+  tunes: Record<string, Tune>;
+  setTune: (id: string, tune: Tune) => void;
+  onClose: () => void;
+}) {
   const icons = useIcons(rows.map((r) => r.icon));
-  const keys = [...new Set(rows.flatMap((r) => Object.keys(r.stats)))].sort((a, b) => labels[a].localeCompare(labels[b]));
+  const ids = rows.map((r) => r.id);
+  const extra = useGd(
+    () =>
+      Promise.all(
+        ids.map(async (id): Promise<Extra> => ({
+          levels: await enhancementOf(gd.rows, id),
+          rolled: (await gd.rows<ItemStat>("item_stats", "item_code", id)).filter((s) => s.is_rolled),
+        })),
+      ).then((l) => Object.fromEntries(ids.map((id, i) => [id, l[i]]))),
+    ids.join("|"),
+  );
+  const dict = useGd(() => gd.builder(cls).then((b) => b.stats), cls);
+  const label = (k: string) => {
+    const d = dict.data?.find((s) => s.stat_key === k);
+    return labels[k] ?? (d ? d.name + (d.percent ? " %" : "") : k);
+  };
   const num = (v: number) => v.toLocaleString(lang, { maximumFractionDigits: 2 });
+
+  // Each piece as set: level within the ones it has, bonuses that hold for it, the stats they add.
+  const tuned = (r: Row) => {
+    const x = extra.data?.[r.id];
+    const tune = tunes[r.id] ?? { enh: 0, opts: [] };
+    const steps = x ? enhSteps(x.levels) : [0];
+    const enh = steps.filter((s) => s <= tune.enh).pop() ?? 0;
+    const opts = x ? fitOpts(tune.opts, x.rolled) : [];
+    const add: Record<string, number> = {};
+    for (const [k, v] of [...(x ? enhBonus(x.levels, enh) : []), ...opts]) add[k] = (add[k] ?? 0) + v;
+    return { x, steps, enh, opts, add };
+  };
+  const set = rows.map(tuned);
+  const at = (r: Row) => set[rows.indexOf(r)];
+  const keys = [...new Set(rows.flatMap((r, i) => [...Object.keys(r.stats), ...Object.keys(set[i].add)]))].sort((a, b) => label(a).localeCompare(label(b)));
+
   const lines: Line[] = [
-    [t("world.gear.level"), (r) => r.level, (r) => (r.level == null ? t("world.db.nd") : num(r.level))],
-    [t("world.gear.maxEnh"), (r) => r.max_enh, (r) => (r.max_enh == null ? t("world.db.nd") : `+${r.max_enh}`)],
-    // A stat listed twice counts as its sum.
+    [t("world.gear.level"), (r) => r.level, (r) => [r.level == null ? t("world.db.nd") : num(r.level)]],
+    [t("world.gear.maxEnh"), (r) => r.max_enh, (r) => [r.max_enh == null ? t("world.db.nd") : `+${r.max_enh}`]],
+    // A stat listed twice counts as its sum; enhancement and bonuses add to it.
     ...keys.map((k): Line => [
-      labels[k],
-      (r) => (r.stats[k] ? r.stats[k].reduce((a, b) => a + b, 0) : null),
-      (r) => (r.stats[k] ? r.stats[k].map(num).join(" + ") : "-"),
+      label(k),
+      (r) => (r.stats[k] || at(r).add[k] != null ? (r.stats[k] ?? []).reduce((a, b) => a + b, 0) + (at(r).add[k] ?? 0) : null),
+      (r) => {
+        const base = r.stats[k];
+        const plus = at(r).add[k];
+        if (!base) return [plus == null ? "-" : num(plus)];
+        if (plus == null) return [base.map(num).join(" + ")];
+        // The total, then where it comes from: the piece's own value, then enhancement and bonuses.
+        return [num(base.reduce((a, b) => a + b, 0) + plus), `${base.map(num).join(" + ")} ${plus < 0 ? "-" : "+"} ${num(Math.abs(plus))}`];
+      },
       LOWER_IS_BETTER.has(k),
     ]),
   ];
+
   return (
     <Modal
-      width={Math.min(1000, 240 + 170 * rows.length)}
+      width={Math.min(1120, 260 + 220 * rows.length)}
       onClose={onClose}
       title={(id) => (
         <div style={{ display: "flex", alignItems: "center" }}>
@@ -361,6 +442,7 @@ function Compare({ t, lang, rows, labels, onClose }: { t: T; lang: string; rows:
         </div>
       )}
     >
+      <p style={{ fontSize: 12, color: "var(--pm-t2)", margin: "0 0 12px" }}>{t("database.gear.tune.note")}</p>
       <div className="gvCmpWrap">
         <table className="gvTable">
           <thead>
@@ -379,29 +461,86 @@ function Compare({ t, lang, rows, labels, onClose }: { t: T; lang: string; rows:
             </tr>
           </thead>
           <tbody>
-            {lines.map(([label, rank, text, lower]) => {
+            {!extra.data ? (
+              <tr>
+                <td colSpan={rows.length + 1}>
+                  <DataState t={t} error={extra.error} retry={extra.retry} rows={2} />
+                </td>
+              </tr>
+            ) : (
+              <>
+                <tr className="gvTune">
+                  <th scope="row">{t("database.gear.tune.enh")}</th>
+                  {rows.map((r, i) => {
+                    const { steps, enh, opts, x } = set[i];
+                    const last = Math.max(0, ...x!.levels.map((v) => v.level));
+                    return (
+                      <td key={r.id}>
+                        {steps.length > 1 ? (
+                          <select
+                            className="input sm mono"
+                            value={enh}
+                            aria-label={t("database.gear.tune.enhFor", { name: r.name ?? r.id })}
+                            onChange={(e) => setTune(r.id, { enh: Number(e.target.value), opts })}
+                          >
+                            {steps.map((l) => (
+                              <option key={l} value={l}>
+                                +{l}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span style={{ color: "var(--pm-t3)" }}>{t("planner.builder.noEnh")}</span>
+                        )}
+                        {last > 0 && enh > last && <div className="gvHint">{t("planner.builder.enhPastPublished", { n: last })}</div>}
+                      </td>
+                    );
+                  })}
+                </tr>
+                <tr className="gvTune">
+                  <th scope="row">{t("database.gear.tune.bonus")}</th>
+                  {rows.map((r, i) => (
+                    <td key={r.id}>
+                      <Bonuses
+                        t={t}
+                        lang={lang}
+                        name={r.name ?? r.id}
+                        rolled={set[i].x!.rolled}
+                        dict={dict.data ?? []}
+                        opts={set[i].opts}
+                        label={label}
+                        set={(opts) => setTune(r.id, { enh: set[i].enh, opts })}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              </>
+            )}
+            {lines.map(([name, rank, text, lower]) => {
               const vals = rows.map(rank);
               const have = vals.filter((v): v is number => v != null);
               const hi = Math.max(...have);
               const lo = Math.min(...have);
               return (
-                <tr key={label}>
+                <tr key={name}>
                   <th scope="row" style={{ textAlign: "left", color: "var(--pm-t2)" }}>
-                    {label}
+                    {name}
                   </th>
                   {rows.map((r, i) => {
                     // Arrows only where the pieces differ.
                     const mark = hi === lo || vals[i] == null ? null : vals[i] === hi ? "hi" : vals[i] === lo ? "lo" : null;
+                    const [shown, from] = text(r);
                     return (
                       // data-mark sets the color: "hi" is green (better), "lo" red; flipped where less is better.
                       <td key={r.id} className="gvNum" data-mark={mark ? ((mark === "hi") !== !!lower ? "hi" : "lo") : undefined}>
-                        {text(r)}
+                        {shown}
                         {mark && (
                           <>
                             {mark === "hi" ? <ArrowUpIcon className="gvMark" weight="bold" aria-hidden="true" /> : <ArrowDownIcon className="gvMark" weight="bold" aria-hidden="true" />}
                             <span className="srOnly">{t(mark === "hi" ? "database.gear.highest" : "database.gear.lowest")}</span>
                           </>
                         )}
+                        {from && <span className="gvFrom">{from}</span>}
                       </td>
                     );
                   })}
@@ -412,5 +551,152 @@ function Compare({ t, lang, rows, labels, onClose }: { t: T; lang: string; rows:
         </table>
       </div>
     </Modal>
+  );
+}
+
+/**
+ * The bonuses of one piece: picked from the options the archive lists for it, each value inside its range; when the
+ * archive lists none, any stat of the stat dictionary, added by hand and marked as manual.
+ */
+function Bonuses({
+  t,
+  lang,
+  name,
+  rolled,
+  dict,
+  opts,
+  label,
+  set,
+}: {
+  t: T;
+  lang: string;
+  name: string;
+  rolled: ItemStat[];
+  dict: BuilderData["stats"];
+  opts: Opt[];
+  label: (k: string) => string;
+  set: (opts: Opt[]) => void;
+}) {
+  const num = (v: number) => v.toLocaleString(lang, { maximumFractionDigits: 2 });
+  const manual = rolled.length === 0;
+  const taken = new Set(opts.map(([k]) => k));
+  const free = manual ? dict.filter((s) => !taken.has(s.stat_key)).map((s) => s.stat_key) : rolled.filter((s) => !taken.has(s.stat_key)).map((s) => s.stat_key);
+  const range = (s: ItemStat) => `${num(s.min_display ?? 0)}-${num(s.max_display ?? 0)}${s.unit === "percent" ? "%" : ""}`;
+  const add = (k: string) => {
+    const s = rolled.find((r) => r.stat_key === k);
+    // An option starts at its top roll; a hand-added stat at 0, to be typed in.
+    set([...opts, s ? [k, inRange(s, s.max_display ?? 0), 0] : [k, 0, 1]]);
+  };
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 190 }}>
+      {manual && <div className="gvHint">{t("database.gear.tune.manualNote")}</div>}
+      {opts.map(([k, v, m], i) => {
+        const s = rolled.find((r) => r.stat_key === k);
+        return (
+          <div key={k}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ flex: 1, minWidth: 0, color: "var(--pm-t1)", whiteSpace: "normal" }}>{label(k)}</span>
+              {m === 1 && <span className="wTag">{t("database.gear.tune.manual")}</span>}
+              <button
+                type="button"
+                className="btn sm"
+                style={{ width: 30, padding: 0 }}
+                title={t("database.gear.tune.remove", { stat: label(k) })}
+                aria-label={t("database.gear.tune.remove", { stat: label(k) })}
+                onClick={() => set(opts.filter((_, j) => j !== i))}
+              >
+                <XIcon aria-hidden="true" />
+              </button>
+            </div>
+            <OptValue
+              value={v}
+              label={t("database.gear.tune.valueOf", { stat: label(k) })}
+              min={s?.min_display ?? undefined}
+              max={s?.max_display ?? undefined}
+              step={s?.unit === "percent" ? 0.01 : s ? 1 : 0.01}
+              fit={(n) => (s ? inRange(s, n) : manualValue(n))}
+              hint={s ? t("database.gear.tune.range", { range: range(s) }) : undefined}
+              bad={s ? t("database.gear.tune.between", { range: range(s) }) : t("database.gear.tune.number")}
+              commit={(n) => set(opts.map((o, j): Opt => (j === i ? [k, n, m] : o)))}
+            />
+          </div>
+        );
+      })}
+      {opts.length === 0 && <span style={{ color: "var(--pm-t3)" }}>{t("database.gear.tune.none")}</span>}
+      {free.length > 0 && (
+        <select className="input sm gvAdd" value="" aria-label={t("database.gear.tune.addFor", { name })} onChange={(e) => e.target.value && add(e.target.value)}>
+          <option value="">{t("database.gear.tune.add")}</option>
+          {free
+            .map((k) => [k, label(k)] as const)
+            .sort((a, b) => a[1].localeCompare(b[1]))
+            .map(([k, l]) => {
+              const s = rolled.find((r) => r.stat_key === k);
+              return (
+                <option key={k} value={k}>
+                  {s ? `${l} (${range(s)})` : l}
+                </option>
+              );
+            })}
+        </select>
+      )}
+    </div>
+  );
+}
+
+/** A bonus value: typed freely, set (and brought into its range) when you leave the field or press Enter. */
+function OptValue({
+  value,
+  label,
+  min,
+  max,
+  step,
+  fit,
+  hint,
+  bad,
+  commit,
+}: {
+  value: number;
+  label: string;
+  min?: number;
+  max?: number;
+  step: number;
+  fit: (n: number) => number;
+  hint?: string;
+  bad: string;
+  commit: (n: number) => void;
+}) {
+  const [text, setText] = useState(String(value));
+  useEffect(() => setText(String(value)), [value]);
+  const n = Number(text);
+  const wrong = text.trim() === "" || !Number.isFinite(n) || (min != null && n < min) || (max != null && n > max);
+  const done = () => {
+    if (text.trim() === "" || !Number.isFinite(n)) return setText(String(value));
+    const v = fit(n);
+    setText(String(v));
+    if (v !== value) commit(v);
+  };
+  const id = useId();
+  return (
+    <div style={{ marginTop: 4 }}>
+      <input
+        type="number"
+        inputMode="decimal"
+        className="input sm mono"
+        style={{ width: "100%", textAlign: "right" }}
+        value={text}
+        min={min}
+        max={max}
+        step={step}
+        aria-label={label}
+        aria-invalid={wrong || undefined}
+        aria-describedby={id}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={done}
+        onKeyDown={(e) => e.key === "Enter" && done()}
+      />
+      <div id={id} className="gvHint" data-bad={wrong || undefined} aria-live="polite">
+        {wrong ? bad : hint}
+      </div>
+    </div>
   );
 }

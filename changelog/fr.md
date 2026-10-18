@@ -2,6 +2,21 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.19
+
+- Nouveau : Mini-carte : le widget Carte est maintenant une mini-carte transparente par-dessus le jeu, dans le style de celle du jeu, avec des curseurs Opacité de la carte et Opacité du tracé, des boutons latéraux (déplacer, filtre, pets, plein écran, zoom) et un verrou qui laisse passer les clics vers le jeu.
+- Nouveau : Filtres de la mini-carte : un menu « Récolte » avec chaque ressource sous son nom dans le jeu (Asvata, Calendula, Azpha, Odyle...) et sa propre icône, et un menu « Calques » avec les autres marqueurs ; les deux ont Tout sélectionner / Tout désélectionner. La grande carte les a aussi.
+- Nouveau : Pets sur la mini-carte : choisissez une famille et un pet et ses monstres apparaissent en points sur la mini-carte, avec le nom au survol ; les pets terminés n'apparaissent jamais.
+- Nouveau : Thèmes : les thèmes de couleur du widget (PowerMeter, AION2, Asmodian, Elyos, Ember, Frost, Obsidian, Cogni, Fera, Natura, Varian) habillent maintenant toute l'app, un seul choix pour le widget, le tableau de bord et toutes les fenêtres.
+- Nouveau : Les réglages du widget DPS sont maintenant dans l'app, dans Paramètres > Widget DPS ; le bouton en forme d'engrenage du widget les ouvre là.
+- Nouveau : Les alertes d'événements peuvent aussi afficher une popup sur le widget avec l'événement et son compte à rebours, de 3 à 30 secondes (8 par défaut) ; activable ou désactivable dans les réglages.
+- Nouveau : Character Builder : chaque objet affiche ses stats bonus et ses manastones lus depuis le jeu, et les stats bonus comptent dans les totaux (les quelques-unes dont la stat n'est pas encore certaine sont affichées comme #id et laissées de côté ; les manastones n'affichent que leur palier, le jeu n'envoyant aucune valeur).
+- Nouveau : Character Builder : les stats d'Arcana comptent dans les totaux, et les stats principales (Time, Life, Freedom, Justice, Illusion et les attributs) ajoutent leurs stats dérivées selon la table de conversion du jeu.
+- Nouveau : Character Builder, Pets : chaque pet affiche ses effets aux niveaux 1, 2 et 3, et Effets possédés affiche le total de la collection par famille à côté des options d'Insight ; la collection compte maintenant dans les stats.
+- Nouveau : Gear Viewer : réglez l'amélioration de chaque objet comparé et choisissez ses stats bonus (ou saisissez-les), pour que la comparaison soit la vraie.
+- Corrigé : Character Builder : les niveaux d'objet correspondent à ceux du jeu (base + amélioration + manastones).
+- Corrigé : Character Builder : les Arcana portés en jeu sont reconnus et remplis automatiquement comme le reste de l'équipement.
+
 ## 0.5.18
 
 - Nouveau : Widget Carte : la carte interactive s'ouvre dans sa propre fenêtre par-dessus le jeu (bouton sur la page Carte), avec un bouton plein écran sur le widget comme sur la page (Échap pour quitter).

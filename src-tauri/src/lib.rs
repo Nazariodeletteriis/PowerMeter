@@ -1745,8 +1745,9 @@ pub fn run() {
 
                         // --- Auto-hide when AION2 loses focus (every tick) ---
                         let auto_hide = tick_count > 20
+                            // Unset reads as on, as the dashboard and the widget show it.
                             && state.settings.get("dpsMeter.autoHideMeter")
-                                .unwrap_or_default() == "true";
+                                .is_none_or(|v| v == "true");
                         if auto_hide {
                             if let Some(window) = handle.get_webview_window("main") {
                                 let aion_fg = platform::window_detector::is_aion2_foreground();

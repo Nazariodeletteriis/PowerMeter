@@ -188,5 +188,15 @@
   "world.layer.shellfish": "Моллюски",
   "world.layer.vegetable": "Овощи",
   "world.layer.wood": "Древесина",
-  "world.layer.berry": "Ягоды"
+  "world.layer.berry": "Ягоды",
+  "world.map.selectAll": "Выбрать все",
+  "world.map.selectNone": "Снять все",
+  "world.map.mapOpacity": "Прозрачность карты",
+  "world.map.pathOpacity": "Прозрачность путей",
+  "world.map.pathOpacityHint": "Метки, точки сбора, места питомцев и границы зон",
+  "world.map.move": "Переместить",
+  "world.map.filter": "Фильтр",
+  "world.map.lock": "Заблокировать: клики проходят в игру",
+  "world.map.unlock": "Заблокировано: нажмите, чтобы разблокировать",
+  "world.map.petMonsters": "Монстры: {list}"
 }

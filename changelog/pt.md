@@ -2,6 +2,21 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.19
+
+- Novo: Minimapa: o widget do Mapa agora é um minimapa transparente sobre o jogo, no estilo do jogo, com controles deslizantes de Opacidade do mapa e Opacidade do caminho, botões laterais (mover, filtro, pets, tela cheia, zoom) e um cadeado que deixa os cliques passarem para o jogo.
+- Novo: Filtros do minimapa: um menu "Coleta" com cada recurso pelo nome no jogo (Asvata, Calendula, Azpha, Odyle...) e seu próprio ícone, e um menu "Camadas" com os demais marcadores; ambos têm Selecionar tudo / Desmarcar tudo. O mapa grande também os tem.
+- Novo: Pets no minimapa: escolha uma família e um pet e seus monstros aparecem como pontos no minimapa, com o nome ao passar o mouse; pets completos nunca aparecem.
+- Novo: Temas: os temas de cor do widget (PowerMeter, AION2, Asmodian, Elyos, Ember, Frost, Obsidian, Cogni, Fera, Natura, Varian) agora dão estilo a todo o app, uma única escolha para o widget, o painel e todas as janelas.
+- Novo: As configurações do widget de DPS agora ficam no app, em Configurações > Widget DPS; o botão de engrenagem do widget as abre lá.
+- Novo: Os avisos de eventos também podem mostrar um popup no widget com o evento e sua contagem regressiva, por 3 a 30 segundos (8 por padrão); pode ser ativado ou desativado nas configurações.
+- Novo: Character Builder: cada item mostra seus atributos bônus e manastones lidos do jogo, e os atributos bônus contam nos totais (os poucos cujo atributo ainda não é certo aparecem como #id e ficam de fora; os manastones mostram apenas o nível, pois o jogo não envia valor).
+- Novo: Character Builder: os atributos de Arcana contam nos totais, e os atributos principais (Time, Life, Freedom, Justice, Illusion e os atributos) adicionam seus atributos derivados conforme a tabela de conversão do jogo.
+- Novo: Character Builder, Pets: cada pet mostra seus efeitos nos níveis 1, 2 e 3, e Efeitos possuídos mostra o total da coleção por família ao lado das opções de Insight; a coleção agora conta nos atributos.
+- Novo: Gear Viewer: defina o aprimoramento de cada item comparado e escolha seus atributos bônus (ou digite-os), para que a comparação seja a real.
+- Corrigido: Character Builder: os níveis dos itens batem com o jogo (base + aprimoramento + manastones).
+- Corrigido: Character Builder: os Arcana vestidos no jogo são reconhecidos e preenchidos automaticamente como o resto do equipamento.
+
 ## 0.5.18
 
 - Novo: Widget do Mapa: o mapa interativo abre em uma janela própria sobre o jogo (botão na página Mapa), com um botão de tela cheia tanto no widget quanto na página (Esc para sair).

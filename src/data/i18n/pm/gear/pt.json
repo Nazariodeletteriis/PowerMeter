@@ -1,0 +1,16 @@
+{
+  "database.gear.tune.note": "Cada atributo conta o nível de aprimoramento e os bônus que você definir para a peça. Suas escolhas ficam salvas neste PC.",
+  "database.gear.tune.enh": "Aprimoramento",
+  "database.gear.tune.enhFor": "Aprimoramento de {name}",
+  "database.gear.tune.bonus": "Bônus",
+  "database.gear.tune.add": "Adicionar bônus",
+  "database.gear.tune.addFor": "Adicionar um bônus a {name}",
+  "database.gear.tune.remove": "Remover {stat}",
+  "database.gear.tune.valueOf": "Valor de {stat}",
+  "database.gear.tune.range": "Faixa {range}",
+  "database.gear.tune.between": "Digite um valor em {range}",
+  "database.gear.tune.number": "Digite um número",
+  "database.gear.tune.manual": "manual",
+  "database.gear.tune.manualNote": "Os dados do jogo não listam bônus para esta peça: adicione-os à mão pela lista de atributos.",
+  "database.gear.tune.none": "Sem bônus"
+}

@@ -11,7 +11,15 @@ import { usePoll } from "./usePoll";
 /** Shape of get_captured_character (src-tauri/src/capture/equip_parser.rs). */
 type Captured = {
   owner: string | null;
-  equipment: { slot: number; itemId: number; enchant: number }[];
+  /** With the item level the game shows and the item's options; stat null = an id not identified yet. */
+  equipment: {
+    slot: number;
+    itemId: number;
+    enchant: number;
+    level?: number | null;
+    bonus?: { id: number; stat: string | null; value: number }[];
+    manastones?: { itemId: number; id: number; stat: string | null; tier: number }[];
+  }[];
   /** Row 0 is skillId, rows 1-3 the chain (0 = empty). */
   skillbar: { bar: number; slot: number; skillId: number; chain: number[] }[];
   daevanion: number[];
@@ -60,14 +68,23 @@ export function CaptureSync({ settings, save, onError }: { settings: Settings; s
   }, [key, char?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A guard (1150xxxxx) on a slot number not seen yet still is the off-hand (a Ranger's guard went missing, no log yet).
-  // Arcana (game slots 41-45, order unknown) by their id: 810 + type digit (1 Grail ... 5 Mirror).
+  // Arcana (game slots 41-45 in the same order) by their id: 810 + type digit (1 Grail ... 5 Mirror).
   const ARCANA = ["ArcanaGrail", "ArcanaParchment", "ArcanaCompass", "ArcanaBell", "ArcanaMirror"];
   const slotOf = (e: { slot: number; itemId: number }) => {
     const id = String(e.itemId);
     const arcana = /^810([1-5])/.exec(id);
     return arcana ? ARCANA[Number(arcana[1]) - 1] : GAME_SLOTS[e.slot] ?? (id.startsWith("1150") ? "offhand" : undefined);
   };
-  const gear = Object.fromEntries((data?.equipment ?? []).flatMap((e) => (slotOf(e) ? [[slotOf(e)!, { id: String(e.itemId), enh: e.enchant }]] : [])));
+  const statOf = (s: { id: number; stat: string | null }) => s.stat ?? `#${s.id}`;
+  const gear = Object.fromEntries(
+    (data?.equipment ?? []).flatMap((e) => {
+      const s = slotOf(e);
+      if (!s) return [];
+      const bonus = (e.bonus ?? []).map((b) => [statOf(b), b.value]);
+      const stones = (e.manastones ?? []).map((m) => [statOf(m), m.tier]);
+      return [[s, { id: String(e.itemId), enh: e.enchant, ...(e.level ? { lvl: e.level } : {}), ...(bonus.length ? { bonus } : {}), ...(stones.length ? { stones } : {}) }]];
+    }),
+  );
   const all = readCapturedGear(settings[CAPTURED_GEAR_KEY]);
   const changed = !!char && Object.keys(gear).length > 0 && JSON.stringify(all[char.id]) !== JSON.stringify(gear);
   useEffect(() => {

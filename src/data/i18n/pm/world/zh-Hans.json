@@ -188,5 +188,15 @@
   "world.layer.shellfish": "贝类",
   "world.layer.vegetable": "蔬菜",
   "world.layer.wood": "木材",
-  "world.layer.berry": "浆果"
+  "world.layer.berry": "浆果",
+  "world.map.selectAll": "全选",
+  "world.map.selectNone": "全不选",
+  "world.map.mapOpacity": "地图不透明度",
+  "world.map.pathOpacity": "路径不透明度",
+  "world.map.pathOpacityHint": "标记、采集点、宠物位置和区域边界",
+  "world.map.move": "移动",
+  "world.map.filter": "筛选",
+  "world.map.lock": "锁定：点击会传到游戏",
+  "world.map.unlock": "已锁定：点击解锁",
+  "world.map.petMonsters": "怪物：{list}"
 }

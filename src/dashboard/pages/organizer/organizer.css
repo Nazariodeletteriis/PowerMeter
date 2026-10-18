@@ -173,13 +173,6 @@
 [data-cat="event"] {
   --c: var(--pm-t2);
 }
-/* Chiaro has no dark amber / green of its own: the brace ones read about 1.8:1 on its light cards. */
-html[data-pm-palette="chiaro"] [data-cat="rift"] {
-  --c: #8a5a00;
-}
-html[data-pm-palette="chiaro"] :is(.evNext, .evTlRow) {
-  --pm-okt: #1d7244;
-}
 .evCat {
   border-color: color-mix(in srgb, var(--c) 55%, transparent);
   color: var(--c);

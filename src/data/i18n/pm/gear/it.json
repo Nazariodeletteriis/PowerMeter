@@ -1,0 +1,16 @@
+{
+  "database.gear.tune.note": "Ogni stat conta il livello di potenziamento e i bonus che imposti per il pezzo. Le scelte restano salvate su questo PC.",
+  "database.gear.tune.enh": "Potenziamento",
+  "database.gear.tune.enhFor": "Potenziamento di {name}",
+  "database.gear.tune.bonus": "Bonus",
+  "database.gear.tune.add": "Aggiungi un bonus",
+  "database.gear.tune.addFor": "Aggiungi un bonus a {name}",
+  "database.gear.tune.remove": "Rimuovi {stat}",
+  "database.gear.tune.valueOf": "Valore di {stat}",
+  "database.gear.tune.range": "Intervallo {range}",
+  "database.gear.tune.between": "Inserisci un valore in {range}",
+  "database.gear.tune.number": "Inserisci un numero",
+  "database.gear.tune.manual": "manuale",
+  "database.gear.tune.manualNote": "I dati di gioco non elencano bonus per questo pezzo: aggiungili a mano dall'elenco delle stat.",
+  "database.gear.tune.none": "Nessun bonus"
+}

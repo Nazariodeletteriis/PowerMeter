@@ -2,6 +2,21 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.19
+
+- Nuevo: Minimapa: el widget del Mapa es ahora un minimapa transparente sobre el juego, con el estilo del del juego, con controles deslizantes de Opacidad del mapa y Opacidad del camino, botones laterales (mover, filtro, mascotas, pantalla completa, zoom) y un candado que deja pasar los clics al juego.
+- Nuevo: Filtros del minimapa: un menú «Recolección» con cada recurso por su nombre en el juego (Asvata, Calendula, Azpha, Odyle...) y su propio icono, y un menú «Capas» con los demás marcadores; ambos tienen Seleccionar todo / Deseleccionar todo. El mapa grande también los tiene.
+- Nuevo: Mascotas en el minimapa: elige una familia y una mascota y sus monstruos aparecen como puntos en el minimapa, con el nombre al pasar el ratón; las mascotas completadas nunca aparecen.
+- Nuevo: Temas: los temas de color del widget (PowerMeter, AION2, Asmodian, Elyos, Ember, Frost, Obsidian, Cogni, Fera, Natura, Varian) ahora dan estilo a toda la app, una sola elección para el widget, el panel y todas las ventanas.
+- Nuevo: Los ajustes del widget de DPS ahora están en la app, en Ajustes > Widget DPS; el botón de engranaje del widget los abre allí.
+- Nuevo: Los avisos de eventos también pueden mostrar un popup en el widget con el evento y su cuenta atrás, de 3 a 30 segundos (8 por defecto); se activa o desactiva en los ajustes.
+- Nuevo: Character Builder: cada objeto muestra sus estadísticas extra y manastones leídos del juego, y las estadísticas extra cuentan en los totales (las pocas cuya estadística aún no es segura se muestran como #id y quedan fuera; los manastones muestran solo su nivel, porque el juego no envía ningún valor).
+- Nuevo: Character Builder: las estadísticas de Arcana cuentan en los totales, y las estadísticas principales (Time, Life, Freedom, Justice, Illusion y los atributos) añaden sus estadísticas derivadas según la tabla de conversión del juego.
+- Nuevo: Character Builder, Pets: cada mascota muestra sus efectos en los niveles 1, 2 y 3, y Efectos que posees muestra el total de la colección por familia junto a las opciones de Insight; la colección ahora cuenta en las estadísticas.
+- Nuevo: Gear Viewer: define la mejora de cada objeto comparado y elige sus estadísticas extra (o escríbelas), para que la comparación sea la real.
+- Corregido: Character Builder: los niveles de los objetos coinciden con el juego (base + mejora + manastones).
+- Corregido: Character Builder: los Arcana que llevas puestos en el juego se reconocen y se rellenan automáticamente como el resto del equipo.
+
 ## 0.5.18
 
 - Nuevo: Widget del Mapa: el mapa interactivo se abre en su propia ventana sobre el juego (botón en la página Mapa), con un botón de pantalla completa tanto en el widget como en la página (Esc para salir).

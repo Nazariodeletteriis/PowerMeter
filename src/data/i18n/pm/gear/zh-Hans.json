@@ -1,0 +1,16 @@
+{
+  "database.gear.tune.note": "每项属性都计入你为装备设定的强化等级和加成。选择会保存在这台电脑上。",
+  "database.gear.tune.enh": "强化",
+  "database.gear.tune.enhFor": "{name}的强化",
+  "database.gear.tune.bonus": "加成",
+  "database.gear.tune.add": "添加加成",
+  "database.gear.tune.addFor": "为{name}添加加成",
+  "database.gear.tune.remove": "移除{stat}",
+  "database.gear.tune.valueOf": "{stat}数值",
+  "database.gear.tune.range": "范围 {range}",
+  "database.gear.tune.between": "请输入{range}内的数值",
+  "database.gear.tune.number": "请输入数字",
+  "database.gear.tune.manual": "手动",
+  "database.gear.tune.manualNote": "游戏数据没有列出此装备的加成：请从属性列表手动添加。",
+  "database.gear.tune.none": "没有加成"
+}

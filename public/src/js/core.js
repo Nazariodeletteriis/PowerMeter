@@ -10,6 +10,7 @@ const REMOTE_APPLIED_SETTING_CONTROLS = {
   "dpsMeter.bossNameSize": ".bossNameSizeInput",
   "dpsMeter.windowOpacity": ".windowOpacityInput",
   "dpsMeter.meterFillOpacity": ".meterOpacityInput",
+  "dpsMeter.showSuspendBtn": ".showSuspendBtnCheckbox",
 };
 
 // Target modes the meter accepts. The first four are exclusive (each hit counts
@@ -87,7 +88,8 @@ class DpsApp {
     this.isCollapse = false;
     this._windowHidden = false;
     this.displayMode = "dps";
-    // PowerMeter: the design's own theme is the default.
+    // PowerMeter: the design's own theme is the default. One theme for all of PowerMeter:
+    // the dashboard reads the same setting (src/dashboard/pages/system/theme.ts THEMES).
     this.theme = "powermeter";
     this.availableThemes = [
       "powermeter",
@@ -2373,10 +2375,9 @@ class DpsApp {
     this.initializeSettingsDropdowns();
 
     this.settingsBtn?.addEventListener("click", () => {
-      // Settings is its own window now, so the overlay no longer grows to
-      // ~820px to contain it.
+      // PowerMeter: the widget's settings live in the dashboard (Settings > Widget DPS).
       if (window.A2_VIEW === "main") {
-        window.javaBridge?.openSettingsWindow?.();
+        window.javaBridge?.openWidgetSettings?.();
         return;
       }
       this.refreshMonitorList().then(() => this.initializeSettingsDropdowns());
@@ -4091,6 +4092,21 @@ class DpsApp {
     }
     if (key === this.storageKeys.onlyShowUser) return this.setOnlyShowUser(value === "1");
     if (key === this.storageKeys.theme) return this.applyTheme(value);
+    // PowerMeter: the two dropdowns the dashboard's Widget DPS section also sets.
+    if (key === this.storageKeys.playerLimit) {
+      const limit = parseInt(value, 10);
+      if (!(limit >= 1) || limit === this.playerLimit) return;
+      this.playerLimit = limit;
+      return this.renderCurrentRows();
+    }
+    if (key === this.storageKeys.defaultMeterMode) {
+      // The widget's own pick sets settingsSelections first, so its echo stops here.
+      const mode = value === "trainTargets" ? "pveTargets" : value;
+      if (!TARGET_MODES.includes(mode) || mode === this.settingsSelections?.defaultMeterMode) return;
+      if (this.settingsSelections) this.settingsSelections.defaultMeterMode = mode;
+      // As a pick in the widget: the meter switches to it now. One window tells the backend.
+      return this.setTargetSelection(mode, { syncBackend: window.A2_VIEW === "main", reason: "default meter mode changed" });
+    }
     const selector = REMOTE_APPLIED_SETTING_CONTROLS[key];
     if (!selector) return;
     const control = document.querySelector(selector);

@@ -1,0 +1,35 @@
+/* Gear Viewer compare: the enhancement and bonus rows, and where a total comes from. */
+.gvTune th,
+.gvTune td {
+  vertical-align: top;
+  white-space: normal;
+  text-align: left;
+}
+.gvTune th {
+  color: var(--pm-t2);
+}
+.gvTune td {
+  width: 220px;
+  min-width: 200px;
+}
+/* Full cell width, so a long stat name in the list does not widen the column. */
+.gvAdd {
+  width: 100%;
+}
+/* Row headers of the compare: the column header row is the only sticky one. */
+.gvCmpWrap tbody th {
+  position: static;
+}
+.gvFrom {
+  display: block;
+  font-size: 11px;
+  color: var(--pm-t3);
+}
+.gvHint {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--pm-t2);
+}
+.gvHint[data-bad] {
+  color: var(--pm-redt);
+}

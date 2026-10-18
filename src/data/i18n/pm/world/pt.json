@@ -188,5 +188,15 @@
   "world.layer.shellfish": "Mariscos",
   "world.layer.vegetable": "Vegetais",
   "world.layer.wood": "Madeira",
-  "world.layer.berry": "Bagas"
+  "world.layer.berry": "Bagas",
+  "world.map.selectAll": "Selecionar tudo",
+  "world.map.selectNone": "Desmarcar tudo",
+  "world.map.mapOpacity": "Opacidade do mapa",
+  "world.map.pathOpacity": "Opacidade dos caminhos",
+  "world.map.pathOpacityHint": "Marcadores, pontos de coleta, locais de mascotes e limites de zona",
+  "world.map.move": "Mover",
+  "world.map.filter": "Filtro",
+  "world.map.lock": "Bloquear: os cliques passam para o jogo",
+  "world.map.unlock": "Bloqueado: clique para desbloquear",
+  "world.map.petMonsters": "Monstros: {list}"
 }

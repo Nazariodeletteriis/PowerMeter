@@ -45,33 +45,52 @@ pub fn start_capture_after_terms(app: &tauri::AppHandle, start: impl FnOnce() + 
     });
 }
 
-/// Not persisted on purpose: the overlay always starts clickable, so a user
-/// who forgot the hotkey is never locked out of it.
-static CLICK_THROUGH: AtomicBool = AtomicBool::new(false);
+/// A window that can be locked: it lets mouse input pass through to the game
+/// underneath. The meter overlay and the minimap (Map window). Not persisted on
+/// purpose: both always start clickable, so a user who forgot how to unlock is
+/// never locked out.
+struct Lock {
+    label: &'static str,
+    /// Emitted with the state, so the window's lock button reflects it.
+    event: &'static str,
+    /// Emitted while the cursor is over the lock button, for its hover style.
+    hot_event: &'static str,
+    on: AtomicBool,
+    /// Lock button rect in CSS px of the window's viewport, reported by the
+    /// window whenever it locks (the button moves with the window's layout).
+    spot: std::sync::Mutex<Option<[f64; 4]>>,
+}
 
-/// Lets mouse input pass through the overlay to the game underneath. Emits
-/// `pm-click-through` so the overlay's lock button reflects the state.
-fn apply_click_through(app: &tauri::AppHandle, enabled: bool) -> Result<(), String> {
-    let window = app.get_webview_window("main").ok_or("overlay window not found")?;
+static LOCKS: [Lock; 2] = [
+    Lock { label: "main", event: "pm-click-through", hot_event: "pm-lock-hot", on: AtomicBool::new(false), spot: std::sync::Mutex::new(None) },
+    Lock { label: "map", event: "pm-map-click-through", hot_event: "pm-map-lock-hot", on: AtomicBool::new(false), spot: std::sync::Mutex::new(None) },
+];
+static METER: &Lock = &LOCKS[0];
+
+fn lock_of(label: &str) -> Result<&'static Lock, String> {
+    LOCKS.iter().find(|l| l.label == label).ok_or_else(|| format!("window {label} has no lock"))
+}
+
+fn apply_click_through(app: &tauri::AppHandle, lock: &Lock, enabled: bool) -> Result<(), String> {
+    let window = app.get_webview_window(lock.label).ok_or_else(|| format!("{} window not found", lock.label))?;
     window.set_ignore_cursor_events(enabled).map_err(|e| e.to_string())?;
-    CLICK_THROUGH.store(enabled, Ordering::SeqCst);
-    let _ = app.emit("pm-click-through", enabled);
+    lock.on.store(enabled, Ordering::SeqCst);
+    let _ = app.emit(lock.event, enabled);
     Ok(())
 }
 
-/// Lock badge rect in CSS px of the meter viewport, reported by pmWidget.js
-/// whenever the meter locks (the badge moves with the meter's layout).
-static LOCK_HOTSPOT: std::sync::Mutex<Option<[f64; 4]>> = std::sync::Mutex::new(None);
-
+/// Reported by the calling window (pmWidget.js for the meter, Minimap.tsx for the map).
 #[tauri::command]
-pub fn set_lock_hotspot(x: f64, y: f64, w: f64, h: f64) {
-    *LOCK_HOTSPOT.lock().unwrap_or_else(|e| e.into_inner()) = Some([x, y, w, h]);
+pub fn set_lock_hotspot(window: tauri::WebviewWindow, x: f64, y: f64, w: f64, h: f64) {
+    if let Ok(lock) = lock_of(window.label()) {
+        *lock.spot.lock().unwrap_or_else(|e| e.into_inner()) = Some([x, y, w, h]);
+    }
 }
 
-/// While locked, the whole window ignores the mouse, so the lock badge can't
-/// be clicked through the webview. This loop polls the cursor: over the badge
+/// While locked, the whole window ignores the mouse, so its lock button can't
+/// be clicked through the webview. This loop polls the cursor: over the button
 /// the window takes the mouse (so the click doesn't reach the game) and emits
-/// `pm-lock-hot` for the hover style; a left-button press there unlocks.
+/// the lock's hot event for the hover style; a left-button press there unlocks.
 /// Detecting the press here keeps it working whatever the webview does.
 #[cfg(windows)]
 fn watch_lock_corner(app: tauri::AppHandle) {
@@ -80,33 +99,35 @@ fn watch_lock_corner(app: tauri::AppHandle) {
     use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
 
     std::thread::spawn(move || {
-        let (mut hot, mut was_down) = (false, false);
+        let (mut hot, mut was_down) = (vec![false; LOCKS.len()], false);
         loop {
             std::thread::sleep(std::time::Duration::from_millis(30));
-            let Some(window) = app.get_webview_window("main") else { continue };
-            let spot = *LOCK_HOTSPOT.lock().unwrap_or_else(|e| e.into_inner());
-            let over = CLICK_THROUGH.load(Ordering::SeqCst)
-                && (|| {
-                    let [x, y, w, h] = spot?;
-                    let mut cursor = POINT::default();
-                    unsafe { GetCursorPos(&mut cursor) }.ok()?;
-                    let origin = window.inner_position().ok()?;
-                    let scale = window.scale_factor().ok()?;
-                    let (cx, cy) = ((cursor.x - origin.x) as f64 / scale, (cursor.y - origin.y) as f64 / scale);
-                    Some(cx >= x && cx <= x + w && cy >= y && cy <= y + h)
-                })()
-                .unwrap_or(false);
-            if over != hot {
-                hot = over;
-                let _ = window.set_ignore_cursor_events(!over && CLICK_THROUGH.load(Ordering::SeqCst));
-                let _ = app.emit("pm-lock-hot", over);
-            }
             let down = unsafe { GetAsyncKeyState(VK_LBUTTON.0 as i32) } as u16 & 0x8000 != 0;
-            if over && down && !was_down {
-                hot = false;
-                let _ = app.emit("pm-lock-hot", false);
-                if let Err(e) = apply_click_through(&app, false) {
-                    tracing::warn!("Unlock from the lock badge failed: {}", e);
+            for (lock, hot) in LOCKS.iter().zip(hot.iter_mut()) {
+                let Some(window) = app.get_webview_window(lock.label) else { continue };
+                let spot = *lock.spot.lock().unwrap_or_else(|e| e.into_inner());
+                let over = lock.on.load(Ordering::SeqCst)
+                    && (|| {
+                        let [x, y, w, h] = spot?;
+                        let mut cursor = POINT::default();
+                        unsafe { GetCursorPos(&mut cursor) }.ok()?;
+                        let origin = window.inner_position().ok()?;
+                        let scale = window.scale_factor().ok()?;
+                        let (cx, cy) = ((cursor.x - origin.x) as f64 / scale, (cursor.y - origin.y) as f64 / scale);
+                        Some(cx >= x && cx <= x + w && cy >= y && cy <= y + h)
+                    })()
+                    .unwrap_or(false);
+                if over != *hot {
+                    *hot = over;
+                    let _ = window.set_ignore_cursor_events(!over && lock.on.load(Ordering::SeqCst));
+                    let _ = app.emit(lock.hot_event, over);
+                }
+                if over && down && !was_down {
+                    *hot = false;
+                    let _ = app.emit(lock.hot_event, false);
+                    if let Err(e) = apply_click_through(&app, lock, false) {
+                        tracing::warn!("Unlock from the {} lock button failed: {}", lock.label, e);
+                    }
                 }
             }
             was_down = down;
@@ -117,15 +138,15 @@ fn watch_lock_corner(app: tauri::AppHandle) {
 #[cfg(not(windows))]
 fn watch_lock_corner(_app: tauri::AppHandle) {}
 
-/// The overlay's lock button (design: widget header).
+/// The lock buttons: the meter's (no label, design: widget header) and the minimap's (label "map").
 #[tauri::command]
-pub fn set_click_through(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
-    apply_click_through(&app, enabled)
+pub fn set_click_through(app: tauri::AppHandle, enabled: bool, label: Option<String>) -> Result<(), String> {
+    apply_click_through(&app, lock_of(label.as_deref().unwrap_or("main"))?, enabled)
 }
 
 #[tauri::command]
-pub fn get_click_through() -> bool {
-    CLICK_THROUGH.load(Ordering::SeqCst)
+pub fn get_click_through(label: Option<String>) -> bool {
+    lock_of(label.as_deref().unwrap_or("main")).is_ok_and(|l| l.on.load(Ordering::SeqCst))
 }
 
 /// Set when the user closes the overlay, so the engine's auto-hide loop does
@@ -154,7 +175,7 @@ pub fn show_overlay(app: tauri::AppHandle) -> Result<(), String> {
     let window = app.get_webview_window("main").ok_or("overlay window not found")?;
     set_user_hidden(false);
     // "Open widget" is also the mouse way out of a locked (click-through) meter.
-    apply_click_through(&app, false)?;
+    apply_click_through(&app, METER, false)?;
     window.show().map_err(|e| e.to_string())?;
     let _ = window.unminimize();
     let _ = window.set_always_on_top(true);
@@ -180,8 +201,8 @@ pub fn start_click_through_hotkey(app: &tauri::AppHandle) {
         0,
         0,
         move || {
-            let next = !CLICK_THROUGH.load(Ordering::SeqCst);
-            if let Err(e) = apply_click_through(&app, next) {
+            let next = !METER.on.load(Ordering::SeqCst);
+            if let Err(e) = apply_click_through(&app, METER, next) {
                 tracing::warn!("Click-through toggle failed: {}", e);
             }
         },
@@ -343,33 +364,41 @@ fn show_dashboard(app: &tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
-/// The Map window: the dashboard page with only the map (MapWindow.tsx), a
-/// widget of its own next to the game. Async for the same reason as
-/// `open_dashboard_window`. Its place and size are remembered like the tool
-/// windows' (`window.map.*`), saved when it loses focus or closes rather than
-/// on every move event, since each save writes the settings file.
+/// The Map window: the minimap widget over the game (MapWindow.tsx), and the
+/// whole map when the user takes it full screen. Transparent: the minimap's
+/// own map and path opacity show the game through it. Async for the same
+/// reason as `open_dashboard_window`. Its place and size are remembered like
+/// the tool windows' (`window.minimap.*`: the old `window.map.*` was the size of
+/// a full map window), saved when it loses focus or closes rather than on every
+/// move event, since each save writes the settings file. Opening it again also
+/// unlocks it: the mouse way out of a locked minimap.
 #[tauri::command]
 pub async fn open_map_window(app: tauri::AppHandle) -> Result<(), String> {
+    let lock = lock_of("map")?;
     if let Some(existing) = app.get_webview_window("map") {
+        apply_click_through(&app, lock, false)?;
         let _ = existing.show();
         let _ = existing.unminimize();
         let _ = existing.set_focus();
         return Ok(());
     }
+    lock.on.store(false, Ordering::SeqCst); // a new window takes the mouse
     let window = tauri::WebviewWindowBuilder::new(&app, "map", tauri::WebviewUrl::App("dashboard.html".into()))
         // WebviewUrl::App is a path (a ?query is percent-encoded): see build_settings_window.
         .initialization_script("window.__PM_VIEW__ = 'map';")
         .title("PowerMeter — Map")
         .decorations(false)
+        .transparent(true)
+        // On Windows an undecorated window's shadow is a 1px border around the transparent area.
+        .shadow(false)
         // Over the game, like the meter and the tool windows.
         .always_on_top(true)
         .resizable(true)
-        .inner_size(900.0, 700.0)
-        .min_inner_size(640.0, 420.0)
-        .background_color(tauri::window::Color(10, 14, 22, 255))
+        .inner_size(360.0, 400.0)
+        .min_inner_size(240.0, 240.0)
         .build()
         .map_err(|e| e.to_string())?;
-    if !crate::restore_window_geometry(&app, &window, "map") {
+    if !crate::restore_window_geometry(&app, &window, "minimap") {
         let _ = window.center();
     }
     let handle = window.clone();
@@ -393,7 +422,7 @@ fn save_map_geometry(window: &tauri::WebviewWindow) {
     if let (Ok(pos), Ok(size)) = (window.outer_position(), window.outer_size()) {
         if pos.x > -10000 && pos.y > -10000 && size.width > 100 && size.height > 100 {
             for (key, value) in [("x", pos.x), ("y", pos.y), ("w", size.width as i32), ("h", size.height as i32)] {
-                state.settings.set(&format!("window.map.{key}"), &value.to_string());
+                state.settings.set(&format!("window.minimap.{key}"), &value.to_string());
             }
         }
     }

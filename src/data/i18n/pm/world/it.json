@@ -188,5 +188,15 @@
   "world.layer.shellfish": "Molluschi",
   "world.layer.vegetable": "Ortaggi",
   "world.layer.wood": "Legno",
-  "world.layer.berry": "Bacche"
+  "world.layer.berry": "Bacche",
+  "world.map.selectAll": "Seleziona tutto",
+  "world.map.selectNone": "Deseleziona tutto",
+  "world.map.mapOpacity": "Opacità mappa",
+  "world.map.pathOpacity": "Opacità percorsi",
+  "world.map.pathOpacityHint": "Segnalini, punti di raccolta, punti dei pet e confini delle zone",
+  "world.map.move": "Sposta",
+  "world.map.filter": "Filtri",
+  "world.map.lock": "Blocca: i clic passano al gioco",
+  "world.map.unlock": "Bloccata: clicca per sbloccare",
+  "world.map.petMonsters": "Mostri: {list}"
 }

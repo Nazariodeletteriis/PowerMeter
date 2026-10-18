@@ -1,0 +1,16 @@
+{
+  "database.gear.tune.note": "每項屬性都計入你為裝備設定的強化等級與加成。選擇會儲存在這台電腦上。",
+  "database.gear.tune.enh": "強化",
+  "database.gear.tune.enhFor": "{name}的強化",
+  "database.gear.tune.bonus": "加成",
+  "database.gear.tune.add": "新增加成",
+  "database.gear.tune.addFor": "為{name}新增加成",
+  "database.gear.tune.remove": "移除{stat}",
+  "database.gear.tune.valueOf": "{stat}數值",
+  "database.gear.tune.range": "範圍 {range}",
+  "database.gear.tune.between": "請輸入{range}內的數值",
+  "database.gear.tune.number": "請輸入數字",
+  "database.gear.tune.manual": "手動",
+  "database.gear.tune.manualNote": "遊戲資料沒有列出此裝備的加成：請從屬性列表手動新增。",
+  "database.gear.tune.none": "沒有加成"
+}

@@ -470,6 +470,9 @@
     "onlyMe": "Только мой DPS",
     "eventSoon": "{name} через {time}",
     "eventDismiss": "Закрыть уведомление",
+    "eventPopupTitle": "Скоро событие",
+    "eventStartsIn": "начнётся через {time}",
+    "eventPopupTest": "Тестовое окно",
     "pillHint": "Нажмите, чтобы развернуть · перетащите, чтобы переместить",
     "copy": "Копировать как изображение для Discord",
     "copied": "Скопировано, вставьте в Discord"

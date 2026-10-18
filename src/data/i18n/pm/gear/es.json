@@ -1,0 +1,16 @@
+{
+  "database.gear.tune.note": "Cada estadística cuenta el nivel de mejora y las bonificaciones que fijes para la pieza. Tu elección se guarda en este PC.",
+  "database.gear.tune.enh": "Mejora",
+  "database.gear.tune.enhFor": "Mejora de {name}",
+  "database.gear.tune.bonus": "Bonificaciones",
+  "database.gear.tune.add": "Añadir bonificación",
+  "database.gear.tune.addFor": "Añadir una bonificación a {name}",
+  "database.gear.tune.remove": "Quitar {stat}",
+  "database.gear.tune.valueOf": "Valor de {stat}",
+  "database.gear.tune.range": "Rango {range}",
+  "database.gear.tune.between": "Introduce un valor en {range}",
+  "database.gear.tune.number": "Introduce un número",
+  "database.gear.tune.manual": "manual",
+  "database.gear.tune.manualNote": "Los datos del juego no listan bonificaciones para esta pieza: añádelas a mano desde la lista de estadísticas.",
+  "database.gear.tune.none": "Sin bonificaciones"
+}

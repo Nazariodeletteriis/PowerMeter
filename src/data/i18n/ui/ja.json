@@ -470,6 +470,9 @@
     "onlyMe": "自分のDPSのみ",
     "eventSoon": "{name}まで {time}",
     "eventDismiss": "通知を閉じる",
+    "eventPopupTitle": "まもなくイベント",
+    "eventStartsIn": "あと {time} で開始",
+    "eventPopupTest": "テスト表示",
     "pillHint": "クリックで展開 · ドラッグで移動",
     "copy": "Discord用に画像としてコピー",
     "copied": "コピーしました。Discordに貼り付けてください"

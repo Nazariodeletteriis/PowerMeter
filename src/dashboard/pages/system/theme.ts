@@ -1,11 +1,15 @@
 import type { Settings } from "../../App";
 import "./themes.css";
 
-export const PALETTE_SETTING = "pm.palette";
-export const PALETTES = ["brace", "carbonio", "chiaro"] as const;
+/** The widget's theme setting (core.js storageKeys.theme): one theme for all of PowerMeter, dashboard and widget windows. */
+export const THEME_SETTING = "dpsMeter.theme";
+/** The widget's themes (core.js availableThemes), the design's own first. */
+export const THEMES = ["powermeter", "aion2", "asmodian", "cogni", "elyos", "ember", "fera", "frost", "natura", "obsidian", "varian"] as const;
 
-/** Puts the saved palette on <html data-pm-palette>; unknown or unset → brace. */
+/** The saved theme; unknown or unset (the old Brace / Carbonio / Chiaro palettes too) → powermeter. */
+export const themeOf = (settings: Settings) => THEMES.find((x) => x === settings[THEME_SETTING]) ?? "powermeter";
+
+/** Puts the saved theme on <html data-theme>, as core.js applyTheme does in the widget windows. */
 export function applyPalette(settings: Settings) {
-  const saved = settings[PALETTE_SETTING];
-  document.documentElement.dataset.pmPalette = PALETTES.find((p) => p === saved) ?? "brace";
+  document.documentElement.dataset.theme = themeOf(settings);
 }

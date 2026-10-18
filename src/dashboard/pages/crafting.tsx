@@ -280,7 +280,7 @@ function Steps({
             <h3 className="wLabel" style={{ margin: 0 }}>
               {t(next ? "craft.tableBoth" : "craft.tableOne")}
             </h3>
-            <span style={{ color: missing ? "var(--pm-redt)" : "var(--pm-okt)" }} aria-live="polite">
+            <span style={{ color: missing ? "var(--pm-err)" : "var(--pm-okt)" }} aria-live="polite">
               {missing ? t("craft.missingOf", { n: fmt(missing, lang), m: fmt(rows.length, lang) }) : t("craft.ready")}
             </span>
             <span className="crSaved">

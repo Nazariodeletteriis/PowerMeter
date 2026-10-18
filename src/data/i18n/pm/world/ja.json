@@ -188,5 +188,15 @@
   "world.layer.shellfish": "貝類",
   "world.layer.vegetable": "野菜",
   "world.layer.wood": "木材",
-  "world.layer.berry": "ベリー"
+  "world.layer.berry": "ベリー",
+  "world.map.selectAll": "すべて選択",
+  "world.map.selectNone": "すべて解除",
+  "world.map.mapOpacity": "マップの不透明度",
+  "world.map.pathOpacity": "パスの不透明度",
+  "world.map.pathOpacityHint": "マーカー、採集ポイント、ペットの出現地点、ゾーン境界",
+  "world.map.move": "移動",
+  "world.map.filter": "フィルター",
+  "world.map.lock": "ロック：クリックがゲームに届きます",
+  "world.map.unlock": "ロック中：クリックで解除",
+  "world.map.petMonsters": "モンスター：{list}"
 }

@@ -81,7 +81,7 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
             position: "absolute",
             inset: "0 0 auto 0",
             height: 2,
-            background: "linear-gradient(90deg,transparent,#DB0000 25%,#DB0000 75%,transparent)",
+            background: "linear-gradient(90deg,transparent,var(--pm-red) 25%,var(--pm-red) 75%,transparent)",
           }}
         />
         <HeartIcon weight="fill" style={{ fontSize: 26, color: "#FF4D4D" }} aria-hidden="true" />
@@ -104,7 +104,7 @@ export function Supporter({ t, lang, onError }: { t: T; lang: string; onError: (
               <span style={{ fontSize: 20, fontWeight: 500 }}>{tierName(t, e.tier)}</span>
               {e.debugger && !e.admin && <span className="badge">Debugger</span>}
               {e.founder && (
-                <span className="badge" style={{ borderColor: "#DB000088", color: "#FF6B6B" }}>
+                <span className="badge" style={{ borderColor: "color-mix(in srgb, var(--pm-red) 53%, transparent)", color: "var(--pm-redt)" }}>
                   <HeartIcon weight="fill" aria-hidden="true" />
                   Founder
                 </span>

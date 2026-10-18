@@ -2,7 +2,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  arcanaCode,
   buildStats,
+  derivedStats,
   twPiece,
   type TwGearRow,
 } from "../src/dashboard/pages/characters/calc.ts";
@@ -95,4 +97,23 @@ test("adds up in the Builder totals", () => {
     [t.WeaponMinDamage, t.WeaponDamage, t.Block],
     [203, 271, 50],
   );
+});
+
+// The Gladiator's Arcana in packets_20261011_144836 (login inventory, slots 41-45) against the archive's codes.
+test("Arcana game ids read as the archive's Arcana", () => {
+  assert.equal(arcanaCode("810130001"), "Arcana_Grail_A_u_set_001_b");
+  assert.equal(arcanaCode("810260001"), "Arcana_Parchment_A_c_set_001_b");
+  assert.equal(arcanaCode("810440002"), "Arcana_Bell_A_l_set_002_b");
+  assert.equal(arcanaCode("810550001"), "Arcana_Mirror_A_r_set_001_b");
+  assert.equal(arcanaCode("110730048"), undefined);
+});
+
+test("attribute points give their stats, and the Builder adds them", () => {
+  const pct = new Set(["CombatSpeed", "HardHitResist"]);
+  // Grail of Vigor +2: Time 22 → Combat Speed and Toughness Resist +0.1% per point.
+  assert.deepEqual(derivedStats({ Time: 22 }, pct), [["CombatSpeed", 2.2], ["HardHitResist", 2.2]]);
+  const data = { base: [], stats: [...pct].map((k) => ({ stat_key: k, name: k, percent: 1, grp: null })), skills: [] } as never;
+  const piece = { id: "Arcana_Grail_A_u_set_001_b", name: null, slot: "ArcanaGrail", grade: null, level: 80, icon: null, max_enh: null, stats_json: [["Time", "Time", 20, "number"]] } as never;
+  const s = buildStats(data, 45, [{ piece, enh: 2, bonus: [["Time", 2]], extra: [["Critical", 20]] }], { spent: {}, stats: {}, skills: {} });
+  assert.deepEqual([s.Time, s.CombatSpeed, s.Critical], [22, 2.2, 20]);
 });

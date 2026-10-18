@@ -295,6 +295,14 @@
     openSettingsWindow() {
       return invoke("open_settings_window").catch((e) => console.error("[A2Tools] openSettingsWindow", e));
     },
+    // PowerMeter: the dashboard on Settings > Widget DPS (Shell.tsx). A dashboard opened now
+    // reads the flag when it starts; one already open gets the event.
+    openWidgetSettings() {
+      try { localStorage.setItem("pm.openWidgetSettings", "1"); } catch {}
+      return invoke("open_dashboard_window")
+        .then(() => window.__TAURI__.event.emit("pm-open-widget-settings"))
+        .catch((e) => console.error("[PowerMeter] openWidgetSettings", e));
+    },
     closeSettingsWindow() {
       return invoke("close_settings_window").catch(() => {});
     },

@@ -4,6 +4,21 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.19
+
+- New: Minimap: the Map widget is now a see-through minimap over the game, styled like the in-game one, with Map opacity and Path opacity sliders, side buttons (move, filter, pets, full screen, zoom) and a lock that lets clicks pass through to the game.
+- New: Minimap filters: a "Gathering" menu with every resource by its in-game name (Asvata, Calendula, Azpha, Odyle...) and its own icon, and a "Layers" menu with the other markers; both have Select all / Deselect all. The big map has them too.
+- New: Minimap pets: pick a family and a pet and its monsters show as dots on the minimap, with the name on hover; completed pets never show.
+- New: Themes: the widget's colour themes (PowerMeter, AION2, Asmodian, Elyos, Ember, Frost, Obsidian, Cogni, Fera, Natura, Varian) now style the whole app, one choice for the widget, the dashboard and every window.
+- New: DPS widget settings are now in the app, in Settings > DPS Widget; the widget's gear button opens them there.
+- New: Event alerts can also show a popup on the widget with the event and its countdown, for 3 to 30 seconds (8 by default); on or off in the settings.
+- New: Character Builder: each item shows its bonus stats and manastones read from the game, and the bonus stats count in the totals (the few whose stat is not certain yet are shown as #id and left out; manastones show their tier only, as the game sends no value).
+- New: Character Builder: Arcana stats count in the totals, and main stats (Time, Life, Freedom, Justice, Illusion and the attributes) add their derived stats as the game's conversion table says.
+- New: Character Builder, Pets: each pet shows its effects at levels 1, 2 and 3, and Owned effects shows the collection total by family next to the Insight options; the collection now counts in the stats.
+- New: Gear Viewer: set the enhancement of each compared item and pick its bonus stats (or type them in), so the comparison is the real one.
+- Fixed: Character Builder: item levels match the game (base + enhancement + manastones).
+- Fixed: Character Builder: Arcana worn in game are recognised and filled in automatically like the rest of the gear.
+
 ## 0.5.18
 
 - New: Map widget: the interactive map opens in its own window over the game (button on the Map page), with a full screen button on both the widget and the page (Esc leaves).

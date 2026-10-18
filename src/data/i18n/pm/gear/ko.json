@@ -1,0 +1,16 @@
+{
+  "database.gear.tune.note": "각 능력치에는 장비에 설정한 강화 단계와 보너스가 포함됩니다. 선택은 이 PC에 저장됩니다.",
+  "database.gear.tune.enh": "강화",
+  "database.gear.tune.enhFor": "{name} 강화",
+  "database.gear.tune.bonus": "보너스",
+  "database.gear.tune.add": "보너스 추가",
+  "database.gear.tune.addFor": "{name}에 보너스 추가",
+  "database.gear.tune.remove": "{stat} 제거",
+  "database.gear.tune.valueOf": "{stat} 값",
+  "database.gear.tune.range": "범위 {range}",
+  "database.gear.tune.between": "{range} 범위의 값을 입력하세요",
+  "database.gear.tune.number": "숫자를 입력하세요",
+  "database.gear.tune.manual": "수동",
+  "database.gear.tune.manualNote": "게임 데이터에 이 장비의 보너스가 없습니다. 능력치 목록에서 직접 추가하세요.",
+  "database.gear.tune.none": "보너스 없음"
+}

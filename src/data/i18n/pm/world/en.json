@@ -188,5 +188,15 @@
   "world.layer.shellfish": "Shellfish",
   "world.layer.vegetable": "Vegetables",
   "world.layer.wood": "Wood",
-  "world.layer.berry": "Berries"
+  "world.layer.berry": "Berries",
+  "world.map.selectAll": "Select all",
+  "world.map.selectNone": "Deselect all",
+  "world.map.mapOpacity": "Map Opacity",
+  "world.map.pathOpacity": "Path Opacity",
+  "world.map.pathOpacityHint": "Markers, gathering nodes, pet spots and zone borders",
+  "world.map.move": "Move",
+  "world.map.filter": "Filter",
+  "world.map.lock": "Lock: clicks go through to the game",
+  "world.map.unlock": "Locked: click to unlock",
+  "world.map.petMonsters": "Monsters: {list}"
 }
