@@ -175,9 +175,8 @@ impl StreamProcessor {
         // Bind the local player from the account character-select list, which
         // arrives as plaintext (uncompressed) and can land in a standalone packet.
         self.scan_char_list_self(buffer);
-        // Mask-driven id↔name records: the self record (33 36) and every other
-        // player's record (45 36). This is the primary naming source — it covers
-        // the already-loaded case where no login char-list is in the capture.
+        // Mask-driven id↔name records of other players (44/45 36). The self record (33 36) is read per
+        // packet (parse_self_record).
         self.scan_masked_identity(buffer);
         // Party roster (names, levels, gear score, combat power).
         self.scan_party_roster(buffer);
@@ -269,6 +268,7 @@ impl StreamProcessor {
             return false;
         }
 
+        self.parse_self_record(packet);
         let parsed_damage = self.parsing_damage(packet, true, false);
         let parsed_ownership = self.parse_summon_ownership_packet(packet);
         let parsed_summon = self.parse_summon_packet(packet);
@@ -880,84 +880,52 @@ impl StreamProcessor {
     /// `0B 37` matcher found nothing and every party member stayed as `#id`.
     /// Reading the mask bit is version-stable across that kind of change.
     ///
-    /// `33 36` is the record for the character *you* are playing. It appears for
-    /// exactly one entity, so it identifies the local player outright — no need
-    /// for the user to have typed their character name into settings, and it
-    /// works when you are already loaded into a zone (where there is no login
-    /// char-list and you never see your own spawn).
+    /// Other players' records sit mid-packet too, so this scans every byte. The parse
+    /// itself is `masked_identity_at`.
     fn scan_masked_identity(&self, data: &[u8]) {
-        if data.len() < 9 {
-            return;
-        }
         let mut i = 0;
         while i + 8 < data.len() {
-            if data[i + 1] != 0x36 {
+            // 0x45/0x44 = another player (pre/post the June 2026 shift). The self record (0x33) is not
+            // looked for here: see parse_self_record.
+            if data[i + 1] != 0x36 || (data[i] != 0x45 && data[i] != 0x44) {
                 i += 1;
                 continue;
             }
-            // 0x33 = self, 0x45/0x44 = another player (pre/post the June 2026 shift).
-            let is_self = data[i] == 0x33;
-            if !is_self && data[i] != 0x45 && data[i] != 0x44 {
-                i += 1;
-                continue;
-            }
-            let id = read_varint(data, i + 2);
-            if id.length <= 0 || !(1..=9_999_999).contains(&id.value) {
-                i += 1;
-                continue;
-            }
-            // mask1 is 4 bytes; mask2 is the byte after it and gates the name.
-            let mask2_idx = i + 2 + id.length as usize + 4;
-            if mask2_idx + 1 >= data.len() || data[mask2_idx] & 0x01 == 0 {
-                i += 1;
-                continue;
-            }
-            let name_len = data[mask2_idx + 1] as usize;
-            if !(2..=36).contains(&name_len) || mask2_idx + 2 + name_len > data.len() {
-                i += 1;
-                continue;
-            }
-            let raw = match std::str::from_utf8(&data[mask2_idx + 2..mask2_idx + 2 + name_len]) {
-                Ok(s) => s,
-                Err(_) => {
-                    i += 1;
-                    continue;
+            match masked_identity_at(data, i) {
+                Some((id, name, end)) => {
+                    self.data_storage.note_low_id_entity(id);
+                    self.data_storage.append_nickname_authoritative(id, &name);
+                    tracing::debug!("player record: '{}' -> entity {}", name, id);
+                    i = end;
                 }
-            };
-            let sanitized = match sanitize_nickname(raw) {
-                Some(s) => s,
-                None => {
-                    i += 1;
-                    continue;
-                }
-            };
-            // Require the whole field to be one clean name: sanitize_nickname
-            // stops at the first non-name character, so a shorter result means we
-            // landed mid-record rather than on a real name string.
-            if sanitized.len() != name_len {
-                i += 1;
-                continue;
+                None => i += 1,
             }
-
-            self.data_storage.note_low_id_entity(id.value);
-            self.data_storage
-                .append_nickname_authoritative(id.value, &sanitized);
-            if is_self {
-                self.data_storage.set_local_player_id(Some(id.value as i64));
-                // The game says who you are playing: adopt that name over whatever
-                // was typed or picked in the dashboard (an alt, a stale name), so
-                // every "is this me?" check downstream lines up.
-                if self.data_storage.local_character_name().as_deref().map(str::trim) != Some(sanitized.as_str()) {
-                    self.data_storage
-                        .set_local_character_name(Some(sanitized.clone()));
-                }
-                super::equip_parser::set_owner(&sanitized);
-                tracing::info!("self record: local player '{}' -> entity {}", sanitized, id.value);
-            } else {
-                tracing::debug!("player record: '{}' -> entity {}", sanitized, id.value);
-            }
-            i = mask2_idx + 2 + name_len;
         }
+    }
+
+    /// `33 36`, the record of the character *you* are playing, read only from the front of a whole packet
+    /// (always its own packet: every login and switch in the packet logs, 10/11 to 10/19). The byte scan that used to
+    /// find it anywhere also matched a `33 36` inside another packet, and an unknown player ("TopBanana") became you.
+    fn parse_self_record(&self, packet: &[u8]) {
+        let len = read_varint(packet, 0);
+        if len.length <= 0 {
+            return;
+        }
+        let at = len.length as usize;
+        if packet.get(at..at + 2) != Some(&[0x33, 0x36]) {
+            return;
+        }
+        let Some((id, name, _)) = masked_identity_at(packet, at) else { return };
+        self.data_storage.note_low_id_entity(id);
+        self.data_storage.append_nickname_authoritative(id, &name);
+        self.data_storage.set_local_player_id(Some(id as i64));
+        // The game says who you are playing: adopt that name over whatever was typed or picked in the
+        // dashboard (an alt, a stale name), so every "is this me?" check downstream lines up.
+        if self.data_storage.local_character_name().as_deref().map(str::trim) != Some(name.as_str()) {
+            self.data_storage.set_local_character_name(Some(name.clone()));
+        }
+        super::equip_parser::set_owner(&name);
+        tracing::info!("self record: local player '{}' -> entity {}", name, id);
     }
 
     // ===== PARTY ROSTER (02 97) =====
@@ -2590,6 +2558,32 @@ fn to_hex(bytes: &[u8]) -> String {
     to_hex_range(bytes, 0, bytes.len())
 }
 
+/// A masked identity record at `i` (`33 36` self, `44/45 36` another player):
+/// `<opcode 2B> <entity_id varint> <mask1 u32 LE> <mask2 u8> [mask2 & 0x01] <len u8><utf8 name>`.
+/// The name is present exactly when bit 0 of `mask2` is set; the other bits vary with whatever else the record
+/// carries (reading the bit, not literal mask bytes, survived the patches that changed them). Returns the entity,
+/// the name and where the record's name ends.
+fn masked_identity_at(data: &[u8], i: usize) -> Option<(i32, String, usize)> {
+    let id = read_varint(data, i + 2);
+    if id.length <= 0 || !(1..=9_999_999).contains(&id.value) {
+        return None;
+    }
+    let mask2_idx = i + 2 + id.length as usize + 4;
+    if mask2_idx + 1 >= data.len() || data[mask2_idx] & 0x01 == 0 {
+        return None;
+    }
+    let name_len = data[mask2_idx + 1] as usize;
+    let end = mask2_idx + 2 + name_len;
+    if !(2..=36).contains(&name_len) || end > data.len() {
+        return None;
+    }
+    let raw = std::str::from_utf8(&data[mask2_idx + 2..end]).ok()?;
+    // The whole field must be one clean name: sanitize_nickname stops at the first non-name character, so a
+    // shorter result means we landed mid-record rather than on a real name string.
+    let name = sanitize_nickname(raw).filter(|s| s.len() == name_len)?;
+    Some((id.value, name, end))
+}
+
 fn sanitize_nickname(nickname: &str) -> Option<String> {
     let trimmed = nickname.split('\0').next().unwrap_or("").trim();
     if trimmed.is_empty() {
@@ -2816,5 +2810,49 @@ mod stagger_tests {
         stream.extend(hex("1405e09eff020301280000001e00000002"));
         assert_eq!(sp.consume_stream(&stream), stream.len());
         assert_eq!(storage.get_stagger(BOSS), Some(Stagger { cur: 30, max: 40, broken: false }));
+    }
+}
+
+#[cfg(test)]
+mod self_record_tests {
+    use super::*;
+
+    fn processor() -> (Arc<DataStorage>, StreamProcessor) {
+        let storage = Arc::new(DataStorage::new());
+        let sp = StreamProcessor::new(storage.clone(), Arc::new(SkillLookup::new()), Arc::new(NpcLookup::new()));
+        (storage, sp)
+    }
+
+    /// A whole packet: 1-byte length varint (value = total + 4 - 1) and the body.
+    fn packet(body: &[u8]) -> Vec<u8> {
+        let mut p = vec![(body.len() + 1 + 4 - 1) as u8];
+        p.extend_from_slice(body);
+        p
+    }
+
+    /// `33 36 df0e 5e81c128 37 07 Allalon ff081f00`: Allalon's self record, packets_20261019_015229 line 540.
+    fn self_record(name: &str) -> Vec<u8> {
+        let mut b = vec![0x33, 0x36, 0xdf, 0x0e, 0x5e, 0x81, 0xc1, 0x28, 0x37, name.len() as u8];
+        b.extend_from_slice(name.as_bytes());
+        b.extend_from_slice(&[0xff, 0x08, 0x1f, 0x00]);
+        b
+    }
+
+    #[test]
+    fn the_self_record_packet_names_you() {
+        let (storage, mut sp) = processor();
+        sp.consume_stream(&packet(&self_record("Allalon")));
+        assert_eq!(storage.local_character_name().as_deref(), Some("Allalon"));
+        assert_eq!(storage.local_player_id(), Some(0x5f + (0x0e << 7))); // varint df 0e = 1887
+    }
+
+    #[test]
+    fn a_self_record_inside_another_packet_is_not_you() {
+        let (storage, mut sp) = processor();
+        let mut body = vec![0x11, 0x56, 0x00, 0x01];
+        body.extend_from_slice(&self_record("TopBanana"));
+        sp.consume_stream(&packet(&body));
+        assert_eq!(storage.local_character_name(), None);
+        assert_eq!(storage.local_player_id(), None);
     }
 }

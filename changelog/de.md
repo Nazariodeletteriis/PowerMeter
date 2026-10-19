@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.26
+
+- Behoben: Der Charakter, den du spielst, wird beim Einloggen und beim Wechsel wieder erkannt: Der Name eines anderen Spielers (etwa eines Fremden in deiner Nähe) konnte als deiner übernommen werden, und Dashboard und Widget folgten ihm.
+
 ## 0.5.25
 
 - Behoben: Der Ping im DPS-Widget (Signalbalken, Wert und Farbe des Live-Punkts) funktioniert wieder: Das Spiel misst seinen Ping jetzt anders, daher bekam die App keinen Wert mehr; sie misst ihn nun von deiner Anfrage bis zur Antwort des Servers.

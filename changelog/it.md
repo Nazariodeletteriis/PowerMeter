@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.26
+
+- Corretto: Il personaggio che stai giocando viene di nuovo riconosciuto al login e al cambio personaggio: il nome di un altro giocatore (per esempio uno sconosciuto vicino a te) poteva essere preso come il tuo, e dashboard e widget lo seguivano.
+
 ## 0.5.25
 
 - Corretto: Il ping del widget DPS (barre del segnale, valore e colore del pallino live) funziona di nuovo: il gioco aveva cambiato il modo in cui misura il ping e l'app non riceveva più nessun valore; ora lo misura dalla tua richiesta alla risposta del server.

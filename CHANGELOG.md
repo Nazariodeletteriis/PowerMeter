@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.26
+
+- Fixed: The character you are playing is recognised again when you log in or switch: another player's name (for example a stranger near you) could be taken as yours, and the dashboard and the widget followed it.
+
 ## 0.5.25
 
 - Fixed: The ping on the DPS widget (signal bars, value and the colour of the live dot) works again: the game changed how it times its ping, so the app never got a value; it now measures it from your request to the server's answer.

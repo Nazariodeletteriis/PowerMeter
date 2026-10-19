@@ -9,8 +9,8 @@ const MIN_PING_RS_BYTES: usize = 12;
 const MAX_HISTORY: usize = 10_000;
 /// The client asks every 10 s: a request older than this has had its answer.
 const KEEP_SENT_MS: i64 = 10_000;
-/// Ping requests are small; bigger client packets (movement bursts, chat) are never one.
-const MAX_SENT_BYTES: usize = 128;
+/// A TCP segment can carry the ping request together with other client packets (movement): kept up to this.
+const MAX_SENT_BYTES: usize = 1500;
 const MAX_SENT: usize = 512;
 
 pub struct PingTracker {

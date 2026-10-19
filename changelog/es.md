@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.26
+
+- Corregido: El personaje que juegas vuelve a reconocerse al entrar y al cambiar: el nombre de otro jugador (por ejemplo un desconocido cerca de ti) podía tomarse como el tuyo, y el panel y el widget lo seguían.
+
 ## 0.5.25
 
 - Corregido: El ping del widget de DPS (barras de señal, valor y color del punto en vivo) vuelve a funcionar: el juego cambió cómo mide su ping y la app ya no recibía ningún valor; ahora lo mide desde tu petición hasta la respuesta del servidor.

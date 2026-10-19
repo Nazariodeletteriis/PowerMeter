@@ -247,9 +247,12 @@ impl CaptureDispatcher {
                 }
             }
 
-            // Only parse server->client (src == locked port)
+            // Only parse server->client (src == locked port); the client's side is only logged.
             if let Some(port) = current_port {
                 if cap.src_port != port {
+                    if cap.dst_port == port {
+                        crate::logging::logger::log_packet(&cap, true);
+                    }
                     continue;
                 }
             }
@@ -268,7 +271,7 @@ impl CaptureDispatcher {
             }
 
             // Log raw packet if packet logging is enabled
-            crate::logging::logger::log_packet(&cap);
+            crate::logging::logger::log_packet(&cap, false);
 
             // Get or create assembler
             let a = cap.src_port.min(cap.dst_port);
