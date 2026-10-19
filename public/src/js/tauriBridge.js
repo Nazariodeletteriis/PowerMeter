@@ -325,11 +325,6 @@
         invoke("set_language", { language: String(value) }).catch(() => {});
       }
     },
-    clearAllSettings() {
-      localStorage.clear();
-      settingsCache = {};
-      invoke("clear_settings").catch(() => {});
-    },
 
     // --- DPS & Combat ---
     resetDps() {
@@ -377,10 +372,7 @@
       window._boundLocalActorId = id;
       invoke("bind_local_actor_id", { actorId: id }).catch(() => {});
       // Also bind nickname if we can find it from any source
-      const name =
-        window._dpsApp?.USER_NAME ||
-        document.querySelector(".characterNameInput")?.value?.trim() ||
-        "";
+      const name = window._dpsApp?.USER_NAME || "";
       if (name) {
         this.bindLocalNickname(actorId, name);
       }
@@ -400,9 +392,6 @@
       window._boundLocalNickname = `${id}:${nickname}`;
       invoke("bind_local_nickname", { actorId: id, nickname }).catch(() => {});
     },
-    setAllTargetsWindowMs() {},
-    setTargetSelectionWindowMs() {},
-    setTrainSelectionMode() {},
 
     // --- Window ---
     moveWindow() {
@@ -412,9 +401,6 @@
       // exists but does nothing, so the JS drag system runs but has no effect.
       // The ghost panel logic is tied to hasDragMoved which requires >3px of
       // mouse movement with isDragging=true. We prevent this below.
-    },
-    exitApp() {
-      invoke("quit_app").catch(() => {});
     },
 
     // --- Browser ---
@@ -433,22 +419,6 @@
     },
     getLastParsedAtMs() {
       return 0;
-    },
-    getAvailableDevices() {
-      // If cache is empty, do a blocking-ish fetch by returning what we have
-      // and immediately triggering a refresh. The settings panel re-populates
-      // the dropdown on each open, so the second open will have data.
-      if (!window._cachedDevices) {
-        // Trigger fetch — will be ready next time
-        invoke("get_available_devices").then((d) => { window._cachedDevices = d; }).catch(() => {});
-        return "[]";
-      }
-      // Keep refreshing in background
-      invoke("get_available_devices").then((d) => { window._cachedDevices = d; }).catch(() => {});
-      return JSON.stringify(window._cachedDevices);
-    },
-    setManualDevice(device) {
-      invoke("set_manual_device", { device: device || "" }).catch(() => {});
     },
     resetAutoDetection() {
       invoke("reset_auto_detection").catch(() => {});
@@ -470,50 +440,11 @@
     chooseScreenshotFolder() { return null; },
     getDefaultScreenshotFolder() { return ""; },
 
-    // --- Hotkeys ---
-    getCurrentHotKey() {
-      return this.getSetting("dpsMeter.hotkey") || "Ctrl+Alt+Shift+R";
-    },
-    getCurrentToggleWindowHotKey() {
-      return this.getSetting("dpsMeter.toggleWindowHotkey") || "Ctrl+Alt+Up";
-    },
-    setHotkey(mods, vk) {
-      const label = this._buildHotkeyLabel(mods, vk);
-      this.setSetting("dpsMeter.hotkey", label);
-    },
-    setToggleWindowHotkey(mods, vk) {
-      const label = this._buildHotkeyLabel(mods, vk);
-      this.setSetting("dpsMeter.toggleWindowHotkey", label);
-    },
-    _buildHotkeyLabel(mods, vk) {
-      const parts = [];
-      if (mods & 0x02) parts.push("Ctrl");
-      if (mods & 0x01) parts.push("Alt");
-      if (mods & 0x04) parts.push("Shift");
-      // Map common VK codes to names
-      const vkNames = {
-        0x08: "Backspace", 0x09: "Tab", 0x0D: "Enter", 0x1B: "Esc",
-        0x20: "Space", 0x21: "PageUp", 0x22: "PageDown", 0x23: "End",
-        0x24: "Home", 0x25: "Left", 0x26: "Up", 0x27: "Right", 0x28: "Down",
-        0x2D: "Insert", 0x2E: "Delete",
-        0x70: "F1", 0x71: "F2", 0x72: "F3", 0x73: "F4", 0x74: "F5",
-        0x75: "F6", 0x76: "F7", 0x77: "F8", 0x78: "F9", 0x79: "F10",
-        0x7A: "F11", 0x7B: "F12",
-      };
-      const keyName = vkNames[vk] || String.fromCharCode(vk);
-      parts.push(keyName);
-      return parts.join("+");
-    },
-
     // --- Feature flags ---
     isRunningFromIde() { return false; },
     getParsingBacklog() { return 0; },
     isCaptureSuspended() { return false; },
     suspendCapture() {},
-    setBossLogsEnabled() {},
-    setAutoHideMeter(enabled) {
-      invoke("update_settings", { key: "dpsMeter.autoHideMeter", value: String(enabled) }).catch(() => {});
-    },
     setSaveRawPackets(enabled) {
       invoke("set_packet_logging", { enabled: !!enabled }).catch(() => {});
     },
@@ -646,7 +577,6 @@
     if (window.A2_VIEW !== "main") return;
 
     const fullPanel = !!(
-      document.querySelector(".settingsPanel.isOpen") ||
       document.querySelector(".detailsPanel.open") ||
       document.querySelector(".historyPanel.isOpen") ||
       document.querySelector(".historyPanel.open")
@@ -715,7 +645,7 @@
     if (target?.closest?.("button, input, select, textarea, a, [data-no-drag]")) return;
     if (target?.closest?.(".headerBtn, .footerBtn, .bossIcon, .resizeHandle")) return;
     // Let panel internals work (close buttons, dropdowns, etc.)
-    if (target?.closest?.(".settingsPanel, .historyPanel, .detailsBody, .detailsHeader, .detailsSettingsMenu")) return;
+    if (target?.closest?.(".historyPanel, .detailsBody, .detailsHeader, .detailsSettingsMenu")) return;
     // Let meter bar item clicks pass through for details/hover
     if (target?.closest?.(".item")) return;
     // Everything else in .meter: native drag
@@ -725,8 +655,7 @@
     }
   }, { capture: true });
 
-  // Pre-fetch device list and fight history so they're ready when panels open
-  invoke("get_available_devices").then((d) => { window._cachedDevices = d; }).catch(() => {});
+  // Pre-fetch fight history so it's ready when the panel opens
   invoke("get_fight_history").then((h) => { window._cachedFightHistory = h; }).catch(() => {});
   // Refresh fight history periodically (picks up auto-saved fights)
   setInterval(() => {

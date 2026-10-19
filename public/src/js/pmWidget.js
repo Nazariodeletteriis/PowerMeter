@@ -101,8 +101,6 @@ const createPmWidget = (app) => {
     const current = Math.round((parseFloat(raw) || 0) * 100);
     const next = OPACITY_LEVELS.find((level) => level > current) ?? OPACITY_LEVELS[0];
     app.applyWindowOpacity(next, { persist: true });
-    if (app.windowOpacityInput) app.windowOpacityInput.value = String(next);
-    if (app.windowOpacityValue) app.windowOpacityValue.textContent = `${next}%`;
   });
 
   // --- pill. The overlay window follows the meter's size (tauriBridge.js

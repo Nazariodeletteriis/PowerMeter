@@ -1,18 +1,3 @@
-// Settings whose change in the Settings window must redraw the meter, mapped to
-// the control that applies them. See DpsApp.applyRemoteSettingChange().
-const REMOTE_APPLIED_SETTING_CONTROLS = {
-  "dpsMeter.roundDps": ".roundDpsCheckbox",
-  "dpsMeter.showTotalDps": ".showTotalDpsCheckbox",
-  "dpsMeter.pinMeToTop": ".pinMeToTopCheckbox",
-  "dpsMeter.mainPlayerNamesBold": ".playerNamesBoldCheckbox",
-  "dpsMeter.mainPlayerDpsBold": ".playerDpsBoldCheckbox",
-  "dpsMeter.showPing": ".showPingCheckbox",
-  "dpsMeter.bossNameSize": ".bossNameSizeInput",
-  "dpsMeter.windowOpacity": ".windowOpacityInput",
-  "dpsMeter.meterFillOpacity": ".meterOpacityInput",
-  "dpsMeter.showSuspendBtn": ".showSuspendBtnCheckbox",
-};
-
 // Target modes the meter accepts. The first four are exclusive (each hit counts
 // in exactly one); Target and All are the older cross-mode views.
 const TARGET_MODES = ["bossTargets", "pveTargets", "pvpTargets", "lastHitByMe", "allTargets"];
@@ -37,9 +22,7 @@ class DpsApp {
       userName: "dpsMeter.userName",
       // "Only my DPS" flag (footer): shared with the dashboard, "1" on / "" off.
       onlyShowUser: "pm.onlyMe",
-      allTargetsWindowMs: "dpsMeter.allTargetsWindowMs",
       trainSelectionMode: "dpsMeter.trainSelectionMode",
-      targetSelectionWindowMs: "dpsMeter.targetSelectionWindowMs",
       meterFillOpacity: "dpsMeter.meterFillOpacity",
       detailsBackgroundOpacity: "dpsMeter.detailsBackgroundOpacity",
       detailsFontSize: "dpsMeter.detailsFontSize",
@@ -63,8 +46,6 @@ class DpsApp {
       playerLimit: "dpsMeter.playerLimit",
       theme: "dpsMeter.theme",
       slimMode: "dpsMeter.slimMode",
-      autoHideMeter: "dpsMeter.autoHideMeter",
-      bossLogs: "dpsMeter.bossLogsEnabled",
       saveRawPackets: "dpsMeter.saveRawPackets",
       windowOpacity: "dpsMeter.windowOpacity",
       bossNameSize: "dpsMeter.bossNameSize",
@@ -104,11 +85,6 @@ class DpsApp {
       "obsidian",
       "varian",
     ];
-    this.supportQrImages = {
-      afdian: "./assets/afdian.png",
-      kofi: "./assets/kofi.png",
-      wechat: "./assets/wechat.png",
-    };
     this.jobColorMap = {
       정령성: "#E06BFF",
       Spiritmaster: "#E06BFF",
@@ -217,10 +193,6 @@ class DpsApp {
   }
 
   safeSetSetting(key, value) {
-    // A remote change being applied (applyRemoteSettingChange) is already stored:
-    // writing it back raced the user's next value while dragging a slider, and the
-    // two windows bounced the old and new values forever (meter growing in RAM).
-    if (this._applyingRemoteSetting) return this.safeSetStorage(key, value);
     try {
       window.javaBridge?.setSetting?.(key, value);
     } catch (e) {
@@ -507,11 +479,9 @@ class DpsApp {
       });
     }
     this.setupDetailsPanelSettings();
-    this.setupSettingsPanel();
+    this.applyStoredSettings();
     this.detailsUI?.updateLabels?.();
-    this.i18n?.onChange?.((lang) => {
-      this.settingsSelections.language = lang;
-      this.initializeSettingsDropdowns();
+    this.i18n?.onChange?.(() => {
       this.detailsUI?.updateLabels?.();
       this.detailsUI?.refresh?.();
       this.updateDisplayToggleLabel();
@@ -520,9 +490,6 @@ class DpsApp {
       }
       this.refreshConnectionInfo();
       this.refreshBossLabel();
-      this.updateSupportVisibility(lang);
-      this.updateSupportPrimaryAction(lang);
-      this.updateSupportQrImage(this.supportPrimaryButton?.dataset.support || "afdian");
     });
     window.ReleaseChecker?.start?.();
     this.setupConsoleDebugging();
@@ -657,7 +624,7 @@ class DpsApp {
     // Every poll, not only when the window comes or goes: the lock and the adapters move
     // on while the window stays, and a status read once at "window found" (not locked
     // yet) left the widget on "detecting" / "no packets" with the meter connected.
-    this.refreshConnectionInfo({ skipSettingsRefresh: !changed });
+    this.refreshConnectionInfo();
     if (changed) this.updateConnectionStatusUi();
     if (!running) return;
     const detectedName = this.parseCharacterNameFromWindowTitle(title);
@@ -673,9 +640,6 @@ class DpsApp {
       this.refreshDamageData({ reason: "character switch" });
     }
     this.setUserName(detectedName, { persist: true, syncBackend: true });
-    if (this.characterNameInput && document.activeElement !== this.characterNameInput) {
-      this.characterNameInput.value = detectedName;
-    }
   }
 
   stopPolling() {
@@ -879,8 +843,7 @@ class DpsApp {
 
 
   _isAnyPanelOpen() {
-    return this.settingsPanel?.classList.contains("isOpen")
-      || this.historyUI?.isOpen?.()
+    return this.historyUI?.isOpen?.()
       || this.detailsUI?.isOpen?.();
   }
 
@@ -1342,12 +1305,9 @@ class DpsApp {
     return Math.min(100, Math.max(10, Math.round(numeric)));
   }
 
-  applyMeterFillOpacity(percent, { persist } = {}) {
+  applyMeterFillOpacity(percent) {
     const normalized = this.normalizeMeterOpacity(percent, 100);
     document.documentElement.style.setProperty("--meter-fill-opacity", String(normalized / 100));
-    if (persist) {
-      this.safeSetSetting(this.storageKeys.meterFillOpacity, String(normalized));
-    }
   }
 
   getDefaultBossNameSize() {
@@ -1364,35 +1324,22 @@ class DpsApp {
     return Math.min(20, Math.max(8, Math.round(numeric * 2) / 2));
   }
 
-  applyBossNameSize(px, { persist } = {}) {
+  applyBossNameSize(px) {
     const normalized = this.normalizeBossNameSize(px, 15);
     document.documentElement.style.setProperty("--boss-name-size", `${normalized}px`);
     // fitBossName reads the computed size, so re-run it: a bigger size may now
     // overflow and need shrinking, a smaller one may have room to grow back.
     this.fitBossName();
-    if (persist) {
-      this.safeSetSetting(this.storageKeys.bossNameSize, String(normalized));
-    }
   }
 
   applyWindowOpacity(percent, { persist } = {}) {
-    const normalized = Math.max(0, Math.min(100, Math.round(Number(percent))));
+    const value = Number(percent);
+    if (!Number.isFinite(value)) return; // an unreadable stored or broadcast value keeps the current one
+    const normalized = Math.max(0, Math.min(100, Math.round(value)));
     document.documentElement.style.setProperty("--window-opacity", String(normalized / 100));
     if (persist) {
       this.safeSetSetting(this.storageKeys.windowOpacity, String(normalized));
     }
-  }
-
-  resetAllSettings() {
-    for (const key of Object.values(this.storageKeys)) {
-      try {
-        localStorage.removeItem(key);
-      } catch (_) {}
-    }
-    try {
-      window.javaBridge?.clearAllSettings?.();
-    } catch (_) {}
-    window.location.reload();
   }
 
   triggerDetailsFlash() {
@@ -1496,10 +1443,7 @@ class DpsApp {
       this.setUserName(this.USER_NAME, { persist: true, syncBackend: true });
       this.rememberLocalIdForName(this.USER_NAME, actorId);
     }
-    if (this.localActorIdInput && document.activeElement !== this.localActorIdInput) {
-      this.localActorIdInput.value = String(actorId);
-    }
-    this.refreshConnectionInfo({ skipSettingsRefresh: true });
+    this.refreshConnectionInfo();
     // NOTE: do NOT reinitTargetSelection() here. Which entity id is "you" can
     // change several times within one fight (the local player churns entity ids,
     // e.g. after casting Divine Aura), and reinit → restartTargetSelection →
@@ -1988,83 +1932,9 @@ class DpsApp {
     }
   }
 
-  setupSettingsPanel() {
-    this.settingsPanel = document.querySelector(".settingsPanel");
-    this.settingsClose = document.querySelector(".settingsClose");
-    this.settingsBtn = document.querySelector(".settingsBtn");
-    this.lockedIp = document.querySelector(".lockedIp");
-    this.lockedPort = document.querySelector(".lockedPort");
-    this.localActorIdInput = document.querySelector(".localActorIdInput");
-    this.allTargetsWindowDropdownBtn = document.querySelector(".allTargetsWindowDropdownBtn");
-    this.allTargetsWindowDropdownMenu = document.querySelector(".allTargetsWindowDropdownMenu");
-    this.targetWindowDropdownBtn = document.querySelector(".targetWindowDropdownBtn");
-    this.targetWindowDropdownMenu = document.querySelector(".targetWindowDropdownMenu");
-    this.trainSelectionModeDropdownBtn = document.querySelector(".trainSelectionModeDropdownBtn");
-    this.trainSelectionModeDropdownMenu = document.querySelector(".trainSelectionModeDropdownMenu");
-    this.defaultMeterModeDropdownBtn = document.querySelector(".defaultMeterModeDropdownBtn");
-    this.defaultMeterModeDropdownMenu = document.querySelector(".defaultMeterModeDropdownMenu");
-    this.resetDetectBtn = document.querySelector(".resetDetectBtn");
-    this.autoDetectDeviceCheckbox = document.querySelector(".autoDetectDeviceCheckbox");
-    this.deviceDropdownBtn = document.querySelector(".deviceDropdownBtn");
-    this.deviceDropdownMenu = document.querySelector(".deviceDropdownMenu");
-    this.characterNameInput = document.querySelector(".characterNameInput");
-    this.showSuspendBtnCheckbox = document.querySelector(".showSuspendBtnCheckbox");
-    this.bossLogsCheckbox = document.querySelector(".bossLogsCheckbox");
-    this.debugLoggingCheckbox = document.querySelector(".debugLoggingCheckbox");
-    this.showPingCheckbox = document.querySelector(".showPingCheckbox");
-    this.saveRawPacketsCheckbox = document.querySelector(".saveRawPacketsCheckbox");
-    this.pinMeToTopCheckbox = document.querySelector(".pinMeToTopCheckbox");
-    this.detailsMonitorDropdownBtn = document.querySelector(".detailsMonitorDropdownBtn");
-    this.detailsMonitorDropdownMenu = document.querySelector(".detailsMonitorDropdownMenu");
-    this.detailsMonitorHint = document.querySelector(".detailsMonitorHint");
-    this.meterLayoutDropdownBtn = document.querySelector(".meterLayoutDropdownBtn");
-    this.meterLayoutDropdownMenu = document.querySelector(".meterLayoutDropdownMenu");
-    this.playerNamesBoldCheckbox = document.querySelector(".playerNamesBoldCheckbox");
-    this.playerDpsBoldCheckbox = document.querySelector(".playerDpsBoldCheckbox");
-    this.meterOpacityInput = document.querySelector(".meterOpacityInput");
-    this.meterOpacityValue = document.querySelector(".meterOpacityValue");
-    this.bossNameSizeInput = document.querySelector(".bossNameSizeInput");
-    this.bossNameSizeValue = document.querySelector(".bossNameSizeValue");
-    this.windowOpacityInput = document.querySelector(".windowOpacityInput");
-    this.windowOpacityValue = document.querySelector(".windowOpacityValue");
-    this.discordButton = document.querySelector(".discordButton");
-    this.supportWidget = document.querySelector(".supportWidget");
-    this.supportButton = document.querySelector(".supportButton");
-    this.supportModal = document.querySelector("#supportModal");
-    this.supportModalTitle = document.querySelector("#supportModalTitle");
-    this.supportModalClose = document.querySelector(".supportModalClose");
-    this.supportQrImage = document.querySelector(".supportQrImage");
-    this.supportPrimaryButton = document.querySelector(".supportPrimaryButton");
-    this.supportCopyStatus = document.querySelector(".supportCopyStatus");
-    this.supportActionButtons = Array.from(document.querySelectorAll(".supportIconButton"));
-    this.kofiButton = document.querySelector(".kofiButton");
-    this.kofiWidget = document.querySelector(".kofiWidget");
-    this.quitButton = document.querySelector(".quitButton");
-    this.settingsVersionValue = document.querySelector(".settingsVersionValue");
-    this.settingsVersionLink = document.querySelector(".settingsVersionLink");
-    this.languageDropdownBtn = document.querySelector(".languageDropdownBtn");
-    this.languageDropdownMenu = document.querySelector(".languageDropdownMenu");
-    this.themeDropdownBtn = document.querySelector(".themeDropdownBtn");
-    this.themeDropdownMenu = document.querySelector(".themeDropdownMenu");
-    this.settingsSelections = {
-      language: "en",
-      theme: this.theme,
-      defaultMeterMode: "bossTargets",
-      allTargetsWindowMs: "120000",
-      trainSelectionMode: "all",
-      targetSelectionWindowMs: "5000",
-    };
-
-    const storedName = this.safeGetStorage(this.storageKeys.userName) || "";
-    const storedAllTargetsWindowMs = this.safeGetSetting(this.storageKeys.allTargetsWindowMs) ||
-      this.safeGetStorage(this.storageKeys.allTargetsWindowMs) ||
-      "120000";
-    const storedTrainSelectionMode = this.safeGetSetting(this.storageKeys.trainSelectionMode) ||
-      this.safeGetStorage(this.storageKeys.trainSelectionMode) ||
-      "all";
-    const storedTargetSelectionWindowMs = this.safeGetSetting(this.storageKeys.targetSelectionWindowMs) ||
-      this.safeGetStorage(this.storageKeys.targetSelectionWindowMs) ||
-      "5000";
+  // The widget's settings are edited in the dashboard (Settings > Widget DPS): read
+  // them once here; applyRemoteSettingChange() follows every later change.
+  applyStoredSettings() {
     let storedMeterOpacity = this.safeGetSetting(this.storageKeys.meterFillOpacity) ||
       this.safeGetStorage(this.storageKeys.meterFillOpacity);
     if (this.safeGetSetting("dpsMeter.migration.opacityReset1") !== "done") {
@@ -2079,265 +1949,76 @@ class DpsApp {
     const mainPlayerDpsBoldSetting = this.safeGetSetting(this.storageKeys.mainPlayerDpsBold);
     const storedMainPlayerDpsBold = mainPlayerDpsBoldSetting !== "false";
     const storedDefaultMeterMode = this.safeGetSetting(this.storageKeys.defaultMeterMode) || "bossTargets";
-    const storedTargetSelection = this.safeGetStorage(this.storageKeys.targetSelection);
     const storedLanguage = this.safeGetStorage(this.storageKeys.language);
     const storedTheme = this.safeGetSetting(this.storageKeys.theme);
 
-    this.setUserName(storedName, { persist: false, syncBackend: true });
+    this.setUserName(this.safeGetStorage(this.storageKeys.userName) || "", { persist: false, syncBackend: true });
     this.setOnlyShowUser(this.safeGetSetting(this.storageKeys.onlyShowUser) === "1", { persist: false });
-    this.setDebugLogging(storedDebugLogging, { persist: false, syncBackend: true });
-    this.setPinMeToTop(storedPinMeToTop, { persist: false });
-    const storedSlimMode = this.safeGetSetting(this.storageKeys.slimMode) === "true";
-    this.setSlimMode(storedSlimMode, { persist: false });
-    this.setMainPlayerNamesBold(storedMainPlayerNamesBold, { persist: false });
-    this.setMainPlayerDpsBold(storedMainPlayerDpsBold, { persist: false });
+    this.setDebugLogging(storedDebugLogging, { syncBackend: true });
+    this.setPinMeToTop(storedPinMeToTop);
+    this.setSlimMode(this.safeGetSetting(this.storageKeys.slimMode) === "true");
+    this.setMainPlayerNamesBold(storedMainPlayerNamesBold);
+    this.setMainPlayerDpsBold(storedMainPlayerDpsBold);
     if (mainPlayerNamesBoldSetting === null || mainPlayerNamesBoldSetting === undefined || mainPlayerNamesBoldSetting === "") {
       this.safeSetSetting(this.storageKeys.mainPlayerNamesBold, "true");
     }
     if (mainPlayerDpsBoldSetting === null || mainPlayerDpsBoldSetting === undefined || mainPlayerDpsBoldSetting === "") {
       this.safeSetSetting(this.storageKeys.mainPlayerDpsBold, "true");
     }
-    const validModes = TARGET_MODES;
     const defaultMode = storedDefaultMeterMode === "trainTargets" ? "pveTargets" : storedDefaultMeterMode;
-    const normalizedDefaultMode = validModes.includes(defaultMode) ? defaultMode : "bossTargets";
-    this.settingsSelections.defaultMeterMode = normalizedDefaultMode;
-    this.setTargetSelection(normalizedDefaultMode, {
+    this.defaultMeterMode = TARGET_MODES.includes(defaultMode) ? defaultMode : "bossTargets";
+    this.setTargetSelection(this.defaultMeterMode, {
       persist: false,
       syncBackend: true,
       reason: "default meter mode setting",
     });
-    this.applyTheme(storedTheme || this.theme, { persist: false });
+    this.applyTheme(storedTheme || this.theme);
     if (storedLanguage) {
       this.i18n?.setLanguage?.(storedLanguage, { persist: false });
     }
 
-    if (this.characterNameInput) {
-      this.characterNameInput.value = this.USER_NAME;
-    }
-    if (this.localActorIdInput) {
-      this.localActorIdInput.value = this.localPlayerId ? String(this.localPlayerId) : "";
-      this.localActorIdInput.addEventListener("input", (event) => {
-        const digits = String(event.target?.value || "").replace(/[^0-9]/g, "");
-        event.target.value = digits;
-      });
-      this.localActorIdInput.addEventListener("change", (event) => {
-        const value = String(event.target?.value || "").trim();
-        if (!value) {
-          // User cleared the ID — reset so auto-detection can take over
-          this.localPlayerId = null;
-          window.javaBridge?.bindLocalActorId?.(0);
-          return;
-        }
-        this.localPlayerId = Number(value);
-        window.javaBridge?.bindLocalActorId?.(value);
-        if (this.USER_NAME) {
-          window.javaBridge?.bindLocalNickname?.(value, this.USER_NAME);
-        }
-        this.setUserName(this.USER_NAME, { persist: true, syncBackend: true });
-      });
-    }
+    // Read by the Details defaults for training targets (getDefaultDetailsOpenOptions).
+    this.trainSelectionMode =
+      this.safeGetSetting(this.storageKeys.trainSelectionMode) === "highestDamage" ? "highestDamage" : "all";
 
-    const allowedWindows = ["30000", "60000", "120000", "180000", "300000"];
-    const selectedWindow = allowedWindows.includes(String(storedAllTargetsWindowMs))
-      ? String(storedAllTargetsWindowMs)
-      : "120000";
-    this.settingsSelections.allTargetsWindowMs = selectedWindow;
-    this.safeSetSetting(this.storageKeys.allTargetsWindowMs, selectedWindow);
-    window.javaBridge?.setAllTargetsWindowMs?.(selectedWindow);
-
-    const allowedTargetWindows = ["5000", "10000", "15000", "20000", "30000"];
-    const selectedTargetWindow = allowedTargetWindows.includes(String(storedTargetSelectionWindowMs))
-      ? String(storedTargetSelectionWindowMs)
-      : "5000";
-    this.settingsSelections.targetSelectionWindowMs = selectedTargetWindow;
-    this.safeSetSetting(this.storageKeys.targetSelectionWindowMs, selectedTargetWindow);
-    window.javaBridge?.setTargetSelectionWindowMs?.(selectedTargetWindow);
-
-    const allowedModes = ["all", "highestDamage"];
-    const selectedMode = allowedModes.includes(String(storedTrainSelectionMode))
-      ? String(storedTrainSelectionMode)
-      : "all";
-    this.trainSelectionMode = selectedMode;
-    this.settingsSelections.trainSelectionMode = selectedMode;
-    this.safeSetSetting(this.storageKeys.trainSelectionMode, selectedMode);
-    window.javaBridge?.setTrainSelectionMode?.(selectedMode);
-
-    if (this.bossLogsCheckbox) {
-      const storedBossLogs = this.safeGetSetting(this.storageKeys.bossLogs) === "true";
-      this.bossLogsCheckbox.checked = storedBossLogs;
-      this.bossLogsCheckbox.addEventListener("change", (event) => {
-        const isChecked = !!event.target?.checked;
-        this.safeSetSetting(this.storageKeys.bossLogs, String(isChecked));
-        window.javaBridge?.setBossLogsEnabled?.(isChecked);
-      });
-    }
-    if (this.debugLoggingCheckbox) {
-      this.debugLoggingCheckbox.checked = this.debugLoggingEnabled;
-      this.debugLoggingCheckbox.addEventListener("change", (event) => {
-        const isChecked = !!event.target?.checked;
-        this.setDebugLogging(isChecked, { persist: true, syncBackend: true });
-      });
-    }
-    if (this.showPingCheckbox) {
-      this.showPingCheckbox.checked = this.showPing;
-      this.showPingCheckbox.addEventListener("change", (event) => {
-        this.showPing = !!event.target?.checked;
-        this.safeSetSetting(this.storageKeys.showPing, String(this.showPing));
-      });
-    }
-    this.showTotalDpsCheckbox = document.querySelector(".showTotalDpsCheckbox");
-    if (this.showTotalDpsCheckbox) {
-      this.showTotalDpsCheckbox.checked = this.showTotalDps;
-      this.showTotalDpsCheckbox.addEventListener("change", (event) => {
-        this.showTotalDps = !!event.target?.checked;
-        this.safeSetSetting(this.storageKeys.showTotalDps, String(this.showTotalDps));
-        this.renderCurrentRows();
-      });
-    }
-    this.roundDpsCheckbox = document.querySelector(".roundDpsCheckbox");
-    if (this.roundDpsCheckbox) {
-      this.roundDpsCheckbox.checked = this.roundDps;
-      this.roundDpsCheckbox.addEventListener("change", (event) => {
-        this.roundDps = !!event.target?.checked;
-        this.safeSetSetting(this.storageKeys.roundDps, String(this.roundDps));
-        this.renderCurrentRows();
-      });
-    }
-    this.autoHideMeterCheckbox = document.querySelector(".autoHideMeterCheckbox");
-    if (this.autoHideMeterCheckbox) {
-      const storedAutoHide = this.safeGetSetting(this.storageKeys.autoHideMeter) === "true";
-      this.autoHideMeterCheckbox.checked = storedAutoHide;
-      this.autoHideMeterCheckbox.addEventListener("change", (event) => {
-        const isChecked = !!event.target?.checked;
-        this.safeSetSetting(this.storageKeys.autoHideMeter, String(isChecked));
-        window.javaBridge?.setAutoHideMeter?.(isChecked);
-      });
-    }
-    // Suspend button setting
-    if (this.showSuspendBtnCheckbox) {
-      const storedShow = this.safeGetSetting(this.storageKeys.showSuspendBtn) === "true";
-      this.showSuspendBtnCheckbox.checked = storedShow;
-      this._applySuspendBtnVisibility(storedShow);
-      this.showSuspendBtnCheckbox.addEventListener("change", (event) => {
-        const isChecked = !!event.target?.checked;
-        this.safeSetSetting(this.storageKeys.showSuspendBtn, String(isChecked));
-        this._applySuspendBtnVisibility(isChecked);
-        if (!isChecked) {
-          // When hiding the button, also resume if suspended
-          this._setCaptureSuspended(false);
-        }
-      });
-    }
+    this._applySuspendBtnVisibility(this.safeGetSetting(this.storageKeys.showSuspendBtn) === "true");
     // Restore suspend state from backend on load
     this._captureSuspended = !!window.javaBridge?.isCaptureSuspended?.();
     this._updateSuspendBtnIcon();
     this._updateSuspendStatusMessage();
 
-    this.initPlayerLimitDropdown();
-    if (this.saveRawPacketsCheckbox) {
-      const storedSaveRaw = this.safeGetSetting(this.storageKeys.saveRawPackets) === "true";
-      this.saveRawPacketsCheckbox.checked = storedSaveRaw;
-      // The switch can show on from localStorage while the backend's setting is missing (reinstall, reset
-      // settings.json): re-send it so what it shows is what gets written.
-      if (storedSaveRaw) window.javaBridge?.setSaveRawPackets?.(true);
-      this.saveRawPacketsCheckbox.addEventListener("change", (event) => {
-        const isChecked = !!event.target?.checked;
-        this.safeSetSetting(this.storageKeys.saveRawPackets, String(isChecked));
-        window.javaBridge?.setSaveRawPackets?.(isChecked);
-      });
-    }
-    // Packet and debug logs are for the Debugger and Admin roles only: the backend refuses them to anyone
-    // else (the re-sends above included), so their switches stay disabled and off (index.html starts them so).
+    // Packet logging can read on from localStorage while the backend's setting is missing (reinstall,
+    // reset settings.json): re-send it so the backend writes what the setting says.
+    if (this.safeGetSetting(this.storageKeys.saveRawPackets) === "true") window.javaBridge?.setSaveRawPackets?.(true);
+    // Packet and debug logs are for the Debugger and Admin roles only: the backend refuses them to
+    // anyone else (the re-sends above included).
     Promise.resolve(window.javaBridge?.mayLog?.()).then((ok) => this.applyLogPermission(!!ok));
-    if (this.pinMeToTopCheckbox) {
-      this.pinMeToTopCheckbox.checked = this.pinMeToTop;
-      this.pinMeToTopCheckbox.addEventListener("change", (event) => {
-        const isChecked = !!event.target?.checked;
-        this.setPinMeToTop(isChecked, { persist: true });
-      });
-    }
-    if (this.playerNamesBoldCheckbox) {
-      this.playerNamesBoldCheckbox.checked = this.mainPlayerNamesBold;
-      this.playerNamesBoldCheckbox.addEventListener("change", (event) => {
-        const isChecked = !!event.target?.checked;
-        this.setMainPlayerNamesBold(isChecked, { persist: true });
-      });
-    }
-    if (this.playerDpsBoldCheckbox) {
-      this.playerDpsBoldCheckbox.checked = this.mainPlayerDpsBold;
-      this.playerDpsBoldCheckbox.addEventListener("change", (event) => {
-        const isChecked = !!event.target?.checked;
-        this.setMainPlayerDpsBold(isChecked, { persist: true });
-      });
-    }
-    if (this.meterOpacityInput && this.meterOpacityValue) {
-      const defaultOpacity = this.getDefaultMeterFillOpacity();
-      const hasStoredOpacity =
-        storedMeterOpacity !== null &&
-        storedMeterOpacity !== undefined &&
-        String(storedMeterOpacity).trim() !== "";
-      const resolvedOpacity = hasStoredOpacity
-        ? this.normalizeMeterOpacity(storedMeterOpacity, defaultOpacity)
-        : defaultOpacity;
-      this.applyMeterFillOpacity(resolvedOpacity, { persist: false });
-      this.meterOpacityInput.value = String(resolvedOpacity);
-      this.meterOpacityValue.textContent = `${resolvedOpacity}%`;
-      const stopDrag = (event) => event.stopPropagation();
-      this.meterOpacityInput.addEventListener("mousedown", stopDrag);
-      this.meterOpacityInput.addEventListener("touchstart", stopDrag, { passive: true });
-      this.meterOpacityInput.addEventListener("input", (event) => {
-        const value = Number(event.target?.value);
-        const next = this.normalizeMeterOpacity(value, defaultOpacity);
-        this.meterOpacityValue.textContent = `${next}%`;
-        this.applyMeterFillOpacity(next, { persist: true });
-      });
-    }
 
-    // Target name size
-    if (this.bossNameSizeInput && this.bossNameSizeValue) {
-      const defaultBossNameSize = this.getDefaultBossNameSize();
-      const storedBossNameSize = this.safeGetSetting(this.storageKeys.bossNameSize);
-      const resolvedBossNameSize =
-        storedBossNameSize !== null && String(storedBossNameSize).trim() !== ""
-          ? this.normalizeBossNameSize(storedBossNameSize, defaultBossNameSize)
-          : defaultBossNameSize;
-      this.applyBossNameSize(resolvedBossNameSize, { persist: false });
-      this.bossNameSizeInput.value = String(resolvedBossNameSize);
-      this.bossNameSizeValue.textContent = `${resolvedBossNameSize}px`;
-      const stopBossNameDrag = (event) => event.stopPropagation();
-      this.bossNameSizeInput.addEventListener("mousedown", stopBossNameDrag);
-      this.bossNameSizeInput.addEventListener("touchstart", stopBossNameDrag, { passive: true });
-      this.bossNameSizeInput.addEventListener("input", (event) => {
-        const next = this.normalizeBossNameSize(event.target?.value, defaultBossNameSize);
-        this.bossNameSizeValue.textContent = `${next}px`;
-        this.applyBossNameSize(next, { persist: true });
-      });
-    }
+    const defaultOpacity = this.getDefaultMeterFillOpacity();
+    const hasStoredOpacity =
+      storedMeterOpacity !== null &&
+      storedMeterOpacity !== undefined &&
+      String(storedMeterOpacity).trim() !== "";
+    this.applyMeterFillOpacity(
+      hasStoredOpacity ? this.normalizeMeterOpacity(storedMeterOpacity, defaultOpacity) : defaultOpacity
+    );
 
-    // Window opacity
-    if (this.windowOpacityInput && this.windowOpacityValue) {
-      const storedWindowOpacity = this.safeGetStorage(this.storageKeys.windowOpacity);
-      const resolvedWindowOpacity = storedWindowOpacity !== null && String(storedWindowOpacity).trim() !== ""
-        ? Math.max(0, Math.min(100, Math.round(Number(storedWindowOpacity))))
-        : 60; // PowerMeter: the design's standard widget opacity.
-      this.applyWindowOpacity(resolvedWindowOpacity, { persist: false });
-      this.windowOpacityInput.value = String(resolvedWindowOpacity);
-      this.windowOpacityValue.textContent = `${resolvedWindowOpacity}%`;
-      const stopDrag = (event) => event.stopPropagation();
-      this.windowOpacityInput.addEventListener("mousedown", stopDrag);
-      this.windowOpacityInput.addEventListener("touchstart", stopDrag, { passive: true });
-      this.windowOpacityInput.addEventListener("input", (event) => {
-        const value = Number(event.target?.value);
-        const next = Math.max(0, Math.min(100, Math.round(value)));
-        this.windowOpacityValue.textContent = `${next}%`;
-        this.applyWindowOpacity(next, { persist: true });
-      });
-    }
+    const defaultBossNameSize = this.getDefaultBossNameSize();
+    const storedBossNameSize = this.safeGetSetting(this.storageKeys.bossNameSize);
+    this.applyBossNameSize(
+      storedBossNameSize !== null && String(storedBossNameSize).trim() !== ""
+        ? this.normalizeBossNameSize(storedBossNameSize, defaultBossNameSize)
+        : defaultBossNameSize
+    );
 
-    // Mirror each slider's position into a CSS custom property so the track
-    // can paint a filled portion. Presentation only — no setting reads it.
+    // settings.json first, as for every other option: the dashboard writes it there.
+    const storedWindowOpacity = this.safeGetSetting(this.storageKeys.windowOpacity);
+    // 60: PowerMeter, the design's standard widget opacity.
+    this.applyWindowOpacity(String(storedWindowOpacity ?? "").trim() !== "" ? storedWindowOpacity : 60);
+
+    // Mirror each Details slider's position into a CSS custom property so the
+    // track can paint a filled portion. Presentation only — no setting reads it.
     const syncRangeFill = (input) => {
-      if (!input) return;
       const min = Number(input.min);
       const max = Number(input.max);
       const value = Number(input.value);
@@ -2347,564 +2028,23 @@ class DpsApp {
       const pct = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
       input.style.setProperty("--range-pct", `${pct}%`);
     };
-    // Both panels: the Details settings menu uses the same slider geometry, so
-    // its tracks read the same property.
-    const isRange = (el) => el?.tagName === "INPUT" && el.type === "range";
-    [this.settingsPanel, this.detailsPanel].forEach((root) => {
-      if (!root) return;
-      root.querySelectorAll('input[type="range"]').forEach(syncRangeFill);
-      root.addEventListener("input", (event) => {
-        if (isRange(event.target)) syncRangeFill(event.target);
-      });
-    });
-
-    this.setupKeybindButtons();
-
-    const currentLanguage = this.i18n?.getLanguage?.() || storedLanguage || "en";
-    this.settingsSelections.language = currentLanguage;
-    this.settingsSelections.theme = this.theme;
-
-    this.detailsMonitor = this.getDetailsMonitorSetting();
-    this.refreshMonitorList().then(() => {
-      this.initializeSettingsDropdowns();
-      // Re-open the Details window if it was left enabled last session.
-      if (this.detailsMonitor !== "off" && window.A2_VIEW !== "details") {
-        this.applyDetailsMonitor(this.detailsMonitor, { persist: false });
-      }
-    });
-
-    this.initializeSettingsDropdowns();
-
-    this.settingsBtn?.addEventListener("click", () => {
-      // PowerMeter: the widget's settings live in the dashboard (Settings > Widget DPS).
-      if (window.A2_VIEW === "main") {
-        window.javaBridge?.openWidgetSettings?.();
-        return;
-      }
-      this.refreshMonitorList().then(() => this.initializeSettingsDropdowns());
-      this.toggleSettingsPanel();
-    });
-
-    this.settingsClose?.addEventListener("click", () => this.closeSettingsPanel());
-
-    const advancedToggle = document.querySelector(".settingsAdvancedToggle");
-    const advancedBody = document.querySelector(".settingsAdvancedBody");
-    advancedToggle?.addEventListener("click", () => {
-      const isOpen = advancedToggle.classList.toggle("isOpen");
-      if (advancedBody) advancedBody.style.display = isOpen ? "" : "none";
-    });
-
-    this.resetDetectBtn?.addEventListener("click", () => {
-      window.javaBridge?.resetAutoDetection?.();
-      this.refreshConnectionInfo();
-    });
-
-    // Device selection: auto-detect checkbox + manual device dropdown
-    this._autoDetectDevice = !this.safeGetSetting("dpsMeter.manualDevice");
-    if (this.autoDetectDeviceCheckbox) {
-      this.autoDetectDeviceCheckbox.checked = this._autoDetectDevice;
-      this._updateDeviceDropdownState();
-      this.autoDetectDeviceCheckbox.addEventListener("change", () => {
-        this._autoDetectDevice = this.autoDetectDeviceCheckbox.checked;
-        this._updateDeviceDropdownState();
-        if (this._autoDetectDevice) {
-          window.javaBridge?.setManualDevice?.("");
-          this.refreshConnectionInfo();
-        }
+    if (this.detailsPanel) {
+      this.detailsPanel.querySelectorAll('input[type="range"]').forEach(syncRangeFill);
+      this.detailsPanel.addEventListener("input", (event) => {
+        if (event.target?.tagName === "INPUT" && event.target.type === "range") syncRangeFill(event.target);
       });
     }
 
-    document.querySelector(".resetAllSettingsBtn")?.addEventListener("click", () => {
-      this.resetAllSettings();
-    });
-
-    this.discordButton?.addEventListener("click", () => {
-      window.javaBridge?.openBrowser?.("https://discord.gg/Aion2Global");
-    });
-
-    this.supportButton?.addEventListener("click", () => {
-      window.javaBridge?.openBrowser?.("https://www.patreon.com/c/powermeter");
-    });
-    this.supportModalClose?.addEventListener("click", () => this.closeSupportModal());
-    this.supportModal?.addEventListener("click", (event) => {
-      if (event.target === this.supportModal) {
-        this.closeSupportModal();
-      }
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape") return;
-      if (this.supportModal?.classList.contains("isOpen")) {
-        this.closeSupportModal();
-      }
-    });
-    this.supportActionButtons?.forEach((button) => {
-      button.addEventListener("click", () => this.handleSupportAction(button));
-    });
-
-    document.querySelector(".letrionLabsButton")?.addEventListener("click", () => {
-      window.javaBridge?.openBrowser?.("https://letrionlabs.it");
-    });
-
-    this.kofiButton?.addEventListener("click", () => {
-      window.javaBridge?.openBrowser?.("https://ko-fi.com/W7W51T1YW9");
-    });
-
-    this.settingsVersionLink?.addEventListener("click", () => {
-      window.javaBridge?.openBrowser?.("https://github.com/Nazariodeletteriis/PowerMeter/releases");
-    });
-
-    this.quitButton?.addEventListener("click", () => {
-      window.javaBridge?.exitApp?.();
-    });
-
-    this.updateSettingsVersion();
-    this.updateSupportVisibility(currentLanguage);
-    this.updateSupportPrimaryAction(currentLanguage);
-    this.updateSupportQrImage(this.supportPrimaryButton?.dataset.support || "afdian");
-  }
-
-  isChineseLanguage(lang) {
-    return String(lang || "").startsWith("zh");
-  }
-
-  updateSupportVisibility() {
-    if (this.supportWidget) {
-      this.supportWidget.style.display = "flex";
-    }
-    if (this.kofiWidget) {
-      this.kofiWidget.style.display = "none";
-    }
-  }
-
-  getSupportIconSvg(type) {
-    const iconByType = {
-      afdian:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.5 2 5 13h5l-1.5 9L19 10h-5.5L13.5 2z" fill="currentColor"/></svg>',
-      kofi:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h12v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V7z" fill="currentColor"/><path d="M16 9h1.5a2.5 2.5 0 0 1 0 5H16V9z" fill="currentColor" opacity="0.75"/><path d="M6 5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>',
-      wechat:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 4c-3.87 0-7 2.69-7 6 0 1.9 1.03 3.59 2.62 4.69L4 19l3.66-1.85A8.4 8.4 0 0 0 9 17c3.87 0 7-2.69 7-6s-3.13-7-7-7z" fill="currentColor"/><path d="M16.5 10.5c3.04 0 5.5 2.01 5.5 4.5 0 1.42-.79 2.69-2.02 3.52L20.5 22l-2.79-1.41c-.39.08-.79.12-1.21.12-3.04 0-5.5-2.01-5.5-4.5s2.46-4.5 5.5-4.5z" fill="currentColor" opacity="0.78"/></svg>',
-      paypal:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.2 3.2h7.2c3.2 0 5.3 1.9 4.9 4.7-.42 2.85-2.8 4.58-6.1 4.58h-2.4l-.75 4.35H5.9L7.2 3.2z" fill="currentColor"/><path d="M9.3 5.6h4.05c1.3 0 2.05.74 1.83 1.82-.22 1.13-1.2 1.84-2.49 1.84H8.55L9.3 5.6z" fill="currentColor" opacity="0.55"/><path d="M10.55 9.05h2.52c1.95 0 3.2 1.14 2.93 2.86-.3 1.92-1.95 3.12-4.19 3.12h-2.38l.56-3.18h2.2c.75 0 1.23-.4 1.33-1 .1-.56-.3-.93-1.02-.93h-2.15l.2-.87z" fill="#0b2f63" opacity="0.45"/></svg>',
-    };
-    return iconByType[type] || "";
-  }
-
-  updateSupportPrimaryAction(lang) {
-    if (!this.supportPrimaryButton) return;
-    const isChinese = this.isChineseLanguage(lang);
-    const nextSupport = isChinese ? "afdian" : "kofi";
-    const nextUrl = isChinese
-      ? "https://afdian.com/a/hiddencube"
-      : "https://ko-fi.com/hiddencube";
-    const nextLabel = isChinese ? "爱发电" : "Ko-fi";
-    const nextIcon = this.getSupportIconSvg(isChinese ? "afdian" : "kofi");
-    this.supportPrimaryButton.dataset.support = nextSupport;
-    this.supportPrimaryButton.dataset.url = nextUrl;
-    const label = this.supportPrimaryButton.querySelector(".supportLabel");
-    const icon = this.supportPrimaryButton.querySelector(".supportIcon");
-    if (label) label.textContent = nextLabel;
-    if (icon) icon.innerHTML = nextIcon;
-    this.supportPrimaryButton.setAttribute("aria-label", nextLabel);
-    const i18nLabel = isChinese ? "support.aria.afdian" : "support.aria.kofi";
-    this.supportPrimaryButton.dataset.i18nAriaLabel = i18nLabel;
-  }
-
-  openSupportModal() {
-    if (!this.supportModal) return;
-    this.supportModal.classList.add("isOpen");
-    this.supportModal.setAttribute("aria-hidden", "false");
-    if (this.supportCopyStatus) {
-      this.supportCopyStatus.textContent = "";
-    }
-  }
-
-  closeSupportModal() {
-    if (!this.supportModal) return;
-    this.supportModal.classList.remove("isOpen");
-    this.supportModal.setAttribute("aria-hidden", "true");
-  }
-
-  handleSupportAction(button) {
-    if (!button) return;
-    const supportType = button.dataset.support;
-    const url = button.dataset.url;
-    const copyValue = button.dataset.copy;
-    const qrType = button.dataset.qr || supportType;
-
-    if (qrType && this.supportQrImages?.[qrType]) {
-      this.updateSupportQrImage(qrType);
+    // Re-open the Details window if it was left enabled last session.
+    const detailsMonitor = this.getDetailsMonitorSetting();
+    if (detailsMonitor !== "off" && window.A2_VIEW !== "details") {
+      this.applyDetailsMonitor(detailsMonitor);
     }
 
-    if (url) {
-      const externalOnly = supportType === "paypal" || supportType === "afdian" || supportType === "kofi";
-      this.openExternalLink(url, { externalOnly });
-    }
-
-    if (copyValue) {
-      const messageKey = `support.copy.${supportType}`;
-      const fallback = `Copied ${supportType?.toUpperCase?.() || "address"}`;
-      this.copySupportValue(copyValue, this.i18n?.t?.(messageKey, fallback) || fallback);
-    }
-  }
-
-  openExternalLink(url, { externalOnly = false } = {}) {
-    if (!url) return;
-    window.javaBridge?.openBrowser?.(url);
-    if (externalOnly) return;
-    try {
-      window.open(url, "_blank", "noopener");
-    } catch {
-      // ignore
-    }
-  }
-
-  copySupportValue(value, message) {
-    if (!value) return;
-    const showStatus = (text) => {
-      if (!this.supportCopyStatus) return;
-      this.supportCopyStatus.textContent = text;
-    };
-    const attemptLegacyCopy = () => {
-      try {
-        const textarea = document.createElement("textarea");
-        textarea.value = value;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
-        const success = document.execCommand("copy");
-        document.body.removeChild(textarea);
-        if (success) showStatus(message);
-      } catch {
-        // ignore
-      }
-    };
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard
-        .writeText(value)
-        .then(() => showStatus(message))
-        .catch(() => attemptLegacyCopy());
-      return;
-    }
-    attemptLegacyCopy();
-  }
-
-  updateSupportQrImage(type) {
-    if (!this.supportQrImage) return;
-    const src = this.supportQrImages?.[type];
-    if (!src) return;
-    this.supportQrImage.src = src;
-    this.updateSupportTitle(type);
-    this.supportActionButtons?.forEach((button) => {
-      const match = button.dataset.support === type || button.dataset.qr === type;
-      button.classList.toggle("isActive", match);
+    // PowerMeter: the widget's settings live in the dashboard (Settings > Widget DPS).
+    document.querySelector(".settingsBtn")?.addEventListener("click", () => {
+      window.javaBridge?.openWidgetSettings?.();
     });
-  }
-
-  updateSupportTitle(type) {
-    if (!this.supportModalTitle) return;
-    const currentLanguage = this.i18n?.getLanguage?.();
-    const isChinese = this.isChineseLanguage(currentLanguage);
-    const isWeChat = type === "wechat";
-    const titleKey = isWeChat ? "support.titleWechat" : "support.title";
-    const fallback = isWeChat
-      ? "Support the author on WeChat"
-      : isChinese
-        ? "Support the author on Afdian"
-        : "Support the author on Ko-fi";
-    this.supportModalTitle.textContent = this.i18n?.t?.(titleKey, fallback) || fallback;
-  }
-
-  initializeSettingsDropdowns() {
-    const previewThemeVars = (themeId) => {
-      const root = document.documentElement;
-      const previous = root.dataset.theme;
-      root.dataset.theme = themeId;
-      const computed = getComputedStyle(root);
-      const textColor = computed.getPropertyValue("--text-color").trim() || "#ffffff";
-      const nameShadow = computed.getPropertyValue("--player-name-shadow").trim() || "none";
-      const rowFill = computed.getPropertyValue("--row-fill").trim() || "#2f2f2f";
-      root.dataset.theme = previous || "powermeter";
-      return { textColor, nameShadow, rowFill };
-    };
-
-    const closeAll = () => {
-      document.querySelectorAll(".settingsDropdownMenu.isOpen").forEach((menu) => {
-        menu.classList.remove("isOpen");
-      });
-    };
-
-    const setupDropdown = (
-      button,
-      menu,
-      options,
-      currentValue,
-      onSelect,
-      { decorateItem = null, decorateButton = null } = {}
-    ) => {
-      if (!button || !menu) return;
-      const optionList = Array.isArray(options) ? options : [];
-      menu.innerHTML = "";
-
-      optionList.forEach((opt) => {
-        const item = document.createElement("button");
-        item.type = "button";
-        item.className = "settingsDropdownItem";
-        item.dataset.value = opt.value;
-        item.textContent = opt.label;
-        if (String(opt.value) === String(currentValue)) {
-          item.classList.add("isActive");
-        }
-        decorateItem?.(item, opt.value);
-        item.addEventListener("click", () => {
-          onSelect?.(opt.value);
-          menu.classList.remove("isOpen");
-          this.initializeSettingsDropdowns();
-        });
-        menu.appendChild(item);
-      });
-
-      const selected = optionList.find((opt) => String(opt.value) === String(currentValue)) || optionList[0];
-      const textEl = button.querySelector(".settingsDropdownText");
-      if (textEl) {
-        textEl.textContent = selected?.label || "-";
-      }
-      button.style.background = "";
-      button.style.color = "";
-      decorateButton?.(button, selected?.value);
-      button.onclick = (event) => {
-        event.stopPropagation();
-        const wasOpen = menu.classList.contains("isOpen");
-        closeAll();
-        menu.classList.toggle("isOpen", !wasOpen);
-      };
-    };
-
-    if (!this._settingsDropdownOutsideBound) {
-      document.addEventListener("click", (event) => {
-        if (!event.target?.closest?.(".settingsDropdownWrapper")) {
-          closeAll();
-        }
-      });
-      this._settingsDropdownOutsideBound = true;
-    }
-
-    const languageOptions = [
-      { value: "en", label: "English" },
-      { value: "de", label: "Deutsch" },
-      { value: "es", label: "Español" },
-      { value: "fr", label: "Français" },
-      { value: "it", label: "Italiano" },
-      { value: "ja", label: "日本語" },
-      { value: "ko", label: "한국어" },
-      { value: "pt", label: "Português" },
-      { value: "ru", label: "Русский" },
-      { value: "zh-Hant", label: "繁體中文" },
-      { value: "zh-Hans", label: "简体中文" },
-    ];
-
-    const themeOptions = [
-      { value: "powermeter", label: this.i18n?.t("settings.theme.options.powermeter", "PowerMeter") },
-      { value: "aion2", label: this.i18n?.t("settings.theme.options.aion2", "AION2") },
-      { value: "asmodian", label: this.i18n?.t("settings.theme.options.asmodian", "Asmodian") },
-      { value: "cogni", label: this.i18n?.t("settings.theme.options.cogni", "Cogni") },
-      { value: "elyos", label: this.i18n?.t("settings.theme.options.elyos", "Elyos") },
-      { value: "ember", label: this.i18n?.t("settings.theme.options.ember", "Ember") },
-      { value: "fera", label: this.i18n?.t("settings.theme.options.fera", "Fera") },
-      { value: "frost", label: this.i18n?.t("settings.theme.options.frost", "Frost") },
-      { value: "natura", label: this.i18n?.t("settings.theme.options.natura", "Natura") },
-      { value: "obsidian", label: this.i18n?.t("settings.theme.options.obsidian", "Obsidian") },
-      { value: "varian", label: this.i18n?.t("settings.theme.options.varian", "Varian") },
-    ];
-
-    themeOptions.sort((a, b) => a.label.localeCompare(b.label));
-
-    const targetWindowOptions = [
-      { value: "5000", label: this.i18n?.t("settings.targetWindow.options.5s", "5 seconds") },
-      { value: "10000", label: this.i18n?.t("settings.targetWindow.options.10s", "10 seconds") },
-      { value: "15000", label: this.i18n?.t("settings.targetWindow.options.15s", "15 seconds") },
-      { value: "20000", label: this.i18n?.t("settings.targetWindow.options.20s", "20 seconds") },
-      { value: "30000", label: this.i18n?.t("settings.targetWindow.options.30s", "30 seconds") },
-    ];
-
-    const allTargetsWindowOptions = [
-      { value: "30000", label: this.i18n?.t("settings.allTargetsWindow.options.30s", "30 seconds") },
-      { value: "60000", label: this.i18n?.t("settings.allTargetsWindow.options.1m", "1 minute") },
-      { value: "120000", label: this.i18n?.t("settings.allTargetsWindow.options.2m", "2 minutes") },
-      { value: "180000", label: this.i18n?.t("settings.allTargetsWindow.options.3m", "3 minutes") },
-      { value: "300000", label: this.i18n?.t("settings.allTargetsWindow.options.5m", "5 minutes") },
-    ];
-
-    const defaultMeterModeOptions = [
-      { value: "lastHitByMe", label: "TARGET" },
-      { value: "bossTargets", label: "BOSS" },
-      { value: "allTargets", label: "ALL" },
-      { value: "pveTargets", label: "PVE" },
-      { value: "pvpTargets", label: "PVP" },
-    ];
-
-    const trainModeOptions = [
-      { value: "all", label: this.i18n?.t("settings.trainingMode.options.all", "All") },
-      {
-        value: "highestDamage",
-        label: this.i18n?.t("settings.trainingMode.options.highestDamage", "Highest Damage"),
-      },
-    ];
-
-    setupDropdown(
-      this.languageDropdownBtn,
-      this.languageDropdownMenu,
-      languageOptions,
-      this.settingsSelections.language,
-      (value) => {
-        if (!value) return;
-        this.settingsSelections.language = value;
-        this.safeSetStorage(this.storageKeys.language, value);
-        this.i18n?.setLanguage?.(value, { persist: true });
-      }
-    );
-
-    setupDropdown(
-      this.themeDropdownBtn,
-      this.themeDropdownMenu,
-      themeOptions,
-      this.settingsSelections.theme,
-      (value) => {
-        if (!value) return;
-        this.settingsSelections.theme = value;
-        this.applyTheme(value, { persist: true });
-      },
-      {
-        // Only the colours are set here; size and weight come from the
-        // stylesheet so the theme control matches every other dropdown.
-        decorateItem: (item, value) => {
-          const colors = previewThemeVars(value);
-          item.style.background = colors.rowFill;
-          item.style.opacity = "1";
-          item.style.color = colors.textColor;
-          item.style.textShadow = colors.nameShadow;
-        },
-        decorateButton: (button, value) => {
-          const colors = previewThemeVars(value);
-          button.style.background = colors.rowFill;
-          button.style.opacity = "1";
-          button.style.color = colors.textColor;
-          button.style.textShadow = colors.nameShadow;
-          const textEl = button.querySelector(".settingsDropdownText");
-          if (textEl) {
-            textEl.style.textShadow = colors.nameShadow;
-          }
-        },
-      }
-    );
-
-    setupDropdown(
-      this.targetWindowDropdownBtn,
-      this.targetWindowDropdownMenu,
-      targetWindowOptions,
-      this.settingsSelections.targetSelectionWindowMs,
-      (value) => {
-        if (!value) return;
-        this.settingsSelections.targetSelectionWindowMs = value;
-        this.safeSetSetting(this.storageKeys.targetSelectionWindowMs, value);
-        window.javaBridge?.setTargetSelectionWindowMs?.(value);
-        if (!this.isCollapse) this.fetchDps();
-      }
-    );
-
-    setupDropdown(
-      this.allTargetsWindowDropdownBtn,
-      this.allTargetsWindowDropdownMenu,
-      allTargetsWindowOptions,
-      this.settingsSelections.allTargetsWindowMs,
-      (value) => {
-        if (!value) return;
-        this.settingsSelections.allTargetsWindowMs = value;
-        this.safeSetSetting(this.storageKeys.allTargetsWindowMs, value);
-        window.javaBridge?.setAllTargetsWindowMs?.(value);
-        if (!this.isCollapse) this.fetchDps();
-      }
-    );
-
-    setupDropdown(
-      this.trainSelectionModeDropdownBtn,
-      this.trainSelectionModeDropdownMenu,
-      trainModeOptions,
-      this.settingsSelections.trainSelectionMode,
-      (value) => {
-        if (!value) return;
-        this.settingsSelections.trainSelectionMode = value;
-        this.trainSelectionMode = value;
-        this.safeSetSetting(this.storageKeys.trainSelectionMode, value);
-        window.javaBridge?.setTrainSelectionMode?.(value);
-        if (!this.isCollapse) this.fetchDps();
-      }
-    );
-
-    // Monitor picker. Rebuilt every time the settings panel opens so hot-plugged
-    // displays appear without a restart.
-    {
-      const monitors = Array.isArray(this.monitorList) ? this.monitorList : [];
-      const offLabel = this.i18n?.t?.("settings.detailsMonitor.off", "Off") ?? "Off";
-      const detailsMonitorOptions = [{ value: "off", label: offLabel }].concat(
-        monitors.map((m, i) => ({ value: String(m.index), label: this.monitorLabel(m, i) }))
-      );
-      const current = this.detailsMonitor ?? this.getDetailsMonitorSetting();
-      setupDropdown(
-        this.detailsMonitorDropdownBtn,
-        this.detailsMonitorDropdownMenu,
-        detailsMonitorOptions,
-        detailsMonitorOptions.some((o) => o.value === current) ? current : "off",
-        (value) => {
-          this.applyDetailsMonitor(value, { persist: true });
-        }
-      );
-      if (monitors.length <= 1) {
-        this.setDetailsMonitorHint(
-          this.i18n?.t?.(
-            "settings.detailsMonitor.single",
-            "Only one display detected — connect a second screen to use this."
-          ) ?? "Only one display detected — connect a second screen to use this."
-        );
-      }
-    }
-
-    // One control for both axes of the main window: which skin, and how dense.
-    // They were two separate toggles, which made four states the user had to
-    // assemble themselves.
-    const meterLayoutOptions = [
-      { value: "beta", label: this.i18n?.t?.("settings.meterLayout.beta", "Interface") ?? "Interface" },
-      { value: "betaSlim", label: this.i18n?.t?.("settings.meterLayout.betaSlim", "Compact") ?? "Compact" },
-    ];
-    setupDropdown(
-      this.meterLayoutDropdownBtn,
-      this.meterLayoutDropdownMenu,
-      meterLayoutOptions,
-      this.getMeterLayout(),
-      (value) => {
-        if (!value) return;
-        this.setMeterLayout(value, { persist: true });
-      }
-    );
-
-    setupDropdown(
-      this.defaultMeterModeDropdownBtn,
-      this.defaultMeterModeDropdownMenu,
-      defaultMeterModeOptions,
-      this.settingsSelections.defaultMeterMode,
-      (value) => {
-        if (!value) return;
-        this.settingsSelections.defaultMeterMode = value;
-        this.safeSetSetting(this.storageKeys.defaultMeterMode, value);
-        this.setTargetSelection(value, {
-          persist: true,
-          syncBackend: true,
-          reason: "default meter mode changed",
-        });
-        if (!this.isCollapse) this.fetchDps();
-      }
-    );
   }
 
   setupDetailsPanelSettings() {
@@ -3123,8 +2263,7 @@ class DpsApp {
       const menuTarget =
         target.closest("[role='menu']") ||
         target.closest(".detailsSettingsMenu") ||
-        target.closest(".detailsDropdownMenu") ||
-        target.closest(".settingsPanel");
+        target.closest(".detailsDropdownMenu");
       if (!menuTarget) return;
       const menuClass = menuTarget.className || menuTarget.getAttribute?.("role") || "menu";
       const targetLabel =
@@ -3274,182 +2413,10 @@ class DpsApp {
     this.detailsSettingsMenu.classList.remove("isOpen");
   }
 
-  setupKeybindButtons() {
-    const MOD_ALT = 1;
-    const MOD_CONTROL = 2;
-    const MOD_SHIFT = 4;
-    const MOD_WIN = 8;
-
-    const vkKeyName = (keyCode) => {
-      if (keyCode >= 65 && keyCode <= 90) return String.fromCharCode(keyCode);
-      if (keyCode >= 48 && keyCode <= 57) return String(keyCode - 48);
-      if (keyCode >= 112 && keyCode <= 123) return `F${keyCode - 111}`;
-      if (keyCode >= 96 && keyCode <= 105) return `Num${keyCode - 96}`;
-      const names = {
-        8: "Backspace", 9: "Tab", 13: "Enter", 19: "Pause", 20: "CapsLock",
-        27: "Esc", 32: "Space", 33: "PgUp", 34: "PgDn", 35: "End", 36: "Home",
-        37: "Left", 38: "Up", 39: "Right", 40: "Down",
-        45: "Insert", 46: "Delete",
-        106: "Num*", 107: "Num+", 109: "Num-", 110: "Num.", 111: "Num/",
-        144: "NumLock", 145: "ScrollLock",
-        186: ";", 187: "=", 188: ",", 189: "-", 190: ".", 191: "/",
-        192: "`", 219: "[", 220: "\\", 221: "]", 222: "'",
-      };
-      return names[keyCode] || `Key${keyCode}`;
-    };
-
-    const formatBinding = (mods, keyCode) => {
-      if (!mods && !keyCode) return "—";
-      const parts = [];
-      if (mods & MOD_CONTROL) parts.push("Ctrl");
-      if (mods & MOD_ALT) parts.push("Alt");
-      if (mods & MOD_SHIFT) parts.push("Shift");
-      if (mods & MOD_WIN) parts.push("Win");
-      if (keyCode) parts.push(vkKeyName(keyCode));
-      return parts.join("+") || "—";
-    };
-
-    const isModifierKeyCode = (kc) =>
-      kc === 16 || kc === 17 || kc === 18 || kc === 91 || kc === 92 ||
-      kc === 93 || kc === 224;
-
-    const reloadBtn = document.querySelector(".reloadKeybindBtn");
-    const toggleBtn = document.querySelector(".toggleKeybindBtn");
-
-    this.refreshKeybindLabels = () => {
-      const reloadLabel = window.javaBridge?.getCurrentHotKey?.() || "";
-      const toggleLabel = window.javaBridge?.getCurrentToggleWindowHotKey?.() || "";
-      if (reloadBtn) {
-        reloadBtn.querySelector(".keybindText").textContent = reloadLabel || "Ctrl+Alt+R";
-      }
-      if (toggleBtn) {
-        toggleBtn.querySelector(".keybindText").textContent = toggleLabel || "Ctrl+Alt+Up";
-      }
-    };
-    this.refreshKeybindLabels();
-
-    let activeRecording = null;
-
-    const stopRecording = () => {
-      if (!activeRecording) return;
-      activeRecording.btn.classList.remove("recording");
-      activeRecording = null;
-    };
-
-    const startRecording = (btn, type) => {
-      stopRecording();
-      btn.classList.add("recording");
-      btn.querySelector(".keybindText").textContent =
-        this.i18n?.t?.("settings.keybind.pressKeys", "Press keys...") ?? "Press keys...";
-      activeRecording = { btn, type };
-    };
-
-    const handleKeybindClick = (btn, type) => {
-      if (activeRecording?.btn === btn) {
-        stopRecording();
-        this.refreshKeybindLabels();
-        return;
-      }
-      startRecording(btn, type);
-    };
-
-    reloadBtn?.addEventListener("click", () => handleKeybindClick(reloadBtn, "reload"));
-    toggleBtn?.addEventListener("click", () => handleKeybindClick(toggleBtn, "toggle"));
-
-    document.addEventListener("keydown", (event) => {
-      if (!activeRecording) return;
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (event.key === "Escape") {
-        stopRecording();
-        this.refreshKeybindLabels();
-        return;
-      }
-
-      if (isModifierKeyCode(event.keyCode)) {
-        const parts = [];
-        if (event.ctrlKey) parts.push("Ctrl");
-        if (event.altKey) parts.push("Alt");
-        if (event.shiftKey) parts.push("Shift");
-        if (event.metaKey) parts.push("Win");
-        activeRecording.btn.querySelector(".keybindText").textContent =
-          parts.length ? parts.join("+") + "+..." : (this.i18n?.t?.("settings.keybind.pressKeys", "Press keys...") ?? "Press keys...");
-        return;
-      }
-
-      let mods = 0;
-      if (event.ctrlKey) mods |= MOD_CONTROL;
-      if (event.altKey) mods |= MOD_ALT;
-      if (event.shiftKey) mods |= MOD_SHIFT;
-      if (event.metaKey) mods |= MOD_WIN;
-
-      const modCount = ((mods & MOD_CONTROL) ? 1 : 0) +
-        ((mods & MOD_ALT) ? 1 : 0) +
-        ((mods & MOD_SHIFT) ? 1 : 0) +
-        ((mods & MOD_WIN) ? 1 : 0);
-
-      if (modCount < 1) {
-        activeRecording.btn.querySelector(".keybindText").textContent =
-          this.i18n?.t?.("settings.keybind.needModifiers", "Need 1+ modifier") ?? "Need 1+ modifier";
-        setTimeout(() => {
-          if (activeRecording) {
-            activeRecording.btn.querySelector(".keybindText").textContent =
-              this.i18n?.t?.("settings.keybind.pressKeys", "Press keys...") ?? "Press keys...";
-          }
-        }, 1200);
-        return;
-      }
-
-      const vk = event.keyCode;
-      const label = formatBinding(mods, vk);
-      const { type } = activeRecording;
-
-      stopRecording();
-
-      if (type === "reload") {
-        window.javaBridge?.setHotkey?.(mods, vk);
-        if (reloadBtn) reloadBtn.querySelector(".keybindText").textContent = label;
-      } else if (type === "toggle") {
-        window.javaBridge?.setToggleWindowHotkey?.(mods, vk);
-        if (toggleBtn) toggleBtn.querySelector(".keybindText").textContent = label;
-      }
-    }, true);
-
-    document.addEventListener("click", (event) => {
-      if (!activeRecording) return;
-      if (event.target?.closest?.(".keybindBtn")) return;
-      stopRecording();
-      this.refreshKeybindLabels();
-    });
-  }
-
-  toggleSettingsPanel() {
-    if (!this.settingsPanel) return;
-    const isOpen = this.settingsPanel.classList.toggle("isOpen");
-    if (isOpen) {
-      this.pinnedDetailsRowId = null;
-      this.hoveredDetailsRowId = null;
-      this.detailsUI?.close?.({ keepPinned: false });
-      this.refreshConnectionInfo();
-      this.refreshKeybindLabels?.();
-      // Populate device dropdown with current list of available devices
-      const savedDevice = this.safeGetSetting("dpsMeter.manualDevice");
-      this._populateDeviceDropdown(savedDevice || null);
-    }
-  }
-
-  closeSettingsPanel() {
-    this.settingsPanel?.classList.remove("isOpen");
-  }
-
   setUserName(name, { persist = false, syncBackend = false } = {}) {
     const previousName = this.USER_NAME;
     const trimmed = String(name ?? "").trim();
     this.USER_NAME = trimmed;
-    if (this.characterNameInput && document.activeElement !== this.characterNameInput) {
-      this.characterNameInput.value = trimmed;
-    }
     if (persist) {
       localStorage.setItem(this.storageKeys.userName, trimmed);
     }
@@ -3464,16 +2431,12 @@ class DpsApp {
         return;
       }
       this.localPlayerId = null;
-      if (this.localActorIdInput && document.activeElement !== this.localActorIdInput) {
-        this.localActorIdInput.value = "";
-      }
       this.refreshDamageData({ reason: "local name update" });
       this.reinitTargetSelection("local name update");
     }
     if (!this.isCollapse) {
       this.fetchDps();
     }
-    this.refreshSettingsPanelIfOpen();
   }
 
   // "Only my DPS": the list keeps just your row (meter.js getOnlyUser); its % stays
@@ -3489,38 +2452,18 @@ class DpsApp {
   }
 
   applyLogPermission(allowed) {
-    for (const box of [this.debugLoggingCheckbox, this.saveRawPacketsCheckbox]) {
-      if (!box) continue;
-      box.disabled = !allowed;
-      if (!allowed) box.checked = false;
-    }
     if (!allowed) this.setDebugLogging(false);
   }
 
-  setDebugLogging(enabled, { persist = false, syncBackend = false } = {}) {
+  setDebugLogging(enabled, { syncBackend = false } = {}) {
     this.debugLoggingEnabled = !!enabled;
-    if (this.debugLoggingCheckbox && document.activeElement !== this.debugLoggingCheckbox) {
-      this.debugLoggingCheckbox.checked = this.debugLoggingEnabled;
-    }
-    if (this.characterNameInput) {
-      this.characterNameInput.readOnly = !this.debugLoggingEnabled;
-    }
-    if (persist) {
-      this.safeSetSetting(this.storageKeys.debugLogging, String(this.debugLoggingEnabled));
-    }
     if (syncBackend) {
       window.javaBridge?.setDebugLoggingEnabled?.(this.debugLoggingEnabled);
     }
   }
 
-  setPinMeToTop(enabled, { persist = false } = {}) {
+  setPinMeToTop(enabled) {
     this.pinMeToTop = !!enabled;
-    if (this.pinMeToTopCheckbox && document.activeElement !== this.pinMeToTopCheckbox) {
-      this.pinMeToTopCheckbox.checked = this.pinMeToTop;
-    }
-    if (persist) {
-      this.safeSetSetting(this.storageKeys.pinMeToTop, String(this.pinMeToTop));
-    }
     this.renderCurrentRows();
   }
 
@@ -3534,74 +2477,24 @@ class DpsApp {
     return String(raw);
   }
 
-  async refreshMonitorList() {
-    try {
-      const list = await window.javaBridge?.listMonitors?.();
-      this.monitorList = Array.isArray(list) ? list : [];
-    } catch {
-      this.monitorList = [];
-    }
-    return this.monitorList;
-  }
-
-  monitorLabel(monitor, position) {
-    const n = Number.isFinite(position) ? position + 1 : Number(monitor?.index) + 1;
-    const w = Math.round(Number(monitor?.width) || 0);
-    const h = Math.round(Number(monitor?.height) || 0);
-    const notes = [];
-    if (monitor?.isPrimary) {
-      notes.push(this.i18n?.t?.("settings.detailsMonitor.primary", "primary") ?? "primary");
-    }
-    // Where the screen physically sits — a resolution alone does not tell the
-    // user which of their monitors they just selected.
-    const side = String(monitor?.side || "");
-    if (side) {
-      notes.push(this.i18n?.t?.(`settings.detailsMonitor.side.${side}`, side) ?? side);
-    }
-    const suffix = notes.length ? ` (${notes.join(", ")})` : "";
-    return `${n} — ${w}×${h}${suffix}`;
-  }
-
   /**
-   * Apply the "Show Details on monitor" setting. Opening is best-effort: if the
-   * chosen display has been unplugged since it was saved, fall back to off
-   * rather than leaving a window stranded off-screen.
+   * Re-open the Details window on the saved monitor (the dashboard opens and
+   * closes it when the setting changes). Best-effort: if that display has been
+   * unplugged since it was saved, leave the window closed rather than stranded
+   * off-screen.
    */
-  async applyDetailsMonitor(value, { persist = false } = {}) {
-    const next = value === "off" || value === null || value === undefined ? "off" : String(value);
-    this.detailsMonitor = next;
-    if (persist) {
-      this.safeSetSetting(this.storageKeys.detailsMonitor, next);
-    }
-    if (next === "off") {
+  async applyDetailsMonitor(value) {
+    const index = Number(value);
+    const monitors = await window.javaBridge?.listMonitors?.();
+    if (!Number.isFinite(index) || !Array.isArray(monitors) || !monitors.some((m) => Number(m.index) === index)) {
       await window.javaBridge?.closeDetailsWindow?.();
-      this.setDetailsMonitorHint("");
-      return;
-    }
-    const index = Number(next);
-    const monitors = await this.refreshMonitorList();
-    if (!Number.isFinite(index) || !monitors.some((m) => Number(m.index) === index)) {
-      this.setDetailsMonitorHint(
-        this.i18n?.t?.("settings.detailsMonitor.missing", "That display is not connected.") ??
-          "That display is not connected."
-      );
-      await window.javaBridge?.closeDetailsWindow?.();
-      this.detailsMonitor = "off";
-      if (persist) this.safeSetSetting(this.storageKeys.detailsMonitor, "off");
       return;
     }
     try {
       await window.javaBridge?.openDetailsWindow?.(index);
-      this.setDetailsMonitorHint("");
     } catch (err) {
-      this.setDetailsMonitorHint(String(err?.message || err || ""));
+      console.error("[A2Tools] openDetailsWindow failed", err);
     }
-  }
-
-  setDetailsMonitorHint(text) {
-    if (!this.detailsMonitorHint) return;
-    this.detailsMonitorHint.textContent = text || "";
-    this.detailsMonitorHint.style.display = text ? "" : "none";
   }
 
   /**
@@ -3807,18 +2700,6 @@ class DpsApp {
     }
   }
 
-  // Two layouts: Interface ("beta") and Compact ("betaSlim"). The Classic pair is
-  // gone; its old dpsMeter.betaUi setting is no longer read, so a saved Classic
-  // lands on Interface and Classic Slim on Compact (dpsMeter.slimMode is kept).
-  getMeterLayout() {
-    return this.slimMode ? "betaSlim" : "beta";
-  }
-
-  setMeterLayout(value, { persist = false } = {}) {
-    this.setSlimMode(value === "betaSlim", { persist });
-    this.redrawFromLatest();
-  }
-
   // Re-run the latest engine update now (identity merge included) instead of
   // waiting for the next one: out of combat the backend re-sends the same JSON,
   // which fetchDps skips, so a layout switch would otherwise keep stale rows.
@@ -3827,38 +2708,23 @@ class DpsApp {
     this.fetchDps();
   }
 
-  setSlimMode(enabled, { persist = false } = {}) {
+  setSlimMode(enabled) {
     this.slimMode = !!enabled;
     document.querySelector(".meter")?.classList.toggle("slim", this.slimMode);
     // Compact keeps the target selector and Reset in its footer (pmWidget.js).
     this.pmWidget?.syncTheme();
     // Compact hides the boss row, so the name is fitted again on the way back.
     this.fitBossName();
-    if (persist) {
-      this.safeSetSetting(this.storageKeys.slimMode, String(this.slimMode));
-    }
   }
 
-  setMainPlayerNamesBold(enabled, { persist = false } = {}) {
+  setMainPlayerNamesBold(enabled) {
     this.mainPlayerNamesBold = !!enabled;
-    if (this.playerNamesBoldCheckbox && document.activeElement !== this.playerNamesBoldCheckbox) {
-      this.playerNamesBoldCheckbox.checked = this.mainPlayerNamesBold;
-    }
     document.body?.classList.toggle("mainPlayerNamesBold", this.mainPlayerNamesBold);
-    if (persist) {
-      this.safeSetSetting(this.storageKeys.mainPlayerNamesBold, String(this.mainPlayerNamesBold));
-    }
   }
 
-  setMainPlayerDpsBold(enabled, { persist = false } = {}) {
+  setMainPlayerDpsBold(enabled) {
     this.mainPlayerDpsBold = !!enabled;
-    if (this.playerDpsBoldCheckbox && document.activeElement !== this.playerDpsBoldCheckbox) {
-      this.playerDpsBoldCheckbox.checked = this.mainPlayerDpsBold;
-    }
     document.body?.classList.toggle("mainPlayerDpsBold", this.mainPlayerDpsBold);
-    if (persist) {
-      this.safeSetSetting(this.storageKeys.mainPlayerDpsBold, String(this.mainPlayerDpsBold));
-    }
   }
 
   // The meter follows the fight on its own: a boss → BOSS, players → PVP, anything
@@ -3898,17 +2764,11 @@ class DpsApp {
     this.updateTargetModeButton();
   }
 
-  applyTheme(themeId, { persist = false } = {}) {
+  applyTheme(themeId) {
     const normalized = this.availableThemes.includes(themeId) ? themeId : this.availableThemes[0];
     this.theme = normalized;
     document.documentElement.dataset.theme = normalized;
     this.pmWidget?.syncTheme();
-    if (this.settingsSelections) {
-      this.settingsSelections.theme = normalized;
-    }
-    if (persist) {
-      this.safeSetSetting(this.storageKeys.theme, normalized);
-    }
   }
 
   setDisplayMode(mode, { persist = false } = {}) {
@@ -4055,68 +2915,60 @@ class DpsApp {
     this.logDebug(`Damage data refreshed (${reason}).`);
   }
 
-  // Settings are edited in a separate window, so this window has to be told
-  // when one changes or it keeps rendering with the value it read at startup.
-  //
-  // Every window loads the same document, so the control for the setting exists
-  // here too, already wired to the handler that applies it. Rather than
-  // duplicate that logic, set the control to the incoming value and fire the
-  // same event a click would — one code path for local and remote changes.
-  //
-  // Only the options that change what the meter draws are listed. Custom
-  // dropdowns (theme, layout, player limit) are not native inputs and need
-  // their own handling, so they are deliberately absent.
+  // Settings are edited in the dashboard, so this window has to be told when one
+  // changes or it keeps rendering with the value it read at startup. Only the
+  // options that change what the meter draws are here; nothing is written back
+  // (the backend already stored the value), so a change never echoes.
   applyRemoteSettingChange(key, value) {
-    // PowerMeter: "Meter layout" (Interface / Compact) is a dropdown, not a form
-    // control, so the map below can't reach it and the meter kept its layout
-    // until restart. Apply it directly; no persist, so there is no echo.
-    if (key === this.storageKeys.slimMode) {
-      this.setSlimMode(value === "true");
-      return this.redrawFromLatest();
-    }
-    if (key === this.storageKeys.onlyShowUser) return this.setOnlyShowUser(value === "1");
-    if (key === this.storageKeys.theme) return this.applyTheme(value);
-    // PowerMeter: the two dropdowns the dashboard's Widget DPS section also sets.
-    if (key === this.storageKeys.playerLimit) {
-      const limit = parseInt(value, 10);
-      if (!(limit >= 1) || limit === this.playerLimit) return;
-      this.playerLimit = limit;
-      return this.renderCurrentRows();
-    }
-    if (key === this.storageKeys.defaultMeterMode) {
-      // The widget's own pick sets settingsSelections first, so its echo stops here.
-      const mode = value === "trainTargets" ? "pveTargets" : value;
-      if (!TARGET_MODES.includes(mode) || mode === this.settingsSelections?.defaultMeterMode) return;
-      if (this.settingsSelections) this.settingsSelections.defaultMeterMode = mode;
-      // As a pick in the widget: the meter switches to it now. One window tells the backend.
-      return this.setTargetSelection(mode, { syncBackend: window.A2_VIEW === "main", reason: "default meter mode changed" });
-    }
-    const selector = REMOTE_APPLIED_SETTING_CONTROLS[key];
-    if (!selector) return;
-    const control = document.querySelector(selector);
-    if (!control) return;
-
-    // Bail when the value already matches — this is what stops the echo. The
-    // handler below writes the setting straight back, and the backend only
-    // broadcasts real changes, so the round trip ends here.
-    if (control.type === "checkbox") {
-      const next = value !== "false";
-      if (control.checked === next) return;
-      control.checked = next;
-    } else {
-      if (String(control.value) === String(value)) return;
-      // The echo of a value this window sent a moment ago, while the user is still on the control.
-      if (document.activeElement === control) return;
-      control.value = value;
-    }
-    this._applyingRemoteSetting = true;
-    try {
-      control.dispatchEvent(new Event("change", { bubbles: true }));
-      if (control.type === "range") {
-        control.dispatchEvent(new Event("input", { bubbles: true }));
+    const keys = this.storageKeys;
+    const on = value !== "false";
+    switch (key) {
+      case keys.slimMode:
+        this.setSlimMode(value === "true");
+        return this.redrawFromLatest();
+      case keys.onlyShowUser:
+        return this.setOnlyShowUser(value === "1");
+      case keys.theme:
+        return this.applyTheme(value);
+      case keys.playerLimit: {
+        const limit = parseInt(value, 10);
+        if (!(limit >= 1) || limit === this.playerLimit) return;
+        this.playerLimit = limit;
+        return this.renderCurrentRows();
       }
-    } finally {
-      this._applyingRemoteSetting = false;
+      case keys.defaultMeterMode: {
+        const mode = value === "trainTargets" ? "pveTargets" : value;
+        if (!TARGET_MODES.includes(mode) || mode === this.defaultMeterMode) return;
+        this.defaultMeterMode = mode;
+        // As a pick in the widget: the meter switches to it now. One window tells the backend.
+        return this.setTargetSelection(mode, { syncBackend: window.A2_VIEW === "main", reason: "default meter mode changed" });
+      }
+      case keys.roundDps:
+        this.roundDps = on;
+        return this.renderCurrentRows();
+      case keys.showTotalDps:
+        this.showTotalDps = on;
+        return this.renderCurrentRows();
+      case keys.pinMeToTop:
+        return this.setPinMeToTop(on);
+      case keys.mainPlayerNamesBold:
+        return this.setMainPlayerNamesBold(on);
+      case keys.mainPlayerDpsBold:
+        return this.setMainPlayerDpsBold(on);
+      case keys.showPing:
+        this.showPing = on;
+        return this.updatePing();
+      case keys.bossNameSize:
+        return this.applyBossNameSize(value);
+      case keys.windowOpacity:
+        return this.applyWindowOpacity(value);
+      case keys.meterFillOpacity:
+        return this.applyMeterFillOpacity(value);
+      case keys.showSuspendBtn:
+        this._applySuspendBtnVisibility(on);
+        // Hiding the button also resumes a suspended capture.
+        if (!on) this._setCaptureSuspended(false);
+        return;
     }
   }
 
@@ -4160,44 +3012,6 @@ class DpsApp {
     if (this.meterTotalDmgEl) {
       this.meterTotalDmgEl.textContent = this.formatAbbreviatedNumber(totalDmg);
     }
-  }
-
-  initPlayerLimitDropdown() {
-    const wrapper = document.querySelector(".playerLimitDropdownWrapper");
-    if (!wrapper) return;
-    const btn = wrapper.querySelector(".playerLimitDropdownBtn");
-    const menu = wrapper.querySelector(".playerLimitDropdownMenu");
-    const textEl = btn?.querySelector(".settingsDropdownText");
-    if (!btn || !menu || !textEl) return;
-
-    const options = [4, 5, 6, 7, 8, 10, 12];
-    textEl.textContent = String(this.playerLimit);
-
-    for (const val of options) {
-      const item = document.createElement("div");
-      item.className = "settingsDropdownItem";
-      item.textContent = String(val);
-      item.dataset.value = String(val);
-      if (val === this.playerLimit) item.classList.add("isActive");
-      item.addEventListener("click", () => {
-        this.playerLimit = val;
-        this.safeSetSetting(this.storageKeys.playerLimit, String(val));
-        textEl.textContent = String(val);
-        menu.querySelectorAll(".settingsDropdownItem").forEach((el) =>
-          el.classList.toggle("isActive", el.dataset.value === String(val))
-        );
-        menu.style.display = "none";
-        this.renderCurrentRows();
-      });
-      menu.appendChild(item);
-    }
-
-    btn.addEventListener("click", () => {
-      menu.style.display = menu.style.display === "none" ? "flex" : "none";
-    });
-    document.addEventListener("click", (e) => {
-      if (!wrapper.contains(e.target)) menu.style.display = "none";
-    });
   }
 
   renderCurrentRows() {
@@ -4247,155 +3061,42 @@ class DpsApp {
     };
   }
 
-  refreshConnectionInfo({ skipSettingsRefresh = false } = {}) {
-    if (!this.lockedIp || !this.lockedPort) return;
+  // Capture state for the widget's status line and its connection diagnosis
+  // (pmWidget.js): game window found, port locked, capture error, who "you" are.
+  refreshConnectionInfo() {
     const raw = window.javaBridge?.getConnectionInfo?.();
     if (typeof raw !== "string") {
-      this.lockedIp.textContent = "-";
-      this.lockedPort.textContent = "-";
-      if (this.localActorIdInput && document.activeElement !== this.localActorIdInput) {
-        this.localActorIdInput.value = "";
-      }
       this.isDetectingPort = this.aionRunning;
       this.updateConnectionStatusUi();
-      if (!skipSettingsRefresh) {
-        this.refreshSettingsPanelIfOpen();
-      }
       return;
     }
     const info = this.safeParseJSON(raw, {});
     this.captureDevices = Array.isArray(info?.devices) ? info.devices : []; // PowerMeter: widget connection diagnosis
 
-    // Show Npcap error if present
     const pcapErr = typeof info?.pcapError === "string" ? info.pcapError.trim() : "";
     this.pcapError = pcapErr; // PowerMeter: read by the widget's capture-error state
     if (pcapErr) {
-      this.lockedIp.textContent = "";
-      this.lockedPort.textContent = pcapErr;
-      this.lockedPort.classList.add("isPcapError");
       this.updateConnectionStatusUi();
-      if (!skipSettingsRefresh) this.refreshSettingsPanelIfOpen();
       return;
     }
-    this.lockedPort.classList.remove("isPcapError");
 
-    const deviceName = typeof info?.device === "string" && info.device.trim() ? info.device : "";
-    const rawIp = info?.ip || "-";
-    const ip =
-      deviceName ||
-      (rawIp === "127.0.0.1" || rawIp === "::1"
-        ? this.i18n?.t("connection.loopback", "Local Loopback") ?? "Local Loopback"
-        : rawIp);
     const hasPort = info?.port != null && Number.isFinite(Number(info.port)); // unlocked = port null, and Number(null) is 0
     this.isDetectingPort = this.aionRunning && !hasPort;
-    const port = hasPort
-      ? String(info.port)
-      : this.isDetectingPort
-        ? this.i18n?.t("connection.detecting", "Detecting AION2 connection...")
-        : this.i18n?.t("connection.auto", "Auto");
-    this.lockedIp.textContent = ip;
-    this.lockedPort.textContent = port;
-    // Keep the device dropdown text in sync with the currently locked device
-    if (this._autoDetectDevice && deviceName && this.deviceDropdownBtn) {
-      const textEl = this.deviceDropdownBtn.querySelector(".settingsDropdownText");
-      if (textEl) textEl.textContent = deviceName;
-    }
     const localPlayerId = Number(info?.localPlayerId);
     this.localPlayerId = Number.isFinite(localPlayerId) && localPlayerId > 0
       ? Math.trunc(localPlayerId)
       : null;
-    if (this.localActorIdInput && document.activeElement !== this.localActorIdInput) {
-      this.localActorIdInput.value = this.localPlayerId ? String(this.localPlayerId) : "";
-    }
     // The backend's name is authoritative once the game has said who you are
     // playing (self record): follow it, without echoing it back (no syncBackend).
     const backendName = String(info?.characterName || "").trim();
     if (backendName && backendName !== this.USER_NAME) {
       this.setUserName(backendName, { persist: true });
     }
-    if (this.characterNameInput && document.activeElement !== this.characterNameInput) {
-      const nickname = String(info?.characterName || this.USER_NAME || "").trim();
-      this.characterNameInput.value = nickname;
-    }
     // Do NOT reinitTargetSelection() when the backend-reported local id changes:
     // the local player churns entity ids mid-fight, and reinit → reset_combat
     // wipes all combat data and every teammate nickname. The "you" highlight
     // follows this.localPlayerId on the next dps render with no reset.
     this.updateConnectionStatusUi();
-    if (!skipSettingsRefresh) {
-      this.refreshSettingsPanelIfOpen();
-    }
-  }
-
-  refreshSettingsPanelIfOpen() {
-    if (!this.settingsPanel?.classList.contains("isOpen")) return;
-    this.refreshConnectionInfo({ skipSettingsRefresh: true });
-    this.updateSettingsVersion();
-  }
-
-  _updateDeviceDropdownState() {
-    const disabled = this._autoDetectDevice;
-    if (this.deviceDropdownBtn) this.deviceDropdownBtn.disabled = disabled;
-    if (disabled && this.deviceDropdownMenu) this.deviceDropdownMenu.classList.remove("isOpen");
-  }
-
-  _populateDeviceDropdown(currentDevice) {
-    if (!this.deviceDropdownBtn || !this.deviceDropdownMenu) return;
-    const raw = window.javaBridge?.getAvailableDevices?.();
-    const devices = typeof raw === "string" ? this.safeParseJSON(raw, []) : [];
-    if (!Array.isArray(devices) || devices.length === 0) return;
-    const options = devices.map((d) => ({ value: d, label: d }));
-    // When auto-detect is on, show the currently locked device; otherwise show the manual selection
-    const connRaw = window.javaBridge?.getConnectionInfo?.();
-    const connInfo = typeof connRaw === "string" ? this.safeParseJSON(connRaw, {}) : {};
-    const lockedDevice = typeof connInfo?.device === "string" && connInfo.device.trim() ? connInfo.device : "";
-    const selected = this._autoDetectDevice ? (lockedDevice || currentDevice || devices[0]) : (currentDevice || devices[0]);
-    this.deviceDropdownMenu.innerHTML = "";
-    options.forEach((opt) => {
-      const item = document.createElement("button");
-      item.type = "button";
-      item.className = "settingsDropdownItem";
-      item.dataset.value = opt.value;
-      item.textContent = opt.label;
-      if (opt.value === selected) item.classList.add("isActive");
-      item.addEventListener("click", () => {
-        window.javaBridge?.setManualDevice?.(opt.value);
-        this.deviceDropdownMenu.classList.remove("isOpen");
-        const textEl = this.deviceDropdownBtn.querySelector(".settingsDropdownText");
-        if (textEl) textEl.textContent = opt.label;
-        this.deviceDropdownMenu.querySelectorAll(".settingsDropdownItem").forEach((el) =>
-          el.classList.toggle("isActive", el.dataset.value === opt.value)
-        );
-        this.refreshConnectionInfo();
-      });
-      this.deviceDropdownMenu.appendChild(item);
-    });
-    const textEl = this.deviceDropdownBtn.querySelector(".settingsDropdownText");
-    if (textEl) textEl.textContent = selected;
-    this.deviceDropdownBtn.onclick = (event) => {
-      if (this.deviceDropdownBtn.disabled) return;
-      event.stopPropagation();
-      // Close other dropdowns
-      document.querySelectorAll(".settingsDropdownMenu.isOpen").forEach((menu) => {
-        if (menu !== this.deviceDropdownMenu) menu.classList.remove("isOpen");
-      });
-      this.deviceDropdownMenu.classList.toggle("isOpen");
-    };
-  }
-
-  updateSettingsVersion() {
-    if (!this.settingsVersionValue) return;
-    const rawVersion = String(window.dpsData?.getVersion?.() || "").trim();
-    const normalized = rawVersion.replace(/^v/i, "");
-    this.settingsVersionValue.textContent = normalized ? `v${normalized}` : "-";
-    // The backend version fetch is async; retry briefly if it wasn't ready yet.
-    if (!normalized && !this._versionRetryScheduled) {
-      this._versionRetryScheduled = true;
-      setTimeout(() => {
-        this._versionRetryScheduled = false;
-        this.updateSettingsVersion();
-      }, 300);
-    }
   }
 
   fitBossName() {
@@ -4662,7 +3363,7 @@ class DpsApp {
       if (targetEl?.closest?.(".headerBtn, .footerBtn, .bossIcon")) {
         return;
       }
-      if (targetEl?.closest?.(".settingsPanel, .historyPanel, .detailsBody, .detailsSettingsMenu")) {
+      if (targetEl?.closest?.(".historyPanel, .detailsBody, .detailsSettingsMenu")) {
         return;
       }
       if (targetEl?.closest?.("button, input, select, textarea, a, [data-no-drag]")) {
@@ -4695,7 +3396,7 @@ class DpsApp {
         this.elList?.classList?.add?.("dragInteracting");
         // Hide heavy panels during drag to reduce per-frame repaint cost;
         // place a lightweight ghost outline so the user sees where they are.
-        for (const sel of [".settingsPanel", ".detailsPanel", ".historyPanel"]) {
+        for (const sel of [".detailsPanel", ".historyPanel"]) {
           const el = document.querySelector(sel);
           if (el && el.offsetParent !== null) {
             const r = el.getBoundingClientRect();
@@ -4725,7 +3426,7 @@ class DpsApp {
         this.elList?.classList?.remove?.("dragInteracting");
         this.suppressRowInteractionUntilMs = this.nowMs() + 120;
         // Restore panels hidden during drag
-        for (const sel of [".settingsPanel", ".detailsPanel", ".historyPanel"]) {
+        for (const sel of [".detailsPanel", ".historyPanel"]) {
           const el = document.querySelector(sel);
           if (el?._dragHidden) {
               el.style.visibility = "";
