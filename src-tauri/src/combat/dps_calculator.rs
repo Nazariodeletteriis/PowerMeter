@@ -376,6 +376,7 @@ impl DpsCalculator {
         let skill_sets = skill_counts;
         let skill_counts: HashMap<i32, usize> = skill_sets.iter().map(|(&k, v)| (k, v.len())).collect();
         let local_ids = self.resolve_local_ids(&summon_data);
+        let can_own = |id: i32| nickname_data.contains_key(&id) || local_ids.as_ref().is_some_and(|l| l.contains(&id));
         let mut orphan_merges: Vec<(i32, i32)> = Vec::new();
         for (&uid, data) in &dps_data.map {
             if summon_data.contains_key(&uid) { continue; }
@@ -400,26 +401,10 @@ impl DpsCalculator {
                 }
             }
 
-            // Skill path, for a placed object: a Sorcerer's Fire Wall ticks from an id of its own, and with its
-            // spawn missed it looked like a sixth party member (#31315, Judge Urahum 10/19, history auto_59360). Its
-            // one or two skills all belong to the rotation of exactly one same-class player showing three times as
-            // many: that player's. Never your own row, unnamed at the start of a fight.
-            if my_skills <= 2 && !local_ids.as_ref().is_some_and(|l| l.contains(&uid)) {
-                if let Some(mine) = skill_sets.get(&uid) {
-                    let owners: Vec<i32> = dps_data.map.iter()
-                        .filter(|(oid, od)| {
-                            **oid != uid
-                                && od.job == *job
-                                && (nickname_data.contains_key(oid) || local_ids.as_ref().is_some_and(|l| l.contains(oid)))
-                                && skill_sets.get(*oid).is_some_and(|s| s.len() >= 3 * my_skills && mine.is_subset(s))
-                        })
-                        .map(|(&oid, _)| oid)
-                        .collect();
-                    if owners.len() == 1 {
-                        orphan_merges.push((uid, owners[0]));
-                        continue;
-                    }
-                }
+            let jobs = dps_data.map.iter().map(|(&id, d)| (id, d.job.as_str()));
+            if let Some(owner) = placed_object_owner(uid, job, jobs, &skill_sets, &can_own) {
+                orphan_merges.push((uid, owner));
+                continue;
             }
 
             // Scalar path, for a summon that skill band alone made look like a
@@ -945,6 +930,8 @@ impl DpsCalculator {
         let summon_data = self.data_storage.get_summon_data();
         let mob_hp_data = self.data_storage.get_mob_hp_data();
         let mob_data = self.data_storage.get_mob_data();
+        let local_ids = self.resolve_local_ids(&summon_data);
+        let can_own = |id: i32| nickname_data.contains_key(&id) || local_ids.as_ref().is_some_and(|l| l.contains(&id));
 
         let mut actor_meta: HashMap<i32, (String, String)> = HashMap::new();
         let mut targets = Vec::new();
@@ -981,13 +968,23 @@ impl DpsCalculator {
             // owner even if several such orphans share the class.
             let target_actor_ids: HashSet<i32> = actor_damage.keys().copied().collect();
             let known_players = self.data_storage.get_known_player_ids();
+            let skill_sets: HashMap<i32, HashSet<i32>> = target_data.actors.iter()
+                .map(|(&id, ad)| (id, ad.skills.keys().map(|&(code, _)| code).collect()))
+                .collect();
             let mut orphan_merges: Vec<(i32, i32)> = Vec::new();
             for (&uid, (_, job)) in &actor_meta {
                 if !target_actor_ids.contains(&uid) { continue; }
                 if summon_data.contains_key(&uid) { continue; }
                 if nickname_data.contains_key(&uid) { continue; }
-                if known_players.contains(&uid) { continue; }
                 if job.is_empty() { continue; }
+                let jobs = actor_meta.iter()
+                    .filter(|(id, _)| target_actor_ids.contains(id))
+                    .map(|(&id, (_, j))| (id, j.as_str()));
+                if let Some(owner) = placed_object_owner(uid, job, jobs, &skill_sets, &can_own) {
+                    orphan_merges.push((uid, owner));
+                    continue;
+                }
+                if known_players.contains(&uid) { continue; }
                 let same_job: Vec<i32> = actor_meta.iter()
                     .filter(|(oid, (_, oj))| **oid != uid && *oj == *job
                         && nickname_data.contains_key(oid)
@@ -1113,32 +1110,7 @@ impl DpsCalculator {
                     std::collections::hash_map::Entry::Vacant(v) => {
                         v.insert(s);
                     }
-                    std::collections::hash_map::Entry::Occupied(mut o) => {
-                        let e = o.get_mut();
-                        e.time += s.time;
-                        e.dmg = e.dmg.saturating_add(s.dmg);
-                        e.multi_hit_count += s.multi_hit_count;
-                        e.multi_hit_damage = e.multi_hit_damage.saturating_add(s.multi_hit_damage);
-                        e.multi_hit_hits += s.multi_hit_hits;
-                        e.min_dmg = e.min_dmg.min(s.min_dmg);
-                        e.max_dmg = e.max_dmg.max(s.max_dmg);
-                        e.crit += s.crit;
-                        e.parry += s.parry;
-                        e.back += s.back;
-                        e.frontal += s.frontal;
-                        e.perfect += s.perfect;
-                        e.double += s.double;
-                        e.smite += s.smite;
-                        e.powershard += s.powershard;
-                        e.regen = e.regen.saturating_add(s.regen);
-                        e.hit_timestamps.extend(s.hit_timestamps);
-                        e.hit_damages.extend(s.hit_damages);
-                        for (k, f) in s.specs.iter().enumerate() {
-                            if *f && k < e.specs.len() {
-                                e.specs[k] = true;
-                            }
-                        }
-                    }
+                    std::collections::hash_map::Entry::Occupied(mut o) => absorb(o.get_mut(), s),
                 }
             }
         }
@@ -1189,6 +1161,11 @@ impl DpsCalculator {
         let mut orphan_to_owner: HashMap<i32, i32> = HashMap::new();
         {
             let known_players = self.data_storage.get_known_player_ids();
+            let local_ids = self.resolve_local_ids(&summon_data);
+            let can_own = |id: i32| nickname_data.contains_key(&id) || local_ids.as_ref().is_some_and(|l| l.contains(&id));
+            let skill_sets: HashMap<i32, HashSet<i32>> = target_data.actors.iter()
+                .map(|(&id, ad)| (id, ad.skills.keys().map(|&(code, _)| code).collect()))
+                .collect();
             let mut actor_jobs: HashMap<i32, String> = HashMap::new();
             for (&actor_id, actor_data) in &target_data.actors {
                 let raw_uid = summon_resolver::resolve(actor_id, &summon_data);
@@ -1204,6 +1181,13 @@ impl DpsCalculator {
                 let raw_uid = summon_resolver::resolve(actor_id, &summon_data);
                 if raw_uid <= 0 { continue; }
                 if summon_data.contains_key(&raw_uid) || nickname_data.contains_key(&raw_uid) { continue; }
+                if let Some(job) = actor_jobs.get(&raw_uid) {
+                    let jobs = actor_jobs.iter().map(|(&id, j)| (id, j.as_str()));
+                    if let Some(owner) = placed_object_owner(raw_uid, job, jobs, &skill_sets, &can_own) {
+                        orphan_to_owner.insert(raw_uid, owner);
+                        continue;
+                    }
+                }
                 // Never merge known players — they have their own identity
                 if known_players.contains(&raw_uid) { continue; }
                 if !seen.insert(raw_uid) { continue; }
@@ -1478,6 +1462,91 @@ fn resolve_nickname(uid: i32, nicknames: &HashMap<i32, String>, summon_data: &Ha
     uid.to_string()
 }
 
+/// Adds `s` into `e`, the entry of the same player, skill and dot.
+fn absorb(e: &mut DetailSkillEntry, s: DetailSkillEntry) {
+    e.time += s.time;
+    e.dmg = e.dmg.saturating_add(s.dmg);
+    e.multi_hit_count += s.multi_hit_count;
+    e.multi_hit_damage = e.multi_hit_damage.saturating_add(s.multi_hit_damage);
+    e.multi_hit_hits += s.multi_hit_hits;
+    e.min_dmg = e.min_dmg.min(s.min_dmg);
+    e.max_dmg = e.max_dmg.max(s.max_dmg);
+    e.crit += s.crit;
+    e.parry += s.parry;
+    e.back += s.back;
+    e.frontal += s.frontal;
+    e.perfect += s.perfect;
+    e.double += s.double;
+    e.smite += s.smite;
+    e.powershard += s.powershard;
+    e.regen = e.regen.saturating_add(s.regen);
+    e.hit_timestamps.extend(s.hit_timestamps);
+    e.hit_damages.extend(s.hit_damages);
+    for (k, f) in s.specs.iter().enumerate() {
+        if *f && k < e.specs.len() {
+            e.specs[k] = true;
+        }
+    }
+}
+
+/// Skill path, for a placed object: a Sorcerer's Fire Wall ticks from an id of its own, and with its spawn missed it
+/// looked like a sixth party member (#31315, Judge Urahum 10/19, history auto_59360). Its one or two skills all belong
+/// to the rotation of exactly one same-class player showing three times as many: that player's, its owner. Only a
+/// player that `can_own` (named, or you) owns one, and is never one: your own row is unnamed at the start of a fight.
+/// `jobs` lists the players of the view with their class.
+fn placed_object_owner<'a>(
+    uid: i32,
+    job: &str,
+    jobs: impl Iterator<Item = (i32, &'a str)>,
+    skill_sets: &HashMap<i32, HashSet<i32>>,
+    can_own: &impl Fn(i32) -> bool,
+) -> Option<i32> {
+    let mine = skill_sets.get(&uid).filter(|m| m.len() <= 2 && !can_own(uid))?;
+    let mut owners = jobs
+        .filter(|&(oid, oj)| {
+            oid != uid
+                && oj == job
+                && can_own(oid)
+                && skill_sets.get(&oid).is_some_and(|s| s.len() >= 3 * mine.len() && mine.is_subset(s))
+        })
+        .map(|(oid, _)| oid);
+    let owner = owners.next()?;
+    owners.next().is_none().then_some(owner)
+}
+
+/// The skill path on a saved fight: records written before the details knew it list a Sorcerer's Fire Wall as a
+/// player of its own (the history and its details read them as they are). A record does not say which row was
+/// yours, so only a named row owns one.
+pub fn merge_placed_objects(record: &mut FightRecord) {
+    let mut skill_sets: HashMap<i32, HashSet<i32>> = HashMap::new();
+    for s in &record.details.skills {
+        skill_sets.entry(s.actor_id).or_default().insert(s.code);
+    }
+    let named = |id: i32| record.actors.iter().any(|a| a.actor_id == id && a.nickname != id.to_string());
+    let owner_of: HashMap<i32, i32> = record.actors.iter()
+        .filter(|a| !a.job.is_empty())
+        .filter_map(|a| {
+            let jobs = record.actors.iter().map(|o| (o.actor_id, o.job.as_str()));
+            Some((a.actor_id, placed_object_owner(a.actor_id, &a.job, jobs, &skill_sets, &named)?))
+        })
+        .collect();
+    if owner_of.is_empty() {
+        return;
+    }
+    record.actors.retain(|a| !owner_of.contains_key(&a.actor_id));
+    let mut skills: HashMap<(i32, i32, bool), DetailSkillEntry> = HashMap::new();
+    for mut s in std::mem::take(&mut record.details.skills) {
+        s.actor_id = *owner_of.get(&s.actor_id).unwrap_or(&s.actor_id);
+        match skills.entry((s.actor_id, s.code, s.is_dot)) {
+            std::collections::hash_map::Entry::Vacant(v) => {
+                v.insert(s);
+            }
+            std::collections::hash_map::Entry::Occupied(mut o) => absorb(o.get_mut(), s),
+        }
+    }
+    record.details.skills = skills.into_values().collect();
+}
+
 fn build_nickname_canonical_map_from_aggregates(
     actor_damage: &HashMap<i32, i64>,
     summon_data: &HashMap<i32, i32>,
@@ -1635,6 +1704,68 @@ mod mode_tests {
         }
         hit_skill(&s, ME, FIRE_WALL, 700, t + 900); // you, a Sorcerer too, one skill in so far
         assert_eq!(rows(&mut calc), vec![ME, ASTRAEVIA]);
+    }
+
+    /// Astraevia's rotation and her wall's tick, in a boss fight long enough to be saved.
+    fn fire_wall_fight(s: &DataStorage, wall: i32) {
+        let t = now() - 20_000;
+        s.append_nickname_authoritative(ASTRAEVIA, "Astraevia");
+        for (i, &sk) in SORC.iter().enumerate() {
+            hit_skill(s, ASTRAEVIA, sk, 1000, t + i as i64 * 100);
+        }
+        hit_skill(s, wall, FIRE_WALL, 45, t + 900);
+        hit_skill(s, ASTRAEVIA, SORC[0], 1000, t + 6_000);
+    }
+
+    fn ids(ids: impl Iterator<Item = i32>) -> Vec<i32> {
+        let mut v: Vec<i32> = ids.collect::<HashSet<_>>().into_iter().collect();
+        v.sort();
+        v
+    }
+
+    #[test]
+    fn a_placed_fire_wall_joins_its_sorcerer_in_details_and_history() {
+        let (s, mut calc) = setup();
+        fire_wall_fight(&s, WALL);
+        let d = calc.get_target_details(BOSS, None);
+        assert_eq!(ids(d.skills.iter().map(|k| k.actor_id)), vec![ASTRAEVIA]);
+        let hers = calc.get_target_details(BOSS, Some(&[ASTRAEVIA]));
+        assert_eq!(hers.skills.iter().map(|k| k.dmg).sum::<i32>(), 7045, "her wall's damage is hers");
+        let ctx = calc.get_details_context();
+        assert_eq!(ids(ctx.actors.iter().map(|a| a.actor_id)), vec![ASTRAEVIA]);
+        assert_eq!(ids(ctx.targets[0].actor_damage.keys().copied()), vec![ASTRAEVIA]);
+        let rec = calc.snapshot_boss_fights_force().into_iter().find(|r| r.mode == "boss").unwrap();
+        assert_eq!(ids(rec.actors.iter().map(|a| a.actor_id)), vec![ASTRAEVIA]);
+    }
+
+    #[test]
+    fn your_unnamed_row_keeps_its_details() {
+        let (s, calc) = setup();
+        fire_wall_fight(&s, ME); // you, a Sorcerer too, one skill in so far
+        let d = calc.get_target_details(BOSS, None);
+        assert_eq!(ids(d.skills.iter().map(|k| k.actor_id)), vec![ME, ASTRAEVIA]);
+        assert_eq!(ids(calc.get_details_context().actors.iter().map(|a| a.actor_id)), vec![ME, ASTRAEVIA]);
+    }
+
+    #[test]
+    fn an_old_record_hands_the_wall_to_its_sorcerer() {
+        let (s, mut calc) = setup();
+        fire_wall_fight(&s, WALL);
+        let mut rec = calc.snapshot_boss_fights_force().into_iter().find(|r| r.mode == "boss").unwrap();
+        // As saved before the details knew placed objects: the wall a row of its own.
+        let mut tick = rec.details.skills.iter().find(|k| k.code == FIRE_WALL).unwrap().clone();
+        let hers = tick.dmg;
+        tick.actor_id = WALL;
+        tick.dmg = 45;
+        rec.details.skills.push(tick);
+        let mut row = rec.actors.iter().find(|a| a.actor_id == ASTRAEVIA).unwrap().clone();
+        row.actor_id = WALL;
+        row.nickname = WALL.to_string();
+        rec.actors.push(row);
+        merge_placed_objects(&mut rec);
+        assert_eq!(ids(rec.actors.iter().map(|a| a.actor_id)), vec![ASTRAEVIA]);
+        let walls: Vec<(i32, i32)> = rec.details.skills.iter().filter(|k| k.code == FIRE_WALL).map(|k| (k.actor_id, k.dmg)).collect();
+        assert_eq!(walls, vec![(ASTRAEVIA, hers + 45)]);
     }
 
     #[test]
