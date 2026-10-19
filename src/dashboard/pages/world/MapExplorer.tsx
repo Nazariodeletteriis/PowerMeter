@@ -45,10 +45,10 @@ const PETS_ALL_KEY = "pm.map.petsAll";
 const PET_COLOR = "#E86FB8";
 /** The map a character of each faction opens on. */
 const HOME_MAP: Record<Faction, string> = { elyos: "World_L_A", asmodian: "World_D_A" };
-/** Game units → map pixels, measured on these maps only (both span ±408000 units). */
-const POS_MAPS = ["World_L_A", "World_D_A"];
-const POS_HALF = 408000;
-const getPlayerPosition = () => invoke<[number, number, number] | null>("get_player_position");
+/** TW map id of a zone load → our map and the game units its tiles span either way of 0 (tw_105 map_points: u = x / 2·half + 0.5). */
+const GAME_MAPS: Record<number, [string, number]> = { 1010: ["World_L_A", 408000], 1110: ["World_D_A", 408000], 20: ["Abyss_Reshanta_A", 204000] };
+const HALF: Record<string, number> = Object.fromEntries(Object.values(GAME_MAPS));
+const getPlayerPosition = () => invoke<{ pos: [number, number, number] | null; map: number | null }>("get_player_position");
 
 // Subtype → icon, color (world.layer.<subtype> labels the layer).
 const LAYERS: Record<string, [Icon, string]> = {
@@ -99,11 +99,15 @@ const label: CSSProperties = { fontSize: 10, letterSpacing: ".1em", textTransfor
  * You, where the game last placed you: it moves on teleports and on your own casts, not while you walk
  * (the rest is encrypted). Polled in here so the rest of the map doesn't re-render with it.
  */
-function You({ t, map, home }: { t: T; map: MapData; home?: string }) {
-  const pos = usePoll(getPlayerPosition, 2000).data;
-  // The position doesn't say which world it is in: with a faction, only on its own.
-  if (!pos || !POS_MAPS.includes(map.id) || (home && home !== map.id)) return null;
-  const px = (v: number, size: number) => ((v + POS_HALF) / (2 * POS_HALF)) * size;
+function You({ t, map, home, onMap }: { t: T; map: MapData; home?: string; onMap: (id?: string) => void }) {
+  const at = usePoll(getPlayerPosition, 2000).data;
+  // The map the game says you are on ("" = one we can't draw on); none seen yet: your faction's.
+  const where = at?.map == null ? undefined : (GAME_MAPS[at.map]?.[0] ?? "");
+  useEffect(() => onMap(where || undefined), [where]); // eslint-disable-line react-hooks/exhaustive-deps
+  const pos = at?.pos;
+  const half = HALF[map.id];
+  if (!pos || !half || (where ?? home ?? map.id) !== map.id) return null;
+  const px = (v: number, size: number) => ((v + half) / (2 * half)) * size;
   const name = t("world.map.you");
   return <div className="wYou" role="img" title={name} aria-label={name} style={{ left: px(pos[0], map.tiles[0] * map.tile), top: px(pos[1], map.tiles[1] * map.tile) }} />;
 }
@@ -159,9 +163,11 @@ export function MapExplorer({
   const chars = readCharacters(settings);
   const active = activeId(settings, chars);
   const char = chars.some((c) => c.id === focusChar) ? focusChar : active;
-  // The map to follow: the active character's faction world (the Abyss joins here once the traffic says where you are).
+  // The map to follow: the one the game says you are on, else the active character's faction world.
+  const [gameMap, setGameMap] = useState<string>();
   const faction = chars.find((c) => c.id === active)?.faction;
-  const follow = faction && HOME_MAP[faction];
+  const home = faction && HOME_MAP[faction];
+  const follow = gameMap ?? home;
   const [followed, setFollowed] = useState<string>();
   const owned = char ? ownedPets(readPets(settings[PETS_KEY])[char]?.owned ?? {}, readPets(settings[CAPTURED_PETS_KEY])[char]?.owned) : {};
   const done = (code: string) => owned[code]?.lvl === 3;
@@ -408,7 +414,7 @@ export function MapExplorer({
                 ))}
               </svg>
             )}
-            <You t={t} map={map} home={follow} />
+            <You t={t} map={map} home={home} onMap={setGameMap} />
             {tip && (
               <div className="wTip" style={{ left: tip.x, top: tip.y }} aria-hidden="true">
                 {tip.name}

@@ -317,12 +317,12 @@ impl StreamProcessor {
         self.data_storage.note_zone_change();
     }
 
-    // ===== OWN POSITION (23 36 / 02 38) =====
+    // ===== OWN POSITION (23 36 / 02 38 / 02 40) =====
 
     /// Where the local player is, for the minimap. The client's own movement is encrypted, so the position comes
     /// only with a teleport (`23 36 00`, x y z f32 at body +6) and with each of their casts
     /// (`02 38 <caster varint> 00 <skill u32> <seq u8> 02 <target varint> <f32> <x> <y> <z>`), not while walking
-    /// (packets_20261019_101654: 20 s of walking, no record).
+    /// (packets_20261019_101654: 20 s of walking, no record). The map comes with each zone load: `02 40 <map id u32> 00 01`.
     fn parse_own_position(&self, packet: &[u8]) {
         let len = read_varint(packet, 0);
         if len.length <= 0 {
@@ -331,6 +331,12 @@ impl StreamProcessor {
         let op = len.length as usize;
         let Some(b) = packet.get(op + 2..) else { return };
         let at = match packet.get(op..op + 2) {
+            Some([0x02, 0x40]) => {
+                if let [m0, m1, m2, m3, 0, 1] = b {
+                    self.data_storage.set_player_map(u32::from_le_bytes([*m0, *m1, *m2, *m3]));
+                }
+                return;
+            }
             Some([0x23, 0x36]) if b.first() == Some(&0) => 6,
             Some([0x02, 0x38]) => {
                 let caster = read_varint(b, 0);
@@ -2793,6 +2799,20 @@ mod stagger_tests {
         assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-188517.0, 235906.0, 765.0]));
         sp.consume_stream(&hex("250238d375003428a8003002d3756732b93f403338c8492266487dd63944de570100"));
         assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-188517.0, 235906.0, 765.0]));
+    }
+
+    /// The map the local player is on, sent with each zone load (`02 40 <map id u32> 00 01`): 1110 = Asmodian world
+    /// (packets_20261019_101654), 20 = Abyss (packets_20261019_155400); a cut record leaves it.
+    #[test]
+    fn own_map_from_zone_load() {
+        let (storage, mut sp) = processor();
+        assert_eq!(storage.player_map(), None);
+        sp.consume_stream(&hex("0c0240560400000001"));
+        assert_eq!(storage.player_map(), Some(1110));
+        sp.consume_stream(&hex("0c0240140000000001"));
+        assert_eq!(storage.player_map(), Some(20));
+        sp.consume_stream(&hex("060240"));
+        assert_eq!(storage.player_map(), Some(20));
     }
 
     /// Boss id `9E FF 02` = 49054 (three-byte varint).

@@ -168,10 +168,11 @@ fn get_captured_character() -> crate::capture::equip_parser::CapturedCharacter {
     crate::capture::equip_parser::snapshot()
 }
 
-/// Where the local player last was (x, y, z game units): set by teleports and their own casts, for the minimap.
+/// Where the local player last was, for the minimap: x, y, z game units (teleports and their own casts) and the
+/// TW map id of the last zone load (null until one is seen).
 #[tauri::command]
-fn get_player_position(state: tauri::State<'_, AppState>) -> Option<[f32; 3]> {
-    state.data_storage.player_position()
+fn get_player_position(state: tauri::State<'_, AppState>) -> serde_json::Value {
+    serde_json::json!({ "pos": state.data_storage.player_position(), "map": state.data_storage.player_map() })
 }
 
 #[tauri::command]
