@@ -373,8 +373,9 @@ impl DpsCalculator {
                 }
             }
         }
-        let skill_counts: HashMap<i32, usize> =
-            skill_counts.into_iter().map(|(k, v)| (k, v.len())).collect();
+        let skill_sets = skill_counts;
+        let skill_counts: HashMap<i32, usize> = skill_sets.iter().map(|(&k, v)| (k, v.len())).collect();
+        let local_ids = self.resolve_local_ids(&summon_data);
         let mut orphan_merges: Vec<(i32, i32)> = Vec::new();
         for (&uid, data) in &dps_data.map {
             if summon_data.contains_key(&uid) { continue; }
@@ -396,6 +397,28 @@ impl DpsCalculator {
                 if same_job.len() == 1 {
                     orphan_merges.push((uid, same_job[0]));
                     continue;
+                }
+            }
+
+            // Skill path, for a placed object: a Sorcerer's Fire Wall ticks from an id of its own, and with its
+            // spawn missed it looked like a sixth party member (#31315, Judge Urahum 10/19, history auto_59360). Its
+            // one or two skills all belong to the rotation of exactly one same-class player showing three times as
+            // many: that player's. Never your own row, unnamed at the start of a fight.
+            if my_skills <= 2 && !local_ids.as_ref().is_some_and(|l| l.contains(&uid)) {
+                if let Some(mine) = skill_sets.get(&uid) {
+                    let owners: Vec<i32> = dps_data.map.iter()
+                        .filter(|(oid, od)| {
+                            **oid != uid
+                                && od.job == *job
+                                && (nickname_data.contains_key(oid) || local_ids.as_ref().is_some_and(|l| l.contains(oid)))
+                                && skill_sets.get(*oid).is_some_and(|s| s.len() >= 3 * my_skills && mine.is_subset(s))
+                        })
+                        .map(|(&oid, _)| oid)
+                        .collect();
+                    if owners.len() == 1 {
+                        orphan_merges.push((uid, owners[0]));
+                        continue;
+                    }
                 }
             }
 
@@ -440,7 +463,6 @@ impl DpsCalculator {
         // lists them; their job comes from the cache or their heal skills.
         let orphan_owner: HashMap<i32, i32> = orphan_merges.into_iter().collect();
         let heal_party = self.data_storage.get_party_members();
-        let local_ids = self.resolve_local_ids(&summon_data);
         for (&actor_id, skills) in &self.data_storage.get_heal_snapshot() {
             let raw_uid = summon_resolver::resolve(actor_id, &summon_data);
             if raw_uid <= 0 { continue; }
@@ -1551,6 +1573,68 @@ mod mode_tests {
     fn mine(calc: &mut DpsCalculator, mode: &str) -> f64 {
         calc.set_target_selection_mode(mode);
         calc.get_dps().map.get(&ME).map(|p| p.amount).unwrap_or(0.0)
+    }
+
+    fn hit_skill(s: &DataStorage, actor: i32, skill: i32, dmg: i32, ts: i64) {
+        let mut p = ParsedDamagePacket::new();
+        p.set_actor_id(actor);
+        p.set_target_id(BOSS);
+        p.set_skill_code(skill);
+        p.set_damage(dmg);
+        p.set_timestamp(ts);
+        s.append_damage(p);
+    }
+
+    /// Sorcerer skills (Judge Urahum, history auto_59360): a rotation of 6, Fire Wall among them.
+    const SORC: [i32; 6] = [15010000, 15020000, 15030000, 15050000, 15280000, 15390000];
+    const FIRE_WALL: i32 = 15390000;
+    const ASTRAEVIA: i32 = 13330;
+    const WALL: i32 = 31315;
+
+    fn rows(calc: &mut DpsCalculator) -> Vec<i32> {
+        calc.set_target_selection_mode("bossTargets");
+        let mut ids: Vec<i32> = calc.get_dps().map.keys().copied().collect();
+        ids.sort();
+        ids
+    }
+
+    #[test]
+    fn a_placed_fire_wall_joins_its_sorcerer() {
+        let (s, mut calc) = setup();
+        let t = now() - 10_000;
+        s.append_nickname_authoritative(ASTRAEVIA, "Astraevia");
+        for (i, &sk) in SORC.iter().enumerate() {
+            hit_skill(&s, ASTRAEVIA, sk, 1000, t + i as i64 * 100);
+        }
+        hit_skill(&s, WALL, FIRE_WALL, 45, t + 900); // the wall's own id, spawn missed
+        hit_at(&s, ME, BOSS, 500, t + 950);
+        assert_eq!(rows(&mut calc), vec![ME, ASTRAEVIA], "no sixth row for the wall");
+    }
+
+    #[test]
+    fn a_second_real_sorcerer_keeps_its_row() {
+        let (s, mut calc) = setup();
+        let t = now() - 10_000;
+        s.append_nickname_authoritative(ASTRAEVIA, "Astraevia");
+        for (i, &sk) in SORC.iter().enumerate() {
+            hit_skill(&s, ASTRAEVIA, sk, 1000, t + i as i64 * 100);
+        }
+        // Unnamed, two skills, one of them outside Astraevia's rotation: a player, not her wall.
+        hit_skill(&s, WALL, FIRE_WALL, 800, t + 900);
+        hit_skill(&s, WALL, 15040000, 800, t + 950);
+        assert_eq!(rows(&mut calc), vec![ASTRAEVIA, WALL]);
+    }
+
+    #[test]
+    fn your_unnamed_row_never_joins_a_teammate() {
+        let (s, mut calc) = setup();
+        let t = now() - 10_000;
+        s.append_nickname_authoritative(ASTRAEVIA, "Astraevia");
+        for (i, &sk) in SORC.iter().enumerate() {
+            hit_skill(&s, ASTRAEVIA, sk, 1000, t + i as i64 * 100);
+        }
+        hit_skill(&s, ME, FIRE_WALL, 700, t + 900); // you, a Sorcerer too, one skill in so far
+        assert_eq!(rows(&mut calc), vec![ME, ASTRAEVIA]);
     }
 
     #[test]

@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.27
+
+- Behoben: Pets: Der Fortschritt jedes Pets steigt jetzt mit jedem Monster, das du dafür besiegst, statt beim Wert vom Login zu bleiben.
+- Behoben: DPS-Widget: Die Feuerwand eines Zauberers erscheint in einer vollen Gruppe nicht mehr als zusätzlicher namenloser Spieler (#id): Ihr Schaden geht an den Zauberer, der sie gewirkt hat.
+
 ## 0.5.26
 
 - Behoben: Der Charakter, den du spielst, wird beim Einloggen und beim Wechsel wieder erkannt: Der Name eines anderen Spielers (etwa eines Fremden in deiner Nähe) konnte als deiner übernommen werden, und Dashboard und Widget folgten ihm.

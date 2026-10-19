@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.27
+
+- Corregido: Mascotas: el progreso de cada mascota ahora sube con cada monstruo que matas para ella, en lugar de quedarse en el valor leído al entrar.
+- Corregido: Widget de DPS: el Muro de fuego de un Hechicero ya no aparece como un jugador extra sin nombre (#id) en un grupo completo: su daño va al Hechicero que lo lanzó.
+
 ## 0.5.26
 
 - Corregido: El personaje que juegas vuelve a reconocerse al entrar y al cambiar: el nombre de otro jugador (por ejemplo un desconocido cerca de ti) podía tomarse como el tuyo, y el panel y el widget lo seguían.

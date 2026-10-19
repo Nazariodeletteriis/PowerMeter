@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.27
+
+- Corrigido: Mascotes: o progresso de cada mascote agora sobe a cada monstro que você mata para ele, em vez de ficar no valor lido ao entrar.
+- Corrigido: Widget de DPS: o Muro de Fogo de um Feiticeiro não aparece mais como um jogador extra sem nome (#id) em um grupo cheio: o dano vai para o Feiticeiro que o lançou.
+
 ## 0.5.26
 
 - Corrigido: O personagem que você está jogando volta a ser reconhecido ao entrar e ao trocar: o nome de outro jogador (por exemplo um desconhecido perto de você) podia ser tomado como o seu, e o painel e o widget o seguiam.

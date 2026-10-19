@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.27
+
+- Corrigé : Familiers : la progression de chaque familier augmente maintenant à chaque monstre que vous tuez pour lui, au lieu de rester à la valeur lue à la connexion.
+- Corrigé : Widget DPS : le Mur de feu d'un Sorcier n'apparaît plus comme un joueur supplémentaire sans nom (#id) dans un groupe complet : ses dégâts vont au Sorcier qui l'a lancé.
+
 ## 0.5.26
 
 - Corrigé : Le personnage que vous jouez est de nouveau reconnu à la connexion et au changement : le nom d'un autre joueur (par exemple un inconnu près de vous) pouvait être pris pour le vôtre, et le tableau de bord et le widget le suivaient.

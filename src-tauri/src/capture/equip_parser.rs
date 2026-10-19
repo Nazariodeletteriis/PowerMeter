@@ -283,6 +283,7 @@ pub fn parse(packet: &[u8]) {
         (0x8C, 0xE2) => parse_login_bars(body),
         (0x26, 0xE2) => parse_daevanion(body),
         (0x00, 0x90) => parse_pets(body),
+        (0x0D, 0x90) => parse_pet_progress(body),
         (0x45, 0x36) => parse_spawn_gear(body),
         (0x33, 0x36) => {
             parse_spawn_gear(body);
@@ -498,6 +499,26 @@ fn parse_pets(b: &[u8]) {
     // A tail out of shape keeps the last good effects.
     if let Some(effects) = effects {
         s.pet_effects = effects;
+    }
+}
+
+/// `0d 90`, one per kill that counts for a pet (packets_20261019_015229: 11 kills of Kerubiel / Kerubian, 11 records,
+/// +7 and +4 against the next `00 90`): `<count varint> { <pet id u32> <exp gained u32> } × count`, e.g.
+/// `01 93040000 01000000` = Cherubim_03 +1. Added to the collection read at login, so the counter moves with each kill;
+/// the next `00 90` replaces it with the game's own numbers. A level up has not been seen yet: exp stops at 75.
+fn parse_pet_progress(b: &[u8]) {
+    let n = read_varint(b, 0);
+    if n.length <= 0 || n.value <= 0 {
+        return;
+    }
+    let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
+    let mut o = n.length as usize;
+    for _ in 0..n.value {
+        let (Some(id), Some(gain)) = (u32_at(b, o), u32_at(b, o + 4)) else { return };
+        if let Some(p) = s.pets.iter_mut().find(|p| p.id == id && p.lvl < 3) {
+            p.exp = (p.exp as u32).saturating_add(gain).min(75) as u8;
+        }
+        o += 8;
     }
 }
 
@@ -769,6 +790,13 @@ mod tests {
         // Not a collection (a level out of range): the last one stays.
         parse(&hex("100000900000000001ea030000ea03000009000000"));
         assert_eq!(snapshot().pets.len(), 3);
+        // packets_20261019_015229, 01:53:44: a kill for Cherubim_03 (1171) is `0f 0d 90 01 93040000 01000000`; here the same
+        // record for 1217 (level 2 at 16): +1. A level 3 pet (1299) gains nothing, an unowned one (1034) isn't added.
+        parse(&hex("0f0d9001c104000001000000"));
+        parse(&hex("0f0d90011305000001000000"));
+        parse(&hex("0f0d90010a04000001000000"));
+        let pets: Vec<(u32, u8, u8)> = snapshot().pets.iter().map(|p| (p.id, p.lvl, p.exp)).collect();
+        assert_eq!(pets, [(1002, 1, 16), (1217, 2, 17), (1299, 3, 0)]);
 
         // packets_20261013_031645, 03:16:55.558: Allalon's login inventory (body), 19 worn items with their options.
         parse_inventory(&hex(include_str!("testdata/inventory_1156_20261013_031655.hex").trim()));

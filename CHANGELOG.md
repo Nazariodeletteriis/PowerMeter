@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.27
+
+- Fixed: Pets: the progress of each pet now moves with every monster you kill for it, instead of staying at the value read at login.
+- Fixed: DPS widget: a Sorcerer's Fire Wall no longer shows up as an extra unnamed player (#id) in a full party: its damage goes to the Sorcerer who cast it.
+
 ## 0.5.26
 
 - Fixed: The character you are playing is recognised again when you log in or switch: another player's name (for example a stranger near you) could be taken as yours, and the dashboard and the widget followed it.

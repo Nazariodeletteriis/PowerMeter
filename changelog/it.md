@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.27
+
+- Corretto: Pet: il progresso di ogni pet ora sale a ogni mostro che uccidi per lui, invece di restare al valore letto al login.
+- Corretto: Widget DPS: il Fire Wall di un Sorcerer non compare più come giocatore in più senza nome (#id) in un party pieno: il suo danno va al Sorcerer che l'ha lanciato.
+
 ## 0.5.26
 
 - Corretto: Il personaggio che stai giocando viene di nuovo riconosciuto al login e al cambio personaggio: il nome di un altro giocatore (per esempio uno sconosciuto vicino a te) poteva essere preso come il tuo, e dashboard e widget lo seguivano.
