@@ -1296,6 +1296,8 @@
     height: 14px;
   }
   .meter.slim .pmSignalMs { font-size: 10px; }
+  /* Compact: the mode's name ("PowerMeter", "Boss Targets") scaled down like the boss name, not at full bar size. */
+  .meter.slim :is(.pmModeTitle, .pmAvgTitle) { font-size: calc(var(--boss-name-size, 15px) * 0.85); }
   .meter.slim .header .pmSpacer { display: none; }
   .meter.slim .battleTime { height: 34px; font-size: 13px; }
   .meter.slim .battleTime .tick { font-size: 13px; }

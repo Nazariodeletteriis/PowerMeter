@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.28
+
+- Corrigé : Widget DPS, affichage compact : le nom du mode (par exemple « PowerMeter » ou « Boss Targets ») n'est plus trop grand.
+- Corrigé : Mini-carte et Character Builder, familiers : les noms de famille au survol ne passent plus sous les cartes des familiers ; le premier filtre est « ALL » dans toutes les langues.
+
 ## 0.5.27
 
 - Corrigé : Familiers : la progression de chaque familier augmente maintenant à chaque monstre que vous tuez pour lui, au lieu de rester à la valeur lue à la connexion.

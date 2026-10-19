@@ -58,7 +58,7 @@
   "characters.builder.pets.effectsEmpty": "Откройте окно питомцев в игре при запущенном PowerMeter, чтобы считать эффекты.",
   "characters.builder.pets.notSummed": "Характеристики ездовых животных: показаны здесь, но не добавляются к характеристикам персонажа",
   "characters.builder.pets.genusLabel": "Категория",
-  "characters.builder.pets.all": "ВСЕ",
+  "characters.builder.pets.all": "ALL",
   "characters.builder.pets.genus.Intellect": "Cogni",
   "characters.builder.pets.genus.Feral": "Fera",
   "characters.builder.pets.genus.Nature": "Natura",

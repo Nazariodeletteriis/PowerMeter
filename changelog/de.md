@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.28
+
+- Behoben: DPS-Widget, kompaktes Layout: Der Name des Modus (etwa „PowerMeter“ oder „Boss Targets“) ist nicht mehr zu groß.
+- Behoben: Minikarte und Character Builder, Pets: Die Familiennamen beim Überfahren verschwinden nicht mehr unter den Pet-Karten; der erste Filter heißt in allen Sprachen „ALL“.
+
 ## 0.5.27
 
 - Behoben: Pets: Der Fortschritt jedes Pets steigt jetzt mit jedem Monster, das du dafür besiegst, statt beim Wert vom Login zu bleiben.

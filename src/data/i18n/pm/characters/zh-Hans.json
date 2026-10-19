@@ -58,7 +58,7 @@
   "characters.builder.pets.effectsEmpty": "在 PowerMeter 运行时于游戏中打开宠物窗口即可读取效果。",
   "characters.builder.pets.notSummed": "坐骑属性: 仅在此显示，不计入角色属性",
   "characters.builder.pets.genusLabel": "类别",
-  "characters.builder.pets.all": "全部",
+  "characters.builder.pets.all": "ALL",
   "characters.builder.pets.genus.Intellect": "智性",
   "characters.builder.pets.genus.Feral": "野性",
   "characters.builder.pets.genus.Nature": "自然",

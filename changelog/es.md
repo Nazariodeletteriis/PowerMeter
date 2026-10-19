@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.28
+
+- Corregido: Widget de DPS, diseño compacto: el nombre del modo (por ejemplo "PowerMeter" o "Boss Targets") ya no es demasiado grande.
+- Corregido: Minimapa y Character Builder, mascotas: los nombres de familia al pasar el ratón ya no quedan debajo de las tarjetas; el primer filtro es "ALL" en todos los idiomas.
+
 ## 0.5.27
 
 - Corregido: Mascotas: el progreso de cada mascota ahora sube con cada monstruo que matas para ella, en lugar de quedarse en el valor leído al entrar.

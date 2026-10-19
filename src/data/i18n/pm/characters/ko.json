@@ -58,7 +58,7 @@
   "characters.builder.pets.effectsEmpty": "PowerMeter를 켠 상태로 게임에서 펫 창을 열면 효과를 읽습니다.",
   "characters.builder.pets.notSummed": "탈것 능력치: 여기에 표시되며 캐릭터 능력치에는 더해지지 않습니다",
   "characters.builder.pets.genusLabel": "분류",
-  "characters.builder.pets.all": "전체",
+  "characters.builder.pets.all": "ALL",
   "characters.builder.pets.genus.Intellect": "지성",
   "characters.builder.pets.genus.Feral": "야성",
   "characters.builder.pets.genus.Nature": "자연",

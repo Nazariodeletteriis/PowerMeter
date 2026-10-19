@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.28
+
+- 修复：DPS 小组件紧凑布局中，模式名称（例如“PowerMeter”或“Boss Targets”）不再过大。
+- 修复：小地图和角色构建器的宠物：悬停时显示的家族名称不再被宠物卡片遮住；第一个筛选项在所有语言中都是“ALL”。
+
 ## 0.5.27
 
 - 修复：宠物：每只宠物的进度现在会随你为它击杀的每只怪物增加，而不再停留在登录时读取的数值。

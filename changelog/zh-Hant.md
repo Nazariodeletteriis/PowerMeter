@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.28
+
+- 修正：DPS 小工具精簡版面中，模式名稱（例如「PowerMeter」或「Boss Targets」）不再過大。
+- 修正：小地圖和角色建構器的寵物：滑鼠停留時顯示的家族名稱不再被寵物卡片遮住；第一個篩選項在所有語言中都是「ALL」。
+
 ## 0.5.27
 
 - 修正：寵物：每隻寵物的進度現在會隨你為牠擊殺的每隻怪物增加，而不再停留在登入時讀取的數值。

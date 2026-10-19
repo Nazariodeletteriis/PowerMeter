@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.28
+
+- Fixed: DPS widget, Compact layout: the mode's name (for example "PowerMeter" or "Boss Targets") is no longer oversized.
+- Fixed: Minimap and Character Builder, pets: the family names shown on hover are no longer hidden under the pet cards; the first filter is "ALL" in every language.
+
 ## 0.5.27
 
 - Fixed: Pets: the progress of each pet now moves with every monster you kill for it, instead of staying at the value read at login.

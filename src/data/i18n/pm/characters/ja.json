@@ -58,7 +58,7 @@
   "characters.builder.pets.effectsEmpty": "PowerMeterを起動した状態でゲーム内のペットウィンドウを開くと、効果を読み取ります。",
   "characters.builder.pets.notSummed": "騎乗ステータス: ここに表示されますが、キャラクターのステータスには加算されません",
   "characters.builder.pets.genusLabel": "カテゴリー",
-  "characters.builder.pets.all": "すべて",
+  "characters.builder.pets.all": "ALL",
   "characters.builder.pets.genus.Intellect": "知性",
   "characters.builder.pets.genus.Feral": "野性",
   "characters.builder.pets.genus.Nature": "自然",

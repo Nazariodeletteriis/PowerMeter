@@ -420,6 +420,7 @@
 .wPetPanel .petRail {
   position: sticky;
   top: 0;
+  z-index: 1; /* the family tooltips over the pet cards */
   align-self: flex-start;
 }
 .wPetPanel .close {

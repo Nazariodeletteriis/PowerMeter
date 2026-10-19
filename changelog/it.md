@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.28
+
+- Corretto: Widget DPS, layout compatto: il nome della modalità (per esempio "PowerMeter" o "Boss Targets") non è più troppo grande.
+- Corretto: Minimappa e Character Builder, pet: i nomi delle famiglie al passaggio del mouse non finiscono più sotto le schede dei pet; il primo filtro è "ALL" in tutte le lingue.
+
 ## 0.5.27
 
 - Corretto: Pet: il progresso di ogni pet ora sale a ogni mostro che uccidi per lui, invece di restare al valore letto al login.
