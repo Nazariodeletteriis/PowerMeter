@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.29
+
+- 수정: DPS 위젯의 핑이 작동합니다. 게임 자체의 핑을 더 이상 읽을 수 없어, 이제 연결 자체(내 패킷이 서버에 갔다 돌아오는 시간)로 측정합니다.
+
 ## 0.5.28
 
 - 수정: DPS 위젯 컴팩트 레이아웃에서 모드 이름(예: "PowerMeter", "Boss Targets")이 더 이상 지나치게 크지 않습니다.

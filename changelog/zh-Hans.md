@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.29
+
+- 修复：DPS 小组件的延迟恢复正常：由于游戏自身的延迟已无法读取，现在直接在连接上测量（你的数据包到服务器再返回的时间）。
+
 ## 0.5.28
 
 - 修复：DPS 小组件紧凑布局中，模式名称（例如“PowerMeter”或“Boss Targets”）不再过大。

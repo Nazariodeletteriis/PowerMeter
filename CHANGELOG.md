@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.29
+
+- Fixed: The ping on the DPS widget works: it is now measured on the connection itself (your packet to the server and back), since the game's own ping can no longer be read.
+
 ## 0.5.28
 
 - Fixed: DPS widget, Compact layout: the mode's name (for example "PowerMeter" or "Boss Targets") is no longer oversized.

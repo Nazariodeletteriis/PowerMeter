@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.29
+
+- 修正: DPSウィジェットのPingが動作します。ゲーム自体のPingが読み取れなくなったため、接続そのもの（あなたのパケットがサーバーに届いて戻るまで）で計測するようにしました。
+
 ## 0.5.28
 
 - 修正: DPSウィジェットのコンパクト表示で、モード名（例:「PowerMeter」「Boss Targets」）が大きすぎなくなりました。

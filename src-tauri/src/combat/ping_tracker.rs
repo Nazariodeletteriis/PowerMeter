@@ -5,13 +5,13 @@ use parking_lot::Mutex;
 use crate::capture::captured_payload::CapturedPayload;
 
 const MAX_PING_MS: i32 = 9999;
-const MIN_PING_RS_BYTES: usize = 12;
 const MAX_HISTORY: usize = 10_000;
-/// The client asks every 10 s: a request older than this has had its answer.
+/// A client segment older than this without its ACK was lost or retransmitted: dropped, never a sample.
 const KEEP_SENT_MS: i64 = 10_000;
-/// A TCP segment can carry the ping request together with other client packets (movement): kept up to this.
-const MAX_SENT_BYTES: usize = 1500;
-const MAX_SENT: usize = 512;
+const MAX_SENT: usize = 2_000;
+/// The ping shown is the lowest round trip of this window: the server's ACK can wait for its next packet (one every
+/// ~50 ms in game), so single samples run a little high; the lowest is the network's own time.
+const WINDOW_MS: i64 = 5_000;
 
 pub struct PingTracker {
     inner: Mutex<Inner>,
@@ -20,8 +20,10 @@ pub struct PingTracker {
 struct Inner {
     last_ping: Option<i32>,
     history: Vec<(i64, i32)>,
-    /// Recent client→server packets: (captured at, payload).
-    sent: VecDeque<(i64, Vec<u8>)>,
+    /// Client segments not acknowledged yet: (local port, sequence number after the segment, captured at).
+    sent: VecDeque<(u16, u32, i64)>,
+    /// Round trips of the last WINDOW_MS: (captured at, ms).
+    samples: VecDeque<(i64, i32)>,
 }
 
 impl PingTracker {
@@ -31,55 +33,56 @@ impl PingTracker {
                 last_ping: None,
                 history: Vec::new(),
                 sent: VecDeque::new(),
+                samples: VecDeque::new(),
             }),
         }
     }
 
-    /// `outbound`: the packet goes client→server.
+    /// The ping as the network's round trip, from the TCP headers: a client segment, then the server's ACK covering
+    /// it. The game's own ping can't be read any more: its answer (`03 36 00 00 <8 bytes>`) echoes a clock of the
+    /// game's whose base moves from day to day, and the request side is encrypted (packets_20261019_023957, the
+    /// first log with the client's packets). `outbound`: the packet goes client→server.
     pub fn on_packet(&self, cap: &CapturedPayload, outbound: bool) {
+        let now = cap.captured_at_ms;
+        let mut inner = self.inner.lock();
         if outbound {
-            if cap.data.len() <= MAX_SENT_BYTES {
-                let mut inner = self.inner.lock();
-                while inner.sent.front().is_some_and(|(t, _)| cap.captured_at_ms - t > KEEP_SENT_MS) || inner.sent.len() >= MAX_SENT {
-                    inner.sent.pop_front();
-                }
-                inner.sent.push_back((cap.captured_at_ms, cap.data.clone()));
+            if cap.data.is_empty() {
+                return; // a bare ACK: nothing for the server to acknowledge
             }
-        } else if cap.data.len() >= MIN_PING_RS_BYTES {
-            self.try_ping_rs(&cap.data, cap.captured_at_ms);
+            while inner.sent.front().is_some_and(|&(_, _, t)| now - t > KEEP_SENT_MS) || inner.sent.len() >= MAX_SENT {
+                inner.sent.pop_front();
+            }
+            inner.sent.push_back((cap.src_port, cap.tcp_seq.wrapping_add(cap.data.len() as u32), now));
+            return;
         }
-    }
-
-    /// The server's answer `03 36 00 00 <8 bytes>` echoes the client's request. Those 8 bytes were the client's
-    /// .NET clock; now they come from a clock of the game's own, whose base the app can't know. So the ping is
-    /// timed on the capture's clock instead: from the request that carried the same 8 bytes to this answer.
-    fn try_ping_rs(&self, data: &[u8], arrival_ms: i64) {
-        let mut i = 0;
-        while i + MIN_PING_RS_BYTES <= data.len() {
-            if data[i..i + 4] == [0x03, 0x36, 0x00, 0x00] {
-                let echoed = &data[i + 4..i + 12];
-                let mut inner = self.inner.lock();
-                let sent_at = inner
-                    .sent
-                    .iter()
-                    .rev()
-                    .find(|(_, d)| d.windows(8).any(|w| w == echoed))
-                    .map(|(t, _)| *t);
-                let rtt_ms = sent_at.map(|t| (arrival_ms - t) as i32);
-                if let Some(rtt_ms) = rtt_ms.filter(|r| (1..=MAX_PING_MS).contains(r)) {
-                    inner.last_ping = Some(rtt_ms);
-                    let now = std::time::SystemTime::now()
-                        .duration_since(std::time::UNIX_EPOCH)
-                        .unwrap_or_default()
-                        .as_millis() as i64;
-                    inner.history.push((now, rtt_ms));
-                    if inner.history.len() > MAX_HISTORY {
-                        inner.history.remove(0);
-                    }
-                }
-                i += 12;
-            } else {
-                i += 1;
+        // Every segment of this connection the ACK covers is acknowledged now; the newest of them is the round trip.
+        let mut newest = None;
+        inner.sent.retain(|&(port, end, t)| {
+            let covered = port == cap.dst_port && cap.tcp_ack.wrapping_sub(end) as i32 >= 0;
+            if covered {
+                newest = Some(t);
+            }
+            !covered
+        });
+        let Some(sent_at) = newest else { return };
+        let rtt = (now - sent_at) as i32;
+        if !(0..=MAX_PING_MS).contains(&rtt) {
+            return;
+        }
+        inner.samples.push_back((now, rtt));
+        while inner.samples.front().is_some_and(|&(t, _)| now - t > WINDOW_MS) {
+            inner.samples.pop_front();
+        }
+        let ping = inner.samples.iter().map(|&(_, r)| r).min().unwrap_or(rtt).max(1);
+        if inner.last_ping != Some(ping) {
+            inner.last_ping = Some(ping);
+            let wall = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_millis() as i64;
+            inner.history.push((wall, ping));
+            if inner.history.len() > MAX_HISTORY {
+                inner.history.remove(0);
             }
         }
     }
@@ -100,6 +103,7 @@ impl PingTracker {
         inner.last_ping = None;
         inner.history.clear();
         inner.sent.clear();
+        inner.samples.clear();
     }
 }
 
@@ -107,32 +111,43 @@ impl PingTracker {
 mod tests {
     use super::*;
 
-    fn cap(data: Vec<u8>, at: i64) -> CapturedPayload {
-        CapturedPayload { src_port: 0, dst_port: 0, data, device_name: None, captured_at_ms: at, src_ip: None, dst_ip: None, tcp_seq: 0, tcp_ack: 0 }
+    const GAME: u16 = 13328;
+    const LOCAL: u16 = 51000;
+
+    fn out(seq: u32, len: usize, at: i64) -> CapturedPayload {
+        CapturedPayload { src_port: LOCAL, dst_port: GAME, data: vec![0x0e; len], device_name: None, captured_at_ms: at, src_ip: None, dst_ip: None, tcp_seq: seq, tcp_ack: 0 }
     }
 
-    // The answer's 8 bytes as packets_20261013_031645 (03:16:50) carries them: no longer a .NET timestamp.
-    const ECHO: [u8; 8] = 0x0003_F21E_5F98_i64.to_le_bytes();
+    fn inbound(ack: u32, at: i64) -> CapturedPayload {
+        CapturedPayload { src_port: GAME, dst_port: LOCAL, data: vec![0x18, 0x03, 0x36], device_name: None, captured_at_ms: at, src_ip: None, dst_ip: None, tcp_seq: 0, tcp_ack: ack }
+    }
 
     #[test]
-    fn ping_is_timed_from_the_request_carrying_the_same_bytes() {
+    fn ping_is_the_round_trip_to_the_servers_ack() {
         let t = PingTracker::new();
-        let mut req = vec![0x0C, 0x00, 0x36];
-        req.extend_from_slice(&ECHO);
-        t.on_packet(&cap(vec![0x05, 0x00, 0x37, 0x01, 0x02], 1_000), true); // another client packet
-        t.on_packet(&cap(req, 1_010), true);
-        let mut answer = vec![0x0E, 0x00, 0x36, 0x01, 0x03, 0x36, 0x00, 0x00];
-        answer.extend_from_slice(&ECHO);
-        t.on_packet(&cap(answer, 1_052), false);
+        t.on_packet(&out(1000, 11, 10_000), true); // the client's 11-byte packets, as in the 10/19 log
+        t.on_packet(&out(1011, 11, 10_031), true);
+        t.on_packet(&inbound(1000, 10_040), false); // acks nothing new yet
+        assert_eq!(t.current_ping_ms(), None);
+        t.on_packet(&inbound(1022, 10_073), false); // covers both: the newest went 42 ms ago
         assert_eq!(t.current_ping_ms(), Some(42));
     }
 
     #[test]
-    fn an_answer_without_its_request_sets_no_ping() {
+    fn the_lowest_round_trip_of_the_window_is_shown() {
         let t = PingTracker::new();
-        let mut answer = vec![0x03, 0x36, 0x00, 0x00];
-        answer.extend_from_slice(&ECHO);
-        t.on_packet(&cap(answer, 1_052), false);
-        assert_eq!(t.current_ping_ms(), None);
+        t.on_packet(&out(1000, 11, 10_000), true);
+        t.on_packet(&inbound(1011, 10_090), false); // the server waited for its next packet to ack
+        t.on_packet(&out(1011, 11, 10_200), true);
+        t.on_packet(&inbound(1022, 10_240), false);
+        assert_eq!(t.current_ping_ms(), Some(40));
+    }
+
+    #[test]
+    fn sequence_numbers_wrap() {
+        let t = PingTracker::new();
+        t.on_packet(&out(u32::MAX - 4, 11, 10_000), true);
+        t.on_packet(&inbound(6, 10_035), false);
+        assert_eq!(t.current_ping_ms(), Some(35));
     }
 }

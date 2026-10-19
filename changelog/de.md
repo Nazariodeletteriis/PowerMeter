@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.29
+
+- Behoben: Der Ping im DPS-Widget funktioniert: Er wird jetzt direkt an der Verbindung gemessen (dein Paket zum Server und zurück), da sich der Ping des Spiels nicht mehr auslesen lässt.
+
 ## 0.5.28
 
 - Behoben: DPS-Widget, kompaktes Layout: Der Name des Modus (etwa „PowerMeter“ oder „Boss Targets“) ist nicht mehr zu groß.

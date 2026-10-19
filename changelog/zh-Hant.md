@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.29
+
+- 修正：DPS 小工具的延遲恢復正常：由於遊戲本身的延遲已無法讀取，現在直接在連線上測量（你的封包到伺服器再返回的時間）。
+
 ## 0.5.28
 
 - 修正：DPS 小工具精簡版面中，模式名稱（例如「PowerMeter」或「Boss Targets」）不再過大。
