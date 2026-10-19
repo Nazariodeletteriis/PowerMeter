@@ -30,6 +30,9 @@
   --pm-filltext: #faf7f7;
   --pm-band: #7f1112;
   --pm-tint: rgba(219, 0, 0, 0.2);
+  /* Switch track when off (system.css .switch): --pm-s3 one notch darker, so the
+     on track (--pm-red) stands 3:1 apart from it (WCAG 1.4.11); --pm-s3 gave 2.92:1. */
+  --pm-switch-off: #262020;
   /* Status colors the prototype writes as literals. */
   --pm-ok: #3fbf7f;
   --pm-okt: #5fd99a;

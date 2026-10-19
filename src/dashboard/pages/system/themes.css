@@ -38,4 +38,5 @@ html[data-theme]:not([data-theme="powermeter"]) {
   --pm-filltext: var(--pm-t1);
   --pm-band: var(--pm-deep);
   --pm-tint: color-mix(in srgb, var(--pm-red) 20%, transparent);
+  --pm-switch-off: var(--pm-s3); /* already 3:1+ from --pm-red in these themes */
 }

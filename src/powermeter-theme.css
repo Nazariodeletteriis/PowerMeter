@@ -1918,23 +1918,8 @@ body:not(.legacyUi) [data-cls="brawler"] :is(.classIcon, .pmCls)::before,
 /* ---------- 3. panels: hard-coded colours in styles.css ---------- */
 
 :root[data-theme="powermeter"] {
-  .settingsPanel .settingsTitle,
-  .settingsPanel .settingsMiniTitle,
   .historyPanel .historyTitle,
   .detailsPanel .detailsSectionTitle { font-weight: 600; }
-  .settingsPanel .discordButton,
-  .settingsPanel .supportButton,
-  .settingsPanel .letrionLabsButton,
-  .settingsPanel .quitButton { font-weight: 600; }
-  .settingsPanel button:focus-visible {
-    outline: 1px solid var(--pm-redt);
-    outline-offset: 2px;
-  }
-  .settingsPanel .discordButton,
-  .settingsPanel .supportButton {
-    background: var(--pm-s3);
-    border-color: var(--pm-line);
-  }
 
   .historyPanel { background: rgba(20, 17, 17, 0.97); }
   .historyIconWrap[data-tip]::after,
@@ -1964,25 +1949,18 @@ body:not(.legacyUi) [data-cls="brawler"] :is(.classIcon, .pmCls)::before,
   .detailsPanel .detailsHeader .detailsModeBtn[data-mode="heal"].isActive { color: var(--pm-bg); }
   .detailsPanel .detailsSkills .cell.name .skillSpecIndicator .specDot.isActive { background: var(--pm-redt); }
 
-  .updateModal .updateModalCard,
-  .supportModal .supportModalCard { background: var(--pm-s1); }
+  .updateModal .updateModalCard { background: var(--pm-s1); }
   .updateModal .updateModalCard .updateModalBtn.updateNotesBtn {
     background: var(--pm-deep);
     border-color: var(--pm-red);
   }
   .updateModal .updateModalCard .updateModalBtn.updateManualBtn { background: var(--pm-s3); }
-  .supportModal .supportIconButton.isActive {
-    background: rgba(219, 0, 0, 0.2);
-    box-shadow: 0 0 0 1px rgba(219, 0, 0, 0.45);
-  }
-  .supportModal .supportIconButton[data-support="afdian"],
-  .supportModal .supportIconButton[data-support="kofi"] { background: var(--pm-deep); }
 
   .hoverDetailsTooltip { background: rgba(20, 17, 17, 0.92); }
 }
 
 /* Square corners, like the game's own icons: 1px at most on every part of the widget
-   (meter only: the details, history and settings windows keep theirs). Status dots stay round. */
+   (meter only: the details and history windows keep theirs). Status dots stay round. */
 :root[data-theme]:not(.detailsWindow, .historyWindow) body:not(.legacyUi) *,
 :root[data-theme]:not(.detailsWindow, .historyWindow) body:not(.legacyUi) *::before,
 :root[data-theme]:not(.detailsWindow, .historyWindow) body:not(.legacyUi) *::after {
