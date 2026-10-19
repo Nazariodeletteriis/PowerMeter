@@ -146,7 +146,6 @@ const same = (xs: string[]) => xs.map((x) => [x, x] as const);
 /** Prototype pg.impostazioni. Options the engine handles use the real settings/commands. */
 export default function Impostazioni({ t, lang, settings, save, name, go, run }: PageProps) {
   const [tab, setTab] = useState<(typeof TABS)[number][0]>("widget"); // prototype default
-  const [scale, setScale] = useState(100);
   const [clickThrough, setClickThrough] = useState(false);
   const [devices, setDevices] = useState<string[]>([]);
   const [device, setDevice] = useState(""); // "" = automatic
@@ -463,20 +462,11 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
             step: 5,
           })}
         </Row>
-        <Row label={t("organizer.set.scale")} desc={t("organizer.set.scaleHint")}>
-          {range(t("organizer.set.scale"), scale, 75, 150, setScale)}
-        </Row>
         <Row label={t("organizer.set.clickThrough")} desc={t("organizer.set.clickThroughHint")}>
           <Switch
             label={t("organizer.set.clickThrough")}
             on={clickThrough}
             set={(enabled) => run(() => invoke("set_click_through", { enabled }).then(() => setClickThrough(enabled)))}
-          />
-        </Row>
-        <Row label={t("organizer.set.columns")} desc={t("organizer.set.columnsHint")}>
-          <Select
-            label={t("organizer.set.columns")}
-            options={["colsA", "colsB", "colsC"].map((v) => [v, t(`organizer.set.${v}`)])}
           />
         </Row>
         <Row label={t("organizer.set.maxRows")}>

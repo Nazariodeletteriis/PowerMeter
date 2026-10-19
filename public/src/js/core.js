@@ -3647,23 +3647,6 @@ class DpsApp {
     });
   }
 
-  // The "settings" window runs this same bundle with only the settings panel
-  // visible, so its markup and wiring are reused rather than duplicated.
-  enterSettingsWindowMode() {
-    document.body.classList.add("isSettingsWindow");
-    this.refreshMonitorList().then(() => this.initializeSettingsDropdowns());
-    this.settingsPanel?.classList.add("isOpen");
-    const close = () => window.javaBridge?.closeSettingsWindow?.();
-    this.settingsClose?.addEventListener("click", close);
-    document.querySelector(".settingsWindowClose")?.addEventListener("click", close);
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") close();
-    });
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => window.javaBridge?.toolWindowReady?.("settings"));
-    });
-  }
-
   // The Battle History window: this bundle again, showing only the history
   // panel. It is a browser the user leaves open — picking a fight opens that
   // fight in a window of its own and the list stays exactly as it was, so
@@ -4983,8 +4966,6 @@ const startApp = async ({ forced = false } = {}) => {
     dpsApp.start();
     if (window.A2_VIEW === "details") {
       dpsApp.enterDetailsWindowMode();
-    } else if (window.A2_VIEW === "settings") {
-      dpsApp.enterSettingsWindowMode();
     } else if (window.A2_VIEW === "history") {
       dpsApp.enterHistoryWindowMode();
     }

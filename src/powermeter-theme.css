@@ -29,7 +29,7 @@
 @import "@fontsource/noto-sans/800.css";
 
 /* Elements added for the widget. The tool windows keep the old meter (hidden there). */
-:root:is(.detailsWindow, .historyWindow, .settingsWindow) .pmOnly {
+:root:is(.detailsWindow, .historyWindow) .pmOnly {
   display: none !important;
 }
 .pmLogo,
@@ -133,7 +133,7 @@
    hidden. Sizes, colours and type are the October 2026 reference (the widget at
    2x in a 1672x941 render, so every value here is the reference's pixel / 2).
    Compact ("slim") overrides the layout further down. */
-:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
+:root[data-theme]:not(.detailsWindow, .historyWindow) body:not(.legacyUi) {
   .meter {
     /* Reference tokens: cool greys over the dark panel, azure for your row. */
     --pm-ui-line: rgba(255, 255, 255, 0.09);
@@ -1374,7 +1374,7 @@
    pmWidget.js sets the state classes on .meter:
    pmMode-dps (every tab), pmView-live|waiting|ended|error, isPmDetail,
    isPmPill, isPmIdle, isPmUploaded, hasPmLast, hasPmSpark. */
-:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) {
+:root[data-theme]:not(.detailsWindow, .historyWindow) body:not(.legacyUi) {
   /* Default size 810x367 (the Interface reference); the list fills the space above the footer. */
   .meter {
     display: flex;
@@ -1918,11 +1918,6 @@ body:not(.legacyUi) [data-cls="brawler"] :is(.classIcon, .pmCls)::before,
 /* ---------- 3. panels: hard-coded colours in styles.css ---------- */
 
 :root[data-theme="powermeter"] {
-  html.settingsWindow&,
-  html.settingsWindow& body,
-  html.settingsWindow& .settingsPanel,
-  html.settingsWindow& .settingsHeader { background: var(--pm-bg); }
-
   .settingsPanel .settingsTitle,
   .settingsPanel .settingsMiniTitle,
   .historyPanel .historyTitle,
@@ -1988,12 +1983,12 @@ body:not(.legacyUi) [data-cls="brawler"] :is(.classIcon, .pmCls)::before,
 
 /* Square corners, like the game's own icons: 1px at most on every part of the widget
    (meter only: the details, history and settings windows keep theirs). Status dots stay round. */
-:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) *,
-:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) *::before,
-:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) *::after {
+:root[data-theme]:not(.detailsWindow, .historyWindow) body:not(.legacyUi) *,
+:root[data-theme]:not(.detailsWindow, .historyWindow) body:not(.legacyUi) *::before,
+:root[data-theme]:not(.detailsWindow, .historyWindow) body:not(.legacyUi) *::after {
   border-radius: 1px !important;
 }
-:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) :is(.pmLiveDot, .pmPillDot, .battleTime .status),
-:root[data-theme]:not(.detailsWindow, .historyWindow, .settingsWindow) body:not(.legacyUi) .pmBarTitle::before {
+:root[data-theme]:not(.detailsWindow, .historyWindow) body:not(.legacyUi) :is(.pmLiveDot, .pmPillDot, .battleTime .status),
+:root[data-theme]:not(.detailsWindow, .historyWindow) body:not(.legacyUi) .pmBarTitle::before {
   border-radius: 50% !important;
 }

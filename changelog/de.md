@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.30
+
+- Behoben: Pets: Ein Pet steigt eine Stufe auf, sobald sein Fortschritt 75 erreicht (Stufe 3 zeigt MAX), statt bei 75/75 stehen zu bleiben.
+- Behoben: Pets: Startest du die App, während du schon im Spiel bist, zählt der Fortschritt deine Kills ab der zuletzt gelesenen Sammlung, statt bis zum nächsten Login stillzustehen.
+- Entfernt: Einstellungen > DPS-Widget: die Optionen „Skalierung“ und „Sichtbare Spalten“, die nichts bewirkten.
+
 ## 0.5.29
 
 - Behoben: Der Ping im DPS-Widget funktioniert: Er wird jetzt direkt an der Verbindung gemessen (dein Paket zum Server und zurück), da sich der Ping des Spiels nicht mehr auslesen lässt.

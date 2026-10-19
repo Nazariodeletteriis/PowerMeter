@@ -267,7 +267,7 @@ fn run_installer(path: &std::path::Path) -> Result<(), String> {
     std::process::Command::new(path).spawn().map(|_| ()).map_err(|e| e.to_string())
 }
 
-/// Async for the same reason as `open_settings_window`: building a window from
+/// Async for the same reason as `open_details_window`: building a window from
 /// a synchronous command deadlocks WebView2 on Windows.
 #[tauri::command]
 pub async fn open_dashboard_window(app: tauri::AppHandle) -> Result<(), String> {
@@ -315,7 +315,7 @@ pub async fn open_map_window(app: tauri::AppHandle) -> Result<(), String> {
     }
     lock.on.store(false, Ordering::SeqCst); // a new window starts unlocked
     let window = tauri::WebviewWindowBuilder::new(&app, "map", tauri::WebviewUrl::App("dashboard.html".into()))
-        // WebviewUrl::App is a path (a ?query is percent-encoded): see build_settings_window.
+        // WebviewUrl::App is a path (a ?query is percent-encoded): see open_details_on_monitor_inner.
         .initialization_script("window.__PM_VIEW__ = 'map';")
         .title("PowerMeter — Map")
         .decorations(false)

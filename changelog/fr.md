@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.30
+
+- Corrigé : Familiers : un familier monte d'un niveau dès que sa progression atteint 75 (le niveau 3 affiche MAX), au lieu de rester bloqué à 75/75.
+- Corrigé : Familiers : si vous lancez l'application alors que vous êtes déjà en jeu, la progression compte vos victimes à partir de la dernière collection lue, au lieu de rester figée jusqu'à la prochaine connexion.
+- Supprimé : Paramètres > Widget DPS : les options « Échelle » et « Colonnes visibles », qui ne faisaient rien.
+
 ## 0.5.29
 
 - Corrigé : Le ping du widget DPS fonctionne : il est désormais mesuré sur la connexion elle-même (votre paquet jusqu'au serveur et retour), car le ping du jeu ne peut plus être lu.

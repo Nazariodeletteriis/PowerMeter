@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.30
+
+- Corrigido: Mascotes: um mascote sobe de nível assim que o progresso chega a 75 (o nível 3 mostra MAX), em vez de parar em 75/75.
+- Corrigido: Mascotes: se você abrir o app quando já estiver no jogo, o progresso conta suas mortes a partir da última coleção lida, em vez de ficar parado até o próximo login.
+- Removido: Configurações > Widget DPS: as opções "Escala" e "Colunas visíveis", que não faziam nada.
+
 ## 0.5.29
 
 - Corrigido: O ping do widget de DPS funciona: agora é medido na própria conexão (seu pacote até o servidor e de volta), porque o ping do jogo não pode mais ser lido.

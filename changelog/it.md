@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.30
+
+- Corretto: Pet: un pet sale di livello appena il progresso arriva a 75 (al livello 3 mostra MAX), invece di fermarsi a 75/75.
+- Corretto: Pet: se avvii l'app quando sei già in gioco, il progresso conta le tue uccisioni partendo dall'ultima collezione letta, invece di restare fermo fino al login successivo.
+- Rimosso: Impostazioni > Widget DPS: le opzioni "Scala" e "Colonne visibili", che non facevano nulla.
+
 ## 0.5.29
 
 - Corretto: Il ping del widget DPS funziona: ora viene misurato sulla connessione stessa (il tuo pacchetto fino al server e ritorno), perché il ping del gioco non si può più leggere.

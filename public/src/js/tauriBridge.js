@@ -12,7 +12,7 @@
 
   // Three windows share this bundle: the game overlay (label "main"), the
   // Details view ("details") which the user can park on a second monitor, and
-  // Settings ("settings"). Which one we are is needed synchronously, before
+  // History ("history"). Which one we are is needed synchronously, before
   // anything else initialises.
   //
   // __A2_VIEW__ is injected by the window's initialization_script and runs
@@ -29,15 +29,13 @@
     // fallback for the singletons; the injected value is what identifies them.
     const label = window.__TAURI__?.window?.getCurrentWindow?.()?.label;
     const candidate = injected || fromUrl || label;
-    if (candidate === "details" || candidate === "settings" || candidate === "history") {
+    if (candidate === "details" || candidate === "history") {
       viewMode = candidate;
     }
   } catch {}
   window.A2_VIEW = viewMode;
   if (viewMode === "details") {
     document.documentElement.classList.add("detailsWindow");
-  } else if (viewMode === "settings") {
-    document.documentElement.classList.add("settingsWindow");
   } else if (viewMode === "history") {
     document.documentElement.classList.add("historyWindow");
   }
@@ -50,7 +48,6 @@
     // does a lot of work and is wrapped in a try/catch, so a single failure in
     // an unrelated part of it used to leave the tool window blank.
     const PANEL_FOR_VIEW = {
-      settings: [".settingsPanel", "isOpen"],
       history: [".historyPanel", "open"],
       details: [".detailsPanel", "open"],
     };
@@ -292,9 +289,6 @@
       }
       return invoke("details_window_ready").catch(() => {});
     },
-    openSettingsWindow() {
-      return invoke("open_settings_window").catch((e) => console.error("[A2Tools] openSettingsWindow", e));
-    },
     // PowerMeter: the dashboard on Settings > Widget DPS (Shell.tsx). A dashboard opened now
     // reads the flag when it starts; one already open gets the event.
     openWidgetSettings() {
@@ -302,9 +296,6 @@
       return invoke("open_dashboard_window")
         .then(() => window.__TAURI__.event.emit("pm-open-widget-settings"))
         .catch((e) => console.error("[PowerMeter] openWidgetSettings", e));
-    },
-    closeSettingsWindow() {
-      return invoke("close_settings_window").catch(() => {});
     },
     toolWindowReady(label) {
       // Reveal from the window's own webview thread. Calling show() on the Rust

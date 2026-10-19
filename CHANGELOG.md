@@ -4,6 +4,12 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.30
+
+- Fixed: Pets: a pet goes up a level as soon as its progress reaches 75 (level 3 shows MAX), instead of stopping at 75/75.
+- Fixed: Pets: if you start the app while you are already in game, the progress counts your kills from the last collection read, instead of standing still until your next login.
+- Removed: Settings > DPS widget: the "Scale" and "Visible columns" options, which did nothing.
+
 ## 0.5.29
 
 - Fixed: The ping on the DPS widget works: it is now measured on the connection itself (your packet to the server and back), since the game's own ping can no longer be read.

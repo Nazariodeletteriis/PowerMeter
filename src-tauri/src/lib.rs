@@ -135,7 +135,7 @@ fn get_settings(state: tauri::State<'_, AppState>) -> std::collections::HashMap<
 
 /// Store a setting and tell every window about it.
 ///
-/// Settings are edited in their own window, so without this broadcast the meter
+/// Settings are edited in the dashboard window, so without this broadcast the meter
 /// keeps rendering with whatever it read at startup — toggling something like
 /// "Round DPS" would appear to do nothing until the app restarted. Only real
 /// changes are emitted (see `Settings::set`), so the originating window's echo
@@ -166,6 +166,11 @@ fn get_ping(state: tauri::State<'_, AppState>) -> Option<i32> {
 #[tauri::command]
 fn get_captured_character() -> crate::capture::equip_parser::CapturedCharacter {
     crate::capture::equip_parser::snapshot()
+}
+
+#[tauri::command]
+fn seed_captured_pets(pets: Vec<crate::capture::equip_parser::CapturedPet>) {
+    crate::capture::equip_parser::seed_pets(pets)
 }
 
 #[tauri::command]
@@ -621,7 +626,16 @@ fn list_monitors(app: tauri::AppHandle) -> Vec<serde_json::Value> {
 /// Open (or move) the always-on Details window, filling the chosen monitor.
 /// Frameless to match the overlay; the in-page header carries the close button.
 ///
-/// `async` is load-bearing — see the note on `open_settings_window`.
+/// **This command must stay `async`.** Tauri runs synchronous commands on the
+/// main thread, and on Windows `WebviewWindowBuilder::build()` deadlocks there:
+/// WebView2 needs the main thread's message loop to deliver the
+/// `CreateCoreWebView2Controller` callback, which cannot run while `build()` is
+/// blocking that same loop. The window still appeared — sized, and painting its
+/// background colour — but its WebView2 host stayed 0x0 and hidden, and the page
+/// never left `about:blank`. That is the "blank tool window". Marshalling
+/// through `run_on_main_thread` makes it worse, not better. An `async` command
+/// runs off the main thread, so the loop stays free to complete the callback.
+/// See <https://docs.rs/tauri/latest/tauri/webview/struct.WebviewWindowBuilder.html>.
 #[tauri::command]
 async fn open_details_window(app: tauri::AppHandle, monitor_index: usize) -> Result<(), String> {
     open_details_on_monitor_inner(&app, monitor_index, true)
@@ -688,6 +702,8 @@ fn open_details_on_monitor_inner(
         "details",
         tauri::WebviewUrl::App("index.html".into()),
     )
+    // Injected before any page script. WebviewUrl::App is a path, so a ?query
+    // gets percent-encoded — this is the one channel that is reliable.
     .initialization_script("window.__A2_VIEW__ = 'details';")
     .title("PowerMeter — Details")
     .decorations(false)
@@ -841,71 +857,6 @@ fn restore_window_geometry(app: &tauri::AppHandle, window: &tauri::WebviewWindow
     true
 }
 
-/// The Settings window. Free-floating like Details — it used to be a panel that
-/// forced the overlay to resize itself to ~820px tall.
-///
-/// **This command must stay `async`.** Tauri runs synchronous commands on the
-/// main thread, and on Windows `WebviewWindowBuilder::build()` deadlocks there:
-/// WebView2 needs the main thread's message loop to deliver the
-/// `CreateCoreWebView2Controller` callback, which cannot run while `build()` is
-/// blocking that same loop. The window still appeared — sized, and painting its
-/// background colour — but its WebView2 host stayed 0x0 and hidden, and the page
-/// never left `about:blank`. That is the "blank tool window". Marshalling
-/// through `run_on_main_thread` makes it worse, not better. An `async` command
-/// runs off the main thread, so the loop stays free to complete the callback.
-/// See <https://docs.rs/tauri/latest/tauri/webview/struct.WebviewWindowBuilder.html>.
-#[tauri::command]
-async fn open_settings_window(app: tauri::AppHandle) -> Result<(), String> {
-    if let Some(existing) = app.get_webview_window("settings") {
-        let _ = existing.show();
-        let _ = existing.unminimize();
-        let _ = existing.set_always_on_top(true);
-        let _ = existing.set_focus();
-        return Ok(());
-    }
-    build_settings_window(&app)
-}
-
-fn build_settings_window(app: &tauri::AppHandle) -> Result<(), String> {
-    let window = tauri::WebviewWindowBuilder::new(
-        app,
-        "settings",
-        tauri::WebviewUrl::App("index.html".into()),
-    )
-    // Injected before any page script. WebviewUrl::App is a path, so a ?query
-    // gets percent-encoded — this is the one channel that is reliable.
-    .initialization_script("window.__A2_VIEW__ = 'settings';")
-    .title("PowerMeter — Settings")
-    .decorations(false)
-    .transparent(false)
-    // Matches Details: the overlay itself is always-on-top, so a settings window
-    // that could fall behind it would be unreachable while the game is focused.
-    .always_on_top(true)
-    .resizable(true)
-    .skip_taskbar(false)
-    .inner_size(760.0, 820.0)
-    .min_inner_size(520.0, 420.0)
-    // Built visible, with the app's background colour to cover the load rather
-    // than flashing white. Building it hidden is not an option: a hidden
-    // WebView2 window may never load its content, so a page-driven reveal
-    // deadlocks.
-    .background_color(tauri::window::Color(10, 14, 22, 255))
-    .build()
-    .map_err(|e| e.to_string())?;
-
-    if !restore_window_geometry(app, &window, "settings") {
-        let _ = window.center();
-    }
-    Ok(())
-}
-
-#[tauri::command]
-fn close_settings_window(app: tauri::AppHandle) {
-    if let Some(window) = app.get_webview_window("settings") {
-        let _ = window.close();
-    }
-}
-
 /// Shown when the frontend of a tool window has painted.
 #[tauri::command]
 fn tool_window_ready(app: tauri::AppHandle, label: String) {
@@ -1004,7 +955,7 @@ fn fight_window_label(fight_id: &str) -> String {
 /// startup — a webview that was created to serve a request has no listener
 /// attached at the moment the request is emitted.
 ///
-/// `async` is load-bearing — it creates windows. See `open_settings_window`.
+/// `async` is load-bearing — it creates windows. See `open_details_window`.
 #[tauri::command]
 async fn request_details_view(
     app: tauri::AppHandle,
@@ -1825,7 +1776,7 @@ pub fn run() {
                             // (details-*) are deliberately absent: they are
                             // opened to be read and closed, and keying geometry
                             // by fight id would grow settings without bound.
-                            for label in ["details", "settings", "history"] {
+                            for label in ["details", "history"] {
                                 // While Details is pinned to a monitor its rect
                                 // comes from the setting, not from the user.
                                 // Saving it poisons the windowed geometry: turn
@@ -1919,6 +1870,7 @@ pub fn run() {
             get_capture_status,
             get_capture_diagnosis,
             get_captured_character,
+            seed_captured_pets,
             set_target_mode,
             set_character_name,
             bind_local_actor_id,
@@ -1942,8 +1894,6 @@ pub fn run() {
             request_details_view,
             take_pending_details_request,
             close_tool_window,
-            open_settings_window,
-            close_settings_window,
             tool_window_ready,
             details_window_ready,
             capture_screenshot,

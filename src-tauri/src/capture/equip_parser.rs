@@ -167,7 +167,7 @@ pub struct CapturedPetEffect {
     pub value: u32,
 }
 
-#[derive(Serialize, Clone, PartialEq, Debug)]
+#[derive(Serialize, serde::Deserialize, Clone, PartialEq, Debug)]
 pub struct CapturedPet {
     pub id: u32,
     pub lvl: u8,
@@ -505,7 +505,8 @@ fn parse_pets(b: &[u8]) {
 /// `0d 90`, one per kill that counts for a pet (packets_20261019_015229: 11 kills of Kerubiel / Kerubian, 11 records,
 /// +7 and +4 against the next `00 90`): `<count varint> { <pet id u32> <exp gained u32> } × count`, e.g.
 /// `01 93040000 01000000` = Cherubim_03 +1. Added to the collection read at login, so the counter moves with each kill;
-/// the next `00 90` replaces it with the game's own numbers. A level up has not been seen yet: exp stops at 75.
+/// the next `00 90` replaces it with the game's own numbers. 75 exp is a level (0/75 at level 2, then MAX); the
+/// game's own level-up record has not been seen yet.
 fn parse_pet_progress(b: &[u8]) {
     let n = read_varint(b, 0);
     if n.length <= 0 || n.value <= 0 {
@@ -516,9 +517,22 @@ fn parse_pet_progress(b: &[u8]) {
     for _ in 0..n.value {
         let (Some(id), Some(gain)) = (u32_at(b, o), u32_at(b, o + 4)) else { return };
         if let Some(p) = s.pets.iter_mut().find(|p| p.id == id && p.lvl < 3) {
-            p.exp = (p.exp as u32).saturating_add(gain).min(75) as u8;
+            let exp = (p.exp as u32).saturating_add(gain);
+            if exp >= 75 {
+                p.lvl += 1;
+            }
+            p.exp = if p.lvl == 3 { 0 } else { (exp % 75) as u8 };
         }
         o += 8;
+    }
+}
+
+/// The collection the dashboard kept, when this run has not seen the login's `00 90` (the meter started with the game
+/// already in): kills count from it. A collection read from the game is never replaced.
+pub fn seed_pets(pets: Vec<CapturedPet>) {
+    let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
+    if s.pets.is_empty() {
+        s.pets = pets.into_iter().filter(|p| (1..=3).contains(&p.lvl)).collect();
     }
 }
 
@@ -797,9 +811,24 @@ mod tests {
         parse(&hex("0f0d90010a04000001000000"));
         let pets: Vec<(u32, u8, u8)> = snapshot().pets.iter().map(|p| (p.id, p.lvl, p.exp)).collect();
         assert_eq!(pets, [(1002, 1, 16), (1217, 2, 17), (1299, 3, 0)]);
+        // 75 exp is a level (Nazario: Kerubiel 0/75 at level 2, then MAX): 1217 +58 reaches level 3, 1002 +60 is
+        // level 2 at 1.
+        parse(&hex("0f0d9001c10400003a000000"));
+        parse(&hex("0f0d9001ea0300003c000000"));
+        let pets: Vec<(u32, u8, u8)> = snapshot().pets.iter().map(|p| (p.id, p.lvl, p.exp)).collect();
+        assert_eq!(pets, [(1002, 2, 1), (1217, 3, 0), (1299, 3, 0)]);
+        // The dashboard's kept collection never replaces one read from the game.
+        seed_pets(vec![CapturedPet { id: 1002, lvl: 1, exp: 0 }]);
+        assert_eq!(snapshot().pets.len(), 3);
 
         // packets_20261013_031645, 03:16:55.558: Allalon's login inventory (body), 19 worn items with their options.
         parse_inventory(&hex(include_str!("testdata/inventory_1156_20261013_031655.hex").trim()));
+        // A login empties the collection until its `00 90`; meanwhile the kept one counts the kills.
+        assert!(snapshot().pets.is_empty());
+        seed_pets(vec![CapturedPet { id: 1217, lvl: 2, exp: 55 }, CapturedPet { id: 9999, lvl: 7, exp: 0 }]);
+        parse(&hex("0f0d9001c104000001000000"));
+        let pets: Vec<(u32, u8, u8)> = snapshot().pets.iter().map(|p| (p.id, p.lvl, p.exp)).collect();
+        assert_eq!(pets, [(1217, 2, 56)]);
         let eq = snapshot().equipment;
         assert_eq!(eq.len(), 19);
         let at = |slot: u8| eq.iter().find(|e| e.item.slot == slot).unwrap().extras.clone();

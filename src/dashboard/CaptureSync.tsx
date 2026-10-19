@@ -110,6 +110,14 @@ export function CaptureSync({ settings, save, onError }: { settings: Settings; s
   useEffect(() => {
     if (petsChanged) save(CAPTURED_PETS_KEY, JSON.stringify({ ...petsAll, [char!.id]: { owned: pets, effects } })).catch(onError);
   }, [petsChanged, char?.id, JSON.stringify(pets), JSON.stringify(effects)]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Meter started with the game already in: no `00 90` this run, so the kills count from the kept collection.
+  const kept = char && data && !data.pets.length ? petsAll[char.id]?.owned : undefined;
+  useEffect(() => {
+    if (!kept) return;
+    const ids = Object.entries(PET_IDS as Record<string, string>);
+    const seed = Object.entries(kept).flatMap(([code, p]) => ids.filter(([, c]) => c === code).map(([id]) => ({ id: Number(id), lvl: p.lvl, exp: p.exp })));
+    if (seed.length) invoke("seed_captured_pets", { pets: seed }).catch(onError);
+  }, [char?.id, !!kept]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Item level and combat power, same owner rule: kept on the character, so they stay with the game closed.
   const gs = data?.gearScore ?? undefined;
