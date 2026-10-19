@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
@@ -19,8 +20,9 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import type { Settings } from "../../App";
-import { activeId, readCharacters } from "../../characters";
+import { activeId, readCharacters, type Faction } from "../../characters";
 import type { T } from "../../i18n";
+import { usePoll } from "../../usePoll";
 import { ownedPets } from "../characters/calc";
 import { PetGrid } from "../characters/pets";
 import { CAPTURED_PETS_KEY, PETS_KEY, readPets } from "../characters/shared";
@@ -41,6 +43,12 @@ const PATH_OPACITY_KEY = "pm.map.pathOpacity";
 const PETS_PICKED_KEY = "pm.map.pets";
 const PETS_ALL_KEY = "pm.map.petsAll";
 const PET_COLOR = "#E86FB8";
+/** The map a character of each faction opens on. */
+const HOME_MAP: Record<Faction, string> = { elyos: "World_L_A", asmodian: "World_D_A" };
+/** Game units → map pixels, measured on these maps only (both span ±408000 units). */
+const POS_MAPS = ["World_L_A", "World_D_A"];
+const POS_HALF = 408000;
+const getPlayerPosition = () => invoke<[number, number, number] | null>("get_player_position");
 
 // Subtype → icon, color (world.layer.<subtype> labels the layer).
 const LAYERS: Record<string, [Icon, string]> = {
@@ -86,6 +94,19 @@ function useStored<V>(key: string, init: V) {
 }
 
 const label: CSSProperties = { fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--pm-t3)", margin: "8px 0 4px" };
+
+/**
+ * You, where the game last placed you: it moves on teleports and on your own casts, not while you walk
+ * (the rest is encrypted). Polled in here so the rest of the map doesn't re-render with it.
+ */
+function You({ t, map, home }: { t: T; map: MapData; home?: string }) {
+  const pos = usePoll(getPlayerPosition, 2000).data;
+  // The position doesn't say which world it is in: with a faction, only on its own.
+  if (!pos || !POS_MAPS.includes(map.id) || (home && home !== map.id)) return null;
+  const px = (v: number, size: number) => ((v + POS_HALF) / (2 * POS_HALF)) * size;
+  const name = t("world.map.you");
+  return <div className="wYou" role="img" title={name} aria-label={name} style={{ left: px(pos[0], map.tiles[0] * map.tile), top: px(pos[1], map.tiles[1] * map.tile) }} />;
+}
 
 /**
  * The world map with its layers (aion2-interactive-map markers, gathering nodes, pet spots), the pet panel and
@@ -136,7 +157,12 @@ export function MapExplorer({
 
   // The character whose pets count: the one "Show on map" came from, else the active one.
   const chars = readCharacters(settings);
-  const char = chars.some((c) => c.id === focusChar) ? focusChar : activeId(settings, chars);
+  const active = activeId(settings, chars);
+  const char = chars.some((c) => c.id === focusChar) ? focusChar : active;
+  // The map to follow: the active character's faction world (the Abyss joins here once the traffic says where you are).
+  const faction = chars.find((c) => c.id === active)?.faction;
+  const follow = faction && HOME_MAP[faction];
+  const [followed, setFollowed] = useState<string>();
   const owned = char ? ownedPets(readPets(settings[PETS_KEY])[char]?.owned ?? {}, readPets(settings[CAPTURED_PETS_KEY])[char]?.owned) : {};
   const done = (code: string) => owned[code]?.lvl === 3;
 
@@ -304,6 +330,12 @@ export function MapExplorer({
     setMarker(null);
     setFocus(undefined);
   };
+  // Opens on the followed map and moves when it changes; a zone picked by hand or a "Show on map" holds until then.
+  // Set while rendering, so the map shown first is already the right one.
+  if (follow !== followed) {
+    setFollowed(follow);
+    if (follow) pickZone(follow);
+  }
   const credit = (
     <>
       {t("world.map.credit")}{" "}
@@ -376,6 +408,7 @@ export function MapExplorer({
                 ))}
               </svg>
             )}
+            <You t={t} map={map} home={follow} />
             {tip && (
               <div className="wTip" style={{ left: tip.x, top: tip.y }} aria-hidden="true">
                 {tip.name}

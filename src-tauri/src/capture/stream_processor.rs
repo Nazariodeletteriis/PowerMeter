@@ -278,6 +278,7 @@ impl StreamProcessor {
         let parsed_hp = self.parse_hp_mp_update_packet(packet);
         self.parse_death_packet(packet);
         self.parse_zone_change_packet(packet);
+        self.parse_own_position(packet);
         self.parse_stagger_packet(packet);
         super::equip_parser::parse(packet);
 
@@ -314,6 +315,43 @@ impl StreamProcessor {
             return;
         }
         self.data_storage.note_zone_change();
+    }
+
+    // ===== OWN POSITION (23 36 / 02 38) =====
+
+    /// Where the local player is, for the minimap. The client's own movement is encrypted, so the position comes
+    /// only with a teleport (`23 36 00`, x y z f32 at body +6) and with each of their casts
+    /// (`02 38 <caster varint> 00 <skill u32> <seq u8> 02 <target varint> <f32> <x> <y> <z>`), not while walking
+    /// (packets_20261019_101654: 20 s of walking, no record).
+    fn parse_own_position(&self, packet: &[u8]) {
+        let len = read_varint(packet, 0);
+        if len.length <= 0 {
+            return;
+        }
+        let op = len.length as usize;
+        let Some(b) = packet.get(op + 2..) else { return };
+        let at = match packet.get(op..op + 2) {
+            Some([0x23, 0x36]) if b.first() == Some(&0) => 6,
+            Some([0x02, 0x38]) => {
+                let caster = read_varint(b, 0);
+                let o = caster.length as usize;
+                if caster.length <= 0 || Some(caster.value as i64) != self.data_storage.local_player_id() || b.get(o) != Some(&0) || b.get(o + 6) != Some(&2) {
+                    return;
+                }
+                let target = read_varint(b, o + 7);
+                if target.length <= 0 {
+                    return;
+                }
+                o + 7 + target.length as usize + 4
+            }
+            _ => return,
+        };
+        let f = |i: usize| b.get(at + 4 * i..at + 4 * i + 4).map(|x| f32::from_le_bytes([x[0], x[1], x[2], x[3]]));
+        if let (Some(x), Some(y), Some(z)) = (f(0), f(1), f(2)) {
+            if [x, y, z].iter().all(|v| v.is_finite() && v.abs() < 1e6) {
+                self.data_storage.set_player_position([x, y, z]);
+            }
+        }
     }
 
     // ===== STAGGER (05 E0) =====
@@ -2736,6 +2774,25 @@ mod stagger_tests {
         let head = |tail: [u8; 2]| vec![(value & 0x7F) as u8 | 0x80, ((value >> 7) & 0x7F) as u8 | 0x80, (value >> 14) as u8, tail[0], tail[1], 0x10, 0x20];
         assert_eq!(sp.consume_stream(&head([0xFF, 0xFF])), 0, "bundle fragment kept for the next segment");
         assert!(sp.consume_stream(&head([0x11, 0x56])) > 0, "plain packet that long is skipped");
+    }
+
+    /// Where the local player is (packets_20261019_101654, self 15198 = `de 76`): a teleport, then their casts on
+    /// themselves and on a mob (`a6 e7 02`); another player's cast and a cast before the self is known move nothing.
+    #[test]
+    fn own_position_from_teleport_and_casts() {
+        let (storage, mut sp) = processor();
+        let cast_self = hex("250238de76003428a8000102de765609e841b26838c8b48066483ba14644de570100");
+        sp.consume_stream(&cast_self);
+        assert_eq!(storage.player_position(), None);
+        sp.consume_stream(&hex("1e2336000000000000db1b38c82c3e664800003b4402000000f019"));
+        assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-188527.0, 235769.0, 748.0]));
+        storage.set_local_player_id(Some(15198));
+        sp.consume_stream(&cast_self);
+        assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-188835.0, 236035.0, 795.0]));
+        sp.consume_stream(&hex("280238de7600ec5fa9000202a6e7028291ebc1301938c88b60664800403f44de5701bec102"));
+        assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-188517.0, 235906.0, 765.0]));
+        sp.consume_stream(&hex("250238d375003428a8003002d3756732b93f403338c8492266487dd63944de570100"));
+        assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-188517.0, 235906.0, 765.0]));
     }
 
     /// Boss id `9E FF 02` = 49054 (three-byte varint).

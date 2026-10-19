@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.31
+
+- Nuovo: Minimappa: un pallino mostra la tua ultima posizione nota sulla mappa della tua fazione. Si sposta quando ti teletrasporti o usi una skill (il gioco non manda la tua posizione mentre cammini e basta), così dopo un'uccisione vedi se sei nel punto giusto.
+- Nuovo: Minimappa: si apre sulla mappa della tua fazione (Asmodian o Elyos) quando la fazione è impostata sul personaggio; una mappa scelta a mano resta finché non giochi un personaggio dell'altra fazione.
+
 ## 0.5.30
 
 - Corretto: Pet: un pet sale di livello appena il progresso arriva a 75 (al livello 3 mostra MAX), invece di fermarsi a 75/75.

@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.31
+
+- Nouveau : Mini-carte : un point indique votre dernière position connue sur la carte de votre faction. Il bouge quand vous vous téléportez ou utilisez une compétence (le jeu n'envoie pas votre position quand vous marchez simplement), ainsi après une victime vous voyez si vous êtes au bon endroit.
+- Nouveau : Mini-carte : elle s'ouvre sur la carte de votre faction (Asmodien ou Élyséen) quand la faction est indiquée sur le personnage ; une carte choisie à la main reste jusqu'à ce que vous jouiez un personnage de l'autre faction.
+
 ## 0.5.30
 
 - Corrigé : Familiers : un familier monte d'un niveau dès que sa progression atteint 75 (le niveau 3 affiche MAX), au lieu de rester bloqué à 75/75.

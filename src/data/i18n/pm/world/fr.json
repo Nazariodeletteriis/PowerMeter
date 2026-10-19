@@ -198,5 +198,6 @@
   "world.map.filter": "Filtre",
   "world.map.lock": "Verrouiller la position",
   "world.map.unlock": "Position verrouillée : cliquez pour déverrouiller",
-  "world.map.petMonsters": "Monstres : {list}"
+  "world.map.petMonsters": "Monstres : {list}",
+  "world.map.you": "Votre dernière position connue"
 }

@@ -352,6 +352,17 @@
 .wPetDots circle:hover {
   r: calc(7px * var(--k));
 }
+/* You: the meter's azure for your own row, filled and rimmed so it never reads as a marker; screen size like them. */
+.wYou {
+  position: absolute;
+  transform: translate(-50%, -50%) scale(var(--k));
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #5fc0d6;
+  border: 2px solid var(--pm-t1);
+  box-shadow: 0 0 0 4px rgba(95, 192, 214, 0.35), 0 1px 4px rgba(0, 0, 0, 0.6);
+}
 .wTip {
   position: absolute;
   transform-origin: 0 0;
@@ -1577,6 +1588,6 @@ td[data-mark="lo"] {
 .mm *::after {
   border-radius: 1px !important;
 }
-.mm :is(.wMarker, .petLvl) {
+.mm :is(.wMarker, .wYou, .petLvl) {
   border-radius: 50% !important;
 }

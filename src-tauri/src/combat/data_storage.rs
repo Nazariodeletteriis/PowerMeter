@@ -278,6 +278,8 @@ struct Inner {
     // Local player
     local_player_id: Option<i64>,
     local_character_name: Option<String>,
+    /// Where the local player last was (x, y, z): teleports and their own casts, for the minimap.
+    player_position: Option<[f32; 3]>,
 }
 
 impl DataStorage {
@@ -311,6 +313,7 @@ impl DataStorage {
                 current_target: 0,
                 local_player_id: None,
                 local_character_name: None,
+                player_position: None,
             }),
             damage_generation: AtomicI64::new(0),
             last_damage_ms: AtomicI64::new(0),
@@ -377,6 +380,14 @@ impl DataStorage {
 
     pub fn local_player_id(&self) -> Option<i64> {
         self.inner.read().local_player_id
+    }
+
+    pub fn set_player_position(&self, pos: [f32; 3]) {
+        self.inner.write().player_position = Some(pos);
+    }
+
+    pub fn player_position(&self) -> Option<[f32; 3]> {
+        self.inner.read().player_position
     }
 
     /// Fallback for the local player when the game's self record was missed. `33 36` comes

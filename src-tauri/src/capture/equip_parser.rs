@@ -704,9 +704,15 @@ mod tests {
         snapshot().equipment.into_iter().map(|e| e.item).collect()
     }
 
-    // One test: the parser keeps global state.
+    /// The parser keeps global state: the tests that write it run one at a time.
+    static GLOBAL: Mutex<()> = Mutex::new(());
+    fn global() -> std::sync::MutexGuard<'static, ()> {
+        GLOBAL.lock().unwrap_or_else(|e| e.into_inner())
+    }
+
     #[test]
     fn equipment_and_skillbar_from_capture() {
+        let _g = global();
         // 12:11:49.445: pants (uid 4da51b..) put on, worn list of 17 items.
         parse(&hex("a3018de201010111e12b110000ca000001e8e60e0000cb000002027e150000a900000380c319000090000004d9320c0000fa0000054da51b00003f000006daa2160000c600000799a90e0000e0000008386d1b00002e00000a0e49150000ce00000ba36d1b00002f00000c4f3e100000f400000dfa96050000ff00000e07be170000be00000f45df190000a4000011f7da1a00003f00001347a018000095000016"));
         parse(&hex("9a011b560101014da51b00003f00001802880c01000000000000000b06000000000000000000000000000000000000000000000000000000260000000603000000"));
@@ -859,6 +865,7 @@ mod tests {
     /// still open are left out.
     #[test]
     fn reads_the_pet_insight_effects() {
+        let _g = global();
         let body = hex(include_str!("testdata/pets_0090_20261013_031702.hex").trim());
         parse_pets(&body);
         let fx: Vec<(&str, u32)> = snapshot().pet_effects.iter().map(|e| (e.stat, e.value)).collect();
@@ -871,6 +878,7 @@ mod tests {
     // packets_20261011_183820, 18:38:25: DrBlacK's spawn (entity 8761), cut after the worn list.
     #[test]
     fn player_gear_from_spawn() {
+        let _g = global();
         let hex_str = [
             "89094536b9441730a00107074472426c61634b13000000020100d24c3eacc72675e4c7d1150147e7d7634306a201cab001cab001a30d0000a30d00000000000000000000c0250100003f0200f0490200f049020002000000a0860100a0860100b8520900",
             "b852090002a4676502a4676502c0d84f01ff08040100000000ff0809436c6f776e446f67730200010000000000000000000000000000000e11115dc4c901ffffffffffffffff8075d52abb030000b9440100919a70c62bb6744600d052451114844e0000",

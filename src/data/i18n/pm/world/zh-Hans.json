@@ -198,5 +198,6 @@
   "world.map.filter": "筛选",
   "world.map.lock": "锁定位置",
   "world.map.unlock": "位置已锁定：点击解锁",
-  "world.map.petMonsters": "怪物：{list}"
+  "world.map.petMonsters": "怪物：{list}",
+  "world.map.you": "你最后已知的位置"
 }

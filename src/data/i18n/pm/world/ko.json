@@ -198,5 +198,6 @@
   "world.map.filter": "필터",
   "world.map.lock": "위치 잠금",
   "world.map.unlock": "위치 잠김: 클릭하면 해제",
-  "world.map.petMonsters": "몬스터: {list}"
+  "world.map.petMonsters": "몬스터: {list}",
+  "world.map.you": "마지막으로 확인된 내 위치"
 }

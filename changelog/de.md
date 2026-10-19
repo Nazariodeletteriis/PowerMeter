@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.31
+
+- Neu: Minikarte: Ein Punkt zeigt deine letzte bekannte Position auf der Karte deiner Fraktion. Er bewegt sich, wenn du dich teleportierst oder eine Fertigkeit einsetzt (beim reinen Laufen sendet das Spiel deine Position nicht), so siehst du nach einem Kill, ob du an der richtigen Stelle bist.
+- Neu: Minikarte: Sie öffnet sich auf der Karte deiner Fraktion (Asmodier oder Elyos), wenn die Fraktion beim Charakter eingestellt ist; eine von Hand gewählte Karte bleibt, bis du einen Charakter der anderen Fraktion spielst.
+
 ## 0.5.30
 
 - Behoben: Pets: Ein Pet steigt eine Stufe auf, sobald sein Fortschritt 75 erreicht (Stufe 3 zeigt MAX), statt bei 75/75 stehen zu bleiben.

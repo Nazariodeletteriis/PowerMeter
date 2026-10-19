@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.31
+
+- Nuevo: Minimapa: un punto muestra tu última posición conocida en el mapa de tu facción. Se mueve cuando te teletransportas o usas una habilidad (el juego no envía tu posición mientras solo caminas), así tras una muerte ves si estás en el sitio correcto.
+- Nuevo: Minimapa: se abre en el mapa de tu facción (Asmodian o Elyos) cuando la facción está indicada en el personaje; un mapa elegido a mano se mantiene hasta que juegas un personaje de la otra facción.
+
 ## 0.5.30
 
 - Corregido: Mascotas: una mascota sube de nivel en cuanto su progreso llega a 75 (el nivel 3 muestra MAX), en lugar de quedarse en 75/75.

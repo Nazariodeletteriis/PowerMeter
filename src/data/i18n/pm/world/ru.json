@@ -198,5 +198,6 @@
   "world.map.filter": "Фильтр",
   "world.map.lock": "Закрепить положение",
   "world.map.unlock": "Положение закреплено: нажмите, чтобы открепить",
-  "world.map.petMonsters": "Монстры: {list}"
+  "world.map.petMonsters": "Монстры: {list}",
+  "world.map.you": "Ваше последнее известное местоположение"
 }

@@ -198,5 +198,6 @@
   "world.map.filter": "Filtro",
   "world.map.lock": "Bloquear posición",
   "world.map.unlock": "Posición bloqueada: haz clic para desbloquear",
-  "world.map.petMonsters": "Monstruos: {list}"
+  "world.map.petMonsters": "Monstruos: {list}",
+  "world.map.you": "Tu última posición conocida"
 }

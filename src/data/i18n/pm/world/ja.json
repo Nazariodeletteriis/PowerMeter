@@ -198,5 +198,6 @@
   "world.map.filter": "フィルター",
   "world.map.lock": "位置をロック",
   "world.map.unlock": "位置ロック中: クリックで解除",
-  "world.map.petMonsters": "モンスター：{list}"
+  "world.map.petMonsters": "モンスター：{list}",
+  "world.map.you": "最後に確認された現在地"
 }

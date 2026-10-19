@@ -168,6 +168,12 @@ fn get_captured_character() -> crate::capture::equip_parser::CapturedCharacter {
     crate::capture::equip_parser::snapshot()
 }
 
+/// Where the local player last was (x, y, z game units): set by teleports and their own casts, for the minimap.
+#[tauri::command]
+fn get_player_position(state: tauri::State<'_, AppState>) -> Option<[f32; 3]> {
+    state.data_storage.player_position()
+}
+
 #[tauri::command]
 fn seed_captured_pets(pets: Vec<crate::capture::equip_parser::CapturedPet>) {
     crate::capture::equip_parser::seed_pets(pets)
@@ -1871,6 +1877,7 @@ pub fn run() {
             get_capture_diagnosis,
             get_captured_character,
             seed_captured_pets,
+            get_player_position,
             set_target_mode,
             set_character_name,
             bind_local_actor_id,

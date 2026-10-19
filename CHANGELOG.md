@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.31
+
+- New: Minimap: a dot shows where you last were on your faction's world map. It moves when you teleport or use a skill (the game doesn't send your position while you just walk), so after a kill you can see if you are on the right spot.
+- New: Minimap: it opens on your faction's map (Asmodian or Elyos) when the faction is set on your character; a map you pick by hand stays until you play a character of the other faction.
+
 ## 0.5.30
 
 - Fixed: Pets: a pet goes up a level as soon as its progress reaches 75 (level 3 shows MAX), instead of stopping at 75/75.

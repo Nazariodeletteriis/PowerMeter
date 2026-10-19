@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.31
+
+- Novo: Minimapa: um ponto mostra sua última posição conhecida no mapa da sua facção. Ele se move quando você se teleporta ou usa uma habilidade (o jogo não envia sua posição enquanto você apenas caminha), assim depois de um abate você vê se está no lugar certo.
+- Novo: Minimapa: abre no mapa da sua facção (Asmodian ou Elyos) quando a facção está definida no personagem; um mapa escolhido à mão permanece até você jogar com um personagem da outra facção.
+
 ## 0.5.30
 
 - Corrigido: Mascotes: um mascote sobe de nível assim que o progresso chega a 75 (o nível 3 mostra MAX), em vez de parar em 75/75.
