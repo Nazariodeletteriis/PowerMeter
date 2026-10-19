@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.32
+
+- Novo: Minimapa: muda sozinho para o mapa em que você está (Elyos, Asmodian ou o Abismo), e sua última posição conhecida aparece também no Abismo.
+- Corrigido: Histórico e detalhes de combate: a Muralha de fogo do Feiticeiro não aparece mais como um jogador extra sem nome; o dano vai para o Feiticeiro, inclusive em combates salvos antes desta atualização.
+- Corrigido: Widget de DPS: o idioma alterado no painel passa a valer na hora também no widget.
+- Corrigido: Configurações: no tema PowerMeter os interruptores ligados e desligados se distinguem melhor.
+- Alterado: O antigo painel de configurações que restava dentro do widget de DPS foi removido (todas as opções estão no painel).
+
 ## 0.5.31
 
 - Novo: Minimapa: um ponto mostra sua última posição conhecida no mapa da sua facção. Ele se move quando você se teleporta ou usa uma habilidade (o jogo não envia sua posição enquanto você apenas caminha), assim depois de um abate você vê se está no lugar certo.

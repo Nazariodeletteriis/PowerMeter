@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.32
+
+- Nouveau : Mini-carte : elle passe d'elle-même à la carte où vous êtes (Élyséens, Asmodiens ou Abysses), et votre dernière position connue s'affiche aussi dans les Abysses.
+- Corrigé : Historique et détails des combats : le Mur de feu du Sorcier n'apparaît plus comme un joueur sans nom en trop ; ses dégâts vont au Sorcier, y compris dans les combats enregistrés avant cette mise à jour.
+- Corrigé : Widget DPS : une langue changée dans le tableau de bord s'applique tout de suite au widget.
+- Corrigé : Paramètres : dans le thème PowerMeter, les interrupteurs activés et désactivés se distinguent mieux.
+- Modifié : L'ancien panneau de paramètres resté dans le widget DPS a été retiré (toutes les options sont dans le tableau de bord).
+
 ## 0.5.31
 
 - Nouveau : Mini-carte : un point indique votre dernière position connue sur la carte de votre faction. Il bouge quand vous vous téléportez ou utilisez une compétence (le jeu n'envoie pas votre position quand vous marchez simplement), ainsi après une victime vous voyez si vous êtes au bon endroit.

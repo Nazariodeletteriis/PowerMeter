@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.32
+
+- Nuovo: Minimappa: passa da sola alla mappa in cui ti trovi (Elyos, Asmodian o Abisso), e la tua ultima posizione nota compare anche nell'Abisso.
+- Corretto: Storico e dettagli dei combattimenti: il Fire Wall del Sorcerer non compare più come un giocatore in più senza nome; il suo danno va al Sorcerer, anche nei combattimenti salvati prima di questo aggiornamento.
+- Corretto: Widget DPS: la lingua cambiata nella dashboard si applica subito anche al widget.
+- Corretto: Impostazioni: nel tema PowerMeter gli interruttori accesi e spenti si distinguono meglio.
+- Cambiato: Il vecchio pannello delle impostazioni rimasto dentro il widget DPS è stato tolto (tutte le opzioni sono nella dashboard).
+
 ## 0.5.31
 
 - Nuovo: Minimappa: un pallino mostra la tua ultima posizione nota sulla mappa della tua fazione. Si sposta quando ti teletrasporti o usi una skill (il gioco non manda la tua posizione mentre cammini e basta), così dopo un'uccisione vedi se sei nel punto giusto.

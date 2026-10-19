@@ -4,6 +4,14 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.32
+
+- New: Minimap: it switches by itself to the map you are on (Elyos, Asmodian or the Abyss), and your last known position shows in the Abyss too.
+- Fixed: Fight history and details: a Sorcerer's Fire Wall no longer shows up as an extra unnamed player; its damage goes to the Sorcerer, in fights saved before this update too.
+- Fixed: DPS widget: a language changed in the dashboard applies to the widget right away.
+- Fixed: Settings: the on and off states of the switches are easier to tell apart in the PowerMeter theme.
+- Changed: The old settings panel left inside the DPS widget is gone (every option is in the dashboard).
+
 ## 0.5.31
 
 - New: Minimap: a dot shows where you last were on your faction's world map. It moves when you teleport or use a skill (the game doesn't send your position while you just walk), so after a kill you can see if you are on the right spot.

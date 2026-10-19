@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.32
+
+- Neu: Minikarte: Sie wechselt von selbst zur Karte, auf der du bist (Elyos, Asmodier oder Abyss), und deine letzte bekannte Position wird auch im Abyss angezeigt.
+- Behoben: Kampfverlauf und Details: Die Feuerwand eines Zauberers erscheint nicht mehr als zusätzlicher namenloser Spieler; ihr Schaden geht an den Zauberer, auch in Kämpfen, die vor diesem Update gespeichert wurden.
+- Behoben: DPS-Widget: Eine im Dashboard geänderte Sprache gilt sofort auch im Widget.
+- Behoben: Einstellungen: Im PowerMeter-Theme sind ein- und ausgeschaltete Schalter besser zu unterscheiden.
+- Geändert: Das alte Einstellungsfeld im DPS-Widget wurde entfernt (alle Optionen sind im Dashboard).
+
 ## 0.5.31
 
 - Neu: Minikarte: Ein Punkt zeigt deine letzte bekannte Position auf der Karte deiner Fraktion. Er bewegt sich, wenn du dich teleportierst oder eine Fertigkeit einsetzt (beim reinen Laufen sendet das Spiel deine Position nicht), so siehst du nach einem Kill, ob du an der richtigen Stelle bist.

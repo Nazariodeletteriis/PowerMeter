@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.32
+
+- Nuevo: Minimapa: cambia solo al mapa en el que estás (Elyos, Asmodian o el Abismo), y tu última posición conocida aparece también en el Abismo.
+- Corregido: Historial y detalles de combate: el Muro de fuego del Hechicero ya no aparece como un jugador extra sin nombre; su daño va al Hechicero, también en combates guardados antes de esta actualización.
+- Corregido: Widget de DPS: el idioma cambiado en el panel se aplica al instante también al widget.
+- Corregido: Ajustes: en el tema PowerMeter los interruptores encendidos y apagados se distinguen mejor.
+- Cambiado: Se eliminó el antiguo panel de ajustes que quedaba dentro del widget de DPS (todas las opciones están en el panel).
+
 ## 0.5.31
 
 - Nuevo: Minimapa: un punto muestra tu última posición conocida en el mapa de tu facción. Se mueve cuando te teletransportas o usas una habilidad (el juego no envía tu posición mientras solo caminas), así tras una muerte ves si estás en el sitio correcto.

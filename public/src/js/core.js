@@ -2923,6 +2923,8 @@ class DpsApp {
     const keys = this.storageKeys;
     const on = value !== "false";
     switch (key) {
+      case keys.language:
+        return this.i18n?.setLanguage?.(value, { persist: false });
       case keys.slimMode:
         this.setSlimMode(value === "true");
         return this.redrawFromLatest();
