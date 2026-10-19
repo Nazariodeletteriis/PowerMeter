@@ -77,8 +77,10 @@ impl FightHistoryManager {
         let file_path = self.history_dir.join(format!("{}.json", id));
         let json = std::fs::read_to_string(&file_path)
             .map_err(|e| format!("Read error: {}", e))?;
-        serde_json::from_str(&json)
-            .map_err(|e| format!("Parse error: {}", e))
+        let mut record: FightRecord = serde_json::from_str(&json)
+            .map_err(|e| format!("Parse error: {}", e))?;
+        crate::combat::dps_calculator::merge_placed_objects(&mut record);
+        Ok(record)
     }
 
     pub fn delete_fight(&self, id: &str) -> Result<(), String> {
