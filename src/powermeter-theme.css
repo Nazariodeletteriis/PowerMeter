@@ -1348,6 +1348,15 @@
   }
   .meter.slim .pmLiveResetBtn span { display: none; } /* icon only; named by aria-label */
   .meter.slim .pmLiveResetBtn svg { width: 12px; height: 12px; }
+  /* The cards' actions are laid out for the Interface width: at 280px they ran past the
+     window and squeezed the text into a one-word column. Here they wrap under the text
+     instead, each label whole; the card's Reset is the footer's, right below. */
+  .meter.slim .pmEndResetBtn { display: none; }
+  .meter.slim .pmEndActions { flex-wrap: wrap; min-width: 0; }
+  .meter.slim .pmEndActions > button { flex: 1 1 auto; }
+  .meter.slim :is(.pmError, .pmUploaded) { flex-wrap: wrap; row-gap: 8px; }
+  .meter.slim .pmCardText { flex-basis: calc(100% - 28px); } /* beside the 18px icon and its 10px gap */
+  .meter.slim :is(.pmError, .pmUploaded) button { flex: 1 1 100%; height: 28px; }
 
   @media (prefers-reduced-motion: reduce) {
     .list .item .fill { transition: none; }
