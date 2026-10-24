@@ -308,23 +308,24 @@ fn show_dashboard(app: &tauri::AppHandle) -> Result<(), String> {
 /// a full map window).
 #[tauri::command]
 pub async fn open_map_window(app: tauri::AppHandle) -> Result<(), String> {
-    open_widget_window(&app, "map", "minimap", "PowerMeter — Map", (360.0, 400.0), true)
+    open_widget_window(&app, "map", "minimap", "PowerMeter — Map", (360.0, 400.0), (240.0, 240.0))
 }
 
 /// The Hidden cube guide (CubeGuide.tsx): a small card over the game pointing
-/// at the nearest hidden cube and listing the other spots of the place. Fixed size, tall enough for the full list
-/// (six spots) and the footer at its longest (three lines in German with the aim line), in type a quarter up on 0.5.34 to
-/// read over the game; its place is remembered (`window.cubes.*`).
+/// at the nearest hidden cube and listing the other spots of the place. Opens at 270 x 336, tall enough for the full
+/// list (six spots) and the footer at its longest (three lines in German with the aim line); resized by hand, the card
+/// scales with the window down to half. Its place and size are remembered under `window.cubeGuide.*`: `window.cubes.*`
+/// holds the sizes of the fixed cards of 0.5.33-0.5.35, too small for this one.
 #[tauri::command]
 pub async fn open_cube_window(app: tauri::AppHandle) -> Result<(), String> {
-    open_widget_window(&app, "cubes", "cubes", "PowerMeter — Hidden cubes", (270.0, 336.0), false)
+    open_widget_window(&app, "cubes", "cubeGuide", "PowerMeter — Hidden cubes", (270.0, 336.0), (135.0, 168.0))
 }
 
 /// A transparent widget window over the game: dashboard.html drawing only the
 /// view named by its label (main.tsx). Its geometry is saved under
 /// `window.<key>.*` when it loses focus or closes rather than on every move
 /// event, since each save writes the settings file.
-fn open_widget_window(app: &tauri::AppHandle, label: &'static str, key: &'static str, title: &str, size: (f64, f64), resizable: bool) -> Result<(), String> {
+fn open_widget_window(app: &tauri::AppHandle, label: &'static str, key: &'static str, title: &str, size: (f64, f64), min: (f64, f64)) -> Result<(), String> {
     let lock = lock_of(label)?;
     if let Some(existing) = app.get_webview_window(label) {
         let _ = existing.show();
@@ -343,17 +344,13 @@ fn open_widget_window(app: &tauri::AppHandle, label: &'static str, key: &'static
         .shadow(false)
         // Over the game, like the meter and the tool windows.
         .always_on_top(true)
-        .resizable(resizable)
+        .resizable(true)
         .inner_size(size.0, size.1)
-        .min_inner_size(size.0.min(240.0), size.1.min(240.0))
+        .min_inner_size(min.0, min.1)
         .build()
         .map_err(|e| e.to_string())?;
     if !crate::restore_window_geometry(app, &window, key) {
         let _ = window.center();
-    }
-    if !resizable {
-        // A fixed card keeps the size it is built with: a saved one is an older layout's (0.5.33's cube guide was 172 high).
-        let _ = window.set_size(tauri::LogicalSize::new(size.0, size.1));
     }
     let handle = window.clone();
     window.on_window_event(move |event| {

@@ -16,7 +16,7 @@ const ALERT_MS = 3000;
 /** How long the compass shows where your last cast aimed: past it you may face anywhere. */
 const HEADING_MS = 60_000;
 /** The big distance counts from the old value to the new one in this long, so you see it closing in. */
-const COUNT_MS = 500;
+const COUNT_MS = 300; // positions come up to ~7 a second in a fight: a longer count never lands
 /** A cube this many metres above or below you lights the up or down caret: a step, not the ground's slope. */
 const CLIMB_M = 3;
 
@@ -42,32 +42,36 @@ function chime() {
 }
 
 /**
- * `target`, counted to over COUNT_MS (ease-out) from what is on screen when it changes, a new value cutting in from
- * wherever the count is. A new `key` (another cube: Skip, one showing up), the first value and reduced motion jump.
+ * `value`, counted to over COUNT_MS (ease-out) from what is on screen when it changes, a new value cutting in from
+ * wherever the count is. A new `id` (another cube: Skip, one showing up), the first value and reduced motion jump.
+ * Written straight into the text node: a render per frame would redraw the whole card for one number.
  */
-function useCountTo(target: number, key: string) {
-  const [shown, setShown] = useState({ key, v: target });
-  const live = useRef(shown);
+function CountTo({ value, id, format }: { value: number; id: string; format: (v: number) => string }) {
+  const el = useRef<HTMLSpanElement>(null);
+  const live = useRef<{ id: string; v: number }>(undefined);
   useEffect(() => {
+    const node = el.current;
+    if (!node) return;
+    const set = (v: number) => {
+      live.current = { id, v };
+      node.textContent = format(v);
+    };
     const from = live.current;
-    if (from.key !== key || from.v === target || matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      live.current = { key, v: target };
-      setShown(live.current);
+    if (!from || from.id !== id || from.v === value || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      set(value);
       return;
     }
     const t0 = performance.now();
     let raf = 0;
     const step = (t: number) => {
       const p = Math.min(1, (t - t0) / COUNT_MS);
-      live.current = { key, v: from.v + (target - from.v) * (1 - (1 - p) ** 5) }; // easeOutQuint
-      setShown(live.current);
+      set(from.v + (value - from.v) * (1 - (1 - p) ** 5)); // easeOutQuint
       if (p < 1) raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [target, key]);
-  // A new cube shows its own distance from the first frame, not the old one's until the effect runs.
-  return shown.key === key ? shown.v : target;
+  }, [value, id, format]);
+  return <span ref={el} />;
 }
 
 /**
@@ -140,6 +144,15 @@ export function CubeGuide({ t, lang, settings, run }: { t: T; lang: string; sett
   }, [liveKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const alerting = now - alertAt < ALERT_MS;
 
+  // Resized by hand, the card scales with the window (its layout is drawn for 270 x 336, CARD in world.css).
+  const [fit, setFit] = useState(1);
+  useEffect(() => {
+    const resize = () => setFit(Math.min(innerWidth / 270, innerHeight / 336));
+    resize();
+    addEventListener("resize", resize);
+    return () => removeEventListener("resize", resize);
+  }, []);
+
   const liveGuides = known ? nearCubes(live, pos, half, w, h, skipped, Infinity) : [];
   const [guide, ...others] = liveGuides.length ? liveGuides : known ? nearCubes(cubes, pos, half, w, h, skipped) : [];
   const empty = !known ? t("world.cubes.noPos") : !cubes.length ? t("world.cubes.noCubes") : !guide ? t("world.cubes.allSkipped") : undefined;
@@ -148,7 +161,6 @@ export function CubeGuide({ t, lang, settings, run }: { t: T; lang: string; sett
 
   // Where your last cast aimed, as a bearing, while that is recent.
   const aim = at?.heading != null && at.headingAt != null && now - at.headingAt < HEADING_MS ? facing(at.heading) : undefined;
-  const dist = useCountTo(guide?.metres ?? 0, guide?.cube.id ?? "");
   const steep = (m?: number): m is number => m !== undefined && Math.abs(m) >= CLIMB_M;
   const climbLabel = (m?: number) => (steep(m) ? t(m > 0 ? "world.cubes.above" : "world.cubes.below", { m: metres.format(Math.abs(m)) }) : undefined);
   const cardinals: [string, number][] = [
@@ -163,7 +175,7 @@ export function CubeGuide({ t, lang, settings, run }: { t: T; lang: string; sett
       className="mm cg"
       data-locked={locked || undefined}
       data-alert={alerting || undefined}
-      style={{ "--c": LAYERS.hiddenCube[1] } as CSSProperties}
+      style={{ "--c": LAYERS.hiddenCube[1], zoom: fit } as CSSProperties}
       onPointerDown={(e) => !locked && !(e.target as Element).closest("button") && startMove(e, run)}
     >
       <div className="cgHead">
@@ -208,7 +220,9 @@ export function CubeGuide({ t, lang, settings, run }: { t: T; lang: string; sett
               {aim !== undefined && <span className="cgAim" aria-hidden="true" style={{ "--a": `${aim}deg` } as CSSProperties} />}
             </div>
             <div className="cgRead">
-              <div className="cgDist">{metres.format(dist)}</div>
+              <div className="cgDist">
+                <CountTo value={guide.metres} id={guide.cube.id} format={metres.format} />
+              </div>
               <div className="cgClimb" {...(steep(guide.climb) ? { role: "img", "aria-label": climbLabel(guide.climb) } : { "aria-hidden": true })}>
                 <CaretUpIcon aria-hidden="true" weight="bold" data-on={(steep(guide.climb) && guide.climb > 0) || undefined} />
                 <CaretDownIcon aria-hidden="true" weight="bold" data-on={(steep(guide.climb) && guide.climb < 0) || undefined} />

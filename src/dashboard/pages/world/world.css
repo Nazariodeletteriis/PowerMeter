@@ -1041,9 +1041,14 @@
    height, the other spots of the place in rows, how old the position is. The
    card moves the window. Sized to be read over the game: a quarter up on the
    0.5.34 card (216 x 270), with the window (powermeter.rs open_cube_window). */
+/* CARD: drawn for 270 x 336 and zoomed to the window when it is resized by hand (CubeGuide.tsx fit), so a
+   smaller window is the same card, smaller. `zoom`, not `scale`: the text is laid out again at the size, not blurred. */
 .cg {
   box-sizing: border-box;
-  height: 100%;
+  position: relative;
+  width: 270px;
+  height: 336px;
+  flex: none;
   display: flex;
   flex-direction: column;
   padding: 10px;
@@ -1110,22 +1115,27 @@
   color: var(--c);
   font-weight: 600;
 }
-/* A cube just showed up: the card's rim flashes three times in the cube colour. */
-.cg[data-alert] {
+/* A cube just showed up: the card's rim flashes three times in the cube colour. The rim is its own layer and only
+   its opacity moves, so the card is not repainted on every frame. */
+.cg[data-alert]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 3px var(--c);
+  pointer-events: none;
   animation: cgAlert 1s cubic-bezier(0.23, 1, 0.32, 1) 3;
 }
 @keyframes cgAlert {
   from {
-    box-shadow: inset 0 0 0 3px var(--c);
+    opacity: 1;
   }
   to {
-    box-shadow: inset 0 0 0 1px var(--mm-line);
+    opacity: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cg[data-alert] {
+  .cg[data-alert]::after {
     animation: none;
-    box-shadow: inset 0 0 0 3px var(--c);
   }
 }
 /* N E S W on the compass rim at --a (0 = up), kept upright. */
