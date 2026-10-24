@@ -49,8 +49,14 @@ const PET_COLOR = "#E86FB8";
 export const HOME_MAP: Record<Faction, string> = { elyos: "World_L_A", asmodian: "World_D_A" };
 const CUBES_SOURCE = "https://github.com/SkeeveAN/Aion-DPS-Meter";
 const HALF: Record<string, number> = Object.fromEntries(Object.values(GAME_MAPS));
-/** `cubes`: the hidden cubes standing near you now, game units (they show up within sight only). */
-export const getPlayerPosition = () => invoke<{ pos: [number, number, number] | null; map: number | null; cubes: [number, number][] }>("get_player_position");
+/**
+ * `pos` and when it was seen (`at`, ms); `heading`: where your last cast aimed (degrees, atan2 of south and east) at
+ * `headingAt`; `cubes`: the hidden cubes standing near you now, game units x y z (they show up within sight only).
+ */
+export const getPlayerPosition = () =>
+  invoke<{ pos: [number, number, number] | null; at: number | null; heading: number | null; headingAt: number | null; map: number | null; cubes: [number, number, number][] }>(
+    "get_player_position",
+  );
 
 // Subtype → icon, color (world.layer.<subtype> labels the layer).
 export const LAYERS: Record<string, [Icon, string]> = {
@@ -65,10 +71,10 @@ export const LAYERS: Record<string, [Icon, string]> = {
 // Subtypes the game lets you complete.
 const COMPLETABLE = new Set(["seal", "occupation", "monolithMaterial"]);
 
-type Marker = { type: string; x: number; y: number; region: string; label: string; id: string };
+type Marker = { type: string; x: number; y: number; z?: number; region: string; label: string; id: string };
 
 /**
- * Hidden cubes: every spot the game can spawn one on (cubes.json: map → [x, y, region], map pixels), from
+ * Hidden cubes: every spot the game can spawn one on (cubes.json: map → [x, y, region, z], map pixels and z in game units), from
  * Aion-DPS-Meter (MIT, cubes.LICENSE). They stand in for the source's hiddenCube markers, placed by hand: 91% of
  * those lie within 20 m of one of these, 41% within 5 m.
  */
@@ -83,7 +89,7 @@ export const markersOf = (m: MapData): Marker[] => [
     label: label as string,
     id: id as string,
   })),
-  ...(cubeSpots[m.id] ?? []).map(([x, y, region], i) => ({ type: "hiddenCube", x, y, region: m.regions[region]?.name ?? "", label: "", id: `cube${i}` })),
+  ...(cubeSpots[m.id] ?? []).map(([x, y, region, z], i) => ({ type: "hiddenCube", x, y, z, region: m.regions[region]?.name ?? "", label: "", id: `cube${i}` })),
 ];
 
 /** localStorage value kept in state; anything unreadable falls back to `init`. */
@@ -107,7 +113,7 @@ function useStored<V>(key: string, init: V) {
 const label: CSSProperties = { fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--pm-t3)", margin: "8px 0 4px" };
 
 /**
- * You, where the game last placed you: it moves on teleports and on your own casts, not while you walk
+ * You, where the game last placed you: it moves on teleports and on your own casts and effects, not while you walk
  * (the rest is encrypted). Polled in here so the rest of the map doesn't re-render with it.
  */
 function You({ t, map, home, onMap }: { t: T; map: MapData; home?: string; onMap: (id?: string) => void }) {
