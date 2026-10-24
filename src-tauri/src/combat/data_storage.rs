@@ -886,6 +886,12 @@ impl DataStorage {
         purge_friendly_damage(&mut inner, summon_id);
     }
 
+    pub fn drop_summon_link(&self, id: i32) {
+        let mut inner = self.inner.write();
+        inner.summon_storage.remove(&id);
+        inner.confirmed_summon_ids.remove(&id);
+    }
+
     pub fn append_summon(&self, summoner: i32, summon: i32) {
         let mut inner = self.inner.write();
 
