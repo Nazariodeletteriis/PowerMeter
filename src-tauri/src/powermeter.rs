@@ -350,6 +350,10 @@ fn open_widget_window(app: &tauri::AppHandle, label: &'static str, key: &'static
     if !crate::restore_window_geometry(app, &window, key) {
         let _ = window.center();
     }
+    if !resizable {
+        // A fixed card keeps the size it is built with: a saved one is an older layout's (0.5.33's cube guide was 172 high).
+        let _ = window.set_size(tauri::LogicalSize::new(size.0, size.1));
+    }
     let handle = window.clone();
     window.on_window_event(move |event| {
         if matches!(event, tauri::WindowEvent::Focused(false) | tauri::WindowEvent::CloseRequested { .. }) {
