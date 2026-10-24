@@ -27,6 +27,63 @@ export function AllNone({ t, rows, set }: { t: T; rows: LayerRow[]; set: (on: bo
 const MAP_LABEL = "map"; // the window's label, for its lock (powermeter.rs LOCKS)
 
 /**
+ * The lock of a widget window (powermeter.rs LOCKS, by window label): its state, kept in step with the Rust side, and
+ * its toggle. Locked, the window can't be moved.
+ */
+export function useLock(label: string, run: (action: () => Promise<unknown>) => void) {
+  const [locked, setLocked] = useState(false);
+  useEffect(() => {
+    invoke<boolean>("get_click_through", { label }).then(setLocked, () => {});
+    const stop = listen<boolean>(`pm-${label}-click-through`, ({ payload }) => setLocked(payload));
+    return () => void stop.then((s) => s(), () => {});
+  }, [label]);
+  const toggle = () => run(() => invoke("set_click_through", { enabled: !locked, label }).then(() => setLocked(!locked)));
+  return [locked, toggle] as const;
+}
+
+/**
+ * Moves the window with the pointer, by hand, not with the native drag: that one let Windows snap it (Aero Snap) to the
+ * screen's top edge or corners, where the game's minimap sits, and a double-click on the bar maximized it.
+ * One setPosition in flight at a time, always to the latest pointer.
+ */
+export function startMove(e: ReactPointerEvent<HTMLElement>, run: (action: () => Promise<unknown>) => void) {
+  if (e.button !== 0) return;
+  const win = getCurrentWindow();
+  const el = e.currentTarget;
+  el.setPointerCapture(e.pointerId);
+  const from = { x: e.screenX, y: e.screenY };
+  const scale = window.devicePixelRatio;
+  const origin = win.outerPosition();
+  let to: { x: number; y: number } | undefined;
+  let busy = false;
+  const push = () => {
+    if (busy || !to) return;
+    const p = to;
+    to = undefined;
+    busy = true;
+    origin
+      .then((o) => win.setPosition(new PhysicalPosition(Math.round(o.x + (p.x - from.x) * scale), Math.round(o.y + (p.y - from.y) * scale))))
+      .catch((err) => run(() => Promise.reject(err)))
+      .finally(() => {
+        busy = false;
+        push();
+      });
+  };
+  const move = (ev: PointerEvent) => {
+    to = { x: ev.screenX, y: ev.screenY };
+    push();
+  };
+  const end = () => {
+    el.removeEventListener("pointermove", move);
+    el.removeEventListener("pointerup", end);
+    el.removeEventListener("pointercancel", end);
+  };
+  el.addEventListener("pointermove", move);
+  el.addEventListener("pointerup", end);
+  el.addEventListener("pointercancel", end);
+}
+
+/**
  * The minimap's controls over the map, as the game's minimap: Map and Path Opacity on top with the close button,
  * the icon column on the right (move, filter, pets, full screen; zoom and lock at the bottom), the zone at the
  * bottom left. The filter holds the two dropdowns, Gathering and Layers. Locked, the window can't be moved; its controls
@@ -70,55 +127,9 @@ export function MiniChrome({
   credit: ReactNode;
 }) {
   const [filter, setFilter] = useState(false);
-  const [locked, setLocked] = useState(false);
+  const [locked, toggleLock] = useLock(MAP_LABEL, run);
   const win = getCurrentWindow();
-
-  useEffect(() => {
-    invoke<boolean>("get_click_through", { label: MAP_LABEL }).then(setLocked, () => {});
-    const stop = listen<boolean>("pm-map-click-through", ({ payload }) => setLocked(payload));
-    return () => void stop.then((s) => s(), () => {});
-  }, []);
-
-  // The window follows the pointer by hand, not with the native drag: that one let Windows snap it (Aero Snap) to the
-  // screen's top edge or corners, where the game's minimap sits, and a double-click on the bar maximized it.
-  // One setPosition in flight at a time, always to the latest pointer.
-  const startMove = (e: ReactPointerEvent<HTMLElement>) => {
-    if (e.button !== 0 || locked) return; // the lock keeps the window in place
-    const el = e.currentTarget;
-    el.setPointerCapture(e.pointerId);
-    const from = { x: e.screenX, y: e.screenY };
-    const scale = window.devicePixelRatio;
-    const origin = win.outerPosition();
-    let to: { x: number; y: number } | undefined;
-    let busy = false;
-    const push = () => {
-      if (busy || !to) return;
-      const p = to;
-      to = undefined;
-      busy = true;
-      origin
-        .then((o) => win.setPosition(new PhysicalPosition(Math.round(o.x + (p.x - from.x) * scale), Math.round(o.y + (p.y - from.y) * scale))))
-        .catch((err) => run(() => Promise.reject(err)))
-        .finally(() => {
-          busy = false;
-          push();
-        });
-    };
-    const move = (ev: PointerEvent) => {
-      to = { x: ev.screenX, y: ev.screenY };
-      push();
-    };
-    const end = () => {
-      el.removeEventListener("pointermove", move);
-      el.removeEventListener("pointerup", end);
-      el.removeEventListener("pointercancel", end);
-    };
-    el.addEventListener("pointermove", move);
-    el.addEventListener("pointerup", end);
-    el.addEventListener("pointercancel", end);
-  };
-
-  const toggleLock = () => run(() => invoke("set_click_through", { enabled: !locked, label: MAP_LABEL }).then(() => setLocked(!locked)));
+  const move = (e: ReactPointerEvent<HTMLElement>) => !locked && startMove(e, run); // the lock keeps the window in place
 
   // The filter closes on Esc or a press outside it.
   useEffect(() => {
@@ -173,7 +184,7 @@ export function MiniChrome({
 
   return (
     <>
-      <div className="mmBar" onPointerDown={(e) => e.target === e.currentTarget && startMove(e)}>
+      <div className="mmBar" onPointerDown={(e) => e.target === e.currentTarget && move(e)}>
         {slider(t("world.map.mapOpacity"), undefined, mapOpacity, 0, setMapOpacity)}
         {slider(t("world.map.pathOpacity"), t("world.map.pathOpacityHint"), pathOpacity, 0.1, setPathOpacity)}
         {railBtn(t("window.close"), <XIcon aria-hidden="true" />, { className: "mmBtn mmClose", onClick: () => run(() => win.close()) })}
@@ -182,7 +193,7 @@ export function MiniChrome({
       <div className="mmRail">
         {railBtn(t("world.map.move"), <ArrowsOutCardinalIcon aria-hidden="true" />, {
           className: "mmBtn mmMove",
-          onPointerDown: startMove,
+          onPointerDown: move,
         })}
         {railBtn(t("world.map.filter"), <FunnelIcon aria-hidden="true" />, {
           className: "mmBtn mmFilterBtn",

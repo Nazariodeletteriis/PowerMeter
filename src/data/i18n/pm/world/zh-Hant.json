@@ -199,5 +199,16 @@
   "world.map.lock": "鎖定位置",
   "world.map.unlock": "位置已鎖定：點擊解鎖",
   "world.map.petMonsters": "怪物：{list}",
-  "world.map.you": "你最後已知的位置"
+  "world.map.you": "你最後已知的位置",
+  "world.cubes.open": "開啟隱藏方塊指南",
+  "world.cubes.north": "北",
+  "world.cubes.bearing": "最近的方塊：距正北 {n}°（上方為北）",
+  "world.cubes.count": "本地圖的方塊數（不含已跳過）",
+  "world.cubes.updated": "更新：{when}",
+  "world.cubes.updatedHint": "遊戲只在你傳送或施放技能時提供你的位置",
+  "world.cubes.skip": "跳過，下一個最近的",
+  "world.cubes.restart": "重新顯示已跳過的方塊",
+  "world.cubes.noPos": "施放技能或傳送即可開始",
+  "world.cubes.noCubes": "本地圖沒有隱藏方塊",
+  "world.cubes.allSkipped": "本地圖的方塊已全部跳過"
 }

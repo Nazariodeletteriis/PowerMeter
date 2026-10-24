@@ -199,5 +199,16 @@
   "world.map.lock": "Position sperren",
   "world.map.unlock": "Position gesperrt: klicken zum Entsperren",
   "world.map.petMonsters": "Monster: {list}",
-  "world.map.you": "Deine letzte bekannte Position"
+  "world.map.you": "Deine letzte bekannte Position",
+  "world.cubes.open": "Führer zu versteckten Würfeln öffnen",
+  "world.cubes.north": "N",
+  "world.cubes.bearing": "Nächster Würfel {n}° von Norden, Norden ist oben",
+  "world.cubes.count": "Würfel auf dieser Karte, übersprungene ausgenommen",
+  "world.cubes.updated": "Aktualisiert {when}",
+  "world.cubes.updatedHint": "Das Spiel teilt deine Position nur beim Teleportieren oder beim Wirken einer Fertigkeit mit",
+  "world.cubes.skip": "Überspringen, nächster",
+  "world.cubes.restart": "Übersprungene Würfel wieder zeigen",
+  "world.cubes.noPos": "Wirke eine Fertigkeit oder teleportiere dich, um zu starten",
+  "world.cubes.noCubes": "Keine versteckten Würfel auf dieser Karte",
+  "world.cubes.allSkipped": "Alle Würfel dieser Karte übersprungen"
 }

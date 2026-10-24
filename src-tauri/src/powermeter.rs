@@ -45,8 +45,9 @@ pub fn start_capture_after_terms(app: &tauri::AppHandle, start: impl FnOnce() + 
     });
 }
 
-/// A window that can be locked in place: the meter overlay and the minimap (Map
-/// window). Locked, it can't be moved; its buttons keep working. Not persisted.
+/// A window that can be locked in place: the meter overlay, the minimap (Map
+/// window) and the Hidden cube guide. Locked, it can't be moved; its buttons
+/// keep working. Not persisted.
 /// (The commands keep their old click-through names: the lock used to let the
 /// mouse through to the game.)
 struct Lock {
@@ -56,9 +57,11 @@ struct Lock {
     on: AtomicBool,
 }
 
-static LOCKS: [Lock; 2] = [
+static LOCKS: [Lock; 3] = [
     Lock { label: "main", event: "pm-click-through", on: AtomicBool::new(false) },
+    // Widget windows: the event is pm-<label>-click-through (Minimap.tsx useLock).
     Lock { label: "map", event: "pm-map-click-through", on: AtomicBool::new(false) },
+    Lock { label: "cubes", event: "pm-cubes-click-through", on: AtomicBool::new(false) },
 ];
 static METER: &Lock = &LOCKS[0];
 
@@ -76,7 +79,7 @@ pub fn meter_locked() -> bool {
     METER.on.load(Ordering::SeqCst)
 }
 
-/// The lock buttons: the meter's (no label, design: widget header) and the minimap's (label "map").
+/// The lock buttons: the meter's (no label, design: widget header) and the widget windows' (their label).
 #[tauri::command]
 pub fn set_click_through(app: tauri::AppHandle, enabled: bool, label: Option<String>) -> Result<(), String> {
     apply_lock(&app, lock_of(label.as_deref().unwrap_or("main"))?, enabled);
@@ -302,47 +305,61 @@ fn show_dashboard(app: &tauri::AppHandle) -> Result<(), String> {
 /// own map and path opacity show the game through it. Async for the same
 /// reason as `open_dashboard_window`. Its place and size are remembered like
 /// the tool windows' (`window.minimap.*`: the old `window.map.*` was the size of
-/// a full map window), saved when it loses focus or closes rather than on every
-/// move event, since each save writes the settings file.
+/// a full map window).
 #[tauri::command]
 pub async fn open_map_window(app: tauri::AppHandle) -> Result<(), String> {
-    let lock = lock_of("map")?;
-    if let Some(existing) = app.get_webview_window("map") {
+    open_widget_window(&app, "map", "minimap", "PowerMeter — Map", (360.0, 400.0), true)
+}
+
+/// The Hidden cube guide (CubeGuide.tsx): a small card over the game pointing
+/// at the nearest hidden cube. Fixed size; its place is remembered (`window.cubes.*`).
+#[tauri::command]
+pub async fn open_cube_window(app: tauri::AppHandle) -> Result<(), String> {
+    open_widget_window(&app, "cubes", "cubes", "PowerMeter — Hidden cubes", (216.0, 172.0), false)
+}
+
+/// A transparent widget window over the game: dashboard.html drawing only the
+/// view named by its label (main.tsx). Its geometry is saved under
+/// `window.<key>.*` when it loses focus or closes rather than on every move
+/// event, since each save writes the settings file.
+fn open_widget_window(app: &tauri::AppHandle, label: &'static str, key: &'static str, title: &str, size: (f64, f64), resizable: bool) -> Result<(), String> {
+    let lock = lock_of(label)?;
+    if let Some(existing) = app.get_webview_window(label) {
         let _ = existing.show();
         let _ = existing.unminimize();
         let _ = existing.set_focus();
         return Ok(());
     }
     lock.on.store(false, Ordering::SeqCst); // a new window starts unlocked
-    let window = tauri::WebviewWindowBuilder::new(&app, "map", tauri::WebviewUrl::App("dashboard.html".into()))
+    let window = tauri::WebviewWindowBuilder::new(app, label, tauri::WebviewUrl::App("dashboard.html".into()))
         // WebviewUrl::App is a path (a ?query is percent-encoded): see open_details_on_monitor_inner.
-        .initialization_script("window.__PM_VIEW__ = 'map';")
-        .title("PowerMeter — Map")
+        .initialization_script(format!("window.__PM_VIEW__ = '{label}';"))
+        .title(title)
         .decorations(false)
         .transparent(true)
         // On Windows an undecorated window's shadow is a 1px border around the transparent area.
         .shadow(false)
         // Over the game, like the meter and the tool windows.
         .always_on_top(true)
-        .resizable(true)
-        .inner_size(360.0, 400.0)
-        .min_inner_size(240.0, 240.0)
+        .resizable(resizable)
+        .inner_size(size.0, size.1)
+        .min_inner_size(size.0.min(240.0), size.1.min(240.0))
         .build()
         .map_err(|e| e.to_string())?;
-    if !crate::restore_window_geometry(&app, &window, "minimap") {
+    if !crate::restore_window_geometry(app, &window, key) {
         let _ = window.center();
     }
     let handle = window.clone();
     window.on_window_event(move |event| {
         if matches!(event, tauri::WindowEvent::Focused(false) | tauri::WindowEvent::CloseRequested { .. }) {
-            save_map_geometry(&handle);
+            save_widget_geometry(&handle, key);
         }
     });
     Ok(())
 }
 
 /// Full screen, minimized or maximized is not a place the user chose: kept out.
-fn save_map_geometry(window: &tauri::WebviewWindow) {
+fn save_widget_geometry(window: &tauri::WebviewWindow, key: &str) {
     let Some(state) = window.app_handle().try_state::<AppState>() else { return };
     let placed = !window.is_fullscreen().unwrap_or(true)
         && !window.is_minimized().unwrap_or(true)
@@ -352,8 +369,8 @@ fn save_map_geometry(window: &tauri::WebviewWindow) {
     }
     if let (Ok(pos), Ok(size)) = (window.outer_position(), window.outer_size()) {
         if pos.x > -10000 && pos.y > -10000 && size.width > 100 && size.height > 100 {
-            for (key, value) in [("x", pos.x), ("y", pos.y), ("w", size.width as i32), ("h", size.height as i32)] {
-                state.settings.set(&format!("window.minimap.{key}"), &value.to_string());
+            for (k, value) in [("x", pos.x), ("y", pos.y), ("w", size.width as i32), ("h", size.height as i32)] {
+                state.settings.set(&format!("window.{key}.{k}"), &value.to_string());
             }
         }
     }

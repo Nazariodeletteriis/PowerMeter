@@ -199,5 +199,16 @@
   "world.map.lock": "位置をロック",
   "world.map.unlock": "位置ロック中: クリックで解除",
   "world.map.petMonsters": "モンスター：{list}",
-  "world.map.you": "最後に確認された現在地"
+  "world.map.you": "最後に確認された現在地",
+  "world.cubes.open": "隠しキューブガイドを開く",
+  "world.cubes.north": "北",
+  "world.cubes.bearing": "最寄りのキューブは北から{n}°（上が北）",
+  "world.cubes.count": "このマップのキューブ数（スキップ分を除く）",
+  "world.cubes.updated": "更新: {when}",
+  "world.cubes.updatedHint": "ゲームが位置を伝えるのはテレポートかスキル使用のときだけです",
+  "world.cubes.skip": "スキップして次に近いキューブへ",
+  "world.cubes.restart": "スキップしたキューブを再表示",
+  "world.cubes.noPos": "スキルを使うかテレポートすると始まります",
+  "world.cubes.noCubes": "このマップに隠しキューブはありません",
+  "world.cubes.allSkipped": "このマップのキューブはすべてスキップ済みです"
 }

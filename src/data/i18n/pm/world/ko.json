@@ -199,5 +199,16 @@
   "world.map.lock": "위치 잠금",
   "world.map.unlock": "위치 잠김: 클릭하면 해제",
   "world.map.petMonsters": "몬스터: {list}",
-  "world.map.you": "마지막으로 확인된 내 위치"
+  "world.map.you": "마지막으로 확인된 내 위치",
+  "world.cubes.open": "숨겨진 큐브 가이드 열기",
+  "world.cubes.north": "북",
+  "world.cubes.bearing": "가장 가까운 큐브: 북쪽에서 {n}° (위쪽이 북쪽)",
+  "world.cubes.count": "이 지도의 큐브 수 (건너뛴 큐브 제외)",
+  "world.cubes.updated": "업데이트: {when}",
+  "world.cubes.updatedHint": "게임은 순간이동하거나 스킬을 사용할 때만 위치를 알려 줍니다",
+  "world.cubes.skip": "건너뛰고 다음 가까운 큐브",
+  "world.cubes.restart": "건너뛴 큐브 다시 표시",
+  "world.cubes.noPos": "스킬을 사용하거나 순간이동하면 시작됩니다",
+  "world.cubes.noCubes": "이 지도에는 숨겨진 큐브가 없습니다",
+  "world.cubes.allSkipped": "이 지도의 큐브를 모두 건너뛰었습니다"
 }

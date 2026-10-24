@@ -199,5 +199,16 @@
   "world.map.lock": "Verrouiller la position",
   "world.map.unlock": "Position verrouillée : cliquez pour déverrouiller",
   "world.map.petMonsters": "Monstres : {list}",
-  "world.map.you": "Votre dernière position connue"
+  "world.map.you": "Votre dernière position connue",
+  "world.cubes.open": "Ouvrir le guide des cubes cachés",
+  "world.cubes.north": "N",
+  "world.cubes.bearing": "Cube le plus proche à {n}° du nord, le nord est en haut",
+  "world.cubes.count": "Cubes de cette carte, sauf ceux passés",
+  "world.cubes.updated": "Mise à jour {when}",
+  "world.cubes.updatedHint": "Le jeu ne transmet ta position que lorsque tu te téléportes ou lances une compétence",
+  "world.cubes.skip": "Passer, cube suivant",
+  "world.cubes.restart": "Réafficher les cubes passés",
+  "world.cubes.noPos": "Lance une compétence ou téléporte-toi pour commencer",
+  "world.cubes.noCubes": "Aucun cube caché sur cette carte",
+  "world.cubes.allSkipped": "Tous les cubes de cette carte sont passés"
 }

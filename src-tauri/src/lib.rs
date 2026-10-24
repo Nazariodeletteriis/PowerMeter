@@ -1713,9 +1713,9 @@ pub fn run() {
                         if auto_hide {
                             if let Some(window) = handle.get_webview_window("main") {
                                 let aion_fg = platform::window_detector::is_aion2_foreground();
-                                // The minimap is over the game too: using it must not hide the meter.
+                                // The widget windows are over the game too: using them must not hide the meter.
                                 let is_self_fg = window.is_focused().unwrap_or(false)
-                                    || handle.get_webview_window("map").is_some_and(|m| m.is_focused().unwrap_or(false));
+                                    || ["map", "cubes"].iter().any(|l| handle.get_webview_window(l).is_some_and(|m| m.is_focused().unwrap_or(false)));
                                 let is_visible = window.is_visible().unwrap_or(true);
                                 let is_minimized = window.is_minimized().unwrap_or(false);
                                 if tick_count % 4 == 0 {
@@ -1950,6 +1950,7 @@ pub fn run() {
             powermeter::install_npcap,
             powermeter::open_dashboard_window,
             powermeter::open_map_window,
+            powermeter::open_cube_window,
             powermeter::take_update_prompt,
             powermeter::show_overlay,
             powermeter::hide_overlay,
