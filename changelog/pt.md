@@ -2,6 +2,15 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.35
+
+- Alterado: Guia de cubos: a bússola fica com o norte em cima como o minimapa do jogo; a seta aponta para o cubo e um cone mostra para onde sua última habilidade mirou.
+- Novo: Guia de cubos: a distância conta até o novo valor quando sua posição atualiza.
+- Novo: Minimapa: um cubo oculto que acabou de aparecer continua pulsando, para você vê-lo num relance.
+- Alterado: Guia de cubos: janela e textos maiores, mais fáceis de ler sobre o jogo.
+- Corrigido: Guia de cubos: a janela não abre mais baixa demais, cortando a lista e as linhas de baixo.
+- Corrigido: Widget de DPS no modo compacto: o nome do modo volta a ficar centralizado na linha em vez de encostar na linha de cima.
+
 ## 0.5.34
 
 - Novo: Guia de cubos: lista todos os pontos de cubos ao seu redor (até 100 m) com distância e direção, e setas indicam se o cubo está acima ou abaixo de você, com o desnível.

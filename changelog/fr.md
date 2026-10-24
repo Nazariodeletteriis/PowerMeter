@@ -2,6 +2,15 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.35
+
+- Modifié : Guide des cubes : la boussole reste nord en haut comme la mini-carte du jeu ; la flèche pointe vers le cube et un cône montre où votre dernière compétence a visé.
+- Nouveau : Guide des cubes : la distance défile jusqu'à la nouvelle valeur quand votre position se met à jour.
+- Nouveau : Mini-carte : un cube caché qui vient d'apparaître continue de pulser, pour le repérer d'un coup d'œil.
+- Modifié : Guide des cubes : fenêtre et textes plus grands, plus lisibles au-dessus du jeu.
+- Corrigé : Guide des cubes : la fenêtre ne s'ouvre plus trop basse en coupant la liste et les lignes du bas.
+- Corrigé : Widget DPS en mode compact : le nom du mode est de nouveau centré dans sa ligne au lieu de toucher la ligne du dessus.
+
 ## 0.5.34
 
 - Nouveau : Guide des cubes : il liste tous les emplacements de cubes autour de vous (jusqu'à 100 m) avec distance et direction, et des flèches indiquent si le cube est plus haut ou plus bas que vous, avec le dénivelé.

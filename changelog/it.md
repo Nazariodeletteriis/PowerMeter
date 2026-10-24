@@ -2,6 +2,15 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.35
+
+- Cambiato: Guida cubi: la bussola resta con il nord in alto come la minimappa del gioco; la freccia punta al cubo e un cono mostra dove ha mirato la tua ultima skill.
+- Nuovo: Guida cubi: la distanza scorre fino al nuovo valore quando la tua posizione si aggiorna.
+- Nuovo: Minimappa: un cubo nascosto appena comparso continua a pulsare, così lo vedi a colpo d'occhio.
+- Cambiato: Guida cubi: finestra e testi più grandi, più facili da leggere sopra il gioco.
+- Corretto: Guida cubi: la finestra non si apre più troppo bassa, tagliando la lista e le righe in fondo.
+- Corretto: Widget DPS in modalità compatta: il nome della modalità è di nuovo centrato nella sua riga invece di toccare la linea sopra.
+
 ## 0.5.34
 
 - Nuovo: Guida cubi: elenca tutti i punti dei cubi intorno a te (entro 100 m) con distanza e direzione, e le frecce indicano se il cubo è più in alto o più in basso di te, con il dislivello.

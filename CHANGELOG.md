@@ -4,6 +4,15 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.35
+
+- Changed: Hidden cube guide: the compass stays north up like the game's minimap; the arrow points at the cube and a cone shows where your last skill aimed.
+- New: Hidden cube guide: the distance counts down to the new value when your position updates.
+- New: Minimap: a hidden cube that just appeared keeps pulsing, so you spot it at a glance.
+- Changed: Hidden cube guide: bigger window and text, easier to read over the game.
+- Fixed: Hidden cube guide: the window no longer opens too short, cutting the list and the bottom lines.
+- Fixed: DPS widget in compact mode: the mode's name sits centered in its row again instead of touching the line above.
+
 ## 0.5.34
 
 - New: Hidden cube guide: it lists every cube spot around you (within 100 m) with distance and direction, and arrows show if the cube is above or below you, with the height difference.

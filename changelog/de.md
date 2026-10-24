@@ -2,6 +2,15 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.35
+
+- Geändert: Würfel-Guide: Der Kompass bleibt wie die Minikarte des Spiels mit Norden oben; der Pfeil zeigt auf den Würfel, ein Kegel zeigt, wohin deine letzte Fertigkeit gezielt hat.
+- Neu: Würfel-Guide: Die Entfernung zählt zum neuen Wert, wenn sich deine Position aktualisiert.
+- Neu: Minikarte: Ein gerade erschienener versteckter Würfel pulsiert weiter, damit du ihn sofort siehst.
+- Geändert: Würfel-Guide: größeres Fenster und größere Schrift, über dem Spiel leichter lesbar.
+- Behoben: Würfel-Guide: Das Fenster öffnet sich nicht mehr zu niedrig und schneidet die Liste und die unteren Zeilen nicht mehr ab.
+- Behoben: DPS-Widget im Kompaktmodus: Der Name des Modus steht wieder mittig in seiner Zeile, statt die Linie darüber zu berühren.
+
 ## 0.5.34
 
 - Neu: Würfel-Guide: Er listet alle Würfel-Fundorte um dich herum (bis 100 m) mit Entfernung und Richtung, und Pfeile zeigen mit dem Höhenunterschied, ob der Würfel über oder unter dir liegt.
