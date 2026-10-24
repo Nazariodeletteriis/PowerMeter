@@ -1194,6 +1194,11 @@ impl StreamProcessor {
             *packet.get(offset + 3).unwrap_or(&0),
         ]);
         let kind = packet[offset];
+        // An NPC on this id is a new entity: an owner link still kept for it belonged to the summon that had the id
+        // before (packets_20261024_122715: the last boss, 37850, read as a stranger's pet and its fight as PvP).
+        if matches!(kind, 0x0C | 0x0D) {
+            self.data_storage.drop_summon_link(real_actor_id);
+        }
 
         // The mask width changed from u16 to u32, which moves the subtree byte
         // that gates the inline name. Nothing else in this record is sensitive to
@@ -3028,5 +3033,30 @@ mod self_record_tests {
         sp.consume_stream(&packet(&hex(SIXPACC)));
         sp.consume_stream(&packet(&hex(ALLALON)));
         assert_eq!(storage.get_nickname(17768).as_deref(), Some("SIXPACC"));
+    }
+
+    /// packets_20261024_122715 (Fire Temple): 12:31:41 the NPC spawn of the last boss, Kromede's Desire, on 37850
+    /// (`41 36 daa702 0c`), then Diff's hit on it (12:35:42.034) and Luni's (12:36:27.247).
+    const KROMEDE_SPAWN: &str = "eb014136daa7020c2200d3192300000242f15ac6790c814600c0524500a0664300a40180a5b20780a5b207640000006400000000000000000000000000000000000000409c0000409c000001000000000000000000000000000000000000000603110181969800ffffffffffffffff8075d52abb030000daa702012842f15ac6790c814600c05245110284969800ffffffffffffffff8075d52abb030000daa7020142f15ac6790c814600c05245110391cf1201ffffffffffffffff8075d52abb030000daa7020142f15ac6790c814600c0524501003f0000000301b0040000b0040000f801000600";
+    const DIFF_HIT: &str = "280438daa7022404f02286f71201670263b0686b01000000935de904043d3d3d3d0100a701190238b05f00d1e3ff008000b05f5ef05443da5f010014008ddaa702020100a8c07700000000000e0036b10a7b6da1010000";
+    const LUNI_HIT: &str = "101d37b05f2703253016251625240438daa7021600d901a616e8002502800002e3d8a85a01000000ab68ec1c0100111d37d9012f030132fdbb3e522014008ddaa70202010082914f00000000000e003641bb7b6da1010000";
+
+    /// An id the game hands to a new NPC is not still the summon it was: the meter kept 37850's owner link from an
+    /// earlier zone, so the boss resolved to that stranger, Luni's hits became PvP damage and Diff's became heals
+    /// (history 10/24 12:34: a 156 s "PVP" fight with only Luni and Agniezska, no Kromede record).
+    #[test]
+    fn an_npc_spawn_drops_the_id_s_old_owner() {
+        let (storage, mut sp) = processor();
+        storage.append_nickname_authoritative(9000, "Stranger");
+        storage.register_confirmed_summon_by_id(37850, 9000);
+        storage.append_nickname_authoritative(217, "Luni");
+        storage.append_nickname_authoritative(4464, "Diff");
+        storage.set_local_player_id(Some(217));
+        sp.consume_stream(&hex(KROMEDE_SPAWN));
+        sp.consume_stream(&hex(DIFF_HIT));
+        sp.consume_stream(&hex(LUNI_HIT));
+        assert!(!storage.get_pvp_target_ids().contains(&37850));
+        let boss = &storage.get_combat_snapshot_light()[&37850];
+        assert!(boss.actors.contains_key(&217) && boss.actors.contains_key(&4464), "{:?}", boss.actors.keys());
     }
 }
