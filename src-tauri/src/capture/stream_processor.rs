@@ -279,6 +279,7 @@ impl StreamProcessor {
         self.parse_death_packet(packet);
         self.parse_zone_change_packet(packet);
         self.parse_own_position(packet);
+        self.parse_hidden_cube(packet);
         self.parse_stagger_packet(packet);
         super::equip_parser::parse(packet);
 
@@ -357,6 +358,42 @@ impl StreamProcessor {
             if [x, y, z].iter().all(|v| v.is_finite() && v.abs() < 1e6) {
                 self.data_storage.set_player_position([x, y, z]);
             }
+        }
+    }
+
+    // ===== HIDDEN CUBES (34 36 / 35 36) =====
+
+    /// Hidden cubes showing up near the local player, for the cube guide: an env object spawn
+    /// `34 36 <entity varint> <2 bytes> <env id u32> <x f32> <y f32> ...` whose env id the client names "Hidden Cube",
+    /// gone with `35 36 <entity varint>`. Env ids and layout after SkeeveAN/Aion-DPS-Meter (MIT), Aion2FrameDecoder.cs.
+    fn parse_hidden_cube(&self, packet: &[u8]) {
+        let len = read_varint(packet, 0);
+        if len.length <= 0 {
+            return;
+        }
+        let op = len.length as usize;
+        let Some(b) = packet.get(op + 2..) else { return };
+        let spawn = match packet.get(op..op + 2) {
+            Some([0x34, 0x36]) => true,
+            Some([0x35, 0x36]) => false,
+            _ => return,
+        };
+        let entity = read_varint(b, 0);
+        if entity.length <= 0 {
+            return;
+        }
+        if !spawn {
+            self.data_storage.remove_cube(entity.value);
+            return;
+        }
+        let at = entity.length as usize + 2;
+        let Some(f) = b.get(at..at + 12) else { return };
+        let env = u32::from_le_bytes([f[0], f[1], f[2], f[3]]);
+        let hidden = matches!(env, 1200036..=1200041 | 1200667 | 1200707 | 1201502..=1201505 | 1300081..=1300083 | 1300754 | 1301199 | 1301200 | 1301242..=1301245 | 1100056 | 1100094);
+        let x = f32::from_le_bytes([f[4], f[5], f[6], f[7]]);
+        let y = f32::from_le_bytes([f[8], f[9], f[10], f[11]]);
+        if hidden && [x, y].iter().all(|v| v.is_finite() && v.abs() < 1e6) {
+            self.data_storage.add_cube(entity.value, [x, y]);
         }
     }
 
@@ -2813,6 +2850,25 @@ mod stagger_tests {
         assert_eq!(storage.player_map(), Some(20));
         sp.consume_stream(&hex("060240"));
         assert_eq!(storage.player_map(), Some(20));
+    }
+
+    /// A hidden cube showing up (packets_20261011_183820, 18:42:25): `34 36 <entity f2ea03 = 62834> 04 00
+    /// <env 1301199 u32> <x f32> <y f32>`, at the spot the game's cube table lists (Altgard -91095, -103566); gone 3 s
+    /// later with `35 36 <entity>`. Any other env object (a gather node) is no cube; a zone load forgets them all.
+    #[test]
+    fn hidden_cubes_spawn_and_go() {
+        let (storage, mut sp) = processor();
+        let spawn = "3D3436F2EA030400CFDA130064EBB1C7F446CAC700190F47000000000080CA41010106E01DD82BA101000000000000000000009574E4E4070000";
+        let rounded = |s: &DataStorage| s.cubes().iter().map(|p| p.map(f32::round)).collect::<Vec<_>>();
+        sp.consume_stream(&hex(&spawn.replace("CFDA1300", "60E31600"))); // env 1500000, Od
+        assert!(storage.cubes().is_empty());
+        sp.consume_stream(&hex(spawn));
+        assert_eq!(rounded(&storage), vec![[-91095.0, -103566.0]]);
+        sp.consume_stream(&hex("0C3536F2EA03010100"));
+        assert!(storage.cubes().is_empty());
+        sp.consume_stream(&hex(spawn));
+        sp.consume_stream(&hex("0c0240560400000001"));
+        assert!(storage.cubes().is_empty());
     }
 
     /// Boss id `9E FF 02` = 49054 (three-byte varint).

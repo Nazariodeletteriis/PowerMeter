@@ -29,7 +29,7 @@ import { CAPTURED_PETS_KEY, PETS_KEY, readPets } from "../characters/shared";
 import { gd, useGd, useIcons } from "./db";
 import { MAP_LICENSE, MAP_SOURCE, MAP_TYPES, MAPS, MapView, type MapData, type MapFocus } from "./MapView";
 import { GAME_MAPS, toPixel } from "./cubes";
-import EXTRA_CUBES from "../../../data/map/cubes.json";
+import CUBE_SPOTS from "../../../data/map/cubes.json";
 import { AllNone, MiniChrome, type GatherGroup, type LayerRow } from "./Minimap";
 import { gatherIcon, loadPoints, MAP_FOCUS_KEY, petSpots, takeMapFocus, type PetFocus } from "./points";
 
@@ -47,8 +47,10 @@ const PETS_ALL_KEY = "pm.map.petsAll";
 const PET_COLOR = "#E86FB8";
 /** The map a character of each faction opens on. */
 export const HOME_MAP: Record<Faction, string> = { elyos: "World_L_A", asmodian: "World_D_A" };
+const CUBES_SOURCE = "https://github.com/SkeeveAN/Aion-DPS-Meter";
 const HALF: Record<string, number> = Object.fromEntries(Object.values(GAME_MAPS));
-export const getPlayerPosition = () => invoke<{ pos: [number, number, number] | null; map: number | null }>("get_player_position");
+/** `cubes`: the hidden cubes standing near you now, game units (they show up within sight only). */
+export const getPlayerPosition = () => invoke<{ pos: [number, number, number] | null; map: number | null; cubes: [number, number][] }>("get_player_position");
 
 // Subtype → icon, color (world.layer.<subtype> labels the layer).
 export const LAYERS: Record<string, [Icon, string]> = {
@@ -63,16 +65,17 @@ export const LAYERS: Record<string, [Icon, string]> = {
 // Subtypes the game lets you complete.
 const COMPLETABLE = new Set(["seal", "occupation", "monolithMaterial"]);
 
-type Marker = { type: string; x: number; y: number; region: string; label: string; id: string; note?: string };
+type Marker = { type: string; x: number; y: number; region: string; label: string; id: string };
 
 /**
- * Hidden cubes collected by hand in game (cubes.json: map → [x, y, region, where in English, id]), beyond the
- * source's; placed from their map image (0–1) by scale and offset fitted on the region each one names.
+ * Hidden cubes: every spot the game can spawn one on (cubes.json: map → [x, y, region], map pixels), from
+ * Aion-DPS-Meter (MIT, cubes.LICENSE). They stand in for the source's hiddenCube markers, placed by hand: 91% of
+ * those lie within 20 m of one of these, 41% within 5 m.
  */
-const extraCubes = EXTRA_CUBES as unknown as Record<string, [number, number, number, string, string][]>;
+const cubeSpots: Record<string, number[][]> = CUBE_SPOTS;
 
 export const markersOf = (m: MapData): Marker[] => [
-  ...m.markers.map(([type, x, y, region, label, id]) => ({
+  ...m.markers.filter(([type]) => MAP_TYPES[type as number] !== "hiddenCube").map(([type, x, y, region, label, id]) => ({
     type: MAP_TYPES[type as number],
     x: x as number,
     y: y as number,
@@ -80,7 +83,7 @@ export const markersOf = (m: MapData): Marker[] => [
     label: label as string,
     id: id as string,
   })),
-  ...(extraCubes[m.id] ?? []).map(([x, y, region, note, id]) => ({ type: "hiddenCube", x, y, region: m.regions[region]?.name ?? "", label: "", id, note })),
+  ...(cubeSpots[m.id] ?? []).map(([x, y, region], i) => ({ type: "hiddenCube", x, y, region: m.regions[region]?.name ?? "", label: "", id: `cube${i}` })),
 ];
 
 /** localStorage value kept in state; anything unreadable falls back to `init`. */
@@ -114,9 +117,19 @@ function You({ t, map, home, onMap }: { t: T; map: MapData; home?: string; onMap
   useEffect(() => onMap(where || undefined), [where]); // eslint-disable-line react-hooks/exhaustive-deps
   const pos = at?.pos;
   const half = HALF[map.id];
-  if (!pos || !half || (where ?? home ?? map.id) !== map.id) return null;
+  if (!half || (where ?? home ?? map.id) !== map.id) return null;
+  const w = map.tiles[0] * map.tile;
+  const h = map.tiles[1] * map.tile;
   const name = t("world.map.you");
-  return <div className="wYou" role="img" title={name} aria-label={name} style={{ left: toPixel(pos[0], half, map.tiles[0] * map.tile), top: toPixel(pos[1], half, map.tiles[1] * map.tile) }} />;
+  const cube = t("world.map.liveCube");
+  return (
+    <>
+      {at?.cubes.map(([x, y]) => (
+        <div key={`${x},${y}`} className="wLiveCube" role="img" title={cube} aria-label={cube} style={{ left: toPixel(x, half, w), top: toPixel(y, half, h) }} />
+      ))}
+      {pos && <div className="wYou" role="img" title={name} aria-label={name} style={{ left: toPixel(pos[0], half, w), top: toPixel(pos[1], half, h) }} />}
+    </>
+  );
 }
 
 /**
@@ -361,6 +374,11 @@ export function MapExplorer({
       </a>
       {" · "}
       {t("world.map.creditGame")}
+      {" · "}
+      {t("world.map.creditCubes")}{" "}
+      <a href={CUBES_SOURCE} onClick={link(CUBES_SOURCE)}>
+        Aion-DPS-Meter (MIT)
+      </a>
     </>
   );
 
@@ -436,7 +454,6 @@ export function MapExplorer({
                     <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>
                       {[marker.label && marker.type !== "monolithMaterial" && t(`world.marker.${marker.type}`), marker.region].filter(Boolean).join(" · ")}
                     </div>
-                    {marker.note && <div style={{ fontSize: 11, color: "var(--pm-t2)", marginTop: 4 }}>{marker.note}</div>}
                   </div>
                   <button type="button" className="close" aria-label={t("world.map.close")} onClick={() => setMarker(null)}>
                     <XIcon aria-hidden="true" />
