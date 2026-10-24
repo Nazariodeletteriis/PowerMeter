@@ -734,7 +734,7 @@ impl DataStorage {
         // (damage with player-band skills arrived before the 0x3640 spawn packet),
         // undo the classification and scrub ghost player damage from aggregates.
         if inner.known_player_ids.remove(&mid) {
-            tracing::trace!("NPC unclassification: entity {} reclassified as mob (code {})", mid, code);
+            tracing::debug!("NPC unclassification: entity {} reclassified as mob (code {})", mid, code);
             // Subtract ghost player damage from target totals
             for target_data in inner.target_combat.values_mut() {
                 if let Some(actor_data) = target_data.actors.remove(&mid) {
@@ -1202,6 +1202,21 @@ impl DataStorage {
         inner.heal_received.clear();
         inner.mob_hits.clear();
         inner.current_target = 0;
+    }
+
+    /// Your self record came with a new id: the game reissued every entity id (packets_20261011_183820: 5214
+    /// was a stranger, "Cama", before it was you). Names, players, summons and mobs kept under the old ids label
+    /// whoever gets them next, so all of it goes, the old zone's numbers too; the new zone's records fill it again.
+    pub fn forget_old_zone(&self) {
+        self.flush();
+        self.reset_nicknames();
+        {
+            let mut inner = self.inner.write();
+            inner.mob_storage.clear();
+            inner.boss_entity_ids.clear();
+            inner.low_id_entities.clear();
+        }
+        self.combat_reset_requested.store(true, Ordering::Relaxed);
     }
 
     pub fn reset_nicknames(&self) {

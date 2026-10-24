@@ -960,6 +960,10 @@ impl StreamProcessor {
             return;
         }
         let Some((id, name, _)) = masked_identity_at(packet, at) else { return };
+        // The same id again is a teleport within the zone; a new one, a new zone where every id was reissued.
+        if self.data_storage.local_player_id().is_some_and(|l| l != id as i64) {
+            self.data_storage.forget_old_zone();
+        }
         self.data_storage.note_low_id_entity(id);
         self.data_storage.append_nickname_authoritative(id, &name);
         self.data_storage.set_local_player_id(Some(id as i64));
@@ -2931,5 +2935,42 @@ mod self_record_tests {
         sp.consume_stream(&packet(&body));
         assert_eq!(storage.local_character_name(), None);
         assert_eq!(storage.local_player_id(), None);
+    }
+
+    fn hex(s: &str) -> Vec<u8> {
+        (0..s.len()).step_by(2).map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap()).collect()
+    }
+
+    /// packets_20261011_183820: 18:48:11.259 Allalon's self record (10192 = `d0 4f`), 18:48:11.379 SIXPACC's player
+    /// record (17768 = `e8 8a 01`), then 18:49:03.060, after a relog, Agniezska's self record on 5214 (`de 28`).
+    const ALLALON: &str = "3336d04f5e81c1083707416c6c616c6f6eff081f00";
+    const SIXPACC: &str = "4536e88a010320a00107075349585041434310000000";
+    const AGNIEZSKA: &str = "3336de285f81e928370941676e69657a736b61ff080800";
+
+    /// Ids are reissued with your own: in that log 5214 was a stranger ("Cama") before it was Agniezska. A name
+    /// kept from the old zone labels whatever gets its id next, a former teammate's row in the next instance
+    /// (history 10/24 02:14: "Luni" on 7413, a Sorcerer object, hours after Luni left).
+    #[test]
+    fn a_new_self_id_forgets_the_old_zone_s_ids() {
+        let (storage, mut sp) = processor();
+        sp.consume_stream(&packet(&hex(ALLALON)));
+        sp.consume_stream(&packet(&hex(SIXPACC)));
+        assert_eq!(storage.get_nickname(17768).as_deref(), Some("SIXPACC"));
+        sp.consume_stream(&packet(&hex(AGNIEZSKA)));
+        assert_eq!(storage.get_nickname(17768), None);
+        assert!(!storage.is_known_player(17768));
+        assert_eq!(storage.get_nickname(5214).as_deref(), Some("Agniezska"));
+        assert!(storage.take_combat_reset_requested());
+    }
+
+    /// A teleport within the zone repeats your self record with the same id: everyone keeps their name (packets
+    /// 20261019_155400, 15:55:08: Clutch fought on as 6866 without a new player record).
+    #[test]
+    fn the_same_self_id_keeps_the_zone_s_names() {
+        let (storage, mut sp) = processor();
+        sp.consume_stream(&packet(&hex(ALLALON)));
+        sp.consume_stream(&packet(&hex(SIXPACC)));
+        sp.consume_stream(&packet(&hex(ALLALON)));
+        assert_eq!(storage.get_nickname(17768).as_deref(), Some("SIXPACC"));
     }
 }
