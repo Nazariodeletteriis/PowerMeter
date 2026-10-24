@@ -6,7 +6,7 @@ export const GAME_MAPS: Record<number, [string, number]> = { 1010: ["World_L_A",
 /** Game units (centimetres, Unreal) → map pixels, on an axis `size` pixels long. */
 export const toPixel = (v: number, half: number, size: number) => ((v + half) / (2 * half)) * size;
 
-export type Cube = { id: string; x: number; y: number; region: string; note?: string };
+export type Cube = { id: string; x: number; y: number; region: string };
 
 /**
  * The cube nearest to `pos` (game units) that isn't skipped, on a map `w`×`h` pixels spanning ±`half` units:

@@ -169,10 +169,11 @@ fn get_captured_character() -> crate::capture::equip_parser::CapturedCharacter {
 }
 
 /// Where the local player last was, for the minimap: x, y, z game units (teleports and their own casts) and the
-/// TW map id of the last zone load (null until one is seen).
+/// TW map id of the last zone load (null until one is seen); `cubes`: the hidden cubes standing near you now, [x, y].
 #[tauri::command]
 fn get_player_position(state: tauri::State<'_, AppState>) -> serde_json::Value {
-    serde_json::json!({ "pos": state.data_storage.player_position(), "map": state.data_storage.player_map() })
+    let ds = &state.data_storage;
+    serde_json::json!({ "pos": ds.player_position(), "map": ds.player_map(), "cubes": ds.cubes() })
 }
 
 #[tauri::command]

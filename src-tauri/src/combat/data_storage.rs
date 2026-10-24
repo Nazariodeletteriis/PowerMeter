@@ -282,6 +282,8 @@ struct Inner {
     player_position: Option<[f32; 3]>,
     /// The map they are on (TW map id: 1010 Elyos world, 1110 Asmodian world, 20 Abyss), from each zone load.
     player_map: Option<u32>,
+    /// Hidden cubes standing on that map now (entity -> x, y), for the cube guide; a zone load forgets them.
+    cubes: HashMap<i32, [f32; 2]>,
 }
 
 impl DataStorage {
@@ -317,6 +319,7 @@ impl DataStorage {
                 local_character_name: None,
                 player_position: None,
                 player_map: None,
+                cubes: HashMap::new(),
             }),
             damage_generation: AtomicI64::new(0),
             last_damage_ms: AtomicI64::new(0),
@@ -394,11 +397,25 @@ impl DataStorage {
     }
 
     pub fn set_player_map(&self, map: u32) {
-        self.inner.write().player_map = Some(map);
+        let mut inner = self.inner.write();
+        inner.player_map = Some(map);
+        inner.cubes.clear();
     }
 
     pub fn player_map(&self) -> Option<u32> {
         self.inner.read().player_map
+    }
+
+    pub fn add_cube(&self, entity: i32, pos: [f32; 2]) {
+        self.inner.write().cubes.insert(entity, pos);
+    }
+
+    pub fn remove_cube(&self, entity: i32) {
+        self.inner.write().cubes.remove(&entity);
+    }
+
+    pub fn cubes(&self) -> Vec<[f32; 2]> {
+        self.inner.read().cubes.values().copied().collect()
     }
 
     /// Fallback for the local player when the game's self record was missed. `33 36` comes
