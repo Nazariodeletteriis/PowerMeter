@@ -313,10 +313,11 @@ pub async fn open_map_window(app: tauri::AppHandle) -> Result<(), String> {
 
 /// The Hidden cube guide (CubeGuide.tsx): a small card over the game pointing
 /// at the nearest hidden cube and listing the other spots of the place. Fixed size, tall enough for the full list
-/// (six spots) and a two-line footer in German and Italian, the longest; its place is remembered (`window.cubes.*`).
+/// (six spots) and the footer at its longest (three lines in German with the aim line), in type a quarter up on 0.5.34 to
+/// read over the game; its place is remembered (`window.cubes.*`).
 #[tauri::command]
 pub async fn open_cube_window(app: tauri::AppHandle) -> Result<(), String> {
-    open_widget_window(&app, "cubes", "cubes", "PowerMeter — Hidden cubes", (216.0, 270.0), false)
+    open_widget_window(&app, "cubes", "cubes", "PowerMeter — Hidden cubes", (270.0, 336.0), false)
 }
 
 /// A transparent widget window over the game: dashboard.html drawing only the
