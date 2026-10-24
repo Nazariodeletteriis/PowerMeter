@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ArrowCounterClockwiseIcon, ArrowUpIcon, LockSimpleIcon, LockSimpleOpenIcon, SkipForwardIcon, XIcon } from "@phosphor-icons/react";
+import { ArrowCounterClockwiseIcon, ArrowUpIcon, CaretDownIcon, CaretUpIcon, LockSimpleIcon, LockSimpleOpenIcon, SkipForwardIcon, XIcon } from "@phosphor-icons/react";
 import type { Settings } from "../../App";
 import { activeId, readCharacters } from "../../characters";
 import type { T } from "../../i18n";
 import { usePoll } from "../../usePoll";
-import { GAME_MAPS, nearestCube, toPixel } from "./cubes";
+import { facing, GAME_MAPS, nearCubes, toPixel } from "./cubes";
 import { getPlayerPosition, HOME_MAP, LAYERS, markersOf } from "./MapExplorer";
 import { MAPS } from "./MapView";
 import { startMove, useLock } from "./Minimap";
@@ -13,6 +13,10 @@ import { startMove, useLock } from "./Minimap";
 const CUBES_LABEL = "cubes"; // the window's label, for its lock (powermeter.rs LOCKS)
 /** How long the card flashes when a cube shows up. */
 const ALERT_MS = 3000;
+/** How long the compass stays turned to your last cast: past it you may face anywhere, so north goes back up. */
+const HEADING_MS = 60_000;
+/** A cube this many metres above or below you lights the up or down caret: a step, not the ground's slope. */
+const CLIMB_M = 3;
 
 /** A short two-tone chime: a cube showed up. Web Audio, so no sound file; muted if the webview refuses to play. */
 function chime() {
@@ -36,16 +40,18 @@ function chime() {
 }
 
 /**
- * The Hidden cube guide (window "cubes", MapWindow.tsx): the nearest hidden cube of the map you are on, from where the
- * game last placed you. The arrow is a compass, north up as on the map: where you face is not something we know.
- * A cube the game shows standing near you (it sends them within sight only) beats the spots it may be on: it becomes the
- * target, and a new one flashes the card and chimes.
- * The position moves on teleports and on your own casts only, so the footer says how old it is. Skipped cubes are
- * kept in memory for the map you are on, never saved: cubes come back, they aren't a collection.
- * The whole card moves the window.
+ * The Hidden cube guide (window "cubes", MapWindow.tsx): the hidden cube spots of the map you are on nearest to where
+ * the game last placed you, the nearest one large, the other spots of the place (within 100 m, nearCubes) in rows under
+ * it. The compass is north up, or turned to where your last cast aimed for a minute after it (the game sends no facing
+ * in between). A cube the game shows standing near you (it sends them within sight only) beats the spots it may be on:
+ * it becomes the target, and each new one flashes the card and chimes.
+ * The position moves on teleports and on your own casts, effects and dashes, not while you walk or fly, so the footer
+ * says how old it is. Skipped cubes are kept in memory for the map you are on, never saved: cubes come back, they
+ * aren't a collection. The whole card moves the window.
  */
 export function CubeGuide({ t, lang, settings, run }: { t: T; lang: string; settings: Settings; run: (action: () => Promise<unknown>) => void }) {
-  const at = usePoll(getPlayerPosition, 2000).data;
+  // Positions come several times a second in a fight: poll often, so the distance drops as you close in.
+  const at = usePoll(getPlayerPosition, 500).data;
   const [locked, toggleLock] = useLock(CUBES_LABEL, run);
   // The map the game says you are on; no zone load seen yet (opened in game): the active character's faction world, as the minimap.
   const chars = readCharacters(settings);
@@ -63,32 +69,30 @@ export function CubeGuide({ t, lang, settings, run }: { t: T; lang: string; sett
     setSkipped(new Set());
   }
 
-  // When the position last changed (first seen counts: the game doesn't say how old it is), and a clock for "N s ago".
-  const pos = at?.pos;
-  const posKey = pos?.join() ?? "";
-  const [since, setSince] = useState<number>();
-  useEffect(() => {
-    if (posKey) setSince(Date.now());
-  }, [posKey]);
+  // A clock for "N s ago".
   const [now, setNow] = useState(Date.now);
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
-  const ago = useMemo(() => new Intl.RelativeTimeFormat(lang, { numeric: "auto", style: "narrow" }), [lang]);
+  const ago = useMemo(() => new Intl.RelativeTimeFormat(lang, { numeric: "always", style: "narrow" }), [lang]);
   const metres = useMemo(() => new Intl.NumberFormat(lang, { style: "unit", unit: "meter", maximumFractionDigits: 0 }), [lang]);
-  const s = since === undefined ? 0 : Math.max(0, Math.round((now - since) / 1000));
-  const when = s < 60 ? ago.format(-s, "second") : s < 3600 ? ago.format(-Math.floor(s / 60), "minute") : ago.format(-Math.floor(s / 3600), "hour");
+  const since = (ms: number) => {
+    const s = Math.max(0, Math.round((now - ms) / 1000));
+    return s < 60 ? ago.format(-s, "second") : s < 3600 ? ago.format(-Math.floor(s / 60), "minute") : ago.format(-Math.floor(s / 3600), "hour");
+  };
 
+  const pos = at?.pos;
   const known = pos && map && half;
   const w = map ? map.tiles[0] * map.tile : 0;
   const h = map ? map.tiles[1] * map.tile : 0;
   // The cubes standing now, as map pixels; their zone is the spot each one stands on.
-  const live = (half ? (at?.cubes ?? []) : []).map(([x, y]) => ({
+  const live = (half ? (at?.cubes ?? []) : []).map(([x, y, z]) => ({
     id: `live${Math.round(x)},${Math.round(y)}`,
     x: toPixel(x, half!, w),
     y: toPixel(y, half!, h),
-    region: nearestCube(cubes, [x, y], half!, w, h, new Set())?.cube.region ?? "",
+    z,
+    region: nearCubes(cubes, [x, y], half!, w, h, new Set(), 0, 1)[0]?.cube.region ?? "",
   }));
   const liveKey = live.map((c) => c.id).join(" ");
 
@@ -105,11 +109,23 @@ export function CubeGuide({ t, lang, settings, run }: { t: T; lang: string; sett
   }, [liveKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const alerting = now - alertAt < ALERT_MS;
 
-  const liveGuide = known ? nearestCube(live, [pos[0], pos[1]], half, w, h, skipped) : undefined;
-  const guide = liveGuide ?? (known ? nearestCube(cubes, [pos[0], pos[1]], half, w, h, skipped) : undefined);
+  const liveGuides = known ? nearCubes(live, pos, half, w, h, skipped, Infinity) : [];
+  const [guide, ...others] = liveGuides.length ? liveGuides : known ? nearCubes(cubes, pos, half, w, h, skipped) : [];
   const empty = !known ? t("world.cubes.noPos") : !cubes.length ? t("world.cubes.noCubes") : !guide ? t("world.cubes.allSkipped") : undefined;
   const zone = guide?.cube.region || map?.name;
   const lockLabel = t(locked ? "world.map.unlock" : "world.map.lock");
+
+  // Up is where your last cast aimed while that is recent, else north.
+  const turned = at?.heading != null && at.headingAt != null && now - at.headingAt < HEADING_MS;
+  const up = turned ? facing(at.heading!) : 0;
+  const steep = (m?: number): m is number => m !== undefined && Math.abs(m) >= CLIMB_M;
+  const climbLabel = (m?: number) => (steep(m) ? t(m > 0 ? "world.cubes.above" : "world.cubes.below", { m: metres.format(Math.abs(m)) }) : undefined);
+  const cardinals: [string, number][] = [
+    [t("world.cubes.north"), 0],
+    [t("world.cubes.east"), 90],
+    [t("world.cubes.south"), 180],
+    [t("world.cubes.west"), 270],
+  ];
 
   return (
     <div
@@ -127,7 +143,7 @@ export function CubeGuide({ t, lang, settings, run }: { t: T; lang: string; sett
             </div>
           )}
           <div className="cgSub">
-            {liveGuide ? <span className="cgLive">{t("world.cubes.live")}</span> : t("world.marker.hiddenCube")}
+            {liveGuides.length ? <span className="cgLive">{t("world.cubes.live")}</span> : t("world.marker.hiddenCube")}
             {cubes.length > 0 && (
               <span className="mmRowN" title={t("world.cubes.count")}>
                 {cubes.length - skipped.size}/{cubes.length}
@@ -145,20 +161,52 @@ export function CubeGuide({ t, lang, settings, run }: { t: T; lang: string; sett
 
       {guide ? (
         <>
-          <div className="cgCompass" data-live={liveGuide ? true : undefined} role="img" aria-label={t("world.cubes.bearing", { n: Math.round(guide.deg) })}>
-            <span className="cgN" aria-hidden="true">
-              {t("world.cubes.north")}
-            </span>
-            <ArrowUpIcon aria-hidden="true" weight="bold" style={{ rotate: `${guide.deg}deg` }} />
+          <div className="cgMain">
+            <div
+              className="cgCompass"
+              data-live={liveGuides.length ? true : undefined}
+              role="img"
+              aria-label={t(turned ? "world.cubes.bearingFacing" : "world.cubes.bearing", { n: Math.round(guide.deg) })}
+            >
+              {cardinals.map(([label, deg]) => (
+                <span key={deg} className="cgCard" aria-hidden="true" style={{ "--a": `${deg - up}deg` } as CSSProperties}>
+                  {label}
+                </span>
+              ))}
+              <ArrowUpIcon aria-hidden="true" weight="bold" style={{ rotate: `${guide.deg - up}deg` }} />
+            </div>
+            <div className="cgRead">
+              <div className="cgDist">{metres.format(guide.metres)}</div>
+              <div className="cgClimb" {...(steep(guide.climb) ? { role: "img", "aria-label": climbLabel(guide.climb) } : { "aria-hidden": true })}>
+                <CaretUpIcon aria-hidden="true" weight="bold" data-on={(steep(guide.climb) && guide.climb > 0) || undefined} />
+                <CaretDownIcon aria-hidden="true" weight="bold" data-on={(steep(guide.climb) && guide.climb < 0) || undefined} />
+                {steep(guide.climb) && <span>{metres.format(Math.abs(guide.climb))}</span>}
+              </div>
+            </div>
           </div>
-          <div className="cgDist">{metres.format(guide.metres)}</div>
+          {others.length > 0 && (
+            <ul className="cgList">
+              {others.map((g) => (
+                <li key={g.cube.id} aria-label={[t("world.cubes.bearing", { n: Math.round(g.deg) }), metres.format(g.metres), climbLabel(g.climb)].filter(Boolean).join(", ")}>
+                  <ArrowUpIcon aria-hidden="true" weight="bold" style={{ rotate: `${g.deg - up}deg` }} />
+                  <span aria-hidden="true">{metres.format(g.metres)}</span>
+                  <span aria-hidden="true" className="cgListZ">
+                    {steep(g.climb) && `${g.climb > 0 ? "↑" : "↓"} ${metres.format(Math.abs(g.climb))}`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </>
       ) : (
         <p className="cgEmpty">{empty}</p>
       )}
 
       <div className="cgFoot">
-        <span title={t("world.cubes.updatedHint")}>{since !== undefined && t("world.cubes.updated", { when })}</span>
+        <span className="cgWhen" title={t("world.cubes.updatedHint")}>
+          {at?.at != null && <span>{t("world.cubes.from", { when: since(at.at) })}</span>}
+          {turned && <span>{t("world.cubes.facing", { when: since(at.headingAt!) })}</span>}
+        </span>
         {guide && (
           <button type="button" className="mmBtn" title={t("world.cubes.skip")} aria-label={t("world.cubes.skip")} onClick={() => setSkipped(new Set(skipped).add(guide.cube.id))}>
             <SkipForwardIcon aria-hidden="true" />

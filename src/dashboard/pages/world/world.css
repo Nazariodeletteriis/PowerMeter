@@ -999,8 +999,9 @@
 
 /* ---------- Hidden cube guide (CubeGuide.tsx in the cubes window) ----------
    The minimap's dress (.mm tokens, .mmBtn) on one card: zone and count, a
-   north-up compass in the hidden cube layer's colour (--c), the distance, how
-   old the position is. The card moves the window. */
+   compass in the hidden cube layer's colour (--c) with the distance and the
+   height, the other spots of the place in rows, how old the position is. The
+   card moves the window. */
 .cg {
   box-sizing: border-box;
   height: 100%;
@@ -1042,17 +1043,23 @@
   line-height: 1.4;
   color: var(--mm-muted);
 }
+/* The target: compass on the left, distance and height on the right. */
+.cgMain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
 .cgCompass {
   position: relative;
   flex: none;
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  margin: 2px auto 0;
+  width: 64px;
+  height: 64px;
   box-shadow: inset 0 0 0 1px var(--mm-line);
   color: var(--c);
-  font-size: 30px;
+  font-size: 26px;
 }
 /* The target is a cube standing now, not a spot: the compass fills with the cube colour. */
 .cgCompass[data-live] {
@@ -1081,20 +1088,74 @@
     box-shadow: inset 0 0 0 3px var(--c);
   }
 }
-.cgN {
+/* N E S W on the compass rim at --a (0 = up), kept upright. */
+.cgCard {
   position: absolute;
-  top: 3px;
   font-size: 9px;
   font-weight: 600;
   line-height: 1;
   color: var(--mm-muted);
+  transform: rotate(var(--a)) translateY(-25px) rotate(calc(-1 * var(--a)));
+}
+.cgCard:first-child {
+  color: var(--mm-icon);
+}
+.cgRead {
+  min-width: 0;
 }
 .cgDist {
-  text-align: center;
   font-size: 22px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1.15;
+}
+/* Up and down carets, the one the cube lies towards lit, and how far. */
+.cgClimb {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 2px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--mm-muted);
+}
+.cgClimb svg {
+  font-size: 14px;
+  opacity: 0.35;
+}
+.cgClimb svg[data-on] {
+  opacity: 1;
+  color: var(--c);
+}
+.cgClimb span {
+  margin-left: 2px;
+  color: #f5f2f2;
+}
+/* The other spots of the place, one compact row each. */
+.cgList {
+  display: grid;
+  gap: 1px;
+  margin: 6px 0 0;
+  padding: 4px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--mm-line);
+}
+.cgList li {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  gap: 6px;
+  padding: 0 2px;
+  font-size: 11px;
+  line-height: 17px;
+  font-variant-numeric: tabular-nums;
+}
+.cgList svg {
+  color: var(--c);
+  font-size: 13px;
+}
+.cgListZ {
+  color: var(--mm-muted);
 }
 .cgEmpty {
   flex: 1;
@@ -1114,14 +1175,13 @@
   min-height: 28px;
   margin-top: auto;
 }
-.cgFoot > span {
+.cgWhen {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: grid;
   padding-left: 2px;
   font-size: 10px;
+  line-height: 1.3;
   color: var(--mm-muted);
 }
 
