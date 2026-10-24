@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.34
+
+- Nouveau : Guide des cubes : il liste tous les emplacements de cubes autour de vous (jusqu'à 100 m) avec distance et direction, et des flèches indiquent si le cube est plus haut ou plus bas que vous, avec le dénivelé.
+- Nouveau : Guide des cubes : la boussole s'oriente là où vous avez visé avec votre dernière compétence (le viseur du jeu), la flèche indique donc devant, à gauche ou derrière ; après une minute sans compétence elle revient au nord en haut.
+- Nouveau : Votre position se met à jour bien plus souvent : aussi avec les buffs, les soins et tout effet que vous lancez, les sprints au sol et les corrections du serveur. Les lanceurs de sorts n'ont plus besoin d'attaquer pour mettre à jour le guide et la mini-carte.
+- Corrigé : Un sprint ne déplace plus votre point sur la mini-carte dans le coin de la carte.
+- Corrigé : Widget DPS : un boss ne devient plus un combat "JcJ" avec seulement une partie du groupe (le boss était pris pour l'invocation d'un autre joueur et les dégâts des autres étaient perdus).
+
 ## 0.5.33
 
 - Nouveau : Guide des cubes : une petite fenêtre au-dessus du jeu qui pointe vers le cube caché le plus proche sur votre carte, nord en haut, avec la distance. Elle se met à jour quand vous vous téléportez ou utilisez une compétence (le jeu n'envoie pas votre position quand vous marchez simplement).

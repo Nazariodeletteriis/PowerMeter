@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.34
+
+- Neu: Würfel-Guide: Er listet alle Würfel-Fundorte um dich herum (bis 100 m) mit Entfernung und Richtung, und Pfeile zeigen mit dem Höhenunterschied, ob der Würfel über oder unter dir liegt.
+- Neu: Würfel-Guide: Der Kompass dreht sich dorthin, wohin du mit deiner letzten Fertigkeit gezielt hast (das Fadenkreuz des Spiels), so zeigt der Pfeil vorne, links oder hinten; nach einer Minute ohne Fertigkeit steht wieder Norden oben.
+- Neu: Deine Position wird viel öfter aktualisiert: auch durch Buffs, Heilungen und jeden Effekt, den du wirkst, Sprints am Boden und Server-Korrekturen. Zauberklassen müssen nicht mehr angreifen, um Guide und Minikarte zu aktualisieren.
+- Behoben: Ein Sprint versetzt deinen Punkt auf der Minikarte nicht mehr in die Kartenecke.
+- Behoben: DPS-Widget: Ein Boss wird nicht mehr zu einem "PvP"-Kampf mit nur einem Teil der Gruppe (der Boss wurde für die Beschwörung eines anderen Spielers gehalten und der Schaden der anderen ging verloren).
+
 ## 0.5.33
 
 - Neu: Würfel-Guide: ein kleines Fenster über dem Spiel, das auf den nächsten versteckten Würfel deiner Karte zeigt, Norden oben, mit der Entfernung. Es aktualisiert sich, wenn du dich teleportierst oder eine Fertigkeit einsetzt (beim bloßen Laufen sendet das Spiel deine Position nicht).

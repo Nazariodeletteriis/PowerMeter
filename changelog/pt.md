@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.34
+
+- Novo: Guia de cubos: lista todos os pontos de cubos ao seu redor (até 100 m) com distância e direção, e setas indicam se o cubo está acima ou abaixo de você, com o desnível.
+- Novo: Guia de cubos: a bússola se orienta para onde você mirou com a última habilidade (a mira do jogo), assim a seta indica à frente, à esquerda ou atrás; após um minuto sem habilidades volta ao norte em cima.
+- Novo: Sua posição atualiza com muito mais frequência: também com buffs, curas e qualquer efeito que você lança, avanços no chão e correções do servidor, então classes conjuradoras não precisam mais atacar para atualizar o guia e o minimapa.
+- Corrigido: Um avanço não leva mais o seu ponto no minimapa para o canto do mapa.
+- Corrigido: Widget de DPS: um chefe não vira mais um combate "PvP" com só parte do grupo (o chefe era confundido com a invocação de outro jogador e o dano dos outros se perdia).
+
 ## 0.5.33
 
 - Novo: Guia de cubos: uma pequena janela sobre o jogo que aponta para o cubo oculto mais próximo no seu mapa, com o norte em cima e a distância. Atualiza quando você se teletransporta ou usa uma habilidade (enquanto você só anda, o jogo não envia sua posição).

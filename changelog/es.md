@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.34
+
+- Nuevo: Guía de cubos: muestra todos los puntos de cubos a tu alrededor (hasta 100 m) con distancia y dirección, y unas flechas indican si el cubo está más arriba o más abajo que tú, con el desnivel.
+- Nuevo: Guía de cubos: la brújula se orienta hacia donde apuntaste con tu última habilidad (la mira del juego), así la flecha indica delante, a la izquierda o detrás; tras un minuto sin habilidades vuelve al norte arriba.
+- Nuevo: Tu posición se actualiza mucho más a menudo: también con mejoras, curas y cualquier efecto que lances, los impulsos en tierra y las correcciones del servidor, así las clases de lanzador ya no necesitan atacar para actualizar la guía y el minimapa.
+- Corregido: Un impulso ya no lleva tu punto del minimapa a la esquina del mapa.
+- Corregido: Widget de DPS: un jefe ya no se convierte en un combate "PvP" con solo una parte del grupo (el jefe se tomaba por la invocación de otro jugador y se perdía el daño de los demás).
+
 ## 0.5.33
 
 - Nuevo: Guía de cubos: una pequeña ventana sobre el juego que apunta al cubo oculto más cercano de tu mapa, con el norte arriba y la distancia. Se actualiza cuando te teletransportas o usas una habilidad (mientras solo caminas, el juego no envía tu posición).

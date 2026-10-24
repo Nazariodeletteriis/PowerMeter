@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.34
+
+- Nuovo: Guida cubi: elenca tutti i punti dei cubi intorno a te (entro 100 m) con distanza e direzione, e le frecce indicano se il cubo è più in alto o più in basso di te, con il dislivello.
+- Nuovo: Guida cubi: la bussola si orienta su dove hai mirato con l'ultima skill (il mirino del gioco), così la freccia indica davanti, a sinistra o dietro; dopo un minuto senza skill torna con il nord in alto.
+- Nuovo: La tua posizione si aggiorna molto più spesso: anche con buff, cure e qualsiasi effetto che lanci, gli scatti a terra e le correzioni del server, così chi gioca un caster non deve più attaccare per aggiornare guida e minimappa.
+- Corretto: Uno scatto non sposta più il tuo segnaposto sulla minimappa nell'angolo della mappa.
+- Corretto: Widget DPS: un boss non diventa più un combattimento "PvP" con solo una parte del gruppo (il boss veniva scambiato per l'evocazione di un altro giocatore e il danno degli altri andava perso).
+
 ## 0.5.33
 
 - Nuovo: Guida cubi: una piccola finestra sopra il gioco che punta al cubo nascosto più vicino nella tua mappa, con il nord in alto e la distanza. Si aggiorna quando ti teletrasporti o usi una skill (mentre cammini il gioco non manda la tua posizione).

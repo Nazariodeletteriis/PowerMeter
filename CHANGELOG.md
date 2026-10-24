@@ -4,6 +4,14 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.34
+
+- New: Hidden cube guide: it lists every cube spot around you (within 100 m) with distance and direction, and arrows show if the cube is above or below you, with the height difference.
+- New: Hidden cube guide: the compass turns to where you aimed your last skill (the game's crosshair), so the arrow says ahead, left or behind; after a minute without skills it goes back to north up.
+- New: Your position updates far more often: also with buffs, heals and every effect you cast, dashes on the ground and server corrections, so casters no longer need to attack to update the guide and the minimap.
+- Fixed: A dash no longer moves your dot on the minimap to the corner of the map.
+- Fixed: DPS widget: a boss no longer turns into a "PvP" fight with only part of the group (the boss was taken for another player's summon, and the others' damage was lost).
+
 ## 0.5.33
 
 - New: Hidden cube guide: a small window over the game that points at the nearest hidden cube on your map, north up, with the distance. It updates when you teleport or use a skill (the game doesn't send your position while you just walk).
