@@ -71,7 +71,7 @@ export function CubeGuide({ t, lang, settings, run }: { t: T; lang: string; sett
       <div className="cgHead">
         <div className="cgTitle">
           {zone && (
-            <div className="cgZone" title={zone}>
+            <div className="cgZone" title={guide?.cube.note ?? zone}>
               {zone}
             </div>
           )}

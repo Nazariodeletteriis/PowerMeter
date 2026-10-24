@@ -29,6 +29,7 @@ import { CAPTURED_PETS_KEY, PETS_KEY, readPets } from "../characters/shared";
 import { gd, useGd, useIcons } from "./db";
 import { MAP_LICENSE, MAP_SOURCE, MAP_TYPES, MAPS, MapView, type MapData, type MapFocus } from "./MapView";
 import { GAME_MAPS, toPixel } from "./cubes";
+import EXTRA_CUBES from "../../../data/map/cubes.json";
 import { AllNone, MiniChrome, type GatherGroup, type LayerRow } from "./Minimap";
 import { gatherIcon, loadPoints, MAP_FOCUS_KEY, petSpots, takeMapFocus, type PetFocus } from "./points";
 
@@ -62,17 +63,25 @@ export const LAYERS: Record<string, [Icon, string]> = {
 // Subtypes the game lets you complete.
 const COMPLETABLE = new Set(["seal", "occupation", "monolithMaterial"]);
 
-type Marker = { type: string; x: number; y: number; region: string; label: string; id: string };
+type Marker = { type: string; x: number; y: number; region: string; label: string; id: string; note?: string };
 
-export const markersOf = (m: MapData): Marker[] =>
-  m.markers.map(([type, x, y, region, label, id]) => ({
+/**
+ * Hidden cubes collected by hand in game (cubes.json: map → [x, y, region, where in English, id]), beyond the
+ * source's; placed from their map image (0–1) by scale and offset fitted on the region each one names.
+ */
+const extraCubes = EXTRA_CUBES as unknown as Record<string, [number, number, number, string, string][]>;
+
+export const markersOf = (m: MapData): Marker[] => [
+  ...m.markers.map(([type, x, y, region, label, id]) => ({
     type: MAP_TYPES[type as number],
     x: x as number,
     y: y as number,
     region: m.regions[region as number]?.name ?? "",
     label: label as string,
     id: id as string,
-  }));
+  })),
+  ...(extraCubes[m.id] ?? []).map(([x, y, region, note, id]) => ({ type: "hiddenCube", x, y, region: m.regions[region]?.name ?? "", label: "", id, note })),
+];
 
 /** localStorage value kept in state; anything unreadable falls back to `init`. */
 function useStored<V>(key: string, init: V) {
@@ -427,6 +436,7 @@ export function MapExplorer({
                     <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>
                       {[marker.label && marker.type !== "monolithMaterial" && t(`world.marker.${marker.type}`), marker.region].filter(Boolean).join(" · ")}
                     </div>
+                    {marker.note && <div style={{ fontSize: 11, color: "var(--pm-t2)", marginTop: 4 }}>{marker.note}</div>}
                   </div>
                   <button type="button" className="close" aria-label={t("world.map.close")} onClick={() => setMarker(null)}>
                     <XIcon aria-hidden="true" />
