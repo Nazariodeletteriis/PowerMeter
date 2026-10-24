@@ -318,7 +318,7 @@ impl StreamProcessor {
         self.data_storage.note_zone_change();
     }
 
-    // ===== OWN POSITION (23 36 / 21 36 / 02 38 / 2A 38 / 3C 37 / 02 40) =====
+    // ===== OWN POSITION (23 36 / 21 36 / 02 38 / 2A 38 / 3C 37) =====
 
     /// Where the local player is and where they aim, for the minimap and the cube guide. The client's own movement is
     /// encrypted, so nothing comes while walking or flying (packets_20261019_101654: 20 s of walking, no record); the
@@ -333,7 +333,8 @@ impl StreamProcessor {
     ///
     /// `2b 38` (effect ticks) repeats the position of the `2a 38` it ticks for, stale by up to 18 m: not read.
     /// Layouts after SkeeveAN/Aion-DPS-Meter (MIT), docs/protocol/position-frames.md, checked on packets_20261024_122715
-    /// and packets_20261019_155400. The map comes with each zone load: `02 40 <map id u32> 00 01`.
+    /// and packets_20261019_155400. The map comes with the zone frame: `21 36 <4 bytes> <map id u32>` (no capture holds
+    /// the `02 40 <map id u32> 00 01` read before, so the map and the zone load's cube reset never came).
     fn parse_own_position(&self, packet: &[u8]) {
         let len = read_varint(packet, 0);
         if len.length <= 0 {
@@ -344,14 +345,13 @@ impl StreamProcessor {
         let me = |id: i32| Some(id as i64) == self.data_storage.local_player_id();
         let f = |at: usize| b.get(at..at + 4).map(|x| f32::from_le_bytes([x[0], x[1], x[2], x[3]]));
         let at = match packet.get(op..op + 2) {
-            Some([0x02, 0x40]) => {
-                if let [m0, m1, m2, m3, 0, 1] = b {
-                    self.data_storage.set_player_map(u32::from_le_bytes([*m0, *m1, *m2, *m3]));
-                }
-                return;
-            }
             Some([0x23, 0x36]) if b.first() == Some(&0) => 6,
-            Some([0x21, 0x36]) => 16,
+            Some([0x21, 0x36]) => {
+                if let Some(m) = b.get(4..8) {
+                    self.data_storage.set_player_map(u32::from_le_bytes([m[0], m[1], m[2], m[3]]));
+                }
+                16
+            }
             Some([0x3c, 0x37]) => {
                 let e = read_varint(b, 0);
                 if e.length <= 0 || !me(e.value) || b.get(e.length as usize) != Some(&3) {
@@ -360,11 +360,18 @@ impl StreamProcessor {
                 e.length as usize + 1
             }
             Some([0x2a, 0x38]) => {
+                // Each varint is checked before the next offset is built on it: a cut record reads length -1.
                 let target = read_varint(b, 0);
+                if target.length <= 0 {
+                    return;
+                }
                 let seq = read_varint(b, target.length as usize + 2);
+                if seq.length <= 0 {
+                    return;
+                }
                 let caster = read_varint(b, target.length as usize + 2 + seq.length as usize + 20);
-                let end = target.length as usize + 2 + seq.length as usize + 20 + caster.length as usize;
-                if target.length <= 0 || seq.length <= 0 || caster.length <= 0 || !me(caster.value) || end + 12 > b.len() {
+                let end = target.length as usize + 2 + seq.length as usize + 20 + caster.length.max(0) as usize;
+                if caster.length <= 0 || !me(caster.value) || end + 12 > b.len() {
                     return;
                 }
                 b.len() - 12
@@ -402,7 +409,9 @@ impl StreamProcessor {
 
     /// Hidden cubes showing up near the local player, for the cube guide: an env object spawn
     /// `34 36 <entity varint> <2 bytes> <env id u32> <x f32> <y f32> <z f32> ...` whose env id the client names "Hidden Cube",
-    /// gone with `35 36 <entity varint>`. Env ids and layout after SkeeveAN/Aion-DPS-Meter (MIT), Aion2FrameDecoder.cs.
+    /// gone with `35 36 <entity varint> <kind> <reason>`. Reason 01 is an object out of your sight, not gone: the cube
+    /// stays on the guide (a zone load or a later `35 36` with another reason drops it); see hidden_cubes_spawn_and_go.
+    /// Env ids and layout after SkeeveAN/Aion-DPS-Meter (MIT), Aion2FrameDecoder.cs.
     fn parse_hidden_cube(&self, packet: &[u8]) {
         let len = read_varint(packet, 0);
         if len.length <= 0 {
@@ -420,7 +429,10 @@ impl StreamProcessor {
             return;
         }
         if !spawn {
-            self.data_storage.remove_cube(entity.value);
+            // ponytail: a cube opened by someone else while out of your sight stays on the guide until the next zone load.
+            if b.get(entity.length as usize + 1) != Some(&1) {
+                self.data_storage.remove_cube(entity.value);
+            }
             return;
         }
         let at = entity.length as usize + 2;
@@ -2900,6 +2912,16 @@ mod stagger_tests {
         assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-16666.0, 12996.0, 3376.0]));
     }
 
+    /// An effect record cut after its target (no sequence varint) is skipped; reading on from an invalid varint
+    /// overflowed (a panic in debug builds) on packets_20261019_101654, _155400 and _20261024_122715.
+    #[test]
+    fn a_cut_effect_record_is_no_position() {
+        let (storage, mut sp) = processor();
+        storage.set_local_player_id(Some(391));
+        sp.consume_stream(&hex("072a3805"));
+        assert_eq!(storage.player_position(), None);
+    }
+
     /// Your own position record `3c 37 <entity> 03 <x> <y> <z>` (packets_20261024_122715, 12:34:28.990, self 391); the
     /// same record of a mob (`da a7 02`, 12:34:26.853) is the mob's.
     #[test]
@@ -2936,23 +2958,31 @@ mod stagger_tests {
         assert_eq!(storage.player_heading().map(|(h, _)| h.round()), Some(-29.0));
     }
 
-    /// The map the local player is on, sent with each zone load (`02 40 <map id u32> 00 01`): 1110 = Asmodian world
-    /// (packets_20261019_101654), 20 = Abyss (packets_20261019_155400); a cut record leaves it.
+    /// The map the local player is on, in the zone frame `21 36` of each zone load (map id u32 at body +4): 1110 =
+    /// Asmodian world (packets_20261019_101654, 10:17:28), 20 = Abyss (packets_20261019_155400, 15:54:11). No capture
+    /// holds a `02 40 <map> 00 01` record, read before; a cut frame leaves the map.
     #[test]
     fn own_map_from_zone_load() {
         let (storage, mut sp) = processor();
         assert_eq!(storage.player_map(), None);
-        sp.consume_stream(&hex("0c0240560400000001"));
+        sp.consume_stream(&hex(ZONE_1110));
         assert_eq!(storage.player_map(), Some(1110));
-        sp.consume_stream(&hex("0c0240140000000001"));
+        sp.consume_stream(&hex(ZONE_ABYSS));
         assert_eq!(storage.player_map(), Some(20));
-        sp.consume_stream(&hex("060240"));
+        sp.consume_stream(&hex("0a213601000000"));
         assert_eq!(storage.player_map(), Some(20));
     }
 
+    const ZONE_1110: &str = "34213601000000560400008CFD0F0000000000DB1B38C82C3E664800003B448579DB4200000000000000000000000000000E0036B9AE3C53A1010000";
+    const ZONE_ABYSS: &str = "3421360100000014000000188B680000000000EB48574754BA4FC7008A9F460000074300000000000000000000004F00000E00364AF57054A1010000";
+
     /// A hidden cube showing up (packets_20261011_183820, 18:42:25): `34 36 <entity f2ea03 = 62834> 04 00
-    /// <env 1301199 u32> <x f32> <y f32>`, at the spot the game's cube table lists (Altgard -91095, -103566); gone 3 s
-    /// later with `35 36 <entity>`. Any other env object (a gather node) is no cube; a zone load forgets them all.
+    /// <env 1301199 u32> <x f32> <y f32>`, at the spot the game's cube table lists (Altgard -91095, -103566). Any other
+    /// env object (a gather node) is no cube.
+    /// `35 36 <entity> <kind> <reason> 00` says why an object goes: reason 01 = out of your sight (236 of 452 such
+    /// objects in the captures come back later with the same entity, env and spot; 7 go at once, 285000+ units away,
+    /// right after a teleport), reason 03 = gone for good (none of 154 comes back). The cube went with reason 01 at 18:42:28: it still
+    /// stands, the guide keeps it. A zone load (`21 36`) forgets them all.
     #[test]
     fn hidden_cubes_spawn_and_go() {
         let (storage, mut sp) = processor();
@@ -2963,9 +2993,11 @@ mod stagger_tests {
         sp.consume_stream(&hex(spawn));
         assert_eq!(rounded(&storage), vec![[-91095.0, -103566.0, 36633.0]]); // gather.json: z 36653
         sp.consume_stream(&hex("0C3536F2EA03010100"));
-        assert!(storage.cubes().is_empty());
+        assert_eq!(rounded(&storage), vec![[-91095.0, -103566.0, 36633.0]], "out of sight, still standing");
+        sp.consume_stream(&hex("0C3536F2EA03040300"));
+        assert!(storage.cubes().is_empty(), "gone for good");
         sp.consume_stream(&hex(spawn));
-        sp.consume_stream(&hex("0c0240560400000001"));
+        sp.consume_stream(&hex(ZONE_1110));
         assert!(storage.cubes().is_empty());
     }
 
