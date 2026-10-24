@@ -41,8 +41,10 @@ const GATHER_ON_KEY = "pm.map.gather";
 /** Minimap: the map's opacity, and the markers' ("Path Opacity", the game's name for its roads layer). */
 const MAP_OPACITY_KEY = "pm.map.mapOpacity";
 const PATH_OPACITY_KEY = "pm.map.pathOpacity";
-/** Minimap: the map keeps you in the middle as you move (off once you drag it, back with its button). */
+/** Minimap: the map keeps you in the middle as you move, zoomed in (off and on with its button). */
 const FOLLOW_KEY = "pm.map.follow";
+/** A drag or a zoom by hand on the minimap holds the follow this long; the next position after it brings you back. */
+const FOLLOW_PAUSE_MS = 10_000;
 /** A cube the game shows is new to you (yellow) this long, then it has been standing (red). */
 const CUBE_NEW_MS = 60_000;
 /** Pets picked in the pet panel (creature codes), and "every pet I'm missing" when none is picked. */
@@ -191,6 +193,7 @@ export function MapExplorer({
   const [pathOpacity, setPathOpacity] = useStored<number>(PATH_OPACITY_KEY, 1);
   const [followMe, setFollowMe] = useStored<boolean>(FOLLOW_KEY, true);
   const [me, setMe] = useState<[number, number]>();
+  const [pausedUntil, setPausedUntil] = useState(0);
   const [marker, setMarker] = useState<Marker | null>(null);
   const [borders, setBorders] = useState(true);
   const [found, setFound] = useStored<string[]>(FOUND_KEY, []);
@@ -380,6 +383,7 @@ export function MapExplorer({
 
   const fullLabel = t(full ? "world.map.exitFullscreen" : "world.map.fullscreen");
   const compact = mini && !full;
+  const following = !!compact && followMe && Date.now() >= pausedUntil;
   const pickZone = (id: string) => {
     setMapId(id);
     setMarker(null);
@@ -421,8 +425,8 @@ export function MapExplorer({
         t={t}
         map={map}
         focus={focus}
-        center={mini && !full && followMe ? me : undefined}
-        onPan={() => mini && !full && setFollowMe(false)}
+        center={following ? me : undefined}
+        onPan={compact ? () => setPausedUntil(Date.now() + FOLLOW_PAUSE_MS) : undefined}
         onBareClick={() => setMarker(null)}
         world={
           <>
@@ -528,8 +532,11 @@ export function MapExplorer({
             pets={panel}
             setPets={setPanel}
             onFullscreen={() => setFullscreen(true)}
-            follow={followMe}
-            setFollow={setFollowMe}
+            follow={following}
+            setFollow={(on) => {
+              setPausedUntil(0);
+              setFollowMe(on);
+            }}
             credit={credit}
           />
         ) : (
