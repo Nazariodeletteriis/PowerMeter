@@ -220,5 +220,6 @@
   "world.cubes.restart": "Volver a mostrar los cubos saltados",
   "world.cubes.noPos": "Lanza una habilidad o teletranspórtate para empezar",
   "world.cubes.noCubes": "No hay cubos ocultos en este mapa",
-  "world.cubes.allSkipped": "Has saltado todos los cubos de este mapa"
+  "world.cubes.allSkipped": "Has saltado todos los cubos de este mapa",
+  "world.map.follow": "Seguir mi posición"
 }

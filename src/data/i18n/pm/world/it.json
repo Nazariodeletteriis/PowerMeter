@@ -220,5 +220,6 @@
   "world.cubes.restart": "Mostra di nuovo i cubi saltati",
   "world.cubes.noPos": "Lancia un'abilità o teletrasportati per iniziare",
   "world.cubes.noCubes": "Nessun cubo nascosto in questa mappa",
-  "world.cubes.allSkipped": "Hai saltato tutti i cubi di questa mappa"
+  "world.cubes.allSkipped": "Hai saltato tutti i cubi di questa mappa",
+  "world.map.follow": "Segui la mia posizione"
 }

@@ -220,5 +220,6 @@
   "world.cubes.restart": "重新顯示已跳過的方塊",
   "world.cubes.noPos": "施放技能或傳送即可開始",
   "world.cubes.noCubes": "本地圖沒有隱藏方塊",
-  "world.cubes.allSkipped": "本地圖的方塊已全部跳過"
+  "world.cubes.allSkipped": "本地圖的方塊已全部跳過",
+  "world.map.follow": "跟隨我的位置"
 }

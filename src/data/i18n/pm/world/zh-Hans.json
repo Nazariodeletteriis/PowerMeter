@@ -220,5 +220,6 @@
   "world.cubes.restart": "重新显示已跳过的魔方",
   "world.cubes.noPos": "施放技能或传送即可开始",
   "world.cubes.noCubes": "本地图没有隐藏魔方",
-  "world.cubes.allSkipped": "本地图的魔方已全部跳过"
+  "world.cubes.allSkipped": "本地图的魔方已全部跳过",
+  "world.map.follow": "跟随我的位置"
 }

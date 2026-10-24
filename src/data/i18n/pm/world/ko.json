@@ -220,5 +220,6 @@
   "world.cubes.restart": "건너뛴 큐브 다시 표시",
   "world.cubes.noPos": "스킬을 사용하거나 순간이동하면 시작됩니다",
   "world.cubes.noCubes": "이 지도에는 숨겨진 큐브가 없습니다",
-  "world.cubes.allSkipped": "이 지도의 큐브를 모두 건너뛰었습니다"
+  "world.cubes.allSkipped": "이 지도의 큐브를 모두 건너뛰었습니다",
+  "world.map.follow": "내 위치 따라가기"
 }

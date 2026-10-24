@@ -220,5 +220,6 @@
   "world.cubes.restart": "スキップしたキューブを再表示",
   "world.cubes.noPos": "スキルを使うかテレポートすると始まります",
   "world.cubes.noCubes": "このマップに隠しキューブはありません",
-  "world.cubes.allSkipped": "このマップのキューブはすべてスキップ済みです"
+  "world.cubes.allSkipped": "このマップのキューブはすべてスキップ済みです",
+  "world.map.follow": "自分の位置を追従"
 }

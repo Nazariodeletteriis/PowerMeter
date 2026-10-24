@@ -220,5 +220,6 @@
   "world.cubes.restart": "Show the skipped cubes again",
   "world.cubes.noPos": "Cast a skill or teleport to start",
   "world.cubes.noCubes": "No hidden cubes on this map",
-  "world.cubes.allSkipped": "Every cube on this map is skipped"
+  "world.cubes.allSkipped": "Every cube on this map is skipped",
+  "world.map.follow": "Follow my position"
 }

@@ -41,6 +41,8 @@ const GATHER_ON_KEY = "pm.map.gather";
 /** Minimap: the map's opacity, and the markers' ("Path Opacity", the game's name for its roads layer). */
 const MAP_OPACITY_KEY = "pm.map.mapOpacity";
 const PATH_OPACITY_KEY = "pm.map.pathOpacity";
+/** Minimap: the map keeps you in the middle as you move (off once you drag it, back with its button). */
+const FOLLOW_KEY = "pm.map.follow";
 /** Pets picked in the pet panel (creature codes), and "every pet I'm missing" when none is picked. */
 const PETS_PICKED_KEY = "pm.map.pets";
 const PETS_ALL_KEY = "pm.map.petsAll";
@@ -116,16 +118,21 @@ const label: CSSProperties = { fontSize: 10, letterSpacing: ".1em", textTransfor
  * You, where the game last placed you: it moves on teleports and on your own casts and effects, not while you walk
  * (the rest is encrypted). Polled in here so the rest of the map doesn't re-render with it.
  */
-function You({ t, map, home, onMap }: { t: T; map: MapData; home?: string; onMap: (id?: string) => void }) {
+function You({ t, map, home, onMap, onAt }: { t: T; map: MapData; home?: string; onMap: (id?: string) => void; onAt: (px?: [number, number]) => void }) {
   const at = usePoll(getPlayerPosition, 2000).data;
   // The map the game says you are on ("" = one we can't draw on); none seen yet: your faction's.
   const where = at?.map == null ? undefined : (GAME_MAPS[at.map]?.[0] ?? "");
   useEffect(() => onMap(where || undefined), [where]); // eslint-disable-line react-hooks/exhaustive-deps
   const pos = at?.pos;
   const half = HALF[map.id];
-  if (!half || (where ?? home ?? map.id) !== map.id) return null;
+  const here = !!half && (where ?? home ?? map.id) === map.id;
   const w = map.tiles[0] * map.tile;
   const h = map.tiles[1] * map.tile;
+  // Your dot in map pixels, for the minimap to follow.
+  const px = here && pos ? toPixel(pos[0], half, w) : undefined;
+  const py = here && pos ? toPixel(pos[1], half, h) : undefined;
+  useEffect(() => onAt(px === undefined || py === undefined ? undefined : [px, py]), [px, py]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!here) return null;
   const name = t("world.map.you");
   const cube = t("world.map.liveCube");
   return (
@@ -168,6 +175,8 @@ export function MapExplorer({
   const [gatherOn, setGatherOn] = useStored<string[]>(GATHER_ON_KEY, []);
   const [mapOpacity, setMapOpacity] = useStored<number>(MAP_OPACITY_KEY, 0.85);
   const [pathOpacity, setPathOpacity] = useStored<number>(PATH_OPACITY_KEY, 1);
+  const [followMe, setFollowMe] = useStored<boolean>(FOLLOW_KEY, true);
+  const [me, setMe] = useState<[number, number]>();
   const [marker, setMarker] = useState<Marker | null>(null);
   const [borders, setBorders] = useState(true);
   const [found, setFound] = useStored<string[]>(FOUND_KEY, []);
@@ -398,6 +407,8 @@ export function MapExplorer({
         t={t}
         map={map}
         focus={focus}
+        center={mini && !full && followMe ? me : undefined}
+        onPan={() => mini && !full && setFollowMe(false)}
         onBareClick={() => setMarker(null)}
         world={
           <>
@@ -445,7 +456,7 @@ export function MapExplorer({
                 ))}
               </svg>
             )}
-            <You t={t} map={map} home={home} onMap={setGameMap} />
+            <You t={t} map={map} home={home} onMap={setGameMap} onAt={setMe} />
             {tip && (
               <div className="wTip" style={{ left: tip.x, top: tip.y }} aria-hidden="true">
                 {tip.name}
@@ -503,6 +514,8 @@ export function MapExplorer({
             pets={panel}
             setPets={setPanel}
             onFullscreen={() => setFullscreen(true)}
+            follow={followMe}
+            setFollow={setFollowMe}
             credit={credit}
           />
         ) : (

@@ -220,5 +220,6 @@
   "world.cubes.restart": "Mostrar de novo os cubos pulados",
   "world.cubes.noPos": "Use uma habilidade ou teleporte-se para começar",
   "world.cubes.noCubes": "Nenhum cubo oculto neste mapa",
-  "world.cubes.allSkipped": "Todos os cubos deste mapa foram pulados"
+  "world.cubes.allSkipped": "Todos os cubos deste mapa foram pulados",
+  "world.map.follow": "Seguir minha posição"
 }

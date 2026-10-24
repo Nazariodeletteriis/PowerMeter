@@ -220,5 +220,6 @@
   "world.cubes.restart": "Übersprungene Würfel wieder zeigen",
   "world.cubes.noPos": "Wirke eine Fertigkeit oder teleportiere dich, um zu starten",
   "world.cubes.noCubes": "Keine versteckten Würfel auf dieser Karte",
-  "world.cubes.allSkipped": "Alle Würfel dieser Karte übersprungen"
+  "world.cubes.allSkipped": "Alle Würfel dieser Karte übersprungen",
+  "world.map.follow": "Meiner Position folgen"
 }

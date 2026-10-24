@@ -220,5 +220,6 @@
   "world.cubes.restart": "Снова показать пропущенные кубы",
   "world.cubes.noPos": "Примените умение или телепортируйтесь, чтобы начать",
   "world.cubes.noCubes": "На этой карте нет скрытых кубов",
-  "world.cubes.allSkipped": "Все кубы на этой карте пропущены"
+  "world.cubes.allSkipped": "Все кубы на этой карте пропущены",
+  "world.map.follow": "Следовать за мной"
 }

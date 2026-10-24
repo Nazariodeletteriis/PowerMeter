@@ -2,7 +2,7 @@ import { useEffect, useState, type ButtonHTMLAttributes, type CSSProperties, typ
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow, PhysicalPosition } from "@tauri-apps/api/window";
-import { ArrowsOutCardinalIcon, ArrowsOutIcon, CaretDownIcon, FunnelIcon, LockSimpleIcon, LockSimpleOpenIcon, PawPrintIcon, XIcon } from "@phosphor-icons/react";
+import { ArrowsOutCardinalIcon, ArrowsOutIcon, CaretDownIcon, CrosshairIcon, FunnelIcon, LockSimpleIcon, LockSimpleOpenIcon, PawPrintIcon, XIcon } from "@phosphor-icons/react";
 import "@fontsource/noto-sans/600.css";
 import type { T } from "../../i18n";
 
@@ -107,6 +107,8 @@ export function MiniChrome({
   setPets,
   onFullscreen,
   credit,
+  follow,
+  setFollow,
 }: {
   t: T;
   run: (action: () => Promise<unknown>) => void;
@@ -125,6 +127,8 @@ export function MiniChrome({
   setPets: (on: boolean) => void;
   onFullscreen: () => void;
   credit: ReactNode;
+  follow: boolean;
+  setFollow: (on: boolean) => void;
 }) {
   const [filter, setFilter] = useState(false);
   const [locked, toggleLock] = useLock(MAP_LABEL, run);
@@ -211,6 +215,7 @@ export function MiniChrome({
             setFilter(false);
           },
         })}
+        {railBtn(t("world.map.follow"), <CrosshairIcon aria-hidden="true" />, { "aria-pressed": follow, onClick: () => setFollow(!follow) })}
         {railBtn(t("world.map.fullscreen"), <ArrowsOutIcon aria-hidden="true" />, { onClick: onFullscreen })}
       </div>
 

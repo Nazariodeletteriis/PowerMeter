@@ -220,5 +220,6 @@
   "world.cubes.restart": "Réafficher les cubes passés",
   "world.cubes.noPos": "Lance une compétence ou téléporte-toi pour commencer",
   "world.cubes.noCubes": "Aucun cube caché sur cette carte",
-  "world.cubes.allSkipped": "Tous les cubes de cette carte sont passés"
+  "world.cubes.allSkipped": "Tous les cubes de cette carte sont passés",
+  "world.map.follow": "Suivre ma position"
 }

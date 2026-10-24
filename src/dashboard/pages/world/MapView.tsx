@@ -27,7 +27,8 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
  * A map's tiles with pan (drag) and zoom (wheel, +/- buttons). `world` is drawn
  * in map pixels on top of the tiles (markers, borders, popups: --k and --kp keep
  * them at screen size); `children` float over the viewport (panels, credits).
- * Opens on the whole map, or on `focus`. Only the tiles that have been in view load.
+ * Opens on the whole map, or on `focus`. Only the tiles that have been in view load. `center` (map pixels) keeps
+ * that point in the middle at the zoom you chose, moving with it; a drag calls `onPan`.
  */
 export function MapView({
   t,
@@ -35,6 +36,8 @@ export function MapView({
   onBareClick,
   world,
   focus,
+  center,
+  onPan,
   children,
 }: {
   t: T;
@@ -42,6 +45,8 @@ export function MapView({
   onBareClick?: () => void;
   world?: ReactNode;
   focus?: MapFocus;
+  center?: [number, number];
+  onPan?: () => void;
   children?: ReactNode;
 }) {
   const [view, setView] = useState<View>({ x: 0, y: 0, s: 0.1 });
@@ -68,12 +73,16 @@ export function MapView({
   // New map or new focus: fit the map (or the focus box, with a margin) in the viewport.
   const framing = useRef(focus);
   framing.current = focus;
+  const centering = useRef(center);
+  centering.current = center;
   const frame = () => {
     const r = box.current!.getBoundingClientRect();
     size.current = { w: r.width, h: r.height };
     const s = Math.min(r.width / w, r.height / h);
     fit.current = s;
     const f = framing.current?.box;
+    const c = centering.current;
+    if (!f && c) return setView(place({ s, x: r.width / 2 - c[0] * s, y: r.height / 2 - c[1] * s }));
     if (!f) return setView({ s, x: (r.width - w * s) / 2, y: (r.height - h * s) / 2 });
     const pad = 120 / MAX_SCALE; // keeps lone spots from zooming in all the way
     const fs = clamp(Math.min(r.width / (f[2] - f[0] + 2 * pad), r.height / (f[3] - f[1] + 2 * pad)), s, MAX_SCALE / 2);
@@ -103,6 +112,10 @@ export function MapView({
   useLayoutEffect(() => {
     if (focus && size.current.w) frame();
   }, [focus?.key]); // eslint-disable-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    if (!center || !size.current.w) return;
+    setView((v) => place({ ...v, x: size.current.w / 2 - center[0] * v.s, y: size.current.h / 2 - center[1] * v.s }));
+  }, [center?.[0], center?.[1]]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // React's onWheel is passive: preventDefault needs a native listener.
   useEffect(() => {
@@ -133,6 +146,7 @@ export function MapView({
     const dx = e.clientX - d.x;
     const dy = e.clientY - d.y;
     if (!d.moved && Math.hypot(dx, dy) < 3) return;
+    if (!d.moved) onPan?.();
     drag.current = { x: e.clientX, y: e.clientY, moved: true };
     setView((v) => place({ ...v, x: v.x + dx, y: v.y + dy }));
   };
