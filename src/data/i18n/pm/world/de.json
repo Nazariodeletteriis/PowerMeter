@@ -181,7 +181,6 @@
   "world.map.petRemove": "Entfernen",
   "world.map.creditGame": "Sammeln und Haustiere: AION2",
   "world.map.creditCubes": "versteckte Würfel:",
-  "world.map.liveCube": "Versteckter Würfel, jetzt da",
   "world.layer.pet": "Haustiere",
   "world.layer.od": "Od",
   "world.layer.gem": "Edelsteine",
@@ -221,5 +220,7 @@
   "world.cubes.noPos": "Wirke eine Fertigkeit oder teleportiere dich, um zu starten",
   "world.cubes.noCubes": "Keine versteckten Würfel auf dieser Karte",
   "world.cubes.allSkipped": "Alle Würfel dieser Karte übersprungen",
-  "world.map.follow": "Meiner Position folgen"
+  "world.map.follow": "Meiner Position folgen",
+  "world.map.liveCubeNew": "Versteckter Würfel, gerade erschienen",
+  "world.map.liveCubePresent": "Versteckter Würfel, schon da"
 }

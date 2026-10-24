@@ -181,7 +181,6 @@
   "world.map.petRemove": "Rimuovi",
   "world.map.creditGame": "raccolta e pet: AION2",
   "world.map.creditCubes": "cubi nascosti:",
-  "world.map.liveCube": "Cubo nascosto, presente ora",
   "world.layer.pet": "Pet",
   "world.layer.od": "Od",
   "world.layer.gem": "Gemme",
@@ -221,5 +220,7 @@
   "world.cubes.noPos": "Lancia un'abilità o teletrasportati per iniziare",
   "world.cubes.noCubes": "Nessun cubo nascosto in questa mappa",
   "world.cubes.allSkipped": "Hai saltato tutti i cubi di questa mappa",
-  "world.map.follow": "Segui la mia posizione"
+  "world.map.follow": "Segui la mia posizione",
+  "world.map.liveCubeNew": "Cubo nascosto, appena comparso",
+  "world.map.liveCubePresent": "Cubo nascosto, già presente"
 }

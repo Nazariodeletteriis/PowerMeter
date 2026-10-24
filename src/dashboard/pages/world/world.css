@@ -363,26 +363,32 @@
   border: 2px solid var(--pm-t1);
   box-shadow: 0 0 0 4px rgba(95, 192, 214, 0.35), 0 1px 4px rgba(0, 0, 0, 0.6);
 }
-/* A hidden cube standing now: the cube layer's colour, solid and rimmed, so it stands out from the spots it may be on. */
+/* A hidden cube standing now, a size up on your dot and in its own colours, so neither is taken for the other or for
+   the spots it may be on: bright yellow while it is new to you (the first minute), fire red once it has been standing
+   (shown with the zone load, or untaken for a minute). MapExplorer You, data-state. */
 .wLiveCube {
+  --lc: #ffe14d;
   position: absolute;
   transform: translate(-50%, -50%) scale(var(--k));
-  width: 12px;
-  height: 12px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
-  background: #5fc8d8;
-  box-shadow: 0 0 0 3px rgba(12, 14, 18, 0.85), 0 0 0 5px #5fc8d8;
+  background: var(--lc);
+  box-shadow: 0 0 0 3px rgba(12, 14, 18, 0.85), 0 0 0 5px var(--lc), 0 0 12px 4px var(--lc);
   pointer-events: none;
+}
+.wLiveCube[data-state="present"] {
+  --lc: #ff3b1f;
 }
 /* And it pings for as long as it stands: the minimap is glanced at, not watched, and a cube can wait there for
    minutes, so a ping only at the start would be missed. A ring on the compositor (transform, opacity), nothing else
-   repaints. White on a dark rim, so it reads over the parchment and over the spots in the same cyan. The ring
+   repaints. In the cube's colour on a dark rim, so it reads over the parchment and over the cyan spots. The ring
    flies out ease-out but fades linearly, so it stays visible most of the way. Reduced motion: the ring stays out, still. */
 .wLiveCube::after {
   content: "";
   position: absolute;
   inset: -5px;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--lc);
   border-radius: 50%;
   box-shadow: 0 0 0 1.5px rgba(12, 14, 18, 0.85), inset 0 0 0 1.5px rgba(12, 14, 18, 0.85);
   animation:

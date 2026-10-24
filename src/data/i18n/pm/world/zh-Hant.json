@@ -181,7 +181,6 @@
   "world.map.petRemove": "移除",
   "world.map.creditGame": "採集與寵物：AION2",
   "world.map.creditCubes": "隱藏方塊：",
-  "world.map.liveCube": "隱藏方塊（目前存在）",
   "world.layer.pet": "寵物",
   "world.layer.od": "奧德",
   "world.layer.gem": "寶石",
@@ -221,5 +220,7 @@
   "world.cubes.noPos": "施放技能或傳送即可開始",
   "world.cubes.noCubes": "本地圖沒有隱藏方塊",
   "world.cubes.allSkipped": "本地圖的方塊已全部跳過",
-  "world.map.follow": "跟隨我的位置"
+  "world.map.follow": "跟隨我的位置",
+  "world.map.liveCubeNew": "隱藏方塊，剛剛出現",
+  "world.map.liveCubePresent": "隱藏方塊，已存在"
 }

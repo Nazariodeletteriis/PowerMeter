@@ -181,7 +181,6 @@
   "world.map.petRemove": "Quitar",
   "world.map.creditGame": "recolección y mascotas: AION2",
   "world.map.creditCubes": "cubos ocultos:",
-  "world.map.liveCube": "Cubo oculto, presente ahora",
   "world.layer.pet": "Mascotas",
   "world.layer.od": "Od",
   "world.layer.gem": "Gemas",
@@ -221,5 +220,7 @@
   "world.cubes.noPos": "Lanza una habilidad o teletranspórtate para empezar",
   "world.cubes.noCubes": "No hay cubos ocultos en este mapa",
   "world.cubes.allSkipped": "Has saltado todos los cubos de este mapa",
-  "world.map.follow": "Seguir mi posición"
+  "world.map.follow": "Seguir mi posición",
+  "world.map.liveCubeNew": "Cubo oculto, recién aparecido",
+  "world.map.liveCubePresent": "Cubo oculto, ya presente"
 }

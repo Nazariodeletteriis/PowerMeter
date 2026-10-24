@@ -43,6 +43,8 @@ const MAP_OPACITY_KEY = "pm.map.mapOpacity";
 const PATH_OPACITY_KEY = "pm.map.pathOpacity";
 /** Minimap: the map keeps you in the middle as you move (off once you drag it, back with its button). */
 const FOLLOW_KEY = "pm.map.follow";
+/** A cube the game shows is new to you (yellow) this long, then it has been standing (red). */
+const CUBE_NEW_MS = 60_000;
 /** Pets picked in the pet panel (creature codes), and "every pet I'm missing" when none is picked. */
 const PETS_PICKED_KEY = "pm.map.pets";
 const PETS_ALL_KEY = "pm.map.petsAll";
@@ -56,7 +58,7 @@ const HALF: Record<string, number> = Object.fromEntries(Object.values(GAME_MAPS)
  * `headingAt`; `cubes`: the hidden cubes standing near you now, game units x y z (they show up within sight only).
  */
 export const getPlayerPosition = () =>
-  invoke<{ pos: [number, number, number] | null; at: number | null; heading: number | null; headingAt: number | null; map: number | null; cubes: [number, number, number][] }>(
+  invoke<{ pos: [number, number, number] | null; at: number | null; heading: number | null; headingAt: number | null; map: number | null; cubes: [number, number, number, number, boolean][] }>(
     "get_player_position",
   );
 
@@ -134,12 +136,24 @@ function You({ t, map, home, onMap, onAt }: { t: T; map: MapData; home?: string;
   useEffect(() => onAt(px === undefined || py === undefined ? undefined : [px, py]), [px, py]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!here) return null;
   const name = t("world.map.you");
-  const cube = t("world.map.liveCube");
   return (
     <>
-      {at?.cubes.map(([x, y]) => (
-        <div key={`${x},${y}`} className="wLiveCube" role="img" title={cube} aria-label={cube} style={{ left: toPixel(x, half, w), top: toPixel(y, half, h) }} />
-      ))}
+      {at?.cubes.map(([x, y, , seen, onLoad]) => {
+        // New to you for its first minute; standing before you came (zone load) or untaken since: present.
+        const present = onLoad || Date.now() - seen > CUBE_NEW_MS;
+        const label = t(present ? "world.map.liveCubePresent" : "world.map.liveCubeNew");
+        return (
+          <div
+            key={`${x},${y}`}
+            className="wLiveCube"
+            data-state={present ? "present" : "new"}
+            role="img"
+            title={label}
+            aria-label={label}
+            style={{ left: toPixel(x, half, w), top: toPixel(y, half, h) }}
+          />
+        );
+      })}
       {pos && <div className="wYou" role="img" title={name} aria-label={name} style={{ left: toPixel(pos[0], half, w), top: toPixel(pos[1], half, h) }} />}
     </>
   );

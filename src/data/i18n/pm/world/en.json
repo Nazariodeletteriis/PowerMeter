@@ -181,7 +181,6 @@
   "world.map.petRemove": "Remove",
   "world.map.creditGame": "gathering and pets: AION2",
   "world.map.creditCubes": "hidden cubes:",
-  "world.map.liveCube": "Hidden cube, standing now",
   "world.layer.pet": "Pets",
   "world.layer.od": "Od",
   "world.layer.gem": "Gemstones",
@@ -221,5 +220,7 @@
   "world.cubes.noPos": "Cast a skill or teleport to start",
   "world.cubes.noCubes": "No hidden cubes on this map",
   "world.cubes.allSkipped": "Every cube on this map is skipped",
-  "world.map.follow": "Follow my position"
+  "world.map.follow": "Follow my position",
+  "world.map.liveCubeNew": "Hidden cube, just appeared",
+  "world.map.liveCubePresent": "Hidden cube, standing"
 }

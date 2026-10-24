@@ -181,7 +181,6 @@
   "world.map.petRemove": "外す",
   "world.map.creditGame": "採集とペット：AION2",
   "world.map.creditCubes": "隠しキューブ:",
-  "world.map.liveCube": "隠しキューブ（出現中）",
   "world.layer.pet": "ペット",
   "world.layer.od": "オド",
   "world.layer.gem": "宝石",
@@ -221,5 +220,7 @@
   "world.cubes.noPos": "スキルを使うかテレポートすると始まります",
   "world.cubes.noCubes": "このマップに隠しキューブはありません",
   "world.cubes.allSkipped": "このマップのキューブはすべてスキップ済みです",
-  "world.map.follow": "自分の位置を追従"
+  "world.map.follow": "自分の位置を追従",
+  "world.map.liveCubeNew": "ヒドゥンキューブ（出現したばかり）",
+  "world.map.liveCubePresent": "ヒドゥンキューブ（出現中）"
 }

@@ -181,7 +181,6 @@
   "world.map.petRemove": "Убрать",
   "world.map.creditGame": "сбор и питомцы: AION2",
   "world.map.creditCubes": "скрытые кубы:",
-  "world.map.liveCube": "Скрытый куб, сейчас на месте",
   "world.layer.pet": "Питомцы",
   "world.layer.od": "Од",
   "world.layer.gem": "Самоцветы",
@@ -221,5 +220,7 @@
   "world.cubes.noPos": "Примените умение или телепортируйтесь, чтобы начать",
   "world.cubes.noCubes": "На этой карте нет скрытых кубов",
   "world.cubes.allSkipped": "Все кубы на этой карте пропущены",
-  "world.map.follow": "Следовать за мной"
+  "world.map.follow": "Следовать за мной",
+  "world.map.liveCubeNew": "Скрытый куб, только что появился",
+  "world.map.liveCubePresent": "Скрытый куб, уже стоит"
 }

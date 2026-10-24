@@ -181,7 +181,6 @@
   "world.map.petRemove": "Retirer",
   "world.map.creditGame": "récolte et familiers : AION2",
   "world.map.creditCubes": "cubes cachés :",
-  "world.map.liveCube": "Cube caché, présent maintenant",
   "world.layer.pet": "Familiers",
   "world.layer.od": "Od",
   "world.layer.gem": "Gemmes",
@@ -221,5 +220,7 @@
   "world.cubes.noPos": "Lance une compétence ou téléporte-toi pour commencer",
   "world.cubes.noCubes": "Aucun cube caché sur cette carte",
   "world.cubes.allSkipped": "Tous les cubes de cette carte sont passés",
-  "world.map.follow": "Suivre ma position"
+  "world.map.follow": "Suivre ma position",
+  "world.map.liveCubeNew": "Cube caché, vient d'apparaître",
+  "world.map.liveCubePresent": "Cube caché, déjà présent"
 }

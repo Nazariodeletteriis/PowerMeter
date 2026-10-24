@@ -181,7 +181,6 @@
   "world.map.petRemove": "제거",
   "world.map.creditGame": "채집 및 펫: AION2",
   "world.map.creditCubes": "숨겨진 큐브:",
-  "world.map.liveCube": "숨겨진 큐브 (지금 있음)",
   "world.layer.pet": "펫",
   "world.layer.od": "오드",
   "world.layer.gem": "보석",
@@ -221,5 +220,7 @@
   "world.cubes.noPos": "스킬을 사용하거나 순간이동하면 시작됩니다",
   "world.cubes.noCubes": "이 지도에는 숨겨진 큐브가 없습니다",
   "world.cubes.allSkipped": "이 지도의 큐브를 모두 건너뛰었습니다",
-  "world.map.follow": "내 위치 따라가기"
+  "world.map.follow": "내 위치 따라가기",
+  "world.map.liveCubeNew": "히든 큐브, 방금 나타남",
+  "world.map.liveCubePresent": "히든 큐브, 이미 있음"
 }

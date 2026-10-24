@@ -23,6 +23,9 @@ const ZONE_RESET_DEBOUNCE_MS: i64 = 4_000;
 /// the refill record normally closes it, this is the fallback if it is missed.
 const STAGGER_BREAK_MS: i64 = 5_000;
 
+/// Cubes the game shows this soon after a zone load were standing before you came (DataStorage::add_cube).
+const CUBE_ON_LOAD_MS: i64 = 10_000;
+
 fn now_ms() -> i64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -285,8 +288,11 @@ struct Inner {
     player_heading: Option<(f32, i64)>,
     /// The map they are on (TW map id: 1010 Elyos world, 1110 Asmodian world, 20 Abyss), from each zone load.
     player_map: Option<u32>,
-    /// Hidden cubes standing on that map now (entity -> x, y, z), for the cube guide; a zone load forgets them.
-    cubes: HashMap<i32, [f32; 3]>,
+    /// Hidden cubes standing on that map now (entity -> x, y, z, when it was first seen, whether it came with the zone
+    /// load), for the cube guide; a zone load forgets them.
+    cubes: HashMap<i32, ([f32; 3], i64, bool)>,
+    /// When the last zone load came (ms): the cubes the game shows in the seconds after it were standing before you came.
+    map_loaded_ms: i64,
 }
 
 impl DataStorage {
@@ -324,6 +330,7 @@ impl DataStorage {
                 player_heading: None,
                 player_map: None,
                 cubes: HashMap::new(),
+                map_loaded_ms: 0,
             }),
             damage_generation: AtomicI64::new(0),
             last_damage_ms: AtomicI64::new(0),
@@ -417,6 +424,7 @@ impl DataStorage {
         let mut inner = self.inner.write();
         inner.player_map = Some(map);
         inner.cubes.clear();
+        inner.map_loaded_ms = now_ms();
     }
 
     pub fn player_map(&self) -> Option<u32> {
@@ -424,7 +432,12 @@ impl DataStorage {
     }
 
     pub fn add_cube(&self, entity: i32, pos: [f32; 3]) {
-        self.inner.write().cubes.insert(entity, pos);
+        let now = now_ms();
+        let mut inner = self.inner.write();
+        // The packet is the same for a cube that just spawned and for one already standing that came into range: those
+        // shown with the zone load (a teleport, a loading screen) were there before you.
+        let on_load = now - inner.map_loaded_ms < CUBE_ON_LOAD_MS;
+        inner.cubes.entry(entity).or_insert((pos, now, on_load)).0 = pos;
     }
 
     pub fn remove_cube(&self, entity: i32) {
@@ -432,6 +445,11 @@ impl DataStorage {
     }
 
     pub fn cubes(&self) -> Vec<[f32; 3]> {
+        self.inner.read().cubes.values().map(|c| c.0).collect()
+    }
+
+    /// The cubes with when each was first seen (ms) and whether it came with the zone load.
+    pub fn cubes_seen(&self) -> Vec<([f32; 3], i64, bool)> {
         self.inner.read().cubes.values().copied().collect()
     }
 

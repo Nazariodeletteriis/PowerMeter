@@ -171,7 +171,7 @@ fn get_captured_character() -> crate::capture::equip_parser::CapturedCharacter {
 /// Where the local player last was, for the minimap: x, y, z game units (zone loads and their own casts, effects
 /// and position records) and `at`, when it was seen (ms since the epoch); `heading`, where their last cast aimed
 /// (degrees, atan2 of south and east) at `headingAt`; the TW map id of the last zone load (null until one is seen);
-/// `cubes`: the hidden cubes standing near you now, [x, y, z].
+/// `cubes`: the hidden cubes standing near you now, [x, y, z, first seen (ms), came with the zone load].
 #[tauri::command]
 fn get_player_position(state: tauri::State<'_, AppState>) -> serde_json::Value {
     let ds = &state.data_storage;
@@ -182,7 +182,7 @@ fn get_player_position(state: tauri::State<'_, AppState>) -> serde_json::Value {
         "heading": heading.map(|(h, _)| h),
         "headingAt": heading.map(|(_, at)| at),
         "map": ds.player_map(),
-        "cubes": ds.cubes(),
+        "cubes": ds.cubes_seen().iter().map(|(p, seen, on_load)| serde_json::json!([p[0], p[1], p[2], seen, on_load])).collect::<Vec<_>>(),
     })
 }
 
