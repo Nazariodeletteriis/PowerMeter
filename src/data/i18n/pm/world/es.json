@@ -199,5 +199,16 @@
   "world.map.lock": "Bloquear posición",
   "world.map.unlock": "Posición bloqueada: haz clic para desbloquear",
   "world.map.petMonsters": "Monstruos: {list}",
-  "world.map.you": "Tu última posición conocida"
+  "world.map.you": "Tu última posición conocida",
+  "world.cubes.open": "Abrir la guía de cubos ocultos",
+  "world.cubes.north": "N",
+  "world.cubes.bearing": "Cubo más cercano a {n}° del norte, el norte está arriba",
+  "world.cubes.count": "Cubos de este mapa, sin contar los saltados",
+  "world.cubes.updated": "Actualizada {when}",
+  "world.cubes.updatedHint": "El juego solo comparte tu posición cuando te teletransportas o lanzas una habilidad",
+  "world.cubes.skip": "Saltar, siguiente más cercano",
+  "world.cubes.restart": "Volver a mostrar los cubos saltados",
+  "world.cubes.noPos": "Lanza una habilidad o teletranspórtate para empezar",
+  "world.cubes.noCubes": "No hay cubos ocultos en este mapa",
+  "world.cubes.allSkipped": "Has saltado todos los cubos de este mapa"
 }

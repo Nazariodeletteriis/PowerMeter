@@ -986,6 +986,107 @@
   }
 }
 
+/* ---------- Hidden cube guide (CubeGuide.tsx in the cubes window) ----------
+   The minimap's dress (.mm tokens, .mmBtn) on one card: zone and count, a
+   north-up compass in the hidden cube layer's colour (--c), the distance, how
+   old the position is. The card moves the window. */
+.cg {
+  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  background: var(--mm-surf);
+  box-shadow: inset 0 0 0 1px var(--mm-line);
+  color: #f5f2f2;
+  user-select: none;
+  cursor: move;
+}
+.cg[data-locked] {
+  cursor: default;
+}
+.cgHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.cgTitle {
+  flex: 1;
+  min-width: 0;
+  padding: 1px 2px 0;
+}
+.cgZone {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.cgSub {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--mm-muted);
+}
+.cgCompass {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 2px auto 0;
+  box-shadow: inset 0 0 0 1px var(--mm-line);
+  color: var(--c);
+  font-size: 30px;
+}
+.cgN {
+  position: absolute;
+  top: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--mm-muted);
+}
+.cgDist {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+.cgEmpty {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0 6px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--mm-icon);
+}
+.cgFoot {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  margin-top: auto;
+}
+.cgFoot > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 2px;
+  font-size: 10px;
+  color: var(--mm-muted);
+}
+
 /* ---------- database (prototype pg.database / pg.item) ---------- */
 .wDbHint {
   color: var(--pm-t2);
@@ -1581,13 +1682,14 @@ td[data-mark="lo"] {
   }
 }
 
-/* Square corners, like the game's own icons: 1px at most on the minimap. Map pins and level badges stay round. */
+/* Square corners, like the game's own icons: 1px at most on the minimap and the cube guide. Map pins, level badges and
+   the guide's compass stay round. */
 .mm,
 .mm *,
 .mm *::before,
 .mm *::after {
   border-radius: 1px !important;
 }
-.mm :is(.wMarker, .wYou, .petLvl) {
+.mm :is(.wMarker, .wYou, .petLvl, .cgCompass) {
   border-radius: 50% !important;
 }

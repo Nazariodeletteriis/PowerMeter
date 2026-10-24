@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "minimap",
-  "description": "The Map widget moves itself (Minimap.tsx startMove: outerPosition + setPosition), so Windows can't snap it to a screen edge.",
-  "windows": ["map"],
+  "description": "The widget windows (Map, Hidden cube guide) move themselves (Minimap.tsx startMove: outerPosition + setPosition), so Windows can't snap them to a screen edge.",
+  "windows": ["map", "cubes"],
   "permissions": ["core:window:allow-outer-position", "core:window:allow-set-position"]
 }

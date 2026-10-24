@@ -199,5 +199,16 @@
   "world.map.lock": "Lock position",
   "world.map.unlock": "Position locked: click to unlock",
   "world.map.petMonsters": "Monsters: {list}",
-  "world.map.you": "Your last known position"
+  "world.map.you": "Your last known position",
+  "world.cubes.open": "Open the hidden cube guide",
+  "world.cubes.north": "N",
+  "world.cubes.bearing": "Nearest cube {n}° from north, north is up",
+  "world.cubes.count": "Cubes on this map, skipped ones left out",
+  "world.cubes.updated": "Updated {when}",
+  "world.cubes.updatedHint": "The game shares your position only when you teleport or cast a skill",
+  "world.cubes.skip": "Skip, next nearest",
+  "world.cubes.restart": "Show the skipped cubes again",
+  "world.cubes.noPos": "Cast a skill or teleport to start",
+  "world.cubes.noCubes": "No hidden cubes on this map",
+  "world.cubes.allSkipped": "Every cube on this map is skipped"
 }

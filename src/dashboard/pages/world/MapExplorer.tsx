@@ -28,6 +28,7 @@ import { PetGrid } from "../characters/pets";
 import { CAPTURED_PETS_KEY, PETS_KEY, readPets } from "../characters/shared";
 import { gd, useGd, useIcons } from "./db";
 import { MAP_LICENSE, MAP_SOURCE, MAP_TYPES, MAPS, MapView, type MapData, type MapFocus } from "./MapView";
+import { GAME_MAPS, toPixel } from "./cubes";
 import { AllNone, MiniChrome, type GatherGroup, type LayerRow } from "./Minimap";
 import { gatherIcon, loadPoints, MAP_FOCUS_KEY, petSpots, takeMapFocus, type PetFocus } from "./points";
 
@@ -45,13 +46,11 @@ const PETS_ALL_KEY = "pm.map.petsAll";
 const PET_COLOR = "#E86FB8";
 /** The map a character of each faction opens on. */
 const HOME_MAP: Record<Faction, string> = { elyos: "World_L_A", asmodian: "World_D_A" };
-/** TW map id of a zone load → our map and the game units its tiles span either way of 0 (tw_105 map_points: u = x / 2·half + 0.5). */
-const GAME_MAPS: Record<number, [string, number]> = { 1010: ["World_L_A", 408000], 1110: ["World_D_A", 408000], 20: ["Abyss_Reshanta_A", 204000] };
 const HALF: Record<string, number> = Object.fromEntries(Object.values(GAME_MAPS));
-const getPlayerPosition = () => invoke<{ pos: [number, number, number] | null; map: number | null }>("get_player_position");
+export const getPlayerPosition = () => invoke<{ pos: [number, number, number] | null; map: number | null }>("get_player_position");
 
 // Subtype → icon, color (world.layer.<subtype> labels the layer).
-const LAYERS: Record<string, [Icon, string]> = {
+export const LAYERS: Record<string, [Icon, string]> = {
   teleport: [LightningIcon, "#E8B03A"],
   village: [HouseIcon, "#EAE3D2"],
   seal: [SealIcon, "#6CC46A"],
@@ -65,7 +64,7 @@ const COMPLETABLE = new Set(["seal", "occupation", "monolithMaterial"]);
 
 type Marker = { type: string; x: number; y: number; region: string; label: string; id: string };
 
-const markersOf = (m: MapData): Marker[] =>
+export const markersOf = (m: MapData): Marker[] =>
   m.markers.map(([type, x, y, region, label, id]) => ({
     type: MAP_TYPES[type as number],
     x: x as number,
@@ -107,9 +106,8 @@ function You({ t, map, home, onMap }: { t: T; map: MapData; home?: string; onMap
   const pos = at?.pos;
   const half = HALF[map.id];
   if (!pos || !half || (where ?? home ?? map.id) !== map.id) return null;
-  const px = (v: number, size: number) => ((v + half) / (2 * half)) * size;
   const name = t("world.map.you");
-  return <div className="wYou" role="img" title={name} aria-label={name} style={{ left: px(pos[0], map.tiles[0] * map.tile), top: px(pos[1], map.tiles[1] * map.tile) }} />;
+  return <div className="wYou" role="img" title={name} aria-label={name} style={{ left: toPixel(pos[0], half, map.tiles[0] * map.tile), top: toPixel(pos[1], half, map.tiles[1] * map.tile) }} />;
 }
 
 /**
