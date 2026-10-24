@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.36
+
+- Novo: Minimapa: segue você, mantendo sua posição no centro enquanto se move. Arraste o mapa para olhar outro lugar; o botão da mira o traz de volta para você.
+- Novo: Guia de cubos: redimensione a janela à mão; o cartão diminui ou aumenta junto.
+- Alterado: Guia de cubos: a contagem da distância é mais rápida e acompanha sua posição em combate.
+
 ## 0.5.35
 
 - Alterado: Guia de cubos: a bússola fica com o norte em cima como o minimapa do jogo; a seta aponta para o cubo e um cone mostra para onde sua última habilidade mirou.

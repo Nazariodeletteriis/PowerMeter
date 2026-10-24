@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.36
+
+- Nuevo: Minimapa: te sigue y mantiene tu posición en el centro mientras te mueves. Arrastra el mapa para mirar a otro sitio; el botón de la mira lo devuelve a ti.
+- Nuevo: Guía de cubos: puedes cambiar el tamaño de la ventana a mano; la tarjeta se reduce o se amplía con ella.
+- Cambiado: Guía de cubos: el conteo de la distancia es más rápido y sigue tu posición en combate.
+
 ## 0.5.35
 
 - Cambiado: Guía de cubos: la brújula se queda con el norte arriba como el minimapa del juego; la flecha apunta al cubo y un cono muestra hacia dónde apuntó tu última habilidad.

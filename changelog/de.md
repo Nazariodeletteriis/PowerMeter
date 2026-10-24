@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.36
+
+- Neu: Minikarte: Sie folgt dir und hält deine Position beim Bewegen in der Mitte. Ziehe die Karte, um woanders hinzusehen; die Fadenkreuz-Schaltfläche holt sie zu dir zurück.
+- Neu: Würfel-Guide: Du kannst das Fenster von Hand skalieren; die Karte wird mit ihm kleiner oder größer.
+- Geändert: Würfel-Guide: Die Entfernung zählt schneller und hält im Kampf mit deiner Position Schritt.
+
 ## 0.5.35
 
 - Geändert: Würfel-Guide: Der Kompass bleibt wie die Minikarte des Spiels mit Norden oben; der Pfeil zeigt auf den Würfel, ein Kegel zeigt, wohin deine letzte Fertigkeit gezielt hat.

@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.36
+
+- Nuovo: Minimappa: ti segue, tenendo la tua posizione al centro mentre ti muovi. Trascina la mappa per guardare altrove; il pulsante con il mirino la riporta su di te.
+- Nuovo: Guida cubi: puoi ridimensionare la finestra a mano; la card si rimpicciolisce o si ingrandisce con lei.
+- Cambiato: Guida cubi: il conteggio della distanza è più rapido, così in combattimento sta al passo con la tua posizione.
+
 ## 0.5.35
 
 - Cambiato: Guida cubi: la bussola resta con il nord in alto come la minimappa del gioco; la freccia punta al cubo e un cono mostra dove ha mirato la tua ultima skill.

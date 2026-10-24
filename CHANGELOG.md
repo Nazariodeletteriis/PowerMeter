@@ -4,6 +4,12 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.36
+
+- New: Minimap: it follows you, keeping your position in the middle as you move. Drag the map to look elsewhere; the crosshair button brings it back to you.
+- New: Hidden cube guide: resize the window by hand; the card shrinks or grows with it.
+- Changed: Hidden cube guide: the distance count is quicker, so it keeps up with your position in a fight.
+
 ## 0.5.35
 
 - Changed: Hidden cube guide: the compass stays north up like the game's minimap; the arrow points at the cube and a cone shows where your last skill aimed.

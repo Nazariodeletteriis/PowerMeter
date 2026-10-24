@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.36
+
+- Nouveau : Mini-carte : elle vous suit et garde votre position au centre quand vous bougez. Faites glisser la carte pour regarder ailleurs ; le bouton viseur la ramène sur vous.
+- Nouveau : Guide des cubes : redimensionnez la fenêtre à la main ; la carte rétrécit ou grandit avec elle.
+- Modifié : Guide des cubes : le décompte de la distance est plus rapide et suit votre position en combat.
+
 ## 0.5.35
 
 - Modifié : Guide des cubes : la boussole reste nord en haut comme la mini-carte du jeu ; la flèche pointe vers le cube et un cône montre où votre dernière compétence a visé.
