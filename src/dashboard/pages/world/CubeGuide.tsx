@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ArrowCounterClockwiseIcon, ArrowUpIcon, LockSimpleIcon, LockSimpleOpenIcon, SkipForwardIcon, XIcon } from "@phosphor-icons/react";
+import type { Settings } from "../../App";
+import { activeId, readCharacters } from "../../characters";
 import type { T } from "../../i18n";
 import { usePoll } from "../../usePoll";
 import { GAME_MAPS, nearestCube } from "./cubes";
-import { getPlayerPosition, LAYERS, markersOf } from "./MapExplorer";
+import { getPlayerPosition, HOME_MAP, LAYERS, markersOf } from "./MapExplorer";
 import { MAPS } from "./MapView";
 import { startMove, useLock } from "./Minimap";
 
@@ -17,10 +19,14 @@ const CUBES_LABEL = "cubes"; // the window's label, for its lock (powermeter.rs 
  * kept in memory for the map you are on, never saved: cubes come back, they aren't a collection.
  * The whole card moves the window.
  */
-export function CubeGuide({ t, lang, run }: { t: T; lang: string; run: (action: () => Promise<unknown>) => void }) {
+export function CubeGuide({ t, lang, settings, run }: { t: T; lang: string; settings: Settings; run: (action: () => Promise<unknown>) => void }) {
   const at = usePoll(getPlayerPosition, 2000).data;
   const [locked, toggleLock] = useLock(CUBES_LABEL, run);
-  const [mapId, half] = (at?.map != null && GAME_MAPS[at.map]) || [];
+  // The map the game says you are on; no zone load seen yet (opened in game): the active character's faction world, as the minimap.
+  const chars = readCharacters(settings);
+  const faction = chars.find((c) => c.id === activeId(settings, chars))?.faction;
+  const home = faction && Object.values(GAME_MAPS).find(([id]) => id === HOME_MAP[faction]);
+  const [mapId, half] = (at?.map != null ? GAME_MAPS[at.map] : home) || [];
   const map = MAPS.find((m) => m.id === mapId);
   const cubes = useMemo(() => (map ? markersOf(map).filter((m) => m.type === "hiddenCube") : []), [map]);
 

@@ -45,7 +45,7 @@ export function MapWindow({ view }: { view: "map" | "cubes" }) {
 
   return (
     <div className="mmWin">
-      {settings && (view === "cubes" ? <CubeGuide t={t} lang={lang} run={run} /> : <MapExplorer t={t} settings={settings} run={run} takeFocus fill mini />)}
+      {settings && (view === "cubes" ? <CubeGuide t={t} lang={lang} settings={settings} run={run} /> : <MapExplorer t={t} settings={settings} run={run} takeFocus fill mini />)}
       {error && (
         <p className="error mmError" role="alert">
           {errorText(t, error)}

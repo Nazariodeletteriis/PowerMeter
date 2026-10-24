@@ -45,7 +45,7 @@ const PETS_PICKED_KEY = "pm.map.pets";
 const PETS_ALL_KEY = "pm.map.petsAll";
 const PET_COLOR = "#E86FB8";
 /** The map a character of each faction opens on. */
-const HOME_MAP: Record<Faction, string> = { elyos: "World_L_A", asmodian: "World_D_A" };
+export const HOME_MAP: Record<Faction, string> = { elyos: "World_L_A", asmodian: "World_D_A" };
 const HALF: Record<string, number> = Object.fromEntries(Object.values(GAME_MAPS));
 export const getPlayerPosition = () => invoke<{ pos: [number, number, number] | null; map: number | null }>("get_player_position");
 
