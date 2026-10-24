@@ -1298,7 +1298,10 @@
   .meter.slim .pmSignalMs { font-size: 10px; }
   /* Compact: the mode's name ("PowerMeter", "Boss Targets") scaled down like the boss name, not at full bar size. */
   .meter.slim :is(.pmModeTitle, .pmAvgTitle) { font-size: calc(var(--boss-name-size, 15px) * 0.85); }
-  .meter.slim .header .pmSpacer { display: none; }
+  /* The spacer stays as a zero-width strut holding the bar at 34px: the bar's rule is
+     painted at 33px, and without the timer (hidden while idle, core.js setVisible)
+     the bar shrank to the signal's 22px, so the rule cut 11px into the title row. */
+  .meter.slim .header .pmSpacer { flex: none; width: 0; height: 34px; margin-left: -2px; } /* -2px: the bar's column gap */
   .meter.slim .battleTime { height: 34px; font-size: 13px; }
   .meter.slim .battleTime .tick { font-size: 13px; }
   .meter.slim .battleTime .analysisStatus { font-size: 12px; }
