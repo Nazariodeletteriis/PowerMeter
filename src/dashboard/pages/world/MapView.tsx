@@ -13,6 +13,8 @@ export const MAP_LICENSE = "https://creativecommons.org/licenses/by-nc/4.0/";
 const MAX_SCALE = 1.5; // 1 = native tile pixels
 const ZOOM_STEP = 1.6;
 const MARKER_MIN = 0.45; // marker size when zoomed out, as a share of full size
+// Zoom a followed `center` comes to at least: 1 map pixel ≈ 1 m in game, so a 360 px minimap shows ~360 m around you.
+const NEAR_SCALE = 1;
 
 export const MAPS = DATA.maps;
 export const MAP_TYPES = DATA.types;
@@ -28,7 +30,8 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
  * in map pixels on top of the tiles (markers, borders, popups: --k and --kp keep
  * them at screen size); `children` float over the viewport (panels, credits).
  * Opens on the whole map, or on `focus`. Only the tiles that have been in view load. `center` (map pixels) keeps
- * that point in the middle at the zoom you chose, moving with it; a drag calls `onPan`.
+ * that point in the middle, moving with it, zoomed in to NEAR_SCALE unless you are closer; a drag, the wheel or the
+ * zoom-out button calls `onPan`.
  */
 export function MapView({
   t,
@@ -82,7 +85,7 @@ export function MapView({
     fit.current = s;
     const f = framing.current?.box;
     const c = centering.current;
-    if (!f && c) return setView(place({ s, x: r.width / 2 - c[0] * s, y: r.height / 2 - c[1] * s }));
+    if (!f && c) return setView(place({ s: NEAR_SCALE, x: r.width / 2 - c[0] * NEAR_SCALE, y: r.height / 2 - c[1] * NEAR_SCALE }));
     if (!f) return setView({ s, x: (r.width - w * s) / 2, y: (r.height - h * s) / 2 });
     const pad = 120 / MAX_SCALE; // keeps lone spots from zooming in all the way
     const fs = clamp(Math.min(r.width / (f[2] - f[0] + 2 * pad), r.height / (f[3] - f[1] + 2 * pad)), s, MAX_SCALE / 2);
@@ -114,16 +117,22 @@ export function MapView({
   }, [focus?.key]); // eslint-disable-line react-hooks/exhaustive-deps
   useLayoutEffect(() => {
     if (!center || !size.current.w) return;
-    setView((v) => place({ ...v, x: size.current.w / 2 - center[0] * v.s, y: size.current.h / 2 - center[1] * v.s }));
+    setView((v) => {
+      const s = Math.max(v.s, NEAR_SCALE);
+      return place({ s, x: size.current.w / 2 - center[0] * s, y: size.current.h / 2 - center[1] * s });
+    });
   }, [center?.[0], center?.[1]]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // React's onWheel is passive: preventDefault needs a native listener.
+  const panned = useRef(onPan);
+  panned.current = onPan;
   useEffect(() => {
     const el = box.current!;
     const wheel = (e: WheelEvent) => {
       if ((e.target as HTMLElement).closest(".wPanel, .wPetPanel, .mmPop")) return; // the panels scroll
       e.preventDefault();
       const r = el.getBoundingClientRect();
+      panned.current?.();
       setView((v) => zoomAt(v, Math.exp(-e.deltaY * 0.002), e.clientX - r.left, e.clientY - r.top));
     };
     el.addEventListener("wheel", wheel, { passive: false });
@@ -131,6 +140,7 @@ export function MapView({
   }, [map.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const zoomButton = (f: number) => {
+    if (f < 1) onPan?.(); // zooming in keeps you in the middle
     const r = box.current!.getBoundingClientRect();
     setView((v) => zoomAt(v, f, r.width / 2, r.height / 2));
   };
