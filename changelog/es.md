@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.37
+
+- Nuevo: Minimapa: un cubo oculto recién aparecido se ve amarillo brillante y uno ya presente rojo fuego, ambos algo más grandes que tu punto.
+- Cambiado: Minimapa: al seguirte, se acerca sola a tu posición; arrastrarla o alejar el zoom la pausa 10 segundos y luego vuelve a ti.
+- Corregido: Cubos ocultos: un cubo ya no desaparece de la guía y del minimapa en cuanto sale de tu vista; se queda hasta que desaparece de verdad.
+- Corregido: Minimapa: el cambio al mapa en el que estás vuelve a funcionar tras cambiar de zona (Elyos, Asmodian, Abismo).
+- Corregido: Un registro de efecto cortado ya no altera tu posición.
+
 ## 0.5.36
 
 - Nuevo: Minimapa: te sigue y mantiene tu posición en el centro mientras te mueves. Arrastra el mapa para mirar a otro sitio; el botón de la mira lo devuelve a ti.

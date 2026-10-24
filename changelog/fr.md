@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.37
+
+- Nouveau : Mini-carte : un cube caché qui vient d'apparaître est jaune vif, un cube déjà présent rouge feu, tous deux un peu plus grands que votre point.
+- Modifié : Mini-carte : quand elle vous suit, elle zoome d'elle-même près de votre position ; la faire glisser ou dézoomer la met en pause 10 secondes, puis elle vous reprend.
+- Corrigé : Cubes cachés : un cube ne disparaît plus du guide et de la mini-carte dès qu'il sort de votre vue ; il reste jusqu'à ce qu'il disparaisse vraiment.
+- Corrigé : Mini-carte : le passage à la carte où vous êtes refonctionne après un changement de zone (Élyséens, Asmodiens, Abysses).
+- Corrigé : Un enregistrement d'effet tronqué ne fausse plus votre position.
+
 ## 0.5.36
 
 - Nouveau : Mini-carte : elle vous suit et garde votre position au centre quand vous bougez. Faites glisser la carte pour regarder ailleurs ; le bouton viseur la ramène sur vous.

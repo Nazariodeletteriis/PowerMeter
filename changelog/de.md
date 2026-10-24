@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.37
+
+- Neu: Minikarte: Ein gerade erschienener versteckter Würfel leuchtet gelb, einer, der schon da war, feuerrot, beide etwas größer als dein Punkt.
+- Geändert: Minikarte: Wenn sie dir folgt, zoomt sie von selbst nah an deine Position; Ziehen oder Herauszoomen pausiert das 10 Sekunden, dann nimmt sie dich wieder auf.
+- Behoben: Versteckte Würfel: Ein Würfel verschwindet nicht mehr aus Guide und Minikarte, sobald er außer Sicht ist; er bleibt, bis er wirklich weg ist.
+- Behoben: Minikarte: Der Wechsel zur Karte, auf der du bist, funktioniert nach einem Zonenwechsel wieder (Elyos, Asmodier, Abyss).
+- Behoben: Ein abgeschnittener Effekt-Eintrag verfälscht deine Position nicht mehr.
+
 ## 0.5.36
 
 - Neu: Minikarte: Sie folgt dir und hält deine Position beim Bewegen in der Mitte. Ziehe die Karte, um woanders hinzusehen; die Fadenkreuz-Schaltfläche holt sie zu dir zurück.

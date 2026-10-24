@@ -4,6 +4,14 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.37
+
+- New: Minimap: a hidden cube that just appeared shows bright yellow, one already standing fire red, both a size up on your dot.
+- Changed: Minimap: following you, it zooms in close on your position by itself; dragging or zooming out pauses it for 10 seconds, then it picks you up again.
+- Fixed: Hidden cubes: a cube no longer drops off the guide and the minimap as soon as it is out of sight; it stays until it is really gone.
+- Fixed: Minimap: switching to the map you are on works again after a zone change (Elyos, Asmodian, Abyss).
+- Fixed: A cut-off effect record no longer upsets your position.
+
 ## 0.5.36
 
 - New: Minimap: it follows you, keeping your position in the middle as you move. Drag the map to look elsewhere; the crosshair button brings it back to you.

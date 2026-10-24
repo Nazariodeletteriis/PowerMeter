@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.37
+
+- Nuovo: Minimappa: un cubo nascosto appena comparso è giallo acceso, uno già presente rosso fuoco, entrambi un po' più grandi del tuo segnaposto.
+- Cambiato: Minimappa: quando ti segue, zooma da sola vicino alla tua posizione; trascinarla o allontanare lo zoom la mette in pausa per 10 secondi, poi ti riprende.
+- Corretto: Cubi nascosti: un cubo non sparisce più da guida e minimappa appena esce dalla tua vista; resta finché non sparisce davvero.
+- Corretto: Minimappa: il passaggio alla mappa in cui ti trovi funziona di nuovo dopo un cambio zona (Elyos, Asmodian, Abisso).
+- Corretto: Un record di effetto troncato non altera più la tua posizione.
+
 ## 0.5.36
 
 - Nuovo: Minimappa: ti segue, tenendo la tua posizione al centro mentre ti muovi. Trascina la mappa per guardare altrove; il pulsante con il mirino la riporta su di te.
