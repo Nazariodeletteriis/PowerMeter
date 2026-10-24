@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.33
+
+- Nouveau : Guide des cubes : une petite fenêtre au-dessus du jeu qui pointe vers le cube caché le plus proche sur votre carte, nord en haut, avec la distance. Elle se met à jour quand vous vous téléportez ou utilisez une compétence (le jeu n'envoie pas votre position quand vous marchez simplement).
+- Nouveau : Cubes cachés : quand un cube apparaît près de vous, le guide le signale par un son et un clignotement et la carte le marque ; une fois ouvert, il disparaît.
+- Nouveau : Carte : 2 811 emplacements de cubes cachés, tous les endroits où un cube peut apparaître, remplacent les 226 d'avant (données : Aion-DPS-Meter, MIT).
+- Corrigé : Widget DPS : après l'entrée dans une nouvelle instance, les joueurs de votre groupe précédent n'apparaissent plus avec leurs anciens noms ou dégâts.
+- Corrigé : Widget DPS en mode compact : les encadrés de fin de combat, de journal envoyé et d'erreur tiennent de nouveau dans la fenêtre, sans boutons hors du bord ni sur le texte.
+
 ## 0.5.32
 
 - Nouveau : Mini-carte : elle passe d'elle-même à la carte où vous êtes (Élyséens, Asmodiens ou Abysses), et votre dernière position connue s'affiche aussi dans les Abysses.

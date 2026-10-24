@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.33
+
+- Nuovo: Guida cubi: una piccola finestra sopra il gioco che punta al cubo nascosto più vicino nella tua mappa, con il nord in alto e la distanza. Si aggiorna quando ti teletrasporti o usi una skill (mentre cammini il gioco non manda la tua posizione).
+- Nuovo: Cubi nascosti: quando un cubo compare vicino a te, la guida lo indica con un suono e un lampeggio e la mappa lo segna; una volta aperto sparisce.
+- Nuovo: Mappa: 2.811 punti dei cubi nascosti, tutti i posti dove un cubo può comparire, al posto dei 226 di prima (dati: Aion-DPS-Meter, MIT).
+- Corretto: Widget DPS: dopo l'ingresso in una nuova istanza, i giocatori del gruppo precedente non compaiono più con i loro vecchi nomi o danni.
+- Corretto: Widget DPS in modalità compatta: i riquadri di fine combattimento, log caricato ed errore stanno di nuovo nella finestra, senza pulsanti fuori dal bordo o sopra il testo.
+
 ## 0.5.32
 
 - Nuovo: Minimappa: passa da sola alla mappa in cui ti trovi (Elyos, Asmodian o Abisso), e la tua ultima posizione nota compare anche nell'Abisso.

@@ -4,6 +4,14 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.33
+
+- New: Hidden cube guide: a small window over the game that points at the nearest hidden cube on your map, north up, with the distance. It updates when you teleport or use a skill (the game doesn't send your position while you just walk).
+- New: Hidden cubes: when a cube appears near you, the guide points at it with a sound and a flash and the map marks it; once it is opened it goes away.
+- New: Map: 2,811 hidden cube spots, every place a cube can appear, replace the 226 shown before (data: Aion-DPS-Meter, MIT).
+- Fixed: DPS widget: after you enter a new instance, players from your previous group no longer show up with their old names or damage.
+- Fixed: DPS widget in compact mode: the end-of-fight, uploaded-log and error boxes fit in the window again, with no buttons off the edge or over the text.
+
 ## 0.5.32
 
 - New: Minimap: it switches by itself to the map you are on (Elyos, Asmodian or the Abyss), and your last known position shows in the Abyss too.

@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.33
+
+- Neu: Würfel-Guide: ein kleines Fenster über dem Spiel, das auf den nächsten versteckten Würfel deiner Karte zeigt, Norden oben, mit der Entfernung. Es aktualisiert sich, wenn du dich teleportierst oder eine Fertigkeit einsetzt (beim bloßen Laufen sendet das Spiel deine Position nicht).
+- Neu: Versteckte Würfel: Erscheint ein Würfel in deiner Nähe, zeigt der Guide mit Ton und Aufblinken darauf und die Karte markiert ihn; sobald er geöffnet ist, verschwindet er.
+- Neu: Karte: 2.811 Fundorte versteckter Würfel, jeder Ort, an dem ein Würfel erscheinen kann, ersetzen die bisherigen 226 (Daten: Aion-DPS-Meter, MIT).
+- Behoben: DPS-Widget: Nach dem Betreten einer neuen Instanz erscheinen Spieler deiner vorherigen Gruppe nicht mehr mit ihren alten Namen oder ihrem Schaden.
+- Behoben: DPS-Widget im Kompaktmodus: Die Felder für Kampfende, hochgeladenes Log und Fehler passen wieder ins Fenster, ohne Schaltflächen über dem Rand oder über dem Text.
+
 ## 0.5.32
 
 - Neu: Minikarte: Sie wechselt von selbst zur Karte, auf der du bist (Elyos, Asmodier oder Abyss), und deine letzte bekannte Position wird auch im Abyss angezeigt.
