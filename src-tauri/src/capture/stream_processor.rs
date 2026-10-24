@@ -318,12 +318,22 @@ impl StreamProcessor {
         self.data_storage.note_zone_change();
     }
 
-    // ===== OWN POSITION (23 36 / 02 38 / 02 40) =====
+    // ===== OWN POSITION (23 36 / 21 36 / 02 38 / 2A 38 / 3C 37 / 02 40) =====
 
-    /// Where the local player is, for the minimap. The client's own movement is encrypted, so the position comes
-    /// only with a teleport (`23 36 00`, x y z f32 at body +6) and with each of their casts
-    /// (`02 38 <caster varint> 00 <skill u32> <seq u8> 02 <target varint> <f32> <x> <y> <z>`), not while walking
-    /// (packets_20261019_101654: 20 s of walking, no record). The map comes with each zone load: `02 40 <map id u32> 00 01`.
+    /// Where the local player is and where they aim, for the minimap and the cube guide. The client's own movement is
+    /// encrypted, so nothing comes while walking or flying (packets_20261019_101654: 20 s of walking, no record); the
+    /// position comes with
+    /// - a teleport `23 36 00` (x y z f32 at body +6) and the zone frame `21 36` (x y z at body +16) of each zone load;
+    /// - each of their casts `02 38 <caster varint> 00 <skill u32> <seq u8> <02|00> <target varint> <heading f32>
+    ///   [<x> <y> <z> with 02]`: the heading is where they aim (degrees, atan2 of south and east); the dash carries
+    ///   its direction ×100 in place of x y z (packets_20261024_122715), never a position;
+    /// - each effect they cause `2a 38 <target varint> <2 bytes> <seq varint> <20 bytes> <caster varint> ... <x> <y> <z>`
+    ///   (the caster's position, last): buffs, heals and the dash of a caster with no target;
+    /// - their position record `3c 37 <entity varint> 03 <x> <y> <z>`.
+    ///
+    /// `2b 38` (effect ticks) repeats the position of the `2a 38` it ticks for, stale by up to 18 m: not read.
+    /// Layouts after SkeeveAN/Aion-DPS-Meter (MIT), docs/protocol/position-frames.md, checked on packets_20261024_122715
+    /// and packets_20261019_155400. The map comes with each zone load: `02 40 <map id u32> 00 01`.
     fn parse_own_position(&self, packet: &[u8]) {
         let len = read_varint(packet, 0);
         if len.length <= 0 {
@@ -331,6 +341,8 @@ impl StreamProcessor {
         }
         let op = len.length as usize;
         let Some(b) = packet.get(op + 2..) else { return };
+        let me = |id: i32| Some(id as i64) == self.data_storage.local_player_id();
+        let f = |at: usize| b.get(at..at + 4).map(|x| f32::from_le_bytes([x[0], x[1], x[2], x[3]]));
         let at = match packet.get(op..op + 2) {
             Some([0x02, 0x40]) => {
                 if let [m0, m1, m2, m3, 0, 1] = b {
@@ -339,23 +351,48 @@ impl StreamProcessor {
                 return;
             }
             Some([0x23, 0x36]) if b.first() == Some(&0) => 6,
+            Some([0x21, 0x36]) => 16,
+            Some([0x3c, 0x37]) => {
+                let e = read_varint(b, 0);
+                if e.length <= 0 || !me(e.value) || b.get(e.length as usize) != Some(&3) {
+                    return;
+                }
+                e.length as usize + 1
+            }
+            Some([0x2a, 0x38]) => {
+                let target = read_varint(b, 0);
+                let seq = read_varint(b, target.length as usize + 2);
+                let caster = read_varint(b, target.length as usize + 2 + seq.length as usize + 20);
+                let end = target.length as usize + 2 + seq.length as usize + 20 + caster.length as usize;
+                if target.length <= 0 || seq.length <= 0 || caster.length <= 0 || !me(caster.value) || end + 12 > b.len() {
+                    return;
+                }
+                b.len() - 12
+            }
             Some([0x02, 0x38]) => {
                 let caster = read_varint(b, 0);
                 let o = caster.length as usize;
-                if caster.length <= 0 || Some(caster.value as i64) != self.data_storage.local_player_id() || b.get(o) != Some(&0) || b.get(o + 6) != Some(&2) {
+                if caster.length <= 0 || !me(caster.value) || b.get(o) != Some(&0) {
                     return;
                 }
                 let target = read_varint(b, o + 7);
                 if target.length <= 0 {
                     return;
                 }
-                o + 7 + target.length as usize + 4
+                let at = o + 7 + target.length as usize;
+                if let Some(h) = f(at).filter(|h| h.abs() <= 360.0) {
+                    self.data_storage.set_player_heading(h);
+                }
+                if b.get(o + 6) != Some(&2) {
+                    return;
+                }
+                at + 4
             }
             _ => return,
         };
-        let f = |i: usize| b.get(at + 4 * i..at + 4 * i + 4).map(|x| f32::from_le_bytes([x[0], x[1], x[2], x[3]]));
-        if let (Some(x), Some(y), Some(z)) = (f(0), f(1), f(2)) {
-            if [x, y, z].iter().all(|v| v.is_finite() && v.abs() < 1e6) {
+        if let (Some(x), Some(y), Some(z)) = (f(at), f(at + 4), f(at + 8)) {
+            // The dash's direction ×100 is no place: nobody stands within 1 m of the map's origin.
+            if [x, y, z].iter().all(|v| v.is_finite() && v.abs() < 1e6) && x.hypot(y).hypot(z) > 101.0 {
                 self.data_storage.set_player_position([x, y, z]);
             }
         }
@@ -364,7 +401,7 @@ impl StreamProcessor {
     // ===== HIDDEN CUBES (34 36 / 35 36) =====
 
     /// Hidden cubes showing up near the local player, for the cube guide: an env object spawn
-    /// `34 36 <entity varint> <2 bytes> <env id u32> <x f32> <y f32> ...` whose env id the client names "Hidden Cube",
+    /// `34 36 <entity varint> <2 bytes> <env id u32> <x f32> <y f32> <z f32> ...` whose env id the client names "Hidden Cube",
     /// gone with `35 36 <entity varint>`. Env ids and layout after SkeeveAN/Aion-DPS-Meter (MIT), Aion2FrameDecoder.cs.
     fn parse_hidden_cube(&self, packet: &[u8]) {
         let len = read_varint(packet, 0);
@@ -387,13 +424,12 @@ impl StreamProcessor {
             return;
         }
         let at = entity.length as usize + 2;
-        let Some(f) = b.get(at..at + 12) else { return };
+        let Some(f) = b.get(at..at + 16) else { return };
         let env = u32::from_le_bytes([f[0], f[1], f[2], f[3]]);
         let hidden = matches!(env, 1200036..=1200041 | 1200667 | 1200707 | 1201502..=1201505 | 1300081..=1300083 | 1300754 | 1301199 | 1301200 | 1301242..=1301245 | 1100056 | 1100094);
-        let x = f32::from_le_bytes([f[4], f[5], f[6], f[7]]);
-        let y = f32::from_le_bytes([f[8], f[9], f[10], f[11]]);
-        if hidden && [x, y].iter().all(|v| v.is_finite() && v.abs() < 1e6) {
-            self.data_storage.add_cube(entity.value, [x, y]);
+        let p = [4, 8, 12].map(|i| f32::from_le_bytes([f[i], f[i + 1], f[i + 2], f[i + 3]]));
+        if hidden && p.iter().all(|v| v.is_finite() && v.abs() < 1e6) {
+            self.data_storage.add_cube(entity.value, p);
         }
     }
 
@@ -2842,6 +2878,59 @@ mod stagger_tests {
         assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-188517.0, 235906.0, 765.0]));
     }
 
+    /// The effects you cause carry your x y z last (`2a 38`, packets_20261024_122715, self 391 = `87 03`): a self buff at
+    /// 12:34:17.957 puts you where the zone load of 12:34:16 did; at 12:34:18.641 someone else (`f0 22`) buffs you,
+    /// and that position is theirs. Before the self is known nothing moves.
+    #[test]
+    fn own_position_from_own_effects() {
+        let (storage, mut sp) = processor();
+        let own = hex("302a38870301119d07c0ea2101ffffffffffffffff8075d52abb03000087030100423482c6dc104b4600005345");
+        sp.consume_stream(&own);
+        assert_eq!(storage.player_position(), None);
+        storage.set_local_player_id(Some(391));
+        sp.consume_stream(&own);
+        assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-16666.0, 12996.0, 3376.0]));
+        assert!(storage.player_position_at().is_some());
+        sp.consume_stream(&hex("342a38870301139e076fffd20a600900000000000048ce796da1010000f022058b19150100423485c6dc10554600a05345"));
+        assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-16666.0, 12996.0, 3376.0]));
+    }
+
+    /// Your own position record `3c 37 <entity> 03 <x> <y> <z>` (packets_20261024_122715, 12:34:28.990, self 391); the
+    /// same record of a mob (`da a7 02`, 12:34:26.853) is the mob's.
+    #[test]
+    fn own_position_from_position_record() {
+        let (storage, mut sp) = processor();
+        storage.set_local_player_id(Some(391));
+        sp.consume_stream(&hex("273c37daa7020365926cc6043a6c4600005345141895c20000016e7b1b000337bc0aa001"));
+        assert_eq!(storage.player_position(), None);
+        sp.consume_stream(&hex("253c37870303342270c6ab0d6b4600005345beda9141000001e0bfaa008798b24257"));
+        assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-15369.0, 15043.0, 3376.0]));
+    }
+
+    /// The zone frame `21 36` puts you where the zone load does, x y z at body +16, 3 s before the teleport `23 36`
+    /// says the same (packets_20261019_101654, 10:18:52.498 and 10:18:55.852).
+    #[test]
+    fn own_position_from_zone_frame() {
+        let (storage, mut sp) = processor();
+        sp.consume_stream(&hex("3421360300000056040000ac4511000000000059c34ec8cdad93470020774546b0ad420200000000000000000000000000"));
+        assert_eq!(storage.player_position().map(|p| p.map(f32::round)), Some([-211725.0, 75612.0, 3954.0]));
+    }
+
+    /// Every cast of yours says where you aim: the f32 after the target, degrees, atan2 of (south, east)
+    /// (packets_20261024_122715: 0° median error against the direction to the target). The dash (skill 11000101,
+    /// 12:34:24.497) carries its direction ×100 where other casts carry x y z: a heading, not a position.
+    #[test]
+    fn own_heading_from_casts_and_the_dash_is_no_position() {
+        let (storage, mut sp) = processor();
+        storage.set_local_player_id(Some(391));
+        sp.consume_stream(&hex("26023887030025d9a7008b028703dc758a4200d51e428a8eb74200000000904e01f403"));
+        assert_eq!(storage.player_position(), None);
+        assert_eq!(storage.player_heading().map(|(h, _)| h.round()), Some(69.0));
+        storage.set_local_player_id(Some(15198));
+        sp.consume_stream(&hex("280238de7600ec5fa9000202a6e7028291ebc1301938c88b60664800403f44de5701bec102"));
+        assert_eq!(storage.player_heading().map(|(h, _)| h.round()), Some(-29.0));
+    }
+
     /// The map the local player is on, sent with each zone load (`02 40 <map id u32> 00 01`): 1110 = Asmodian world
     /// (packets_20261019_101654), 20 = Abyss (packets_20261019_155400); a cut record leaves it.
     #[test]
@@ -2867,7 +2956,7 @@ mod stagger_tests {
         sp.consume_stream(&hex(&spawn.replace("CFDA1300", "60E31600"))); // env 1500000, Od
         assert!(storage.cubes().is_empty());
         sp.consume_stream(&hex(spawn));
-        assert_eq!(rounded(&storage), vec![[-91095.0, -103566.0]]);
+        assert_eq!(rounded(&storage), vec![[-91095.0, -103566.0, 36633.0]]); // gather.json: z 36653
         sp.consume_stream(&hex("0C3536F2EA03010100"));
         assert!(storage.cubes().is_empty());
         sp.consume_stream(&hex(spawn));

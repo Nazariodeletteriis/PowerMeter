@@ -278,12 +278,15 @@ struct Inner {
     // Local player
     local_player_id: Option<i64>,
     local_character_name: Option<String>,
-    /// Where the local player last was (x, y, z): teleports and their own casts, for the minimap.
-    player_position: Option<[f32; 3]>,
+    /// Where the local player last was (x, y, z) and when it was seen (ms): teleports, zone frames, their own casts,
+    /// effects and position records, for the minimap.
+    player_position: Option<([f32; 3], i64)>,
+    /// Where they last aimed (degrees, atan2 of south and east) and when (ms): each of their casts.
+    player_heading: Option<(f32, i64)>,
     /// The map they are on (TW map id: 1010 Elyos world, 1110 Asmodian world, 20 Abyss), from each zone load.
     player_map: Option<u32>,
-    /// Hidden cubes standing on that map now (entity -> x, y), for the cube guide; a zone load forgets them.
-    cubes: HashMap<i32, [f32; 2]>,
+    /// Hidden cubes standing on that map now (entity -> x, y, z), for the cube guide; a zone load forgets them.
+    cubes: HashMap<i32, [f32; 3]>,
 }
 
 impl DataStorage {
@@ -318,6 +321,7 @@ impl DataStorage {
                 local_player_id: None,
                 local_character_name: None,
                 player_position: None,
+                player_heading: None,
                 player_map: None,
                 cubes: HashMap::new(),
             }),
@@ -389,11 +393,24 @@ impl DataStorage {
     }
 
     pub fn set_player_position(&self, pos: [f32; 3]) {
-        self.inner.write().player_position = Some(pos);
+        self.inner.write().player_position = Some((pos, now_ms()));
     }
 
     pub fn player_position(&self) -> Option<[f32; 3]> {
-        self.inner.read().player_position
+        self.inner.read().player_position.map(|(p, _)| p)
+    }
+
+    /// When the position was seen (ms since the epoch).
+    pub fn player_position_at(&self) -> Option<i64> {
+        self.inner.read().player_position.map(|(_, at)| at)
+    }
+
+    pub fn set_player_heading(&self, deg: f32) {
+        self.inner.write().player_heading = Some((deg, now_ms()));
+    }
+
+    pub fn player_heading(&self) -> Option<(f32, i64)> {
+        self.inner.read().player_heading
     }
 
     pub fn set_player_map(&self, map: u32) {
@@ -406,7 +423,7 @@ impl DataStorage {
         self.inner.read().player_map
     }
 
-    pub fn add_cube(&self, entity: i32, pos: [f32; 2]) {
+    pub fn add_cube(&self, entity: i32, pos: [f32; 3]) {
         self.inner.write().cubes.insert(entity, pos);
     }
 
@@ -414,7 +431,7 @@ impl DataStorage {
         self.inner.write().cubes.remove(&entity);
     }
 
-    pub fn cubes(&self) -> Vec<[f32; 2]> {
+    pub fn cubes(&self) -> Vec<[f32; 3]> {
         self.inner.read().cubes.values().copied().collect()
     }
 
