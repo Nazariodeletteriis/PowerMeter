@@ -6,21 +6,24 @@
 // Reads the settings keys of src/dashboard/characters.ts (not imported: it pulls in the dashboard shell).
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import odyleIcon from "../assets/pm/map/Od_A_c_01.png";
+import beritraIcon from "../assets/pm/counters/beritra.png";
+import dungeonIcon from "../assets/pm/counters/dungeon.png";
+import odyleIcon from "../assets/pm/counters/odyle.png";
+import shugoIcon from "../assets/pm/counters/shugo.png";
 
 type Character = { id: string; name: string; cls: string };
 type I18n = { format?: (key: string, vars: Record<string, string>, fallback: string) => string; onChange?: (f: () => void) => void };
 
 const COUNTER_POLL_MS = 2000;
-// Phosphor (regular) Key and CastleTurret.
-const svg = (d: string) => `<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
-const KEY = svg("M216.57,39.43A80,80,0,0,0,83.91,120.78L28.69,176A15.86,15.86,0,0,0,24,187.31V216a16,16,0,0,0,16,16H72a8,8,0,0,0,8-8V208H96a8,8,0,0,0,8-8V184h16a8,8,0,0,0,5.66-2.34l9.56-9.57A79.73,79.73,0,0,0,160,176h.1A80,80,0,0,0,216.57,39.43ZM224,98.1c-1.09,34.09-29.75,61.86-63.89,61.9H160a63.7,63.7,0,0,1-23.65-4.51,8,8,0,0,0-8.84,1.68L116.69,168H96a8,8,0,0,0-8,8v16H72a8,8,0,0,0-8,8v16H40V187.31l58.83-58.82a8,8,0,0,0,1.68-8.84A63.72,63.72,0,0,1,96,95.92c0-34.14,27.81-62.8,61.9-63.89A64,64,0,0,1,224,98.1ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z");
-const CASTLE = svg("M216,216H200V115.31L211.31,104A15.86,15.86,0,0,0,216,92.69V48a16,16,0,0,0-16-16H176a8,8,0,0,0-8,8V64H152V40a8,8,0,0,0-8-8H112a8,8,0,0,0-8,8V64H88V40a8,8,0,0,0-8-8H56A16,16,0,0,0,40,48V92.69A15.86,15.86,0,0,0,44.69,104L56,115.31V216H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16ZM69.66,106.34,56,92.69V48H72V72a8,8,0,0,0,8,8h32a8,8,0,0,0,8-8V48h16V72a8,8,0,0,0,8,8h32a8,8,0,0,0,8-8V48h16V92.69l-13.66,13.65A8,8,0,0,0,184,112V216H160V168a32,32,0,0,0-64,0v48H72V112A8,8,0,0,0,69.66,106.34ZM144,216H112V168a16,16,0,0,1,32,0Z");
-/** The counters shown, in order: game id, the base's max (the game's tooltip), label key, icon. */
-const COUNTERS: [number, number, string, string, string][] = [
-  [101, 14, "pmWidget.counterDailyDungeon", "Daily Dungeon", CASTLE],
-  [1, 21, "pmWidget.counterShugoKeys", "Shugo Festival keys", KEY],
-  [60000001, 840, "pmWidget.counterOdyle", "Odyle", `<img src="${odyleIcon}" alt="">`],
+/**
+ * The counters shown, in order (Nazario's design: dungeon, Beritra, Shugo, Odyle): game id (capture/counters.rs), the
+ * base's max from the game's tooltip (null: not known yet, shown without), label key, icon (the game's, from the design).
+ */
+const COUNTERS: [number, number | null, string, string, string][] = [
+  [101, 14, "pmWidget.counterDailyDungeon", "Daily Dungeon", dungeonIcon],
+  [8, null, "pmWidget.counterBeritraKeys", "Beritra keys", beritraIcon],
+  [1, 21, "pmWidget.counterShugoKeys", "Shugo Festival keys", shugoIcon],
+  [60000001, 840, "pmWidget.counterOdyle", "Odyle", odyleIcon],
 ];
 
 const bar = document.querySelector<HTMLElement>(".pmCharBar");
@@ -56,8 +59,10 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
       const c = counts[id];
       if (!c) return [];
       const label = i18n()?.format?.(key, {}, fallback) ?? fallback;
-      const title = `${label}: ${c[0]} (+${c[1]}) / ${max}`;
-      return [`<span class="pmCounter" title="${title}" aria-label="${title}">${icon}<span>${c[0]} <span class="pmCounterPlus">(+${c[1]})</span><span class="pmCounterMax">/${max}</span></span></span>`];
+      const of = max === null ? "" : ` / ${max}`;
+      const title = `${label}: ${c[0]} (+${c[1]})${of}`;
+      const maxText = max === null ? "" : `<span class="pmCounterMax">/${max}</span>`;
+      return [`<span class="pmCounter" title="${title}" aria-label="${title}"><img src="${icon}" alt=""><span>${c[0]} <span class="pmCounterPlus">(+${c[1]})</span>${maxText}</span></span>`];
     }).join("");
     if (slot.innerHTML !== html) slot.innerHTML = html;
   };

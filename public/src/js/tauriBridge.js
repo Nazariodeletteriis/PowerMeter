@@ -610,7 +610,8 @@
     if (container) {
       containerObserver.observe(container, {
         attributes: true,
-        attributeFilter: ["class"],
+        // hidden too: the top row (event notice, character bar) shows by its attribute, not a class.
+        attributeFilter: ["class", "hidden"],
         subtree: true,
       });
     }

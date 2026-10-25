@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.45
+
+- Nuovo: Minimappa: il tuo segnalino si muove quasi in tempo reale: chiede la posizione 4 volte al secondo e scivola fino al punto nuovo, e la mappa scivola con lui mentre ti segue. In cavalcatura ora ti sta dietro; in volo il gioco manda la posizione solo al decollo e all'atterraggio.
+- Nuovo: Minimappa e Cube Finder, Opzioni: la barra Zoom sceglie quanto vicino la minimappa ti segue, tenendoti sempre al centro.
+- Nuovo: Widget DPS: si aggiungono le chiavi Beritra, e ogni contatore ha la sua icona del gioco (dungeon, Beritra, Shugo, Odyle).
+- Corretto: Widget DPS, modalità Interfaccia: i contatori e la barra del personaggio non finiscono più sotto il timer; la finestra si allunga anche quando compare la riga in alto.
+
 ## 0.5.44
 
 - Nuovo: Widget DPS: ingressi del Dungeon giornaliero, chiavi dello Shugo Festival e Odyle come li mostra il gioco (base (+caricati) / massimo), accanto al personaggio, e nella colonna destra in modalità compatta. Si aggiornano quando entri nel mondo, cambi personaggio o ne spendi uno.

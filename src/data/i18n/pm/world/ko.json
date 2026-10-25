@@ -195,6 +195,8 @@
   "world.map.mapOpacity": "지도 불투명도",
   "world.map.iconOpacity": "아이콘 불투명도",
   "world.map.compassOpacity": "나침반 불투명도",
+  "world.map.zoom": "확대/축소",
+  "world.map.zoomHint": "미니맵이 따라올 때의 확대 정도. 휠로도 잠시 확대/축소할 수 있습니다",
   "world.map.options": "옵션",
   "world.map.hideInMenus": "게임 메뉴에서 숨기기",
   "world.map.hideInMenusHint": "Aion 2가 마우스 포인터를 보여 주는 동안(가방, 지도, 메뉴) 미니맵이 숨겨집니다. 포인터가 항상 자유로운 조작(Aion 1 조작)이면 끄세요.",

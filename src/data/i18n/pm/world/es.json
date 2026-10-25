@@ -195,6 +195,8 @@
   "world.map.mapOpacity": "Opacidad del mapa",
   "world.map.iconOpacity": "Opacidad de iconos",
   "world.map.compassOpacity": "Opacidad de la brújula",
+  "world.map.zoom": "Zoom",
+  "world.map.zoomHint": "A qué distancia te sigue el minimapa; la rueda sigue haciendo zoom un momento",
   "world.map.options": "Opciones",
   "world.map.hideInMenus": "Ocultar en los menús del juego",
   "world.map.hideInMenusHint": "Mientras Aion 2 muestra el puntero (bolsa, mapa, menús) el minimapa se aparta. Desactívalo si juegas con el puntero siempre libre (controles de Aion 1).",

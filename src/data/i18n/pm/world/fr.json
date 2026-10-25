@@ -195,6 +195,8 @@
   "world.map.mapOpacity": "Opacité de la carte",
   "world.map.iconOpacity": "Opacité des icônes",
   "world.map.compassOpacity": "Opacité de la boussole",
+  "world.map.zoom": "Zoom",
+  "world.map.zoomHint": "À quelle distance la minicarte vous suit ; la molette zoome quand même un moment",
   "world.map.options": "Options",
   "world.map.hideInMenus": "Masquer dans les menus du jeu",
   "world.map.hideInMenusHint": "Quand Aion 2 affiche le pointeur (sac, carte, menus), la minicarte s'efface. Désactivez-le si vous jouez avec le pointeur toujours libre (commandes Aion 1).",

@@ -195,6 +195,8 @@
   "world.map.mapOpacity": "地图不透明度",
   "world.map.iconOpacity": "图标不透明度",
   "world.map.compassOpacity": "指南针不透明度",
+  "world.map.zoom": "缩放",
+  "world.map.zoomHint": "小地图跟随你时的远近；滚轮仍可临时缩放",
   "world.map.options": "选项",
   "world.map.hideInMenus": "在游戏菜单中隐藏",
   "world.map.hideInMenusHint": "当 Aion 2 显示鼠标指针时（背包、地图、菜单），小地图会让开。如果你用指针始终可用的操作方式（Aion 1 操作）请关闭。",

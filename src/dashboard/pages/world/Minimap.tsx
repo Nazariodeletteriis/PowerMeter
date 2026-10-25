@@ -81,8 +81,8 @@ export function startMove(e: ReactPointerEvent<HTMLElement>, run: (action: () =>
   el.addEventListener("pointercancel", end);
 }
 
-/** An opacity slider of the minimap's options. */
-export type Opacity = { label: string; hint?: string; value: number; min: number; set: (v: number) => void };
+/** A slider of the minimap's options (an opacity, 0-1, or the zoom: `max`, shown as a share of `base`). */
+export type Opacity = { label: string; hint?: string; value: number; min: number; max?: number; base?: number; set: (v: number) => void };
 
 /**
  * The minimap's controls over the map: the icon column on the right (close, move, filter, pets, follow, full screen,
@@ -161,12 +161,12 @@ export function MiniChrome({
       <input
         type="range"
         min={o.min}
-        max={1}
+        max={o.max ?? 1}
         step={0.05}
         value={o.value}
         onChange={(e) => o.set(Number(e.target.value))}
-        aria-valuetext={`${Math.round(o.value * 100)}%`}
-        style={{ "--v": `${((o.value - o.min) / (1 - o.min)) * 100}%` } as CSSProperties}
+        aria-valuetext={`${Math.round((o.value / (o.base ?? 1)) * 100)}%`}
+        style={{ "--v": `${((o.value - o.min) / ((o.max ?? 1) - o.min)) * 100}%` } as CSSProperties}
       />
     </label>
   );

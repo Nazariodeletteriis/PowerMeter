@@ -8,7 +8,7 @@
 //! (varint), 0x08 the charged (varint); a missing one is 0.
 //! `0B 61 <count varint> <entry>…`: all of them, on entering the world (so a new character replaces the last one's).
 //! `0C 61 00 <entry> <u8>`: one that changed.
-//! Ids seen: 1 Shugo keys, 101 Daily Dungeon, 60000001 Odyle (85 / 370 = the tooltip's Basic 85/840, Charged 370/2000).
+//! Ids seen: 1 Shugo keys, 8 Beritra keys (1 → 0 using one, packets_beritra_20261025_223047), 101 Daily Dungeon, 60000001 Odyle (85 / 370 = the tooltip's Basic 85/840, Charged 370/2000).
 
 use std::collections::BTreeMap;
 use std::sync::Mutex;

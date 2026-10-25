@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.45
+
+- Nouveau : Minicarte : votre point bouge presque en temps réel : il demande la position 4 fois par seconde et glisse jusqu'au nouvel endroit, et la carte glisse avec lui quand elle vous suit. À dos de monture il suit maintenant ; en vol le jeu n'envoie la position qu'au décollage et à l'atterrissage.
+- Nouveau : Minicarte et Cube Finder, Options : un curseur Zoom choisit à quelle distance la minicarte vous suit, en vous gardant au centre.
+- Nouveau : Widget DPS : les clés de Beritra rejoignent les compteurs, et chaque compteur a l'icône du jeu (donjon, Beritra, Shugo, Odyle).
+- Corrigé : Widget DPS, mode Interface : les compteurs et la barre du personnage ne passent plus sous le minuteur ; la fenêtre s'agrandit aussi quand la ligne du haut apparaît.
+
 ## 0.5.44
 
 - Nouveau : Widget DPS : entrées du donjon quotidien, clés du festival Shugo et Odyle comme le jeu les affiche (base (+chargées) / max), à côté de votre personnage, et dans la colonne de droite en mode compact. Ils se mettent à jour à la connexion, au changement de personnage ou quand vous en dépensez un.

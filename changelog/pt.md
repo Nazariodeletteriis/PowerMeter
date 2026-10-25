@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.45
+
+- Novo: Minimapa: seu ponto se move quase em tempo real: pede a posição 4 vezes por segundo e desliza até o novo lugar, e o mapa desliza junto enquanto segue você. Na montaria agora acompanha; em voo o jogo só envia a posição na decolagem e no pouso.
+- Novo: Minimapa e Cube Finder, Opções: uma barra de Zoom escolhe quão perto o minimapa segue você, mantendo você no centro.
+- Novo: Widget DPS: as chaves de Beritra entram nos contadores, e cada contador tem o ícone do jogo (masmorra, Beritra, Shugo, Odyle).
+- Corrigido: Widget DPS, modo Interface: os contadores e a barra do personagem não ficam mais sob o cronômetro; a janela também cresce quando a linha de cima aparece.
+
 ## 0.5.44
 
 - Novo: Widget DPS: entradas da masmorra diária, chaves do festival Shugo e Odyle como o jogo mostra (base (+carregadas) / máximo), ao lado do seu personagem, e na coluna direita no modo compacto. Atualizam ao entrar no mundo, ao trocar de personagem ou ao gastar uma.

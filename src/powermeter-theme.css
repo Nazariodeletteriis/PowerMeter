@@ -603,7 +603,7 @@
   .pmCounters:empty { display: none; }
   /* One counter (charBar.ts): icon, base, (+charged) in your colour, /max. */
   .pmCounter { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
-  .pmCounter > :is(svg, img) { width: 14px; height: 14px; flex: none; }
+  .pmCounter > img { width: 16px; height: 16px; flex: none; object-fit: contain; }
   .pmCounterPlus { color: var(--pm-you); }
   .pmCounterMax { color: var(--pm-ui-muted); font-weight: 400; }
   /* Event popup (src/widget/eventAlert.ts): over the list, under the bar, for the set seconds.
@@ -683,6 +683,8 @@
 
   /* Fight timer / status, centred in the bar (moved there by pmWidget.js). In a
      fight it shows the timer; out of it the grey dot and the status ("Idle"). */
+  /* The bar holds the centred timer below: with the row over it (.pmTopRow) the timer would sit on that row. */
+  .meter:not(.slim) .header { position: relative; }
   .battleTime {
     order: 20;
     /* Centred on the widget, not on the gap between tabs and controls. */
@@ -1566,7 +1568,7 @@
     padding: 8px 4px;
   }
   .meter.slim .pmCounters > * + * { border-top: 1px solid var(--pm-ui-line); }
-  .meter.slim .pmCounter > :is(svg, img) { width: 20px; height: 20px; }
+  .meter.slim .pmCounter > img { width: 24px; height: 24px; }
   .meter.slim .pmCounterMax { display: none; } /* the column is narrow: base (+charged), the max in the tooltip */
 
   .meter.slim .pmEventPopup { left: calc(var(--pm-side) + 8px); }

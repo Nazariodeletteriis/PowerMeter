@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.45
+
+- Neu: Minikarte: dein Punkt bewegt sich fast in Echtzeit: er fragt die Position 4-mal pro Sekunde ab und gleitet zum neuen Ort, die Karte gleitet beim Folgen mit. Auf dem Reittier hält er jetzt mit; im Flug sendet das Spiel die Position nur beim Start und bei der Landung.
+- Neu: Minikarte und Cube Finder, Optionen: der Zoom-Regler legt fest, wie nah die Minikarte dir folgt, du bleibst in der Mitte.
+- Neu: DPS-Widget: Beritra-Schlüssel kommen zu den Zählern, und jeder Zähler hat das Symbol aus dem Spiel (Dungeon, Beritra, Shugo, Odyle).
+- Behoben: DPS-Widget, Interface-Modus: Zähler und Charakterleiste liegen nicht mehr unter dem Timer; das Fenster wächst auch, wenn die obere Zeile erscheint.
+
 ## 0.5.44
 
 - Neu: DPS-Widget: Eintritte des täglichen Dungeons, Shugo-Festival-Schlüssel und Odyle wie im Spiel (Basis (+aufgeladen) / Maximum), neben deinem Charakter und im kompakten Modus in der rechten Spalte. Sie aktualisieren sich beim Einloggen, beim Charakterwechsel und wenn du einen verbrauchst.

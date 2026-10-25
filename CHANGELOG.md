@@ -4,6 +4,13 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.45
+
+- New: Minimap: your dot moves more like real time: it asks for your position 4 times a second and glides to each new place, and the map glides with it while following you. On a mount it now keeps up; in flight the game sends your position only on take-off and landing.
+- New: Minimap and Cube Finder, Options: a Zoom slider picks how close the minimap follows you, still keeping you in the middle.
+- New: DPS widget: Beritra keys join the counters, and every counter has the game's own icon (dungeon, Beritra, Shugo, Odyle).
+- Fixed: DPS widget, Interface mode: the counters and the character bar no longer hide under the timer; the window also grows when the top row appears.
+
 ## 0.5.44
 
 - New: DPS widget: your Daily Dungeon entries, Shugo Festival keys and Odyle, as the game shows them (base (+charged) / max), next to your character, and in the right-hand column in compact mode. They update when you log in, change character or spend one.

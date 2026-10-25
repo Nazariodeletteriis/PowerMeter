@@ -27,7 +27,7 @@ import { ownedPets } from "../characters/calc";
 import { PetGrid } from "../characters/pets";
 import { CAPTURED_PETS_KEY, PETS_KEY, readPets } from "../characters/shared";
 import { gd, useGd, useIcons } from "./db";
-import { MAP_LICENSE, MAP_SOURCE, MAP_TYPES, MAPS, MapView, type MapData, type MapFocus } from "./MapView";
+import { MAP_LICENSE, MAP_SOURCE, MAP_TYPES, MAPS, MAX_ZOOM, MapView, NEAR_SCALE, type MapData, type MapFocus } from "./MapView";
 import { GAME_MAPS, toPixel } from "./cubes";
 import CUBE_SPOTS from "../../../data/map/cubes.json";
 import { AllNone, MiniChrome, type GatherGroup, type LayerRow } from "./Minimap";
@@ -47,6 +47,9 @@ const COMPASS_OPACITY_KEY = "pm.map.compassOpacity";
 const FOLLOW_KEY = "pm.map.follow";
 /** Minimap: out of the way while a game menu is open (Aion 2 in front, the mouse pointer shown), checked this often. */
 const HIDE_IN_MENUS_KEY = "pm.map.hideInMenus";
+/** Minimap: the zoom it follows you at (MapView `near`), from far out to the closest; NEAR_SCALE as it opens. */
+const FOLLOW_ZOOM_KEY = "pm.map.followZoom";
+const FOLLOW_ZOOM_MIN = 0.2;
 const MENU_POLL_MS = 250;
 /** Cube Finder (its widget, opened from the menu): the map's own layers and minimap settings, under pm.cubes.*, opening on these only. */
 const CUBE_LAYERS = new Set(["hiddenCube", "teleport", "village"]);
@@ -210,6 +213,7 @@ export function MapExplorer({
   const [compassOpacity, setCompassOpacity] = useStored<number>(own(COMPASS_OPACITY_KEY), 1);
   const [followMe, setFollowMe] = useStored<boolean>(own(FOLLOW_KEY), true);
   const [hideInMenus, setHideInMenus] = useStored<boolean>(own(HIDE_IN_MENUS_KEY), true);
+  const [followZoom, setFollowZoom] = useStored<number>(own(FOLLOW_ZOOM_KEY), NEAR_SCALE);
   const [away, setAway] = useState(false);
   const [me, setMe] = useState<[number, number]>();
   const [pausedUntil, setPausedUntil] = useState(0);
@@ -465,6 +469,7 @@ export function MapExplorer({
         center={following ? me : undefined}
         onPan={compact ? () => setPausedUntil(Date.now() + FOLLOW_PAUSE_MS) : undefined}
         zoomButtons={!compact}
+        near={compact ? followZoom : undefined}
         onBareClick={() => setMarker(null)}
         world={
           <>
@@ -570,6 +575,18 @@ export function MapExplorer({
                   { label: t("world.map.mapOpacity"), value: mapOpacity, min: 0, set: setMapOpacity },
                   { label: t("world.map.iconOpacity"), hint: t("world.map.pathOpacityHint"), value: pathOpacity, min: 0.1, set: setPathOpacity },
                   { label: t("world.map.compassOpacity"), value: compassOpacity, min: 0, set: setCompassOpacity },
+                  {
+                    label: t("world.map.zoom"),
+                    hint: t("world.map.zoomHint"),
+                    value: followZoom,
+                    min: FOLLOW_ZOOM_MIN,
+                    max: MAX_ZOOM,
+                    base: NEAR_SCALE,
+                    set: (v) => {
+                      setFollowZoom(v);
+                      setPausedUntil(0); // back on you, at this zoom
+                    },
+                  },
                 ]}
                 pets={panel}
                 setPets={setPanel}
