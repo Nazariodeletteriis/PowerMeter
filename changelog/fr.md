@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.47
+
+- Modifié : Widget DPS : le compteur du donjon quotidien a sa propre icône du jeu.
+
 ## 0.5.46
 
 - Corrigé : Widget DPS, compact et Interface : les compteurs d'entrées et de clés s'affichent toujours, avec un tiret tant que le jeu ne les a pas envoyés ; les dernières valeurs lues pour un personnage s'affichent dès le départ, avant la connexion suivante.

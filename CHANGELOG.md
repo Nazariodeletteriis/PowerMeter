@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.47
+
+- Changed: DPS widget: the Daily Dungeon counter has its own icon from the game.
+
 ## 0.5.46
 
 - Fixed: DPS widget, compact and Interface: the entry and key counters always show, with a dash until the game sends them; the last values read for a character show from the start, before the next login.

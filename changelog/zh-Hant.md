@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.47
+
+- 變更：DPS 小工具：每日副本計數器使用遊戲中自己的圖示。
+
 ## 0.5.46
 
 - 修正：DPS 小工具（精簡與介面模式）：入場次數和鑰匙計數始終顯示，遊戲傳送前顯示「–」；角色最後讀取的數值在下次登入前就會顯示。

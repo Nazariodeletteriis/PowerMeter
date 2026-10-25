@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.47
+
+- Cambiado: Widget DPS: el contador de la mazmorra diaria tiene su propio icono del juego.
+
 ## 0.5.46
 
 - Corregido: Widget DPS, compacto e Interfaz: los contadores de entradas y llaves se ven siempre, con un guion hasta que el juego los envía; los últimos valores leídos de un personaje aparecen desde el inicio, antes del siguiente inicio de sesión.

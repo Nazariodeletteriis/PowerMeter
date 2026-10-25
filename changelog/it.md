@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.47
+
+- Cambiato: Widget DPS: il contatore del Dungeon giornaliero ha la sua icona del gioco.
+
 ## 0.5.46
 
 - Corretto: Widget DPS, compatta e Interfaccia: i contatori di ingressi e chiavi si vedono sempre, con un trattino finché il gioco non li manda; gli ultimi valori letti per un personaggio compaiono subito, prima del login successivo.

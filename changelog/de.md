@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.47
+
+- Geändert: DPS-Widget: der Zähler des täglichen Dungeons hat sein eigenes Symbol aus dem Spiel.
+
 ## 0.5.46
 
 - Behoben: DPS-Widget, kompakt und Interface: die Zähler für Eintritte und Schlüssel sind immer sichtbar, mit einem Strich, bis das Spiel sie sendet; die zuletzt gelesenen Werte eines Charakters erscheinen sofort, noch vor dem nächsten Login.

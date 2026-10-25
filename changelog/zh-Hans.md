@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.47
+
+- 更改：DPS 小组件：每日副本计数器使用游戏中自己的图标。
+
 ## 0.5.46
 
 - 修复：DPS 小组件（紧凑与界面模式）：入场次数和钥匙计数始终显示，游戏发送前显示“–”；角色最后读取的数值在下次登录前就会显示。
