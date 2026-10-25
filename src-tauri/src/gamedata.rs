@@ -366,7 +366,7 @@ pub fn gamedata_planner(state: tauri::State<'_, AppState>, class: String) -> Res
 const EVENTS_SQL: &str = "SELECT event_id, category, name, timezone, duration_minutes, cadence_json, location, server_verified
      FROM events ORDER BY event_id";
 
-/// Event timer rules (Asia/Seoul times; the page shows them in local time).
+/// Event timer rules (in their own zone, Europe/Berlin for the EU servers; the page shows them in local time).
 #[tauri::command]
 pub fn gamedata_events(state: tauri::State<'_, AppState>) -> Result<Vec<Value>, String> {
     state.gamedata.query(EVENTS_SQL, &[])

@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import type { T } from "../../i18n";
 
 // Event timer: the `events` table of the game data archive (rules in the event's own
-// time zone, Asia/Seoul). Instants are UTC ms; pages show them in the PC's local time
+// time zone, Europe/Berlin: the EU servers keep their clock through daylight saving, 25/10/2026). Instants are UTC
+// ms; pages show them in the PC's local time
 // (Intl does the zone and DST conversion, see shugo/events.ts `clock`).
 
 export type Cadence =
@@ -70,7 +71,7 @@ export function upcomingWindows(e: GameEvent, now: number, count = 8): EventWind
     if (end > now || (len === 0 && start > now)) out.push({ event_id: e.event_id, start, end, active: len > 0 && start <= now && now < end });
   };
   if (c.kind === "minuteOfHour") {
-    // ponytail: whole-hour UTC base, right for every whole-hour zone (Asia/Seoul).
+    // ponytail: whole-hour UTC base, right for every whole-hour zone (Europe/Berlin).
     const base = Math.floor((now - len) / HOUR) * HOUR;
     const minutes = [...c.minutes].sort((a, b) => a - b);
     for (let h = 0; out.length < count; h++) for (const m of minutes) add(base + h * HOUR + m * MIN);
@@ -96,7 +97,7 @@ export function eventStatus(e: GameEvent, now: number) {
 }
 
 /**
- * The rule in words for the Timer list ("Every 3 hours, 8 times a day"). Weekdays are the PC's own (a Seoul
+ * The rule in words for the Timer list ("Every 3 hours, 8 times a day"). Weekdays are the PC's own (a server
  * evening can be another day elsewhere), read off the next windows.
  */
 export function cadenceText(e: GameEvent, now: number, t: T, lang: string) {
