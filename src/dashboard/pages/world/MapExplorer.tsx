@@ -52,6 +52,8 @@ const MENU_POLL_MS = 250;
 const CUBE_LAYERS = new Set(["hiddenCube", "teleport", "village"]);
 /** A drag or a zoom by hand on the minimap holds the follow this long; the next position after it brings you back. */
 const FOLLOW_PAUSE_MS = 10_000;
+/** Your dot asks for the position this often: a new one shows at once (each glides there, world.css .wYou). */
+const POSITION_POLL_MS = 250;
 /** A cube the game shows is new to you (yellow) this long, then it has been standing (red). */
 const CUBE_NEW_MS = 60_000;
 /** Pets picked in the pet panel (creature codes), and "every pet I'm missing" when none is picked. */
@@ -130,7 +132,7 @@ const label: CSSProperties = { fontSize: 10, letterSpacing: ".1em", textTransfor
  * (the rest is encrypted). Polled in here so the rest of the map doesn't re-render with it.
  */
 function You({ t, map, home, onMap, onAt }: { t: T; map: MapData; home?: string; onMap: (id?: string) => void; onAt: (px?: [number, number]) => void }) {
-  const at = usePoll(getPlayerPosition, 2000).data;
+  const at = usePoll(getPlayerPosition, POSITION_POLL_MS).data;
   // The map the game says you are on ("" = one we can't draw on); none seen yet: your faction's.
   const where = at?.map == null ? undefined : (GAME_MAPS[at.map]?.[0] ?? "");
   useEffect(() => onMap(where || undefined), [where]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -453,6 +455,7 @@ export function MapExplorer({
       className={["wExplorer", fill && "wFill", compact && "mm"].filter(Boolean).join(" ")}
       data-full={full || undefined}
       data-away={away || undefined}
+      data-following={following || undefined}
       style={compact ? ({ "--mm-map": mapOpacity, "--mm-path": pathOpacity, "--mm-compass": compassOpacity } as CSSProperties) : undefined}
     >
       <MapView
