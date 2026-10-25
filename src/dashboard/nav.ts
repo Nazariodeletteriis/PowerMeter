@@ -110,6 +110,9 @@ export const NAV_BOTTOM: NavPage[] = [
   p("impostazioni", "nav.settings", GearIcon, "R1"),
 ];
 
+/** Not pages: these menu entries open their widget window (Tauri command), the dashboard stays where it is. */
+export const WIDGET_ENTRIES: Record<string, string> = { cubefinder: "open_cube_window" };
+
 /** Not a page: the Report's Rotation tab (report.tsx) locks with Party. */
 export const ROTATION_TIER: PaidTier = "recluta";
 

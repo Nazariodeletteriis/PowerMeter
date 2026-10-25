@@ -308,7 +308,7 @@ fn show_dashboard(app: &tauri::AppHandle) -> Result<(), String> {
 /// a full map window).
 #[tauri::command]
 pub async fn open_map_window(app: tauri::AppHandle) -> Result<(), String> {
-    open_widget_window(&app, "map", "minimap", "PowerMeter — Map", (360.0, 400.0), (240.0, 320.0))
+    open_widget_window(&app, "map", "minimap", "PowerMeter — Map", (380.0, 380.0), (280.0, 280.0))
 }
 
 /// The Cube Finder window: the minimap (MapExplorer.tsx) with Cube Finder's own layers and settings, its hidden cube
@@ -316,7 +316,7 @@ pub async fn open_map_window(app: tauri::AppHandle) -> Result<(), String> {
 /// `window.cubeGuide.*` holds the size of the 0.5.36-0.5.40 compass card, too small for a map.
 #[tauri::command]
 pub async fn open_cube_window(app: tauri::AppHandle) -> Result<(), String> {
-    open_widget_window(&app, "cubes", "cubeFinder", "PowerMeter — Cube Finder", (360.0, 400.0), (240.0, 320.0))
+    open_widget_window(&app, "cubes", "cubeFinder", "PowerMeter — Cube Finder", (380.0, 380.0), (280.0, 280.0))
 }
 
 /// A transparent widget window over the game: dashboard.html drawing only the

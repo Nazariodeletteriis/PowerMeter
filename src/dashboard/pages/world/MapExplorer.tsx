@@ -45,7 +45,7 @@ const PATH_OPACITY_KEY = "pm.map.pathOpacity";
 const COMPASS_OPACITY_KEY = "pm.map.compassOpacity";
 /** Minimap: the map keeps you in the middle as you move, zoomed in (off and on with its button). */
 const FOLLOW_KEY = "pm.map.follow";
-/** Cube Finder (its page and its widget): the map's own layers and minimap settings, under pm.cubes.*, opening on these only. */
+/** Cube Finder (its widget, opened from the menu): the map's own layers and minimap settings, under pm.cubes.*, opening on these only. */
 const CUBE_LAYERS = new Set(["hiddenCube", "teleport", "village"]);
 /** A drag or a zoom by hand on the minimap holds the follow this long; the next position after it brings you back. */
 const FOLLOW_PAUSE_MS = 10_000;
@@ -167,7 +167,7 @@ function You({ t, map, home, onMap, onAt }: { t: T; map: MapData; home?: string;
 
 /**
  * The world map with its layers (aion2-interactive-map markers, gathering nodes, pet spots), the pet panel and
- * full screen. Used by the Map and Cube Finder pages and by their widget windows. `takeFocus`: this one answers "Show
+ * full screen. Used by the Map page and by the Map and Cube Finder widget windows. `takeFocus`: this one answers "Show
  * on map" (showOnMap). `fill`: the map takes its parent's height instead of the page's. `extra`: more buttons in the
  * top-right row. `mini`: the minimap (widget window), with its own controls (Minimap.tsx) and the hidden cube compass
  * until it goes full screen. `cubes`: Cube Finder, the same map with its own settings, opening on CUBE_LAYERS.

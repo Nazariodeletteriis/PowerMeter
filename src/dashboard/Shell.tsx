@@ -18,7 +18,7 @@ import { CaptureSync } from "./CaptureSync";
 import { Home } from "./Home";
 import { Locked, TrialReminder } from "./Locked";
 import type { T } from "./i18n";
-import { ADMIN_PAGE, ALL_PAGES, NAV, NAV_BOTTOM, type NavPage } from "./nav";
+import { ADMIN_PAGE, ALL_PAGES, NAV, NAV_BOTTOM, WIDGET_ENTRIES, type NavPage } from "./nav";
 import { Palette } from "./Palette";
 import { Supporter } from "./Supporter";
 import { ClassAvatar, ProfileAvatar } from "./ui";
@@ -113,6 +113,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
   const entitlement = useEntitlement();
   // Cleared on navigation; the new page sets its own from an effect.
   const go = (id: string) => {
+    if (WIDGET_ENTRIES[id]) return void invoke(WIDGET_ENTRIES[id]).catch(onError);
     setHeader({});
     setPage(id);
   };

@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "fullscreen",
-  "description": "Full screen for the two windows that show the map (dashboard page and Map widget).",
-  "windows": ["dashboard", "map"],
+  "description": "Full screen for the windows that show the map (dashboard page, Map and Cube Finder widgets).",
+  "windows": ["dashboard", "map", "cubes"],
   "permissions": ["core:window:allow-set-fullscreen"]
 }
