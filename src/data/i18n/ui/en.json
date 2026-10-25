@@ -214,7 +214,6 @@
     },
     "berserkTip": "Berserk timer: turns red in the last 30 s",
     "phase": "Phase {n}",
-    "sparkLabel": "DPS over time",
     "detail": {
       "skill": "Skill",
       "damage": "Damage",

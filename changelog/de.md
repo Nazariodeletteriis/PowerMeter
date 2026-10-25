@@ -2,6 +2,15 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.41
+
+- Neu: Welt, Cube Finder: die Karte nur mit versteckten Würfeln, Teleportern und Dörfern, mit eigenen Einstellungen und einer Schaltfläche, um sie als Widget über dem Spiel zu öffnen.
+- Geändert: Minikarte: neues Aussehen. Der Kompass für versteckte Würfel sitzt oben links auf der Karte (Richtung, Entfernung, Höhe), die Schaltfläche Nächster Würfel in der Symbolspalte.
+- Geändert: Minikarte: eine neue Schaltfläche Optionen enthält die Sperre, die Deckkraft von Karte, Symbolen und Kompass und die Kartenwahl; gezoomt wird nur mit dem Mausrad.
+- Geändert: Karte: die Schaltfläche des Würfel-Guides ist weg; der Guide ist jetzt der Kompass der Minikarte und von Cube Finder.
+- Neu: DPS-Widget: eine Zeile über der Kopfleiste zeigt den aktiven Charakter, und der Ereignishinweis steht jetzt dort, rot und blinkend bis zum Start des Ereignisses.
+- Entfernt: DPS-Widget: das Diagramm DPS im Zeitverlauf, für ein kompakteres Widget.
+
 ## 0.5.40
 
 - Behoben: Timer und Widget-Hinweise: Die Reshanta-Bosse folgen dem EU-Zeitplan: Watcher Kaira alle 3 Stunden ab 01:00, Guardian Lord Nahma Sonntag und Freitag 21:10, die Executors Tamasa, Argo und Kaira Montag, Donnerstag und Samstag 21:40 (sie lagen 7 Stunden daneben). Artifact Siege um 21:00, neu ist die Arena of Tactics (11:00 und 19:00).

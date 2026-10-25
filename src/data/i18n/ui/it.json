@@ -214,7 +214,6 @@
     },
     "berserkTip": "Timer berserk: diventa rosso negli ultimi 30 s",
     "phase": "Fase {n}",
-    "sparkLabel": "DPS nel tempo",
     "detail": {
       "skill": "Skill",
       "damage": "Danno",

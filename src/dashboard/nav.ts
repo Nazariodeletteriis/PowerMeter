@@ -7,6 +7,7 @@ import {
   ClockCounterClockwiseIcon,
   CloudArrowUpIcon,
   CrosshairIcon,
+  CubeFocusIcon,
   CubeIcon,
   DatabaseIcon,
   ScalesIcon,
@@ -90,6 +91,7 @@ export const NAV: NavGroup[] = [
     icon: GlobeHemisphereWestIcon,
     items: [
       p("mappa", "nav.map", MapTrifoldIcon, "R4"),
+      p("cubefinder", "nav.cubeFinder", CubeFocusIcon, "R4"),
       p("crafting", "nav.crafting", HammerIcon, "R4"),
     ],
   },

@@ -2,7 +2,7 @@ import { useEffect, useState, type ButtonHTMLAttributes, type CSSProperties, typ
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow, PhysicalPosition } from "@tauri-apps/api/window";
-import { ArrowsOutCardinalIcon, ArrowsOutIcon, CaretDownIcon, CrosshairIcon, FunnelIcon, LockSimpleIcon, LockSimpleOpenIcon, PawPrintIcon, XIcon } from "@phosphor-icons/react";
+import { ArrowsOutCardinalIcon, ArrowsOutIcon, CaretDownIcon, CrosshairIcon, FunnelIcon, GearSixIcon, LockSimpleIcon, LockSimpleOpenIcon, PawPrintIcon, XIcon } from "@phosphor-icons/react";
 import "@fontsource/noto-sans/600.css";
 import type { T } from "../../i18n";
 
@@ -23,8 +23,6 @@ export function AllNone({ t, rows, set }: { t: T; rows: LayerRow[]; set: (on: bo
     </span>
   );
 }
-
-const MAP_LABEL = "map"; // the window's label, for its lock (powermeter.rs LOCKS)
 
 /**
  * The lock of a widget window (powermeter.rs LOCKS, by window label): its state, kept in step with the Rust side, and
@@ -83,15 +81,19 @@ export function startMove(e: ReactPointerEvent<HTMLElement>, run: (action: () =>
   el.addEventListener("pointercancel", end);
 }
 
+/** An opacity slider of the minimap's options. */
+export type Opacity = { label: string; hint?: string; value: number; min: number; set: (v: number) => void };
+
 /**
- * The minimap's controls over the map, as the game's minimap: Map and Path Opacity on top with the close button,
- * the icon column on the right (move, filter, pets, full screen; zoom and lock at the bottom), the zone at the
- * bottom left. The filter holds the two dropdowns, Gathering and Layers. Locked, the window can't be moved; its controls
- * keep working.
+ * The minimap's controls over the map: the icon column on the right (close, move, filter, pets, follow, full screen,
+ * options, then `rail`: the hidden cube compass's Next cube), zoom on the wheel only. The filter holds the two
+ * dropdowns, Gathering and Layers; the options the lock, the opacities (map, icons, compass) and the zone.
+ * Locked, the window can't be moved; its controls keep working. `label`: the window's, for its lock (powermeter.rs LOCKS).
  */
 export function MiniChrome({
   t,
   run,
+  label,
   zone,
   zones,
   onZone,
@@ -99,19 +101,18 @@ export function MiniChrome({
   setLayers,
   gather,
   setGather,
-  mapOpacity,
-  setMapOpacity,
-  pathOpacity,
-  setPathOpacity,
+  opacities,
   pets,
   setPets,
   onFullscreen,
   credit,
   follow,
   setFollow,
+  rail,
 }: {
   t: T;
   run: (action: () => Promise<unknown>) => void;
+  label: string;
   zone: string;
   zones: { id: string; name: string }[];
   onZone: (id: string) => void;
@@ -119,47 +120,49 @@ export function MiniChrome({
   setLayers: (on: boolean) => void;
   gather: GatherGroup[];
   setGather: (rows: LayerRow[], on: boolean) => void;
-  mapOpacity: number;
-  setMapOpacity: (v: number) => void;
-  pathOpacity: number;
-  setPathOpacity: (v: number) => void;
+  opacities: Opacity[];
   pets: boolean;
   setPets: (on: boolean) => void;
   onFullscreen: () => void;
   credit: ReactNode;
   follow: boolean;
   setFollow: (on: boolean) => void;
+  rail?: ReactNode;
 }) {
-  const [filter, setFilter] = useState(false);
-  const [locked, toggleLock] = useLock(MAP_LABEL, run);
+  const [pop, setPop] = useState<"filter" | "options">();
+  const [locked, toggleLock] = useLock(label, run);
   const win = getCurrentWindow();
   const move = (e: ReactPointerEvent<HTMLElement>) => !locked && startMove(e, run); // the lock keeps the window in place
 
-  // The filter closes on Esc or a press outside it.
+  // A dropdown closes on Esc or a press outside it.
   useEffect(() => {
-    if (!filter) return;
-    const down = (e: PointerEvent) => !(e.target as Element).closest(".mmPop, .mmFilterBtn") && setFilter(false);
-    const key = (e: KeyboardEvent) => e.key === "Escape" && setFilter(false);
+    if (!pop) return;
+    const down = (e: PointerEvent) => !(e.target as Element).closest(".mmPop, .mmPopBtn") && setPop(undefined);
+    const key = (e: KeyboardEvent) => e.key === "Escape" && setPop(undefined);
     window.addEventListener("pointerdown", down);
     window.addEventListener("keydown", key);
     return () => {
       window.removeEventListener("pointerdown", down);
       window.removeEventListener("keydown", key);
     };
-  }, [filter]);
+  }, [pop]);
+  const openPop = (p: "filter" | "options") => {
+    setPop(pop === p ? undefined : p);
+    setPets(false);
+  };
 
-  const slider = (label: string, hint: string | undefined, value: number, min: number, set: (v: number) => void) => (
-    <label className="mmSlider" title={hint}>
-      <span>{label}</span>
+  const slider = (o: Opacity) => (
+    <label key={o.label} className="mmSlider" title={o.hint}>
+      <span>{o.label}</span>
       <input
         type="range"
-        min={min}
+        min={o.min}
         max={1}
         step={0.05}
-        value={value}
-        onChange={(e) => set(Number(e.target.value))}
-        aria-valuetext={`${Math.round(value * 100)}%`}
-        style={{ "--v": `${((value - min) / (1 - min)) * 100}%` } as CSSProperties}
+        value={o.value}
+        onChange={(e) => o.set(Number(e.target.value))}
+        aria-valuetext={`${Math.round(o.value * 100)}%`}
+        style={{ "--v": `${((o.value - o.min) / (1 - o.min)) * 100}%` } as CSSProperties}
       />
     </label>
   );
@@ -188,60 +191,34 @@ export function MiniChrome({
 
   return (
     <>
-      <div className="mmBar" onPointerDown={(e) => e.target === e.currentTarget && move(e)}>
-        {slider(t("world.map.mapOpacity"), undefined, mapOpacity, 0, setMapOpacity)}
-        {slider(t("world.map.pathOpacity"), t("world.map.pathOpacityHint"), pathOpacity, 0.1, setPathOpacity)}
-        {railBtn(t("window.close"), <XIcon aria-hidden="true" />, { className: "mmBtn mmClose", onClick: () => run(() => win.close()) })}
-      </div>
-
       <div className="mmRail">
-        {railBtn(t("world.map.move"), <ArrowsOutCardinalIcon aria-hidden="true" />, {
-          className: "mmBtn mmMove",
-          onPointerDown: move,
-        })}
+        {railBtn(t("window.close"), <XIcon aria-hidden="true" />, { className: "mmBtn mmClose", onClick: () => run(() => win.close()) })}
+        {railBtn(t("world.map.move"), <ArrowsOutCardinalIcon aria-hidden="true" />, { className: "mmBtn mmMove", onPointerDown: move })}
         {railBtn(t("world.map.filter"), <FunnelIcon aria-hidden="true" />, {
-          className: "mmBtn mmFilterBtn",
-          "aria-pressed": filter,
-          "aria-expanded": filter,
-          onClick: () => {
-            setFilter(!filter);
-            setPets(false);
-          },
+          className: "mmBtn mmPopBtn",
+          "aria-pressed": pop === "filter",
+          "aria-expanded": pop === "filter",
+          onClick: () => openPop("filter"),
         })}
         {railBtn(t("world.map.pets"), <PawPrintIcon aria-hidden="true" />, {
           "aria-pressed": pets,
           onClick: () => {
             setPets(!pets);
-            setFilter(false);
+            setPop(undefined);
           },
         })}
         {railBtn(t("world.map.follow"), <CrosshairIcon aria-hidden="true" />, { "aria-pressed": follow, onClick: () => setFollow(!follow) })}
         {railBtn(t("world.map.fullscreen"), <ArrowsOutIcon aria-hidden="true" />, { onClick: onFullscreen })}
+        {railBtn(t("world.map.options"), <GearSixIcon aria-hidden="true" />, {
+          className: "mmBtn mmPopBtn",
+          "aria-pressed": pop === "options",
+          "aria-expanded": pop === "options",
+          onClick: () => openPop("options"),
+        })}
+        {rail}
       </div>
 
-      <button
-        type="button"
-        className="mmBtn mmLock"
-        aria-pressed={locked}
-        title={t(locked ? "world.map.unlock" : "world.map.lock")}
-        aria-label={t(locked ? "world.map.unlock" : "world.map.lock")}
-        onClick={toggleLock}
-      >
-        {locked ? <LockSimpleIcon aria-hidden="true" weight="fill" /> : <LockSimpleOpenIcon aria-hidden="true" />}
-      </button>
-
-      <label className="mmZone">
-        <select value={zone} onChange={(e) => onZone(e.target.value)} aria-label={t("world.map.zone")}>
-          {zones.map((z) => (
-            <option key={z.id} value={z.id}>
-              {z.name}
-            </option>
-          ))}
-        </select>
-        <CaretDownIcon aria-hidden="true" />
-      </label>
-
-      {filter && (
+      {pop === "filter" && (
         <div className="mmPop" role="dialog" aria-label={t("world.map.filter")}>
           {gatherRows.length > 0 && (
             <details name="mmFilter" open onToggle={shown}>
@@ -269,6 +246,28 @@ export function MiniChrome({
             {layers.map(row)}
           </details>
           <div className="mmCredit">{credit}</div>
+        </div>
+      )}
+
+      {pop === "options" && (
+        <div className="mmPop mmOptions" role="dialog" aria-label={t("world.map.options")}>
+          <label className="mmRow">
+            <input type="checkbox" checked={locked} onChange={toggleLock} />
+            <span className="mmRowIcon">{locked ? <LockSimpleIcon aria-hidden="true" weight="fill" /> : <LockSimpleOpenIcon aria-hidden="true" />}</span>
+            <span className="mmRowName">{t("world.map.lock")}</span>
+          </label>
+          {opacities.map(slider)}
+          <label className="mmZone">
+            <span>{t("world.map.zone")}</span>
+            <select value={zone} onChange={(e) => onZone(e.target.value)}>
+              {zones.map((z) => (
+                <option key={z.id} value={z.id}>
+                  {z.name}
+                </option>
+              ))}
+            </select>
+            <CaretDownIcon aria-hidden="true" />
+          </label>
         </div>
       )}
     </>

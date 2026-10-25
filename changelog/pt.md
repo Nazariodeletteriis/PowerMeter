@@ -2,6 +2,15 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.41
+
+- Novo: Mundo, Cube Finder: o mapa só com cubos ocultos, teleportes e vilas, com configurações próprias e um botão para abri-lo como widget sobre o jogo.
+- Alterado: Minimapa: novo visual. A bússola dos cubos ocultos fica no canto superior esquerdo do mapa (direção, distância, altura) e o botão Próximo cubo na coluna de ícones.
+- Alterado: Minimapa: um novo botão Opções reúne o bloqueio, a opacidade do mapa, dos ícones e da bússola e a escolha do mapa; o zoom é só pela roda do mouse.
+- Alterado: Mapa: o botão do guia de cubos ocultos saiu; o guia agora é a bússola do minimapa e do Cube Finder.
+- Novo: Widget DPS: uma linha acima do cabeçalho mostra o personagem ativo, e o aviso de eventos foi para lá, em vermelho, piscando até o evento começar.
+- Removido: Widget DPS: o gráfico de DPS ao longo do tempo, para um widget mais compacto.
+
 ## 0.5.40
 
 - Corrigido: Timer e avisos do widget: os chefes de Reshanta seguem o horário EU: Watcher Kaira a cada 3 horas desde 01:00, Guardian Lord Nahma domingo e sexta às 21:10, os Executors Tamasa, Argo e Kaira segunda, quinta e sábado às 21:40 (estavam 7 horas fora). Artifact Siege às 21:00, e a nova Arena of Tactics (11:00 e 19:00).

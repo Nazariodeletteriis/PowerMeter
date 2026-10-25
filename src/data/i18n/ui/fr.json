@@ -214,7 +214,6 @@
     },
     "berserkTip": "Minuteur de rage : devient rouge dans les 30 dernières s",
     "phase": "Phase {n}",
-    "sparkLabel": "DPS dans le temps",
     "detail": {
       "skill": "Compétence",
       "damage": "Dégâts",

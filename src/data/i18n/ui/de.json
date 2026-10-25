@@ -214,7 +214,6 @@
     },
     "berserkTip": "Berserker-Timer: wird in den letzten 30 s rot",
     "phase": "Phase {n}",
-    "sparkLabel": "DPS im Zeitverlauf",
     "detail": {
       "skill": "Skill",
       "damage": "Schaden",

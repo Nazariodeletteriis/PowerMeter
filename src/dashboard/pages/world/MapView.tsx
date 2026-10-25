@@ -31,7 +31,7 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
  * them at screen size); `children` float over the viewport (panels, credits).
  * Opens on the whole map, or on `focus`. Only the tiles that have been in view load. `center` (map pixels) keeps
  * that point in the middle, moving with it, zoomed in to NEAR_SCALE unless you are closer; a drag, the wheel or the
- * zoom-out button calls `onPan`.
+ * zoom-out button calls `onPan`. `zoomButtons`: false leaves zoom to the wheel (the minimap).
  */
 export function MapView({
   t,
@@ -41,6 +41,7 @@ export function MapView({
   focus,
   center,
   onPan,
+  zoomButtons = true,
   children,
 }: {
   t: T;
@@ -50,6 +51,7 @@ export function MapView({
   focus?: MapFocus;
   center?: [number, number];
   onPan?: () => void;
+  zoomButtons?: boolean;
   children?: ReactNode;
 }) {
   const [view, setView] = useState<View>({ x: 0, y: 0, s: 0.1 });
@@ -146,7 +148,7 @@ export function MapView({
   };
 
   const down = (e: PointerEvent) => {
-    if ((e.target as HTMLElement).closest("button, a, input, select, label, .wPopup, .wPanel, .wPetPanel, .mmPop, .mmBar")) return;
+    if ((e.target as HTMLElement).closest("button, a, input, select, label, .wPopup, .wPanel, .wPetPanel, .mmPop")) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     drag.current = { x: e.clientX, y: e.clientY, moved: false };
   };
@@ -207,14 +209,16 @@ export function MapView({
         {world}
       </div>
       {children}
-      <div className="wZoom">
-        <button type="button" title={t("world.map.zoomIn")} aria-label={t("world.map.zoomIn")} disabled={view.s >= MAX_SCALE} onClick={() => zoomButton(ZOOM_STEP)}>
-          <PlusIcon aria-hidden="true" />
-        </button>
-        <button type="button" title={t("world.map.zoomOut")} aria-label={t("world.map.zoomOut")} disabled={view.s <= fit.current} onClick={() => zoomButton(1 / ZOOM_STEP)}>
-          <MinusIcon aria-hidden="true" />
-        </button>
-      </div>
+      {zoomButtons && (
+        <div className="wZoom">
+          <button type="button" title={t("world.map.zoomIn")} aria-label={t("world.map.zoomIn")} disabled={view.s >= MAX_SCALE} onClick={() => zoomButton(ZOOM_STEP)}>
+            <PlusIcon aria-hidden="true" />
+          </button>
+          <button type="button" title={t("world.map.zoomOut")} aria-label={t("world.map.zoomOut")} disabled={view.s <= fit.current} onClick={() => zoomButton(1 / ZOOM_STEP)}>
+            <MinusIcon aria-hidden="true" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,6 +4,15 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.41
+
+- New: World, Cube Finder: the map on hidden cubes, teleports and villages only, with its own settings, and a button to open it as a widget over the game.
+- Changed: Minimap: new look. The hidden cube compass sits top left on the map (direction, distance, height), and the Next cube button is in the icon column.
+- Changed: Minimap: a new Options button holds the lock, Map, Icon and Compass Opacity and the map choice; zoom is on the mouse wheel only.
+- Changed: Map: the hidden cube guide button is gone; the guide is now the compass of the minimap and of Cube Finder.
+- New: DPS widget: a row over the header shows the active character, and the event notice moved there, in red, pulsing until the event starts.
+- Removed: DPS widget: the DPS over time chart, for a more compact widget.
+
 ## 0.5.40
 
 - Fixed: Timer and widget alerts: the Reshanta bosses are on the EU schedule: Watcher Kaira every 3 hours from 01:00, Guardian Lord Nahma Sunday and Friday 21:10, Executors Tamasa, Argo and Kaira Monday, Thursday and Saturday 21:40 (they were 7 hours off). Artifact Siege at 21:00, and the Arena of Tactics (11:00 and 19:00) is new.

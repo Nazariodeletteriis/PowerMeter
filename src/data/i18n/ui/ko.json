@@ -214,7 +214,6 @@
     },
     "berserkTip": "광폭화 타이머: 마지막 30초 동안 빨간색으로 표시됩니다",
     "phase": "페이즈 {n}",
-    "sparkLabel": "시간별 DPS",
     "detail": {
       "skill": "스킬",
       "damage": "피해",

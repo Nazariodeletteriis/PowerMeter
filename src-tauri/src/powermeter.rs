@@ -308,17 +308,15 @@ fn show_dashboard(app: &tauri::AppHandle) -> Result<(), String> {
 /// a full map window).
 #[tauri::command]
 pub async fn open_map_window(app: tauri::AppHandle) -> Result<(), String> {
-    open_widget_window(&app, "map", "minimap", "PowerMeter — Map", (360.0, 400.0), (240.0, 240.0))
+    open_widget_window(&app, "map", "minimap", "PowerMeter — Map", (360.0, 400.0), (240.0, 320.0))
 }
 
-/// The Hidden cube guide (CubeGuide.tsx): a small card over the game pointing
-/// at the nearest hidden cube and listing the other spots of the place. Opens at 270 x 336, tall enough for the full
-/// list (six spots) and the footer at its longest (three lines in German with the aim line); resized by hand, the card
-/// scales with the window down to half. Its place and size are remembered under `window.cubeGuide.*`: `window.cubes.*`
-/// holds the sizes of the fixed cards of 0.5.33-0.5.35, too small for this one.
+/// The Cube Finder window: the minimap (MapExplorer.tsx) with Cube Finder's own layers and settings, its hidden cube
+/// compass top left like the Map window's. Its place and size are remembered under `window.cubeFinder.*`:
+/// `window.cubeGuide.*` holds the size of the 0.5.36-0.5.40 compass card, too small for a map.
 #[tauri::command]
 pub async fn open_cube_window(app: tauri::AppHandle) -> Result<(), String> {
-    open_widget_window(&app, "cubes", "cubeGuide", "PowerMeter — Hidden cubes", (270.0, 336.0), (135.0, 168.0))
+    open_widget_window(&app, "cubes", "cubeFinder", "PowerMeter — Cube Finder", (360.0, 400.0), (240.0, 320.0))
 }
 
 /// A transparent widget window over the game: dashboard.html drawing only the

@@ -4,13 +4,13 @@ import { listen } from "@tauri-apps/api/event";
 import type { Settings } from "./App";
 import { errorText, initialLanguage, LANGUAGE_SETTING, translator } from "./i18n";
 import { applyPalette } from "./pages/system/theme";
-import { CubeGuide } from "./pages/world/CubeGuide";
 import { MapExplorer } from "./pages/world/MapExplorer";
 
 /**
  * The widget windows over the game, dashboard.html with window.__PM_VIEW__ set (powermeter.rs open_widget_window):
- * "map", the minimap in a transparent window (its controls are Minimap.tsx), full screen the whole map; "cubes", the
- * Hidden cube guide (CubeGuide.tsx). Settings read and followed like the dashboard (App.tsx).
+ * the minimap in a transparent window (its controls are Minimap.tsx, the hidden cube compass CubeGuide.tsx), full
+ * screen the whole map; "map" from the Map page, "cubes" from Cube Finder (its own layers and settings).
+ * Settings read and followed like the dashboard (App.tsx).
  */
 export function MapWindow({ view }: { view: "map" | "cubes" }) {
   const [settings, setSettings] = useState<Settings>();
@@ -45,7 +45,7 @@ export function MapWindow({ view }: { view: "map" | "cubes" }) {
 
   return (
     <div className="mmWin">
-      {settings && (view === "cubes" ? <CubeGuide t={t} lang={lang} settings={settings} run={run} /> : <MapExplorer t={t} settings={settings} run={run} takeFocus fill mini />)}
+      {settings && <MapExplorer t={t} settings={settings} run={run} takeFocus={view === "map"} fill mini cubes={view === "cubes"} />}
       {error && (
         <p className="error mmError" role="alert">
           {errorText(t, error)}

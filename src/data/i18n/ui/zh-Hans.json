@@ -214,7 +214,6 @@
     },
     "berserkTip": "狂暴计时器：最后 30 秒变为红色",
     "phase": "阶段 {n}",
-    "sparkLabel": "DPS 时间曲线",
     "detail": {
       "skill": "技能",
       "damage": "伤害",

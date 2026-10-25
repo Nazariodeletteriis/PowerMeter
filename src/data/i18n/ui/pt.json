@@ -214,7 +214,6 @@
     },
     "berserkTip": "Temporizador de berserk: fica vermelho nos últimos 30 s",
     "phase": "Fase {n}",
-    "sparkLabel": "DPS ao longo do tempo",
     "detail": {
       "skill": "Habilidade",
       "damage": "Dano",

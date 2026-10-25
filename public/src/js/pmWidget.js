@@ -22,7 +22,6 @@ const createPmWidget = (app) => {
     String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
   const OPACITY_LEVELS = [30, 60, 90]; // design 8.1: the three background levels
-  const SPARK_POINTS = 41; // design 8.7: the sparkline's sample count
   const DIAG_AFTER_MS = 20000; // stuck this long without a connection = say why (capture error card)
   const RECENT_MS = 15000; // window for "the adapter sees packets / game packets now"
   // The idle game sends ~19 marked packets a second; random traffic matches the 3-byte
@@ -43,8 +42,6 @@ const createPmWidget = (app) => {
   let lastFight = null; // summary of the last boss fight that ended this session
   let endDismissed = false;
   let upload = null; // { url } once the last fight's log is uploaded
-  let spark = [];
-  let lastSparkAt = 0;
   let detectingSince = 0;
 
   const isActive = () => window.A2_VIEW === "main"; // every theme
@@ -531,25 +528,6 @@ const createPmWidget = (app) => {
     render();
   };
 
-  const drawSpark = () => {
-    const path = $(".pmSpark path");
-    if (!path) return;
-    // Scaled to the fight's own range so the shape reads, as in the design
-    // (its line spans roughly 15-90% of the 40-unit box).
-    const min = Math.min(...spark);
-    const range = Math.max(1, Math.max(...spark) - min);
-    const last = Math.max(1, spark.length - 1);
-    path.setAttribute(
-      "d",
-      spark.length < 2
-        ? ""
-        : spark
-            .map((v, k) => `${k ? "L" : "M"}${((k / last) * 100).toFixed(1)},${(40 - (0.15 + ((v - min) / range) * 0.75) * 36).toFixed(1)}`)
-            .join("")
-    );
-    meter.classList.toggle("hasPmSpark", spark.length > 1);
-  };
-
   // Every poll (100 ms): work out which state the DPS view is in.
   const tick = () => {
     if (!isActive()) return;
@@ -559,8 +537,6 @@ const createPmWidget = (app) => {
     if (fighting && !wasFighting) {
       endDismissed = false;
       upload = null;
-      spark = [];
-      drawSpark();
       const label = $(".pmUploadLabel");
       if (label) label.textContent = t("pmWidget.end.upload", "Upload log");
       if (uploadBtn) uploadBtn.disabled = false;
@@ -600,7 +576,7 @@ const createPmWidget = (app) => {
     setText(".pmPillTime", app.battleTime?.getCombatTimeText?.() || "0:00");
   };
 
-  // After each render: title, HP readout, target extras and the sparkline samples.
+  // After each render: title, HP readout and target extras.
   const onFrame = (next) => {
     frame = next;
     if (avgOn) renderAvg();
@@ -642,13 +618,6 @@ const createPmWidget = (app) => {
         $(".pmStaggerFill").style.width = `${p}%`;
         setText(".pmStaggerPct", `${p}%`);
       }
-    }
-    const now = Date.now();
-    if (wasFighting && now - lastSparkAt >= 1000) {
-      lastSparkAt = now;
-      spark.push(next.rows.reduce((sum, r) => sum + (Number(r.dps) || 0), 0));
-      if (spark.length > SPARK_POINTS) spark.shift();
-      drawSpark();
     }
   };
 

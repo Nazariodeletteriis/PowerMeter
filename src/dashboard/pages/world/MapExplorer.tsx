@@ -31,6 +31,7 @@ import { MAP_LICENSE, MAP_SOURCE, MAP_TYPES, MAPS, MapView, type MapData, type M
 import { GAME_MAPS, toPixel } from "./cubes";
 import CUBE_SPOTS from "../../../data/map/cubes.json";
 import { AllNone, MiniChrome, type GatherGroup, type LayerRow } from "./Minimap";
+import { CubeCompass } from "./CubeGuide";
 import { gatherIcon, loadPoints, MAP_FOCUS_KEY, petSpots, takeMapFocus, type PetFocus } from "./points";
 
 const FOUND_KEY = "pm.map.found";
@@ -38,11 +39,14 @@ const FOUND_KEY = "pm.map.found";
 const HIDDEN_KEY = "pm.map.hidden";
 /** Gathering resources switched on (resource keys): they start off, thousands of nodes. */
 const GATHER_ON_KEY = "pm.map.gather";
-/** Minimap: the map's opacity, and the markers' ("Path Opacity", the game's name for its roads layer). */
+/** Minimap: the map's opacity, the markers' (once "Path Opacity", hence the key) and the hidden cube compass's. */
 const MAP_OPACITY_KEY = "pm.map.mapOpacity";
 const PATH_OPACITY_KEY = "pm.map.pathOpacity";
+const COMPASS_OPACITY_KEY = "pm.map.compassOpacity";
 /** Minimap: the map keeps you in the middle as you move, zoomed in (off and on with its button). */
 const FOLLOW_KEY = "pm.map.follow";
+/** Cube Finder (its page and its widget): the map's own layers and minimap settings, under pm.cubes.*, opening on these only. */
+const CUBE_LAYERS = new Set(["hiddenCube", "teleport", "village"]);
 /** A drag or a zoom by hand on the minimap holds the follow this long; the next position after it brings you back. */
 const FOLLOW_PAUSE_MS = 10_000;
 /** A cube the game shows is new to you (yellow) this long, then it has been standing (red). */
@@ -163,9 +167,10 @@ function You({ t, map, home, onMap, onAt }: { t: T; map: MapData; home?: string;
 
 /**
  * The world map with its layers (aion2-interactive-map markers, gathering nodes, pet spots), the pet panel and
- * full screen. Used by the Map page and by the Map window. `takeFocus`: this one answers "Show on map" (showOnMap).
- * `fill`: the map takes its parent's height instead of the page's. `extra`: more buttons in the top-right row.
- * `mini`: the minimap (Map window), with its own controls (Minimap.tsx) until it goes full screen.
+ * full screen. Used by the Map and Cube Finder pages and by their widget windows. `takeFocus`: this one answers "Show
+ * on map" (showOnMap). `fill`: the map takes its parent's height instead of the page's. `extra`: more buttons in the
+ * top-right row. `mini`: the minimap (widget window), with its own controls (Minimap.tsx) and the hidden cube compass
+ * until it goes full screen. `cubes`: Cube Finder, the same map with its own settings, opening on CUBE_LAYERS.
  */
 export function MapExplorer({
   t,
@@ -175,6 +180,7 @@ export function MapExplorer({
   fill,
   extra,
   mini,
+  cubes,
 }: {
   t: T;
   settings: Settings;
@@ -183,19 +189,25 @@ export function MapExplorer({
   fill?: boolean;
   extra?: ReactNode;
   mini?: boolean;
+  cubes?: boolean;
 }) {
+  const own = (key: string) => (cubes ? key.replace("pm.map.", "pm.cubes.") : key);
   const [mapId, setMapId] = useState(MAPS[0].id);
   const map = MAPS.find((m) => m.id === mapId)!;
   const markers = useMemo(() => markersOf(map), [map]);
-  const [hidden, setHidden] = useStored<Record<string, boolean>>(HIDDEN_KEY, {});
-  const [gatherOn, setGatherOn] = useStored<string[]>(GATHER_ON_KEY, []);
-  const [mapOpacity, setMapOpacity] = useStored<number>(MAP_OPACITY_KEY, 0.85);
-  const [pathOpacity, setPathOpacity] = useStored<number>(PATH_OPACITY_KEY, 1);
-  const [followMe, setFollowMe] = useStored<boolean>(FOLLOW_KEY, true);
+  const [hidden, setHidden] = useStored<Record<string, boolean>>(
+    own(HIDDEN_KEY),
+    cubes ? Object.fromEntries([...Object.keys(LAYERS), "pet"].filter((id) => !CUBE_LAYERS.has(id)).map((id) => [id, true])) : {},
+  );
+  const [gatherOn, setGatherOn] = useStored<string[]>(own(GATHER_ON_KEY), []);
+  const [mapOpacity, setMapOpacity] = useStored<number>(own(MAP_OPACITY_KEY), 0.85);
+  const [pathOpacity, setPathOpacity] = useStored<number>(own(PATH_OPACITY_KEY), 1);
+  const [compassOpacity, setCompassOpacity] = useStored<number>(own(COMPASS_OPACITY_KEY), 1);
+  const [followMe, setFollowMe] = useStored<boolean>(own(FOLLOW_KEY), true);
   const [me, setMe] = useState<[number, number]>();
   const [pausedUntil, setPausedUntil] = useState(0);
   const [marker, setMarker] = useState<Marker | null>(null);
-  const [borders, setBorders] = useState(true);
+  const [borders, setBorders] = useState(!cubes);
   const [found, setFound] = useStored<string[]>(FOUND_KEY, []);
   const [q, setQ] = useState("");
   const [focus, setFocus] = useState<MapFocus>();
@@ -419,7 +431,7 @@ export function MapExplorer({
     <div
       className={["wExplorer", fill && "wFill", compact && "mm"].filter(Boolean).join(" ")}
       data-full={full || undefined}
-      style={compact ? ({ "--mm-map": mapOpacity, "--mm-path": pathOpacity } as CSSProperties) : undefined}
+      style={compact ? ({ "--mm-map": mapOpacity, "--mm-path": pathOpacity, "--mm-compass": compassOpacity } as CSSProperties) : undefined}
     >
       <MapView
         t={t}
@@ -427,6 +439,7 @@ export function MapExplorer({
         focus={focus}
         center={following ? me : undefined}
         onPan={compact ? () => setPausedUntil(Date.now() + FOLLOW_PAUSE_MS) : undefined}
+        zoomButtons={!compact}
         onBareClick={() => setMarker(null)}
         world={
           <>
@@ -507,38 +520,45 @@ export function MapExplorer({
         }
       >
         {compact ? (
-          <MiniChrome
-            t={t}
-            run={run}
-            zone={mapId}
-            zones={MAPS}
-            onZone={pickZone}
-            layers={[
-              ...layerRows,
-              ...(map.regions.length > 0
-                ? [{ id: "borders", icon: <PolygonIcon aria-hidden="true" style={{ fontSize: 15 }} />, name: t("world.map.regions"), on: borders, toggle: () => setBorders(!borders) }]
-                : []),
-            ]}
-            setLayers={(on) => {
-              setLayers(layerRows, on);
-              setBorders(on);
-            }}
-            gather={gatherGroups}
-            setGather={setGather}
-            mapOpacity={mapOpacity}
-            setMapOpacity={setMapOpacity}
-            pathOpacity={pathOpacity}
-            setPathOpacity={setPathOpacity}
-            pets={panel}
-            setPets={setPanel}
-            onFullscreen={() => setFullscreen(true)}
-            follow={following}
-            setFollow={(on) => {
-              setPausedUntil(0);
-              setFollowMe(on);
-            }}
-            credit={credit}
-          />
+          <CubeCompass t={t} settings={settings}>
+            {(next) => (
+              <MiniChrome
+                t={t}
+                run={run}
+                label={cubes ? "cubes" : "map"}
+                zone={mapId}
+                zones={MAPS}
+                onZone={pickZone}
+                layers={[
+                  ...layerRows,
+                  ...(map.regions.length > 0
+                    ? [{ id: "borders", icon: <PolygonIcon aria-hidden="true" style={{ fontSize: 15 }} />, name: t("world.map.regions"), on: borders, toggle: () => setBorders(!borders) }]
+                    : []),
+                ]}
+                setLayers={(on) => {
+                  setLayers(layerRows, on);
+                  setBorders(on);
+                }}
+                gather={gatherGroups}
+                setGather={setGather}
+                opacities={[
+                  { label: t("world.map.mapOpacity"), value: mapOpacity, min: 0, set: setMapOpacity },
+                  { label: t("world.map.iconOpacity"), hint: t("world.map.pathOpacityHint"), value: pathOpacity, min: 0.1, set: setPathOpacity },
+                  { label: t("world.map.compassOpacity"), value: compassOpacity, min: 0, set: setCompassOpacity },
+                ]}
+                pets={panel}
+                setPets={setPanel}
+                onFullscreen={() => setFullscreen(true)}
+                follow={following}
+                setFollow={(on) => {
+                  setPausedUntil(0);
+                  setFollowMe(on);
+                }}
+                credit={credit}
+                rail={next}
+              />
+            )}
+          </CubeCompass>
         ) : (
           <>
             <div className="wPanel">

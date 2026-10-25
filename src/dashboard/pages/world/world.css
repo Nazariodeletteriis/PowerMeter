@@ -582,7 +582,8 @@
    The game's minimap in the DPS widget's dress: its dark surface, hairlines,
    icon colour and red accent (powermeter-theme.css, .meter). The window is
    transparent: --mm-map fades the map, --mm-path the markers, gathering nodes,
-   pet spots and zone borders drawn over it. */
+   pet spots and zone borders drawn over it (Icon Opacity), --mm-compass the
+   hidden cube compass. Zoom is the wheel's. */
 .mmDoc,
 .mmDoc body {
   background: transparent;
@@ -632,33 +633,19 @@
   height: 18px;
 }
 
-/* Top bar: Map Opacity, Path Opacity, close. The gaps drag the window. */
-.mmBar {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  right: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 4;
-}
+/* Options: an opacity, its name over its slider. */
 .mmSlider {
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 4px 8px 5px;
-  border-radius: 6px;
-  background: var(--mm-surf);
-  box-shadow: inset 0 0 0 1px var(--mm-line);
+  gap: 4px;
+  padding: 6px 8px;
 }
-.mmSlider span {
+.mmSlider span,
+.mmZone span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1.2;
   color: var(--mm-icon);
@@ -693,9 +680,8 @@
   border-radius: 2px;
 }
 
-/* The icon column (and the zoom and lock under it): 28px squares like the widget's header buttons. */
-.mmBtn,
-.mm .wZoom button {
+/* The icon column: 28px squares like the widget's header buttons. */
+.mmBtn {
   flex: none;
   display: grid;
   place-items: center;
@@ -711,8 +697,7 @@
   cursor: pointer;
   transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease, scale 100ms var(--mm-ease);
 }
-.mmBtn:active,
-.mm .wZoom button:not(:disabled):active {
+.mmBtn:active {
   scale: 0.94;
 }
 .mmBtn[aria-pressed="true"] {
@@ -720,14 +705,12 @@
   box-shadow: inset 0 0 0 1px var(--mm-hot), 0 0 8px color-mix(in srgb, var(--pm-red) 45%, transparent);
   color: #ffffff;
 }
-.mmBtn:focus-visible,
-.mm .wZoom button:focus-visible {
+.mmBtn:focus-visible {
   outline: 2px solid #ffffff;
   outline-offset: 1px;
 }
 @media (hover: hover) and (pointer: fine) {
-  .mmBtn:not([aria-pressed="true"]):hover,
-  .mm .wZoom button:not(:disabled):hover {
+  .mmBtn:not([aria-pressed="true"]):hover {
     background: color-mix(in srgb, var(--mm-surf) 70%, #ffffff 18%);
     color: #ffffff;
   }
@@ -740,52 +723,27 @@
 }
 .mmRail {
   position: absolute;
-  top: 46px;
+  top: 6px;
   right: 6px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   z-index: 4;
 }
-.mm .wZoom {
-  right: 6px;
-  bottom: 40px;
-  gap: 4px;
-  border: 0;
-  border-radius: 0;
-  overflow: visible;
-  z-index: 4;
-}
-.mm .wZoom button + button {
-  border-top: 0;
-}
-.mm .wZoom button:disabled {
-  color: var(--mm-muted);
-  opacity: 0.5;
-  cursor: default;
-}
-.mmLock {
-  position: absolute;
-  right: 6px;
-  bottom: 6px;
-  z-index: 4;
-}
 
-/* Zone, bottom left: a select dressed as the game's place name. */
+/* Options: the zone, a select dressed as the game's place name. */
 .mmZone {
-  position: absolute;
-  left: 6px;
-  bottom: 6px;
-  max-width: calc(100% - 52px);
+  position: relative;
   display: flex;
-  align-items: center;
-  z-index: 4;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px 8px;
 }
 .mmZone select {
   appearance: none;
   min-width: 0;
   max-width: 100%;
-  height: 24px;
+  height: 26px;
   padding: 0 22px 0 8px;
   border: 0;
   border-radius: 6px;
@@ -804,19 +762,20 @@
 }
 .mmZone svg {
   position: absolute;
-  right: 7px;
+  right: 15px;
+  bottom: 15px;
   font-size: 11px;
   color: var(--mm-icon);
   pointer-events: none;
 }
 
-/* Filter: the Gathering and Layers dropdowns, opening from the funnel (top right). */
+/* Filter (the Gathering and Layers dropdowns) and Options, opening left of the icon column. */
 .mmPop {
   position: absolute;
-  top: 46px;
+  top: 6px;
   right: 40px;
   width: min(250px, calc(100% - 52px));
-  max-height: calc(100% - 88px);
+  max-height: calc(100% - 12px);
   overflow-y: auto;
   padding: 4px;
   border-radius: 8px;
@@ -940,7 +899,7 @@
 
 /* Pets: the Map page's panel, filling the minimap left of the icon column. */
 .mm .wPetPanel {
-  top: 46px;
+  top: 6px;
   right: 40px;
   left: 6px;
   bottom: 6px;
@@ -1011,15 +970,11 @@
   width: 28px;
 }
 
-.mm:has(.wPetPanel) .mmZone {
-  visibility: hidden;
-}
-
 .mmError {
   position: absolute;
   left: 6px;
   right: 40px;
-  top: 46px;
+  top: 6px;
   z-index: 6;
 }
 
@@ -1032,8 +987,7 @@
       scale: 1;
     }
   }
-  .mmBtn:active,
-  .mm .wZoom button:not(:disabled):active {
+  .mmBtn:active {
     scale: 1;
   }
   .mmPop summary svg {
@@ -1041,94 +995,52 @@
   }
 }
 
-/* ---------- Hidden cube guide (CubeGuide.tsx in the cubes window) ----------
-   The minimap's dress (.mm tokens, .mmBtn) on one card: zone and count, a
-   compass in the hidden cube layer's colour (--c) with the distance and the
-   height, the other spots of the place in rows, how old the position is. The
-   card moves the window. Sized to be read over the game: a quarter up on the
-   0.5.34 card (216 x 270), with the window (powermeter.rs open_cube_window). */
-/* CARD: drawn for 270 x 336 and zoomed to the window when it is resized by hand (CubeGuide.tsx fit), so a
-   smaller window is the same card, smaller. `zoom`, not `scale`: the text is laid out again at the size, not blurred. */
+/* ---------- hidden cube compass (CubeGuide.tsx, top left of the minimap) ----------
+   As the design: a round compass, north lit, the arrow to the cube in the
+   hidden cube layer's colour (--c), the distance large beside it and the
+   height under it, readable over the map by their shadow. --mm-compass fades
+   it (Options). Over the map but under the dropdowns and the pet panel. */
 .cg {
-  box-sizing: border-box;
-  position: relative;
-  width: 270px;
-  height: 336px;
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  background: var(--mm-surf);
-  box-shadow: inset 0 0 0 1px var(--mm-line);
-  color: #f5f2f2;
-  user-select: none;
-  cursor: move;
-}
-.cg[data-locked] {
-  cursor: default;
-}
-.cgHead {
-  display: flex;
-  align-items: flex-start;
-  gap: 4px;
-}
-.cgTitle {
-  flex: 1;
-  min-width: 0;
-  padding: 1px 2px 0;
-}
-.cgZone {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.3;
-}
-.cgSub {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  font-size: 12.5px;
-  line-height: 1.4;
-  color: var(--mm-muted);
-}
-/* The target: compass on the left, distance and height on the right. */
-.cgMain {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  max-width: calc(100% - 52px);
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 8px;
+  opacity: var(--mm-compass, 1);
+  color: #f5f2f2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.6);
+  user-select: none; /* a drag on it still pans the map (MapView) */
+  z-index: 3;
 }
 .cgCompass {
   position: relative;
   flex: none;
   display: grid;
   place-items: center;
-  width: 80px;
-  height: 80px;
-  box-shadow: inset 0 0 0 1px var(--mm-line);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(15, 17, 20, 0.55), rgba(15, 17, 20, 0.88));
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.22), 0 2px 8px rgba(0, 0, 0, 0.5);
   color: var(--c);
-  font-size: 32px;
+  font-size: 30px;
   isolation: isolate; /* the aim cone (z-index -1) under the arrow, over the fill */
 }
 /* The target is a cube standing now, not a spot: the compass fills with the cube colour. */
-.cgCompass[data-live] {
-  background: color-mix(in srgb, var(--c) 18%, transparent);
-  box-shadow: inset 0 0 0 1px var(--c);
+.cg[data-live] .cgCompass {
+  background: radial-gradient(circle, color-mix(in srgb, var(--c) 30%, rgba(15, 17, 20, 0.6)), rgba(15, 17, 20, 0.88));
+  box-shadow: inset 0 0 0 2px var(--c), 0 2px 8px rgba(0, 0, 0, 0.5);
 }
-.cgLive {
-  color: var(--c);
-  font-weight: 600;
-}
-/* A cube just showed up: the card's rim flashes three times in the cube colour. The rim is its own layer and only
-   its opacity moves, so the card is not repainted on every frame. */
-.cg[data-alert]::after {
+/* A cube just showed up: the compass rim flashes three times in the cube colour. The rim is its own layer and only
+   its opacity moves. */
+.cg[data-alert] .cgCompass::after {
   content: "";
   position: absolute;
-  inset: 0;
-  box-shadow: inset 0 0 0 3px var(--c);
-  pointer-events: none;
+  inset: -3px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--c), 0 0 14px var(--c);
   animation: cgAlert 1s cubic-bezier(0.23, 1, 0.32, 1) 3;
 }
 @keyframes cgAlert {
@@ -1140,62 +1052,59 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cg[data-alert]::after {
+  .cg[data-alert] .cgCompass::after {
     animation: none;
   }
 }
-/* N E S W on the compass rim at --a (0 = up), kept upright. */
+/* N E S W on the compass rim at --a (0 = up), kept upright; north in the teleport gold. */
 .cgCard {
   position: absolute;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1;
-  color: var(--mm-muted);
-  transform: rotate(var(--a)) translateY(-31px) rotate(calc(-1 * var(--a)));
+  color: #f5f2f2;
+  transform: rotate(var(--a)) translateY(-26px) rotate(calc(-1 * var(--a)));
+}
+.cgCard:first-child {
+  color: #e8b03a;
 }
 /* Where your last cast aimed (bearing --a, 0 = north): a soft cone from the
    centre, like the view cone on the game's minimap, under the cube's arrow. */
 .cgAim {
   position: absolute;
-  inset: 1px;
+  inset: 2px;
   z-index: -1;
-  background: conic-gradient(from calc(var(--a) - 30deg), rgb(255 255 255 / 0.24) 0 60deg, transparent 0);
-}
-/* The same cone, small, before its line in the footer. */
-.cgAimKey {
-  display: inline-block;
-  width: 11px;
-  height: 11px;
-  margin-right: 4px;
-  vertical-align: -1px;
-  background: conic-gradient(from -30deg, rgb(255 255 255 / 0.55) 0 60deg, transparent 0);
-  box-shadow: inset 0 0 0 1px var(--mm-line);
-}
-.cgCard:first-child {
-  color: var(--mm-icon);
+  border-radius: 50%;
+  background: conic-gradient(from calc(var(--a) - 30deg), rgb(255 255 255 / 0.3) 0 60deg, transparent 0);
 }
 .cgRead {
   min-width: 0;
 }
+.cgLive {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c);
+}
 .cgDist {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  line-height: 1.15;
+  line-height: 1.1;
+  color: #f7e9c8;
 }
 /* Up and down carets, the one the cube lies towards lit, and how far. */
 .cgClimb {
   display: flex;
   align-items: center;
   gap: 2px;
-  margin-top: 2px;
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--mm-muted);
+  color: var(--mm-icon);
 }
 .cgClimb svg {
   font-size: 17px;
-  opacity: 0.35;
+  opacity: 0.45;
 }
 .cgClimb svg[data-on] {
   opacity: 1;
@@ -1205,58 +1114,16 @@
   margin-left: 2px;
   color: #f5f2f2;
 }
-/* The other spots of the place, one compact row each. */
-.cgList {
-  display: grid;
-  gap: 1px;
-  margin: 8px 0 0;
-  padding: 5px 0 0;
-  list-style: none;
-  border-top: 1px solid var(--mm-line);
-}
-.cgList li {
-  display: grid;
-  grid-template-columns: 20px 1fr auto;
-  align-items: center;
-  gap: 8px;
-  padding: 0 2px;
-  font-size: 14px;
-  line-height: 21px;
-  font-variant-numeric: tabular-nums;
-}
-.cgList svg {
-  color: var(--c);
-  font-size: 16px;
-}
-.cgListZ {
-  color: var(--mm-muted);
-}
 .cgEmpty {
-  flex: 1;
-  display: grid;
-  place-items: center;
-  margin: 0;
-  padding: 0 6px;
-  text-align: center;
-  font-size: 15px;
-  line-height: 1.4;
-  color: var(--mm-icon);
-}
-.cgFoot {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 28px;
-  margin-top: auto;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 .cgWhen {
-  flex: 1;
-  min-width: 0;
-  display: grid;
-  padding-left: 2px;
-  font-size: 12.5px;
+  margin-top: 2px;
+  font-size: 10.5px;
   line-height: 1.3;
-  color: var(--mm-muted);
+  color: var(--mm-icon);
 }
 
 /* ---------- database (prototype pg.database / pg.item) ---------- */
