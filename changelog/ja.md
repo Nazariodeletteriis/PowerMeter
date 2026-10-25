@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.43
+
+- 変更: DPSウィジェット、コンパクトモード: 新しい3列レイアウト。左の列にPing・DPS/HEAL/AGGRO・設定・最小化、中央にターゲットとプレイヤーのDPS(下に割合)、下部に合計DPS、右に入場回数とキーのカウンター用の列。
+
 ## 0.5.42
 
 - 変更: ワールド、Cube Finder: メニューから直接 Cube Finder ウィジェットを開きます(ダッシュボードのページはマップと重複していました)。

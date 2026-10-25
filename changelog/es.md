@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.43
+
+- Cambiado: Widget DPS, modo compacto: nuevo diseño en tres columnas. Ping, DPS/HEAL/AGGRO, ajustes y minimizar en una columna a la izquierda; en el centro el objetivo, los jugadores y su DPS con el porcentaje debajo; abajo el DPS total; a la derecha una columna lista para los contadores de entradas y llaves.
+
 ## 0.5.42
 
 - Cambiado: Mundo, Cube Finder: la entrada del menú abre directamente el widget Cube Finder (la página del panel duplicaba el Mapa).

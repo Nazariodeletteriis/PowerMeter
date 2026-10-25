@@ -49,11 +49,11 @@ const createPmWidget = (app) => {
   // --- widget layout: lift the fight timer into the bar, and the target selector (the BOSS
   // badge), the HP bar and the timer box into the boss row. Moved rather than duplicated so
   // core.js keeps driving them; put back where A2Tools had them outside the overlay. Compact
-  // hides the boss row, so the selector and the fight time stay home there, in its footer
-  // (footerHome). Reset lives in the footer, bottom left, in both layouts.
+  // hides the timer box, so it stays home there, in its footer (footerHome). Reset lives in
+  // the footer in both layouts.
   const moves = [
     [document.querySelector(".battleTime"), $(".pmBarTitle"), "before"],
-    [document.querySelector(".targetModeBtn"), $(".pmBerserk"), "after", true],
+    [document.querySelector(".targetModeBtn"), $(".pmBerserk"), "after"],
     [$(".bossHpBar"), $(".bossNames"), "append"],
     [$(".pmDuration"), $(".bossNames"), "append", true],
   ]
@@ -492,6 +492,15 @@ const createPmWidget = (app) => {
     const el = $(sel);
     if (el && el.textContent !== text) el.textContent = text;
   };
+  // Compact footer: the party's total DPS (every player in the fight, as core.js updateMeterTotalBar),
+  // in the rows' own format. DPS tab only: the other tabs' rows are not damage per second.
+  const renderTotal = () => {
+    const el = $(".pmTotal");
+    const rows = frame?.rows || [];
+    if (!el) return;
+    el.hidden = mode !== "dps" || !rows.length;
+    if (!el.hidden) setText(".pmTotalDps", app.formatDpsThousands(rows.reduce((sum, r) => sum + (Number(r?.dps) || 0), 0)));
+  };
   const render = () => {
     meter.querySelectorAll(".pmTab").forEach((tab) => {
       const on = tab.dataset.pmMode === mode;
@@ -519,6 +528,7 @@ const createPmWidget = (app) => {
     meter.classList.toggle("hasPmLast", !!lastFight);
     setText(".pmModeTitle", app.getDefaultTargetLabel?.(frame?.targetMode || app.targetSelection) || "");
     if (avgOn) renderAvg();
+    renderTotal();
   };
 
   const setView = (next) => {
@@ -580,6 +590,7 @@ const createPmWidget = (app) => {
   const onFrame = (next) => {
     frame = next;
     if (avgOn) renderAvg();
+    renderTotal();
     setText(".pmModeTitle", app.getDefaultTargetLabel?.(next.targetMode || app.targetSelection) || "");
     // HP as the design writes it ("5.076.235 HP - 61,8%"), same remaining-HP rule as core.js updateBossHpBar.
     const maxHp = Number(next.targetMaxHp) || 0;

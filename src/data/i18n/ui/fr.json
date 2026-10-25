@@ -302,6 +302,7 @@
     "eventPopupTest": "Popup de test",
     "pillHint": "Cliquer pour agrandir · glisser pour déplacer",
     "copy": "Copier en image pour Discord",
-    "copied": "Copié, collez-le dans Discord"
+    "copied": "Copié, collez-le dans Discord",
+    "totalDps": "DPS total"
   }
 }

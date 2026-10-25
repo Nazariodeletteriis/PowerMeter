@@ -302,6 +302,7 @@
     "eventPopupTest": "테스트 팝업",
     "pillHint": "클릭하여 펼치기 · 드래그하여 이동",
     "copy": "Discord용 이미지로 복사",
-    "copied": "복사됨, Discord에 붙여넣으세요"
+    "copied": "복사됨, Discord에 붙여넣으세요",
+    "totalDps": "총 DPS"
   }
 }

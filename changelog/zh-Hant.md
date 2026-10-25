@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.43
+
+- 變更：DPS 小工具精簡模式：全新三欄版面。左欄為延遲、DPS/HEAL/AGGRO、設定和最小化；中間為目標、玩家及其 DPS（下方為占比）；底部為總 DPS；右欄留給入場次數和鑰匙計數。
+
 ## 0.5.42
 
 - 變更：世界，Cube Finder：選單項目直接開啟 Cube Finder 小工具（儀表板頁面與地圖重複）。

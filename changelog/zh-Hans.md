@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.43
+
+- 更改：DPS 小组件紧凑模式：全新三栏布局。左栏为延迟、DPS/HEAL/AGGRO、设置和最小化；中间为目标、玩家及其 DPS（下方为占比）；底部为总 DPS；右栏留给入场次数和钥匙计数。
+
 ## 0.5.42
 
 - 更改：世界，Cube Finder：菜单项直接打开 Cube Finder 小组件（仪表盘页面与地图重复）。

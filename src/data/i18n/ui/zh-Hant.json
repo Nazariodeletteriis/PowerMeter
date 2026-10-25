@@ -302,6 +302,7 @@
     "eventPopupTest": "測試彈窗",
     "pillHint": "點擊展開 · 拖曳以移動",
     "copy": "複製為圖片，用於 Discord",
-    "copied": "已複製，貼到 Discord"
+    "copied": "已複製，貼到 Discord",
+    "totalDps": "總 DPS"
   }
 }

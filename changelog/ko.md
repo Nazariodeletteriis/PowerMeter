@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.43
+
+- 변경: DPS 위젯 컴팩트 모드: 새 3열 레이아웃. 왼쪽 열에 핑, DPS/HEAL/AGGRO, 설정, 최소화; 가운데에 대상과 플레이어 DPS(아래에 비율); 아래에 총 DPS; 오른쪽에 입장 횟수와 열쇠 카운터용 열.
+
 ## 0.5.42
 
 - 변경: 월드, Cube Finder: 메뉴 항목이 Cube Finder 위젯을 바로 엽니다(대시보드 페이지는 지도와 중복이었습니다).

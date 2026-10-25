@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.43
+
+- Changed: DPS widget, compact mode: new three-column layout. Ping, DPS/HEAL/AGGRO, settings and minimise in a column on the left; target, players and their DPS with the share under it in the middle; total DPS at the bottom; a column on the right ready for the entry and key counters.
+
 ## 0.5.42
 
 - Changed: World, Cube Finder: the menu entry opens the Cube Finder widget straight away (the dashboard page was the Map page again).

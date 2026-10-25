@@ -1267,7 +1267,8 @@
   .pingDisplay,
   .meterTotalBar,
   .meterTotalBar[style] { display: none !important; }
-  .pmSample { display: none; }
+  .pmSample,
+  .pmTotal { display: none; } /* the total: Compact only, see .meter.slim .pmTotal */
   /* Live: blinks while the meter runs; amber / red when the ping is high. */
   .pmLiveDot {
     display: block;
@@ -1306,76 +1307,223 @@
   .meterFooter:has(.pingDisplay.ping-warn) .pmLiveDot { --dot: #e8b03a; }
   .meterFooter:has(.pingDisplay:is(.ping-high, .ping-bad)) .pmLiveDot { --dot: #ff4d4d; }
 
-  /* --- Compact ("betaSlim"): the same language at 280px. Bar with logo and the
-     centred timer (controls on hover); rows of rank badge, class icon, name, DPS
-     and %, the DPS bar drawn as a 2px line under them; target badge, Reset, Only
-     my DPS and Trainer in the footer. --- */
+  /* --- Compact ("slim"), October 2026 design: three columns.
+     Left, the side rail: signal, the DPS / HEAL / AGGRO tabs stacked (icon over label),
+     settings and pill at the foot. Centre: the top row (event notice + character), a thin
+     bar (timer or status; the window controls on hover), the target row (crest, target
+     badge, title, what is recording), the party rows and the footer with the total DPS.
+     Right: the character's counters stacked (.pmCounters, charBar.ts), only while they
+     have something to show. The rail and the counters are absolutely placed in the
+     meter's padding, so no element is duplicated or moved for them. --- */
   .meter.slim {
-    --pm-row-cols: 20px 6px 20px 7px minmax(0, 1fr) 0 auto 42px 0;
-    width: 280px;
+    --pm-side: 58px;     /* left rail width */
+    --pm-count: 66px;    /* counters column width */
+    --pm-side-min: 280px; /* rail height: signal + three tabs + settings + pill, with air */
+    --pm-row-cols: 22px 7px 22px 8px minmax(0, 1fr) minmax(34px, 0.85fr) minmax(52px, auto) 0 0;
+    width: 400px;
     min-height: 160px;
   }
-  .meter.slim :is(.header .bossNames, .bossHpBar, .pmCols) { display: none; }
-  /* The Compact bar is logo and timer only; the controls come back on hover
-     so the widget stays usable. */
-  .meter.slim:not(:hover, :has(:focus-visible)) :is(.pmTabs, .headerBtn) { display: none; }
-  .meter.slim :is(.pmTabs, .bossIcon, .suspendBtn, .historyBtn, .resetBtn, .pmAvgBtn) { display: none; }
+  /* The rail and the counters live in the padding; the breakdown, the Trainer and the
+     pill take the whole widget, so they have neither. */
+  .meter.slim:not(.isPmDetail, .isPmTrainer, .isPmPill) {
+    padding-left: var(--pm-side);
+    /* Never shorter than the rail (the resize grip keeps its own min-height inline). */
+    height: calc-size(auto, max(size, var(--pm-side-min)));
+  }
+  .meter.slim:not(.isPmDetail, .isPmTrainer, .isPmPill):has(.pmCharBar:not([hidden]) .pmCounters:not(:empty)) {
+    padding-right: var(--pm-count);
+  }
+  .meter.slim:not(.isPmDetail, .isPmTrainer, .isPmPill)::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--pm-side);
+    box-sizing: border-box;
+    border-right: 1px solid var(--pm-ui-line);
+    border-radius: 9px 0 0 9px;
+    background: var(--pm-wsurf);
+    pointer-events: none;
+  }
+  .meter.slim :is(.bossHpBar, .pmCols) { display: none; }
+  /* The bar's window controls come back on hover, so the widget stays usable; settings and
+     the pill stay on the rail. */
+  .meter.slim:not(:hover, :has(:focus-visible)) .headerBtn:not(.settingsBtn, .pmPillBtn) { display: none; }
+  .meter.slim :is(.bossIcon, .suspendBtn, .historyBtn, .resetBtn, .pmAvgBtn) { display: none; }
   .meter.slim .header {
     gap: 0 2px;
-    background-position: 0 33px;
+    padding-right: 4px;
+    background-position: 0 27px;
   }
-  .meter.slim .pmSignal { gap: 4px; padding: 4px 8px; }
-  .meter.slim .pmLogo {
-    width: 14px;
-    height: 14px;
+
+  /* Rail: signal at the head, tabs under it, settings and pill at the foot. */
+  .meter.slim .pmSignal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--pm-side);
+    height: 34px;
+    box-sizing: border-box;
+    justify-content: center;
+    gap: 4px;
+    padding: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--pm-ui-line);
   }
+  .meter.slim .pmLogo { width: 13px; height: 13px; }
   .meter.slim .pmSignalMs { font-size: 10px; }
-  /* Compact: the mode's name ("PowerMeter", "Boss Targets") scaled down like the boss name, not at full bar size. */
-  .meter.slim :is(.pmModeTitle, .pmAvgTitle) { font-size: calc(var(--boss-name-size, 15px) * 0.85); }
-  /* The spacer stays as a zero-width strut holding the bar at 34px: the bar's rule is
-     painted at 33px, and without the timer (hidden while idle, core.js setVisible)
-     the bar shrank to the signal's 22px, so the rule cut 11px into the title row. */
-  .meter.slim .header .pmSpacer { flex: none; width: 0; height: 34px; margin-left: -2px; } /* -2px: the bar's column gap */
-  .meter.slim .battleTime { height: 34px; font-size: 13px; }
+  .meter.slim .pmTabs {
+    position: absolute;
+    top: 42px;
+    left: 0;
+    width: var(--pm-side);
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+  }
+  .meter.slim .pmTab,
+  .meter.slim .pmTab.isActive {
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    width: 46px;
+    height: 44px;
+    padding: 0;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+  .meter.slim .pmTab svg,
+  .meter.slim .pmTab.isActive svg { width: 16px; height: 16px; }
+  .meter.slim .pmTab + .pmTab { margin-left: 0; }
+  /* The hairline between tabs runs across the rail here, not down it. */
+  .meter.slim .pmTab + .pmTab::before {
+    top: -5px;
+    right: 6px;
+    bottom: auto;
+    left: 6px;
+    width: auto;
+    height: 1px;
+  }
+  .meter.slim .header :is(.settingsBtn, .pmPillBtn) {
+    position: absolute;
+    left: calc((var(--pm-side) - 28px) / 2);
+    width: 28px;
+    height: 28px;
+    margin: 0;
+  }
+  .meter.slim .header .settingsBtn { bottom: 40px; }
+  .meter.slim .header .pmPillBtn { bottom: 8px; }
+  .meter.slim .header .settingsBtn::after {
+    top: auto;
+    right: 2px;
+    bottom: -6px;
+    left: 2px;
+    width: auto;
+    height: 1px;
+  }
+
+  /* Bar: timer or status, and the window controls on hover. The spacer is a strut holding
+     it at 28px when the timer is hidden (idle, core.js setVisible): its rule is painted at 27px. */
+  .meter.slim .header .pmSpacer { flex: 1 1 0; height: 28px; }
+  .meter.slim .battleTime { height: 28px; padding-left: 10px; font-size: 12px; }
   .meter.slim .battleTime .tick { font-size: 13px; }
-  .meter.slim .battleTime .analysisStatus { font-size: 12px; }
+  .meter.slim .battleTime .analysisStatus { font-size: 11px; }
   .meter.slim .header .headerBtns .headerBtn { width: 24px; height: 24px; }
   .meter.slim .header :is(.pmPillBtn, .dashboardBtn, .pmCloseBtn) { margin-left: 0; }
-  .meter.slim .header :is(.settingsBtn, .pmAvgBtn, .pmCopyBtn, .pmLockBtn, .pmOpacityBtn)::after { content: none; }
+  .meter.slim .header :is(.pmAvgBtn, .pmCopyBtn, .pmLockBtn, .pmOpacityBtn)::after { content: none; }
   .meter.slim .header .headerBtns .headerBtn svg { width: 13px; height: 13px; }
-  .meter.slim .list.hasRows { gap: 3px; padding: 6px 6px 6px; }
-  .meter.slim .list .item {
-    height: 26px;
-    padding: 0 8px 0 5px;
-    border-radius: 5px;
+  .meter.slim .header .headerBtns :is(.settingsBtn, .pmPillBtn) svg { width: 16px; height: 16px; }
+
+  /* Target row: crest | target badge, title | what is recording, as the Interface layout's
+     boss row at half the height. */
+  .meter.slim .header .bossNames {
+    grid-template-columns: 30px auto minmax(0, 1fr) auto;
+    grid-template-rows: 22px 18px;
+    column-gap: 8px;
+    row-gap: 2px;
+    padding: 6px 10px 7px 10px;
   }
+  .meter.slim .pmEmblem { width: 32px; height: 40px; margin: 0 0 0 -2px; }
+  .meter.slim :is(.pmModeTitle, .pmAvgTitle) { font-size: calc(var(--boss-name-size, 15px) * 16 / 15); }
+  .meter.slim .header .bossNames .bossName { font-size: calc(var(--boss-name-size, 15px) * 1.2); }
+  .meter.slim .pmBerserk { grid-area: 1 / 4 / 3 / 5; font-size: 12px; }
+
+  /* Rows: rank badge, class tile, name, bar in the class colour, then the DPS over its share. */
+  .meter.slim .list.hasRows { gap: 4px; padding: 7px 8px 8px; }
+  .meter.slim .list .item {
+    grid-template-rows: auto auto;
+    align-content: center;
+    height: 38px;
+    padding: 0 9px 0 6px;
+    border-radius: 6px;
+  }
+  .meter.slim .list .item :is(.rank, .classIcon, .name, .fillTrack) { grid-row: 1 / 3; }
   .meter.slim .list .item .rank {
-    width: 20px;
-    height: 19px;
+    width: 22px;
+    height: 21px;
     font-size: 11px;
   }
   .meter.slim .list .item .classIcon {
-    width: 20px;
-    height: 20px;
-    border-radius: 3px;
-    background-size: 14px, auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background-size: 15px, auto;
   }
-  .meter.slim .list .item .name { padding-right: 6px; font-size: 12px; }
+  .meter.slim .list .item .name { padding-right: 8px; font-size: 13px; }
   .meter.slim .list .item .name::after { content: none; }
   .meter.slim .list .item .fillTrack {
-    grid-column: 5 / 9;
-    align-self: end;
-    height: 2px;
-    margin-bottom: 2px;
-    padding-right: 0;
-    border-radius: 1px;
+    height: 8px;
+    margin-right: 10px;
+    border-radius: 3px;
   }
-  .meter.slim .list .item .fill { border-radius: 1px; }
-  .meter.slim .list .item .dps > p:first-child { font-size: 12px; }
+  .meter.slim .list .item .fill { border-radius: 3px; }
+  .meter.slim .list .item .dps > p:first-child {
+    grid-row: 1;
+    align-self: end;
+    font-size: 14px;
+    line-height: 1.15;
+  }
   .meter.slim .list .item .dps .dpsTotal { display: none; }
-  .meter.slim .list .item .dps .dpsContribution { font-size: 11px; text-align: right; }
-  .meter.slim .meterFooter { gap: 6px; padding: 0 8px; }
+  .meter.slim .list .item .dps .dpsContribution {
+    grid-column: 7;
+    grid-row: 2;
+    align-self: start;
+    font-size: 11px;
+    line-height: 1.2;
+    text-align: right;
+  }
+  .meter.slim .list .item .dps .dpsContribution::before { content: "("; }
+  .meter.slim .list .item .dps .dpsContribution::after { content: ")"; }
+
+  /* Footer: the party's total DPS on the left, Reset, Only my DPS and Trainer on the right. */
+  .meter.slim .meterFooter { gap: 6px; height: 32px; padding: 0 8px 0 12px; }
   .meter.slim .pmDuration { display: none; } /* the timer is already in the bar */
+  .meter.slim .pmTotal {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+    margin-right: 6px;
+    white-space: nowrap;
+  }
+  .meter.slim .pmTotal[hidden] { display: none; }
+  .meter.slim .pmTotalLabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--pm-ui-muted);
+  }
+  .meter.slim .pmTotalDps {
+    font-size: 15px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #ffffff;
+  }
   .meter.slim .pmLiveResetBtn {
     width: 22px;
     height: 20px;
@@ -1385,7 +1533,37 @@
   }
   .meter.slim .pmLiveResetBtn span { display: none; } /* icon only; named by aria-label */
   .meter.slim .pmLiveResetBtn svg { width: 12px; height: 12px; }
-  /* The cards' actions are laid out for the Interface width: at 280px they ran past the
+
+  /* Counters column (right): one entry per line, icon over the count. */
+  .meter.slim:not(.isPmDetail, .isPmTrainer, .isPmPill) .pmCounters {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: var(--pm-count);
+    box-sizing: border-box;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 4px 0;
+    overflow: hidden;
+    border-left: 1px solid var(--pm-ui-line);
+    border-radius: 0 9px 9px 0;
+    background: var(--pm-wsurf);
+    font-size: 12px;
+    text-align: center;
+  }
+  .meter.slim .pmCounters > * {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 4px;
+  }
+  .meter.slim .pmCounters > * + * { border-top: 1px solid var(--pm-ui-line); }
+
+  .meter.slim .pmEventPopup { left: calc(var(--pm-side) + 8px); }
+  /* The cards' actions are laid out for the Interface width: at the compact width they ran past the
      window and squeezed the text into a one-word column. Here they wrap under the text
      instead, each label whole; the card's Reset is the footer's, right below. */
   .meter.slim .pmEndResetBtn { display: none; }
@@ -1495,14 +1673,6 @@
   }
   /* An empty mode still shows what the engine is recording and the mode button, to switch to it. */
   .meter.pmMode-dps.pmView-waiting:not(.isPmAvg) .header .bossNames { display: grid; }
-  /* Compact has no boss row: the mode's name and the recording chip on one line. */
-  .meter.slim.pmMode-dps.pmView-waiting:not(.isPmAvg) .header .bossNames {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-  }
-  .meter.slim .pmEmblem { display: none; }
   /* The footer too: the Trainer starts from the dummy, before any fight is on screen. */
   .meter.pmMode-dps.pmView-waiting.pmView-waiting:not(.isPmAvg) .meterFooter { display: flex; } /* class doubled: outweighs the :is() hide above */
   .meter.pmMode-dps.pmView-waiting { min-height: 220px; }
