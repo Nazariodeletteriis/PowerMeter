@@ -1,5 +1,6 @@
 pub mod captured_payload;
 pub mod combat_port_detector;
+pub mod counters;
 pub mod equip_parser;
 pub mod file_replay;
 pub mod packet_accumulator;

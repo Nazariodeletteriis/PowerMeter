@@ -303,6 +303,9 @@
     "pillHint": "Clique para expandir · arraste para mover",
     "copy": "Copiar como imagem para o Discord",
     "copied": "Copiado, cole no Discord",
-    "totalDps": "DPS total"
+    "totalDps": "DPS total",
+    "counterDailyDungeon": "Masmorra diária",
+    "counterShugoKeys": "Chaves do festival Shugo",
+    "counterOdyle": "Odyle"
   }
 }

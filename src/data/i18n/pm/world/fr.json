@@ -196,6 +196,8 @@
   "world.map.iconOpacity": "Opacité des icônes",
   "world.map.compassOpacity": "Opacité de la boussole",
   "world.map.options": "Options",
+  "world.map.hideInMenus": "Masquer dans les menus du jeu",
+  "world.map.hideInMenusHint": "Quand Aion 2 affiche le pointeur (sac, carte, menus), la minicarte s'efface. Désactivez-le si vous jouez avec le pointeur toujours libre (commandes Aion 1).",
   "world.map.pathOpacityHint": "Repères, points de récolte, emplacements des familiers et limites de zone",
   "world.map.move": "Déplacer",
   "world.map.filter": "Filtre",

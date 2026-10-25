@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.44
+
+- Nouveau : Widget DPS : entrées du donjon quotidien, clés du festival Shugo et Odyle comme le jeu les affiche (base (+chargées) / max), à côté de votre personnage, et dans la colonne de droite en mode compact. Ils se mettent à jour à la connexion, au changement de personnage ou quand vous en dépensez un.
+- Nouveau : Minicarte et Cube Finder se masquent tant qu'un menu du jeu est ouvert (sac, carte, menus : quand Aion 2 affiche le pointeur) et reviennent quand vous le fermez. Options, Masquer dans les menus du jeu : désactivez-le si vous jouez avec le pointeur toujours libre (commandes Aion 1).
+
 ## 0.5.43
 
 - Modifié : Widget DPS, mode compact : nouvelle disposition en trois colonnes. Ping, DPS/HEAL/AGGRO, réglages et réduire dans une colonne à gauche ; au centre la cible, les joueurs et leur DPS avec la part dessous ; en bas le DPS total ; à droite une colonne prête pour les compteurs d'entrées et de clés.

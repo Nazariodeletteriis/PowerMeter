@@ -970,6 +970,11 @@
   width: 28px;
 }
 
+/* A game menu is open (MapExplorer.tsx): out of sight; the window lets the mouse through meanwhile. */
+.mm[data-away] {
+  visibility: hidden;
+}
+
 .mmError {
   position: absolute;
   left: 6px;

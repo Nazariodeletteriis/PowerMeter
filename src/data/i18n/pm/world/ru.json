@@ -196,6 +196,8 @@
   "world.map.iconOpacity": "Прозрачность значков",
   "world.map.compassOpacity": "Прозрачность компаса",
   "world.map.options": "Настройки",
+  "world.map.hideInMenus": "Скрывать в меню игры",
+  "world.map.hideInMenusHint": "Пока Aion 2 показывает указатель мыши (сумка, карта, меню), мини-карта скрывается. Отключите, если играете со всегда свободным указателем (управление Aion 1).",
   "world.map.pathOpacityHint": "Метки, точки сбора, места питомцев и границы зон",
   "world.map.move": "Переместить",
   "world.map.filter": "Фильтр",

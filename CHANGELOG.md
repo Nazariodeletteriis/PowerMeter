@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.44
+
+- New: DPS widget: your Daily Dungeon entries, Shugo Festival keys and Odyle, as the game shows them (base (+charged) / max), next to your character, and in the right-hand column in compact mode. They update when you log in, change character or spend one.
+- New: Minimap and Cube Finder: they hide while a game menu is open (bag, map, menus: when Aion 2 shows the mouse pointer) and come back when you close it. Options, Hide in game menus: turn it off if you play with the pointer always free (Aion 1 controls).
+
 ## 0.5.43
 
 - Changed: DPS widget, compact mode: new three-column layout. Ping, DPS/HEAL/AGGRO, settings and minimise in a column on the left; target, players and their DPS with the share under it in the middle; total DPS at the bottom; a column on the right ready for the entry and key counters.

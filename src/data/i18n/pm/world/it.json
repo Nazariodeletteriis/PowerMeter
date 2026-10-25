@@ -196,6 +196,8 @@
   "world.map.iconOpacity": "Opacità icone",
   "world.map.compassOpacity": "Opacità bussola",
   "world.map.options": "Opzioni",
+  "world.map.hideInMenus": "Nascondi nei menu del gioco",
+  "world.map.hideInMenusHint": "Quando Aion 2 mostra il puntatore del mouse (zaino, mappa, menu) la minimappa si toglie di mezzo. Spegnilo se giochi col puntatore sempre libero (comandi Aion 1).",
   "world.map.pathOpacityHint": "Segnalini, punti di raccolta, punti dei pet e confini delle zone",
   "world.map.move": "Sposta",
   "world.map.filter": "Filtri",

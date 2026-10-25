@@ -45,6 +45,9 @@ const PATH_OPACITY_KEY = "pm.map.pathOpacity";
 const COMPASS_OPACITY_KEY = "pm.map.compassOpacity";
 /** Minimap: the map keeps you in the middle as you move, zoomed in (off and on with its button). */
 const FOLLOW_KEY = "pm.map.follow";
+/** Minimap: out of the way while a game menu is open (Aion 2 in front, the mouse pointer shown), checked this often. */
+const HIDE_IN_MENUS_KEY = "pm.map.hideInMenus";
+const MENU_POLL_MS = 250;
 /** Cube Finder (its widget, opened from the menu): the map's own layers and minimap settings, under pm.cubes.*, opening on these only. */
 const CUBE_LAYERS = new Set(["hiddenCube", "teleport", "village"]);
 /** A drag or a zoom by hand on the minimap holds the follow this long; the next position after it brings you back. */
@@ -204,6 +207,8 @@ export function MapExplorer({
   const [pathOpacity, setPathOpacity] = useStored<number>(own(PATH_OPACITY_KEY), 1);
   const [compassOpacity, setCompassOpacity] = useStored<number>(own(COMPASS_OPACITY_KEY), 1);
   const [followMe, setFollowMe] = useStored<boolean>(own(FOLLOW_KEY), true);
+  const [hideInMenus, setHideInMenus] = useStored<boolean>(own(HIDE_IN_MENUS_KEY), true);
+  const [away, setAway] = useState(false);
   const [me, setMe] = useState<[number, number]>();
   const [pausedUntil, setPausedUntil] = useState(0);
   const [marker, setMarker] = useState<Marker | null>(null);
@@ -294,6 +299,22 @@ export function MapExplorer({
     return () => window.removeEventListener("keydown", key);
   }, [full]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => void getCurrentWindow().setFullscreen(false).catch(() => {}), []); // leaving the page while full
+
+  // A game menu open (the pointer shows over Aion 2): the minimap hides and lets the mouse through to the game. With
+  // the pointer always free (Aion 1 controls) it would never show: the option turns it off.
+  const watchMenus = mini && !full && hideInMenus;
+  useEffect(() => {
+    if (!watchMenus) return setAway(false);
+    let alive = true;
+    const id = setInterval(() => invoke<boolean>("game_pointer_free").then((free) => alive && setAway(free), () => {}), MENU_POLL_MS);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, [watchMenus]);
+  useEffect(() => {
+    if (mini) getCurrentWindow().setIgnoreCursorEvents(away).catch(() => {});
+  }, [mini, away]);
 
   // Named places keep their English game name; the rest use the type
   // (world.marker.<subtype>), plus the number monoliths carry.
@@ -431,6 +452,7 @@ export function MapExplorer({
     <div
       className={["wExplorer", fill && "wFill", compact && "mm"].filter(Boolean).join(" ")}
       data-full={full || undefined}
+      data-away={away || undefined}
       style={compact ? ({ "--mm-map": mapOpacity, "--mm-path": pathOpacity, "--mm-compass": compassOpacity } as CSSProperties) : undefined}
     >
       <MapView
@@ -556,6 +578,8 @@ export function MapExplorer({
                 }}
                 credit={credit}
                 rail={next}
+                hideInMenus={hideInMenus}
+                setHideInMenus={setHideInMenus}
               />
             )}
           </CubeCompass>

@@ -2,7 +2,7 @@ import { useEffect, useState, type ButtonHTMLAttributes, type CSSProperties, typ
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow, PhysicalPosition } from "@tauri-apps/api/window";
-import { ArrowsOutCardinalIcon, ArrowsOutIcon, CaretDownIcon, CrosshairIcon, FunnelIcon, GearSixIcon, LockSimpleIcon, LockSimpleOpenIcon, PawPrintIcon, XIcon } from "@phosphor-icons/react";
+import { ArrowsOutCardinalIcon, ArrowsOutIcon, CaretDownIcon, CrosshairIcon, EyeSlashIcon, FunnelIcon, GearSixIcon, LockSimpleIcon, LockSimpleOpenIcon, PawPrintIcon, XIcon } from "@phosphor-icons/react";
 import "@fontsource/noto-sans/600.css";
 import type { T } from "../../i18n";
 
@@ -87,7 +87,7 @@ export type Opacity = { label: string; hint?: string; value: number; min: number
 /**
  * The minimap's controls over the map: the icon column on the right (close, move, filter, pets, follow, full screen,
  * options, then `rail`: the hidden cube compass's Next cube), zoom on the wheel only. The filter holds the two
- * dropdowns, Gathering and Layers; the options the lock, the opacities (map, icons, compass) and the zone.
+ * dropdowns, Gathering and Layers; the options the lock, hiding in game menus, the opacities (map, icons, compass) and the zone.
  * Locked, the window can't be moved; its controls keep working. `label`: the window's, for its lock (powermeter.rs LOCKS).
  */
 export function MiniChrome({
@@ -109,6 +109,8 @@ export function MiniChrome({
   follow,
   setFollow,
   rail,
+  hideInMenus,
+  setHideInMenus,
 }: {
   t: T;
   run: (action: () => Promise<unknown>) => void;
@@ -128,6 +130,8 @@ export function MiniChrome({
   follow: boolean;
   setFollow: (on: boolean) => void;
   rail?: ReactNode;
+  hideInMenus: boolean;
+  setHideInMenus: (on: boolean) => void;
 }) {
   const [pop, setPop] = useState<"filter" | "options">();
   const [locked, toggleLock] = useLock(label, run);
@@ -255,6 +259,13 @@ export function MiniChrome({
             <input type="checkbox" checked={locked} onChange={toggleLock} />
             <span className="mmRowIcon">{locked ? <LockSimpleIcon aria-hidden="true" weight="fill" /> : <LockSimpleOpenIcon aria-hidden="true" />}</span>
             <span className="mmRowName">{t("world.map.lock")}</span>
+          </label>
+          <label className="mmRow" title={t("world.map.hideInMenusHint")}>
+            <input type="checkbox" checked={hideInMenus} onChange={() => setHideInMenus(!hideInMenus)} />
+            <span className="mmRowIcon">
+              <EyeSlashIcon aria-hidden="true" />
+            </span>
+            <span className="mmRowName">{t("world.map.hideInMenus")}</span>
           </label>
           {opacities.map(slider)}
           <label className="mmZone">

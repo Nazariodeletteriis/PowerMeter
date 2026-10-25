@@ -196,6 +196,8 @@
   "world.map.iconOpacity": "圖示不透明度",
   "world.map.compassOpacity": "指南針不透明度",
   "world.map.options": "選項",
+  "world.map.hideInMenus": "在遊戲選單中隱藏",
+  "world.map.hideInMenusHint": "當 Aion 2 顯示滑鼠指標時（背包、地圖、選單），小地圖會讓開。如果你用指標始終可用的操作方式（Aion 1 操作）請關閉。",
   "world.map.pathOpacityHint": "標記、採集點、寵物位置和區域邊界",
   "world.map.move": "移動",
   "world.map.filter": "篩選",

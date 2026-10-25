@@ -168,6 +168,19 @@ fn get_captured_character() -> crate::capture::equip_parser::CapturedCharacter {
     crate::capture::equip_parser::snapshot()
 }
 
+/// The character's recharging counters, id → [base, charged] (capture/counters.rs), for the widget's counters.
+#[tauri::command]
+fn get_counters() -> std::collections::BTreeMap<u32, (i32, i32)> {
+    crate::capture::counters::snapshot()
+}
+
+/// Aion 2 is the window in front and shows the mouse pointer: a menu, the bag or the map is open (with the pointer
+/// locked to the camera while you play). The minimap widgets step aside then (MapExplorer.tsx).
+#[tauri::command]
+fn game_pointer_free() -> bool {
+    platform::window_detector::is_aion2_foreground() && platform::window_detector::cursor_shown()
+}
+
 /// Where the local player last was, for the minimap: x, y, z game units (zone loads and their own casts, effects
 /// and position records) and `at`, when it was seen (ms since the epoch); `heading`, where their last cast aimed
 /// (degrees, atan2 of south and east) at `headingAt`; the TW map id of the last zone load (null until one is seen);
@@ -1888,6 +1901,8 @@ pub fn run() {
             get_capture_status,
             get_capture_diagnosis,
             get_captured_character,
+            get_counters,
+            game_pointer_free,
             seed_captured_pets,
             get_player_position,
             set_target_mode,

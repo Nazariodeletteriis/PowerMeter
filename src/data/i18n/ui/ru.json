@@ -303,6 +303,9 @@
     "pillHint": "Нажмите, чтобы развернуть · перетащите, чтобы переместить",
     "copy": "Копировать как изображение для Discord",
     "copied": "Скопировано, вставьте в Discord",
-    "totalDps": "Общий DPS"
+    "totalDps": "Общий DPS",
+    "counterDailyDungeon": "Ежедневное подземелье",
+    "counterShugoKeys": "Ключи фестиваля Шуго",
+    "counterOdyle": "Одил"
   }
 }

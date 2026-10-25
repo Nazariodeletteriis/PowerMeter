@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.44
+
+- Novo: Widget DPS: entradas da masmorra diária, chaves do festival Shugo e Odyle como o jogo mostra (base (+carregadas) / máximo), ao lado do seu personagem, e na coluna direita no modo compacto. Atualizam ao entrar no mundo, ao trocar de personagem ou ao gastar uma.
+- Novo: Minimapa e Cube Finder se ocultam enquanto um menu do jogo está aberto (bolsa, mapa, menus: quando o Aion 2 mostra o ponteiro) e voltam ao fechar. Opções, Ocultar nos menus do jogo: desligue se joga com o ponteiro sempre livre (controles do Aion 1).
+
 ## 0.5.43
 
 - Alterado: Widget DPS, modo compacto: novo layout em três colunas. Ping, DPS/HEAL/AGGRO, configurações e minimizar numa coluna à esquerda; no centro o alvo, os jogadores e o DPS com a porcentagem embaixo; embaixo o DPS total; à direita uma coluna pronta para os contadores de entradas e chaves.

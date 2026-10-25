@@ -196,6 +196,8 @@
   "world.map.iconOpacity": "Symbol-Deckkraft",
   "world.map.compassOpacity": "Kompass-Deckkraft",
   "world.map.options": "Optionen",
+  "world.map.hideInMenus": "In Spielmenüs ausblenden",
+  "world.map.hideInMenusHint": "Solange Aion 2 den Mauszeiger zeigt (Tasche, Karte, Menüs), tritt die Minikarte zur Seite. Schalte es aus, wenn du mit immer freiem Zeiger spielst (Aion-1-Steuerung).",
   "world.map.pathOpacityHint": "Markierungen, Sammelpunkte, Haustier-Fundorte und Zonengrenzen",
   "world.map.move": "Verschieben",
   "world.map.filter": "Filter",

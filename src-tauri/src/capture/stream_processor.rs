@@ -282,6 +282,7 @@ impl StreamProcessor {
         self.parse_hidden_cube(packet);
         self.parse_stagger_packet(packet);
         super::equip_parser::parse(packet);
+        super::counters::parse(packet);
 
         if !parsed_damage && !parsed_name && !parsed_summon && !parsed_ownership && !parsed_hp {
             self.parse_dot_packet(packet);

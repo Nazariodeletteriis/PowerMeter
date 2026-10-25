@@ -133,6 +133,20 @@ pub fn is_aion2_foreground() -> bool {
     false
 }
 
+/// The mouse pointer is on screen: shown and with a shape (a game that takes the mouse for its camera hides it, or
+/// sets no cursor).
+#[cfg(windows)]
+pub fn cursor_shown() -> bool {
+    use windows::Win32::UI::WindowsAndMessaging::{GetCursorInfo, CURSORINFO, CURSOR_SHOWING};
+    let mut info = CURSORINFO { cbSize: std::mem::size_of::<CURSORINFO>() as u32, ..Default::default() };
+    unsafe { GetCursorInfo(&mut info) }.is_ok() && info.flags.0 & CURSOR_SHOWING.0 != 0 && !info.hCursor.0.is_null()
+}
+
+#[cfg(not(windows))]
+pub fn cursor_shown() -> bool {
+    true
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

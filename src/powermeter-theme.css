@@ -599,8 +599,13 @@
     background: var(--cls-icon) center / contain no-repeat;
   }
   .pmCharName { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--cls-text, var(--cls)); }
-  .pmCounters { display: flex; align-items: center; gap: 8px; color: var(--pm-ui-icon); }
+  .pmCounters { display: flex; align-items: center; gap: 10px; color: var(--pm-ui-icon); }
   .pmCounters:empty { display: none; }
+  /* One counter (charBar.ts): icon, base, (+charged) in your colour, /max. */
+  .pmCounter { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .pmCounter > :is(svg, img) { width: 14px; height: 14px; flex: none; }
+  .pmCounterPlus { color: var(--pm-you); }
+  .pmCounterMax { color: var(--pm-ui-muted); font-weight: 400; }
   /* Event popup (src/widget/eventAlert.ts): over the list, under the bar, for the set seconds.
      Drops in from the bar (ease-out 200ms), leaves the same way faster; the bar underneath is the
      time left (its animation is the timer, paused while the pointer is on the popup). */
@@ -1561,6 +1566,8 @@
     padding: 8px 4px;
   }
   .meter.slim .pmCounters > * + * { border-top: 1px solid var(--pm-ui-line); }
+  .meter.slim .pmCounter > :is(svg, img) { width: 20px; height: 20px; }
+  .meter.slim .pmCounterMax { display: none; } /* the column is narrow: base (+charged), the max in the tooltip */
 
   .meter.slim .pmEventPopup { left: calc(var(--pm-side) + 8px); }
   /* The cards' actions are laid out for the Interface width: at the compact width they ran past the

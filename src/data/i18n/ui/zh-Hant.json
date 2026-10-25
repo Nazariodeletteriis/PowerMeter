@@ -303,6 +303,9 @@
     "pillHint": "點擊展開 · 拖曳以移動",
     "copy": "複製為圖片，用於 Discord",
     "copied": "已複製，貼到 Discord",
-    "totalDps": "總 DPS"
+    "totalDps": "總 DPS",
+    "counterDailyDungeon": "每日副本",
+    "counterShugoKeys": "修古慶典鑰匙",
+    "counterOdyle": "奧德"
   }
 }

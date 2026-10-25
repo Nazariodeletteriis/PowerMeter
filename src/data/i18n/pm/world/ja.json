@@ -196,6 +196,8 @@
   "world.map.iconOpacity": "アイコンの不透明度",
   "world.map.compassOpacity": "コンパスの不透明度",
   "world.map.options": "オプション",
+  "world.map.hideInMenus": "ゲームのメニューで隠す",
+  "world.map.hideInMenusHint": "Aion 2 がマウスポインターを表示している間(バッグ・地図・メニュー)はミニマップを隠します。ポインターが常に自由な操作(Aion 1 操作)ならオフにしてください。",
   "world.map.pathOpacityHint": "マーカー、採集ポイント、ペットの出現地点、ゾーン境界",
   "world.map.move": "移動",
   "world.map.filter": "フィルター",

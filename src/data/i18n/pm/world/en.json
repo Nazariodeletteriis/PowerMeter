@@ -196,6 +196,8 @@
   "world.map.iconOpacity": "Icon Opacity",
   "world.map.compassOpacity": "Compass Opacity",
   "world.map.options": "Options",
+  "world.map.hideInMenus": "Hide in game menus",
+  "world.map.hideInMenusHint": "While Aion 2 shows the mouse pointer (bag, map, menus) the minimap steps aside. Turn it off if you play with the pointer always free (Aion 1 controls).",
   "world.map.pathOpacityHint": "Markers, gathering nodes, pet spots and zone borders",
   "world.map.move": "Move",
   "world.map.filter": "Filter",
