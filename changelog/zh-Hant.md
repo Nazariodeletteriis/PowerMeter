@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.48
+
+- 新增：DPS 小工具：新增夢魘計數器（夢魘、每日副本、貝利特拉、修古、奧德），每個計數器都換上了更清晰的新圖示。
+
 ## 0.5.47
 
 - 變更：DPS 小工具：每日副本計數器使用遊戲中自己的圖示。

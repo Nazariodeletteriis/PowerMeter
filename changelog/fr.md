@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.48
+
+- Nouveau : Widget DPS : le compteur Nightmare rejoint les autres (Nightmare, donjon quotidien, Beritra, Shugo, Odyle), et chaque compteur a une nouvelle icône plus nette.
+
 ## 0.5.47
 
 - Modifié : Widget DPS : le compteur du donjon quotidien a sa propre icône du jeu.

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.48
+
+- Neu: DPS-Widget: der Nightmare-Zähler kommt dazu (Nightmare, täglicher Dungeon, Beritra, Shugo, Odyle), und jeder Zähler hat ein neues, schärferes Symbol.
+
 ## 0.5.47
 
 - Geändert: DPS-Widget: der Zähler des täglichen Dungeons hat sein eigenes Symbol aus dem Spiel.

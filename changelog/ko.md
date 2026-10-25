@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.48
+
+- 신규: DPS 위젯: 악몽 카운터가 추가되었습니다(악몽, 일일 던전, 베리트라, 슈고, 오드). 모든 카운터에 더 선명한 새 아이콘을 사용합니다.
+
 ## 0.5.47
 
 - 변경: DPS 위젯: 일일 던전 카운터에 게임 고유 아이콘을 사용합니다.

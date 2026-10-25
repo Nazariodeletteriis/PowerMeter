@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.48
+
+- 新增：DPS 小组件：新增梦魇计数器（梦魇、每日副本、贝利特拉、修古、奥德），每个计数器都换上了更清晰的新图标。
+
 ## 0.5.47
 
 - 更改：DPS 小组件：每日副本计数器使用游戏中自己的图标。

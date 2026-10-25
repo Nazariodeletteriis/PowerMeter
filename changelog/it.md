@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.48
+
+- Nuovo: Widget DPS: si aggiunge il contatore del Nightmare (Nightmare, Dungeon giornaliero, Beritra, Shugo, Odyle), e ogni contatore ha una nuova icona più nitida.
+
 ## 0.5.47
 
 - Cambiato: Widget DPS: il contatore del Dungeon giornaliero ha la sua icona del gioco.

@@ -8,6 +8,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import beritraIcon from "../assets/pm/counters/beritra.png";
 import dailyIcon from "../assets/pm/counters/daily.png";
+import nightmareIcon from "../assets/pm/counters/nightmare.png";
 import odyleIcon from "../assets/pm/counters/odyle.png";
 import shugoIcon from "../assets/pm/counters/shugo.png";
 
@@ -18,11 +19,11 @@ const COUNTER_POLL_MS = 2000;
 /** Last counters read for a character (+ its name), in this window's storage. */
 const REMEMBER_KEY = "pm.counters.";
 /**
- * The counters shown, in order (Nazario's design: dungeon, Beritra, Shugo, Odyle): game id (capture/counters.rs), the
- * base's max from the game's tooltip (null: not known yet, shown without), label key, icon (the game's, from the design;
- * counters/nightmare.png waits for the Nightmare counter, its id not read yet).
+ * The counters shown, in order (Nazario's: Nightmare, Daily Dungeon, Beritra, Shugo, Odyle): game id (capture/counters.rs),
+ * the base's max from the game's tooltip (null: not known yet, shown without), label key, icon (the game's, Nazario's set).
  */
 const COUNTERS: [number, number | null, string, string, string][] = [
+  [4, null, "pmWidget.counterNightmare", "Nightmare", nightmareIcon],
   [101, 14, "pmWidget.counterDailyDungeon", "Daily Dungeon", dailyIcon],
   [8, null, "pmWidget.counterBeritraKeys", "Beritra keys", beritraIcon],
   [1, 21, "pmWidget.counterShugoKeys", "Shugo Festival keys", shugoIcon],

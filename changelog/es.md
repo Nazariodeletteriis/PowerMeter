@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.48
+
+- Nuevo: Widget DPS: se añade el contador de Nightmare (Nightmare, mazmorra diaria, Beritra, Shugo, Odyle), y cada contador tiene un icono nuevo y más nítido.
+
 ## 0.5.47
 
 - Cambiado: Widget DPS: el contador de la mazmorra diaria tiene su propio icono del juego.
