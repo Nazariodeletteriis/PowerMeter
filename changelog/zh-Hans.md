@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.42
+
+- 更改：世界，Cube Finder：菜单项直接打开 Cube Finder 小组件（仪表盘页面与地图重复）。
+- 修复：Cube Finder 小组件：全屏可用（之前出现权限错误）。
+- 修复：小地图和 Cube Finder 以与地图相同的正方形打开，不再留空白条。
+- 修复：DPS 小组件紧凑模式：顶行的角色名完整显示；事件提醒在旁边换行。
+
 ## 0.5.41
 
 - 新增：世界，Cube Finder：只显示隐藏方块、传送点和村庄的地图，有独立设置，并可作为小组件在游戏上方打开。

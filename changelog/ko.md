@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.42
+
+- 변경: 월드, Cube Finder: 메뉴 항목이 Cube Finder 위젯을 바로 엽니다(대시보드 페이지는 지도와 중복이었습니다).
+- 수정: Cube Finder 위젯: 전체 화면이 작동합니다(권한 오류가 났습니다).
+- 수정: 미니맵과 Cube Finder가 지도처럼 정사각형으로 열려 빈 띠가 생기지 않습니다.
+- 수정: DPS 위젯 컴팩트 모드: 위쪽 줄의 캐릭터 이름이 잘리지 않고, 이벤트 알림이 옆에서 줄바꿈됩니다.
+
 ## 0.5.41
 
 - 신규: 월드, Cube Finder: 숨겨진 큐브, 텔레포트, 마을만 표시하는 지도. 전용 설정과 게임 위에 위젯으로 여는 버튼 포함.

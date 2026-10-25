@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.42
+
+- Geändert: Welt, Cube Finder: der Menüeintrag öffnet direkt das Cube-Finder-Widget (die Dashboard-Seite war eine Kopie der Karte).
+- Behoben: Cube-Finder-Widget: Vollbild funktioniert (es kam ein Berechtigungsfehler).
+- Behoben: Minikarte und Cube Finder öffnen quadratisch wie die Karte, ohne leeren Streifen.
+- Behoben: DPS-Widget, kompakter Modus: der Charaktername in der oberen Zeile ist ganz lesbar; der Ereignishinweis bricht daneben um.
+
 ## 0.5.41
 
 - Neu: Welt, Cube Finder: die Karte nur mit versteckten Würfeln, Teleportern und Dörfern, mit eigenen Einstellungen und einer Schaltfläche, um sie als Widget über dem Spiel zu öffnen.

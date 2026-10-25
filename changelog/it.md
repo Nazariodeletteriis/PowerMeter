@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.42
+
+- Cambiato: Mondo, Cube Finder: la voce del menu apre subito il widget Cube Finder (la pagina nella dashboard era un doppione della Mappa).
+- Corretto: Widget Cube Finder: lo schermo intero funziona (dava un errore di permessi).
+- Corretto: Minimappa e Cube Finder: si aprono quadrati, come la mappa, senza lasciare una fascia vuota.
+- Corretto: Widget DPS, modalità compatta: il nome del personaggio nella riga in alto si legge intero; l'avviso eventi va a capo accanto.
+
 ## 0.5.41
 
 - Nuovo: Mondo, Cube Finder: la mappa solo con cubi nascosti, teletrasporti e villaggi, con impostazioni proprie e un pulsante per aprirla come widget sopra il gioco.

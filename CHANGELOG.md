@@ -4,6 +4,13 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.42
+
+- Changed: World, Cube Finder: the menu entry opens the Cube Finder widget straight away (the dashboard page was the Map page again).
+- Fixed: Cube Finder widget: full screen works (it showed a permission error).
+- Fixed: Minimap and Cube Finder: they open square, the shape of the map, instead of leaving an empty band.
+- Fixed: DPS widget, compact mode: the character name in the top row reads in full; the event notice wraps beside it.
+
 ## 0.5.41
 
 - New: World, Cube Finder: the map on hidden cubes, teleports and villages only, with its own settings, and a button to open it as a widget over the game.

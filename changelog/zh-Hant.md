@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.42
+
+- 變更：世界，Cube Finder：選單項目直接開啟 Cube Finder 小工具（儀表板頁面與地圖重複）。
+- 修正：Cube Finder 小工具：全螢幕可用（之前出現權限錯誤）。
+- 修正：小地圖和 Cube Finder 以與地圖相同的正方形開啟，不再留空白條。
+- 修正：DPS 小工具精簡模式：頂列的角色名稱完整顯示；事件提醒在旁邊換行。
+
 ## 0.5.41
 
 - 新增：世界，Cube Finder：只顯示隱藏方塊、傳送點和村莊的地圖，有獨立設定，並可作為小工具在遊戲上方開啟。
