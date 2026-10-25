@@ -593,6 +593,7 @@
     font-variant-numeric: tabular-nums;
   }
   .pmCharBar[hidden] { display: none; }
+  .pmCharBar:not([data-cls]) .pmCharIcon { display: none; } /* no character set: the counters alone */
   .pmCharIcon {
     flex: none;
     width: 16px; height: 16px;

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.46
+
+- Corrigido: Widget DPS, compacto e Interface: os contadores de entradas e chaves aparecem sempre, com um traço até o jogo enviá-los; os últimos valores lidos de um personagem aparecem desde o início, antes do próximo login.
+
 ## 0.5.45
 
 - Novo: Minimapa: seu ponto se move quase em tempo real: pede a posição 4 vezes por segundo e desliza até o novo lugar, e o mapa desliza junto enquanto segue você. Na montaria agora acompanha; em voo o jogo só envia a posição na decolagem e no pouso.

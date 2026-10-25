@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.46
+
+- Fixed: DPS widget, compact and Interface: the entry and key counters always show, with a dash until the game sends them; the last values read for a character show from the start, before the next login.
+
 ## 0.5.45
 
 - New: Minimap: your dot moves more like real time: it asks for your position 4 times a second and glides to each new place, and the map glides with it while following you. On a mount it now keeps up; in flight the game sends your position only on take-off and landing.

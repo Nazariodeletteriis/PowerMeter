@@ -15,6 +15,8 @@ type Character = { id: string; name: string; cls: string };
 type I18n = { format?: (key: string, vars: Record<string, string>, fallback: string) => string; onChange?: (f: () => void) => void };
 
 const COUNTER_POLL_MS = 2000;
+/** Last counters read for a character (+ its name), in this window's storage. */
+const REMEMBER_KEY = "pm.counters.";
 /**
  * The counters shown, in order (Nazario's design: dungeon, Beritra, Shugo, Odyle): game id (capture/counters.rs), the
  * base's max from the game's tooltip (null: not known yet, shown without), label key, icon (the game's, from the design).
@@ -34,6 +36,9 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
   const i18n = () => (window as { i18n?: I18n }).i18n;
   let settings: Record<string, string> = {};
 
+  // The active character's name: the counters read this session are remembered under it (REMEMBER_KEY), so they show
+  // from the start, before the game sends them again on entering the world.
+  let charName = "";
   const show = () => {
     let list: Character[] = [];
     try {
@@ -46,31 +51,50 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
       list = onboarded && settings["pm.class"] ? [{ id: "c1", name: onboarded, cls: settings["pm.class"] }] : [];
     }
     const char = list.find((c) => c.id === settings["pm.activeCharacter"]) ?? list[0];
-    bar.hidden = !char;
-    if (!char) return;
-    name.textContent = char.name;
-    bar.dataset.cls = char.cls.toLowerCase(); // powermeter-theme.css [data-cls]: the class's colour and icon
+    name.hidden = !char;
+    name.textContent = char?.name ?? "";
+    if (char) bar.dataset.cls = char.cls.toLowerCase(); // powermeter-theme.css [data-cls]: the class's colour and icon
+    else delete bar.dataset.cls;
+    if ((char?.name ?? "") !== charName) {
+      charName = char?.name ?? "";
+      counts = remembered();
+      showCounters();
+    }
   };
 
-  // Counter id → [base, charged]; one the game hasn't sent (not logged in yet) is left out.
+  // Counter id → [base, charged]. Always shown: one not known yet reads "–" until the game sends it.
   let counts: Record<string, [number, number]> = {};
+  const remembered = (): Record<string, [number, number]> => {
+    try {
+      return JSON.parse(localStorage.getItem(REMEMBER_KEY + charName) ?? "{}");
+    } catch {
+      return {};
+    }
+  };
   const showCounters = () => {
-    const html = COUNTERS.flatMap(([id, max, key, fallback, icon]) => {
+    const html = COUNTERS.map(([id, max, key, fallback, icon]) => {
       const c = counts[id];
-      if (!c) return [];
       const label = i18n()?.format?.(key, {}, fallback) ?? fallback;
       const of = max === null ? "" : ` / ${max}`;
-      const title = `${label}: ${c[0]} (+${c[1]})${of}`;
+      const value = c ? `${c[0]} <span class="pmCounterPlus">(+${c[1]})</span>` : "–";
+      const title = `${label}: ${c ? `${c[0]} (+${c[1]})` : "–"}${of}`;
       const maxText = max === null ? "" : `<span class="pmCounterMax">/${max}</span>`;
-      return [`<span class="pmCounter" title="${title}" aria-label="${title}"><img src="${icon}" alt=""><span>${c[0]} <span class="pmCounterPlus">(+${c[1]})</span>${maxText}</span></span>`];
+      return `<span class="pmCounter" title="${title}" aria-label="${title}"><img src="${icon}" alt=""><span>${value}${maxText}</span></span>`;
     }).join("");
     if (slot.innerHTML !== html) slot.innerHTML = html;
   };
   const poll = () =>
     invoke<Record<string, [number, number]>>("get_counters").then((c) => {
+      if (!Object.keys(c).length) return; // nothing read yet this session: keep the remembered ones
       counts = c;
+      try {
+        localStorage.setItem(REMEMBER_KEY + charName, JSON.stringify(c));
+      } catch {
+        // storage refused: they show until the app closes
+      }
       showCounters();
     }, () => {});
+  showCounters();
   poll();
   setInterval(poll, COUNTER_POLL_MS);
   i18n()?.onChange?.(showCounters);

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.46
+
+- Behoben: DPS-Widget, kompakt und Interface: die Zähler für Eintritte und Schlüssel sind immer sichtbar, mit einem Strich, bis das Spiel sie sendet; die zuletzt gelesenen Werte eines Charakters erscheinen sofort, noch vor dem nächsten Login.
+
 ## 0.5.45
 
 - Neu: Minikarte: dein Punkt bewegt sich fast in Echtzeit: er fragt die Position 4-mal pro Sekunde ab und gleitet zum neuen Ort, die Karte gleitet beim Folgen mit. Auf dem Reittier hält er jetzt mit; im Flug sendet das Spiel die Position nur beim Start und bei der Landung.
