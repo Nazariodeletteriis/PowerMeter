@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.40
+
+- Corregido: Temporizador y avisos del widget: los jefes de Reshanta siguen el horario EU: Watcher Kaira cada 3 horas desde las 01:00, Guardian Lord Nahma domingo y viernes a las 21:10, los Executors Tamasa, Argo y Kaira lunes, jueves y sábado a las 21:40 (iban 7 horas desfasados). Artifact Siege a las 21:00, y la nueva Arena of Tactics (11:00 y 19:00).
+- Corregido: Widget de DPS: un aviso con dos eventos a la vez pasa a la línea siguiente en lugar de cortar los nombres.
+
 ## 0.5.39
 
 - Corregido: Temporizador, pestaña Todos: el Shugo Festival aparece con cada Spacetime Rift con el que empieza (antes solo en su próxima hora, y los Rift parecían solos), y los eventos que empiezan a la vez van juntos con la hora una sola vez.

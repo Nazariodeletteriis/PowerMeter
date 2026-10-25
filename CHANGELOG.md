@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.40
+
+- Fixed: Timer and widget alerts: the Reshanta bosses are on the EU schedule: Watcher Kaira every 3 hours from 01:00, Guardian Lord Nahma Sunday and Friday 21:10, Executors Tamasa, Argo and Kaira Monday, Thursday and Saturday 21:40 (they were 7 hours off). Artifact Siege at 21:00, and the Arena of Tactics (11:00 and 19:00) is new.
+- Fixed: DPS widget: an event notice with two events starting together wraps instead of cutting the names.
+
 ## 0.5.39
 
 - Fixed: Timer, All tab: the Shugo Festival shows with every Spacetime Rift it opens with (it was listed only at its next hour, so the rifts looked alone), and events starting together sit together with the time shown once.

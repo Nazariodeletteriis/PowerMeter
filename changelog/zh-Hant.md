@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.40
+
+- 修正：計時器與小工具提醒：雷尚塔首領改為 EU 時間表：Watcher Kaira 自 01:00 起每 3 小時，Guardian Lord Nahma 週日與週五 21:10，Executor Tamasa、Argo 與 Kaira 週一、週四與週六 21:40（之前偏差 7 小時）。Artifact Siege 為 21:00，並新增 Arena of Tactics（11:00 與 19:00）。
+- 修正：DPS 小工具：兩個同時開始的活動提醒會換行顯示，不再截斷名稱。
+
 ## 0.5.39
 
 - 修正：計時器「全部」分頁：Shugo Festival 會與同時開始的每次 Spacetime Rift 一起顯示（之前只顯示下一次，裂隙看起來是單獨的），同時開始的活動排在一起，時間只顯示一次。

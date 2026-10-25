@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.40
+
+- 修正: タイマーとウィジェット通知: レシャンタのボスがEUのスケジュールになりました。Watcher Kairaは01:00から3時間ごと、Guardian Lord Nahmaは日曜と金曜の21:10、Executor Tamasa・Argo・Kairaは月・木・土の21:40（7時間ずれていました）。Artifact Siegeは21:00、新たにArena of Tactics（11:00と19:00）を追加。
+- 修正: DPSウィジェット: 2つのイベントが同時に始まる通知は、名前を切らずに折り返します。
+
 ## 0.5.39
 
 - 修正: タイマーの「すべて」タブ: Shugo Festivalが同時に始まる各Spacetime Riftと一緒に表示されるようになりました（以前は次の1回だけで、リフトが単独に見えていました）。同時に始まるイベントはまとめて並び、時刻は1回だけ表示されます。

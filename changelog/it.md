@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.40
+
+- Corretto: Timer e avvisi del widget: i boss di Reshanta seguono l'orario EU: Watcher Kaira ogni 3 ore dalle 01:00, Guardian Lord Nahma domenica e venerdì alle 21:10, gli Executor Tamasa, Argo e Kaira lunedì, giovedì e sabato alle 21:40 (erano sfasati di 7 ore). Artifact Siege alle 21:00, e c'è la nuova Arena of Tactics (11:00 e 19:00).
+- Corretto: Widget DPS: un avviso con due eventi che partono insieme va a capo invece di tagliare i nomi.
+
 ## 0.5.39
 
 - Corretto: Timer, scheda Tutti: lo Shugo Festival compare insieme a ogni Spacetime Rift con cui parte (prima era elencato solo alla sua prossima ora, e i Rift sembravano da soli), e gli eventi che partono insieme stanno vicini con l'orario scritto una volta sola.
