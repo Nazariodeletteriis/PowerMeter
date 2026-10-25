@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.49
+
+- Modifié : Minicarte et Cube Finder ne se masquent dans les menus du jeu que s'ils sont au-dessus du jeu ; sur un autre écran ils restent visibles au lieu de clignoter à chaque libération du pointeur.
+
 ## 0.5.48
 
 - Nouveau : Widget DPS : le compteur Nightmare rejoint les autres (Nightmare, donjon quotidien, Beritra, Shugo, Odyle), et chaque compteur a une nouvelle icône plus nette.

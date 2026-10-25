@@ -199,7 +199,7 @@
   "world.map.zoomHint": "미니맵이 따라올 때의 확대 정도. 휠로도 잠시 확대/축소할 수 있습니다",
   "world.map.options": "옵션",
   "world.map.hideInMenus": "게임 메뉴에서 숨기기",
-  "world.map.hideInMenusHint": "Aion 2가 마우스 포인터를 보여 주는 동안(가방, 지도, 메뉴) 미니맵이 숨겨집니다. 포인터가 항상 자유로운 조작(Aion 1 조작)이면 끄세요.",
+  "world.map.hideInMenusHint": "Aion 2가 마우스 포인터를 보여 주는 동안(가방, 지도, 메뉴) 게임 위에 있는 미니맵은 숨겨집니다. 다른 모니터에 있으면 그대로 표시됩니다. 포인터가 항상 자유로운 조작(Aion 1 조작)이면 끄세요.",
   "world.map.pathOpacityHint": "마커, 채집 지점, 펫 위치, 지역 경계",
   "world.map.move": "이동",
   "world.map.filter": "필터",

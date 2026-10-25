@@ -306,7 +306,8 @@ export function MapExplorer({
   }, [full]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => void getCurrentWindow().setFullscreen(false).catch(() => {}), []); // leaving the page while full
 
-  // A game menu open (the pointer shows over Aion 2): the minimap hides and lets the mouse through to the game. With
+  // A game menu open (the pointer shows over Aion 2, and this window lies over the game: game_pointer_free): the
+  // minimap hides and lets the mouse through to the game. With
   // the pointer always free (Aion 1 controls) it would never show: the option turns it off.
   const watchMenus = mini && !full && hideInMenus;
   useEffect(() => {

@@ -199,7 +199,7 @@
   "world.map.zoomHint": "À quelle distance la minicarte vous suit ; la molette zoome quand même un moment",
   "world.map.options": "Options",
   "world.map.hideInMenus": "Masquer dans les menus du jeu",
-  "world.map.hideInMenusHint": "Quand Aion 2 affiche le pointeur (sac, carte, menus), la minicarte s'efface. Désactivez-le si vous jouez avec le pointeur toujours libre (commandes Aion 1).",
+  "world.map.hideInMenusHint": "Quand Aion 2 affiche le pointeur (sac, carte, menus), la minicarte s'efface si elle est au-dessus du jeu : sur un autre écran elle reste. Désactivez-le si vous jouez avec le pointeur toujours libre (commandes Aion 1).",
   "world.map.pathOpacityHint": "Repères, points de récolte, emplacements des familiers et limites de zone",
   "world.map.move": "Déplacer",
   "world.map.filter": "Filtre",

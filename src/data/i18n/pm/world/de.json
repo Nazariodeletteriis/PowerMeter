@@ -199,7 +199,7 @@
   "world.map.zoomHint": "Wie nah dir die Minikarte folgt; das Mausrad zoomt trotzdem kurz",
   "world.map.options": "Optionen",
   "world.map.hideInMenus": "In Spielmenüs ausblenden",
-  "world.map.hideInMenusHint": "Solange Aion 2 den Mauszeiger zeigt (Tasche, Karte, Menüs), tritt die Minikarte zur Seite. Schalte es aus, wenn du mit immer freiem Zeiger spielst (Aion-1-Steuerung).",
+  "world.map.hideInMenusHint": "Solange Aion 2 den Mauszeiger zeigt (Tasche, Karte, Menüs), tritt die Minikarte zur Seite, wenn sie über dem Spiel liegt: auf einem anderen Monitor bleibt sie. Schalte es aus, wenn du mit immer freiem Zeiger spielst (Aion-1-Steuerung).",
   "world.map.pathOpacityHint": "Markierungen, Sammelpunkte, Haustier-Fundorte und Zonengrenzen",
   "world.map.move": "Verschieben",
   "world.map.filter": "Filter",

@@ -174,11 +174,13 @@ fn get_counters() -> std::collections::BTreeMap<u32, (i32, i32)> {
     crate::capture::counters::snapshot()
 }
 
-/// Aion 2 is the window in front and shows the mouse pointer: a menu, the bag or the map is open (with the pointer
-/// locked to the camera while you play). The minimap widgets step aside then (MapExplorer.tsx).
+/// Aion 2 is the window in front and shows the mouse pointer (a menu, the bag or the map is open; the pointer is locked
+/// to the camera while you play), and the asking minimap lies over it: the minimap steps aside then (MapExplorer.tsx).
+/// One moved to another monitor stays, or it would blink each time the pointer is freed.
 #[tauri::command]
-fn game_pointer_free() -> bool {
-    platform::window_detector::is_aion2_foreground() && platform::window_detector::cursor_shown()
+fn game_pointer_free(window: tauri::WebviewWindow) -> bool {
+    let (Ok(p), Ok(s)) = (window.outer_position(), window.outer_size()) else { return false };
+    platform::window_detector::game_menu_over([p.x, p.y, p.x + s.width as i32, p.y + s.height as i32])
 }
 
 /// Where the local player last was, for the minimap: x, y, z game units (zone loads and their own casts, effects

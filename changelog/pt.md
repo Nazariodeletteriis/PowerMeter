@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.49
+
+- Alterado: Minimapa e Cube Finder só se ocultam nos menus do jogo se estiverem sobre o jogo; em outro monitor ficam visíveis em vez de piscar cada vez que o ponteiro é liberado.
+
 ## 0.5.48
 
 - Novo: Widget DPS: entra o contador do Nightmare (Nightmare, masmorra diária, Beritra, Shugo, Odyle), e cada contador tem um ícone novo e mais nítido.

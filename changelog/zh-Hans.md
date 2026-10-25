@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.49
+
+- 更改：小地图和 Cube Finder 只在位于游戏上方时才在游戏菜单中隐藏；移到另一台显示器上会保持显示，不会在每次释放指针时闪烁。
+
 ## 0.5.48
 
 - 新增：DPS 小组件：新增梦魇计数器（梦魇、每日副本、贝利特拉、修古、奥德），每个计数器都换上了更清晰的新图标。

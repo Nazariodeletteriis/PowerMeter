@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.49
+
+- 變更：小地圖和 Cube Finder 只在位於遊戲上方時才在遊戲選單中隱藏；移到另一台螢幕上會保持顯示，不會在每次釋放指標時閃爍。
+
 ## 0.5.48
 
 - 新增：DPS 小工具：新增夢魘計數器（夢魘、每日副本、貝利特拉、修古、奧德），每個計數器都換上了更清晰的新圖示。

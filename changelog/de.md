@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.49
+
+- Geändert: Minikarte und Cube Finder blenden sich in Spielmenüs nur aus, wenn sie über dem Spiel liegen; auf einem anderen Monitor bleiben sie sichtbar, statt bei jedem freien Mauszeiger zu blinken.
+
 ## 0.5.48
 
 - Neu: DPS-Widget: der Nightmare-Zähler kommt dazu (Nightmare, täglicher Dungeon, Beritra, Shugo, Odyle), und jeder Zähler hat ein neues, schärferes Symbol.

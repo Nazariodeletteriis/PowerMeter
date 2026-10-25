@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.49
+
+- Changed: Minimap and Cube Finder: hiding in game menus only happens when the minimap lies over the game; moved to another monitor it stays on screen instead of blinking each time the pointer is freed.
+
 ## 0.5.48
 
 - New: DPS widget: the Nightmare counter joins the others (Nightmare, Daily Dungeon, Beritra, Shugo, Odyle), and every counter has a new, sharper icon.

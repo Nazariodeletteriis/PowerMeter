@@ -147,6 +147,25 @@ pub fn cursor_shown() -> bool {
     true
 }
 
+/// Aion 2 is in front showing the mouse pointer, and its window overlaps `rect` (left, top, right, bottom; physical
+/// pixels, as the widget windows give theirs).
+#[cfg(windows)]
+pub fn game_menu_over(rect: [i32; 4]) -> bool {
+    use windows::Win32::Foundation::RECT;
+    use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, GetWindowRect};
+    if !is_aion2_foreground() || !cursor_shown() {
+        return false;
+    }
+    let mut r = RECT::default();
+    let game = unsafe { GetForegroundWindow() };
+    unsafe { GetWindowRect(game, &mut r) }.is_ok() && r.left < rect[2] && rect[0] < r.right && r.top < rect[3] && rect[1] < r.bottom
+}
+
+#[cfg(not(windows))]
+pub fn game_menu_over(_rect: [i32; 4]) -> bool {
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

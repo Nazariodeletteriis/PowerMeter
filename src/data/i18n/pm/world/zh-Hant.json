@@ -199,7 +199,7 @@
   "world.map.zoomHint": "小地圖跟隨你時的遠近；滾輪仍可暫時縮放",
   "world.map.options": "選項",
   "world.map.hideInMenus": "在遊戲選單中隱藏",
-  "world.map.hideInMenusHint": "當 Aion 2 顯示滑鼠指標時（背包、地圖、選單），小地圖會讓開。如果你用指標始終可用的操作方式（Aion 1 操作）請關閉。",
+  "world.map.hideInMenusHint": "當 Aion 2 顯示滑鼠指標時（背包、地圖、選單），位於遊戲上方的小地圖會讓開；放在另一台螢幕上則保持顯示。如果你用指標始終可用的操作方式（Aion 1 操作）請關閉。",
   "world.map.pathOpacityHint": "標記、採集點、寵物位置和區域邊界",
   "world.map.move": "移動",
   "world.map.filter": "篩選",

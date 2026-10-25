@@ -199,7 +199,7 @@
   "world.map.zoomHint": "A qué distancia te sigue el minimapa; la rueda sigue haciendo zoom un momento",
   "world.map.options": "Opciones",
   "world.map.hideInMenus": "Ocultar en los menús del juego",
-  "world.map.hideInMenusHint": "Mientras Aion 2 muestra el puntero (bolsa, mapa, menús) el minimapa se aparta. Desactívalo si juegas con el puntero siempre libre (controles de Aion 1).",
+  "world.map.hideInMenusHint": "Mientras Aion 2 muestra el puntero (bolsa, mapa, menús) el minimapa se aparta si está sobre el juego: en otro monitor se queda. Desactívalo si juegas con el puntero siempre libre (controles de Aion 1).",
   "world.map.pathOpacityHint": "Marcadores, puntos de recolección, puntos de mascotas y límites de zona",
   "world.map.move": "Mover",
   "world.map.filter": "Filtro",
