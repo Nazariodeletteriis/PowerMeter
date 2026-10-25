@@ -58,5 +58,8 @@
   "events.fb.killed": "{time} 擊殺",
   "events.fb.every": "每 {d}",
   "events.fb.up": "應該已重生",
-  "events.fb.hint": "依首領在你面前死亡的時間加上重生時間計算。間隔為估計值；其間可能已被其他玩家擊殺。"
+  "events.fb.hint": "依首領在你面前死亡的時間加上重生時間計算。間隔為估計值；其間可能已被其他玩家擊殺。",
+  "events.timer.nextSiege": "下一場攻城戰",
+  "events.timer.tabSiege": "攻城戰",
+  "events.cat.siege": "攻城戰"
 }

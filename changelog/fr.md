@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.38
+
+- Nouveau : Minuteur : Dimensional Invasion (chaque heure à la demie), l'Artifact Siege dans un nouvel onglet Sièges, et Executor Kaira.
+- Corrigé : Minuteur et alertes du widget : les horaires suivent l'heure des serveurs EU même au changement d'heure ; depuis le 25 octobre ils avaient une heure d'avance.
+
 ## 0.5.37
 
 - Nouveau : Mini-carte : un cube caché qui vient d'apparaître est jaune vif, un cube déjà présent rouge feu, tous deux un peu plus grands que votre point.

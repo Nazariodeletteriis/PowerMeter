@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.38
+
+- 新增：计时器：Dimensional Invasion（每小时半点）、新“攻城战”标签中的 Artifact Siege，以及 Executor Kaira。
+- 修复：计时器和小组件提醒：活动时间在夏令时切换后也跟随 EU 服务器时钟；自 10 月 25 日起曾提前一小时显示。
+
 ## 0.5.37
 
 - 新增：小地图：刚出现的隐藏方块显示为亮黄色，已存在的显示为火红色，两者都比你的标记稍大。

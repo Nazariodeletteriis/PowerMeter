@@ -58,5 +58,8 @@
   "events.fb.killed": "Derrotado às {time}",
   "events.fb.every": "a cada {d}",
   "events.fb.up": "Deve estar vivo",
-  "events.fb.hint": "Calculado a partir da hora em que o chefe morreu na sua frente mais o tempo de respawn. Os intervalos são estimados; outro jogador pode tê-lo derrotado desde então."
+  "events.fb.hint": "Calculado a partir da hora em que o chefe morreu na sua frente mais o tempo de respawn. Os intervalos são estimados; outro jogador pode tê-lo derrotado desde então.",
+  "events.timer.nextSiege": "Próximo cerco",
+  "events.timer.tabSiege": "Cercos",
+  "events.cat.siege": "Cerco"
 }

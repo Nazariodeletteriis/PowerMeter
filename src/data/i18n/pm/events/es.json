@@ -58,5 +58,8 @@
   "events.fb.killed": "Derrotado a las {time}",
   "events.fb.every": "cada {d}",
   "events.fb.up": "Debería estar vivo",
-  "events.fb.hint": "Calculado a partir de la hora en que el jefe murió delante de ti más su tiempo de reaparición. Los intervalos son estimados; otro jugador puede haberlo derrotado desde entonces."
+  "events.fb.hint": "Calculado a partir de la hora en que el jefe murió delante de ti más su tiempo de reaparición. Los intervalos son estimados; otro jugador puede haberlo derrotado desde entonces.",
+  "events.timer.nextSiege": "Próximo asedio",
+  "events.timer.tabSiege": "Asedios",
+  "events.cat.siege": "Asedio"
 }

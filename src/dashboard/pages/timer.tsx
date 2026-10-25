@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 
 import {
   ArrowCounterClockwiseIcon,
   CalendarBlankIcon,
+  CastleTurretIcon,
   ConfettiIcon,
   GlobeHemisphereEastIcon,
   HourglassIcon,
@@ -30,6 +31,7 @@ const CATS: { id: string; icon: ReactNode; tab: string; label: string; next: str
   { id: "rift", icon: <HourglassIcon aria-hidden="true" />, tab: "events.timer.tabRift", label: "events.cat.rift", next: "events.rift.next" },
   { id: "event", icon: <ConfettiIcon aria-hidden="true" />, tab: "events.timer.tabEvent", label: "events.cat.event", next: "events.timer.nextEvent" },
   { id: "boss", icon: <SkullIcon aria-hidden="true" />, tab: "events.timer.tabBoss", label: "events.cat.boss", next: "events.timer.nextBoss" },
+  { id: "siege", icon: <CastleTurretIcon aria-hidden="true" />, tab: "events.timer.tabSiege", label: "events.cat.siege", next: "events.timer.nextSiege" },
   { id: "reset", icon: <ArrowCounterClockwiseIcon aria-hidden="true" />, tab: "events.timer.tabReset", label: "events.cat.reset", next: "events.timer.nextReset" },
 ];
 const TABS = ["all", ...CATS.map((c) => c.id)];

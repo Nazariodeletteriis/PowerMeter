@@ -58,5 +58,8 @@
   "events.fb.killed": "Ucciso alle {time}",
   "events.fb.every": "ogni {d}",
   "events.fb.up": "Dovrebbe essere vivo",
-  "events.fb.hint": "Calcolato dall'ora in cui il boss è morto davanti a te più il suo tempo di respawn. Gli intervalli sono stimati; nel frattempo un altro giocatore potrebbe averlo ucciso."
+  "events.fb.hint": "Calcolato dall'ora in cui il boss è morto davanti a te più il suo tempo di respawn. Gli intervalli sono stimati; nel frattempo un altro giocatore potrebbe averlo ucciso.",
+  "events.timer.nextSiege": "Prossimo assedio",
+  "events.timer.tabSiege": "Assedi",
+  "events.cat.siege": "Assedio"
 }

@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.38
+
+- Nuevo: Temporizador: Dimensional Invasion (cada hora a y media), el Artifact Siege en una nueva pestaña Asedios, y Executor Kaira.
+- Corregido: Temporizador y avisos del widget: los horarios siguen el reloj de los servidores EU también con el cambio de hora; desde el 25 de octubre iban una hora adelantados.
+
 ## 0.5.37
 
 - Nuevo: Minimapa: un cubo oculto recién aparecido se ve amarillo brillante y uno ya presente rojo fuego, ambos algo más grandes que tu punto.

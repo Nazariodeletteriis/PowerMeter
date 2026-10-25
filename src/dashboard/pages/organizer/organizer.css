@@ -159,7 +159,7 @@
   color: var(--pm-t3);
 }
 
-/* Category colour: rift amber, bosses red, events and resets neutral; the icon and the word carry it too. */
+/* Category colour: rift amber, bosses and sieges red, events and resets neutral; the icon and the word carry it too. */
 .evNext,
 .evCat {
   --c: var(--pm-t3);
@@ -168,6 +168,9 @@
   --c: var(--pm-warn);
 }
 [data-cat="boss"] {
+  --c: var(--pm-redt);
+}
+[data-cat="siege"] {
   --c: var(--pm-redt);
 }
 [data-cat="event"] {

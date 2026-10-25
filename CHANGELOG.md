@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.38
+
+- New: Timer: Dimensional Invasion (every hour at half past), the Artifact Siege in a new Sieges tab, and Executor Kaira.
+- Fixed: Timer and widget alerts: event times follow the EU servers' clock through daylight saving; since 25 October they showed an hour early.
+
 ## 0.5.37
 
 - New: Minimap: a hidden cube that just appeared shows bright yellow, one already standing fire red, both a size up on your dot.

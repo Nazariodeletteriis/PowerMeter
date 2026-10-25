@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.38
+
+- Nuovo: Timer: Dimensional Invasion (ogni ora alle e mezza), l'Artifact Siege in una nuova scheda Assedi, ed Executor Kaira.
+- Corretto: Timer e avvisi del widget: gli orari degli eventi seguono l'ora dei server EU anche con il cambio dell'ora legale; dal 25 ottobre erano un'ora in anticipo.
+
 ## 0.5.37
 
 - Nuovo: Minimappa: un cubo nascosto appena comparso è giallo acceso, uno già presente rosso fuoco, entrambi un po' più grandi del tuo segnaposto.

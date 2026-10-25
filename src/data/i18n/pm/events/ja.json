@@ -58,5 +58,8 @@
   "events.fb.killed": "{time} に討伐",
   "events.fb.every": "{d}ごと",
   "events.fb.up": "出現しているはず",
-  "events.fb.hint": "目の前でボスが倒れた時刻に再出現時間を足して計算しています。間隔は推定値です。その後、他のプレイヤーが倒している可能性があります。"
+  "events.fb.hint": "目の前でボスが倒れた時刻に再出現時間を足して計算しています。間隔は推定値です。その後、他のプレイヤーが倒している可能性があります。",
+  "events.timer.nextSiege": "次の攻城戦",
+  "events.timer.tabSiege": "攻城戦",
+  "events.cat.siege": "攻城戦"
 }

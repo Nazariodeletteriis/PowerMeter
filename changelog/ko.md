@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.38
+
+- 신규: 타이머: Dimensional Invasion(매시 30분), 새 '공성전' 탭의 Artifact Siege, Executor Kaira를 추가했습니다.
+- 수정: 타이머와 위젯 알림: 서머타임 전환 후에도 이벤트 시간이 EU 서버 시계를 따릅니다. 10월 25일부터 1시간 일찍 표시되었습니다.
+
 ## 0.5.37
 
 - 신규: 미니맵: 방금 나타난 히든 큐브는 밝은 노란색, 이미 있던 큐브는 불타는 빨간색으로 표시되며 둘 다 내 점보다 조금 큽니다.

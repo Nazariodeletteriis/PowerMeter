@@ -58,5 +58,8 @@
   "events.fb.killed": "{time} 击杀",
   "events.fb.every": "每 {d}",
   "events.fb.up": "应该已刷新",
-  "events.fb.hint": "根据首领在你面前死亡的时间加上刷新时间计算。间隔为估计值；其间可能已被其他玩家击杀。"
+  "events.fb.hint": "根据首领在你面前死亡的时间加上刷新时间计算。间隔为估计值；其间可能已被其他玩家击杀。",
+  "events.timer.nextSiege": "下一场攻城战",
+  "events.timer.tabSiege": "攻城战",
+  "events.cat.siege": "攻城战"
 }

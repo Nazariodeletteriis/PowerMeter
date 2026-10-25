@@ -58,5 +58,8 @@
   "events.fb.killed": "{time} 처치",
   "events.fb.every": "{d}마다",
   "events.fb.up": "출현했을 것",
-  "events.fb.hint": "눈앞에서 보스가 쓰러진 시각에 리스폰 시간을 더해 계산합니다. 간격은 추정치이며, 그사이 다른 플레이어가 처치했을 수 있습니다."
+  "events.fb.hint": "눈앞에서 보스가 쓰러진 시각에 리스폰 시간을 더해 계산합니다. 간격은 추정치이며, 그사이 다른 플레이어가 처치했을 수 있습니다.",
+  "events.timer.nextSiege": "다음 공성전",
+  "events.timer.tabSiege": "공성전",
+  "events.cat.siege": "공성전"
 }

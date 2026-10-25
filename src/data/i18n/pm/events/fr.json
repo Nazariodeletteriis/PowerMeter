@@ -58,5 +58,8 @@
   "events.fb.killed": "Tué à {time}",
   "events.fb.every": "toutes les {d}",
   "events.fb.up": "Devrait être là",
-  "events.fb.hint": "Calculé à partir de l'heure où le boss est mort devant vous plus son délai de réapparition. Les intervalles sont estimés ; un autre joueur a pu le tuer entre-temps."
+  "events.fb.hint": "Calculé à partir de l'heure où le boss est mort devant vous plus son délai de réapparition. Les intervalles sont estimés ; un autre joueur a pu le tuer entre-temps.",
+  "events.timer.nextSiege": "Prochain siège",
+  "events.timer.tabSiege": "Sièges",
+  "events.cat.siege": "Siège"
 }

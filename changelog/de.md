@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.38
+
+- Neu: Timer: Dimensional Invasion (jede Stunde um halb), die Artifact Siege in einem neuen Tab Belagerungen und Executor Kaira.
+- Behoben: Timer und Widget-Hinweise: Die Eventzeiten folgen der Uhr der EU-Server auch bei der Zeitumstellung; seit dem 25. Oktober lagen sie eine Stunde zu früh.
+
 ## 0.5.37
 
 - Neu: Minikarte: Ein gerade erschienener versteckter Würfel leuchtet gelb, einer, der schon da war, feuerrot, beide etwas größer als dein Punkt.

@@ -58,5 +58,8 @@
   "events.fb.killed": "Besiegt um {time}",
   "events.fb.every": "alle {d}",
   "events.fb.up": "Sollte da sein",
-  "events.fb.hint": "Berechnet aus dem Zeitpunkt, an dem der Boss vor dir starb, plus seiner Respawnzeit. Die Intervalle sind geschätzt; inzwischen könnte ihn ein anderer Spieler besiegt haben."
+  "events.fb.hint": "Berechnet aus dem Zeitpunkt, an dem der Boss vor dir starb, plus seiner Respawnzeit. Die Intervalle sind geschätzt; inzwischen könnte ihn ein anderer Spieler besiegt haben.",
+  "events.timer.nextSiege": "Nächste Belagerung",
+  "events.timer.tabSiege": "Belagerungen",
+  "events.cat.siege": "Belagerung"
 }
