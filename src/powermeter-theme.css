@@ -577,9 +577,10 @@
     .pmEventStrip { animation: none; }
   }
   /* Character bar (src/widget/charBar.ts): class icon and name in the class colour, then the counters. */
+  /* Keeps its width (the name reads whole); the event notice beside it gives way and wraps. */
   .pmCharBar {
-    flex: 0 1 auto;
-    min-width: 0;
+    flex: none;
+    max-width: 60%;
     margin-left: auto;
     display: flex;
     align-items: center;
