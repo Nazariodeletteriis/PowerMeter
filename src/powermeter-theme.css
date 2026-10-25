@@ -549,7 +549,8 @@
   }
   .pmEventStrip[hidden] { display: none; }
   .pmEventStrip > svg { width: 13px; height: 13px; flex: none; color: var(--pm-hot); }
-  .pmEventText { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: pre; } /* one line per start (\n) */
+  /* One line per start (\n); a long one (two events starting together) wraps instead of losing its end. */
+  .pmEventText { flex: 1; min-width: 0; white-space: pre-line; overflow-wrap: anywhere; }
   .pmEventClose {
     display: grid; place-items: center;
     width: 20px; height: 20px; flex: none;
@@ -601,10 +602,10 @@
   }
   .pmEventPopup > svg { width: 18px; height: 18px; margin-top: 1px; color: var(--pm-hot); }
   .pmEventPopupTitle { color: var(--pm-redt); font-weight: 600; font-size: 11px; line-height: 1.4; }
+  /* Wraps: two events starting together ("Shugo Festival, Spacetime Rift") must read in full. */
   .pmEventPopupName {
-    overflow: hidden;
-    font-weight: 700; font-size: 14px; line-height: 1.35;
-    text-overflow: ellipsis; white-space: nowrap;
+    font-weight: 700; font-size: 13px; line-height: 1.3;
+    overflow-wrap: anywhere;
   }
   .pmEventPopupTime { color: var(--pm-widget-muted); font-weight: 600; font-size: 12px; font-variant-numeric: tabular-nums; }
   .pmEventPopupAlert {
