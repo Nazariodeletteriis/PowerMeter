@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.39
+
+- 수정: 타이머 '전체' 탭: Shugo Festival이 함께 시작하는 모든 Spacetime Rift와 같이 표시됩니다(전에는 다음 한 번만 표시되어 균열이 따로인 것처럼 보였습니다). 동시에 시작하는 이벤트는 함께 묶이고 시간은 한 번만 표시됩니다.
+
 ## 0.5.38
 
 - 신규: 타이머: Dimensional Invasion(매시 30분), 새 '공성전' 탭의 Artifact Siege, Executor Kaira를 추가했습니다.

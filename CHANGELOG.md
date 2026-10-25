@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.39
+
+- Fixed: Timer, All tab: the Shugo Festival shows with every Spacetime Rift it opens with (it was listed only at its next hour, so the rifts looked alone), and events starting together sit together with the time shown once.
+
 ## 0.5.38
 
 - New: Timer: Dimensional Invasion (every hour at half past), the Artifact Siege in a new Sieges tab, and Executor Kaira.

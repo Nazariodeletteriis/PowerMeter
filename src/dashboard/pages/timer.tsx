@@ -62,11 +62,12 @@ export default function Timer({ t, lang, settings, save, run, onError }: PagePro
       return (near.length ? near : all.slice(0, 1)).map((w) => ({ e, w }));
     })
     .sort((a, b) => a.w.start - b.w.start || a.e.name.localeCompare(b.e.name));
-  // "All" keeps an hourly event (the Shugo Festival) to its next window: its 24 rows a day
-  // buried the rifts and bosses. Its own tab still lists every one.
+  // "All" keeps an hourly event (the Shugo Festival) to its next window and to the ones that start with something
+  // else (each rift opens with a festival): its 24 rows a day buried the rifts and bosses. Its own tab lists every one.
+  const hourly = (r: (typeof rows)[number]) => r.e.cadence_json.kind === "minuteOfHour";
   const shown =
     tab === "all"
-      ? rows.filter((r) => r.e.cadence_json.kind !== "minuteOfHour" || rows.find((x) => x.e === r.e) === r)
+      ? rows.filter((r) => !hourly(r) || rows.find((x) => x.e === r.e) === r || rows.some((x) => !hourly(x) && x.w.start === r.w.start))
       : rows.filter((r) => r.e.category === tab);
 
   // The next window of each kind; events starting together (bosses at 21:30) share the card.
@@ -102,6 +103,7 @@ export default function Timer({ t, lang, settings, save, run, onError }: PagePro
     );
 
   let lastDay = "";
+  let lastStart = 0;
   return (
     <>
       <div className="evNextGrid">
@@ -165,10 +167,13 @@ export default function Timer({ t, lang, settings, save, run, onError }: PagePro
                   const head = day !== lastDay && day;
                   lastDay = day;
                   const cat = catOf(e.category);
+                  // Events starting together sit together: the time once, on the first of them.
+                  const together = w.start === lastStart && !head;
+                  lastStart = w.start;
                   return (
                     <li key={`${e.event_id}-${w.start}`}>
                       {head && <h3 className="evTlDay">{head}</h3>}
-                      <div className="evTlRow" data-live={w.active}>
+                      <div className="evTlRow" data-live={w.active} data-together={together || undefined}>
                         <span className="evTlTime">
                           {clock(w.start, lang)}
                           {w.end > w.start && <small>{clock(w.end, lang)}</small>}

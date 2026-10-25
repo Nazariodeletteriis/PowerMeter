@@ -212,6 +212,14 @@
 .evTlList li + li:not(:has(.evTlDay)) .evTlRow {
   border-top: 1px solid var(--pm-line);
 }
+/* A row starting with the one above (a rift and its festival) joins it: no hairline, its time not repeated (still
+   read out, so a screen reader hears it). */
+.evTlList li + li .evTlRow[data-together] {
+  border-top: 0;
+}
+.evTlRow[data-together] .evTlTime {
+  opacity: 0;
+}
 .evTlRow[data-live="true"] {
   background: var(--pm-s2);
   box-shadow: inset 2px 0 0 var(--pm-ok);

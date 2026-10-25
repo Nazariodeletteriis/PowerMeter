@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.39
+
+- Behoben: Timer, Tab Alle: Das Shugo Festival erscheint mit jedem Spacetime Rift, mit dem es beginnt (bisher nur zu seiner nächsten Stunde, sodass die Rifts allein wirkten), und gleichzeitig startende Events stehen zusammen, die Uhrzeit nur einmal.
+
 ## 0.5.38
 
 - Neu: Timer: Dimensional Invasion (jede Stunde um halb), die Artifact Siege in einem neuen Tab Belagerungen und Executor Kaira.

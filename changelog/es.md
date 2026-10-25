@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.39
+
+- Corregido: Temporizador, pestaña Todos: el Shugo Festival aparece con cada Spacetime Rift con el que empieza (antes solo en su próxima hora, y los Rift parecían solos), y los eventos que empiezan a la vez van juntos con la hora una sola vez.
+
 ## 0.5.38
 
 - Nuevo: Temporizador: Dimensional Invasion (cada hora a y media), el Artifact Siege en una nueva pestaña Asedios, y Executor Kaira.

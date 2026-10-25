@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.39
+
+- Исправлено: Таймер, вкладка «Все»: Shugo Festival показывается вместе с каждым Spacetime Rift, с которым он начинается (раньше только в ближайший час, и рифты выглядели одиночными), а одновременные события стоят рядом, время указано один раз.
+
 ## 0.5.38
 
 - Новое: Таймер: Dimensional Invasion (каждый час в половину), Artifact Siege на новой вкладке «Осады» и Executor Kaira.

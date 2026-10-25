@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.39
+
+- 修正: タイマーの「すべて」タブ: Shugo Festivalが同時に始まる各Spacetime Riftと一緒に表示されるようになりました（以前は次の1回だけで、リフトが単独に見えていました）。同時に始まるイベントはまとめて並び、時刻は1回だけ表示されます。
+
 ## 0.5.38
 
 - 新機能: タイマー: Dimensional Invasion（毎時30分）、新しい「攻城戦」タブのArtifact Siege、Executor Kairaを追加しました。

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.39
+
+- Corrigé : Minuteur, onglet Tous : le Shugo Festival s'affiche avec chaque Spacetime Rift avec lequel il commence (avant seulement à sa prochaine heure, les Rifts semblaient seuls), et les événements qui commencent ensemble sont regroupés, l'heure affichée une fois.
+
 ## 0.5.38
 
 - Nouveau : Minuteur : Dimensional Invasion (chaque heure à la demie), l'Artifact Siege dans un nouvel onglet Sièges, et Executor Kaira.

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.39
+
+- 修正：計時器「全部」分頁：Shugo Festival 會與同時開始的每次 Spacetime Rift 一起顯示（之前只顯示下一次，裂隙看起來是單獨的），同時開始的活動排在一起，時間只顯示一次。
+
 ## 0.5.38
 
 - 新增：計時器：Dimensional Invasion（每小時半點）、新「攻城戰」分頁中的 Artifact Siege，以及 Executor Kaira。
