@@ -34,6 +34,7 @@
   "organizer.set.theme": "Thema",
   "organizer.set.themeHint": "Ember und Carbon sind dunkel, Hell nutzt die gleichen Farben",
   "organizer.set.startWithWindows": "Mit Windows starten",
+  "organizer.set.startWithWindowsHint": "PowerMeter startet mit dem PC und läuft schon, wenn du ins Spiel gehst: die Zähler des Widgets (Nightmare, täglicher Dungeon, Beritra, Shugo, Odyle) aktualisieren sich von selbst, ohne Aus- und Einloggen. Das Spiel sendet sie nur beim Betreten der Welt.",
   "organizer.set.trayOnClose": "Beim Schließen ins Tray minimieren",
   "organizer.set.adapter": "Netzwerkadapter",
   "organizer.set.adapterHint": "Nützlich bei VPN oder Ping-Reduzierer",

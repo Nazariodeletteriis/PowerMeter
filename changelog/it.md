@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.50
+
+- Nuovo: Impostazioni > Generale: Avvia con Windows funziona. Il PowerMeter si apre con il PC, così è già attivo quando entri in gioco e i contatori del widget si aggiornano senza sloggare e riloggare.
+
 ## 0.5.49
 
 - Cambiato: Minimappa e Cube Finder: si nascondono nei menu del gioco solo se stanno sopra il gioco; spostate su un altro monitor restano visibili invece di sparire e ricomparire ogni volta che sblocchi il mouse.

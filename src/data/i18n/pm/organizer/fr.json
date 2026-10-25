@@ -34,6 +34,7 @@
   "organizer.set.theme": "Thème",
   "organizer.set.themeHint": "Ember et Carbon sont sombres, Clair garde les mêmes couleurs",
   "organizer.set.startWithWindows": "Démarrer avec Windows",
+  "organizer.set.startWithWindowsHint": "PowerMeter s'ouvre au démarrage du PC et tourne déjà quand vous entrez en jeu : les compteurs du widget (Nightmare, donjon quotidien, Beritra, Shugo, Odyle) se mettent à jour seuls, sans vous déconnecter et reconnecter. Le jeu ne les envoie qu'à l'entrée dans le monde.",
   "organizer.set.trayOnClose": "Réduire dans la barre d'état à la fermeture",
   "organizer.set.adapter": "Adaptateur réseau",
   "organizer.set.adapterHint": "Utile avec un VPN ou un réducteur de ping",

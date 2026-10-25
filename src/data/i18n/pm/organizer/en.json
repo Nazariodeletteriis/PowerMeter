@@ -34,6 +34,7 @@
   "organizer.set.theme": "Theme",
   "organizer.set.themeHint": "Ember and Carbon are dark, Light keeps the same colors",
   "organizer.set.startWithWindows": "Start with Windows",
+  "organizer.set.startWithWindowsHint": "PowerMeter opens when you turn on the PC, so it is already running when you enter the game: the widget's counters (Nightmare, Daily Dungeon, Beritra, Shugo, Odyle) update on their own, with no need to log out and back in. The game sends them only when you enter the world.",
   "organizer.set.trayOnClose": "Minimize to tray on close",
   "organizer.set.adapter": "Network adapter",
   "organizer.set.adapterHint": "Useful with a VPN or ping reducer",

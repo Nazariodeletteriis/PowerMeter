@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.50
+
+- 新增：设置 > 常规：“随 Windows 启动”可用。PowerMeter 随电脑启动，进入游戏时已在运行，小组件计数无需重新登录即可更新。
+
 ## 0.5.49
 
 - 更改：小地图和 Cube Finder 只在位于游戏上方时才在游戏菜单中隐藏；移到另一台显示器上会保持显示，不会在每次释放指针时闪烁。

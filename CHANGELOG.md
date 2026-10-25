@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.50
+
+- New: Settings > General: Start with Windows works. PowerMeter opens with the PC, so it is already running when you enter the game and the widget's counters update without logging out and in again.
+
 ## 0.5.49
 
 - Changed: Minimap and Cube Finder: hiding in game menus only happens when the minimap lies over the game; moved to another monitor it stays on screen instead of blinking each time the pointer is freed.

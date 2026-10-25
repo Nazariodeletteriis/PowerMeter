@@ -147,6 +147,10 @@ const same = (xs: string[]) => xs.map((x) => [x, x] as const);
 export default function Impostazioni({ t, lang, settings, save, name, go, run }: PageProps) {
   const [tab, setTab] = useState<(typeof TABS)[number][0]>("widget"); // prototype default
   const [clickThrough, setClickThrough] = useState(false);
+  const [startWithWindows, setStartWithWindows] = useState(false);
+  useEffect(() => {
+    invoke<boolean>("get_start_with_windows").then(setStartWithWindows, () => {});
+  }, []);
   const [devices, setDevices] = useState<string[]>([]);
   const [device, setDevice] = useState(""); // "" = automatic
   const [version, setVersion] = useState("");
@@ -420,7 +424,13 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
           />
         </Row>
         {themeRow(t("organizer.set.theme"))}
-        {fixed("organizer.set.startWithWindows")}
+        <Row label={t("organizer.set.startWithWindows")} desc={t("organizer.set.startWithWindowsHint")}>
+          <Switch
+            label={t("organizer.set.startWithWindows")}
+            on={startWithWindows}
+            set={(on) => run(() => invoke("set_start_with_windows", { on }).then(() => setStartWithWindows(on)))}
+          />
+        </Row>
         {fixed("organizer.set.trayOnClose")}
       </>
     ),

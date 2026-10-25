@@ -34,6 +34,7 @@
   "organizer.set.theme": "Tema",
   "organizer.set.themeHint": "Brace e Carbonio scuri, oppure Chiaro con gli stessi colori",
   "organizer.set.startWithWindows": "Avvia con Windows",
+  "organizer.set.startWithWindowsHint": "Il PowerMeter si apre all'accensione del PC, così è già attivo quando entri in gioco: i contatori del widget (Nightmare, Dungeon giornaliero, Beritra, Shugo, Odyle) si aggiornano da soli, senza dover sloggare e riloggare. Il gioco li manda solo quando entri nel mondo.",
   "organizer.set.trayOnClose": "Riduci nella tray alla chiusura",
   "organizer.set.adapter": "Adattatore di rete",
   "organizer.set.adapterHint": "Utile con VPN o ping reducer",

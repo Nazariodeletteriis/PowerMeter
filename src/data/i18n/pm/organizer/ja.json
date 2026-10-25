@@ -34,6 +34,7 @@
   "organizer.set.theme": "テーマ",
   "organizer.set.themeHint": "エンバーとカーボンはダークテーマ、ライトは同じ配色を維持します",
   "organizer.set.startWithWindows": "Windows起動時に開始",
+  "organizer.set.startWithWindowsHint": "PC の起動時に PowerMeter が開くので、ゲームに入るときにはすでに動いています。ウィジェットのカウンター(ナイトメア、デイリーダンジョン、ベリトラ、シュゴ、オディル)がログアウトし直さなくても自動で更新されます。ゲームはワールドに入ったときにだけこれを送ります。",
   "organizer.set.trayOnClose": "閉じるときにトレイに最小化",
   "organizer.set.adapter": "ネットワークアダプター",
   "organizer.set.adapterHint": "VPNやping軽減ツール使用時に有効",

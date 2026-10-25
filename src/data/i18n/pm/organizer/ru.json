@@ -34,6 +34,7 @@
   "organizer.set.theme": "Тема",
   "organizer.set.themeHint": "Ember и Carbon — тёмные, Светлая сохраняет те же цвета",
   "organizer.set.startWithWindows": "Запускать с Windows",
+  "organizer.set.startWithWindowsHint": "PowerMeter запускается вместе с ПК и уже работает, когда вы входите в игру: счётчики виджета (Кошмар, ежедневное подземелье, Беритра, Шуго, Одил) обновляются сами, без выхода и повторного входа. Игра присылает их только при входе в мир.",
   "organizer.set.trayOnClose": "Сворачивать в трей при закрытии",
   "organizer.set.adapter": "Сетевой адаптер",
   "organizer.set.adapterHint": "Полезно при использовании VPN или ping reducer",

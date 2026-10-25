@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.50
+
+- 신규: 설정 > 일반: 'Windows와 함께 시작'이 작동합니다. PC와 함께 PowerMeter가 열려 게임에 들어갈 때 이미 실행 중이며, 다시 로그인하지 않아도 위젯 카운터가 갱신됩니다.
+
 ## 0.5.49
 
 - 변경: 미니맵과 Cube Finder는 게임 위에 있을 때만 게임 메뉴에서 숨겨집니다. 다른 모니터로 옮기면 포인터를 풀 때마다 깜빡이지 않고 계속 표시됩니다.

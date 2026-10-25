@@ -34,6 +34,7 @@
   "organizer.set.theme": "테마",
   "organizer.set.themeHint": "Ember와 Carbon은 어두운 테마이며, Light는 기존 색상을 유지합니다",
   "organizer.set.startWithWindows": "Windows 시작 시 실행",
+  "organizer.set.startWithWindowsHint": "PC를 켤 때 PowerMeter가 열려 게임에 들어갈 때 이미 실행 중입니다. 위젯 카운터(악몽, 일일 던전, 베리트라, 슈고, 오드)가 다시 로그인하지 않아도 자동으로 갱신됩니다. 게임은 월드에 들어갈 때만 이 값을 보냅니다.",
   "organizer.set.trayOnClose": "닫을 때 트레이로 최소화",
   "organizer.set.adapter": "네트워크 어댑터",
   "organizer.set.adapterHint": "VPN이나 핑 감소 프로그램 사용 시 유용합니다",

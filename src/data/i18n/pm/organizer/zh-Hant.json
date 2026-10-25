@@ -34,6 +34,7 @@
   "organizer.set.theme": "主題",
   "organizer.set.themeHint": "Ember 和 Carbon 為深色,淺色維持相同配色",
   "organizer.set.startWithWindows": "隨 Windows 啟動",
+  "organizer.set.startWithWindowsHint": "開機時自動開啟 PowerMeter，進入遊戲時它已在執行：小工具的計數（夢魘、每日副本、貝利特拉、修古、奧德）會自動更新，無需重新登入。遊戲只在進入世界時傳送這些資料。",
   "organizer.set.trayOnClose": "關閉時縮小至系統匣",
   "organizer.set.adapter": "網路介面卡",
   "organizer.set.adapterHint": "使用 VPN 或降低延遲工具時很有用",

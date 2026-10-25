@@ -168,6 +168,43 @@ fn get_captured_character() -> crate::capture::equip_parser::CapturedCharacter {
     crate::capture::equip_parser::snapshot()
 }
 
+/// Start with Windows (Settings > General): the app's line in the user's Run key, written with reg.exe. The point: the
+/// game sends the widget's counters only on entering the world (capture/counters.rs), so a PowerMeter that is already
+/// running then has them without logging out and in again.
+const RUN_KEY: &str = r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run";
+const RUN_NAME: &str = "PowerMeter";
+
+fn reg(args: &[&str]) -> bool {
+    let mut cmd = std::process::Command::new("reg");
+    cmd.args(args);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW: no console flashing up
+    }
+    cmd.output().is_ok_and(|o| o.status.success())
+}
+
+#[tauri::command]
+fn get_start_with_windows() -> bool {
+    reg(&["query", RUN_KEY, "/v", RUN_NAME])
+}
+
+#[tauri::command]
+fn set_start_with_windows(on: bool) -> Result<(), String> {
+    if on {
+        let exe = std::env::current_exe().map_err(|e| e.to_string())?;
+        reg(&["add", RUN_KEY, "/v", RUN_NAME, "/t", "REG_SZ", "/d", &format!("\"{}\"", exe.display()), "/f"]);
+    } else {
+        reg(&["delete", RUN_KEY, "/v", RUN_NAME, "/f"]);
+    }
+    if get_start_with_windows() == on {
+        Ok(())
+    } else {
+        Err("Windows did not take the change to start with Windows".into())
+    }
+}
+
 /// The character's recharging counters, id → [base, charged] (capture/counters.rs), for the widget's counters.
 #[tauri::command]
 fn get_counters() -> std::collections::BTreeMap<u32, (i32, i32)> {
@@ -1904,6 +1941,8 @@ pub fn run() {
             get_capture_diagnosis,
             get_captured_character,
             get_counters,
+            get_start_with_windows,
+            set_start_with_windows,
             game_pointer_free,
             seed_captured_pets,
             get_player_position,
