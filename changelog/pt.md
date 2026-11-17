@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.52
+
+- Novo: Início: o cartão de Notícias mostra os últimos anúncios e notas de patch oficiais de AION 2; um clique abre no navegador.
+- Novo: Masmorras: uma aba Hard com o nível Hard de cada masmorra de Expedição, uma aba Transcendência com Deus Research Base e Shattered Arkanis e seus quatro níveis, e uma aba Sanctuary com a raid Abyssal Forge: Ludra (Normal e Hard, 10 jogadores, 1 entrada por semana). Deus Research Base e Shattered Arkanis também estão em Exploração.
+- Corrigido: Timer: os horários dos eventos batem com os servidores europeus: Artifact Siege e os Executors na quinta e no sábado (21:10 e 21:40), Argo, the Spirit King todo dia às 10:30 e 22:30, a duração certa para chefes, cercos, Dimensional Invasion e Arena of Tactics, e os resets não mudam mais com o horário de verão.
+
 ## 0.5.51
 
 - Corrigido: Início, lutas recentes: aparecem o resultado (Derrotado / Não derrotado) e o DPS do grupo em vez de um traço; passe o mouse sobre o resultado para ver o que significa. A coluna Posição foi removida.

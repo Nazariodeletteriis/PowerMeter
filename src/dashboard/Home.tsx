@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { CaretRightIcon, ListChecksIcon, NewspaperIcon, ShieldIcon, SwordIcon, UserPlusIcon } from "@phosphor-icons/react";
+import { ArrowSquareOutIcon, CaretRightIcon, ListChecksIcon, NewspaperIcon, ShieldIcon, SwordIcon, UserPlusIcon } from "@phosphor-icons/react";
 import type { Settings } from "./App";
 import { activeId, readCharacters } from "./characters";
 import { type FightOutcome, fightOutcome, groupDps } from "./fightRow";
 import type { T } from "./i18n";
+import { cleanNews, type NewsItem } from "./news";
 import { REGIONS } from "./Onboarding";
 import { nextDailyReset, nextWeeklyReset } from "./pages/organizer/resets";
 import { Card, ClassAvatar, EmptyState, FactionTag, fmt } from "./ui";
@@ -23,6 +24,11 @@ type FightSummary = {
 
 // Newest first (the backend sorts by start time).
 const getFights = () => invoke<FightSummary[]>("get_fight_history");
+// The server refreshes its copy of the official site every 30 minutes.
+const getNews = () => invoke<unknown>("pm_news").then(cleanNews);
+// The server caches NCSOFT for 30 min, so a short poll costs NCSOFT nothing and a failed read recovers fast.
+const NEWS_POLL_MS = 5 * 60 * 1000;
+const NEWS_COLS = "80px minmax(0,1fr) 16px";
 // The prototype's 48px position column is gone (the record does not mark the local player): its width went to the
 // result, whose words ("Not killed", "Nicht besiegt") are longer than the prototype's "Kill".
 const FIGHT_COLS = "minmax(0,1fr) 112px 80px 96px 90px 24px";
@@ -88,13 +94,11 @@ export function Home(props: Props) {
           >
             <Fights {...props} fights={fights} />
           </Card>
-          {/* No source yet for today's activities (organizer storage, R5) or news. */}
+          {/* No source yet for today's activities (organizer storage, R5). */}
           <Card title={t("home.today")} style={{ gridColumn: "span 4" }}>
             <EmptyState icon={<ListChecksIcon aria-hidden="true" />} title={t("shell.states.noData")} text={t("shell.states.soonText")} />
           </Card>
-          <Card title={t("home.news")} style={{ gridColumn: "span 12" }}>
-            <EmptyState icon={<NewspaperIcon aria-hidden="true" />} title={t("shell.states.noData")} text={t("shell.states.soonText")} />
-          </Card>
+          <NewsCard t={t} lang={props.lang} />
         </div>
       )}
     </>
@@ -197,6 +201,52 @@ function TimersCard({ t }: { t: T }) {
           </div>
         );
       })}
+    </Card>
+  );
+}
+
+function NewsCard({ t, lang }: { t: T; lang: string }) {
+  const news = usePoll(getNews, NEWS_POLL_MS);
+  const day = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short" });
+  const empty = news.error || (news.data && !news.data.notices.length && !news.data.updates.length);
+  const list = (title: string, items?: NewsItem[]) => (
+    <div style={{ minWidth: 0 }}>
+      <div className="gridHead">
+        <span>{title}</span>
+      </div>
+      {!items ? (
+        [0, 1, 2].map((k) => <div key={k} className="skeleton" style={{ height: 36, marginTop: 4 }} />)
+      ) : !items.length ? (
+        <p style={{ padding: "10px 0", fontSize: 12, color: "var(--pm-t3)" }}>{t("home.newsListEmpty")}</p>
+      ) : (
+        items.map((n) => (
+          <button key={n.url} type="button" className="gridRow" style={{ gridTemplateColumns: NEWS_COLS }} title={n.title} onClick={() => void invoke("open_url", { url: n.url })}>
+            <span className="mono" style={{ fontSize: 11, color: "var(--pm-t3)", whiteSpace: "nowrap" }}>
+              {day.format(new Date(n.date))}
+            </span>
+            <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {n.title}
+              <span className="srOnly"> ({t("home.newsOpens")})</span>
+            </span>
+            <ArrowSquareOutIcon style={{ color: "var(--pm-t3)" }} aria-hidden="true" />
+          </button>
+        ))
+      )}
+    </div>
+  );
+  return (
+    <Card title={t("home.news")} style={{ gridColumn: "span 12" }}>
+      {empty ? (
+        <EmptyState icon={<NewspaperIcon aria-hidden="true" />} title={t("shell.states.noData")} text={t("home.newsOffline")} />
+      ) : (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16, marginTop: 8 }}>
+            {list(t("home.newsNotices"), news.data?.notices)}
+            {list(t("home.newsUpdates"), news.data?.updates)}
+          </div>
+          <p style={{ marginTop: 10, fontSize: 11, color: "var(--pm-t3)" }}>{t("home.newsSource")}</p>
+        </>
+      )}
     </Card>
   );
 }

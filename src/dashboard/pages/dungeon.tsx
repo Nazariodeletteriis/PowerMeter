@@ -11,19 +11,20 @@ import fire from "../../assets/dungeons/fire.webp";
 import draupnir from "../../assets/dungeons/draupnir.webp";
 import vakron from "../../assets/dungeons/vakron.webp";
 import ferocious from "../../assets/dungeons/ferocious.webp";
+import ludra from "../../assets/dungeons/ludra.webp";
 import "./organizer/organizer.css";
 import "./world/world.css";
 
-// Dungeon page: the Expedition dungeons as cards (Exploration / Conquest tabs).
+// Dungeon page: the dungeons out in EU as cards, one tab per mode (Exploration, Conquest, Hard, Transcendence, Raid).
 // The card of any dungeon (opened from a card, the search or an item's sources
 // through openEntry) still lists every version the archive holds.
 
-const Mode = ["exploration", "conquest"] as const;
+const Mode = ["exploration", "conquest", "hard", "transcendence", "raid"] as const;
 type Mode = (typeof Mode)[number];
 const MODE_KEY = "pm.dungeon.mode";
 
 // Art: in-game screenshots from the owner (src/assets/dungeons). Ids are the archive's
-// Expedition entries: Exploration, Conquest and the locked Conquest level (item level 2400-2600).
+// Expedition entries: Exploration, Conquest and Hard (filed as a tier-less Conquest level, item level 2400-2600).
 // players, kinah and cube are not in the archive: they come from the in-game Expedition window
 // (Exploration tab, screenshots of 2026-10-12) and are shown on the Exploration cards only.
 const EXPEDITIONS = [
@@ -34,7 +35,17 @@ const EXPEDITIONS = [
   { name: "Vakron Sky Island", art: vakron, ids: ["600071", "600072", "600073"], players: "2-5", kinah: 30000, cube: 40 },
   { name: "Ferocious Horn Den", art: ferocious, ids: ["600091", "600092", "600093"], players: "1-5", kinah: 36000, cube: 40 },
 ];
-type Expedition = (typeof EXPEDITIONS)[number];
+const HARD_IDS = new Set(EXPEDITIONS.map((e) => e.ids[2]));
+// Transcendence dungeons out in EU (the archive lists more that are not): Exploration, then the four Transcendence levels.
+// No art yet, and none of the Exploration window's extras.
+const TRANSCENDENCE = [
+  { name: "Deus Research Base", ids: ["600051", "600053", "600055", "600058", "610052"] },
+  { name: "Shattered Arkanis", ids: ["600061", "600063", "600065", "600068", "610062"] },
+];
+// The only raid out in EU. From the in-game window, 2026-11-17: Normal and Hard both Lv 45, 10 players,
+// Final Boss Kill Count 1/1 (the archive says 2), cube 40; Hard (item level 3,000) is not in the archive.
+const RAID = { name: "Abyssal Forge: Ludra", art: ludra, id: "600082", players: "10", entries: 1, cube: 40, hardItemLevel: 3000 };
+const IDS = [...EXPEDITIONS.flatMap((e) => e.ids), ...TRANSCENDENCE.flatMap((d) => d.ids), RAID.id];
 // "Play Count x17, Odyle Energy Cube Kina Gain 20%": the same on every Exploration dungeon.
 const RUNS = 17;
 const CUBE_KINAH = 20;
@@ -43,13 +54,61 @@ const CUBE_KINAH = 20;
 type Rec = {
   dungeon: { minLevel?: number; itemLevel?: number; entries?: number; resetDay?: string };
   tierName?: string;
+  transcendenceItemLevel?: number;
   bosses?: { name: string; level?: number }[];
   rewards?: { name: string; grade?: string; icon?: string }[];
 };
-const loadExpeditions = () =>
-  Promise.all(EXPEDITIONS.flatMap((e) => e.ids).map((id) => gd.get("dungeon", id))).then((rs) =>
-    Object.fromEntries(rs.flatMap((r) => (r ? [[r.id, r.data_json as Rec]] : []))),
+const loadDungeons = () =>
+  Promise.all(IDS.map((id) => gd.get("dungeon", id))).then((rs) =>
+    Object.fromEntries(
+      rs.flatMap((r) => {
+        if (!r) return [];
+        const d = r.data_json as Rec;
+        // Transcendence keeps its item level outside `dungeon`.
+        return [[r.id, d.transcendenceItemLevel == null ? d : { ...d, dungeon: { ...d.dungeon, itemLevel: d.transcendenceItemLevel } }]];
+      }),
+    ) as Record<string, Rec | undefined>,
   );
+
+/** A further level of the same dungeon, shown as a lock line under the card. */
+type Level = { label?: string; itemLevel?: number; bossLv?: number };
+type Card = { id: string; name: string; art?: string; rec: Rec; badge?: string; players?: string; kinah?: number; cube?: number; entries?: number; levels?: Level[] };
+
+const byItemLevel = (a: Card, b: Card) => (a.rec.dungeon.itemLevel ?? 0) - (b.rec.dungeon.itemLevel ?? 0);
+
+function cardsFor(mode: Mode, recs: Record<string, Rec | undefined>, t: T): Card[] {
+  const card = (c: Omit<Card, "rec">) => (recs[c.id] ? [{ ...c, rec: recs[c.id]! }] : []);
+  switch (mode) {
+    case "exploration":
+      return [
+        ...EXPEDITIONS.flatMap(({ ids, ...e }) => card({ ...e, id: ids[0] })),
+        ...TRANSCENDENCE.flatMap((d) => card({ id: d.ids[0], name: d.name })),
+      ];
+    // Conquest and Hard in the game's order: by item level (Krao, Draupnir, Urugugu, Vakron, Fire, Horn Den).
+    case "conquest":
+    case "hard":
+      return EXPEDITIONS.flatMap((e) => card({ id: e.ids[mode === "conquest" ? 1 : 2], name: e.name, art: e.art })).sort(byItemLevel);
+    case "transcendence":
+      return TRANSCENDENCE.flatMap((d) =>
+        card({
+          id: d.ids[1],
+          name: d.name,
+          levels: d.ids.slice(2).flatMap((id) => (recs[id] ? [{ itemLevel: recs[id]!.dungeon.itemLevel, bossLv: recs[id]!.bosses?.[0]?.level }] : [])),
+        }),
+      );
+    case "raid":
+      return card({
+        id: RAID.id,
+        name: RAID.name,
+        art: RAID.art,
+        badge: t("world.dungeon.normal"),
+        players: RAID.players,
+        cube: RAID.cube,
+        entries: RAID.entries,
+        levels: [{ label: t("world.dungeon.hard"), itemLevel: RAID.hardItemLevel }],
+      });
+  }
+}
 
 export default function DungeonPage({ t, lang, go, setHeader, settings }: PageProps) {
   // The active character's item level as the game last showed it (CaptureSync): it unlocks what it reaches.
@@ -62,22 +121,16 @@ export default function DungeonPage({ t, lang, go, setHeader, settings }: PagePr
       setHeader={setHeader}
       category="dungeon"
       title={t("world.dungeon.title")}
-      list={(open) => <Expeditions t={t} lang={lang} open={open} name={char?.name} gs={char?.gs} />}
+      list={(open) => <Dungeons t={t} lang={lang} open={open} name={char?.name} gs={char?.gs} />}
       card={(id, open) => <DungeonDetail t={t} lang={lang} id={id} open={open} />}
     />
   );
 }
 
-function Expeditions({ t, lang, open, name, gs }: { t: T; lang: string; open: Open; name?: string; gs?: number }) {
-  const [mode, setMode] = useState<Mode>(() => (sessionStorage.getItem(MODE_KEY) === "conquest" ? "conquest" : "exploration"));
-  const recs = useGd(loadExpeditions, "expeditions");
-  const conquest = mode === "conquest";
-  const cards = recs.data
-    ? EXPEDITIONS.map((e) => ({ e, id: e.ids[conquest ? 1 : 0], rec: recs.data![e.ids[conquest ? 1 : 0]], locked: conquest ? recs.data![e.ids[2]] : undefined }))
-        .filter((c) => c.rec)
-        // Conquest in the game's order: by item level (Krao, Draupnir, Urugugu, Vakron, Fire, Horn Den).
-        .sort((a, b) => (conquest ? (a.rec.dungeon.itemLevel ?? 0) - (b.rec.dungeon.itemLevel ?? 0) : 0))
-    : undefined;
+function Dungeons({ t, lang, open, name, gs }: { t: T; lang: string; open: Open; name?: string; gs?: number }) {
+  const [mode, setMode] = useState<Mode>(() => Mode.find((m) => m === sessionStorage.getItem(MODE_KEY)) ?? "exploration");
+  const recs = useGd(loadDungeons, "dungeonCards");
+  const cards = recs.data ? cardsFor(mode, recs.data, t) : undefined;
   const icons = useIcons(cards?.flatMap((c) => c.rec.rewards?.map((r) => r.icon) ?? []) ?? []);
   const pick = (m: Mode) => {
     sessionStorage.setItem(MODE_KEY, m);
@@ -85,7 +138,7 @@ function Expeditions({ t, lang, open, name, gs }: { t: T; lang: string; open: Op
   };
   return (
     <>
-      <div className="orgTabs" role="tablist" aria-label={t("world.dungeon.expedition")}>
+      <div className="orgTabs" role="tablist" aria-label={t("world.dungeon.title")}>
         {Mode.map((m) => (
           <button key={m} id={`dg-${m}`} type="button" role="tab" aria-selected={m === mode} aria-controls="dg-panel" className={`orgTab dgTab ${m}`} onClick={() => pick(m)}>
             {t(`world.dungeon.${m}`)}
@@ -99,10 +152,12 @@ function Expeditions({ t, lang, open, name, gs }: { t: T; lang: string; open: Op
         </p>
         {!cards ? (
           <DataState t={t} error={recs.error} retry={recs.retry} />
+        ) : !cards.length ? (
+          <None>{t("world.db.none")}</None>
         ) : (
           <div className="dgGrid">
             {cards.map((c) => (
-              <ExpeditionCard key={c.id} t={t} lang={lang} conquest={conquest} icons={icons} gs={gs} open={() => open("dungeon", c.id)} {...c} />
+              <DungeonTile key={c.id} t={t} lang={lang} card={c} explore={mode === "exploration"} icons={icons} gs={gs} open={() => open("dungeon", c.id)} />
             ))}
           </div>
         )}
@@ -111,37 +166,19 @@ function Expeditions({ t, lang, open, name, gs }: { t: T; lang: string; open: Op
   );
 }
 
-function ExpeditionCard({
-  t,
-  lang,
-  e,
-  rec,
-  locked,
-  conquest,
-  icons,
-  gs,
-  open,
-}: {
-  t: T;
-  lang: string;
-  e: Expedition;
-  rec: Rec;
-  locked?: Rec;
-  conquest: boolean;
-  icons: IconUrls;
-  gs?: number;
-  open: () => void;
-}) {
+function DungeonTile({ t, lang, card, explore, icons, gs, open }: { t: T; lang: string; card: Card; explore: boolean; icons: IconUrls; gs?: number; open: () => void }) {
+  const { rec } = card;
   const d = rec.dungeon;
+  const entries = card.entries ?? d.entries;
   const num = (n: number) => n.toLocaleString(lang);
   const tier = rec.tierName?.match(/\d+/)?.[0];
+  const badge = card.badge ?? (tier && t("world.dungeon.tier", { n: tier }));
   const bossLv = rec.bosses?.[0]?.level;
   // Item level still missing for a requirement: 0 = reached, undefined = item level not known.
   const short = (need?: number) => (gs == null || need == null ? undefined : Math.max(0, need - gs));
   const cardShort = short(d.itemLevel);
   // Opens (and loses the Conquest red) only once the character's item level reaches it; unknown item level = locked.
   const unlocked = cardShort === 0;
-  const levelShort = short(locked?.dungeon.itemLevel);
   const ilvl = (n: number) => (
     <>
       <ShieldChevronIcon aria-hidden="true" />
@@ -150,38 +187,38 @@ function ExpeditionCard({
     </>
   );
   return (
-    <article className={`dgCard${unlocked ? "" : conquest ? " conquest locked" : " locked"}`}>
-      <img className="dgArt" src={e.art} alt="" />
-      {tier && <span className="dgTier">{t("world.dungeon.tier", { n: tier })}</span>}
+    <article className={`dgCard${unlocked ? "" : explore ? " locked" : " conquest locked"}`}>
+      {card.art && <img className="dgArt" src={card.art} alt="" />}
+      {badge && <span className="dgTier">{badge}</span>}
       <div className="dgBody">
         <h3 className="dgName">
           {unlocked ? (
             <button type="button" onClick={open}>
-              {e.name}
+              {card.name}
             </button>
           ) : (
-            e.name
+            card.name
           )}
         </h3>
         <ul className="dgChips">
           {d.minLevel != null && <li className="mono">{t("world.db.lv", { n: d.minLevel })}</li>}
           {d.itemLevel != null && <li title={t("world.dungeon.itemLevel")}>{ilvl(d.itemLevel)}</li>}
-          {!conquest && (
+          {card.players && (
             <li>
               <UsersIcon aria-hidden="true" />
-              {t("world.dungeon.players", { n: e.players })}
+              {t("world.dungeon.players", { n: card.players })}
             </li>
           )}
-          {conquest && d.entries != null && (
+          {!explore && entries != null && (
             <li>
               <CalendarBlankIcon aria-hidden="true" />
-              {t("world.dungeon.perWeek", { n: d.entries })}
+              {t("world.dungeon.perWeek", { n: entries })}
             </li>
           )}
-          {conquest && d.resetDay && <li>{t("world.dungeon.resetOn", { day: t(`world.day.${d.resetDay}`) })}</li>}
+          {!explore && d.resetDay && <li>{t("world.dungeon.resetOn", { day: t(`world.day.${d.resetDay}`) })}</li>}
         </ul>
 
-        {!conquest && (
+        {card.kinah != null && (
           <div>
             <h4 className="wLabel dgLabel">{t("world.dungeon.weeklyReward")}</h4>
             <p className="dgText">{t("world.dungeon.cubeKina", { n: RUNS, p: CUBE_KINAH })}</p>
@@ -189,7 +226,7 @@ function ExpeditionCard({
               {t("world.dungeon.allBosses")}
               <span>
                 <CoinsIcon aria-hidden="true" />
-                <span className="mono">{num(e.kinah)}</span> {t("world.currency.gold")}
+                <span className="mono">{num(card.kinah)}</span> {t("world.currency.gold")}
               </span>
             </p>
           </div>
@@ -199,7 +236,7 @@ function ExpeditionCard({
           <div>
             <h4 className="wLabel dgLabel">
               {t("world.dungeon.cubeReward")}
-              {!conquest && <span className="mono">{e.cube}</span>}
+              {card.cube != null && <span className="mono">{card.cube}</span>}
             </h4>
             <ul className="dgLoot">
               {rec.rewards.map((r) => (
@@ -228,15 +265,19 @@ function ExpeditionCard({
           </p>
         )}
 
-        {locked?.dungeon.itemLevel != null && (
-          <p className="dgText dgLocked">
-            {levelShort === 0 ? <LockSimpleOpenIcon aria-hidden="true" /> : <LockSimpleIcon aria-hidden="true" />}
-            {t(levelShort === 0 ? "world.dungeon.unlocked" : "world.dungeon.locked")}
-            {!!levelShort && <span>· {t("world.dungeon.missing", { n: num(levelShort) })}</span>}
-            <span className="dgLockedVal">{ilvl(locked.dungeon.itemLevel)}</span>
-            {locked.bosses?.[0]?.level != null && <span className="mono">{t("world.db.lv", { n: locked.bosses[0].level })}</span>}
-          </p>
-        )}
+        {card.levels?.map((l, i) => {
+          const levelShort = short(l.itemLevel);
+          return (
+            <p key={i} className="dgText dgLocked">
+              {levelShort === 0 ? <LockSimpleOpenIcon aria-hidden="true" /> : <LockSimpleIcon aria-hidden="true" />}
+              {l.label && <span>{l.label} ·</span>}
+              {t(levelShort === 0 ? "world.dungeon.unlocked" : "world.dungeon.locked")}
+              {!!levelShort && <span>· {t("world.dungeon.missing", { n: num(levelShort) })}</span>}
+              {l.itemLevel != null && <span className="dgLockedVal">{ilvl(l.itemLevel)}</span>}
+              {l.bossLv != null && <span className="mono">{t("world.db.lv", { n: l.bossLv })}</span>}
+            </p>
+          );
+        })}
       </div>
     </article>
   );
@@ -254,6 +295,8 @@ const groupKey = (d: DungeonRow) => d.name ?? d.dungeon_id;
 function DungeonCard({ t, lang, data, id, open }: { t: T; lang: string; data: Data; id: string; open: Open }) {
   const picked = data.dungeons.find((d) => d.dungeon_id === id);
   const rec = useGd(() => gd.get("dungeon", id), id);
+  // Transcendence levels have no item level in the dungeons table, only in their records (as on the cards).
+  const recs = useGd(loadDungeons, "dungeonCards");
   if (!picked)
     return (
       <section className="card">
@@ -262,7 +305,8 @@ function DungeonCard({ t, lang, data, id, open }: { t: T; lang: string; data: Da
     );
   const entries = data.dungeons.filter((d) => groupKey(d) === groupKey(picked));
   const description = (rec.data?.data_json as { description?: string } | undefined)?.description;
-  const variant = (d: DungeonRow) => [d.tier_name ?? d.tier, d.type_label].filter(Boolean).join(" · ") || d.dungeon_id;
+  // The archive files Hard as a tier-less level with the Conquest tier name: name it.
+  const variant = (d: DungeonRow) => [HARD_IDS.has(d.dungeon_id) ? t("world.dungeon.hard") : (d.tier_name ?? d.tier), d.type_label].filter(Boolean).join(" · ") || d.dungeon_id;
 
   return (
     <div className="wStack">
@@ -290,7 +334,7 @@ function DungeonCard({ t, lang, data, id, open }: { t: T; lang: string; data: Da
                     <Nd t={t} lang={lang} value={d.min_level} />
                   </td>
                   <td>
-                    <Nd t={t} lang={lang} value={d.item_level} />
+                    <Nd t={t} lang={lang} value={d.item_level ?? recs.data?.[d.dungeon_id]?.dungeon.itemLevel} />
                   </td>
                   <td>
                     <Nd t={t} lang={lang} value={d.entries} />

@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.52
+
+- 신규: 홈: 뉴스 카드에 AION 2 공식 최신 공지와 패치 노트가 표시됩니다. 클릭하면 브라우저에서 열립니다.
+- 신규: 던전: 모든 원정 던전의 Hard 단계를 모은 Hard 탭, Deus Research Base와 Shattered Arkanis의 네 단계를 담은 초월 탭, 레이드 Abyssal Forge: Ludra(Normal과 Hard, 10인, 주 1회)의 Sanctuary 탭이 추가되었습니다. Deus Research Base와 Shattered Arkanis는 탐험 탭에도 있습니다.
+- 수정: 타이머: 이벤트 시간이 유럽 서버와 일치합니다. Artifact Siege와 Executor는 목요일과 토요일(21:10, 21:40), Argo, the Spirit King은 매일 10:30과 22:30이며, 보스·공성·Dimensional Invasion·Arena of Tactics의 지속 시간이 정확해지고 초기화가 서머타임에 따라 밀리지 않습니다.
+
 ## 0.5.51
 
 - 수정: 홈, 최근 전투: 대시 대신 결과(처치함 / 처치 못함)와 파티 DPS가 표시됩니다. 결과에 마우스를 올리면 의미를 볼 수 있습니다. 순위 열은 제거되었습니다.

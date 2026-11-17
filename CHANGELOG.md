@@ -4,6 +4,12 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.52
+
+- New: Home: the News card shows the latest official AION 2 announcements and patch notes; click one to open it in your browser.
+- New: Dungeons: a Hard tab with the Hard level of every Expedition dungeon, a Transcendence tab with Deus Research Base and Shattered Arkanis and their four levels, and a Sanctuary tab with the Abyssal Forge: Ludra raid (Normal and Hard, 10 players, 1 entry a week). Deus Research Base and Shattered Arkanis are also in Exploration.
+- Fixed: Timer: event times match the European servers: Artifact Siege and the Executors on Thursday and Saturday (21:10 and 21:40), Argo, the Spirit King every day at 10:30 and 22:30, the right length for bosses, sieges, Dimensional Invasion and Arena of Tactics, and the resets no longer shift with daylight saving.
+
 ## 0.5.51
 
 - Fixed: Home, recent fights: the result (Killed / Not killed) and the group DPS show instead of a dash; hover the result for what it means. The Position column is gone.

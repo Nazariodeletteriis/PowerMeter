@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.52
+
+- 新增：首页：新闻卡片显示 AION 2 最新的官方公告和补丁说明；点击即在浏览器中打开。
+- 新增：副本：新增 Hard 标签（每个远征副本的 Hard 难度）、超越标签（Deus Research Base 和 Shattered Arkanis 及其四个等级）和 Sanctuary 标签（团队副本 Abyssal Forge: Ludra，Normal 和 Hard，10 人，每周 1 次）。Deus Research Base 和 Shattered Arkanis 也出现在探索中。
+- 修复：计时器：活动时间与欧洲服务器一致：Artifact Siege 和 Executor 在周四和周六（21:10 和 21:40），Argo, the Spirit King 每天 10:30 和 22:30；首领、攻城、Dimensional Invasion 和 Arena of Tactics 的持续时间正确，重置不再随夏令时偏移。
+
 ## 0.5.51
 
 - 修复：首页·最近战斗：显示结果（已击杀 / 未击杀）和队伍 DPS，不再是横线；将鼠标悬停在结果上可查看含义。移除了“排名”列。

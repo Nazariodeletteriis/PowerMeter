@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.52
+
+- Nuovo: Home: la card Notizie mostra gli ultimi annunci e le patch note ufficiali di AION 2; un clic li apre nel browser.
+- Nuovo: Dungeon: la scheda Hard con il livello Hard di ogni dungeon Spedizione, la scheda Trascendenza con Deus Research Base e Shattered Arkanis e i loro quattro livelli, e la scheda Sanctuary con il raid Abyssal Forge: Ludra (Normal e Hard, 10 giocatori, 1 ingresso a settimana). Deus Research Base e Shattered Arkanis sono anche in Esplorazione.
+- Corretto: Timer: gli orari degli eventi coincidono con i server europei: Artifact Siege ed Executor giovedì e sabato (21:10 e 21:40), Argo, the Spirit King ogni giorno alle 10:30 e alle 22:30, la durata giusta per boss, assedi, Dimensional Invasion e Arena of Tactics, e i reset non si spostano più col cambio dell'ora legale.
+
 ## 0.5.51
 
 - Corretto: Home, scontri recenti: compaiono l'esito (Ucciso / Non ucciso) e il DPS del gruppo al posto del trattino; passando sull'esito si vede cosa significa. La colonna Posizione è stata tolta.

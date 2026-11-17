@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.52
+
+- Neu: Startseite: Die News-Karte zeigt die neuesten offiziellen Ankündigungen und Patchnotes von AION 2; ein Klick öffnet sie im Browser.
+- Neu: Dungeons: ein Tab Hard mit der Hard-Stufe jedes Expeditions-Dungeons, ein Tab Transzendenz mit Deus Research Base und Shattered Arkanis und ihren vier Stufen und ein Tab Sanctuary mit dem Raid Abyssal Forge: Ludra (Normal und Hard, 10 Spieler, 1 Eintritt pro Woche). Deus Research Base und Shattered Arkanis stehen auch unter Erkundung.
+- Behoben: Timer: Die Eventzeiten entsprechen den europäischen Servern: Artifact Siege und die Executors am Donnerstag und Samstag (21:10 und 21:40), Argo, the Spirit King täglich um 10:30 und 22:30, die richtige Dauer für Bosse, Belagerungen, Dimensional Invasion und Arena of Tactics, und die Resets verschieben sich nicht mehr mit der Sommerzeit.
+
 ## 0.5.51
 
 - Behoben: Startseite, letzte Kämpfe: Ergebnis (Besiegt / Nicht besiegt) und Gruppen-DPS erscheinen statt eines Strichs; beim Überfahren des Ergebnisses steht, was es bedeutet. Die Spalte Position entfällt.

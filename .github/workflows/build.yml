@@ -31,7 +31,7 @@ jobs:
       - run: npm ci
 
       - name: Test
-        run: cargo test --manifest-path src-tauri/Cargo.toml
+        run: cargo test --manifest-path src-tauri/Cargo.toml -- --test-threads=1
 
       - name: Build MSI
         run: npm run tauri build

@@ -606,6 +606,12 @@ pub async fn pm_class_stats(
     call(reqwest::Method::GET, url.as_str(), None, None).await
 }
 
+/// The official site's latest notices and patch notes, as the server caches them; no account needed.
+#[tauri::command]
+pub async fn pm_news(state: tauri::State<'_, AppState>) -> Result<Value, String> {
+    call(reqwest::Method::GET, &format!("{}/api/news", server_url(&state)), None, None).await
+}
+
 /// Rankings over the community's public boss logs (`kind`: hit / time / party); no account needed.
 /// The server validates every parameter; empty strings are left out so "all" needs no special value.
 #[tauri::command]

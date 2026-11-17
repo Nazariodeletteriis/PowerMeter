@@ -2,6 +2,12 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.52
+
+- 新機能: ホーム: ニュースカードに AION 2 の最新の公式お知らせとパッチノートを表示。クリックでブラウザが開きます。
+- 新機能: ダンジョン: 各遠征ダンジョンの Hard を集めた「Hard」タブ、Deus Research Base と Shattered Arkanis の4段階を載せた「超越」タブ、レイド Abyssal Forge: Ludra（Normal と Hard、10人、週1回）の「Sanctuary」タブを追加。Deus Research Base と Shattered Arkanis は探索タブにも表示されます。
+- 修正: タイマー: イベント時刻を欧州サーバーに合わせました。Artifact Siege と Executor は木曜・土曜（21:10 と 21:40）、Argo, the Spirit King は毎日 10:30 と 22:30。ボス、攻城戦、Dimensional Invasion、Arena of Tactics の時間も正しくなり、リセットが夏時間でずれなくなりました。
+
 ## 0.5.51
 
 - 修正: ホーム、最近の戦闘: ダッシュの代わりに結果（撃破 / 未撃破）とパーティDPSを表示。結果にカーソルを合わせると意味が分かります。順位の列は削除しました。

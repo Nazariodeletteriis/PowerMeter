@@ -1550,11 +1550,11 @@ td[data-mark="lo"] {
 }
 
 /* ---------- Dungeon page: Expedition cards ---------- */
-/* Exploration reads neutral; a Conquest still locked for the character takes the theme's red. */
+/* Exploration reads neutral; the weekly modes (Conquest, Hard, Transcendence, Raid) take the theme's red while locked. */
 .dgTab.exploration[aria-selected="true"] {
   border-bottom-color: var(--pm-t2);
 }
-.dgTab.conquest[aria-selected="true"] {
+.dgTab:not(.exploration)[aria-selected="true"] {
   color: var(--pm-redt);
 }
 .dgGrid {
@@ -1722,6 +1722,14 @@ td[data-mark="lo"] {
   gap: 4px;
   margin-left: auto;
   color: var(--pm-t1);
+}
+/* No screenshot yet (Transcendence dungeons): no room kept for the art. */
+.dgCard:not(:has(.dgArt)) {
+  min-height: 0;
+}
+.dgCard:not(:has(.dgArt)) .dgBody {
+  justify-content: flex-start;
+  padding-top: 16px;
 }
 /* Above the active character's item level (or unknown): not clickable. */
 .dgCard.locked .dgArt {

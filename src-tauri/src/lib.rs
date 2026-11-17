@@ -1994,6 +1994,7 @@ pub fn run() {
             pm_account::pm_item_map,
             pm_account::pm_item_map_vote,
             pm_account::pm_rankings,
+            pm_account::pm_news,
             pm_account::pm_entitlement,
             pm_account::pm_patreon_link,
             pm_account::pm_patreon_unlink,
