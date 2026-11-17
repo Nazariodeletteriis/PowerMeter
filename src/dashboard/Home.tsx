@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { CaretRightIcon, ListChecksIcon, NewspaperIcon, ShieldIcon, SwordIcon, UserPlusIcon } from "@phosphor-icons/react";
 import type { Settings } from "./App";
 import { activeId, readCharacters } from "./characters";
+import { type FightOutcome, fightOutcome, groupDps } from "./fightRow";
 import type { T } from "./i18n";
 import { REGIONS } from "./Onboarding";
 import { nextDailyReset, nextWeeklyReset } from "./pages/organizer/resets";
@@ -10,11 +11,28 @@ import { Card, ClassAvatar, EmptyState, FactionTag, fmt } from "./ui";
 import { usePoll } from "./usePoll";
 
 /** The fields of FightSummary (src-tauri/src/entity/fight_record.rs) shown here. */
-type FightSummary = { id: string; bossName: string; startTimeMs: number; durationMs: number };
+type FightSummary = {
+  id: string;
+  bossName: string;
+  startTimeMs: number;
+  durationMs: number;
+  totalDamage: number;
+  mode: string;
+  killed?: boolean;
+};
 
 // Newest first (the backend sorts by start time).
 const getFights = () => invoke<FightSummary[]>("get_fight_history");
-const FIGHT_COLS = "minmax(0,1fr) 64px 80px 48px 96px 90px 24px";
+// The prototype's 48px position column is gone (the record does not mark the local player): its width went to the
+// result, whose words ("Not killed", "Nicht besiegt") are longer than the prototype's "Kill".
+const FIGHT_COLS = "minmax(0,1fr) 112px 80px 96px 90px 24px";
+
+const OUTCOME: Record<FightOutcome, { text?: string; title?: string; color: string }> = {
+  kill: { text: "admin.u.killed", color: "var(--pm-ok)" },
+  notKilled: { text: "admin.u.notKilled", title: "home.outcomeNotKilled", color: "var(--pm-t2)" },
+  unknown: { title: "home.outcomeUnknown", color: "var(--pm-t3)" },
+  na: { title: "home.outcomeNa", color: "var(--pm-t3)" },
+};
 
 type Props = {
   t: T;
@@ -75,7 +93,7 @@ export function Home(props: Props) {
             <EmptyState icon={<ListChecksIcon aria-hidden="true" />} title={t("shell.states.noData")} text={t("shell.states.soonText")} />
           </Card>
           <Card title={t("home.news")} style={{ gridColumn: "span 12" }}>
-            <EmptyState icon={<NewspaperIcon aria-hidden="true" />} title={t("shell.states.noData")} text={t("shell.states.afterLaunch")} />
+            <EmptyState icon={<NewspaperIcon aria-hidden="true" />} title={t("shell.states.noData")} text={t("shell.states.soonText")} />
           </Card>
         </div>
       )}
@@ -213,43 +231,47 @@ function Fights({
       <div className="gridHead" style={{ gridTemplateColumns: FIGHT_COLS }}>
         <span>{t("home.colBoss")}</span>
         <span>{t("home.colResult")}</span>
-        <span style={{ textAlign: "right" }}>DPS</span>
-        <span style={{ textAlign: "right" }}>{t("home.colPos")}</span>
+        <span style={{ textAlign: "right" }}>{t("home.colGroupDps")}</span>
         <span>{t("home.colDate")}</span>
         <span>{t("home.colUpload")}</span>
         <span />
       </div>
       {!fights.data
         ? [0, 1, 2].map((k) => <div key={k} className="skeleton" style={{ height: 36, marginTop: 4 }} />)
-        : fights.data.slice(0, 5).map((f) => (
-            // Result, DPS and position need the fight record; upload is R2, so
-            // every fight is local for now.
-            <button
-              key={f.id}
-              type="button"
-              className="gridRow"
-              style={{ gridTemplateColumns: FIGHT_COLS }}
-              onClick={() => openFight(f.id)}
-            >
-              <div style={{ minWidth: 0 }}>
-                <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{f.bossName || "—"}</div>
-                <div className="mono" style={{ fontSize: 11, color: "var(--pm-t3)" }}>
-                  {clock(f.durationMs / 1000)}
+        : fights.data.slice(0, 5).map((f) => {
+            // Upload is R2, so every fight is local for now.
+            const out = OUTCOME[fightOutcome(f)];
+            const dps = groupDps(f);
+            return (
+              <button
+                key={f.id}
+                type="button"
+                className="gridRow"
+                style={{ gridTemplateColumns: FIGHT_COLS }}
+                onClick={() => openFight(f.id)}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{f.bossName || "—"}</div>
+                  <div className="mono" style={{ fontSize: 11, color: "var(--pm-t3)" }}>
+                    {clock(f.durationMs / 1000)}
+                  </div>
                 </div>
-              </div>
-              <span style={{ color: "var(--pm-t3)", fontWeight: 500 }}>—</span>
-              <span className="num">—</span>
-              <span className="num" style={{ color: "var(--pm-t2)" }}>
-                —
-              </span>
-              <span style={{ color: "var(--pm-t2)", fontSize: 12 }}>{when(f.startTimeMs)}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
-                <span className="dot" style={{ background: "var(--pm-t3)" }} />
-                {t("home.uploadLocal")}
-              </span>
-              <CaretRightIcon style={{ color: "var(--pm-t3)" }} aria-hidden="true" />
-            </button>
-          ))}
+                <span
+                  title={out.title && t(out.title)}
+                  style={{ color: out.color, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                >
+                  {out.text ? t(out.text) : "—"}
+                </span>
+                <span className="num">{dps === null ? "—" : fmt(dps, lang)}</span>
+                <span style={{ color: "var(--pm-t2)", fontSize: 12 }}>{when(f.startTimeMs)}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+                  <span className="dot" style={{ background: "var(--pm-t3)" }} />
+                  {t("home.uploadLocal")}
+                </span>
+                <CaretRightIcon style={{ color: "var(--pm-t3)" }} aria-hidden="true" />
+              </button>
+            );
+          })}
     </div>
   );
 }

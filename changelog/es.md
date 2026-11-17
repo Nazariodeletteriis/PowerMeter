@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.51
+
+- Corregido: Inicio, combates recientes: aparecen el resultado (Derrotado / No derrotado) y el DPS del grupo en lugar de un guion; al pasar sobre el resultado se explica qué significa. Se quita la columna Posición.
+- Corregido: Inicio: la tarjeta de Noticias ya no dice que llegará tras el lanzamiento de Aion 2.
+- Corregido: Temporizador: una regla de evento sin minutos indicados ya no bloquea la app.
+- Cambiado: Inicio, Personajes y Builder: tu poder de combate es el actual que muestra el juego, ya no el máximo alcanzado, así que baja si te quitas una pieza.
+
 ## 0.5.50
 
 - Nuevo: Ajustes > General: Iniciar con Windows funciona. PowerMeter se abre con el PC, así ya está activo al entrar al juego y los contadores del widget se actualizan sin volver a iniciar sesión.

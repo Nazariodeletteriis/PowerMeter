@@ -4,6 +4,13 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.51
+
+- Fixed: Home, recent fights: the result (Killed / Not killed) and the group DPS show instead of a dash; hover the result for what it means. The Position column is gone.
+- Fixed: Home: the News card no longer says it arrives after the Aion 2 launch.
+- Fixed: Timer: an event rule with no minutes listed no longer freezes the app.
+- Changed: Home, Characters and Builder: your combat power is the current one the game shows, no longer the highest ever reached, so it goes down when you take off a piece.
+
 ## 0.5.50
 
 - New: Settings > General: Start with Windows works. PowerMeter opens with the PC, so it is already running when you enter the game and the widget's counters update without logging out and in again.

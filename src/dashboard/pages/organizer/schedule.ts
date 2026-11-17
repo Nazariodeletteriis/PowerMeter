@@ -74,7 +74,7 @@ export function upcomingWindows(e: GameEvent, now: number, count = 8): EventWind
     // ponytail: whole-hour UTC base, right for every whole-hour zone (Europe/Berlin).
     const base = Math.floor((now - len) / HOUR) * HOUR;
     const minutes = [...c.minutes].sort((a, b) => a - b);
-    for (let h = 0; out.length < count; h++) for (const m of minutes) add(base + h * HOUR + m * MIN);
+    for (let h = 0; out.length < count && h < 400; h++) for (const m of minutes) add(base + h * HOUR + m * MIN);
   } else {
     const p = parts(now - len, e.timezone);
     const day0 = Date.UTC(p.year, p.month - 1, p.day);

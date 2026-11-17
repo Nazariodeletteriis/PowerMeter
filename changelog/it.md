@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.51
+
+- Corretto: Home, scontri recenti: compaiono l'esito (Ucciso / Non ucciso) e il DPS del gruppo al posto del trattino; passando sull'esito si vede cosa significa. La colonna Posizione è stata tolta.
+- Corretto: Home: la card Notizie non dice più che arriva dopo il lancio di Aion 2.
+- Corretto: Timer: una regola evento senza minuti indicati non blocca più l'app.
+- Cambiato: Home, Personaggi e Builder: il CP è quello attuale mostrato dal gioco, non più il massimo mai raggiunto, quindi scende se togli un pezzo.
+
 ## 0.5.50
 
 - Nuovo: Impostazioni > Generale: Avvia con Windows funziona. Il PowerMeter si apre con il PC, così è già attivo quando entri in gioco e i contatori del widget si aggiornano senza sloggare e riloggare.

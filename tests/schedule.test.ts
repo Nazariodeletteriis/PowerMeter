@@ -131,3 +131,10 @@ test("cadence in words", () => {
   assert.equal(cadenceText(nahma, now, t, "en-GB"), 'events.cad.timesWeek {"n":2,"days":"Fri, Sun"}');
   assert.match(cadenceText(weekly, now, t, "en-GB"), /^events\.cad\.weekly \{"n":1,/); // 07:00 UTC: Tuesday west of UTC-7
 });
+
+test("empty cadences return [] and do not hang", () => {
+  const now = Date.UTC(2026, 10, 17);
+  assert.deepEqual(upcomingWindows(rule("e1", { kind: "minuteOfHour", minutes: [] }, 10), now, 8), []);
+  assert.deepEqual(upcomingWindows(rule("e2", { kind: "hourOfDay", hours: [] }), now, 8), []);
+  assert.deepEqual(upcomingWindows(rule("e3", { kind: "daysAtTime", weekdays: [], hour: 16, minute: 0 }), now, 8), []);
+});

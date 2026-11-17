@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.51
+
+- Behoben: Startseite, letzte Kämpfe: Ergebnis (Besiegt / Nicht besiegt) und Gruppen-DPS erscheinen statt eines Strichs; beim Überfahren des Ergebnisses steht, was es bedeutet. Die Spalte Position entfällt.
+- Behoben: Startseite: Die News-Karte sagt nicht mehr, dass sie nach dem Start von Aion 2 kommt.
+- Behoben: Timer: Eine Event-Regel ohne angegebene Minuten friert die App nicht mehr ein.
+- Geändert: Startseite, Charaktere und Builder: Die Kampfkraft ist die aktuelle aus dem Spiel, nicht mehr die höchste je erreichte; sie sinkt also, wenn du ein Teil ablegst.
+
 ## 0.5.50
 
 - Neu: Einstellungen > Allgemein: Mit Windows starten funktioniert. PowerMeter startet mit dem PC, läuft also schon beim Betreten des Spiels, und die Zähler des Widgets aktualisieren sich ohne Aus- und Einloggen.

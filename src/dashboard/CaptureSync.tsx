@@ -24,7 +24,9 @@ type Captured = {
   skillbar: { bar: number; slot: number; skillId: number; chain: number[] }[];
   daevanion: number[];
   gearScore: number | null;
+  /** The game's best (or the roster's figure, see equip_parser.rs); the character keeps the current one. */
   combatPower: number | null;
+  combatPowerNow: number | null;
   /** Pet collection, TW pet ids (src/data/pet_ids.json maps them to creature codes). */
   pets: { id: number; lvl: number; exp: number }[];
   /** Owned effects (genus insight), raw values: every stat the parser maps is a flat one. */
@@ -121,7 +123,7 @@ export function CaptureSync({ settings, save, onError }: { settings: Settings; s
 
   // Item level and combat power, same owner rule: kept on the character, so they stay with the game closed.
   const gs = data?.gearScore ?? undefined;
-  const cp = data?.combatPower ?? undefined;
+  const cp = data?.combatPowerNow ?? undefined;
   const powerChanged = !!char && ((gs != null && gs !== char.gs) || (cp != null && cp !== char.cp));
   useEffect(() => {
     if (powerChanged) saveCharacters(save, readCharacters(settings).map((c) => (c.id === char!.id ? { ...c, gs: gs ?? c.gs, cp: cp ?? c.cp } : c))).catch(onError);

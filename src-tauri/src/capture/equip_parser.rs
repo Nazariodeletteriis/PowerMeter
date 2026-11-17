@@ -154,7 +154,10 @@ pub struct CapturedCharacter {
     pub daevanion: Vec<u32>,
     /// Item level and combat power of the character being played; None until the game sends them after a login.
     pub gear_score: Option<u32>,
+    /// The `best` of your own record, or the party roster's one figure when that came last (not always the max).
     pub combat_power: Option<u64>,
+    /// The current one, what the character shows on the dashboard: drops when a piece is taken off.
+    pub combat_power_now: Option<u64>,
     /// Pet collection (`00 90`): empty until the game sends it after a login.
     pub pets: Vec<CapturedPet>,
     /// The collection's owned effects (genus insight, tail of `00 90`), raw stat values.
@@ -184,6 +187,9 @@ struct State {
     daevanion: Vec<u32>,
     gear_score: Option<u32>,
     combat_power: Option<u64>,
+    combat_power_now: Option<u64>,
+    /// A `now` came from your own record (`56 36`/`33 36`) since the login: the roster no longer sets the current.
+    combat_power_now_exact: bool,
     pets: Vec<CapturedPet>,
     pet_effects: Vec<CapturedPetEffect>,
 }
@@ -196,6 +202,8 @@ static STATE: Mutex<State> = Mutex::new(State {
     daevanion: Vec::new(),
     gear_score: None,
     combat_power: None,
+    combat_power_now: None,
+    combat_power_now_exact: false,
     pets: Vec::new(),
     pet_effects: Vec::new(),
 });
@@ -208,16 +216,30 @@ fn set_gear_score(now: u32, best: u32) {
     }
 }
 
+/// Combat power keeps both: `best` as above, `now` (from 1) as the current value.
 fn set_combat_power(now: u64, best: u64) {
     if (1..=100_000_000).contains(&best) && now <= best {
-        STATE.lock().unwrap_or_else(|e| e.into_inner()).combat_power = Some(best);
+        let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
+        s.combat_power = Some(best);
+        if now >= 1 {
+            s.combat_power_now = Some(now);
+            s.combat_power_now_exact = true;
+        }
     }
 }
 
-/// Your own entry of the party roster (stream_processor), the same figures the game shows there.
+/// Your own entry of the party roster (stream_processor), the same figures the game shows there. Its one combat
+/// power is the current value only until your own record sends a `now`, so the two never take turns.
 pub fn set_power(gear_score: i32, combat_power: i64) {
     set_gear_score(gear_score as u32, gear_score as u32);
-    set_combat_power(combat_power as u64, combat_power as u64);
+    let cp = combat_power as u64;
+    if (1..=100_000_000).contains(&cp) {
+        let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
+        s.combat_power = Some(cp);
+        if !s.combat_power_now_exact {
+            s.combat_power_now = Some(cp);
+        }
+    }
 }
 
 /// The self record named the character being played (stream_processor).
@@ -240,6 +262,7 @@ pub fn snapshot() -> CapturedCharacter {
         daevanion: s.daevanion.clone(),
         gear_score: s.gear_score,
         combat_power: s.combat_power,
+        combat_power_now: s.combat_power_now,
         pets: s.pets.clone(),
         pet_effects: s.pet_effects.clone(),
     }
@@ -392,6 +415,8 @@ fn parse_inventory(b: &[u8]) {
         s.owner = None; // a login: the character may be another one
         s.gear_score = None;
         s.combat_power = None;
+        s.combat_power_now = None;
+        s.combat_power_now_exact = false;
         s.pets.clear();
     }
 }
@@ -859,6 +884,34 @@ mod tests {
         let arcana = snapshot().equipment.remove(0);
         assert_eq!(arcana.item, WornItem { slot: 0x29, item_id: 810130001, enchant: 2 });
         assert_eq!((arcana.extras.level, arcana.extras.bonus), (Some(82), vec![ItemStat { id: 11, stat: Some("Time"), value: 22 }]));
+    }
+
+    #[test]
+    fn current_combat_power_and_the_roster() {
+        let _g = global();
+        let cp = || (snapshot().combat_power_now, snapshot().combat_power);
+        // A login inventory page with a worn item (the Cleric login above, 18:48:04.231) clears both.
+        let login = hex("9758115610027800e9d8170000e90000e6e2140000f40000409b990601000000000000000b01000000000000000000000000000a0000000000000000000000000037000000010400000000000000");
+        parse(&login);
+        assert_eq!(cp(), (None, None));
+        // The roster first: its one figure is the current value too.
+        set_power(908, 52000);
+        assert_eq!(cp(), (Some(52000), Some(52000)));
+        // Your own `56 36`, 51858 of 52244: current and best apart.
+        parse(&hex("16563692ca00000000000014cc000000000000"));
+        assert_eq!(cp(), (Some(51858), Some(52244)));
+        // A later roster sets the best as before, never the current: no flipping with the packet order.
+        set_power(908, 52244);
+        assert_eq!(cp(), (Some(51858), Some(52244)));
+        // Now above best (not a pair) and now = 0: the current stays.
+        parse(&hex("16563614cc000000000000ca92000000000000"));
+        parse(&hex("165636000000000000000014cc000000000000"));
+        assert_eq!(cp(), (Some(51858), Some(52244)));
+        // A new login clears it, and the roster sets the current again.
+        parse(&login);
+        assert_eq!(cp(), (None, None));
+        set_power(900, 50000);
+        assert_eq!(cp(), (Some(50000), Some(50000)));
     }
 
     /// packets_20261013_031645, 03:17:02.495: Allalon's full `00 90` (body), 31 insight options; the 7 on stat ids

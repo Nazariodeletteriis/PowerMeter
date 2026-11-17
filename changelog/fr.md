@@ -2,6 +2,13 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.51
+
+- Corrigé : Accueil, combats récents : le résultat (Tué / Non tué) et le DPS du groupe s'affichent au lieu d'un tiret ; survolez le résultat pour voir ce qu'il signifie. La colonne Position est retirée.
+- Corrigé : Accueil : la carte Actualités ne dit plus qu'elle arrive après le lancement d'Aion 2.
+- Corrigé : Minuteur : une règle d'événement sans minutes indiquées ne bloque plus l'application.
+- Modifié : Accueil, Personnages et Builder : votre puissance de combat est celle affichée actuellement par le jeu, et non plus la plus haute jamais atteinte ; elle baisse donc si vous retirez une pièce.
+
 ## 0.5.50
 
 - Nouveau : Paramètres > Général : Démarrer avec Windows fonctionne. PowerMeter s'ouvre avec le PC, il tourne donc déjà quand vous entrez en jeu et les compteurs du widget se mettent à jour sans vous reconnecter.
