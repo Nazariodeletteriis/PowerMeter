@@ -1,4 +1,4 @@
-/* Pet popup (PetPopup.tsx) in its 360x560 transparent window (the Black Market panel below): the card sits 8px from the top and 16px from the
+/* Pet popup (PetPopup.tsx) in its 360x96 transparent window: the card sits 8px from the top and 16px from the
    sides, so the entry offset and the shadow stay inside the window. The window over the game can't blur what is
    behind it (backdrop-filter sees only this page), so the card is near-opaque instead. */
 .petPop {
@@ -64,12 +64,11 @@
   .petPopBar { transition: none; }
 }
 
-/* Black Market panel (BlackMarket.tsx), under the kill card's slot (8 + 64 + 8px), so the card never covers it and
-   it never moves when a card comes or goes. Same surface, edge, shadow and curves as the card. 32px title + up to
-   10 rows of 42px fit in the 560px window with the shadow. */
+/* Black Market panel (BlackMarket.tsx) in its own 360x480 window ("petmarket"), which the user moves by the title.
+   Same surface, edge, shadow and curves as the card. 32px title + up to 10 rows of 42px fit with the shadow. */
 .bmPanel {
   position: absolute;
-  top: 80px;
+  top: 8px;
   left: 16px;
   right: 16px;
   padding: 0 4px 4px;
@@ -88,7 +87,11 @@
   transform: translateY(-4px) scale(0.98);
   transition-duration: 150ms;
 }
+/* The title moves the window (BlackMarket.tsx, Minimap.tsx startMove). */
 .bmTitle {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
   margin: 0;
   padding: 0 8px;
   font-size: 12px;
@@ -133,13 +136,15 @@
 .bmLocked { font-size: 11px; line-height: 1; color: var(--pm-t3); }
 /* Level as 3 pips: filled up to the level, outlined when not reached. */
 .bmPips { display: flex; gap: 3px; }
+/* The pet's genus colour (BlackMarket.tsx GENUS_COLOR, the game's Soul Crystals): empty pips its outline, full ones
+   filled. Without a genus, the text colours. */
 .bmPips > span {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1px var(--pm-t3);
+  box-shadow: inset 0 0 0 1px var(--genus, var(--pm-t3));
 }
-.bmPips > .isOn { background: var(--pm-t1); box-shadow: none; }
+.bmPips > .isOn { background: var(--genus, var(--pm-t1)); box-shadow: none; }
 @media (prefers-reduced-motion: reduce) {
   .bmPanel { transition: opacity 200ms ease; }
   .bmPanel.isLeaving { transform: none; }

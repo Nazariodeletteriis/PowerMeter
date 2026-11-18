@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.57
+
+- Novo: Mascotes do Mercado negro: o painel tem janela própria: arraste-o pelo título e ele fica onde você colocar.
+- Alterado: Mascotes do Mercado negro: os pontos de nível têm a cor da categoria do mascote (Cogni azul, Feral vermelho, Natureza verde, Varian dourado, Especial turquesa), e o painel fecha 15 segundos após a última aba aberta ou a última compra.
+
 ## 0.5.56
 
 - Corrigido: Mascotes do Mercado negro: mascotes marcados como Esgotado não aparecem mais, mesmo comprados antes de abrir o PowerMeter.

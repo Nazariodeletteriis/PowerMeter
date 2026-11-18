@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.57
+
+- Neu: Pets im Schwarzmarkt: Das Fenster lässt sich am Titel verschieben und bleibt dort, wo du es hinstellst.
+- Geändert: Pets im Schwarzmarkt: Die Stufenpunkte haben die Farbe der Pet-Kategorie (Cogni blau, Feral rot, Natur grün, Varian gold, Spezial türkis), und das Fenster schließt sich 15 Sekunden nach dem zuletzt geöffneten Tab oder dem letzten Kauf.
+
 ## 0.5.56
 
 - Behoben: Pets im Schwarzmarkt: Als Ausverkauft markierte Pets werden nicht mehr angezeigt, auch wenn du sie vor dem Start von PowerMeter gekauft hast.

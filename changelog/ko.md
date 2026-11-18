@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.57
+
+- 신규: 암시장 펫: 패널이 별도 창이 되어 제목을 끌어 원하는 위치에 둘 수 있으며 위치가 유지됩니다.
+- 변경: 암시장 펫: 레벨 점이 펫 분류의 색(Cogni 파랑, Feral 빨강, Nature 초록, Varian 금색, Special 청록)으로 표시되고, 패널은 마지막으로 연 탭이나 마지막 구매 후 15초 뒤에 닫힙니다.
+
 ## 0.5.56
 
 - 수정: 암시장 펫: 품절 표시된 펫은 PowerMeter 실행 전에 구매했더라도 더 이상 표시되지 않습니다.

@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.57
+
+- Nuevo: Mascotas del Mercado negro: el panel tiene su propia ventana: arrástralo por el título y se queda donde lo pongas.
+- Cambiado: Mascotas del Mercado negro: los puntos de nivel toman el color de la categoría de la mascota (Cogni azul, Feral rojo, Naturaleza verde, Varian dorado, Especial turquesa) y el panel se cierra 15 segundos después de la última pestaña abierta o la última compra.
+
 ## 0.5.56
 
 - Corregido: Mascotas del Mercado negro: las mascotas marcadas como Agotado ya no aparecen, aunque las compraras antes de abrir PowerMeter.

@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "petmarket",
+  "description": "The Black Market panel's window is as tall as the panel while it shows (BlackMarket.tsx), so no clear area below it holds the game's clicks.",
+  "windows": [
+    "petmarket"
+  ],
+  "permissions": [
+    "core:window:allow-set-size"
+  ]
+}

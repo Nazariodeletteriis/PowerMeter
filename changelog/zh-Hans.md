@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.57
+
+- 新增：黑市宠物：面板拥有独立窗口，拖动标题即可移动，并会记住位置。
+- 调整：黑市宠物：等级圆点使用宠物类别的颜色（Cogni 蓝、Feral 红、Nature 绿、Varian 金、Special 青），面板在最后一次打开标签页或购买后 15 秒关闭。
+
 ## 0.5.56
 
 - 修复：黑市宠物：标记为售罄的宠物不再显示，即使是在启动 PowerMeter 之前购买的。

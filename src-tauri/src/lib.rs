@@ -1756,12 +1756,16 @@ pub fn run() {
                         let _ = handle.emit("dps-update", &dps);
                         // Taken every tick so a later switch-on does not show a backlog. Default on.
                         let kills = crate::capture::equip_parser::take_pet_kills();
-                        if !kills.is_empty() && state.settings.get("petPopup.enabled").is_none_or(|v| v != "false") {
-                            let _ = handle.emit_to("petpop", "pet-kill", &kills);
+                        if !kills.is_empty() {
+                            if state.settings.get("petPopup.enabled").is_none_or(|v| v != "false") {
+                                let _ = handle.emit_to("petpop", "pet-kill", &kills);
+                            }
+                            // The Black Market panel re-reads its counts on them, popup on or off.
+                            let _ = handle.emit_to("petmarket", "pet-kill", &kills);
                         }
                         if let Some(items) = crate::capture::equip_parser::take_market() {
                             if state.settings.get("petMarket.enabled").is_none_or(|v| v != "false") {
-                                let _ = handle.emit_to("petpop", "black-market", &items);
+                                let _ = handle.emit_to("petmarket", "black-market", &items);
                             }
                         }
                         let total_ms = t0.elapsed().as_millis();

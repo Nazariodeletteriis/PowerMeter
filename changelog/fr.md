@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.57
+
+- Nouveau : Familiers du Marché noir : le panneau a sa propre fenêtre : faites-le glisser par son titre, il reste là où vous le placez.
+- Modifié : Familiers du Marché noir : les points de niveau prennent la couleur de la catégorie du familier (Cogni bleu, Féral rouge, Nature vert, Varian or, Spécial turquoise), et le panneau se ferme 15 secondes après le dernier onglet ouvert ou le dernier achat.
+
 ## 0.5.56
 
 - Corrigé : Familiers du Marché noir : les familiers marqués Épuisé n'apparaissent plus, même achetés avant le lancement de PowerMeter.

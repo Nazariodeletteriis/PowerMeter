@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.57
+
+- New: Black Market pets: the panel has its own window: drag it by its title and it stays where you put it.
+- Changed: Black Market pets: the level pips take the colour of the pet's category (Cogni blue, Feral red, Nature green, Varian gold, Special teal), and the panel closes 15 seconds after the last tab you open or the last purchase.
+
 ## 0.5.56
 
 - Fixed: Black Market pets: pets marked Sold Out are no longer listed, even when you bought them before starting PowerMeter.

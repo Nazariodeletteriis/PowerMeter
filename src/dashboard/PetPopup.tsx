@@ -9,7 +9,6 @@ import { applyPalette } from "./pages/system/theme";
 import { GameIcon, gd, useGd, useIcons } from "./pages/world/db";
 import { PET_EXP_MAX } from "./pages/characters/calc";
 import PET_IDS from "../data/pet_ids.json";
-import { BlackMarket } from "./BlackMarket";
 import "./petPopup.css";
 
 /** One kill that counts for a pet (src-tauri/src/capture/equip_parser.rs PetKill), emitted to this window as "pet-kill". */
@@ -27,21 +26,40 @@ function petLine(t: T, k: PetKill): { label: string; count: string; fill?: numbe
 }
 
 /**
+ * What both pet overlays (PetPopup here, BlackMarket's "petmarket") need: the settings followed like the dashboard's,
+ * its language and palette, and the creature list with its icons, loaded once for the window's life.
+ */
+export function usePetWindow() {
+  const [settings, setSettings] = useState<Settings>({});
+  useEffect(() => {
+    invoke<Settings>("get_settings").then(setSettings, () => {}); // the defaults draw it as well
+    const stop = listen<{ key: string; value: string }>("setting-changed", ({ payload }) =>
+      setSettings((s) => ({ ...s, [payload.key]: String(payload.value) })),
+    );
+    return () => void stop.then((f) => f(), () => {});
+  }, []);
+  const lang = initialLanguage(settings[LANGUAGE_SETTING]);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+  useEffect(() => applyPalette(settings), [settings]);
+  const list = useGd(() => gd.list("creature"), "creature");
+  const icons = useIcons(list.data?.map((r) => r.icon) ?? []);
+  return { t: translator(lang), list, icons };
+}
+
+/**
  * The pet popup over the game (window "petpop", powermeter.rs open_pet_popup_on_start): always there, transparent and
  * click-through; it draws a card for a few seconds when a kill counts for a collection pet. Another kill of the
  * shown pet updates the count and restarts the time; another pet takes the card. Nothing is stacked.
  */
 export function PetPopup() {
-  const [settings, setSettings] = useState<Settings>({});
+  const { t, list, icons } = usePetWindow();
   const [kill, setKill] = useState<PetKill>();
   const [leaving, setLeaving] = useState(false);
   const timers = useRef<number[]>([]);
 
   useEffect(() => {
-    invoke<Settings>("get_settings").then(setSettings, () => {}); // the defaults draw it as well
-    const stopSettings = listen<{ key: string; value: string }>("setting-changed", ({ payload }) =>
-      setSettings((s) => ({ ...s, [payload.key]: String(payload.value) })),
-    );
     const clear = () => timers.current.splice(0).forEach(clearTimeout);
     const stopKills = listen<PetKill[]>("pet-kill", ({ payload }) => {
       // Several kills in one tick: a pet reaching MAX wins, otherwise the latest.
@@ -59,33 +77,20 @@ export function PetPopup() {
     });
     return () => {
       clear();
-      for (const stop of [stopSettings, stopKills]) stop.then((f) => f(), () => {});
+      stopKills.then((f) => f(), () => {});
     };
   }, []);
 
-  const lang = initialLanguage(settings[LANGUAGE_SETTING]);
-  useEffect(() => {
-    document.documentElement.lang = lang;
-  }, [lang]);
-  useEffect(() => applyPalette(settings), [settings]);
-
-  // Loaded once for the window's life: the card mounts anew for every popup.
-  const list = useGd(() => gd.list("creature"), "creature");
-  const icons = useIcons(list.data?.map((r) => r.icon) ?? []);
   const code = kill && (PET_IDS as Record<string, string>)[String(kill.id)];
   const row = code ? list.data?.find((r) => r.id === code) : undefined;
 
-  const t = translator(lang);
-  // The status region stays mounted, so the reader hears each new card. The Black Market panel sits under it.
+  // The status region stays mounted, so the reader hears each new card.
   return (
-    <>
-      <div role="status" aria-live="polite">
+    <div role="status" aria-live="polite">
         {/* Keyed by pet and level: another pet, or a level up (the bar back to the start), enters as a new card
             instead of swapping its text in place and running the bar backwards. */}
         {kill && <PetCard key={`${kill.id}:${kill.lvl}`} t={t} kill={kill} leaving={leaving} row={row} icon={row?.icon ? icons[row.icon] : undefined} />}
-      </div>
-      <BlackMarket t={t} creatures={list.data} icons={icons} />
-    </>
+    </div>
   );
 }
 

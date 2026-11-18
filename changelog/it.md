@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.57
+
+- Nuovo: Pet al Mercato nero: il pannello ha una finestra sua: trascinalo dal titolo e resta dove lo metti.
+- Modificato: Pet al Mercato nero: i pallini del livello prendono il colore della categoria del pet (Cogni blu, Fera rossa, Natura verde, Varian oro, Speciale turchese) e il pannello si chiude 15 secondi dopo l'ultima scheda aperta o l'ultimo acquisto.
+
 ## 0.5.56
 
 - Corretto: Pet al Mercato nero: i pet segnati Sold Out non compaiono più, anche se li hai comprati prima di avviare PowerMeter.

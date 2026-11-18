@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import { PawPrintIcon } from "@phosphor-icons/react";
-import type { IconUrls, ListRow } from "../data/db/types";
-import type { T } from "./i18n";
+import { usePetWindow } from "./PetPopup";
+import { startMove } from "./pages/world/Minimap";
 import { GameIcon } from "./pages/world/db";
 import { PET_EXP_MAX, petsFromGame, type PetSet } from "./pages/characters/calc";
 import { loadPoints, petSpots, type MapPoints } from "./pages/world/points";
 import PET_IDS from "../data/pet_ids.json";
 import PET_ITEMS from "../data/pet_items.json";
+import PET_GENUS from "../data/pet_genus_effects.json";
 
 /**
  * Spots on the map (all maps summed) under which a pet counts as hard to farm. 0 = only bosses, dungeons or events
@@ -17,11 +19,14 @@ import PET_ITEMS from "../data/pet_items.json";
 const HARD_SPOTS = 15;
 // The game sends nothing when the shop closes (packets_20261118_235928: closed at 00:01 and 00:09, no packet from the
 // server; the client's own are encrypted). The panel stays this long after the last tab opened or pet bought, each of
-// which sends the list again.
-const SHOW_MS = 30_000;
+// which sends the list again (Nazario: 15 s).
+const SHOW_MS = 15_000;
+/** The pips' colour by genus (pet_genus_effects.json), the Soul Crystals of the Builder's Pet window (assets/pm/genus). */
+const GENUS_COLOR: Record<string, string> = { Intellect: "#3d8bff", Feral: "#e5384a", Nature: "#3fd65a", Trans: "#f2c230", Special: "#3fd6d0" };
+const GENUS = (PET_GENUS as { genus: Record<string, string> }).genus;
 const ALL_MAX_MS = 4000; // the "all at MAX" line goes sooner, like the kill card
 const LEAVE_MS = 150; // .bmPanel.isLeaving / .bmRow.isLeaving transition
-const MAX_ROWS = 10; // 10 rows of 42px fit under the kill card in the 360x560 window
+const MAX_ROWS = 10; // 10 rows of 42px fit in the 360x480 window (powermeter.rs pet_overlay)
 
 const ITEM_PET = PET_ITEMS as Record<string, string>;
 const spotCount = (points: MapPoints, code: string) => Object.values(petSpots(points, code)).reduce((n, s) => n + s.length, 0);
@@ -31,10 +36,12 @@ const loadPets = () =>
   );
 
 /**
- * The Black Market panel under the kill card. lib.rs's tick sends "black-market" with the pets on sale (item ids)
+ * The Black Market panel, window "petmarket" (powermeter.rs pet_overlay). lib.rs's tick sends "black-market" with the pets on sale (item ids)
  * when a shop tab opens, and again without the one just bought. It lists those not at MAX yet, hard to farm first.
  */
-export function BlackMarket({ t, creatures, icons }: { t: T; creatures?: ListRow[]; icons: IconUrls }) {
+export function BlackMarket() {
+  const { t, list, icons } = usePetWindow();
+  const creatures = list.data;
   const [items, setItems] = useState<number[]>();
   const [bought, setBought] = useState<number>(); // the item just bought: its row leaves instead of vanishing
   const [leaving, setLeaving] = useState(false);
@@ -107,12 +114,29 @@ export function BlackMarket({ t, creatures, icons }: { t: T; creatures?: ListRow
     return () => clearTimeout(id);
   }, [leaving]);
 
+  // The window lets the mouse through to the game, but while the panel shows it takes it, to be moved by its title;
+  // and it is as tall as the panel (plus its offset and shadow), so no clear area below it holds the game's clicks.
+  const visible = !!pets && (!!items?.length || bought !== undefined);
+  useEffect(() => {
+    getCurrentWindow().setIgnoreCursorEvents(!visible).catch(() => {});
+  }, [visible]);
+  const panel = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = panel.current;
+    if (!visible || !el) return;
+    const fit = new ResizeObserver(() => {
+      getCurrentWindow().setSize(new LogicalSize(360, Math.ceil(el.offsetHeight) + 8 + 24)).catch(() => {});
+    });
+    fit.observe(el);
+    return () => fit.disconnect();
+  }, [visible]);
+
   return (
     <div aria-live="polite">
       {/* Nothing left on sale (the last pet bought): no "all at MAX" line, the panel goes. */}
-      {pets && (items?.length || bought !== undefined) && (
-        <section className={`bmPanel${leaving ? " isLeaving" : ""}`} aria-labelledby="bmTitle">
-          <h2 id="bmTitle" className="bmTitle">
+      {visible && (
+        <section ref={panel} className={`bmPanel${leaving ? " isLeaving" : ""}`} aria-labelledby="bmTitle">
+          <h2 id="bmTitle" className="bmTitle" onPointerDown={(e) => startMove(e, (action) => void action().catch(() => {}))}>
             {t("widgetset.blackMarket")}
           </h2>
           {empty && bought === undefined ? (
@@ -136,6 +160,7 @@ export function BlackMarket({ t, creatures, icons }: { t: T; creatures?: ListRow
                       )}
                       <span
                         className="bmPips"
+                        style={GENUS_COLOR[GENUS[p.code]] ? ({ "--genus": GENUS_COLOR[GENUS[p.code]] } as CSSProperties) : undefined}
                         {...(p.lvl
                           ? {
                               role: "img",
