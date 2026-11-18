@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.54
+
+- Nuovo: Popup pet: ogni uccisione che conta per un pet della collezione mostra in alto sullo schermo una piccola card con icona, nome e progresso del pet (per esempio 45/75, oppure MAX). Lascia passare i clic e non toglie mai il focus al gioco. Si spegne in Impostazioni > Widget DPS > Popup pet.
+
 ## 0.5.53
 
 - Nuovo: Builder: la scheda Ali funziona: scegli un'ala della tua fazione e il livello di potenziamento (da +0 al massimo); le sue statistiche si sommano alla build.

@@ -64,5 +64,8 @@
   "widgetset.resetHint": "Volta aos valores predefinidos. Idioma, tema, conta e dados do painel mantêm-se",
   "widgetset.resetConfirm": "Repor todas as definições do widget DPS?",
   "widgetset.restartHint": "Aplica-se no próximo arranque do PowerMeter",
-  "widgetset.needModifier": "Adicione Ctrl, Alt ou Shift"
+  "widgetset.needModifier": "Adicione Ctrl, Alt ou Shift",
+  "widgetset.petPopup": "Popup de mascote",
+  "widgetset.petPopupHint": "Sobre o jogo, cada abate que conta para um mascote da coleção mostra o mascote e o seu progresso",
+  "widgetset.petUnlock": "Desbloqueio"
 }

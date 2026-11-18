@@ -64,5 +64,8 @@
   "widgetset.resetHint": "初期値に戻します。言語、テーマ、アカウント、ダッシュボードのデータはそのままです",
   "widgetset.resetConfirm": "DPSウィジェットのすべての設定を初期値に戻しますか？",
   "widgetset.restartHint": "次回のPowerMeter起動時に反映されます",
-  "widgetset.needModifier": "Ctrl・Alt・Shift と組み合わせてください"
+  "widgetset.needModifier": "Ctrl・Alt・Shift と組み合わせてください",
+  "widgetset.petPopup": "ペットポップアップ",
+  "widgetset.petPopupHint": "ゲーム上に、コレクションのペットに加算される討伐ごとにペットと進捗を表示します",
+  "widgetset.petUnlock": "解放"
 }

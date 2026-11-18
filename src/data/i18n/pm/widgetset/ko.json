@@ -64,5 +64,8 @@
   "widgetset.resetHint": "기본값으로 되돌립니다. 언어, 테마, 계정, 대시보드 데이터는 그대로 유지됩니다",
   "widgetset.resetConfirm": "DPS 위젯의 모든 설정을 기본값으로 되돌릴까요?",
   "widgetset.restartHint": "다음 PowerMeter 실행 시 적용됩니다",
-  "widgetset.needModifier": "Ctrl, Alt 또는 Shift와 함께 누르세요"
+  "widgetset.needModifier": "Ctrl, Alt 또는 Shift와 함께 누르세요",
+  "widgetset.petPopup": "펫 팝업",
+  "widgetset.petPopupHint": "게임 위에 컬렉션 펫에 집계되는 처치마다 펫과 진행도를 표시합니다",
+  "widgetset.petUnlock": "해금"
 }

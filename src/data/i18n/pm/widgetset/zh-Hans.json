@@ -64,5 +64,8 @@
   "widgetset.resetHint": "恢复默认值。语言、主题、账号和仪表盘数据保持不变",
   "widgetset.resetConfirm": "将 DPS 小组件的所有设置恢复为默认值？",
   "widgetset.restartHint": "下次启动 PowerMeter 时生效",
-  "widgetset.needModifier": "请配合 Ctrl、Alt 或 Shift"
+  "widgetset.needModifier": "请配合 Ctrl、Alt 或 Shift",
+  "widgetset.petPopup": "宠物弹窗",
+  "widgetset.petPopupHint": "在游戏上方，每次计入收藏宠物的击杀都会显示该宠物及其进度",
+  "widgetset.petUnlock": "解锁"
 }

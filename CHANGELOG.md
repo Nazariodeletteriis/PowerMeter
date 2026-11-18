@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.54
+
+- New: Pet popup: every kill that counts for a collection pet shows a small card at the top of the screen with the pet's icon, name and progress (for example 45/75, or MAX). It lets clicks through and never takes focus from the game. Turn it off in Settings > DPS Widget > Pet popup.
+
 ## 0.5.53
 
 - New: Builder: the Wings tab works: pick a wing of your faction and its enchant level (+0 to the maximum); its stats add to the build.

@@ -64,5 +64,8 @@
   "widgetset.resetHint": "Возврат к значениям по умолчанию. Язык, тема, аккаунт и данные панели сохраняются",
   "widgetset.resetConfirm": "Сбросить все настройки виджета DPS?",
   "widgetset.restartHint": "Применится при следующем запуске PowerMeter",
-  "widgetset.needModifier": "Добавьте Ctrl, Alt или Shift"
+  "widgetset.needModifier": "Добавьте Ctrl, Alt или Shift",
+  "widgetset.petPopup": "Окно питомца",
+  "widgetset.petPopupHint": "Поверх игры каждое убийство, которое засчитывается питомцу из коллекции, показывает питомца и его прогресс",
+  "widgetset.petUnlock": "Открытие"
 }

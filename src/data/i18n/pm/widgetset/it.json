@@ -64,5 +64,8 @@
   "widgetset.resetHint": "Torna ai valori predefiniti. Lingua, tema, account e dati della dashboard restano come sono",
   "widgetset.resetConfirm": "Ripristinare tutte le impostazioni del widget DPS ai valori predefiniti?",
   "widgetset.restartHint": "Vale dal prossimo avvio di PowerMeter",
-  "widgetset.needModifier": "Aggiungi Ctrl, Alt o Maiusc"
+  "widgetset.needModifier": "Aggiungi Ctrl, Alt o Maiusc",
+  "widgetset.petPopup": "Popup pet",
+  "widgetset.petPopupHint": "Sopra il gioco, ogni uccisione che conta per un pet della collezione mostra il pet e il suo progresso",
+  "widgetset.petUnlock": "Sblocco"
 }

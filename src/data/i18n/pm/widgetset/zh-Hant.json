@@ -64,5 +64,8 @@
   "widgetset.resetHint": "恢復預設值。語言、主題、帳號與儀表板資料保持不變",
   "widgetset.resetConfirm": "將 DPS 小工具的所有設定恢復為預設值？",
   "widgetset.restartHint": "下次啟動 PowerMeter 時生效",
-  "widgetset.needModifier": "請搭配 Ctrl、Alt 或 Shift"
+  "widgetset.needModifier": "請搭配 Ctrl、Alt 或 Shift",
+  "widgetset.petPopup": "寵物彈窗",
+  "widgetset.petPopupHint": "在遊戲上方，每次計入收藏寵物的擊殺都會顯示該寵物及其進度",
+  "widgetset.petUnlock": "解鎖"
 }

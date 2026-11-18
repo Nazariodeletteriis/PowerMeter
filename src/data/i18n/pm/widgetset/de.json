@@ -64,5 +64,8 @@
   "widgetset.resetHint": "Zurück zu den Standardwerten. Sprache, Design, Konto und Dashboard-Daten bleiben erhalten",
   "widgetset.resetConfirm": "Alle DPS-Widget-Einstellungen auf die Standardwerte zurücksetzen?",
   "widgetset.restartHint": "Gilt ab dem nächsten Start von PowerMeter",
-  "widgetset.needModifier": "Mit Strg, Alt oder Umschalt kombinieren"
+  "widgetset.needModifier": "Mit Strg, Alt oder Umschalt kombinieren",
+  "widgetset.petPopup": "Pet-Popup",
+  "widgetset.petPopupHint": "Über dem Spiel zeigt jeder Kill, der für ein Sammlungs-Pet zählt, das Pet und seinen Fortschritt",
+  "widgetset.petUnlock": "Freischaltung"
 }

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.54
+
+- Nouveau : Popup familier : chaque élimination qui compte pour un familier de la collection affiche en haut de l'écran une petite carte avec l'icône, le nom et la progression (par exemple 45/75, ou MAX). Elle laisse passer les clics et ne prend jamais le focus au jeu. À désactiver dans Paramètres > Widget DPS > Popup familier.
+
 ## 0.5.53
 
 - Nouveau : Builder : l'onglet Ailes fonctionne : choisissez des ailes de votre faction et leur niveau d'amélioration (+0 au maximum) ; leurs statistiques s'ajoutent au build.

@@ -319,6 +319,40 @@ pub async fn open_cube_window(app: tauri::AppHandle) -> Result<(), String> {
     open_widget_window(&app, "cubes", "cubeFinder", "PowerMeter — Cube Finder", (380.0, 380.0), (280.0, 280.0))
 }
 
+/// The pet popup (PetPopup.tsx): a card at the top centre of the main monitor for each kill that counts for a pet
+/// (lib.rs's tick sends `pet-kill`). Made at launch so it is loaded before the first kill; transparent, never
+/// focused and clicks pass through it, so it never gets in the game's way while it draws nothing.
+pub fn open_pet_popup_on_start(app: &tauri::AppHandle) {
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        let (w, h) = (360.0, 96.0);
+        let built = tauri::WebviewWindowBuilder::new(&app, "petpop", tauri::WebviewUrl::App("dashboard.html".into()))
+            .initialization_script("window.__PM_VIEW__ = 'petpop';")
+            .title("PowerMeter — Pet")
+            .decorations(false)
+            .transparent(true)
+            .shadow(false)
+            .always_on_top(true)
+            .focused(false)
+            .skip_taskbar(true)
+            .resizable(false)
+            .inner_size(w, h)
+            .build();
+        let window = match built {
+            Ok(window) => window,
+            Err(e) => return tracing::error!("Failed to open the pet popup: {}", e),
+        };
+        let _ = window.set_ignore_cursor_events(true);
+        if let Some(m) = app.primary_monitor().ok().flatten() {
+            // Physical: a logical position is scaled by the monitor the window is on now, maybe not this one.
+            let scale = m.scale_factor();
+            let x = m.position().x + ((m.size().width as f64 - w * scale) / 2.0) as i32;
+            let y = m.position().y + (72.0 * scale) as i32;
+            let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+        }
+    });
+}
+
 /// A transparent widget window over the game: dashboard.html drawing only the
 /// view named by its label (main.tsx). Its geometry is saved under
 /// `window.<key>.*` when it loses focus or closes rather than on every move

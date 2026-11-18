@@ -64,5 +64,8 @@
   "widgetset.resetHint": "Retour aux valeurs par défaut. Langue, thème, compte et données du tableau de bord sont conservés",
   "widgetset.resetConfirm": "Réinitialiser tous les réglages du widget DPS ?",
   "widgetset.restartHint": "Pris en compte au prochain démarrage de PowerMeter",
-  "widgetset.needModifier": "Ajoutez Ctrl, Alt ou Maj"
+  "widgetset.needModifier": "Ajoutez Ctrl, Alt ou Maj",
+  "widgetset.petPopup": "Popup familier",
+  "widgetset.petPopupHint": "Par-dessus le jeu, chaque élimination qui compte pour un familier de la collection affiche le familier et sa progression",
+  "widgetset.petUnlock": "Déblocage"
 }

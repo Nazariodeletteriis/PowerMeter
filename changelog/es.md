@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.54
+
+- Nuevo: Popup de mascota: cada muerte que cuenta para una mascota de la colección muestra arriba en la pantalla una pequeña tarjeta con el icono, el nombre y el progreso (por ejemplo 45/75, o MAX). Deja pasar los clics y nunca quita el foco al juego. Se desactiva en Ajustes > Widget DPS > Popup de mascota.
+
 ## 0.5.53
 
 - Nuevo: Builder: la pestaña Alas funciona: elige unas alas de tu facción y su nivel de mejora (de +0 al máximo); sus estadísticas se suman a la build.

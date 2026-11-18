@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.54
+
+- Neu: Pet-Popup: Jeder Kill, der für ein Pet der Sammlung zählt, zeigt oben auf dem Bildschirm eine kleine Karte mit Symbol, Name und Fortschritt (z. B. 45/75 oder MAX). Klicks gehen hindurch und das Spiel verliert nie den Fokus. Abschalten unter Einstellungen > DPS-Widget > Pet-Popup.
+
 ## 0.5.53
 
 - Neu: Builder: Der Tab Flügel funktioniert: Wähle Flügel deiner Fraktion und die Verzauberungsstufe (+0 bis Maximum); ihre Werte zählen zum Build.

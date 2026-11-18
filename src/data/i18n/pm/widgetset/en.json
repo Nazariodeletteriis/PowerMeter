@@ -64,5 +64,8 @@
   "widgetset.resetHint": "Back to the defaults. Language, theme, account and dashboard data stay as they are",
   "widgetset.resetConfirm": "Reset every DPS widget setting to its default?",
   "widgetset.restartHint": "Takes effect the next time PowerMeter starts",
-  "widgetset.needModifier": "Add Ctrl, Alt or Shift"
+  "widgetset.needModifier": "Add Ctrl, Alt or Shift",
+  "widgetset.petPopup": "Pet popup",
+  "widgetset.petPopupHint": "Over the game, each kill that counts for a collection pet shows the pet and its progress",
+  "widgetset.petUnlock": "Unlock"
 }

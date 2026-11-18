@@ -1596,6 +1596,7 @@ pub fn run() {
             app.manage(state);
             gamedata::start_sync(app.handle().clone());
             powermeter::open_dashboard_on_start(app.handle());
+            powermeter::open_pet_popup_on_start(app.handle());
             powermeter::start_click_through_hotkey(app.handle());
 
             // Reopen the Details window if it was left enabled. Done here rather
@@ -1753,6 +1754,11 @@ pub fn run() {
                             let _ = handle.emit("combat-reset", ());
                         }
                         let _ = handle.emit("dps-update", &dps);
+                        // Taken every tick so a later switch-on does not show a backlog. Default on.
+                        let kills = crate::capture::equip_parser::take_pet_kills();
+                        if !kills.is_empty() && state.settings.get("petPopup.enabled").is_none_or(|v| v != "false") {
+                            let _ = handle.emit_to("petpop", "pet-kill", &kills);
+                        }
                         let total_ms = t0.elapsed().as_millis();
                         if total_ms > 200 {
                             tracing::warn!("Slow: lock={}ms calc={}ms emit={}ms total={}ms gen={}",

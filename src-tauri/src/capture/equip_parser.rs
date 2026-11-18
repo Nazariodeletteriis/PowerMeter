@@ -192,6 +192,22 @@ struct State {
     combat_power_now_exact: bool,
     pets: Vec<CapturedPet>,
     pet_effects: Vec<CapturedPetEffect>,
+    /// (pet id, exp) of the pets not in the collection yet: the second list of `00 90` also carries them
+    /// (pets_0090_20261013_031702: 9 of them, exp 1-4). How much unlocks one is not in the packet.
+    unlock: Vec<(u32, u32)>,
+    /// `unlock` was read from this login's `00 90`.
+    unlock_read: bool,
+    /// Kills counted by `0D 90` since the last `take_pet_kills`, for the pet popup.
+    pet_kills: Vec<PetKill>,
+}
+
+/// One kill that counted for a pet, as it stands after it: `lvl` 0 is a pet not unlocked yet, its `exp` the unlock
+/// progress (no known maximum); 1-2 the level and its 0-74 exp of 75; 3 is MAX.
+#[derive(Serialize, Clone, PartialEq, Debug)]
+pub struct PetKill {
+    pub id: u32,
+    pub lvl: u8,
+    pub exp: u32,
 }
 
 static STATE: Mutex<State> = Mutex::new(State {
@@ -206,6 +222,9 @@ static STATE: Mutex<State> = Mutex::new(State {
     combat_power_now_exact: false,
     pets: Vec::new(),
     pet_effects: Vec::new(),
+    unlock: Vec::new(),
+    unlock_read: false,
+    pet_kills: Vec::new(),
 });
 
 /// Your own item level and combat power: a `now`/`best` pair whose best is kept. Out of range or now above best:
@@ -418,6 +437,8 @@ fn parse_inventory(b: &[u8]) {
         s.combat_power_now = None;
         s.combat_power_now_exact = false;
         s.pets.clear();
+        s.unlock.clear();
+        s.unlock_read = false;
     }
 }
 
@@ -511,16 +532,21 @@ fn parse_pets(b: &[u8]) {
         o += 12;
     }
     let Some((n, mut o)) = count(o) else { return };
+    let mut unlock = Vec::new();
     for _ in 0..n {
         let (Some(id), Some(exp)) = (u32_at(b, o), u32_at(b, o + 4)) else { return };
-        if let Some(p) = pets.iter_mut().find(|p| p.id == id && p.lvl < 3) {
-            p.exp = exp.min(75) as u8;
+        match pets.iter_mut().find(|p| p.id == id) {
+            Some(p) if p.lvl < 3 => p.exp = exp.min(75) as u8,
+            Some(_) => {}
+            None => unlock.push((id, exp)),
         }
         o += 8;
     }
     let effects = pet_insight(b, o);
     let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
     s.pets = pets;
+    s.unlock = unlock;
+    s.unlock_read = true;
     // A tail out of shape keeps the last good effects.
     if let Some(effects) = effects {
         s.pet_effects = effects;
@@ -541,15 +567,42 @@ fn parse_pet_progress(b: &[u8]) {
     let mut o = n.length as usize;
     for _ in 0..n.value {
         let (Some(id), Some(gain)) = (u32_at(b, o), u32_at(b, o + 4)) else { return };
-        if let Some(p) = s.pets.iter_mut().find(|p| p.id == id && p.lvl < 3) {
+        o += 8;
+        let kill = if let Some(p) = s.pets.iter_mut().find(|p| p.id == id) {
+            if p.lvl >= 3 {
+                continue;
+            }
             let exp = (p.exp as u32).saturating_add(gain);
             if exp >= 75 {
                 p.lvl += 1;
             }
             p.exp = if p.lvl == 3 { 0 } else { (exp % 75) as u8 };
-        }
-        o += 8;
+            PetKill { id, lvl: p.lvl, exp: p.exp as u32 }
+        } else {
+            // Not in the collection: unlock progress, counted only from a login's `00 90` (a pet it does not list
+            // starts at 0). Without one (the meter started in game) the count so far is unknown: no popup.
+            if !s.unlock_read {
+                continue;
+            }
+            let exp = match s.unlock.iter_mut().find(|u| u.0 == id) {
+                Some(u) => {
+                    u.1 = u.1.saturating_add(gain);
+                    u.1
+                }
+                None => {
+                    s.unlock.push((id, gain));
+                    gain
+                }
+            };
+            PetKill { id, lvl: 0, exp }
+        };
+        s.pet_kills.push(kill);
     }
+}
+
+/// The kills counted since the last call (the pet popup, lib.rs's tick).
+pub fn take_pet_kills() -> Vec<PetKill> {
+    std::mem::take(&mut STATE.lock().unwrap_or_else(|e| e.into_inner()).pet_kills)
 }
 
 /// The collection the dashboard kept, when this run has not seen the login's `00 90` (the meter started with the game
@@ -836,18 +889,24 @@ mod tests {
         parse(&hex("100000900000000001ea030000ea03000009000000"));
         assert_eq!(snapshot().pets.len(), 3);
         // packets_20261019_015229, 01:53:44: a kill for Cherubim_03 (1171) is `0f 0d 90 01 93040000 01000000`; here the same
-        // record for 1217 (level 2 at 16): +1. A level 3 pet (1299) gains nothing, an unowned one (1034) isn't added.
+        // record for 1217 (level 2 at 16): +1. A level 3 pet (1299) gains nothing, an unowned one (1034) isn't added
+        // to the collection: its unlock progress goes from the login's 5 to 6.
+        take_pet_kills();
         parse(&hex("0f0d9001c104000001000000"));
         parse(&hex("0f0d90011305000001000000"));
         parse(&hex("0f0d90010a04000001000000"));
         let pets: Vec<(u32, u8, u8)> = snapshot().pets.iter().map(|p| (p.id, p.lvl, p.exp)).collect();
         assert_eq!(pets, [(1002, 1, 16), (1217, 2, 17), (1299, 3, 0)]);
+        let kill = |id, lvl, exp| PetKill { id, lvl, exp };
+        assert_eq!(take_pet_kills(), [kill(1217, 2, 17), kill(1034, 0, 6)]);
+        assert!(take_pet_kills().is_empty());
         // 75 exp is a level (Nazario: Kerubiel 0/75 at level 2, then MAX): 1217 +58 reaches level 3, 1002 +60 is
         // level 2 at 1.
         parse(&hex("0f0d9001c10400003a000000"));
         parse(&hex("0f0d9001ea0300003c000000"));
         let pets: Vec<(u32, u8, u8)> = snapshot().pets.iter().map(|p| (p.id, p.lvl, p.exp)).collect();
         assert_eq!(pets, [(1002, 2, 1), (1217, 3, 0), (1299, 3, 0)]);
+        assert_eq!(take_pet_kills(), [kill(1217, 3, 0), kill(1002, 2, 1)]);
         // The dashboard's kept collection never replaces one read from the game.
         seed_pets(vec![CapturedPet { id: 1002, lvl: 1, exp: 0 }]);
         assert_eq!(snapshot().pets.len(), 3);
@@ -860,6 +919,9 @@ mod tests {
         parse(&hex("0f0d9001c104000001000000"));
         let pets: Vec<(u32, u8, u8)> = snapshot().pets.iter().map(|p| (p.id, p.lvl, p.exp)).collect();
         assert_eq!(pets, [(1217, 2, 56)]);
+        // An unowned pet before this login's `00 90`: its count so far is unknown, no popup.
+        parse(&hex("0f0d90010a04000001000000"));
+        assert_eq!(take_pet_kills(), [PetKill { id: 1217, lvl: 2, exp: 56 }]);
         let eq = snapshot().equipment;
         assert_eq!(eq.len(), 19);
         let at = |slot: u8| eq.iter().find(|e| e.item.slot == slot).unwrap().extras.clone();

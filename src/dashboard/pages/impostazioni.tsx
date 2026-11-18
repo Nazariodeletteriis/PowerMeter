@@ -81,6 +81,7 @@ const WIDGET_DEFAULTS: Record<string, string> = {
   [VOLUME_KEY]: "50",
   [POPUP_KEY]: "1",
   [POPUP_SECONDS_KEY]: "8",
+  "petPopup.enabled": "true", // read by lib.rs: only "false" turns the pet popup off
 };
 const MONITOR = "dpsMeter.detailsMonitor";
 const LOGS = { debug: ["dpsMeter.debugLoggingEnabled", "set_debug_logging"], packets: ["dpsMeter.saveRawPackets", "set_packet_logging"] } as const;
@@ -547,6 +548,7 @@ export default function Impostazioni({ t, lang, settings, save, name, go, run }:
           })}
           {button(t("widgetset.preview"), () => run(() => emit("pm-event-popup-test", { seconds })))}
         </Row>
+        {widgetSwitch("petPopup.enabled", t("widgetset.petPopup"), t("widgetset.petPopupHint"))}
 
         <h3 className="acctSection">{t("widgetset.connection")}</h3>
         <Row label={t("widgetset.character")} desc={t("widgetset.actorHint")}>
