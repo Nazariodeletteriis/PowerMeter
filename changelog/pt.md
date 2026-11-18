@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.53
+
+- Novo: Builder: a aba Asas funciona: escolha asas da sua facção e o nível de aprimoramento (de +0 ao máximo); os atributos delas somam à build.
+- Novo: Builder: a aba Títulos (antes "Conquistas") lista todos os títulos por categoria, com busca e filtro por grau: os atributos ao equipar, o bônus por possuir e como obter. Os atributos do título equipado somam à build.
+
 ## 0.5.52
 
 - Novo: Início: o cartão de Notícias mostra os últimos anúncios e notas de patch oficiais de AION 2; um clique abre no navegador.

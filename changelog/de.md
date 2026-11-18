@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.53
+
+- Neu: Builder: Der Tab Flügel funktioniert: Wähle Flügel deiner Fraktion und die Verzauberungsstufe (+0 bis Maximum); ihre Werte zählen zum Build.
+- Neu: Builder: Der Tab Titel (vorher „Erfolge“) listet alle Titel nach Kategorie mit Suche und Gradfilter: Werte beim Ausrüsten, Bonus für den Besitz und wie man ihn erhält. Die Werte des ausgerüsteten Titels zählen zum Build.
+
 ## 0.5.52
 
 - Neu: Startseite: Die News-Karte zeigt die neuesten offiziellen Ankündigungen und Patchnotes von AION 2; ein Klick öffnet sie im Browser.

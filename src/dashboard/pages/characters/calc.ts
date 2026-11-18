@@ -205,12 +205,15 @@ export type PetSet = Record<string, PetState>;
 export type PetEffect = [statKey: string, value: number, percent: boolean];
 export const PET_EXP_MAX = 75;
 
-/** Mount-only stats: the Pet window lists them, but they are no stat of the character. */
-const MOUNT_STATS = new Set(["GroundVehicleSpeed", "VehicleSpeed", "VehicleSprintSpeed", "VehicleSprintCost"]);
+/**
+ * Stats that are no stat of the character: the mount's (the Pet window lists them) and the wings' Flight Power
+ * (FPMax: no class base value to add it to, so a total would only repeat the wing's figure).
+ */
+const MOUNT_STATS = new Set(["GroundVehicleSpeed", "VehicleSpeed", "VehicleSprintSpeed", "VehicleSprintCost", "FPMax"]);
 
 /**
- * The Builder stat a pet effect adds to, or null when it adds to none (mount stats, keys the stat dictionary does
- * not have). The Builder sums the game's own stat keys, so a known key maps to itself. The capture uses this too.
+ * The Builder stat a pet, wing or title effect adds to, or null when it adds to none (mount and flight stats, keys
+ * the stat dictionary does not have). The Builder sums the game's own stat keys, so a known key maps to itself. The capture uses this too.
  */
 export const petStatKey = (key: string, known: Set<string>) => (known.has(key) && !MOUNT_STATS.has(key) ? key : null);
 
@@ -334,3 +337,58 @@ export const GAME_SLOTS: Record<number, string> = {
   10: "Necklace", 11: "Earring 1", 12: "Earring 2", 13: "Ring 1", 14: "Ring 2", 15: "Bracelet", 16: "Bracelet 2",
   17: "Belt", 19: "Cape", 22: "Amulet", 23: "Rune", 24: "Rune 2",
 };
+
+// ---------- Wings and titles ----------
+// Both add to the totals as effects next to the pets' (buildStats `pets`), in display units.
+
+/** The wing of a build (pm.buildData): record id of category "wing" and enchant level. */
+export type WingPick = { id: string; enh: number };
+/** A saved wing as stored, or undefined (settings can be hand-edited). The level is capped by the wing's max where shown. */
+export function readWing(v: unknown): WingPick | undefined {
+  if (!v || typeof v !== "object") return undefined;
+  const { id, enh } = v as Record<string, unknown>;
+  if (typeof id !== "string" || !/^Wing_[A-Za-z0-9_]{1,60}$/.test(id)) return undefined;
+  return { id, enh: Number.isInteger(enh) && (enh as number) >= 0 && (enh as number) <= 30 ? (enh as number) : 0 };
+}
+/** A saved title id as stored (8 digits, first 1-4), or undefined. */
+export const readTitle = (v: unknown): number | undefined => (typeof v === "number" && Number.isInteger(v) && v >= 1e7 && v < 5e7 ? v : undefined);
+
+/** The archive's race of a wing or title: Light = Elyos, Dark = Asmodian, anything else both. */
+export const raceFits = (race: string | null | undefined, faction?: "elyos" | "asmodian") =>
+  !faction || (race !== "Light" && race !== "Dark") || (race === "Light") === (faction === "elyos");
+/**
+ * A title's race from its id: 1xxxxxxx and 2xxxxxxx are the Elyos and Asmodian versions of the same title (checked by
+ * name against the archive's title records: 151 Light and 150 Dark, none crossed), 3xxxxxxx and 4xxxxxxx both.
+ */
+export function titleRace(id: number) {
+  const d = Math.floor(id / 1e7);
+  return d === 1 ? "Light" : d === 2 ? "Dark" : "All";
+}
+
+/**
+ * What a wing gives at an enchant level: its own stats plus its enchant group's at exactly that level (the group's
+ * values are the level's totals, "reported_group_stats", not bonuses to add up). Raw values; percent = ×100.
+ */
+export function wingStats(own: { stat: string; value: number }[], levels: EnhancementValue[], enh: number, pct: Set<string>): PetEffect[] {
+  const at = levels.filter((v) => v.level === enh && v.status === "published" && v.value_kind === "reported_group_stats" && v.value_raw != null);
+  return [
+    ...own.filter((s) => typeof s?.stat === "string" && Number.isFinite(s.value)).map((s): PetEffect => [s.stat, statValue(s.value, pct.has(s.stat)), pct.has(s.stat)]),
+    ...at.map((v): PetEffect => [v.stat_key, statValue(v.value_raw!, v.percent === 1), v.percent === 1]),
+  ];
+}
+
+/**
+ * A title's stats ([English display label, raw value]) as effects on the Builder's stat keys: a label is the stat
+ * dictionary's name of the stat. Labels the dictionary has no name for are returned apart, shown but not added.
+ */
+export function titleStats(list: [label: string, raw: number][], dict: BuilderData["stats"]): { fx: PetEffect[]; unmapped: [string, number][] } {
+  const byName = new Map(dict.map((s) => [s.name, s]));
+  const fx: PetEffect[] = [];
+  const unmapped: [string, number][] = [];
+  for (const [label, raw] of list) {
+    const s = byName.get(label);
+    if (s) fx.push([s.stat_key, statValue(raw, s.percent === 1), s.percent === 1]);
+    else unmapped.push([label, raw]);
+  }
+  return { fx, unmapped };
+}

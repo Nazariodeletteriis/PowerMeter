@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.53
+
+- Nuevo: Builder: la pestaña Alas funciona: elige unas alas de tu facción y su nivel de mejora (de +0 al máximo); sus estadísticas se suman a la build.
+- Nuevo: Builder: la pestaña Títulos (antes «Logros») muestra todos los títulos por categoría, con búsqueda y filtro por grado: las estadísticas al equiparlo, la bonificación por poseerlo y cómo conseguirlo. Las estadísticas del título equipado se suman a la build.
+
 ## 0.5.52
 
 - Nuevo: Inicio: la tarjeta de Noticias muestra los últimos anuncios y notas de parche oficiales de AION 2; un clic los abre en el navegador.

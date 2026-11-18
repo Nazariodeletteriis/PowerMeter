@@ -31,7 +31,7 @@ import { classSkills, planClass, SkillIcon } from "../skills";
 import { art, ClassAvatar, CLASSES, FactionTag } from "../ui";
 import { activeId, readCharacters } from "../characters";
 import type { BuilderData, EnhancementGroup, EnhancementValue, GearPiece, PlannerBoardData } from "../../data/db/types";
-import { arcanaCode, boardMax, buildStats, connected, derivedStats, estimates, GAME_SLOTS, ownedPets, petCollection, planTotals, plannerNodes, PLAN_KEY, readPlans, savedNodes, statValue, twPiece, type Equipped } from "./characters/calc";
+import { arcanaCode, boardMax, buildStats, connected, derivedStats, estimates, GAME_SLOTS, ownedPets, petCollection, planTotals, plannerNodes, PLAN_KEY, readPlans, readTitle, readWing, savedNodes, statValue, titleStats, twPiece, wingStats, type Equipped, type WingPick } from "./characters/calc";
 import {
   BAR_SLOTS,
   BUILD_DATA_KEY,
@@ -59,6 +59,7 @@ import {
   type GearSet,
 } from "./characters/shared";
 import { PetsTab } from "./characters/pets";
+import { TitlesTab, WingsTab, type Title, type WingRecord } from "./characters/adornments";
 import { onePerPiece } from "./gearviewer";
 import { BoardView } from "./daevanion";
 import { DataState, GameIcon, gd, gradeColor, openEntry, useGd, useIcons } from "./world/db";
@@ -66,8 +67,8 @@ import { ShareModal } from "./shared/ShareModal";
 import { Modal } from "./system/Modal";
 import type { PageProps } from "./types";
 
-// Wings to Closet: empty until their pages are designed.
-const SOON = ["wings", "pantheon", "achievements", "closet"];
+// Pantheon and Closet: empty until their pages are designed.
+const SOON = ["pantheon", "closet"];
 const TABS = [
   ["equip", TShirtIcon],
   ["skills", LightningIcon],
@@ -75,7 +76,7 @@ const TABS = [
   ["pet", PawPrintIcon],
   ["wings", FeatherIcon],
   ["pantheon", BankIcon],
-  ["achievements", TrophyIcon],
+  ["titles", TrophyIcon],
   ["closet", CoatHangerIcon],
   ["desc", TextAlignLeftIcon],
   ["comm", ChatCircleIcon],
@@ -92,7 +93,7 @@ const SLOT_GROUPS: [group: string, slots: [id: string, accepts: string[]][]][] =
 const SLOTS = SLOT_GROUPS.flatMap(([, list]) => list);
 /** The level the builder starts at when the build has none saved. */
 const DEFAULT_LEVEL = 45;
-type BuildEdit = { lvl: number; gear: GearSet; want?: GearSet };
+type BuildEdit = { lvl: number; gear: GearSet; want?: GearSet; wing?: WingPick; title?: number };
 
 /** Game item ids (numeric, from the packets) are Taiwan data; the Builder's own pieces have string codes. */
 const isGameId = (id: string) => /^\d+$/.test(id);
@@ -177,10 +178,10 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   // Unsaved edits per build (the default one per character): switching character or build parks them, coming
   // back shows them again; nothing is dropped until Save or Delete.
   const [edits, setEdits] = useMem<Record<string, BuildEdit>>("bEdits", {});
-  const cur = edits[key] ?? { lvl: saved.lvl ?? char?.level ?? DEFAULT_LEVEL, gear: wornGear(saved.gear), want: saved.want };
+  const cur = edits[key] ?? { lvl: saved.lvl ?? char?.level ?? DEFAULT_LEVEL, gear: wornGear(saved.gear), want: saved.want, wing: readWing(saved.wing), title: readTitle(saved.title) };
   const update = (p: Partial<BuildEdit>) => setEdits({ ...edits, [key]: { ...cur, ...p } });
   const storeData = (title: string, from?: string) => {
-    const next = { ...allData, [dataKey(title)]: { lvl: cur.lvl, gear: cur.gear, want: cur.want } };
+    const next = { ...allData, [dataKey(title)]: { lvl: cur.lvl, gear: cur.gear, want: cur.want, wing: cur.wing, title: cur.title } };
     if (from !== undefined && from !== title) delete next[dataKey(from)];
     const { [key]: _old, ...rest } = edits; // eslint-disable-line @typescript-eslint/no-unused-vars
     setEdits({ ...rest, [dataKey(title)]: cur });
@@ -261,7 +262,21 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   // plus each owned pet's effects at its level (game pets over hand-marked ones).
   const gamePets = char ? readPets(settings[CAPTURED_PETS_KEY])[char.id] : undefined;
   const petEffects = char ? [...(gamePets?.effects ?? []), ...petCollection(ownedPets(readPets(settings[PETS_KEY])[char.id]?.owned ?? {}, gamePets?.owned))] : [];
-  const totalsOf = (gear: (Equipped & { slot: string })[]) => (calcData.data ? buildStats(calcData.data, cur.lvl, gear, plan, petEffects) : {});
+  // The build's wing at its enchant level and its equipped title count in both gear sets, as the pets do.
+  const wingRec = useGd(() => (cur.wing ? (gd.get("wing", cur.wing.id) as Promise<WingRecord | null>) : Promise.resolve(null)), cur.wing?.id ?? "");
+  const wingData = wingRec.data?.data_json;
+  const wingGroup = wingData?.wing?.enchantGroup ?? "";
+  const wingLevels = useGd(() => (wingGroup ? gd.rows<EnhancementValue>("enhancement_values", "enchant_group", wingGroup) : Promise.resolve([])), wingGroup);
+  const wingEnh = Math.min(cur.wing?.enh ?? 0, wingData?.adornment?.enchantMax ?? 0);
+  const wingOwn = wingStats(wingData?.wing?.stats ?? [], [], 0, pctKeys);
+  const wingLevel = wingStats([], wingLevels.data ?? [], wingEnh, pctKeys);
+  // Titles file (~160 kB): loaded once a title is picked or the tab is opened.
+  const titlesOn = cur.title !== undefined || tab === "titles";
+  const titles = useGd(() => (titlesOn ? import("../../data/titles.json").then((m) => m.default as Title[]) : Promise.resolve(undefined)), String(titlesOn));
+  const eqTitle = titles.data?.find((x) => x.id === cur.title);
+  const titleFx = eqTitle && calcData.data ? titleStats(eqTitle.equipped, calcData.data.stats).fx : [];
+  const effects = [...petEffects, ...wingOwn, ...wingLevel, ...titleFx];
+  const totalsOf = (gear: (Equipped & { slot: string })[]) => (calcData.data ? buildStats(calcData.data, cur.lvl, gear, plan, effects) : {});
   const totals = totalsOf(equipped);
   const wornTotals = which === "want" ? totalsOf(worn) : undefined;
   const wornHere = worn.find((x) => x.slot === slot);
@@ -270,6 +285,7 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
   const real = src.own && char?.cls === src.cls && which === "gear" ? char : undefined;
   const levels = calcData.data?.base.map((b) => b.level) ?? [];
   const icons = useIcons(equipped.map((e) => e.piece.icon));
+  const statName = (k: string) => calcData.data?.stats.find((x) => x.stat_key === k)?.name ?? k;
   const maxByBoard = useMemo(() => boardMax(nodes), [nodes]);
 
   const isNew = !!src.isNew;
@@ -607,7 +623,7 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
                   // Shared so it is known for everyone; signed out it stays yours only.
                   invoke("pm_item_map_vote", { gameId, code }).catch(() => {});
                 }}
-                statName={(k) => calcData.data?.stats.find((x) => x.stat_key === k)?.name ?? k}
+                statName={statName}
                 openItem={(id) => openEntry(go, "item", id)}
               />
             )}
@@ -683,6 +699,32 @@ export default function Builder({ t, lang, name, go, onError, setHeader, setting
               </div>
             )}
             {tab === "pet" && <PetsTab t={t} lang={lang} settings={settings} save={saveSetting} onError={onError} charId={char?.id} stats={calcData.data?.stats} />}
+            {tab === "wings" && (
+              <WingsTab
+                t={t}
+                lang={lang}
+                faction={faction}
+                pick={cur.wing && { ...cur.wing, enh: wingEnh }}
+                wing={wingRec.error ? null : wingRec.data}
+                stats={{ own: wingOwn, level: wingLevel }}
+                set={(wing) => update({ wing })}
+                statName={statName}
+              />
+            )}
+            {tab === "titles" && (
+              <TitlesTab
+                t={t}
+                lang={lang}
+                faction={faction}
+                titles={titles.data}
+                error={titles.error}
+                retry={titles.retry}
+                picked={eqTitle}
+                set={(id) => update({ title: id })}
+                dict={calcData.data?.stats ?? []}
+                statName={statName}
+              />
+            )}
             {SOON.includes(tab) && (
               <div style={{ padding: 16 }}>
                 <div style={{ padding: "24px 0", color: "var(--pm-t2)", fontSize: 13 }}>

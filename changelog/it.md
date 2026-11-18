@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.53
+
+- Nuovo: Builder: la scheda Ali funziona: scegli un'ala della tua fazione e il livello di potenziamento (da +0 al massimo); le sue statistiche si sommano alla build.
+- Nuovo: Builder: la scheda Titoli (prima «Obiettivi») elenca tutti i titoli per categoria, con ricerca e filtro per grado: le statistiche da equipaggiato, il bonus da possesso e come ottenerlo. Le statistiche del titolo equipaggiato si sommano alla build.
+
 ## 0.5.52
 
 - Nuovo: Home: la card Notizie mostra gli ultimi annunci e le patch note ufficiali di AION 2; un clic li apre nel browser.

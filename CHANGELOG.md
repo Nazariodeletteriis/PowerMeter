@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.53
+
+- New: Builder: the Wings tab works: pick a wing of your faction and its enchant level (+0 to the maximum); its stats add to the build.
+- New: Builder: the Titles tab (it was "Achievements") lists every title by category with search and grade filter: the stats when equipped, the bonus for owning it and how to get it. The equipped title's stats add to the build.
+
 ## 0.5.52
 
 - New: Home: the News card shows the latest official AION 2 announcements and patch notes; click one to open it in your browser.

@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.53
+
+- Nouveau : Builder : l'onglet Ailes fonctionne : choisissez des ailes de votre faction et leur niveau d'amélioration (+0 au maximum) ; leurs statistiques s'ajoutent au build.
+- Nouveau : Builder : l'onglet Titres (anciennement « Succès ») liste tous les titres par catégorie, avec recherche et filtre par rang : les statistiques une fois équipé, le bonus de possession et comment l'obtenir. Les statistiques du titre équipé s'ajoutent au build.
+
 ## 0.5.52
 
 - Nouveau : Accueil : la carte Actualités affiche les dernières annonces et notes de patch officielles d'AION 2 ; un clic les ouvre dans le navigateur.

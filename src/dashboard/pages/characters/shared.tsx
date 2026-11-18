@@ -128,7 +128,8 @@ export function readPets(json?: string): Record<string, PetsOf> {
   }
   return out;
 }
-export type BuildData = { lvl?: number; gear?: GearSet; want?: GearSet };
+/** `wing` and `title`: the build's wing (record id, enchant level) and equipped title (src/data/titles.json id). */
+export type BuildData = { lvl?: number; gear?: GearSet; want?: GearSet; wing?: unknown; title?: unknown };
 export function readBuildData(json?: string): Record<string, BuildData> {
   try {
     const v = JSON.parse(json ?? "");
