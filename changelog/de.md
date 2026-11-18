@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.59
+
+- Geändert: Pets im Schwarzmarkt: Wie das Pet-Popup erscheint das Fenster erst, wenn das Spiel deine Sammlung gesendet hat (beim Login, Teleport oder Zonenwechsel), damit Stufen und Zähler immer die des Spiels sind.
+
 ## 0.5.58
 
 - Behoben: Pet-Popup: Wurde PowerMeter erst nach dem Betreten des Spiels gestartet, konnte die Zählung falsch sein (alte Sammlung oder die eines anderen Charakters), zu früh MAX zeigen und dann neu zählen. Jetzt wartet es auf die Sammlung des Spiels, die beim Login und bei jedem Teleport oder Zonenwechsel kommt, und zählt immer von dort.

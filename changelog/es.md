@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.59
+
+- Cambiado: Mascotas del Mercado negro: como el popup de mascota, el panel solo aparece cuando el juego ha enviado tu colección (al iniciar sesión, teletransportarte o cambiar de zona), así niveles y contadores son siempre los del juego.
+
 ## 0.5.58
 
 - Corregido: Popup de mascota: si PowerMeter se abría después de entrar al juego, la cuenta podía ser errónea (una colección antigua o de otro personaje), llegar a MAX demasiado pronto y luego volver a contar. Ahora espera la colección que envía el juego, al iniciar sesión y en cada teletransporte o cambio de zona, y siempre cuenta desde ella.

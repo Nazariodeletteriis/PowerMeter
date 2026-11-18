@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.59
+
+- Changed: Black Market pets: like the pet popup, the panel now shows only once the game has sent your collection (on login, teleport or zone change), so its levels and counts are always the game's own.
+
 ## 0.5.58
 
 - Fixed: Pet popup: with PowerMeter started after entering the game, the count could be wrong (an old collection or another character's), even show MAX too early, and then start counting again. It now waits for the game's own collection, sent on login and on every teleport or zone change, and always counts from it.

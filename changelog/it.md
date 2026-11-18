@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.59
+
+- Modificato: Pet al Mercato nero: come il popup pet, il pannello compare solo dopo che il gioco ha inviato la tua collezione (al login, a un teletrasporto o a un cambio zona), così livelli e contatori sono sempre quelli del gioco.
+
 ## 0.5.58
 
 - Corretto: Popup pet: se PowerMeter partiva dopo l'ingresso in gioco, il conteggio poteva essere sbagliato (collezione vecchia o di un altro personaggio), arrivare a MAX troppo presto e poi ricominciare a contare. Ora aspetta la collezione inviata dal gioco, al login e a ogni teletrasporto o cambio zona, e conta sempre da quella.

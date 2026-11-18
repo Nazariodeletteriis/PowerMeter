@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.59
+
+- Modifié : Familiers du Marché noir : comme le popup familier, le panneau n'apparaît qu'une fois votre collection envoyée par le jeu (connexion, téléportation ou changement de zone), pour des niveaux et compteurs toujours exacts.
+
 ## 0.5.58
 
 - Corrigé : Popup familier : si PowerMeter était lancé après l'entrée en jeu, le compteur pouvait être faux (collection ancienne ou d'un autre personnage), atteindre MAX trop tôt puis recompter. Il attend maintenant la collection envoyée par le jeu, à la connexion et à chaque téléportation ou changement de zone, et compte toujours à partir d'elle.

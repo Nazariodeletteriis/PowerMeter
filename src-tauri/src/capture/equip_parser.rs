@@ -679,10 +679,13 @@ fn parse_shop_buy(b: &[u8]) {
     s.market_changed |= s.market.len() != before;
 }
 
-/// The pet item ids on sale, when they changed since the last call (the Black Market panel, lib.rs's tick).
+/// The pet item ids on sale, when they changed since the last call (the Black Market panel, lib.rs's tick). Only
+/// once the game's own collection came this login (`collection_read`, as the kill popup): before it, the panel's
+/// levels would be a kept collection's, maybe stale or another character's (Nazario, 2026-11-19: no panel then).
 pub fn take_market() -> Option<Vec<u32>> {
     let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
-    std::mem::take(&mut s.market_changed).then(|| s.market.iter().map(|m| m.2).collect())
+    let changed = std::mem::take(&mut s.market_changed);
+    (changed && s.collection_read).then(|| s.market.iter().map(|m| m.2).collect())
 }
 
 /// The kills counted since the last call (the pet popup, lib.rs's tick).
@@ -1068,6 +1071,11 @@ mod tests {
     fn reads_the_black_market_pets() {
         let _g = global();
         take_market();
+        // No collection from the game yet (a login without its `00 90`): no panel.
+        parse_inventory(&hex(include_str!("testdata/inventory_1156_20261013_031655.hex").trim()));
+        parse(&hex(include_str!("testdata/shop_9156_20261118_231054.hex").trim()));
+        assert_eq!(take_market(), None);
+        parse_pets(&hex(include_str!("testdata/pets_0090_20261013_031702.hex").trim()));
         parse(&hex(include_str!("testdata/shop_9156_20261118_231054.hex").trim()));
         let on_sale = [534760014, 534760094, 534760115, 534760109, 534760144, 534760173, 534760063, 534760041, 534760024, 534760075];
         assert_eq!(take_market().as_deref(), Some(&on_sale[..]));
