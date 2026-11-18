@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.56
+
+- Behoben: Pets im Schwarzmarkt: Als Ausverkauft markierte Pets werden nicht mehr angezeigt, auch wenn du sie vor dem Start von PowerMeter gekauft hast.
+- Geändert: Pets im Schwarzmarkt: Das Fenster schließt sich 30 Sekunden nach dem zuletzt geöffneten Tab oder dem letzten Kauf (vorher 60). Das Spiel meldet nicht, wann der Laden geschlossen wird.
+
 ## 0.5.55
 
 - Neu: Pets im Schwarzmarkt: Wenn du den Schwarzmarkt öffnest, listet ein Fenster unter dem Pet-Popup die angebotenen Pets, die noch nicht MAX sind, mit Stufe und Fortschritt (z. B. ●●○ 12/75), die, die du noch nicht hast, und die Markierung „Schwer zu farmen“ für Pets, die auf der Karte selten sind oder nur von Bossen, Dungeons und Events kommen. Ein gekauftes Pet verschwindet aus der Liste. Abschalten unter Einstellungen > DPS-Widget > Pets im Schwarzmarkt.

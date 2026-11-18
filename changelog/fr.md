@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.56
+
+- Corrigé : Familiers du Marché noir : les familiers marqués Épuisé n'apparaissent plus, même achetés avant le lancement de PowerMeter.
+- Modifié : Familiers du Marché noir : le panneau se ferme 30 secondes après le dernier onglet ouvert ou le dernier achat (60 avant). Le jeu n'indique pas la fermeture de la boutique.
+
 ## 0.5.55
 
 - Nouveau : Familiers du Marché noir : à l'ouverture du Marché noir, un panneau sous le popup familier liste les familiers en vente qui ne sont pas encore MAX, avec leur niveau et leur progression (par exemple ●●○ 12/75), ceux que vous n'avez pas encore et l'étiquette « Difficile à farmer » pour ceux qui sont rares sur la carte ou ne viennent que des boss, donjons et événements. Le familier acheté sort de la liste. À désactiver dans Paramètres > Widget DPS > Familiers du Marché noir.

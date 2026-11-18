@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.56
+
+- Corrigido: Mascotes do Mercado negro: mascotes marcados como Esgotado não aparecem mais, mesmo comprados antes de abrir o PowerMeter.
+- Alterado: Mascotes do Mercado negro: o painel fecha 30 segundos após a última aba aberta ou a última compra (antes 60). O jogo não informa quando a loja é fechada.
+
 ## 0.5.55
 
 - Novo: Mascotes do Mercado negro: ao abrir o Mercado negro, um painel abaixo do popup de mascote lista os mascotes à venda que ainda não estão no MAX, com nível e progresso (por exemplo ●●○ 12/75), os que você ainda não tem e a etiqueta "Difícil de farmar" para os raros no mapa ou que só vêm de chefes, masmorras e eventos. O mascote comprado sai da lista. Desative em Configurações > Widget DPS > Mascotes do Mercado negro.

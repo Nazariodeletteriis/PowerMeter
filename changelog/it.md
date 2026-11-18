@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.56
+
+- Corretto: Pet al Mercato nero: i pet segnati Sold Out non compaiono più, anche se li hai comprati prima di avviare PowerMeter.
+- Modificato: Pet al Mercato nero: il pannello si chiude 30 secondi dopo l'ultima scheda aperta o l'ultimo acquisto (prima 60). Il gioco non comunica quando chiudi il negozio.
+
 ## 0.5.55
 
 - Nuovo: Pet al Mercato nero: quando apri il Mercato nero, un pannello sotto il popup pet elenca i pet in vendita non ancora a MAX, con livello e progresso (per esempio ●●○ 12/75), quelli che non hai ancora e l'etichetta "Difficile da farmare" per i pet rari sulla mappa o che arrivano solo da boss, dungeon ed eventi. Il pet che compri esce dalla lista. Si spegne in Impostazioni > Widget DPS > Pet al Mercato nero.

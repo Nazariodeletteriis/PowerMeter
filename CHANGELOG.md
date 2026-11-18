@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.56
+
+- Fixed: Black Market pets: pets marked Sold Out are no longer listed, even when you bought them before starting PowerMeter.
+- Changed: Black Market pets: the panel closes 30 seconds after the last tab you open or the last purchase (it was 60). The game does not tell when the shop closes.
+
 ## 0.5.55
 
 - New: Black Market pets: when you open the Black Market, a panel under the pet popup lists the pets on sale that are not at MAX yet, with their level and progress (for example ●●○ 12/75), the ones you don't have yet, and a "Hard to farm" tag for pets that are rare on the map or only come from bosses, dungeons and events. A pet you buy leaves the list. Turn it off in Settings > DPS Widget > Black Market pets.

@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.56
+
+- Corregido: Mascotas del Mercado negro: las mascotas marcadas como Agotado ya no aparecen, aunque las compraras antes de abrir PowerMeter.
+- Cambiado: Mascotas del Mercado negro: el panel se cierra 30 segundos después de la última pestaña abierta o la última compra (antes 60). El juego no avisa cuando cierras la tienda.
+
 ## 0.5.55
 
 - Nuevo: Mascotas del Mercado negro: al abrir el Mercado negro, un panel bajo el popup de mascota muestra las mascotas a la venta que aún no están en MAX, con su nivel y progreso (por ejemplo ●●○ 12/75), las que todavía no tienes y la etiqueta «Difícil de farmear» para las raras en el mapa o que solo salen de jefes, mazmorras y eventos. La mascota que compras sale de la lista. Se desactiva en Ajustes > Widget DPS > Mascotas del Mercado negro.

@@ -617,33 +617,40 @@ fn is_pet_item(item: u32) -> bool {
     (534_760_000..534_761_000).contains(&item) || (574_760_000..574_761_000).contains(&item)
 }
 
-/// `91 56`, a Black Market tab opened (packets_20261118_230720 / _231033: 0xC9 Special, 0xCC Pets):
+/// `91 56`, a Black Market tab opened (packets_20261118_230720 / _231033 / _235928: 0xC9 Special, 0xCC Pets):
 /// `<tab u8> <count u8>` then `count` products of 34 bytes, `<slot u32> <item u32> <quantity u64> <discount tier u8>
-/// <currency u8> <list price u64> <price u64>`, with a byte between some of them (0x55 before the 2nd and 6th, 0x05
-/// before the 10th, meaning unknown): a product is found where its fields read as one. The tab's pet items replace
-/// the ones it had; the hourly refresh comes as a new list when the tab is opened again.
+/// <currency u8> <list price u64> <price u64>`. After the 1st, 5th and 9th product a state byte for that product and
+/// the next three, 2 bits each from the low end: 1 on sale, 3 sold out (packets_20261118_235928: 0x55 0x55 0x05 at
+/// 23:59:59; three bought at 00:00:13, and the 00:02:04 list reads 0x5d 0x5d 0x07, the 2nd, 6th and 9th sold out).
+/// The tab's pet items on sale replace the ones it had; the hourly refresh (`99 56`) sends the new list.
 fn parse_shop_list(b: &[u8]) {
     let (Some(&tab), Some(&count)) = (b.first(), b.get(1)) else { return };
-    let mut items = Vec::new();
-    let (mut o, mut found) = (2, 0);
-    while found < count && o + 34 <= b.len() {
+    let (mut items, mut pets) = (Vec::new(), false);
+    let (mut o, mut state) = (2, 0u8);
+    for i in 0..count as usize {
         let (Some(slot), Some(item), Some(qty), Some(list), Some(price)) =
             (u32_at(b, o), u32_at(b, o + 4), u64_at(b, o + 8), u64_at(b, o + 18), u64_at(b, o + 26))
         else {
-            return;
+            return; // cut short: keep the last good list
         };
         if !(100_000_000..1_000_000_000).contains(&item) || !(1..1000).contains(&qty) || price > list {
+            return; // not a product: not this layout
+        }
+        o += 34;
+        if i % 4 == 0 {
+            let Some(&byte) = b.get(o) else { return };
+            state = byte;
             o += 1;
-            continue;
         }
         if is_pet_item(item) {
-            items.push((tab, slot, item));
+            pets = true;
+            if (state >> (2 * (i % 4))) & 3 != 3 {
+                items.push((tab, slot, item));
+            }
         }
-        found += 1;
-        o += 34;
     }
-    // Out of shape: keep the last good list. No pets (another tab or another shop): nothing to show.
-    if found < count || items.is_empty() {
+    // No pets at all (another tab, another shop): nothing to show. All sold out: the tab's list empties.
+    if !pets {
         return;
     }
     let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
@@ -1069,6 +1076,13 @@ mod tests {
         // Not a list (cut short): the last one stays.
         parse(&hex("1291 56cc0a6e5b03004ecadf1f".replace(' ', "").as_str()));
         assert_eq!(take_market(), None);
+
+        // packets_20261118_235928, 00:02:04.113: the Special tab after three of its pets were bought (00:00:13): its
+        // state bytes 0x5d 0x5d 0x07 mark them sold out, and the other pet (534760003, 534760140) stay on sale.
+        parse(&hex(include_str!("testdata/shop_9156_20261119_000204.hex").trim()));
+        let market = take_market().unwrap();
+        assert_eq!(market[market.len() - 2..], [534760003, 534760140]);
+        assert!(![534760202, 534760038, 534760067].iter().any(|i| market.contains(i)));
     }
 
     /// packets_20261013_031645, 03:17:02.495: Allalon's full `00 90` (body), 31 insight options; the 7 on stat ids

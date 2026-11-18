@@ -15,7 +15,10 @@ import PET_ITEMS from "../data/pet_items.json";
  * (58 pets of 207); among the others, under 15 spots is roughly the rarest 10%.
  */
 const HARD_SPOTS = 15;
-const SHOW_MS = 60_000; // the shop sends no "closed": the panel stays this long after the last list
+// The game sends nothing when the shop closes (packets_20261118_235928: closed at 00:01 and 00:09, no packet from the
+// server; the client's own are encrypted). The panel stays this long after the last tab opened or pet bought, each of
+// which sends the list again.
+const SHOW_MS = 30_000;
 const ALL_MAX_MS = 4000; // the "all at MAX" line goes sooner, like the kill card
 const LEAVE_MS = 150; // .bmPanel.isLeaving / .bmRow.isLeaving transition
 const MAX_ROWS = 10; // 10 rows of 42px fit under the kill card in the 360x560 window
