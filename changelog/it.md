@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.58
+
+- Corretto: Popup pet: se PowerMeter partiva dopo l'ingresso in gioco, il conteggio poteva essere sbagliato (collezione vecchia o di un altro personaggio), arrivare a MAX troppo presto e poi ricominciare a contare. Ora aspetta la collezione inviata dal gioco, al login e a ogni teletrasporto o cambio zona, e conta sempre da quella.
+
 ## 0.5.57
 
 - Nuovo: Pet al Mercato nero: il pannello ha una finestra sua: trascinalo dal titolo e resta dove lo metti.

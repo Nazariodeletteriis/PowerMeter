@@ -195,8 +195,8 @@ struct State {
     /// (pet id, exp) of the pets not in the collection yet: the second list of `00 90` also carries them
     /// (pets_0090_20261013_031702: 9 of them, exp 1-4). How much unlocks one is not in the packet.
     unlock: Vec<(u32, u32)>,
-    /// `unlock` was read from this login's `00 90`.
-    unlock_read: bool,
+    /// The collection (and `unlock`) was read from the game's `00 90` since the login, not seeded by the dashboard.
+    collection_read: bool,
     /// Kills counted by `0D 90` since the last `take_pet_kills`, for the pet popup.
     pet_kills: Vec<PetKill>,
     /// The Black Market's pet items on sale: (tab, slot, item id), from the tabs opened on this visit to the shop.
@@ -229,7 +229,7 @@ static STATE: Mutex<State> = Mutex::new(State {
     pets: Vec::new(),
     pet_effects: Vec::new(),
     unlock: Vec::new(),
-    unlock_read: false,
+    collection_read: false,
     pet_kills: Vec::new(),
     market: Vec::new(),
     market_changed: false,
@@ -449,7 +449,7 @@ fn parse_inventory(b: &[u8]) {
         s.combat_power_now_exact = false;
         s.pets.clear();
         s.unlock.clear();
-        s.unlock_read = false;
+        s.collection_read = false;
     }
 }
 
@@ -557,7 +557,7 @@ fn parse_pets(b: &[u8]) {
     let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
     s.pets = pets;
     s.unlock = unlock;
-    s.unlock_read = true;
+    s.collection_read = true;
     // A tail out of shape keeps the last good effects.
     if let Some(effects) = effects {
         s.pet_effects = effects;
@@ -590,9 +590,8 @@ fn parse_pet_progress(b: &[u8]) {
             p.exp = if p.lvl == 3 { 0 } else { (exp % 75) as u8 };
             PetKill { id, lvl: p.lvl, exp: p.exp as u32 }
         } else {
-            // Not in the collection: unlock progress, counted only from a login's `00 90` (a pet it does not list
-            // starts at 0). Without one (the meter started in game) the count so far is unknown: no popup.
-            if !s.unlock_read {
+            // Not in the collection: unlock progress (a pet the `00 90` does not list starts at 0).
+            if !s.collection_read {
                 continue;
             }
             let exp = match s.unlock.iter_mut().find(|u| u.0 == id) {
@@ -607,7 +606,12 @@ fn parse_pet_progress(b: &[u8]) {
             };
             PetKill { id, lvl: 0, exp }
         };
-        s.pet_kills.push(kill);
+        // Only on the game's own numbers: a collection kept by the dashboard (the meter started in game) may be
+        // stale or another character's, and its counts went wrong, even to a MAX, until the next `00 90` (each
+        // teleport or zone change: packets_20261118_235928, 00:02:40 and 00:08:14) set them right again.
+        if s.collection_read {
+            s.pet_kills.push(kill);
+        }
     }
 }
 
@@ -1000,9 +1004,10 @@ mod tests {
         parse(&hex("0f0d9001c104000001000000"));
         let pets: Vec<(u32, u8, u8)> = snapshot().pets.iter().map(|p| (p.id, p.lvl, p.exp)).collect();
         assert_eq!(pets, [(1217, 2, 56)]);
-        // An unowned pet before this login's `00 90`: its count so far is unknown, no popup.
+        // Before this login's `00 90` no popup: the kept counts may be stale or another character's; an unowned pet's
+        // count is unknown.
         parse(&hex("0f0d90010a04000001000000"));
-        assert_eq!(take_pet_kills(), [PetKill { id: 1217, lvl: 2, exp: 56 }]);
+        assert!(take_pet_kills().is_empty());
         let eq = snapshot().equipment;
         assert_eq!(eq.len(), 19);
         let at = |slot: u8| eq.iter().find(|e| e.item.slot == slot).unwrap().extras.clone();

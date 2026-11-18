@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.58
+
+- Corrigido: Popup de mascote: se o PowerMeter abria depois de entrar no jogo, a contagem podia estar errada (coleção antiga ou de outro personagem), chegar ao MAX cedo demais e depois recomeçar. Agora ele espera a coleção enviada pelo jogo, no login e a cada teleporte ou troca de zona, e conta sempre a partir dela.
+
 ## 0.5.57
 
 - Novo: Mascotes do Mercado negro: o painel tem janela própria: arraste-o pelo título e ele fica onde você colocar.
