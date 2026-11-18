@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.55
+
+- New: Black Market pets: when you open the Black Market, a panel under the pet popup lists the pets on sale that are not at MAX yet, with their level and progress (for example ●●○ 12/75), the ones you don't have yet, and a "Hard to farm" tag for pets that are rare on the map or only come from bosses, dungeons and events. A pet you buy leaves the list. Turn it off in Settings > DPS Widget > Black Market pets.
+
 ## 0.5.54
 
 - New: Pet popup: every kill that counts for a collection pet shows a small card at the top of the screen with the pet's icon, name and progress (for example 45/75, or MAX). It lets clicks through and never takes focus from the game. Turn it off in Settings > DPS Widget > Pet popup.

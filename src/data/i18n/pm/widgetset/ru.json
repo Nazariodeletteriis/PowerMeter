@@ -67,5 +67,11 @@
   "widgetset.needModifier": "Добавьте Ctrl, Alt или Shift",
   "widgetset.petPopup": "Окно питомца",
   "widgetset.petPopupHint": "Поверх игры каждое убийство, которое засчитывается питомцу из коллекции, показывает питомца и его прогресс",
-  "widgetset.petUnlock": "Открытие"
+  "widgetset.petUnlock": "Открытие",
+  "widgetset.blackMarket": "Чёрный рынок",
+  "widgetset.petHard": "Трудно добыть",
+  "widgetset.petLocked": "Не открыт",
+  "widgetset.petMarketAllMax": "Все питомцы в продаже на MAX",
+  "widgetset.petMarket": "Питомцы чёрного рынка",
+  "widgetset.petMarketHint": "При открытии чёрного рынка поверх игры: питомцы в продаже, ещё не на MAX, сначала трудные для добычи"
 }

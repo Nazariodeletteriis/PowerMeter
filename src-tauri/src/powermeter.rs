@@ -320,12 +320,13 @@ pub async fn open_cube_window(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 /// The pet popup (PetPopup.tsx): a card at the top centre of the main monitor for each kill that counts for a pet
-/// (lib.rs's tick sends `pet-kill`). Made at launch so it is loaded before the first kill; transparent, never
+/// (lib.rs's tick sends `pet-kill`), and the Black Market's pets on sale when the shop is opened (`black-market`). Made at launch so it is loaded before the first kill; transparent, never
 /// focused and clicks pass through it, so it never gets in the game's way while it draws nothing.
 pub fn open_pet_popup_on_start(app: &tauri::AppHandle) {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
-        let (w, h) = (360.0, 96.0);
+        // The kill card on top, the Black Market panel (up to 10 pets) under it.
+        let (w, h) = (360.0, 560.0);
         let built = tauri::WebviewWindowBuilder::new(&app, "petpop", tauri::WebviewUrl::App("dashboard.html".into()))
             .initialization_script("window.__PM_VIEW__ = 'petpop';")
             .title("PowerMeter — Pet")

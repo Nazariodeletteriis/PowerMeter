@@ -67,5 +67,11 @@
   "widgetset.needModifier": "Add Ctrl, Alt or Shift",
   "widgetset.petPopup": "Pet popup",
   "widgetset.petPopupHint": "Over the game, each kill that counts for a collection pet shows the pet and its progress",
-  "widgetset.petUnlock": "Unlock"
+  "widgetset.petUnlock": "Unlock",
+  "widgetset.blackMarket": "Black Market",
+  "widgetset.petHard": "Hard to farm",
+  "widgetset.petLocked": "Not unlocked",
+  "widgetset.petMarketAllMax": "All pets on sale are at MAX",
+  "widgetset.petMarket": "Black Market pets",
+  "widgetset.petMarketHint": "When you open the Black Market, over the game: the pets on sale you have not maxed yet, the hard-to-farm ones first"
 }

@@ -1,4 +1,4 @@
-/* Pet popup (PetPopup.tsx) in its 360x96 transparent window: the card sits 8px from the top and 16px from the
+/* Pet popup (PetPopup.tsx) in its 360x560 transparent window (the Black Market panel below): the card sits 8px from the top and 16px from the
    sides, so the entry offset and the shadow stay inside the window. The window over the game can't blur what is
    behind it (backdrop-filter sees only this page), so the card is near-opaque instead. */
 .petPop {
@@ -62,4 +62,90 @@
     .petPop { transform: none; }
   }
   .petPopBar { transition: none; }
+}
+
+/* Black Market panel (BlackMarket.tsx), under the kill card's slot (8 + 64 + 8px), so the card never covers it and
+   it never moves when a card comes or goes. Same surface, edge, shadow and curves as the card. 32px title + up to
+   10 rows of 42px fit in the 560px window with the shadow. */
+.bmPanel {
+  position: absolute;
+  top: 80px;
+  left: 16px;
+  right: 16px;
+  padding: 0 4px 4px;
+  border: 1px solid var(--pm-line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--pm-bg) 90%, transparent);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.45);
+  color: var(--pm-t1);
+  transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1), transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@starting-style {
+  .bmPanel { opacity: 0; transform: translateY(-8px) scale(0.97); }
+}
+.bmPanel.isLeaving {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.98);
+  transition-duration: 150ms;
+}
+.bmTitle {
+  margin: 0;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 32px;
+  color: var(--pm-t2);
+}
+.bmEmpty { margin: 0; padding: 0 8px 8px; font-size: 13px; line-height: 1.3; color: var(--pm-t3); }
+.bmList { margin: 0; padding: 0; list-style: none; }
+.bmRow {
+  height: 42px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px;
+  /* Entry staggered by row; the exit (a purchase) leaves at once. */
+  transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1) calc(var(--i, 0) * 40ms),
+    transform 200ms cubic-bezier(0.23, 1, 0.32, 1) calc(var(--i, 0) * 40ms);
+}
+@starting-style {
+  .bmRow { opacity: 0; transform: translateY(-4px); }
+}
+.bmRow.isLeaving {
+  opacity: 0;
+  transform: translateX(8px);
+  transition-duration: 150ms;
+  transition-delay: 0ms;
+}
+.bmText { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.bmName, .bmHard { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bmName { font-size: 13px; font-weight: 600; line-height: 1.3; }
+.bmHard { font-size: 11px; line-height: 1.3; color: var(--pm-redt); }
+.bmLevel { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.bmCount {
+  font-family: var(--pm-mono);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.bmLocked { font-size: 11px; line-height: 1; color: var(--pm-t3); }
+/* Level as 3 pips: filled up to the level, outlined when not reached. */
+.bmPips { display: flex; gap: 3px; }
+.bmPips > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--pm-t3);
+}
+.bmPips > .isOn { background: var(--pm-t1); box-shadow: none; }
+@media (prefers-reduced-motion: reduce) {
+  .bmPanel { transition: opacity 200ms ease; }
+  .bmPanel.isLeaving { transform: none; }
+  .bmRow { transition: opacity 200ms ease; }
+  .bmRow.isLeaving { transform: none; transition-duration: 150ms; }
+  @starting-style {
+    .bmPanel, .bmRow { transform: none; }
+  }
 }

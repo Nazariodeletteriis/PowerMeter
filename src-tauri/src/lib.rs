@@ -1759,6 +1759,11 @@ pub fn run() {
                         if !kills.is_empty() && state.settings.get("petPopup.enabled").is_none_or(|v| v != "false") {
                             let _ = handle.emit_to("petpop", "pet-kill", &kills);
                         }
+                        if let Some(items) = crate::capture::equip_parser::take_market() {
+                            if state.settings.get("petMarket.enabled").is_none_or(|v| v != "false") {
+                                let _ = handle.emit_to("petpop", "black-market", &items);
+                            }
+                        }
                         let total_ms = t0.elapsed().as_millis();
                         if total_ms > 200 {
                             tracing::warn!("Slow: lock={}ms calc={}ms emit={}ms total={}ms gen={}",

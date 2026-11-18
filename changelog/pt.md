@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.55
+
+- Novo: Mascotes do Mercado negro: ao abrir o Mercado negro, um painel abaixo do popup de mascote lista os mascotes à venda que ainda não estão no MAX, com nível e progresso (por exemplo ●●○ 12/75), os que você ainda não tem e a etiqueta "Difícil de farmar" para os raros no mapa ou que só vêm de chefes, masmorras e eventos. O mascote comprado sai da lista. Desative em Configurações > Widget DPS > Mascotes do Mercado negro.
+
 ## 0.5.54
 
 - Novo: Popup de mascote: cada abate que conta para um mascote da coleção mostra no topo da tela um pequeno cartão com o ícone, o nome e o progresso (por exemplo 45/75, ou MAX). Deixa os cliques passarem e nunca tira o foco do jogo. Desative em Configurações > Widget DPS > Popup de mascote.

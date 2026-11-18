@@ -67,5 +67,11 @@
   "widgetset.needModifier": "Ctrl・Alt・Shift と組み合わせてください",
   "widgetset.petPopup": "ペットポップアップ",
   "widgetset.petPopupHint": "ゲーム上に、コレクションのペットに加算される討伐ごとにペットと進捗を表示します",
-  "widgetset.petUnlock": "解放"
+  "widgetset.petUnlock": "解放",
+  "widgetset.blackMarket": "ブラックマーケット",
+  "widgetset.petHard": "入手困難",
+  "widgetset.petLocked": "未解放",
+  "widgetset.petMarketAllMax": "販売中のペットはすべてMAXです",
+  "widgetset.petMarket": "ブラックマーケットのペット",
+  "widgetset.petMarketHint": "ブラックマーケットを開くと、ゲーム上にMAX未到達の販売中ペットを表示（入手困難なものが先）"
 }

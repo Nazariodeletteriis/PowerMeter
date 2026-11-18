@@ -67,5 +67,11 @@
   "widgetset.needModifier": "Ctrl, Alt 또는 Shift와 함께 누르세요",
   "widgetset.petPopup": "펫 팝업",
   "widgetset.petPopupHint": "게임 위에 컬렉션 펫에 집계되는 처치마다 펫과 진행도를 표시합니다",
-  "widgetset.petUnlock": "해금"
+  "widgetset.petUnlock": "해금",
+  "widgetset.blackMarket": "암시장",
+  "widgetset.petHard": "파밍 어려움",
+  "widgetset.petLocked": "미해금",
+  "widgetset.petMarketAllMax": "판매 중인 펫이 모두 MAX입니다",
+  "widgetset.petMarket": "암시장 펫",
+  "widgetset.petMarketHint": "암시장을 열면 게임 위에 아직 MAX가 아닌 판매 중인 펫을 표시합니다 (파밍이 어려운 펫 먼저)"
 }

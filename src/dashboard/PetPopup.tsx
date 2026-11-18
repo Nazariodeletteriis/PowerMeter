@@ -9,6 +9,7 @@ import { applyPalette } from "./pages/system/theme";
 import { GameIcon, gd, useGd, useIcons } from "./pages/world/db";
 import { PET_EXP_MAX } from "./pages/characters/calc";
 import PET_IDS from "../data/pet_ids.json";
+import { BlackMarket } from "./BlackMarket";
 import "./petPopup.css";
 
 /** One kill that counts for a pet (src-tauri/src/capture/equip_parser.rs PetKill), emitted to this window as "pet-kill". */
@@ -74,13 +75,17 @@ export function PetPopup() {
   const code = kill && (PET_IDS as Record<string, string>)[String(kill.id)];
   const row = code ? list.data?.find((r) => r.id === code) : undefined;
 
-  // The status region stays mounted, so the reader hears each new card.
+  const t = translator(lang);
+  // The status region stays mounted, so the reader hears each new card. The Black Market panel sits under it.
   return (
-    <div role="status" aria-live="polite">
-      {/* Keyed by pet and level: another pet, or a level up (the bar back to the start), enters as a new card
-          instead of swapping its text in place and running the bar backwards. */}
-      {kill && <PetCard key={`${kill.id}:${kill.lvl}`} t={translator(lang)} kill={kill} leaving={leaving} row={row} icon={row?.icon ? icons[row.icon] : undefined} />}
-    </div>
+    <>
+      <div role="status" aria-live="polite">
+        {/* Keyed by pet and level: another pet, or a level up (the bar back to the start), enters as a new card
+            instead of swapping its text in place and running the bar backwards. */}
+        {kill && <PetCard key={`${kill.id}:${kill.lvl}`} t={t} kill={kill} leaving={leaving} row={row} icon={row?.icon ? icons[row.icon] : undefined} />}
+      </div>
+      <BlackMarket t={t} creatures={list.data} icons={icons} />
+    </>
   );
 }
 

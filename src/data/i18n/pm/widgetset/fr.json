@@ -67,5 +67,11 @@
   "widgetset.needModifier": "Ajoutez Ctrl, Alt ou Maj",
   "widgetset.petPopup": "Popup familier",
   "widgetset.petPopupHint": "Par-dessus le jeu, chaque élimination qui compte pour un familier de la collection affiche le familier et sa progression",
-  "widgetset.petUnlock": "Déblocage"
+  "widgetset.petUnlock": "Déblocage",
+  "widgetset.blackMarket": "Marché noir",
+  "widgetset.petHard": "Difficile à farmer",
+  "widgetset.petLocked": "Non débloqué",
+  "widgetset.petMarketAllMax": "Tous les familiers en vente sont au MAX",
+  "widgetset.petMarket": "Familiers du Marché noir",
+  "widgetset.petMarketHint": "À l'ouverture du Marché noir, par-dessus le jeu : les familiers en vente pas encore au MAX, les plus difficiles à farmer d'abord"
 }

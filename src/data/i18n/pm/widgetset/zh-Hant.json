@@ -67,5 +67,11 @@
   "widgetset.needModifier": "請搭配 Ctrl、Alt 或 Shift",
   "widgetset.petPopup": "寵物彈窗",
   "widgetset.petPopupHint": "在遊戲上方，每次計入收藏寵物的擊殺都會顯示該寵物及其進度",
-  "widgetset.petUnlock": "解鎖"
+  "widgetset.petUnlock": "解鎖",
+  "widgetset.blackMarket": "黑市",
+  "widgetset.petHard": "難以刷取",
+  "widgetset.petLocked": "未解鎖",
+  "widgetset.petMarketAllMax": "在售寵物均已達到 MAX",
+  "widgetset.petMarket": "黑市寵物",
+  "widgetset.petMarketHint": "開啟黑市時，在遊戲上方顯示尚未達到 MAX的在售寵物，難以刷取的優先"
 }

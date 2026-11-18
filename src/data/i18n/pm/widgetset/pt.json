@@ -67,5 +67,11 @@
   "widgetset.needModifier": "Adicione Ctrl, Alt ou Shift",
   "widgetset.petPopup": "Popup de mascote",
   "widgetset.petPopupHint": "Sobre o jogo, cada abate que conta para um mascote da coleção mostra o mascote e o seu progresso",
-  "widgetset.petUnlock": "Desbloqueio"
+  "widgetset.petUnlock": "Desbloqueio",
+  "widgetset.blackMarket": "Mercado negro",
+  "widgetset.petHard": "Difícil de farmar",
+  "widgetset.petLocked": "Não desbloqueado",
+  "widgetset.petMarketAllMax": "Todos os mascotes à venda estão no MAX",
+  "widgetset.petMarket": "Mascotes do Mercado negro",
+  "widgetset.petMarketHint": "Ao abrir o Mercado negro, sobre o jogo: os mascotes à venda ainda não no MAX, primeiro os difíceis de farmar"
 }

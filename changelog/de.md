@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.55
+
+- Neu: Pets im Schwarzmarkt: Wenn du den Schwarzmarkt öffnest, listet ein Fenster unter dem Pet-Popup die angebotenen Pets, die noch nicht MAX sind, mit Stufe und Fortschritt (z. B. ●●○ 12/75), die, die du noch nicht hast, und die Markierung „Schwer zu farmen“ für Pets, die auf der Karte selten sind oder nur von Bossen, Dungeons und Events kommen. Ein gekauftes Pet verschwindet aus der Liste. Abschalten unter Einstellungen > DPS-Widget > Pets im Schwarzmarkt.
+
 ## 0.5.54
 
 - Neu: Pet-Popup: Jeder Kill, der für ein Pet der Sammlung zählt, zeigt oben auf dem Bildschirm eine kleine Karte mit Symbol, Name und Fortschritt (z. B. 45/75 oder MAX). Klicks gehen hindurch und das Spiel verliert nie den Fokus. Abschalten unter Einstellungen > DPS-Widget > Pet-Popup.

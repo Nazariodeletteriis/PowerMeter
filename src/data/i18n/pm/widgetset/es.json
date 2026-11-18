@@ -67,5 +67,11 @@
   "widgetset.needModifier": "Añade Ctrl, Alt o Mayús",
   "widgetset.petPopup": "Popup de mascota",
   "widgetset.petPopupHint": "Sobre el juego, cada muerte que cuenta para una mascota de la colección muestra la mascota y su progreso",
-  "widgetset.petUnlock": "Desbloqueo"
+  "widgetset.petUnlock": "Desbloqueo",
+  "widgetset.blackMarket": "Mercado negro",
+  "widgetset.petHard": "Difícil de farmear",
+  "widgetset.petLocked": "No desbloqueada",
+  "widgetset.petMarketAllMax": "Todas las mascotas en venta están al MAX",
+  "widgetset.petMarket": "Mascotas del Mercado negro",
+  "widgetset.petMarketHint": "Al abrir el Mercado negro, sobre el juego: las mascotas en venta que aún no están al MAX, primero las difíciles de farmear"
 }

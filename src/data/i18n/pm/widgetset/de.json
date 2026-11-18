@@ -67,5 +67,11 @@
   "widgetset.needModifier": "Mit Strg, Alt oder Umschalt kombinieren",
   "widgetset.petPopup": "Pet-Popup",
   "widgetset.petPopupHint": "Über dem Spiel zeigt jeder Kill, der für ein Sammlungs-Pet zählt, das Pet und seinen Fortschritt",
-  "widgetset.petUnlock": "Freischaltung"
+  "widgetset.petUnlock": "Freischaltung",
+  "widgetset.blackMarket": "Schwarzmarkt",
+  "widgetset.petHard": "Schwer zu farmen",
+  "widgetset.petLocked": "Nicht freigeschaltet",
+  "widgetset.petMarketAllMax": "Alle angebotenen Pets sind auf MAX",
+  "widgetset.petMarket": "Pets im Schwarzmarkt",
+  "widgetset.petMarketHint": "Beim Öffnen des Schwarzmarkts über dem Spiel: die angebotenen Pets, die noch nicht auf MAX sind, schwer zu farmende zuerst"
 }

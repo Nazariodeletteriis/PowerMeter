@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.55
+
+- Nuevo: Mascotas del Mercado negro: al abrir el Mercado negro, un panel bajo el popup de mascota muestra las mascotas a la venta que aún no están en MAX, con su nivel y progreso (por ejemplo ●●○ 12/75), las que todavía no tienes y la etiqueta «Difícil de farmear» para las raras en el mapa o que solo salen de jefes, mazmorras y eventos. La mascota que compras sale de la lista. Se desactiva en Ajustes > Widget DPS > Mascotas del Mercado negro.
+
 ## 0.5.54
 
 - Nuevo: Popup de mascota: cada muerte que cuenta para una mascota de la colección muestra arriba en la pantalla una pequeña tarjeta con el icono, el nombre y el progreso (por ejemplo 45/75, o MAX). Deja pasar los clics y nunca quita el foco al juego. Se desactiva en Ajustes > Widget DPS > Popup de mascota.

@@ -199,6 +199,12 @@ struct State {
     unlock_read: bool,
     /// Kills counted by `0D 90` since the last `take_pet_kills`, for the pet popup.
     pet_kills: Vec<PetKill>,
+    /// The Black Market's pet items on sale: (tab, slot, item id), from the tabs opened on this visit to the shop.
+    market: Vec<(u8, u32, u32)>,
+    /// `market` changed since the last `take_market`.
+    market_changed: bool,
+    /// When the last tab list came.
+    market_at: Option<std::time::Instant>,
 }
 
 /// One kill that counted for a pet, as it stands after it: `lvl` 0 is a pet not unlocked yet, its `exp` the unlock
@@ -225,6 +231,9 @@ static STATE: Mutex<State> = Mutex::new(State {
     unlock: Vec::new(),
     unlock_read: false,
     pet_kills: Vec::new(),
+    market: Vec::new(),
+    market_changed: false,
+    market_at: None,
 });
 
 /// Your own item level and combat power: a `now`/`best` pair whose best is kept. Out of range or now above best:
@@ -326,6 +335,8 @@ pub fn parse(packet: &[u8]) {
         (0x26, 0xE2) => parse_daevanion(body),
         (0x00, 0x90) => parse_pets(body),
         (0x0D, 0x90) => parse_pet_progress(body),
+        (0x91, 0x56) => parse_shop_list(body),
+        (0x95, 0x56) => parse_shop_buy(body),
         (0x45, 0x36) => parse_spawn_gear(body),
         (0x33, 0x36) => {
             parse_spawn_gear(body);
@@ -598,6 +609,69 @@ fn parse_pet_progress(b: &[u8]) {
         };
         s.pet_kills.push(kill);
     }
+}
+
+/// Pet items ("Pet: Krall Laborer"): 534760001-534760334 in the Taiwan v105 datamine, and 574760001 (Black Dragon)
+/// (scripts/build-pet-items.mjs).
+fn is_pet_item(item: u32) -> bool {
+    (534_760_000..534_761_000).contains(&item) || (574_760_000..574_761_000).contains(&item)
+}
+
+/// `91 56`, a Black Market tab opened (packets_20261118_230720 / _231033: 0xC9 Special, 0xCC Pets):
+/// `<tab u8> <count u8>` then `count` products of 34 bytes, `<slot u32> <item u32> <quantity u64> <discount tier u8>
+/// <currency u8> <list price u64> <price u64>`, with a byte between some of them (0x55 before the 2nd and 6th, 0x05
+/// before the 10th, meaning unknown): a product is found where its fields read as one. The tab's pet items replace
+/// the ones it had; the hourly refresh comes as a new list when the tab is opened again.
+fn parse_shop_list(b: &[u8]) {
+    let (Some(&tab), Some(&count)) = (b.first(), b.get(1)) else { return };
+    let mut items = Vec::new();
+    let (mut o, mut found) = (2, 0);
+    while found < count && o + 34 <= b.len() {
+        let (Some(slot), Some(item), Some(qty), Some(list), Some(price)) =
+            (u32_at(b, o), u32_at(b, o + 4), u64_at(b, o + 8), u64_at(b, o + 18), u64_at(b, o + 26))
+        else {
+            return;
+        };
+        if !(100_000_000..1_000_000_000).contains(&item) || !(1..1000).contains(&qty) || price > list {
+            o += 1;
+            continue;
+        }
+        if is_pet_item(item) {
+            items.push((tab, slot, item));
+        }
+        found += 1;
+        o += 34;
+    }
+    // Out of shape: keep the last good list. No pets (another tab or another shop): nothing to show.
+    if found < count || items.is_empty() {
+        return;
+    }
+    let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
+    // Another visit to the shop (the stock turns over every hour): the tabs of the last one are gone.
+    let now = std::time::Instant::now();
+    if s.market_at.is_none_or(|at| now.duration_since(at).as_secs() > 600) {
+        s.market.clear();
+    }
+    s.market_at = Some(now);
+    s.market.retain(|m| m.0 != tab);
+    s.market.extend(items);
+    s.market_changed = true;
+}
+
+/// `95 56`, a product bought: `00 00 <tab u8> <slot u32>` (packets_20261118_231033, 23:11:20-45: five pets, each
+/// followed by its `0D 90` +5). It leaves the list.
+fn parse_shop_buy(b: &[u8]) {
+    let (Some(&tab), Some(slot)) = (b.get(2), u32_at(b, 3)) else { return };
+    let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
+    let before = s.market.len();
+    s.market.retain(|m| (m.0, m.1) != (tab, slot));
+    s.market_changed |= s.market.len() != before;
+}
+
+/// The pet item ids on sale, when they changed since the last call (the Black Market panel, lib.rs's tick).
+pub fn take_market() -> Option<Vec<u32>> {
+    let mut s = STATE.lock().unwrap_or_else(|e| e.into_inner());
+    std::mem::take(&mut s.market_changed).then(|| s.market.iter().map(|m| m.2).collect())
 }
 
 /// The kills counted since the last call (the pet popup, lib.rs's tick).
@@ -974,6 +1048,27 @@ mod tests {
         assert_eq!(cp(), (None, None));
         set_power(900, 50000);
         assert_eq!(cp(), (Some(50000), Some(50000)));
+    }
+
+    /// packets_20261118_231033, 23:10:54.790: the Black Market's Pets tab (10 pets), then the first two of the five
+    /// bought at 23:11:20-21.
+    #[test]
+    fn reads_the_black_market_pets() {
+        let _g = global();
+        take_market();
+        parse(&hex(include_str!("testdata/shop_9156_20261118_231054.hex").trim()));
+        let on_sale = [534760014, 534760094, 534760115, 534760109, 534760144, 534760173, 534760063, 534760041, 534760024, 534760075];
+        assert_eq!(take_market().as_deref(), Some(&on_sale[..]));
+        assert_eq!(take_market(), None);
+        // 534760024 (slot 0x35b72) and 534760063 (slot 0x35b9b) bought; another tab's slot changes nothing.
+        parse(&hex("0d95560000cc725b0300"));
+        parse(&hex("0d95560000cc9b5b0300"));
+        parse(&hex("0d95560000c9725b0300"));
+        let left: Vec<u32> = on_sale.into_iter().filter(|&i| i != 534760024 && i != 534760063).collect();
+        assert_eq!(take_market(), Some(left));
+        // Not a list (cut short): the last one stays.
+        parse(&hex("1291 56cc0a6e5b03004ecadf1f".replace(' ', "").as_str()));
+        assert_eq!(take_market(), None);
     }
 
     /// packets_20261013_031645, 03:17:02.495: Allalon's full `00 90` (body), 31 insight options; the 7 on stat ids

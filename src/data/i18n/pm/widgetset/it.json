@@ -67,5 +67,11 @@
   "widgetset.needModifier": "Aggiungi Ctrl, Alt o Maiusc",
   "widgetset.petPopup": "Popup pet",
   "widgetset.petPopupHint": "Sopra il gioco, ogni uccisione che conta per un pet della collezione mostra il pet e il suo progresso",
-  "widgetset.petUnlock": "Sblocco"
+  "widgetset.petUnlock": "Sblocco",
+  "widgetset.blackMarket": "Mercato nero",
+  "widgetset.petHard": "Difficile da farmare",
+  "widgetset.petLocked": "Non sbloccato",
+  "widgetset.petMarketAllMax": "Tutti i pet in vendita sono a MAX",
+  "widgetset.petMarket": "Pet al Mercato nero",
+  "widgetset.petMarketHint": "Quando apri il Mercato nero, sopra il gioco: i pet in vendita non ancora a MAX, prima quelli difficili da farmare"
 }

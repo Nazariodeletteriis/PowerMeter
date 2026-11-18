@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.55
+
+- Nuovo: Pet al Mercato nero: quando apri il Mercato nero, un pannello sotto il popup pet elenca i pet in vendita non ancora a MAX, con livello e progresso (per esempio ●●○ 12/75), quelli che non hai ancora e l'etichetta "Difficile da farmare" per i pet rari sulla mappa o che arrivano solo da boss, dungeon ed eventi. Il pet che compri esce dalla lista. Si spegne in Impostazioni > Widget DPS > Pet al Mercato nero.
+
 ## 0.5.54
 
 - Nuovo: Popup pet: ogni uccisione che conta per un pet della collezione mostra in alto sullo schermo una piccola card con icona, nome e progresso del pet (per esempio 45/75, oppure MAX). Lascia passare i clic e non toglie mai il focus al gioco. Si spegne in Impostazioni > Widget DPS > Popup pet.

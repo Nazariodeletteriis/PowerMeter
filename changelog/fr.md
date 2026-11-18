@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.55
+
+- Nouveau : Familiers du Marché noir : à l'ouverture du Marché noir, un panneau sous le popup familier liste les familiers en vente qui ne sont pas encore MAX, avec leur niveau et leur progression (par exemple ●●○ 12/75), ceux que vous n'avez pas encore et l'étiquette « Difficile à farmer » pour ceux qui sont rares sur la carte ou ne viennent que des boss, donjons et événements. Le familier acheté sort de la liste. À désactiver dans Paramètres > Widget DPS > Familiers du Marché noir.
+
 ## 0.5.54
 
 - Nouveau : Popup familier : chaque élimination qui compte pour un familier de la collection affiche en haut de l'écran une petite carte avec l'icône, le nom et la progression (par exemple 45/75, ou MAX). Elle laisse passer les clics et ne prend jamais le focus au jeu. À désactiver dans Paramètres > Widget DPS > Popup familier.
