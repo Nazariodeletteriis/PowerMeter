@@ -9,9 +9,15 @@ import { writeFileSync } from "node:fs";
 
 const RAW = "https://raw.githubusercontent.com/aion2-interactive-map/aion2-interactive-map/master/public/";
 // Maps with markers first; the starter zones have (almost) none.
-const MAPS = ["World_L_A", "World_D_A", "Abyss_Reshanta_A", "World_L_Starter", "World_D_Starter"];
-// The project names the starter zones just "Starter".
-const NAME = { World_L_Starter: "Poeta (Elyos)", World_D_Starter: "Ishalgen (Asmodian)" };
+// Abyss_Reshanta_C (Chaotic Middle Reshanta, TW map 22) is left out until it opens on Global.
+const MAPS = ["World_L_A", "World_D_A", "Abyss_Reshanta_A", "Abyss_Reshanta_B", "World_L_Starter", "World_D_Starter"];
+// The project names the starter zones just "Starter", the Abyss ones A and B: the game's names (Global map 20 and 23).
+const NAME = {
+  World_L_Starter: "Poeta (Elyos)",
+  World_D_Starter: "Ishalgen (Asmodian)",
+  Abyss_Reshanta_A: "Chaotic Lower Reshanta",
+  Abyss_Reshanta_B: "Chaotic Upper Reshanta",
+};
 // Marker subtypes kept, in panel order. The source defines gathering and pet
 // subtypes too, but has no markers for them yet.
 const TYPES = ["teleport", "village", "seal", "battlefield", "occupation", "monolithMaterial", "hiddenCube"];

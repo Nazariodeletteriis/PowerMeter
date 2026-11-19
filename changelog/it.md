@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.60
+
+- Corretto: Mappa del mondo: i pet ora si trovano anche nell'Abisso. Chaotic Lower Reshanta mostra i punti dei suoi mostri pet, e si aggiunge la nuova mappa Chaotic Upper Reshanta con i suoi pet, la tua posizione e il segui. Compaiono anche alcuni mostri pet in più a Verteron e Altgard.
+
 ## 0.5.59
 
 - Modificato: Pet al Mercato nero: come il popup pet, il pannello compare solo dopo che il gioco ha inviato la tua collezione (al login, a un teletrasporto o a un cambio zona), così livelli e contatori sono sempre quelli del gioco.

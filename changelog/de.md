@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.60
+
+- Behoben: Weltkarte: Pets werden jetzt auch im Abyss gefunden. Chaotic Lower Reshanta zeigt die Fundorte seiner Pet-Monster, und die neue Karte Chaotic Upper Reshanta kommt mit ihren Pets, deiner Position und dem Folgen-Modus hinzu. Auch in Verteron und Altgard werden einige Pet-Monster mehr angezeigt.
+
 ## 0.5.59
 
 - Geändert: Pets im Schwarzmarkt: Wie das Pet-Popup erscheint das Fenster erst, wenn das Spiel deine Sammlung gesendet hat (beim Login, Teleport oder Zonenwechsel), damit Stufen und Zähler immer die des Spiels sind.

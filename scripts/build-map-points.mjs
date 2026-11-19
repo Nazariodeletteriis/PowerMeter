@@ -37,8 +37,9 @@ const DB =
   (process.env.APPDATA && join(process.env.APPDATA, "com.letrionlabs.powermeter/gamedata/gamedata.sqlite"));
 if (!DB) throw new Error("Pass the path of gamedata.sqlite (no APPDATA to find it)");
 
-// TW map id → our map (maps.json). The other TW maps have no tiles here.
-const MAP_OF = { 1010: "World_L_A", 1110: "World_D_A", 20: "Abyss_Reshanta_A" };
+// TW map id → our map (maps.json), the same ids as Global's. The other TW maps have no tiles here.
+const MAP_OF = { 1010: "World_L_A", 1110: "World_D_A", 20: "Abyss_Reshanta_A", 23: "Abyss_Reshanta_B" };
+const RELATIONS = join(ROOT, "tools/datamine/import/csv/tw_105/relations.csv");
 // Gathering groups (TW names) → group keys (the dropdown's headings), in panel order.
 const GATHER = { 奥德: "od", 宝石: "gem", 金属: "metal", 药草: "herb", 贝类: "shellfish", 蔬菜: "vegetable", 木材: "wood", 浆果: "berry" };
 const GROUPS = Object.values(GATHER);
@@ -74,6 +75,28 @@ for (const r of db.prepare("SELECT id, name, data_json FROM records WHERE catego
   if (!code) continue;
   (pets[code] ??= []).push([Number(r.id), r.name ?? m.name ?? String(r.id), m.level ?? null]);
   petMonster.add(String(r.id));
+}
+// The Abyss monsters show no portrait: they give their creature as a drop, "Soul: <creature name> (Bound)" (TW
+// relations, English names), and those of Chaotic Upper Reshanta are not in the Global archive yet.
+const creatureByName = new Map();
+for (const r of db.prepare("SELECT id, name FROM records WHERE category = 'creature'").all())
+  creatureByName.set(r.name, creatureByName.has(r.name) ? null : String(r.id)); // null: two creatures share it
+const SOUL = /^npc,(\d+),([^,]*),item,\d+,Soul: ([^,]+?)(?: \(Bound\))?,/;
+const soulOf = new Map(); // monster id → [English name, creature name]
+for await (const line of createInterface({ input: createReadStream(RELATIONS, "utf8"), crlfDelay: Infinity })) {
+  const s = line.startsWith("npc,") && line.match(SOUL);
+  if (s) soulOf.set(s[1], [s[2], s[3]]);
+}
+const monsterName = db.prepare("SELECT name FROM records WHERE category = 'monster' AND id = ?");
+// A monster met on a map that gives a creature through its soul: linked once, with the level the map lists.
+function soulMonster(entity, level) {
+  const soul = soulOf.get(entity);
+  if (!soul) return false;
+  const code = creatureByName.get(soul[1]);
+  if (!code) throw new Error(`Monster ${entity} drops Soul: ${soul[1]}, ${code === null ? "a name two creatures share" : "no creature"}`);
+  (pets[code] ??= []).push([Number(entity), monsterName.get(entity)?.name ?? soul[0], level === "" ? null : Number(level)]);
+  petMonster.add(entity);
+  return true;
 }
 // Material nouns ending the Global item names (Log, Ore, Gemstone: the only ones among the 21).
 const MATERIAL = / (Log|Ore|Gemstone)$/;
@@ -140,14 +163,14 @@ for await (const raw of createInterface({ input: createReadStream(CSV, "utf8"), 
   }
   const mapId = MAP_OF[raw.slice(0, raw.indexOf(","))];
   if (!mapId) continue;
-  const [, , category, , entity, , group, , , , , u, v] = fields(raw);
+  const [, , category, , entity, , group, level, , , , u, v] = fields(raw);
   const [W, H] = size[mapId];
   const x = Math.round(Number(u) * W);
   const y = Math.round(Number(v) * H);
   if (!(x >= 0 && x < W && y >= 0 && y < H)) continue;
   let list, id;
   if (category === "gatherable" && GATHER[group]) [list, id] = [out[mapId].gather, resourceOf(entity, GATHER[group])];
-  else if (category === "monster" && petMonster.has(entity)) [list, id] = [out[mapId].monsters, Number(entity)];
+  else if (category === "monster" && (petMonster.has(entity) || soulMonster(entity, level))) [list, id] = [out[mapId].monsters, Number(entity)];
   else continue;
   const key = `${mapId}|${category}|${id}|${x}|${y}`; // the same spawn listed twice
   if (seen.has(key)) continue;

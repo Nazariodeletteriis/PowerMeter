@@ -286,7 +286,7 @@ struct Inner {
     player_position: Option<([f32; 3], i64)>,
     /// Where they last aimed (degrees, atan2 of south and east) and when (ms): each of their casts.
     player_heading: Option<(f32, i64)>,
-    /// The map they are on (TW map id: 1010 Elyos world, 1110 Asmodian world, 20 Abyss), from each zone load.
+    /// The map they are on (TW map id: 1010 Elyos world, 1110 Asmodian world, 20 Lower and 23 Upper Reshanta), from each zone load.
     player_map: Option<u32>,
     /// Hidden cubes standing on that map now (entity -> x, y, z, when it was first seen, whether it came with the zone
     /// load), for the cube guide; a zone load forgets them.

@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.60
+
+- Fixed: World map: pets are now found in the Abyss too. Chaotic Lower Reshanta shows the spots of its pet monsters, and the new Chaotic Upper Reshanta map is added with its pets, your position and follow. A few more pet monsters in Verteron and Altgard are shown too.
+
 ## 0.5.59
 
 - Changed: Black Market pets: like the pet popup, the panel now shows only once the game has sent your collection (on login, teleport or zone change), so its levels and counts are always the game's own.

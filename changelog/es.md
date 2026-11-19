@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.60
+
+- Corregido: Mapa del mundo: las mascotas ahora también se encuentran en el Abismo. Chaotic Lower Reshanta muestra los puntos de sus monstruos de mascota, y se añade el nuevo mapa Chaotic Upper Reshanta con sus mascotas, tu posición y el seguimiento. También aparecen algunos monstruos de mascota más en Verteron y Altgard.
+
 ## 0.5.59
 
 - Cambiado: Mascotas del Mercado negro: como el popup de mascota, el panel solo aparece cuando el juego ha enviado tu colección (al iniciar sesión, teletransportarte o cambiar de zona), así niveles y contadores son siempre los del juego.

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.60
+
+- Corrigé : Carte du monde : les familiers sont maintenant trouvés aussi dans l'Abysse. Chaotic Lower Reshanta affiche les emplacements de ses monstres à familier, et la nouvelle carte Chaotic Upper Reshanta est ajoutée avec ses familiers, votre position et le suivi. Quelques monstres à familier de plus apparaissent aussi à Verteron et Altgard.
+
 ## 0.5.59
 
 - Modifié : Familiers du Marché noir : comme le popup familier, le panneau n'apparaît qu'une fois votre collection envoyée par le jeu (connexion, téléportation ou changement de zone), pour des niveaux et compteurs toujours exacts.

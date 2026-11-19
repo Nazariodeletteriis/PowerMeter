@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.60
+
+- 修正：世界地圖：深淵中現在也能找到寵物。Chaotic Lower Reshanta 顯示其寵物怪物的位置，並新增 Chaotic Upper Reshanta 地圖，包含寵物、你的位置和跟隨。韋爾特隆和阿爾特加德也多顯示了幾種寵物怪物。
+
 ## 0.5.59
 
 - 調整：黑市寵物：與寵物彈窗一樣，面板只在遊戲送出你的收藏後（登入、傳送或切換區域時）才顯示，等級和計數始終與遊戲一致。

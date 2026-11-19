@@ -1,7 +1,12 @@
 // Hidden cube guide math (CubeGuide.tsx). No imports: tests/cubes.test.ts runs it under node --test.
 
 /** TW map id of a zone load → our map and the game units its tiles span either way of 0 (tw_105 map_points: u = x / 2·half + 0.5). */
-export const GAME_MAPS: Record<number, [string, number]> = { 1010: ["World_L_A", 408000], 1110: ["World_D_A", 408000], 20: ["Abyss_Reshanta_A", 204000] };
+export const GAME_MAPS: Record<number, [string, number]> = {
+  1010: ["World_L_A", 408000],
+  1110: ["World_D_A", 408000],
+  20: ["Abyss_Reshanta_A", 204000],
+  23: ["Abyss_Reshanta_B", 102000],
+};
 
 /** Game units (centimetres, Unreal) → map pixels, on an axis `size` pixels long. */
 export const toPixel = (v: number, half: number, size: number) => ((v + half) / (2 * half)) * size;

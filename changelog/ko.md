@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.60
+
+- 수정: 월드 맵: 이제 어비스에서도 펫을 찾을 수 있습니다. Chaotic Lower Reshanta에 펫 몬스터 위치가 표시되고, 새 맵 Chaotic Upper Reshanta가 펫, 내 위치, 따라가기와 함께 추가되었습니다. 베르테론과 알트가르드에서도 펫 몬스터가 조금 더 표시됩니다.
+
 ## 0.5.59
 
 - 변경: 암시장 펫: 펫 팝업처럼 게임이 컬렉션을 보낸 뒤(로그인, 텔레포트, 지역 이동 시)에만 패널이 나타나 레벨과 카운트가 항상 게임 값과 같습니다.

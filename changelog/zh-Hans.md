@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.60
+
+- 修复：世界地图：深渊中现在也能找到宠物。Chaotic Lower Reshanta 显示其宠物怪物的位置，并新增 Chaotic Upper Reshanta 地图，包含宠物、你的位置和跟随。韦尔特隆和阿尔特加德也多显示了几种宠物怪物。
+
 ## 0.5.59
 
 - 调整：黑市宠物：与宠物弹窗一样，面板只在游戏发送你的收藏后（登录、传送或切换区域时）才显示，等级和计数始终与游戏一致。

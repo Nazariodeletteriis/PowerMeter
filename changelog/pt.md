@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.60
+
+- Corrigido: Mapa do mundo: os mascotes agora também são encontrados no Abismo. Chaotic Lower Reshanta mostra os pontos dos seus monstros de mascote, e o novo mapa Chaotic Upper Reshanta foi adicionado com seus mascotes, sua posição e o seguir. Alguns monstros de mascote a mais também aparecem em Verteron e Altgard.
+
 ## 0.5.59
 
 - Alterado: Mascotes do Mercado negro: como o popup de mascote, o painel só aparece depois que o jogo envia sua coleção (no login, teleporte ou troca de zona), para que níveis e contadores sejam sempre os do jogo.
