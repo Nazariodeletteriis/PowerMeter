@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.61
+
+- Added: Packet log (Settings): with it on, the game's other connections are logged too, not only the combat one. It helps find what the game sends when the Black Market closes.
+
 ## 0.5.60
 
 - Fixed: World map: pets are now found in the Abyss too. Chaotic Lower Reshanta shows the spots of its pet monsters, and the new Chaotic Upper Reshanta map is added with its pets, your position and follow. A few more pet monsters in Verteron and Altgard are shown too.

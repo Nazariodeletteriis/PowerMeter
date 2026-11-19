@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.61
+
+- Aggiunto: Log pacchetti (Impostazioni): quando è attivo registra anche le altre connessioni del gioco, non solo quella del combattimento. Serve a trovare cosa invia il gioco quando il Mercato nero si chiude.
+
 ## 0.5.60
 
 - Corretto: Mappa del mondo: i pet ora si trovano anche nell'Abisso. Chaotic Lower Reshanta mostra i punti dei suoi mostri pet, e si aggiunge la nuova mappa Chaotic Upper Reshanta con i suoi pet, la tua posizione e il segui. Compaiono anche alcuni mostri pet in più a Verteron e Altgard.

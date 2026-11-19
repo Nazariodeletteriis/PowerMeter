@@ -203,10 +203,19 @@ pub fn is_packet_log_enabled() -> bool {
 /// (the ping's request is only seen on that side).
 pub fn log_packet(cap: &CapturedPayload, outbound: bool) {
     if !PACKET_LOG_ENABLED.load(Ordering::Relaxed) { return; }
+    write_packet(cap, &if outbound { format!("Out:{}", cap.dst_port) } else { format!("Client:{}", cap.src_port) });
+}
+
+/// Another connection of the game than the combat one, `OtherOut:` / `OtherIn:` and the server's port.
+pub fn log_other_packet(cap: &CapturedPayload, outbound: bool) {
+    if !PACKET_LOG_ENABLED.load(Ordering::Relaxed) { return; }
+    write_packet(cap, &if outbound { format!("OtherOut:{}", cap.dst_port) } else { format!("OtherIn:{}", cap.src_port) });
+}
+
+fn write_packet(cap: &CapturedPayload, key: &str) {
     let mut guard = PACKET_LOGGER.lock();
     if let Some(ref mut logger) = *guard {
         let ts = chrono::Local::now().format("%+");
-        let key = if outbound { format!("Out:{}", cap.dst_port) } else { format!("Client:{}", cap.src_port) };
         let hex: String = cap.data.iter().map(|b| format!("{:02X}", b)).collect();
         let line = format!("{}|{}|{}\n", ts, key, hex);
         if logger.writer.write_all(line.as_bytes()).is_ok() {

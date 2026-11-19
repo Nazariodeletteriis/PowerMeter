@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.61
+
+- Adicionado: Registro de pacotes (Configurações): ativado, registra também as outras conexões do jogo, não só a de combate. Ajuda a descobrir o que o jogo envia quando o Mercado Negro fecha.
+
 ## 0.5.60
 
 - Corrigido: Mapa do mundo: os mascotes agora também são encontrados no Abismo. Chaotic Lower Reshanta mostra os pontos dos seus monstros de mascote, e o novo mapa Chaotic Upper Reshanta foi adicionado com seus mascotes, sua posição e o seguir. Alguns monstros de mascote a mais também aparecem em Verteron e Altgard.

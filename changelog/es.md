@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.61
+
+- Añadido: Registro de paquetes (Ajustes): al activarlo también registra las demás conexiones del juego, no solo la de combate. Ayuda a encontrar qué envía el juego al cerrarse el Mercado negro.
+
 ## 0.5.60
 
 - Corregido: Mapa del mundo: las mascotas ahora también se encuentran en el Abismo. Chaotic Lower Reshanta muestra los puntos de sus monstruos de mascota, y se añade el nuevo mapa Chaotic Upper Reshanta con sus mascotas, tu posición y el seguimiento. También aparecen algunos monstruos de mascota más en Verteron y Altgard.

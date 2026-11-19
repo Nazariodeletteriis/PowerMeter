@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.61
+
+- 추가: 패킷 로그(설정): 켜면 전투 연결뿐 아니라 게임의 다른 연결도 기록합니다. 암시장을 닫을 때 게임이 보내는 것을 찾는 데 도움이 됩니다.
+
 ## 0.5.60
 
 - 수정: 월드 맵: 이제 어비스에서도 펫을 찾을 수 있습니다. Chaotic Lower Reshanta에 펫 몬스터 위치가 표시되고, 새 맵 Chaotic Upper Reshanta가 펫, 내 위치, 따라가기와 함께 추가되었습니다. 베르테론과 알트가르드에서도 펫 몬스터가 조금 더 표시됩니다.

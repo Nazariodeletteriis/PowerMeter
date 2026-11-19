@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.61
+
+- 新增：封包記錄（設定）：開啟後也會記錄遊戲的其他連線，而不只是戰鬥連線。用於找出關閉黑市時遊戲傳送的內容。
+
 ## 0.5.60
 
 - 修正：世界地圖：深淵中現在也能找到寵物。Chaotic Lower Reshanta 顯示其寵物怪物的位置，並新增 Chaotic Upper Reshanta 地圖，包含寵物、你的位置和跟隨。韋爾特隆和阿爾特加德也多顯示了幾種寵物怪物。

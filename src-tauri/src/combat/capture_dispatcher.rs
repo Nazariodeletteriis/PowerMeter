@@ -150,6 +150,8 @@ impl CaptureDispatcher {
         let mut window_logged: Option<bool> = None;
         let mut unlocked_stats = UnlockedStats::default();
         let mut last_unlocked_report_ms = now_ms();
+        let mut game_ports: Vec<u16> = Vec::new();
+        let mut game_ports_at_ms: i64 = 0;
 
         while let Some(cap) = receiver.recv().await {
             if self.suspended.load(Ordering::SeqCst) {
@@ -228,9 +230,21 @@ impl CaptureDispatcher {
                 }
             }
 
-            // Port filter
+            // Port filter. With the packet log on, the game's other connections are logged too (its local ports,
+            // read every 5 s): what the combat connection never shows may go there.
             if let Some(port) = current_port {
                 if cap.src_port != port && cap.dst_port != port {
+                    if crate::logging::logger::is_packet_log_enabled() {
+                        if now - game_ports_at_ms >= 5_000 {
+                            game_ports = window_detector::aion2_tcp_ports();
+                            game_ports_at_ms = now;
+                        }
+                        if game_ports.contains(&cap.src_port) {
+                            crate::logging::logger::log_other_packet(&cap, true);
+                        } else if game_ports.contains(&cap.dst_port) {
+                            crate::logging::logger::log_other_packet(&cap, false);
+                        }
+                    }
                     continue;
                 }
             }

@@ -32,14 +32,16 @@ mod win {
         unsafe { IsWindowVisible(hwnd) }.as_bool()
     }
 
+    pub fn pid(hwnd: HWND) -> Option<u32> {
+        let mut pid: u32 = 0;
+        unsafe { GetWindowThreadProcessId(hwnd, Some(&mut pid)) };
+        (pid != 0).then_some(pid)
+    }
+
     /// Full path of the program that owns `hwnd`; no elevation needed for the user's own processes.
     pub fn exe_path(hwnd: HWND) -> Option<String> {
+        let pid = pid(hwnd)?;
         unsafe {
-            let mut pid: u32 = 0;
-            GetWindowThreadProcessId(hwnd, Some(&mut pid));
-            if pid == 0 {
-                return None;
-            }
             let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid).ok()?;
             let mut buf = [0u16; 512];
             let mut len = buf.len() as u32;
@@ -101,6 +103,39 @@ pub fn describe_candidates() -> Vec<String> {
         })
         .take(8)
         .collect()
+}
+
+/// Local ports of every TCP connection (IPv4) of the AION 2 process, for the packet log: the combat
+/// connection is one of them, and the game may talk on others (the Black Market's close sends nothing on it).
+#[cfg(windows)]
+pub fn aion2_tcp_ports() -> Vec<u16> {
+    use windows::Win32::NetworkManagement::IpHelper::{GetExtendedTcpTable, MIB_TCPROW_OWNER_PID, TCP_TABLE_OWNER_PID_ALL};
+    let mut pids: Vec<u32> = win::top_level_windows()
+        .into_iter()
+        .filter(|&h| is_game_title(&win::title(h)) || win::exe_path(h).is_some_and(|p| is_game_exe(&p)))
+        .filter_map(win::pid)
+        .collect();
+    pids.sort_unstable();
+    pids.dedup();
+    if pids.is_empty() {
+        return Vec::new();
+    }
+    const AF_INET: u32 = 2;
+    let mut size = 0u32;
+    unsafe { GetExtendedTcpTable(None, &mut size, false, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0) };
+    // u32 words: the table is a count then rows of six u32, so the buffer is aligned for them.
+    let mut buf = vec![0u32; size as usize / 4 + 1];
+    if unsafe { GetExtendedTcpTable(Some(buf.as_mut_ptr().cast()), &mut size, false, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0) } != 0 {
+        return Vec::new();
+    }
+    let n = (buf[0] as usize).min((buf.len() - 1) / 6);
+    let rows = unsafe { std::slice::from_raw_parts(buf.as_ptr().add(1).cast::<MIB_TCPROW_OWNER_PID>(), n) };
+    rows.iter().filter(|r| pids.contains(&r.dwOwningPid)).map(|r| u16::from_be(r.dwLocalPort as u16)).collect()
+}
+
+#[cfg(not(windows))]
+pub fn aion2_tcp_ports() -> Vec<u16> {
+    Vec::new()
 }
 
 #[cfg(not(windows))]

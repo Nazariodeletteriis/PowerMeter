@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.61
+
+- Ajouté : Journal des paquets (Paramètres) : activé, il enregistre aussi les autres connexions du jeu, pas seulement celle du combat. Il aide à trouver ce que le jeu envoie à la fermeture du Marché noir.
+
 ## 0.5.60
 
 - Corrigé : Carte du monde : les familiers sont maintenant trouvés aussi dans l'Abysse. Chaotic Lower Reshanta affiche les emplacements de ses monstres à familier, et la nouvelle carte Chaotic Upper Reshanta est ajoutée avec ses familiers, votre position et le suivi. Quelques monstres à familier de plus apparaissent aussi à Verteron et Altgard.

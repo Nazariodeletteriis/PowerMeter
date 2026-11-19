@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.61
+
+- Hinzugefügt: Paketprotokoll (Einstellungen): wenn aktiv, werden auch die anderen Verbindungen des Spiels protokolliert, nicht nur die Kampfverbindung. Es hilft herauszufinden, was das Spiel beim Schließen des Schwarzmarkts sendet.
+
 ## 0.5.60
 
 - Behoben: Weltkarte: Pets werden jetzt auch im Abyss gefunden. Chaotic Lower Reshanta zeigt die Fundorte seiner Pet-Monster, und die neue Karte Chaotic Upper Reshanta kommt mit ihren Pets, deiner Position und dem Folgen-Modus hinzu. Auch in Verteron und Altgard werden einige Pet-Monster mehr angezeigt.

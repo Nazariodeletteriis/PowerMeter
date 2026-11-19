@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.61
+
+- 新增：数据包日志（设置）：开启后也会记录游戏的其他连接，而不仅是战斗连接。用于找出关闭黑市时游戏发送的内容。
+
 ## 0.5.60
 
 - 修复：世界地图：深渊中现在也能找到宠物。Chaotic Lower Reshanta 显示其宠物怪物的位置，并新增 Chaotic Upper Reshanta 地图，包含宠物、你的位置和跟随。韦尔特隆和阿尔特加德也多显示了几种宠物怪物。
