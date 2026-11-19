@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.62
+
+- Corrigido: Mascotes do Mercado Negro: o painel agora fica aberto enquanto você estiver na loja e fecha 5 segundos depois de voltar ao jogo (o ponteiro do mouse volta a ficar oculto). Não fecha mais 15 segundos após a última aba.
+
 ## 0.5.61
 
 - Adicionado: Registro de pacotes (Configurações): ativado, registra também as outras conexões do jogo, não só a de combate. Ajuda a descobrir o que o jogo envia quando o Mercado Negro fecha.

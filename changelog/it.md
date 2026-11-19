@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.62
+
+- Corretto: Pet del Mercato nero: il pannello ora resta aperto finché sei nel negozio e si chiude 5 secondi dopo che torni al gioco (il puntatore del mouse torna nascosto). Non si chiude più 15 secondi dopo l'ultima scheda.
+
 ## 0.5.61
 
 - Aggiunto: Log pacchetti (Impostazioni): quando è attivo registra anche le altre connessioni del gioco, non solo quella del combattimento. Serve a trovare cosa invia il gioco quando il Mercato nero si chiude.

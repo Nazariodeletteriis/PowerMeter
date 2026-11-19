@@ -17,10 +17,13 @@ import PET_GENUS from "../data/pet_genus_effects.json";
  * (58 pets of 207); among the others, under 15 spots is roughly the rarest 10%.
  */
 const HARD_SPOTS = 15;
-// The game sends nothing when the shop closes (packets_20261118_235928: closed at 00:01 and 00:09, no packet from the
-// server; the client's own are encrypted). The panel stays this long after the last tab opened or pet bought, each of
-// which sends the list again (Nazario: 15 s).
-const SHOW_MS = 15_000;
+// The game sends nothing when the shop closes (packets_20261119_212907 / _215945: ESC, Exit and X, on the combat
+// connection and on the game's other one). The shop is a game menu: the mouse pointer shows while it is open, and Aion 2
+// locks it to the camera again once it is closed. The panel goes 5 s after that (Nazario), polled every half second;
+// at most 5 min after the last tab opened or pet bought, for a pointer that never locks.
+const POINTER_LOCKED_MS = 5_000;
+const POLL_MS = 500;
+const MAX_SHOW_MS = 300_000;
 /** The pips' colour by genus (pet_genus_effects.json), the Soul Crystals of the Builder's Pet window (assets/pm/genus). */
 const GENUS_COLOR: Record<string, string> = { Intellect: "#3d8bff", Feral: "#e5384a", Nature: "#3fd65a", Trans: "#f2c230", Special: "#3fd6d0" };
 const GENUS = (PET_GENUS as { genus: Record<string, string> }).genus;
@@ -99,11 +102,31 @@ export function BlackMarket() {
   }, [items, bought, owned, points]);
   const empty = !!pets && !pets.some((p) => !p.gone);
 
-  // Every new list rearms the time.
+  // The panel stays while the shop is open (the pointer shows), goes once the pointer is locked again; every new list
+  // rearms the time.
   useEffect(() => {
     if (!items) return;
-    const id = window.setTimeout(() => setLeaving(true), empty ? ALL_MAX_MS : SHOW_MS);
-    return () => clearTimeout(id);
+    if (empty) {
+      const id = window.setTimeout(() => setLeaving(true), ALL_MAX_MS);
+      return () => clearTimeout(id);
+    }
+    let alive = true;
+    let lockedAt: number | undefined;
+    const cap = window.setTimeout(() => setLeaving(true), MAX_SHOW_MS);
+    const poll = window.setInterval(
+      () =>
+        invoke<boolean>("game_pointer_locked").then((locked) => {
+          if (!alive) return;
+          if (!locked) lockedAt = undefined;
+          else if (Date.now() - (lockedAt ??= Date.now()) >= POINTER_LOCKED_MS) setLeaving(true);
+        }, () => {}),
+      POLL_MS,
+    );
+    return () => {
+      alive = false;
+      clearTimeout(cap);
+      clearInterval(poll);
+    };
   }, [items, empty]);
   useEffect(() => {
     if (!leaving) return;

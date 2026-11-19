@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.62
+
+- Corregido: Mascotas del Mercado negro: el panel ahora sigue abierto mientras estés en la tienda y se cierra 5 segundos después de volver al juego (el puntero del ratón vuelve a ocultarse). Ya no se cierra 15 segundos después de la última pestaña.
+
 ## 0.5.61
 
 - Añadido: Registro de paquetes (Ajustes): al activarlo también registra las demás conexiones del juego, no solo la de combate. Ayuda a encontrar qué envía el juego al cerrarse el Mercado negro.

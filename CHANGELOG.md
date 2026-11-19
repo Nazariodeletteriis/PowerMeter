@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.62
+
+- Fixed: Black Market pets: the panel now stays open as long as you are in the shop, and closes 5 seconds after you are back in the game (the mouse pointer is hidden again). It no longer closes 15 seconds after the last tab.
+
 ## 0.5.61
 
 - Added: Packet log (Settings): with it on, the game's other connections are logged too, not only the combat one. It helps find what the game sends when the Black Market closes.

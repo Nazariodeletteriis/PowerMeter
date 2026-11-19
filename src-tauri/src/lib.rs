@@ -220,6 +220,13 @@ fn game_pointer_free(window: tauri::WebviewWindow) -> bool {
     platform::window_detector::game_menu_over([p.x, p.y, p.x + s.width as i32, p.y + s.height as i32])
 }
 
+/// Aion 2 is in front with the mouse pointer locked to its camera: no menu open, so the Black Market is closed
+/// (BlackMarket.tsx). Another window in front (the panel itself, another program) does not count as closed.
+#[tauri::command]
+fn game_pointer_locked() -> bool {
+    platform::window_detector::is_aion2_foreground() && !platform::window_detector::cursor_shown()
+}
+
 /// Where the local player last was, for the minimap: x, y, z game units (zone loads and their own casts, effects
 /// and position records) and `at`, when it was seen (ms since the epoch); `heading`, where their last cast aimed
 /// (degrees, atan2 of south and east) at `headingAt`; the TW map id of the last zone load (null until one is seen);
@@ -1959,6 +1966,7 @@ pub fn run() {
             get_start_with_windows,
             set_start_with_windows,
             game_pointer_free,
+            game_pointer_locked,
             seed_captured_pets,
             get_player_position,
             set_target_mode,

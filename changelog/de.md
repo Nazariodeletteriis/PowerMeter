@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.62
+
+- Behoben: Schwarzmarkt-Haustiere: Das Fenster bleibt jetzt offen, solange du im Laden bist, und schließt sich 5 Sekunden nachdem du zurück im Spiel bist (der Mauszeiger ist wieder ausgeblendet). Es schließt sich nicht mehr 15 Sekunden nach dem letzten Reiter.
+
 ## 0.5.61
 
 - Hinzugefügt: Paketprotokoll (Einstellungen): wenn aktiv, werden auch die anderen Verbindungen des Spiels protokolliert, nicht nur die Kampfverbindung. Es hilft herauszufinden, was das Spiel beim Schließen des Schwarzmarkts sendet.

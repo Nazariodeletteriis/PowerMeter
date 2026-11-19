@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.62
+
+- Corrigé : Familiers du Marché noir : le panneau reste ouvert tant que vous êtes dans la boutique et se ferme 5 secondes après votre retour au jeu (le pointeur de la souris est à nouveau masqué). Il ne se ferme plus 15 secondes après le dernier onglet.
+
 ## 0.5.61
 
 - Ajouté : Journal des paquets (Paramètres) : activé, il enregistre aussi les autres connexions du jeu, pas seulement celle du combat. Il aide à trouver ce que le jeu envoie à la fermeture du Marché noir.
