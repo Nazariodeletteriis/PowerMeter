@@ -75,7 +75,7 @@
 //! `00 90` the pet collection, sent once on entering the world (packets_20261013_031645, Allalon login 03:17):
 //!   `<u32> <count varint> { <pet id u32> <pet id u32> <level u32> } × count <count varint> { <pet id u32> <exp u32> }
 //!   × count`. Pet ids are the TW archive's (1001-1325, its icon names the creature code); level 1-3; exp is the
-//!   progress of the level (0-75, missing = 0), the second list also holds unowned pets (their unlock progress).
+//!   progress of the level (0-25 at level 1, 0-75 at level 2, missing = 0; 5 unlock a pet), the second list also holds unowned pets (their unlock progress).
 //!   e.g. `52040000 a501 | ea030000 ea030000 01000000 | ...` = 165 pets, 1002 at level 1; 163 of the game's 200
 //!   without the 2 Special ones.
 
@@ -208,7 +208,7 @@ struct State {
 }
 
 /// One kill that counted for a pet, as it stands after it: `lvl` 0 is a pet not unlocked yet, its `exp` the unlock
-/// progress (no known maximum); 1-2 the level and its 0-74 exp of 75; 3 is MAX.
+/// progress (of 5); 1-2 the level and its exp (of 25 at level 1, of 75 at level 2); 3 is MAX.
 #[derive(Serialize, Clone, PartialEq, Debug)]
 pub struct PetKill {
     pub id: u32,
@@ -547,7 +547,7 @@ fn parse_pets(b: &[u8]) {
     for _ in 0..n {
         let (Some(id), Some(exp)) = (u32_at(b, o), u32_at(b, o + 4)) else { return };
         match pets.iter_mut().find(|p| p.id == id) {
-            Some(p) if p.lvl < 3 => p.exp = exp.min(75) as u8,
+            Some(p) if p.lvl < 3 => p.exp = exp.min(pet_exp_max(p.lvl)) as u8,
             Some(_) => {}
             None => unlock.push((id, exp)),
         }
@@ -564,10 +564,19 @@ fn parse_pets(b: &[u8]) {
     }
 }
 
+/// Souls for a pet's next level: 5 unlock it, +25 level 2, +75 level 3 (MAX), 105 in all.
+fn pet_exp_max(lvl: u8) -> u32 {
+    match lvl {
+        0 => 5,
+        1 => 25,
+        _ => 75,
+    }
+}
+
 /// `0d 90`, one per kill that counts for a pet (packets_20261019_015229: 11 kills of Kerubiel / Kerubian, 11 records,
 /// +7 and +4 against the next `00 90`): `<count varint> { <pet id u32> <exp gained u32> } × count`, e.g.
 /// `01 93040000 01000000` = Cherubim_03 +1. Added to the collection read at login, so the counter moves with each kill;
-/// the next `00 90` replaces it with the game's own numbers. 75 exp is a level (0/75 at level 2, then MAX); the
+/// the next `00 90` replaces it with the game's own numbers. Level 1 needs 25 exp, level 2 75 (then MAX); the
 /// game's own level-up record has not been seen yet.
 fn parse_pet_progress(b: &[u8]) {
     let n = read_varint(b, 0);
@@ -583,11 +592,12 @@ fn parse_pet_progress(b: &[u8]) {
             if p.lvl >= 3 {
                 continue;
             }
-            let exp = (p.exp as u32).saturating_add(gain);
-            if exp >= 75 {
+            let mut exp = (p.exp as u32).saturating_add(gain);
+            while p.lvl < 3 && exp >= pet_exp_max(p.lvl) {
+                exp -= pet_exp_max(p.lvl);
                 p.lvl += 1;
             }
-            p.exp = if p.lvl == 3 { 0 } else { (exp % 75) as u8 };
+            p.exp = if p.lvl == 3 { 0 } else { exp as u8 };
             PetKill { id, lvl: p.lvl, exp: p.exp as u32 }
         } else {
             // Not in the collection: unlock progress (a pet the `00 90` does not list starts at 0).
@@ -968,7 +978,7 @@ mod tests {
         parse(&hex("16563614cc000000000000ca92000000000000"));
         assert_eq!(snapshot().combat_power, Some(52244));
 
-        // packets_20261013_031645, 03:16:55: the pet collection, three of its 165 pets (1002 level 1 at 16/75,
+        // packets_20261013_031645, 03:16:55: the pet collection, three of its 165 pets (1002 level 1 at 16/25,
         // 1217 level 2 at 16/75, 1299 level 3) and an unowned one (1034) in the exp list.
         parse(&hex("c12200905204000003ea030000ea03000001000000c1040000c10400000200000013050000130500000300000003ea03000010000000c1040000100000000a04000005000000"));
         let pets: Vec<(u32, u8, u8)> = snapshot().pets.iter().map(|p| (p.id, p.lvl, p.exp)).collect();
@@ -988,13 +998,13 @@ mod tests {
         let kill = |id, lvl, exp| PetKill { id, lvl, exp };
         assert_eq!(take_pet_kills(), [kill(1217, 2, 17), kill(1034, 0, 6)]);
         assert!(take_pet_kills().is_empty());
-        // 75 exp is a level (Nazario: Kerubiel 0/75 at level 2, then MAX): 1217 +58 reaches level 3, 1002 +60 is
-        // level 2 at 1.
+        // Level 1 needs 25 exp, level 2 75 (Nazario: 5 / 25 / 75 souls): 1217 +58 reaches level 3, 1002 +60 (16 + 60
+        // = 76, 25 of them for level 2) is level 2 at 51.
         parse(&hex("0f0d9001c10400003a000000"));
         parse(&hex("0f0d9001ea0300003c000000"));
         let pets: Vec<(u32, u8, u8)> = snapshot().pets.iter().map(|p| (p.id, p.lvl, p.exp)).collect();
-        assert_eq!(pets, [(1002, 2, 1), (1217, 3, 0), (1299, 3, 0)]);
-        assert_eq!(take_pet_kills(), [kill(1217, 3, 0), kill(1002, 2, 1)]);
+        assert_eq!(pets, [(1002, 2, 51), (1217, 3, 0), (1299, 3, 0)]);
+        assert_eq!(take_pet_kills(), [kill(1217, 3, 0), kill(1002, 2, 51)]);
         // The dashboard's kept collection never replaces one read from the game.
         seed_pets(vec![CapturedPet { id: 1002, lvl: 1, exp: 0 }]);
         assert_eq!(snapshot().pets.len(), 3);

@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.63
+
+- Corretto: Pet: ogni livello ha ora il suo obiettivo, 5 anime per lo sblocco, 25 per il livello 2 e 75 per il livello 3 (105 in tutto). I pet di livello 1 contano x/25 e passano al livello 2 all'uccisione giusta, invece di contare sempre fino a 75.
+
 ## 0.5.62
 
 - Corretto: Pet del Mercato nero: il pannello ora resta aperto finché sei nel negozio e si chiude 5 secondi dopo che torni al gioco (il puntatore del mouse torna nascosto). Non si chiude più 15 secondi dopo l'ultima scheda.

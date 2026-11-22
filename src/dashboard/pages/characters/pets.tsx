@@ -11,7 +11,7 @@ import type { PageProps } from "../types";
 import { Modal } from "../system/Modal";
 import { DataState, gd, useGd, useIcons } from "../world/db";
 import { loadPoints, petSpots, showOnMap } from "../world/points";
-import { ownedPets, petCollection, PET_EXP_MAX, petLevelEffects, petStatKey, type PetEffect, type PetSet, type PetState } from "./calc";
+import { ownedPets, petCollection, petExpMax, petLevelEffects, petStatKey, type PetEffect, type PetSet, type PetState } from "./calc";
 import { CAPTURED_PETS_KEY, PETS_KEY, readPets } from "./shared";
 
 /** Genus menu of the Pet window: the records' creature.genus, in the game's order, with the game's Soul Crystal icons. */
@@ -239,7 +239,7 @@ function PetsModal({
                         type="button"
                         aria-pressed={(shownPet?.lvl ?? 0) === l}
                         disabled={fromGame}
-                        onClick={() => edit(l ? withEq({ lvl: l, exp: l === 3 ? 0 : (mine?.exp ?? 0) }, !!mine?.eq) : undefined)}
+                        onClick={() => edit(l ? withEq({ lvl: l, exp: l === 3 ? 0 : Math.min(petExpMax(l), mine?.exp ?? 0) }, !!mine?.eq) : undefined)}
                       >
                         {l ? t("characters.builder.pets.level", { n: l }) : t("characters.builder.pets.notOwned")}
                       </button>
@@ -247,16 +247,16 @@ function PetsModal({
                   </div>
                 </div>
                 <label className="field" style={{ margin: 0 }}>
-                  {t("characters.builder.pets.progress", { max: PET_EXP_MAX })}
+                  {t("characters.builder.pets.progress", { max: petExpMax(shownPet?.lvl ?? 1) })}
                   <input
                     className="input sm"
                     type="number"
                     min={0}
-                    max={PET_EXP_MAX}
+                    max={petExpMax(shownPet?.lvl ?? 1)}
                     style={{ width: 80 }}
                     disabled={fromGame || !mine || mine.lvl === 3}
                     value={shownPet && shownPet.lvl < 3 ? shownPet.exp : ""}
-                    onChange={(e) => mine && edit({ ...mine, exp: Math.min(PET_EXP_MAX, Math.max(0, Math.round(Number(e.target.value) || 0))) })}
+                    onChange={(e) => mine && edit({ ...mine, exp: Math.min(petExpMax(mine.lvl), Math.max(0, Math.round(Number(e.target.value) || 0))) })}
                   />
                 </label>
                 <label style={{ display: "flex", gap: 8, alignItems: "center", height: 30, fontSize: 12, color: "var(--pm-t2)", cursor: "pointer" }}>
@@ -327,7 +327,7 @@ export function PetGrid({
   const statusOf = (p?: PetState) =>
     !p
       ? t("characters.builder.pets.notOwned")
-      : [t("characters.builder.pets.level", { n: p.lvl }), p.lvl < 3 ? `${p.exp}/${PET_EXP_MAX}` : "MAX", p.eq ? t("characters.builder.pets.equipped") : ""].filter(Boolean).join(", ");
+      : [t("characters.builder.pets.level", { n: p.lvl }), p.lvl < 3 ? `${p.exp}/${petExpMax(p.lvl)}` : "MAX", p.eq ? t("characters.builder.pets.equipped") : ""].filter(Boolean).join(", ");
 
   const move = (e: KeyboardEvent<HTMLDivElement>) => {
     const cards = [...(grid.current?.querySelectorAll<HTMLButtonElement>(".petCard") ?? [])];
@@ -385,10 +385,10 @@ export function PetGrid({
                     ) : (
                       <span className="petExp">
                         <span className="mono">
-                          {p.exp}/{PET_EXP_MAX}
+                          {p.exp}/{petExpMax(p.lvl)}
                         </span>
                         <span className="petBar">
-                          <span style={{ transform: `scaleX(${p.exp / PET_EXP_MAX})` }} />
+                          <span style={{ transform: `scaleX(${p.exp / petExpMax(p.lvl)})` }} />
                         </span>
                       </span>
                     )}

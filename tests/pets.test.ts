@@ -48,7 +48,7 @@ test("pets read from the game win, and so does their equipped one", () => {
 });
 
 test("the game's collection maps TW pet ids to creature codes", () => {
-  // packets_20261013_031645 (00 90): 1013 level 3 (MAX), 1002 level 1 at 16/75; 9999 is no pet of the map.
+  // packets_20261013_031645 (00 90): 1013 level 3 (MAX), 1002 level 1 at 16/25; 9999 is no pet of the map.
   const codes = { "1002": "Basilisk_01", "1013": "AbyssSwarm_01" };
   const got = petsFromGame([{ id: 1002, lvl: 1, exp: 16 }, { id: 1013, lvl: 3, exp: 40 }, { id: 9999, lvl: 2, exp: 3 }], codes);
   assert.deepEqual(got, { Basilisk_01: { lvl: 1, exp: 16 }, AbyssSwarm_01: { lvl: 3, exp: 0 } });

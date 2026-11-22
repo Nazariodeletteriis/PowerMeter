@@ -197,13 +197,14 @@ export function buildStats(data: BuilderData, level: number, gear: Equipped[], p
 
 // ---------- Pets ----------
 
-/** A pet of the collection: level 1-3, progress toward the next level (levels 1-2, 0-PET_EXP_MAX), the equipped one. */
+/** A pet of the collection: level 1-3, progress toward the next level (levels 1-2, 0-petExpMax(lvl)), the equipped one. */
 export type PetState = { lvl: 1 | 2 | 3; exp: number; eq?: true };
 /** Owned pets by creature code (records of category "creature"). */
 export type PetSet = Record<string, PetState>;
 /** A collection effect as the game's Pet window lists it: stat key (stat_dictionary), value in display units (4.7 = 4.7%), percent. */
 export type PetEffect = [statKey: string, value: number, percent: boolean];
-export const PET_EXP_MAX = 75;
+/** Souls for the next level: 5 unlock it (level 1), +25 level 2, +75 level 3 (MAX), 105 in all. */
+export const petExpMax = (lvl: number) => (lvl <= 0 ? 5 : lvl === 1 ? 25 : 75);
 
 /**
  * Stats that are no stat of the character: the mount's (the Pet window lists them) and the wings' Flight Power
@@ -222,7 +223,7 @@ export function petsFromGame(pets: { id: number; lvl: number; exp: number }[], c
   const out: PetSet = {};
   for (const p of pets) {
     const code = codes[p.id];
-    if (code && (p.lvl === 1 || p.lvl === 2 || p.lvl === 3)) out[code] = { lvl: p.lvl, exp: p.lvl === 3 ? 0 : Math.min(PET_EXP_MAX, p.exp) };
+    if (code && (p.lvl === 1 || p.lvl === 2 || p.lvl === 3)) out[code] = { lvl: p.lvl, exp: p.lvl === 3 ? 0 : Math.min(petExpMax(p.lvl), p.exp) };
   }
   return out;
 }

@@ -6,7 +6,7 @@ import { PawPrintIcon } from "@phosphor-icons/react";
 import { usePetWindow } from "./PetPopup";
 import { startMove } from "./pages/world/Minimap";
 import { GameIcon } from "./pages/world/db";
-import { PET_EXP_MAX, petsFromGame, type PetSet } from "./pages/characters/calc";
+import { petExpMax, petsFromGame, type PetSet } from "./pages/characters/calc";
 import { loadPoints, petSpots, type MapPoints } from "./pages/world/points";
 import PET_IDS from "../data/pet_ids.json";
 import PET_ITEMS from "../data/pet_items.json";
@@ -177,7 +177,7 @@ export function BlackMarket() {
                     </span>
                     <span className="bmLevel">
                       {p.lvl ? (
-                        <span className="bmCount">{`${Math.min(PET_EXP_MAX, p.exp)}/${PET_EXP_MAX}`}</span>
+                        <span className="bmCount">{`${Math.min(petExpMax(p.lvl), p.exp)}/${petExpMax(p.lvl)}`}</span>
                       ) : (
                         <span className="bmLocked">{t("widgetset.petLocked")}</span>
                       )}

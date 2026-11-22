@@ -2,7 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { CheckCircleIcon, TrashIcon } from "@phosphor-icons/react";
 import type { T } from "../../i18n";
 import { Modal } from "../system/Modal";
-import { PET_EXP_MAX, type PetEffect, type PetSet, type PetState } from "./calc";
+import { petExpMax, type PetEffect, type PetSet, type PetState } from "./calc";
 import "./characters.css";
 
 // Page state that survives switching page, like the prototype's single state
@@ -118,7 +118,7 @@ export function readPets(json?: string): Record<string, PetsOf> {
     const owned: PetSet = {};
     for (const [code, p] of Object.entries(x?.owned && typeof x.owned === "object" ? (x.owned as Record<string, Partial<PetState>>) : {})) {
       if (p?.lvl !== 1 && p?.lvl !== 2 && p?.lvl !== 3) continue;
-      const exp = p.lvl === 3 ? 0 : Math.min(PET_EXP_MAX, Math.max(0, Math.round(Number(p.exp) || 0)));
+      const exp = p.lvl === 3 ? 0 : Math.min(petExpMax(p.lvl), Math.max(0, Math.round(Number(p.exp) || 0)));
       owned[code] = p.eq ? { lvl: p.lvl, exp, eq: true } : { lvl: p.lvl, exp };
     }
     const effects = (Array.isArray(x?.effects) ? (x.effects as unknown[]) : []).filter(

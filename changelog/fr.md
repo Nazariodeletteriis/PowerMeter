@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.63
+
+- Corrigé : Familiers : chaque niveau a désormais son propre objectif, 5 âmes pour le débloquer, 25 pour le niveau 2 et 75 pour le niveau 3 (105 au total). Les familiers de niveau 1 comptent x/25 et passent au niveau 2 au bon kill, au lieu de compter toujours jusqu'à 75.
+
 ## 0.5.62
 
 - Corrigé : Familiers du Marché noir : le panneau reste ouvert tant que vous êtes dans la boutique et se ferme 5 secondes après votre retour au jeu (le pointeur de la souris est à nouveau masqué). Il ne se ferme plus 15 secondes après le dernier onglet.

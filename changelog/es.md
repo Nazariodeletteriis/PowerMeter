@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.63
+
+- Corregido: Mascotas: cada nivel tiene ahora su propio objetivo, 5 almas para desbloquear, 25 para el nivel 2 y 75 para el nivel 3 (105 en total). Las mascotas de nivel 1 cuentan x/25 y pasan al nivel 2 en la muerte correcta, en lugar de contar siempre hasta 75.
+
 ## 0.5.62
 
 - Corregido: Mascotas del Mercado negro: el panel ahora sigue abierto mientras estés en la tienda y se cierra 5 segundos después de volver al juego (el puntero del ratón vuelve a ocultarse). Ya no se cierra 15 segundos después de la última pestaña.

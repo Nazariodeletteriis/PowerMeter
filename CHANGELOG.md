@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.63
+
+- Fixed: Pets: each level now has its own target, 5 souls to unlock, 25 for level 2 and 75 for level 3 (105 in all). Level 1 pets now count x/25 and move to level 2 at the right kill, instead of always counting to 75.
+
 ## 0.5.62
 
 - Fixed: Black Market pets: the panel now stays open as long as you are in the shop, and closes 5 seconds after you are back in the game (the mouse pointer is hidden again). It no longer closes 15 seconds after the last tab.

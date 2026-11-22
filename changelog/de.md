@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.63
+
+- Behoben: Haustiere: Jede Stufe hat jetzt ihr eigenes Ziel, 5 Seelen zum Freischalten, 25 für Stufe 2 und 75 für Stufe 3 (insgesamt 105). Haustiere auf Stufe 1 zählen jetzt x/25 und steigen beim richtigen Kill auf Stufe 2, statt immer bis 75 zu zählen.
+
 ## 0.5.62
 
 - Behoben: Schwarzmarkt-Haustiere: Das Fenster bleibt jetzt offen, solange du im Laden bist, und schließt sich 5 Sekunden nachdem du zurück im Spiel bist (der Mauszeiger ist wieder ausgeblendet). Es schließt sich nicht mehr 15 Sekunden nach dem letzten Reiter.

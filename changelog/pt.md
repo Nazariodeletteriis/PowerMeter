@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.63
+
+- Corrigido: Mascotes: cada nível agora tem seu próprio objetivo, 5 almas para desbloquear, 25 para o nível 2 e 75 para o nível 3 (105 no total). Mascotes de nível 1 contam x/25 e passam ao nível 2 no abate certo, em vez de contar sempre até 75.
+
 ## 0.5.62
 
 - Corrigido: Mascotes do Mercado Negro: o painel agora fica aberto enquanto você estiver na loja e fecha 5 segundos depois de voltar ao jogo (o ponteiro do mouse volta a ficar oculto). Não fecha mais 15 segundos após a última aba.

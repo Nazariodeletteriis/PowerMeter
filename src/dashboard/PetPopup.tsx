@@ -7,7 +7,7 @@ import type { ListRow } from "../data/db/types";
 import { initialLanguage, LANGUAGE_SETTING, translator, type T } from "./i18n";
 import { applyPalette } from "./pages/system/theme";
 import { GameIcon, gd, useGd, useIcons } from "./pages/world/db";
-import { PET_EXP_MAX } from "./pages/characters/calc";
+import { petExpMax } from "./pages/characters/calc";
 import PET_IDS from "../data/pet_ids.json";
 import "./petPopup.css";
 
@@ -17,12 +17,13 @@ type PetKill = { id: number; lvl: number; exp: number };
 const SHOW_MS = 4000;
 const LEAVE_MS = 150; // .petPop.isLeaving transition
 
-/** What the card says: level 0 = not unlocked yet (threshold unknown: no denominator, no bar), 1-2 = exp/75, 3 = MAX. */
+/** What the card says: level 0 = not unlocked yet (exp/5), 1 = exp/25, 2 = exp/75, 3 = MAX. */
 function petLine(t: T, k: PetKill): { label: string; count: string; fill?: number; max?: boolean } {
-  if (k.lvl <= 0) return { label: t("widgetset.petUnlock"), count: String(k.exp) };
   if (k.lvl >= 3) return { label: t("characters.builder.pets.level", { n: 3 }), count: "MAX", fill: 1, max: true };
-  const exp = Math.min(PET_EXP_MAX, k.exp);
-  return { label: t("characters.builder.pets.level", { n: k.lvl }), count: `${exp}/${PET_EXP_MAX}`, fill: exp / PET_EXP_MAX };
+  const max = petExpMax(k.lvl);
+  const exp = Math.min(max, k.exp);
+  const label = k.lvl <= 0 ? t("widgetset.petUnlock") : t("characters.builder.pets.level", { n: k.lvl });
+  return { label, count: `${exp}/${max}`, fill: exp / max };
 }
 
 /**
