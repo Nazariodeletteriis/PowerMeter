@@ -319,46 +319,7 @@
     "you": "(tu)",
     "total": "Totale",
     "custom": {
-      "open": "Personalizza meter",
-      "title": "Personalizza",
-      "closeLabel": "Chiudi impostazioni",
-      "preset": "Preset",
-      "presets": {
-        "min": "Minimo",
-        "std": "Standard",
-        "full": "Completo"
-      },
-      "elements": "Elementi",
-      "icons": "Icone classe",
-      "rank": "Posizione (#)",
-      "bars": "Barre di fondo",
-      "header": "Intestazione e boss",
-      "cTotal": "Colonna totale",
-      "cRate": "Colonna al secondo",
-      "cShare": "Colonna quota %",
-      "cDeaths": "Colonna morti",
-      "density": "Densità righe",
-      "dense": "Compatta",
-      "normal": "Normale",
-      "rows": "Giocatori visibili",
-      "bg": "Sfondo",
-      "bgClear": "Trasparente",
-      "bgSoft": "Soft",
-      "bgFull": "Pieno",
-      "color": "Colore barre",
-      "colors": {
-        "class": "Classe",
-        "azure": "Azzurro",
-        "violet": "Viola",
-        "green": "Verde",
-        "amber": "Ambra",
-        "pink": "Rosa"
-      },
-      "mode": "Modalità",
-      "dummy": "Manichino",
-      "counters": "Contatori",
-      "controls": "Controlli finestre",
-      "more": "Altre impostazioni"
+      "open": "Opzioni"
     },
     "controls": "Controlli"
   }

@@ -70,6 +70,7 @@ const createPmWidget = (app) => {
       closeDetail();
       closeTrainer();
     }
+    emitMeterState();
   };
 
   // --- lock: keeps the meter in place (start_drag does nothing), everything else stays clickable.
@@ -485,7 +486,7 @@ const createPmWidget = (app) => {
     trainerEl.dataset.cls = $(".pmCharBar")?.dataset.cls || ""; // your class (src/widget/charBar.ts)
     countdown(TRAINER_COUNTDOWN);
     $(".pmTrainerClose").focus();
-    syncCustom();
+    emitMeterState();
   };
   function closeTrainer() {
     if (!trainer) return;
@@ -496,7 +497,14 @@ const createPmWidget = (app) => {
     const hadFocus = trainerEl.contains(document.activeElement);
     meter.classList.remove("isPmTrainer");
     if (hadFocus) trainerBtn?.focus();
-    syncCustom();
+    emitMeterState();
+  }
+  // To the Options window (Controls.tsx): the dummy test's state and the layout, at each change and on request.
+  function emitMeterState() {
+    if (!isActive()) return;
+    window.__TAURI__.event
+      .emit("pm-meter-state", { dummy: !!trainer, compact: meter.classList.contains("slim") })
+      .catch((err) => console.error("[PowerMeter] pm-meter-state failed", err));
   }
   // Every poll: the latest numbers, parsed only when a new update came in.
   const tickTrainer = () => {
@@ -511,7 +519,7 @@ const createPmWidget = (app) => {
     if (trainer.cur) refreshTrainerDetail(trainer, me.id);
   };
   trainerBtn?.addEventListener("click", openTrainer);
-  // The Controls window starts / stops the dummy test as the Customise switch does.
+  // The Options window starts / stops the dummy test (its Mode switch).
   window.__TAURI__.event
     .listen("pm-trainer-toggle", () => (trainer ? closeTrainer() : openTrainer()))
     .catch((err) => console.error("[PowerMeter] pm-trainer-toggle listener failed", err));
@@ -701,10 +709,10 @@ const createPmWidget = (app) => {
     }
   };
 
-  // --- Compact preferences and the Customise panel (Main.dc.html). Stored as one JSON in
-  // localStorage (pm.compactPrefs, like pm.widgetMode); every value is read back through a
-  // whitelist, so nothing saved ever reaches a style unchecked. Applied as classes and two
-  // custom properties on .meter, used by the Compact rules only (powermeter-theme.css).
+  // --- Compact preferences, chosen in the Options window (Controls.tsx) and kept in the shared settings as one
+  // JSON (pm.compactPrefs; localStorage up to 0.5.65, moved over once). Every value is read back through a
+  // whitelist, so nothing saved ever reaches a style unchecked. Applied as classes and two custom properties
+  // on .meter, used by the Compact rules only (powermeter-theme.css).
   const PREFS_KEY = "pm.compactPrefs";
   // "class" (default): each row's bar in its class colour, as in the Interface layout ([data-cls] --cls in
   // powermeter-theme.css); the UI accent (switches, your ring, the HP bar) is then the azure.
@@ -716,19 +724,16 @@ const createPmWidget = (app) => {
   const BGS = { clear: 0.7, soft: 0.95, full: 1 };
   const ROW_COUNTS = [3, 5, 8];
   const SWITCHES = ["icons", "rank", "bars", "header", "cTotal", "cRate", "cShare", "cDeaths"];
-  const PRESETS = {
-    min: { icons: false, rank: false, bars: true, header: false, cTotal: false, cRate: true, cShare: false, cDeaths: false, dense: true, rows: 5, bg: "clear" },
-    std: { icons: true, rank: false, bars: true, header: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft" },
-    full: { icons: true, rank: true, bars: true, header: true, cTotal: true, cRate: true, cShare: true, cDeaths: true, dense: false, rows: 8, bg: "full" },
-  };
-  const readPrefs = () => {
+  // The Standard preset (Controls.tsx PRESETS.std).
+  const DEFAULTS = { icons: true, rank: false, bars: true, header: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft", accent: "class" };
+  const readPrefs = (raw) => {
     let saved = {};
     try {
-      saved = JSON.parse(app.safeGetStorage(PREFS_KEY) || "{}") || {};
+      saved = JSON.parse(raw || "{}") || {};
     } catch {
       // unreadable: the defaults
     }
-    const prefs = { ...PRESETS.std, accent: "class" };
+    const prefs = { ...DEFAULTS };
     for (const key of [...SWITCHES, "dense"]) if (typeof saved[key] === "boolean") prefs[key] = saved[key];
     if (saved.v !== PREFS_VERSION) prefs.icons = true; // class icons became the default with version 2
     if (ROW_COUNTS.includes(saved.rows)) prefs.rows = saved.rows;
@@ -737,149 +742,45 @@ const createPmWidget = (app) => {
     if (Object.hasOwn(ACCENTS, saved.accent) && (saved.v === PREFS_VERSION || saved.accent !== "azure")) prefs.accent = saved.accent;
     return prefs;
   };
-  let prefs = readPrefs();
+  let prefs = readPrefs(null);
   const isSlim = () => meter.classList.contains("slim");
-  const applyPrefs = () => {
+  const usePrefs = (raw) => {
+    prefs = readPrefs(raw);
     meter.style.setProperty("--pm-accent", ACCENTS[prefs.accent]);
     meter.classList.toggle("pmBars-class", prefs.accent === "class");
     meter.style.setProperty("--pm-card-alpha", String(BGS[prefs.bg]));
     for (const key of [...SWITCHES, "dense"]) meter.classList.toggle(`pmPref-${key}`, prefs[key]);
     meter.classList.toggle("pmBg-clear", prefs.bg === "clear");
+    if (frame) app.meterUI.updateFromRows(frame.rows); // the visible players, at once
   };
-  // Counters of the character bar (src/widget/charBar.ts, which draws them): one switch each, saved in the
-  // settings so the dashboard and every window agree. Unset = Odyle only. [game id, label key, fallback]
-  const COUNTER_KEY = "pm.counters.show.";
-  const COUNTERS = [
-    ["60000001", "counterOdyle", "Odyle"],
-    ["4", "counterNightmare", "Nightmare"],
-    ["101", "counterDailyDungeon", "Daily Dungeon"],
-    ["8", "counterBeritraKeys", "Beritra keys"],
-    ["1", "counterShugoKeys", "Shugo Festival keys"],
-  ];
-  let settings = {};
-  const counterShown = (id) => (settings[COUNTER_KEY + id] ?? (id === "60000001" ? "1" : "0")) === "1";
   invoke("get_settings")
-    .then((s) => {
-      settings = { ...s, ...settings };
-      syncCustom();
+    .then((settings) => {
+      const legacy = app.safeGetStorage(PREFS_KEY);
+      if (settings[PREFS_KEY] != null || !legacy) return usePrefs(settings[PREFS_KEY]);
+      // The choices made before 0.5.66 move to the settings, checked, and leave localStorage once they are saved.
+      const value = JSON.stringify({ ...readPrefs(legacy), v: PREFS_VERSION });
+      usePrefs(value);
+      return invoke("update_settings", { key: PREFS_KEY, value }).then(() => localStorage.removeItem(PREFS_KEY));
     })
-    .catch((err) => console.error("[PowerMeter] get_settings failed", err));
+    .catch((err) => console.error("[PowerMeter] compact preferences failed", err));
   window.__TAURI__.event
     .listen("setting-changed", ({ payload }) => {
-      if (!String(payload?.key).startsWith(COUNTER_KEY)) return;
-      settings[payload.key] = String(payload.value);
-      syncCustom();
+      if (payload?.key === PREFS_KEY) usePrefs(String(payload.value));
     })
     .catch((err) => console.error("[PowerMeter] setting-changed listener failed", err));
-  const customEl = $(".pmCustom");
-  const customBtn = $(".pmCustomBtn");
-  // The panel's controls, drawn once per language; their state is synced in place (syncCustom),
-  // so a click never rebuilds the button it came from.
-  const renderCustom = () => {
-    if (!customEl) return;
-    const L = (key, fallback) => esc(t(`pmWidget.custom.${key}`, fallback));
-    const seg = (attr, options) =>
-      `<div class="pmSeg">${options.map(([value, label]) => `<button type="button" ${attr}="${value}">${label}</button>`).join("")}</div>`;
-    // compact: a Compact-only group (the Interface layout ignores those preferences, so it does not offer them).
-    const group = (label, body, compact) =>
-      `<div class="pmCustomGroup${compact ? " pmCustomCompact" : ""}"><span class="pmCustomLabel">${label}</span>${body}</div>`;
-    const swit = (attr, value, label) =>
-      `<div class="pmSwitchRow"><span>${label}</span><button type="button" role="switch" ${attr}="${value}" aria-label="${label}"><span class="pmKnob"></span></button></div>`;
-    const link = (attr, label) =>
-      `<button type="button" class="pmCustomLink" ${attr}><span>${label}</span><svg viewBox="0 0 256 256" width="12" height="12" fill="currentColor" aria-hidden="true" focusable="false"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button>`;
-    customEl.innerHTML = [
-      `<div class="pmCustomHead"><span id="pmCustomTitle">${L("title", "Customise")}</span><button type="button" class="pmCustomClose" aria-label="${L("closeLabel", "Close settings")}">${esc(t("pmWidget.close", "Close"))}</button></div>`,
-      group(L("preset", "Preset"), seg("data-preset", [["min", L("presets.min", "Minimal")], ["std", L("presets.std", "Standard")], ["full", L("presets.full", "Complete")]]), true),
-      group(
-        L("elements", "Elements"),
-        [["icons", "Class icons"], ["rank", "Position (#)"], ["bars", "Background bars"], ["header", "Header and boss"], ["cTotal", "Total column"], ["cRate", "Per-second column"], ["cShare", "Share % column"], ["cDeaths", "Deaths column"]]
-          .map(([key, fallback]) => swit("data-switch", key, L(key, fallback)))
-          .join(""),
-        true
-      ),
-      group(L("density", "Row density"), seg("data-dense", [["true", L("dense", "Compact")], ["false", L("normal", "Normal")]]), true),
-      group(L("rows", "Visible players"), seg("data-rows", ROW_COUNTS.map((n) => [n, n])), true),
-      group(L("bg", "Background"), seg("data-bg", [["clear", L("bgClear", "Transparent")], ["soft", L("bgSoft", "Soft")], ["full", L("bgFull", "Solid")]]), true),
-      group(
-        L("color", "Bar colour"),
-        `<div class="pmSwatches">${Object.entries(ACCENTS)
-          .map(([key, hex]) => `<button type="button" data-accent="${key}" style="--swatch:${key === "class" ? "var(--pm-class-swatch)" : hex}" aria-label="${L(`colors.${key}`, key)}" title="${L(`colors.${key}`, key)}"></button>`)
-          .join("")}</div>`,
-        true
-      ),
-      group(
-        L("counters", "Counters"),
-        COUNTERS.map(([id, key, fallback]) => swit("data-counter", id, esc(t(`pmWidget.${key}`, fallback)))).join("")
-      ),
-      group(L("mode", "Mode"), swit("data-dummy", "on", L("dummy", "Training dummy"))),
-      `<div class="pmCustomLinks">${link("data-link=\"controls\"", L("controls", "Window controls"))}${link("data-link=\"settings\"", L("more", "More settings"))}</div>`,
-    ].join("");
-    syncCustom();
-  };
-  function syncCustom() {
-    if (!customEl?.firstChild) return;
-    const same = (key) => Object.entries(PRESETS[key]).every(([k, v]) => prefs[k] === v);
-    const set = (sel, on, attr = "aria-pressed") => customEl.querySelectorAll(sel).forEach((el) => el.setAttribute(attr, String(on(el))));
-    set("[data-preset]", (el) => same(el.dataset.preset));
-    set("[data-switch]", (el) => prefs[el.dataset.switch], "aria-checked");
-    set("[data-dense]", (el) => String(prefs.dense) === el.dataset.dense);
-    set("[data-rows]", (el) => String(prefs.rows) === el.dataset.rows);
-    set("[data-bg]", (el) => prefs.bg === el.dataset.bg);
-    set("[data-accent]", (el) => prefs.accent === el.dataset.accent);
-    set("[data-dummy]", () => !!trainer, "aria-checked");
-    set("[data-counter]", (el) => counterShown(el.dataset.counter), "aria-checked");
-  }
-  const setCustomOpen = (open) => {
-    if (!customEl) return;
-    customEl.hidden = !open;
-    customBtn?.setAttribute("aria-expanded", String(open));
-    // The panel itself: Tab goes on to its controls, no ring on a click. No scroll: the window grows to the
-    // panel a moment later (tauriBridge.js), and a scroll made before that left the card's top out of view.
-    if (open) customEl.focus({ preventScroll: true });
-    else customBtn?.focus();
-  };
-  customBtn?.addEventListener("click", () => setCustomOpen(customEl.hidden));
-  customEl?.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") setCustomOpen(false);
-  });
-  customEl?.addEventListener("click", (event) => {
-    const btn = event.target.closest("button");
-    if (!btn) return;
-    const d = btn.dataset;
-    if (btn.classList.contains("pmCustomClose")) return setCustomOpen(false);
-    if (d.dummy) return trainer ? closeTrainer() : openTrainer();
-    if (d.counter) {
-      const value = counterShown(d.counter) ? "0" : "1";
-      settings[COUNTER_KEY + d.counter] = value; // at once; setting-changed confirms it
-      syncCustom();
-      return invoke("update_settings", { key: COUNTER_KEY + d.counter, value }).catch((err) =>
-        console.error("[PowerMeter] counter switch failed", err)
-      );
-    }
-    if (d.link === "controls")
-      return invoke("open_controls_window").catch((err) => console.error("[PowerMeter] open_controls_window failed", err));
-    if (d.link === "settings") return window.javaBridge?.openWidgetSettings?.();
-    if (d.preset) prefs = { ...prefs, ...PRESETS[d.preset] };
-    else if (d.switch) prefs = { ...prefs, [d.switch]: !prefs[d.switch] };
-    else if (d.dense) prefs = { ...prefs, dense: d.dense === "true" };
-    else if (d.rows) prefs = { ...prefs, rows: Number(d.rows) };
-    else if (d.bg) prefs = { ...prefs, bg: d.bg };
-    else if (d.accent) prefs = { ...prefs, accent: d.accent };
-    else return;
-    app.safeSetStorage(PREFS_KEY, JSON.stringify({ ...prefs, v: PREFS_VERSION }));
-    applyPrefs();
-    syncCustom();
-    if (frame) app.meterUI.updateFromRows(frame.rows); // the visible players, at once
-  });
+  // The settings button opens the Options window, or closes it when it is open.
+  $(".pmCustomBtn")?.addEventListener("click", () =>
+    invoke("toggle_controls_window").catch((err) => console.error("[PowerMeter] toggle_controls_window failed", err))
+  );
+  // The Options window shows whether the dummy test runs and offers the compact preferences in that layout only.
+  window.__TAURI__.event
+    .listen("pm-meter-state-request", () => emitMeterState())
+    .catch((err) => console.error("[PowerMeter] pm-meter-state-request listener failed", err));
   // Compact shows the chosen number of players; the Interface layout keeps the Settings value.
   const rowLimit = () => (isSlim() ? prefs.rows : 0);
 
-  window.i18n?.onChange?.(() => {
-    render();
-    renderCustom();
-  });
-  applyPrefs();
-  renderCustom();
+  window.i18n?.onChange?.(render);
+  usePrefs(null);
   meter.classList.add("pmMode-dps"); // the three tabs share the DPS layout and states
   syncTheme();
   render();

@@ -1,5 +1,6 @@
-/* Controls window and alignment grid (Controls.tsx). Same tokens as the compact meter's design: dark panel,
-   8px containers, 6px buttons, the meter's blue accent. */
+/* Options window and alignment grid (Controls.tsx). Same tokens as the compact meter's design: dark panel,
+   8px containers, 6px buttons, the meter's blue accent. The header stays put (it moves the window and holds
+   the X); what is under it scrolls. */
 .ctWin {
   --ct-bg: #0d0f1f;
   --ct-line: rgba(255, 255, 255, 0.09);
@@ -7,13 +8,12 @@
   --ct-t2: #c3c7e0;
   --ct-t3: #9aa0c0;
   --ct-acc: #4cc2ff;
+  /* The "Class" bar colour: the class colours (powermeter-theme.css [data-cls]) round the dial. */
+  --ct-class-swatch: conic-gradient(#4da8e0 0 12.5%, #2f62e8 0 25%, #42c169 0 37.5%, #46c46e 0 50%, #a65be0 0 62.5%, #c84cb8 0 75%, #f5d547 0 87.5%, #ff8a2b 0);
   box-sizing: border-box;
   height: 100vh;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 0 12px 12px;
   background: var(--ct-bg);
   border: 1px solid var(--ct-line);
   border-radius: 8px;
@@ -21,10 +21,13 @@
   font: 12px/1.4 Inter, system-ui, sans-serif;
 }
 .ctHead {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 40px;
+  padding: 0 6px 0 12px;
+  border-bottom: 1px solid var(--ct-line);
   font-size: 13px;
   font-weight: 600;
   cursor: grab;
@@ -44,10 +47,29 @@
   background: rgba(255, 255, 255, 0.08);
   color: var(--ct-t1);
 }
-.ctSection {
+.ctBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 12px;
+}
+.ctSection,
+.ctGroup {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+.ctGroup {
+  color: var(--ct-t2);
+}
+.ctSection + .ctSection {
+  padding-top: 14px;
+  border-top: 1px solid var(--ct-line);
 }
 .ctSection h2 {
   margin: 0;
@@ -94,8 +116,8 @@
   transform: translateX(16px);
   background: #04101a;
 }
-.ctBtn,
 .ctSeg button {
+  flex: 1;
   height: 28px;
   padding: 0 10px;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -106,10 +128,17 @@
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
+  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
 }
-.ctBtn:hover,
-.ctSeg button:hover {
-  color: var(--ct-t1);
+.ctSeg button:active,
+.ctLink:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ctSeg button:hover,
+  .ctLink:hover {
+    color: var(--ct-t1);
+  }
 }
 .ctSeg {
   display: flex;
@@ -119,6 +148,41 @@
   background: var(--ct-acc);
   border-color: var(--ct-acc);
   color: #04101a;
+}
+.ctSwatches {
+  display: flex;
+  gap: 8px;
+}
+.ctSwatches button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  background-clip: padding-box;
+  cursor: pointer;
+}
+.ctSwatches button[aria-pressed="true"] {
+  box-shadow: 0 0 0 2px var(--ct-bg), 0 0 0 4px var(--ct-t1);
+}
+.ctLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ct-t2);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.ctLink svg {
+  color: var(--ct-t3);
 }
 .ctWin button:focus-visible {
   outline: 2px solid #fff;
@@ -137,6 +201,11 @@
 @media (prefers-reduced-motion: reduce) {
   .ctSwitch span {
     transition: background-color 150ms ease;
+  }
+  .ctSeg button,
+  .ctLink {
+    transition: none;
+    transform: none !important;
   }
 }
 

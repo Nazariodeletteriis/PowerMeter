@@ -2050,6 +2050,7 @@ pub fn run() {
             powermeter::open_map_window,
             powermeter::open_cube_window,
             powermeter::open_controls_window,
+            powermeter::toggle_controls_window,
             powermeter::overlay_state,
             powermeter::close_overlay_window,
             powermeter::set_grid,

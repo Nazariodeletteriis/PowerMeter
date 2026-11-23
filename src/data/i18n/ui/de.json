@@ -319,46 +319,7 @@
     "you": "(du)",
     "total": "Gesamt",
     "custom": {
-      "open": "Meter anpassen",
-      "title": "Anpassen",
-      "closeLabel": "Einstellungen schließen",
-      "preset": "Vorlage",
-      "presets": {
-        "min": "Minimal",
-        "std": "Standard",
-        "full": "Vollständig"
-      },
-      "elements": "Elemente",
-      "icons": "Klassensymbole",
-      "rank": "Position (#)",
-      "bars": "Hintergrundbalken",
-      "header": "Kopfzeile und Boss",
-      "cTotal": "Spalte Gesamt",
-      "cRate": "Spalte pro Sekunde",
-      "cShare": "Spalte Anteil %",
-      "cDeaths": "Spalte Tode",
-      "density": "Zeilendichte",
-      "dense": "Kompakt",
-      "normal": "Normal",
-      "rows": "Sichtbare Spieler",
-      "bg": "Hintergrund",
-      "bgClear": "Transparent",
-      "bgSoft": "Weich",
-      "bgFull": "Voll",
-      "color": "Balkenfarbe",
-      "colors": {
-        "class": "Klasse",
-        "azure": "Azur",
-        "violet": "Violett",
-        "green": "Grün",
-        "amber": "Bernstein",
-        "pink": "Rosa"
-      },
-      "mode": "Modus",
-      "dummy": "Trainingspuppe",
-      "counters": "Zähler",
-      "controls": "Fenstersteuerung",
-      "more": "Weitere Einstellungen"
+      "open": "Optionen"
     },
     "controls": "Steuerung"
   }

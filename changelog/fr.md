@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.66
+
+- Modifié : Compteur : le bouton de réglages ouvre désormais une fenêtre Options flottante que vous pouvez faire glisser n'importe où à l'écran (elle se souvient de sa position). Elle regroupe toutes les options du compteur, les compteurs, le mannequin, les fenêtres et la disposition ; le panneau sous le compteur disparaît. Vos choix sont conservés.
+
 ## 0.5.65
 
 - Ajouté : Les alertes d'événements s'affichent désormais dans leur propre grande carte en haut au centre de l'écran (comme celle des familiers), avec le nom de l'événement et un compte à rebours en direct ; elles ne sont plus dans le compteur.

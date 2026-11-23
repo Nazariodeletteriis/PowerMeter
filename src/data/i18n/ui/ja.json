@@ -319,46 +319,7 @@
     "you": "(あなた)",
     "total": "合計",
     "custom": {
-      "open": "メーターをカスタマイズ",
-      "title": "カスタマイズ",
-      "closeLabel": "設定を閉じる",
-      "preset": "プリセット",
-      "presets": {
-        "min": "最小",
-        "std": "標準",
-        "full": "完全"
-      },
-      "elements": "要素",
-      "icons": "クラスアイコン",
-      "rank": "順位 (#)",
-      "bars": "背景バー",
-      "header": "ヘッダーとボス",
-      "cTotal": "合計列",
-      "cRate": "毎秒列",
-      "cShare": "割合 % 列",
-      "cDeaths": "死亡列",
-      "density": "行の密度",
-      "dense": "コンパクト",
-      "normal": "標準",
-      "rows": "表示人数",
-      "bg": "背景",
-      "bgClear": "透明",
-      "bgSoft": "ソフト",
-      "bgFull": "不透明",
-      "color": "バーの色",
-      "colors": {
-        "class": "クラス",
-        "azure": "空色",
-        "violet": "紫",
-        "green": "緑",
-        "amber": "琥珀",
-        "pink": "ピンク"
-      },
-      "mode": "モード",
-      "dummy": "訓練用かかし",
-      "counters": "カウンター",
-      "controls": "ウィンドウ操作",
-      "more": "その他の設定"
+      "open": "オプション"
     },
     "controls": "コントロール"
   }

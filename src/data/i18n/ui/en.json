@@ -319,46 +319,7 @@
     "you": "(you)",
     "total": "Total",
     "custom": {
-      "open": "Customise meter",
-      "title": "Customise",
-      "closeLabel": "Close settings",
-      "preset": "Preset",
-      "presets": {
-        "min": "Minimal",
-        "std": "Standard",
-        "full": "Complete"
-      },
-      "elements": "Elements",
-      "icons": "Class icons",
-      "rank": "Position (#)",
-      "bars": "Background bars",
-      "header": "Header and boss",
-      "cTotal": "Total column",
-      "cRate": "Per-second column",
-      "cShare": "Share % column",
-      "cDeaths": "Deaths column",
-      "density": "Row density",
-      "dense": "Compact",
-      "normal": "Normal",
-      "rows": "Visible players",
-      "bg": "Background",
-      "bgClear": "Transparent",
-      "bgSoft": "Soft",
-      "bgFull": "Solid",
-      "color": "Bar colour",
-      "colors": {
-        "class": "Class",
-        "azure": "Azure",
-        "violet": "Violet",
-        "green": "Green",
-        "amber": "Amber",
-        "pink": "Pink"
-      },
-      "mode": "Mode",
-      "dummy": "Training dummy",
-      "counters": "Counters",
-      "controls": "Window controls",
-      "more": "More settings"
+      "open": "Options"
     },
     "controls": "Controls"
   }

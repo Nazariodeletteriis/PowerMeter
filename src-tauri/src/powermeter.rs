@@ -320,11 +320,21 @@ pub async fn open_cube_window(app: tauri::AppHandle) -> Result<(), String> {
     open_widget_window(&app, "cubes", "cubeFinder", "PowerMeter — Cube Finder", (380.0, 380.0), (280.0, 280.0))
 }
 
-/// The Controls window (Controls.tsx): one switch per PowerMeter window that can float over the game, so they are
-/// shown or hidden from the game without going through the dashboard, and the grid to line them up.
+/// The Options window (Controls.tsx, label "controls"; its place under `window.options.*`, as the 0.5.64-0.5.65
+/// Controls card was smaller): the meter's preferences, its counters, the dummy test, a
+/// switch per PowerMeter window that can float over the game and the grid to line them up.
 #[tauri::command]
 pub async fn open_controls_window(app: tauri::AppHandle) -> Result<(), String> {
-    open_widget_window(&app, "controls", "controls", "PowerMeter — Controls", (300.0, 460.0), (260.0, 320.0))
+    open_widget_window(&app, "controls", "options", "PowerMeter — Options", (320.0, 640.0), (280.0, 320.0))
+}
+
+/// The meter's settings button: opens Options, or closes it when it is already open.
+#[tauri::command]
+pub async fn toggle_controls_window(app: tauri::AppHandle) -> Result<(), String> {
+    match app.get_webview_window("controls") {
+        Some(window) => window.close().map_err(|e| e.to_string()),
+        None => open_controls_window(app).await,
+    }
 }
 
 /// Windows the Controls window can close (the meter hides instead: hide_overlay).

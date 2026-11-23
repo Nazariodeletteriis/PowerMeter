@@ -319,46 +319,7 @@
     "you": "(tú)",
     "total": "Total",
     "custom": {
-      "open": "Personalizar medidor",
-      "title": "Personalizar",
-      "closeLabel": "Cerrar ajustes",
-      "preset": "Preajuste",
-      "presets": {
-        "min": "Mínimo",
-        "std": "Estándar",
-        "full": "Completo"
-      },
-      "elements": "Elementos",
-      "icons": "Iconos de clase",
-      "rank": "Posición (#)",
-      "bars": "Barras de fondo",
-      "header": "Cabecera y jefe",
-      "cTotal": "Columna total",
-      "cRate": "Columna por segundo",
-      "cShare": "Columna cuota %",
-      "cDeaths": "Columna muertes",
-      "density": "Densidad de filas",
-      "dense": "Compacta",
-      "normal": "Normal",
-      "rows": "Jugadores visibles",
-      "bg": "Fondo",
-      "bgClear": "Transparente",
-      "bgSoft": "Suave",
-      "bgFull": "Sólido",
-      "color": "Color de barras",
-      "colors": {
-        "class": "Clase",
-        "azure": "Celeste",
-        "violet": "Violeta",
-        "green": "Verde",
-        "amber": "Ámbar",
-        "pink": "Rosa"
-      },
-      "mode": "Modo",
-      "dummy": "Muñeco de entrenamiento",
-      "counters": "Contadores",
-      "controls": "Control de ventanas",
-      "more": "Más ajustes"
+      "open": "Opciones"
     },
     "controls": "Controles"
   }

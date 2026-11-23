@@ -319,46 +319,7 @@
     "you": "(你)",
     "total": "总计",
     "custom": {
-      "open": "自定义统计",
-      "title": "自定义",
-      "closeLabel": "关闭设置",
-      "preset": "预设",
-      "presets": {
-        "min": "最简",
-        "std": "标准",
-        "full": "完整"
-      },
-      "elements": "元素",
-      "icons": "职业图标",
-      "rank": "名次 (#)",
-      "bars": "背景条",
-      "header": "标题与首领",
-      "cTotal": "总计列",
-      "cRate": "每秒列",
-      "cShare": "占比 % 列",
-      "cDeaths": "死亡列",
-      "density": "行密度",
-      "dense": "紧凑",
-      "normal": "正常",
-      "rows": "显示人数",
-      "bg": "背景",
-      "bgClear": "透明",
-      "bgSoft": "柔和",
-      "bgFull": "不透明",
-      "color": "条形颜色",
-      "colors": {
-        "class": "职业",
-        "azure": "天蓝",
-        "violet": "紫色",
-        "green": "绿色",
-        "amber": "琥珀",
-        "pink": "粉色"
-      },
-      "mode": "模式",
-      "dummy": "训练假人",
-      "counters": "计数器",
-      "controls": "窗口控制",
-      "more": "更多设置"
+      "open": "选项"
     },
     "controls": "控制"
   }

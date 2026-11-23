@@ -319,46 +319,7 @@
     "you": "(你)",
     "total": "總計",
     "custom": {
-      "open": "自訂統計",
-      "title": "自訂",
-      "closeLabel": "關閉設定",
-      "preset": "預設",
-      "presets": {
-        "min": "最簡",
-        "std": "標準",
-        "full": "完整"
-      },
-      "elements": "元素",
-      "icons": "職業圖示",
-      "rank": "名次 (#)",
-      "bars": "背景條",
-      "header": "標題與首領",
-      "cTotal": "總計欄",
-      "cRate": "每秒欄",
-      "cShare": "佔比 % 欄",
-      "cDeaths": "死亡欄",
-      "density": "列密度",
-      "dense": "緊湊",
-      "normal": "正常",
-      "rows": "顯示人數",
-      "bg": "背景",
-      "bgClear": "透明",
-      "bgSoft": "柔和",
-      "bgFull": "不透明",
-      "color": "條形顏色",
-      "colors": {
-        "class": "職業",
-        "azure": "天藍",
-        "violet": "紫色",
-        "green": "綠色",
-        "amber": "琥珀",
-        "pink": "粉紅"
-      },
-      "mode": "模式",
-      "dummy": "訓練假人",
-      "counters": "計數器",
-      "controls": "視窗控制",
-      "more": "更多設定"
+      "open": "選項"
     },
     "controls": "控制"
   }

@@ -263,8 +263,8 @@
      dropped, history lives in the dashboard, reset is the boss row's button
      (and Ctrl+Alt+R). Suspend shows only when turned on in Settings. */
   .header :is(.bossIcon, .historyBtn, .resetBtn, .pmSep) { display: none; }
-  /* One settings button, the footer's Customise (pmCustomBtn), in both layouts: the gear's "More settings"
-     is a link in its panel (core.js still binds the gear, so it stays in the markup). */
+  /* One settings button, the footer's (pmCustomBtn), in both layouts: it opens the Options window, whose "More settings"
+     does the gear's job (core.js still binds the gear, so it stays in the markup). */
   .header .settingsBtn { display: none; }
   .header .suspendBtn { order: 51; }
   .header button.pmAvgBtn { order: 61; }
@@ -1347,9 +1347,8 @@
      outside the card while the window still follows .meter (tauriBridge.js updateWindowSize).
      What the design leaves out but the widget needs (window controls, Reset, Only me, Trainer)
      shows on hover / keyboard focus only, so the resting geometry is the design's.
-     Preferences (pmWidget.js applyPrefs): .pmPref-* classes, --pm-accent, --pm-card-alpha. --- */
-  .meter.slim,
-  .meter .pmCustom {
+     Preferences (pmWidget.js usePrefs, chosen in the Options window): .pmPref-* classes, --pm-accent, --pm-card-alpha. --- */
+  .meter.slim {
     --pm-card: rgba(10, 11, 24, var(--pm-card-alpha, 0.95));
     --pm-card-line: rgba(255, 255, 255, 0.09);
     --pm-hair: rgba(255, 255, 255, 0.06);
@@ -1384,7 +1383,6 @@
     background: var(--pm-card);
   }
   .meter.slim > .meterFooter { order: 2; }
-  .meter.slim > .pmCustom { order: 3; }
   .meter.slim .pmEventPopup { left: 8px; right: 8px; }
   .meter.slim .pmEmpty { padding: 8px 10px 12px; }
 
@@ -1694,87 +1692,7 @@
   @media (hover: hover) and (pointer: fine) {
     .meter.slim .footerBtns :is(.pmLiveResetBtn, .onlyMeBtn, .pmTrainerBtn, .pmCustomBtn):hover { border-color: rgba(255, 255, 255, 0.3); color: #ffffff; background: transparent; }
   }
-  .pmCustom { display: none; }
-
-  /* Customise panel */
-  .meter.slim .pmCustom:not([hidden]) {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    /* Scrolls past this, so the window (which follows .meter) stays on a 1080p screen. */
-    max-height: 440px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    margin-top: 12px;
-    padding: 12px;
-    border: 1px solid var(--pm-card-line);
-    border-radius: var(--pm-r-container);
-    background: #0d0f1f;
-    font-size: 12px;
-  }
-  .pmCustom button { font-family: inherit; cursor: pointer; }
-  .pmCustom:focus { outline: none; }
   .meter.slim :is(.resizeHandle, .pmGrip) { background: var(--pm-accent); }
-  .pmCustom button:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
-  .pmCustomHead { display: flex; align-items: center; justify-content: space-between; }
-  .pmCustomHead > span { font-size: 13px; font-weight: 600; }
-  .pmCustomClose { padding: 4px; border: 0; background: transparent; color: var(--pm-c-muted); font-size: 11px; }
-  .pmCustomGroup { display: flex; flex-direction: column; gap: 6px; }
-  .pmCustomLabel { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--pm-c-muted); }
-  .pmSeg { display: flex; gap: 4px; }
-  .pmSeg > button {
-    flex: 1;
-    height: 28px;
-    padding: 0 6px;
-    border: 1px solid var(--pm-c-ghost);
-    border-radius: var(--pm-r-btn);
-    background: transparent;
-    color: var(--pm-c-soft);
-    font-size: 11px;
-    font-weight: 600;
-    transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
-  }
-  .pmSeg > button[aria-pressed="true"] { border-color: var(--pm-accent); background: var(--pm-accent); color: #04101a; }
-  .pmSeg > button:active { transform: scale(0.97); }
-  .pmSwitchRow { display: flex; align-items: center; justify-content: space-between; min-height: 26px; color: var(--pm-c-label); }
-  .pmSwitchRow > button {
-    position: relative;
-    flex: none;
-    width: 34px;
-    height: 18px;
-    padding: 0;
-    border: 0;
-    border-radius: 9px;
-    background: #2a2d45;
-    transition: background-color 150ms ease;
-  }
-  .pmSwitchRow > button[aria-checked="true"] { background: var(--pm-accent); }
-  .pmKnob {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 14px;
-    height: 14px;
-    border-radius: 7px;
-    background: var(--pm-c-muted);
-    transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1), background-color 150ms ease;
-  }
-  [aria-checked="true"] > .pmKnob { transform: translateX(16px); background: #04101a; }
-  .pmSwatches { display: flex; gap: 8px; }
-  .pmSwatches > button {
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    border: 2px solid transparent;
-    border-radius: 14px;
-    background: var(--swatch);
-  }
-  .pmSwatches > button[aria-pressed="true"] { border-color: #ffffff; }
-  /* The "Class" swatch: the class colours ([data-cls] at the end of this file) round the dial. */
-  .pmCustom {
-    --pm-class-swatch: conic-gradient(#4da8e0 0 12.5%, #2f62e8 0 25%, #42c169 0 37.5%, #46c46e 0 50%, #a65be0 0 62.5%, #c84cb8 0 75%, #f5d547 0 87.5%, #ff8a2b 0);
-  }
 
   /* The cards' actions are laid out for the Interface width: at the compact width they wrap
      under the text, each label whole; the card's Reset is the footer's, right below. */
@@ -1786,10 +1704,7 @@
   .meter.slim :is(.pmError, .pmUploaded) button { flex: 1 1 100%; height: 28px; }
 
   @media (prefers-reduced-motion: reduce) {
-    .meter.slim .footerBtns :is(.pmLiveResetBtn, .onlyMeBtn, .pmTrainerBtn, .pmCustomBtn),
-    .pmSeg > button,
-    .pmCustomLink { transition: opacity 150ms ease; transform: none !important; }
-    .pmKnob { transition: background-color 150ms ease; }
+    .meter.slim .footerBtns :is(.pmLiveResetBtn, .onlyMeBtn, .pmTrainerBtn, .pmCustomBtn) { transition: opacity 150ms ease; transform: none !important; }
   }
   /* --- Compact, November 2026 fixes (Nazario on 0.5.64) --- */
   /* The character bar and its counters are the card's first band, inside its width: the counters wrap
@@ -1830,7 +1745,7 @@
   /* Legibility over a bright desktop: the card is 0.95 opaque by default (design 0.7, raised on request:
      its muted text fell under 3:1 over white). "Transparent" keeps the see-through card and gives the
      text a dark halo, so it never melts into what is behind. */
-  .meter.slim.pmBg-clear > :not(.pmCustom) {
+  .meter.slim.pmBg-clear > * {
     --pm-c-muted: #c3c7e0;
     text-shadow: 0 0 2px rgba(5, 6, 13, 0.95), 0 0 6px rgba(5, 6, 13, 0.7);
   }
@@ -1856,32 +1771,7 @@
     font-weight: 600;
   }
 
-  /* The panel's links (Window controls, More settings), under its options. */
-  .pmCustomLinks { display: flex; flex-direction: column; gap: 4px; padding-top: 12px; border-top: 1px solid var(--pm-hair); }
-  .pmCustomLink {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    height: 28px;
-    padding: 0 8px;
-    border: 1px solid var(--pm-c-ghost);
-    border-radius: var(--pm-r-btn);
-    background: transparent;
-    color: var(--pm-c-label);
-    font-size: 12px;
-    font-weight: 500;
-    text-align: left;
-    transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
-  }
-  .pmCustomLink > svg { flex: none; color: var(--pm-c-muted); }
-  .pmCustomLink:active { transform: scale(0.97); }
-  @media (hover: hover) and (pointer: fine) {
-    .pmCustomLink:hover { border-color: rgba(255, 255, 255, 0.3); color: #ffffff; }
-  }
-
-  /* Interface layout: the same button, last in the footer, opens the same panel over the list
-     (the window does not grow there), with only what applies to this layout. */
+  /* Interface layout: the same button, last in the footer (opens the Options window). */
   .meter:not(.slim) .footerBtns .pmCustomBtn {
     flex: none;
     display: grid;
@@ -1895,42 +1785,10 @@
     color: var(--pm-ui-icon);
     cursor: pointer;
   }
-  .meter:not(.slim) .footerBtns .pmCustomBtn[aria-expanded="true"] { border-color: #ffffff; color: #ffffff; }
   .meter:not(.slim) .footerBtns .pmCustomBtn:focus-visible { outline: 2px solid #ffffff; outline-offset: 1px; }
   @media (hover: hover) and (pointer: fine) {
     .meter:not(.slim) .footerBtns .pmCustomBtn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
   }
-  .meter:not(.slim) .pmCustom:not([hidden]) {
-    position: absolute;
-    right: 8px;
-    bottom: 34px;
-    z-index: 6;
-    /* Two columns (counters | mode and links), so it fits the meter's height without scrolling. */
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    align-content: start;
-    gap: 14px 24px;
-    box-sizing: border-box;
-    width: min(520px, calc(100% - 16px));
-    max-height: calc(100% - 50px);
-    overflow-y: auto;
-    padding: 12px;
-    border: 1px solid var(--pm-card-line);
-    border-radius: var(--pm-r-container);
-    background: #0d0f1f;
-    color: var(--pm-c-text);
-    font-family: "Inter", "Segoe UI", sans-serif, var(--cjk-font-stack);
-    font-size: 12px;
-    scrollbar-width: thin;
-  }
-  .meter:not(.slim) .pmCustomCompact { display: none; }
-  /* A short meter (capture error, waiting) grows while the panel is open, so the panel fits whole. */
-  .meter:not(.slim):has(> .pmCustom:not([hidden])) { min-height: 340px; }
-  .meter:not(.slim):has(> .pmCustom:not([hidden])) > .meterFooter { margin-top: auto; }
-  .meter:not(.slim) .pmCustomHead { grid-column: 1 / -1; }
-  .meter:not(.slim) .pmCustom > .pmCustomGroup:not(.pmCustomCompact) { grid-row: span 2; }
-  .meter:not(.slim) .pmCustom > .pmCustomGroup:not(.pmCustomCompact) ~ .pmCustomGroup { grid-row: auto; }
-  .meter:not(.slim) .pmCustomLinks { padding-top: 0; border-top: 0; }
   /* The list follows the opacity setting (30% at the lowest): its text keeps a dark halo over a bright game. */
   /* The state cards are one message, not a table to see the game through: a near-solid surface. */
   .meter:not(.slim) > :is(.pmEmpty, .pmError, .pmDetail, .pmTrainer) { background: color-mix(in srgb, var(--pm-wsurf) 94%, transparent); }

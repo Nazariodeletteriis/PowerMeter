@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.66
+
+- Alterado: Medidor: o botão de configurações agora abre uma janela flutuante de Opções que você pode arrastar para qualquer lugar da tela (ela lembra onde você a deixou). Reúne todas as opções do medidor, contadores, boneco, janelas e disposição; o painel sob o medidor sai. Suas escolhas são mantidas.
+
 ## 0.5.65
 
 - Adicionado: Os alertas de eventos agora aparecem num cartão grande próprio no topo, no centro da tela (como o dos mascotes), com o nome do evento e uma contagem regressiva ao vivo; não ficam mais dentro do medidor.

@@ -319,46 +319,7 @@
     "you": "(vous)",
     "total": "Total",
     "custom": {
-      "open": "Personnaliser le compteur",
-      "title": "Personnaliser",
-      "closeLabel": "Fermer les réglages",
-      "preset": "Préréglage",
-      "presets": {
-        "min": "Minimal",
-        "std": "Standard",
-        "full": "Complet"
-      },
-      "elements": "Éléments",
-      "icons": "Icônes de classe",
-      "rank": "Position (#)",
-      "bars": "Barres de fond",
-      "header": "En-tête et boss",
-      "cTotal": "Colonne total",
-      "cRate": "Colonne par seconde",
-      "cShare": "Colonne part %",
-      "cDeaths": "Colonne morts",
-      "density": "Densité des lignes",
-      "dense": "Compacte",
-      "normal": "Normale",
-      "rows": "Joueurs visibles",
-      "bg": "Fond",
-      "bgClear": "Transparent",
-      "bgSoft": "Doux",
-      "bgFull": "Plein",
-      "color": "Couleur des barres",
-      "colors": {
-        "class": "Classe",
-        "azure": "Azur",
-        "violet": "Violet",
-        "green": "Vert",
-        "amber": "Ambre",
-        "pink": "Rose"
-      },
-      "mode": "Mode",
-      "dummy": "Mannequin",
-      "counters": "Compteurs",
-      "controls": "Contrôle des fenêtres",
-      "more": "Autres paramètres"
+      "open": "Options"
     },
     "controls": "Commandes"
   }

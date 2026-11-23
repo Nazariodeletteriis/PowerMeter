@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.66
+
+- Modificato: Meter: il pulsante impostazioni ora apre una finestra Opzioni floating che puoi trascinare ovunque sullo schermo (ricorda dove la lasci). Contiene tutte le opzioni del meter, contatori, manichino, finestre e disposizione; il pannello sotto il meter non c'è più. Le tue scelte restano.
+
 ## 0.5.65
 
 - Aggiunto: Gli avvisi eventi ora compaiono in una card grande tutta loro in alto al centro dello schermo (come quella dei pet), con il nome dell'evento e il conto alla rovescia live; non stanno più dentro il meter.

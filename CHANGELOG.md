@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.66
+
+- Changed: Meter: the settings button now opens a floating Options window you can drag anywhere on the screen (it remembers where you left it). It holds all the meter options, counters, training dummy, windows and layout; the panel under the meter is gone. Your choices are kept.
+
 ## 0.5.65
 
 - Added: Event alerts now pop up in their own big card at the top centre of the screen (like the pet card), with the event name and a live countdown; they no longer sit inside the meter.

@@ -643,8 +643,8 @@
             <button type="button" class="footerBtn onlyMeBtn" aria-pressed="false" aria-label="Only my DPS" data-i18n-aria-label="pmWidget.onlyMe" title="Only my DPS" data-i18n-title="pmWidget.onlyMe"><svg class="onlyMeOff" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M42.76,50A8,8,0,0,0,40,56V224a8,8,0,0,0,16,0V179.77c26.79-21.16,49.87-9.75,76.45,3.41,16.4,8.11,34.06,16.85,53,16.85,13.93,0,28.54-4.75,43.82-18a8,8,0,0,0,2.76-6V56A8,8,0,0,0,218.76,50c-28,24.23-51.72,12.49-79.21-1.12C111.07,34.76,78.78,18.79,42.76,50ZM216,172.25c-26.79,21.16-49.87,9.74-76.45-3.41-25-12.35-52.81-26.13-83.55-8.4V59.79c26.79-21.16,49.87-9.75,76.45,3.4,25,12.35,52.82,26.13,83.55,8.4Z"/></svg><svg class="onlyMeOn" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M232,56V176a8,8,0,0,1-2.76,6c-15.28,13.23-29.89,18-43.82,18-18.91,0-36.57-8.74-53-16.85C105.87,170,82.79,158.61,56,179.77V224a8,8,0,0,1-16,0V56a8,8,0,0,1,2.77-6h0c36-31.18,68.31-15.21,96.79-1.12C167,62.46,190.79,74.2,218.76,50A8,8,0,0,1,232,56Z"/></svg></button>
             <!-- PowerMeter: Trainer (pmWidget.js). Target: Phosphor regular, as the dashboard's button. -->
             <button type="button" class="pmOnly footerBtn pmTrainerBtn" aria-label="Training dummy test" data-i18n-aria-label="pmWidget.trainer.title" title="Training dummy test" data-i18n-title="pmWidget.trainer.title"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M221.87,83.16A104.1,104.1,0,1,1,195.67,49l22.67-22.68a8,8,0,0,1,11.32,11.32l-96,96a8,8,0,0,1-11.32-11.32l27.72-27.72a40,40,0,1,0,17.87,31.09,8,8,0,1,1,16-.9,56,56,0,1,1-22.38-41.65L184.3,60.39a87.88,87.88,0,1,0,23.13,29.67,8,8,0,0,1,14.44-6.9Z"/></svg></button>
-            <!-- PowerMeter: the one settings button, both layouts: opens the Customise panel (pmWidget.js). Icon: the design's own sliders glyph. -->
-            <button type="button" class="pmOnly footerBtn pmCustomBtn" aria-expanded="false" aria-controls="pmCustom" aria-label="Customise meter" data-i18n-aria-label="pmWidget.custom.open" title="Customise meter" data-i18n-title="pmWidget.custom.open"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
+            <!-- PowerMeter: the one settings button, both layouts: opens / closes the Options window (pmWidget.js, Controls.tsx). Icon: the design's own sliders glyph. -->
+            <button type="button" class="pmOnly footerBtn pmCustomBtn" aria-label="Options" data-i18n-aria-label="pmWidget.custom.open" title="Options" data-i18n-title="pmWidget.custom.open"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
             <button
               class="footerBtn metricToggleBtn"
               type="button"
@@ -668,9 +668,6 @@
         </div>
         <!-- PowerMeter: last result, greyed, under the waiting state (design 8.4). -->
         <div class="pmOnly pmLast"><span class="pmLastText"></span><span class="pmSpacer"></span><span class="pmLastDps"></span></div>
-        <!-- PowerMeter: Customise panel of the compact meter (Main.dc.html). Its controls are drawn by
-             pmWidget.js (renderCustom) from the preference list there; preferences persist in pm.compactPrefs. -->
-        <section class="pmOnly pmCustom" id="pmCustom" hidden tabindex="-1" aria-labelledby="pmCustomTitle"></section>
         <div class="resizeHandle" aria-hidden="true"></div>
         <!-- PowerMeter: the other grips of the design's hover frame (8.1). The top-left
              one moves the widget: the window cannot grow up or left. -->

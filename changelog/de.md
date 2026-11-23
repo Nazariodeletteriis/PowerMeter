@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.66
+
+- Geändert: Meter: der Einstellungsknopf öffnet jetzt ein schwebendes Optionen-Fenster, das du überall auf den Bildschirm ziehen kannst (es merkt sich die Position). Es enthält alle Meter-Optionen, Zähler, Trainingspuppe, Fenster und Anordnung; das Panel unter dem Meter entfällt. Deine Einstellungen bleiben erhalten.
+
 ## 0.5.65
 
 - Hinzugefügt: Event-Hinweise erscheinen jetzt in einer eigenen großen Karte oben in der Bildschirmmitte (wie die Pet-Karte), mit Eventname und Live-Countdown; sie sind nicht mehr im Meter.
