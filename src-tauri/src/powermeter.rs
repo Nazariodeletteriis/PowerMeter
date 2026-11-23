@@ -450,12 +450,14 @@ pub fn snap_after_move(window: &tauri::Window) {
 pub fn open_pet_popup_on_start(app: &tauri::AppHandle) {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
-        pet_overlay(&app, "petpop", "PowerMeter — Pet", (360.0, 96.0), None);
-        pet_overlay(&app, "petmarket", "PowerMeter — Black Market", (360.0, 480.0), Some("petMarket"));
+        pet_overlay(&app, "petpop", "PowerMeter — Pet", (360.0, 96.0), None, 72.0);
+        pet_overlay(&app, "petmarket", "PowerMeter — Black Market", (360.0, 480.0), Some("petMarket"), 72.0);
+        // The event popup (EventPopup.tsx): the same kind of card, bigger, just below the pet card.
+        pet_overlay(&app, "eventpop", "PowerMeter — Event", (460.0, 120.0), None, 176.0);
     });
 }
 
-fn pet_overlay(app: &tauri::AppHandle, label: &'static str, title: &str, (w, h): (f64, f64), key: Option<&'static str>) {
+fn pet_overlay(app: &tauri::AppHandle, label: &'static str, title: &str, (w, h): (f64, f64), key: Option<&'static str>, top: f64) {
     let built = tauri::WebviewWindowBuilder::new(app, label, tauri::WebviewUrl::App("dashboard.html".into()))
         .initialization_script(format!("window.__PM_VIEW__ = '{label}';"))
         .title(title)
@@ -493,7 +495,7 @@ fn pet_overlay(app: &tauri::AppHandle, label: &'static str, title: &str, (w, h):
         let scale = m.scale_factor();
         let centre = m.position().x + ((m.size().width as f64 - w * scale) / 2.0) as i32;
         let x = if key.is_some() { centre + (380.0 * scale) as i32 } else { centre };
-        let y = m.position().y + (72.0 * scale) as i32;
+        let y = m.position().y + (top * scale) as i32;
         let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
     }
 }

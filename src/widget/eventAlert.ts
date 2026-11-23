@@ -4,10 +4,10 @@
 // each get their own lead. A line goes at its start; the X hides the lines shown, a later event brings the
 // strip back.
 // Same event rules and maths as the dashboard's Timer (gamedata_events + organizer/schedule.ts); rings the
-// Timer's chime when a new notice appears, if the Timer's sound is on, and opens a popup over the widget for
-// the seconds set in Settings > Widget DPS, unless it is turned off there.
+// Timer's chime when a new notice appears, if the Timer's sound is on, and shows the event popup (its own window at
+// the top centre of the screen, EventPopup.tsx) for the seconds set in Settings > Widget DPS, unless turned off there.
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { emitTo, listen } from "@tauri-apps/api/event";
 import { chime, LEAD_KEY, leadMinutes, POPUP_KEY, POPUP_SECONDS_KEY, popupSeconds, SOUND_KEY, VOLUME_KEY } from "../dashboard/chime";
 import { eventNotice, type GameEvent } from "../dashboard/pages/organizer/schedule";
 
@@ -52,41 +52,9 @@ if (strip && w.A2_VIEW === "main") {
   };
   const say = (key: string, vars: Record<string, string>, fallback: string) => w.i18n?.format?.(key, vars, fallback) ?? fallback;
 
-  // The popup. Its bar's animation is the timer: paused while the pointer or focus is on it, so it can be read.
-  const popup = document.querySelector<HTMLElement>(".pmEventPopup")!;
-  const popupName = popup.querySelector<HTMLElement>(".pmEventPopupName")!;
-  const popupTime = popup.querySelector<HTMLElement>(".pmEventPopupTime")!;
-  const popupAlert = popup.querySelector<HTMLElement>(".pmEventPopupAlert")!;
-  let popupStart = 0; // the start it counts down to; 0 = closed
-  let timer: Animation | undefined;
-  const closePopup = () => {
-    if (!popupStart) return;
-    popupStart = 0;
-    timer?.cancel();
-    popup.classList.add("isLeaving");
-    setTimeout(() => popupStart || (popup.hidden = true), 150); // the leave transition
-  };
-  const showPopup = (name: string, start: number, seconds: number) => {
-    popupStart = start;
-    const time = countdown(start, Date.now());
-    popupName.textContent = name;
-    popupTime.textContent = say("pmWidget.eventStartsIn", { time }, `in ${time}`);
-    popupAlert.textContent = say("pmWidget.eventSoon", { name, time }, `${name} in ${time}`);
-    popup.classList.remove("isLeaving");
-    popup.hidden = false;
-    timer?.cancel();
-    timer = popup.querySelector(".pmEventPopupBar")!.animate([{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }], {
-      duration: seconds * 1000,
-      easing: "linear",
-      fill: "forwards",
-    });
-    timer.finished.then(closePopup, () => {}); // cancel() rejects: a newer popup or the X
-  };
-  popup.querySelector(".pmEventPopupClose")!.addEventListener("click", closePopup);
-  for (const [on, off] of [["pointerenter", "pointerleave"], ["focusin", "focusout"]]) {
-    popup.addEventListener(on, () => timer?.pause());
-    popup.addEventListener(off, () => popupStart && timer?.play());
-  }
+  // The popup is its own window at the top centre of the screen (EventPopup.tsx, "eventpop"), like the pet card.
+  const showPopup = (name: string, start: number, seconds: number) =>
+    void emitTo("eventpop", "event-alert", { name, start, seconds }).catch(() => {});
   // "Preview" next to the popup options in the dashboard.
   listen<{ seconds: number }>("pm-event-popup-test", ({ payload }) =>
     showPopup(say("pmWidget.eventPopupTest", {}, "Test popup"), Date.now() + lead, popupSeconds(String(payload?.seconds))),
@@ -100,12 +68,6 @@ if (strip && w.A2_VIEW === "main") {
       invoke<GameEvent[]>("gamedata_events").then((e) => (events = e), () => (loadedAt = now - RELOAD + 60e3));
     }
     const { soon, fresh } = eventNotice(events, now, lead, announced);
-    if (popupStart) {
-      // Closes on its timer, or when the event starts if that comes first.
-      const time = countdown(popupStart, now);
-      if (popupStart <= now) closePopup();
-      else popupTime.textContent = say("pmWidget.eventStartsIn", { time }, `in ${time}`);
-    }
     const lines = soon.filter((s) => s.start > dismissed);
     if (off || !lines.length) {
       strip.hidden = true;
@@ -125,7 +87,8 @@ if (strip && w.A2_VIEW === "main") {
       const time = countdown(start, now);
       return say("pmWidget.eventSoon", { name, time }, `${name} in ${time}`);
     }).join("\n");
-    strip.hidden = false;
+    // Detached from the widget (Nazario, 0.5.65): the notice is the popup window now; the strip stays hidden.
+    strip.hidden = true;
   };
   tick();
   setInterval(tick, 1000);

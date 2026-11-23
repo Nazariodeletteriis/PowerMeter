@@ -61,5 +61,6 @@
   "events.fb.hint": "Worked out from when the boss died in front of you plus its respawn time. Intervals are estimates; another player may have killed it since.",
   "events.timer.nextSiege": "Next siege",
   "events.timer.tabSiege": "Sieges",
-  "events.cat.siege": "Siege"
+  "events.cat.siege": "Siege",
+  "events.started": "Started"
 }

@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.65
+
+- Ajouté : Les alertes d'événements s'affichent désormais dans leur propre grande carte en haut au centre de l'écran (comme celle des familiers), avec le nom de l'événement et un compte à rebours en direct ; elles ne sont plus dans le compteur.
+- Ajouté : Compteur : couleurs de classe sur les barres et icônes de classe colorées aussi en mode compact ; icônes de compétences dans les détails du joueur et dans le test sur mannequin.
+- Modifié : Compteur : un seul bouton de réglages (en bas à droite) qui ouvre Personnaliser, avec compteurs, mannequin, Contrôles des fenêtres et Autres réglages.
+- Modifié : Compteurs : seul Odyle est affiché par défaut ; activez les autres un par un dans Personnaliser. Ils ne sont plus coupés et ne recouvrent plus le compteur.
+- Corrigé : Compteur compact : le texte d'état n'est plus coupé (un point coloré, détails au survol), plus lisible sur fond clair, carte d'erreur plus nette, les boutons de fenêtre ne recouvrent plus la ligne du boss, plus de cadre coloré autour du compteur lors d'une erreur de capture.
+
 ## 0.5.64
 
 - Ajouté : Fenêtre Contrôles au-dessus du jeu (bouton dans le compteur et le tableau de bord) : afficher ou masquer le compteur DPS, l'Historique, la Carte, Cube Finder, le ping, les alertes d'événements et les compteurs, lancer un test sur mannequin, et « Déplacer les fenêtres » pour les aligner sur une grille (grille masquable ; 8, 16 ou 32 px).

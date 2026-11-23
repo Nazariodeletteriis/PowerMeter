@@ -124,7 +124,7 @@
   --hud-faint: var(--pm-grey);
   --hud-tech: "Inter", "Segoe UI", sans-serif;
   --hud-ident: "Inter", "Segoe UI", sans-serif;
-  --window-opacity: 0.6;
+  --window-opacity: 0.9;
 }
 
 /* Inter for Latin UIs. Korean and Chinese keep their own stacks from styles.css. */
@@ -249,7 +249,7 @@
     cursor: pointer;
   }
   /* Hairlines between the tool icons; the window controls stand apart, wider spaced. */
-  .header :is(.settingsBtn, .pmAvgBtn, .pmCopyBtn, .pmLockBtn, .pmOpacityBtn)::after {
+  .header :is(.pmAvgBtn, .pmCopyBtn, .pmLockBtn, .pmOpacityBtn)::after {
     content: "";
     position: absolute;
     top: 6px;
@@ -263,17 +263,17 @@
      dropped, history lives in the dashboard, reset is the boss row's button
      (and Ctrl+Alt+R). Suspend shows only when turned on in Settings. */
   .header :is(.bossIcon, .historyBtn, .resetBtn, .pmSep) { display: none; }
+  /* One settings button, the footer's Customise (pmCustomBtn), in both layouts: the gear's "More settings"
+     is a link in its panel (core.js still binds the gear, so it stays in the markup). */
+  .header .settingsBtn { display: none; }
   .header .suspendBtn { order: 51; }
-  .header .settingsBtn { order: 61; }
   .header button.pmAvgBtn { order: 61; }
   .header button.pmAvgBtn[aria-pressed="true"] {
     background: color-mix(in srgb, var(--pm-deep) 75%, #000000);
     box-shadow: inset 0 0 0 1px var(--pm-hot);
     color: #ffffff;
   }
-  .header .pmControlsBtn { order: 61; }
   .header .pmLockBtn { order: 62; }
-  .header .pmControlsBtn svg { fill: none; }
   .header .pmOpacityBtn { order: 63; }
   .header .pmPillBtn { order: 64; }
   .header .dashboardBtn { order: 65; }
@@ -607,8 +607,10 @@
     width: 16px; height: 16px;
     background: var(--cls-icon) center / contain no-repeat;
   }
-  .pmCharName { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--cls-text, var(--cls)); }
-  .pmCounters { display: flex; align-items: center; gap: 10px; color: var(--pm-ui-icon); }
+  /* The name whole, the counters wrapping onto a second line when they do not fit beside it. */
+  .pmCharBar { flex-wrap: wrap; row-gap: 4px; }
+  .pmCharName { flex: none; max-width: 100%; white-space: nowrap; color: var(--cls-text, var(--cls)); }
+  .pmCounters { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px 10px; margin-left: auto; color: var(--pm-ui-icon); }
   .pmCounters:empty { display: none; }
   /* One counter (charBar.ts): icon, base, (+charged) in your colour, /max. */
   .pmCounter { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
@@ -736,6 +738,10 @@
     box-shadow: none;
     animation: none;
   }
+  /* Its colour says the connection (pmWidget.js data-pm-conn): amber while it looks for the game, green once
+     connected; the grey ring when the game is not running. */
+  .battleTime[data-pm-conn="detecting"] .status { border-color: #e8b03a; background: #e8b03a; }
+  .battleTime[data-pm-conn="ok"] .status { border-color: #46c46e; background: #46c46e; }
   /* The connection override (core.js applyConnectionStatusOverride) adds state-idle on top of
      the timer's own state, so "fighting + idle" can coexist: idle wins, or the bar went blank. */
   .battleTime.state-fighting:not(.state-idle) .status { display: none; }
@@ -1342,8 +1348,9 @@
      What the design leaves out but the widget needs (window controls, Reset, Only me, Trainer)
      shows on hover / keyboard focus only, so the resting geometry is the design's.
      Preferences (pmWidget.js applyPrefs): .pmPref-* classes, --pm-accent, --pm-card-alpha. --- */
-  .meter.slim {
-    --pm-card: rgba(10, 11, 24, var(--pm-card-alpha, 0.7));
+  .meter.slim,
+  .meter .pmCustom {
+    --pm-card: rgba(10, 11, 24, var(--pm-card-alpha, 0.95));
     --pm-card-line: rgba(255, 255, 255, 0.09);
     --pm-hair: rgba(255, 255, 255, 0.06);
     --pm-c-text: #e8eaf6;
@@ -1351,6 +1358,8 @@
     --pm-c-soft: #c3c7e0;
     --pm-c-label: #d6d9ee;
     --pm-c-ghost: rgba(255, 255, 255, 0.14);
+  }
+  .meter.slim {
     width: 360px;
     max-height: none !important; /* the panel below the card must never be cut by a dragged height */
     /* The card's height is its rows ("Visible players"): a height dragged in the Interface layout
@@ -1504,6 +1513,19 @@
     transition: opacity 150ms cubic-bezier(0.23, 1, 0.32, 1);
   }
   .meter.slim:is(:hover, :has(:focus-visible)) .header .headerBtns { opacity: 1; pointer-events: auto; }
+  /* Shown, they never cover data: they take the timer's place in the first row (the target-mode select
+     stays beside them, reachable), in the flow and at the tabs' 24px, so nothing else moves. With the
+     header off (Minimal) the same row opens for them. */
+  .meter.slim:is(:hover, :has(:focus-visible)) .header .headerBtns {
+    position: static;
+    grid-area: 1 / 4;
+    justify-self: end;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .meter.slim:is(:hover, :has(:focus-visible)) .header .battleTime { display: none; }
+  .meter.slim:not(.pmPref-header):is(:hover, :has(:focus-visible)) .header { padding: 4px 10px; }
   .meter.slim .header .headerBtns .headerBtn { width: 24px; height: 24px; margin: 0; }
   .meter.slim .header .headerBtns .headerBtn svg { width: 13px; height: 13px; }
   .meter.slim .header .headerBtns .headerBtn::after { content: none; }
@@ -1570,6 +1592,10 @@
     opacity: 0.22;
   }
   .meter.slim .list .item.isUser .fill { opacity: 0.38; }
+  /* "Class" bar colour (default, pmWidget.js .pmBars-class): every bar in its class colour, as in the
+     Interface layout; your row stays ringed in the accent. */
+  .meter.slim.pmBars-class .list .item .fill { background: var(--cls, var(--pm-accent)); opacity: 0.3; }
+  .meter.slim.pmBars-class .list .item.isUser .fill { opacity: 0.45; }
   .meter.slim .list .item .rank {
     display: block;
     width: 12px;
@@ -1587,10 +1613,9 @@
     border: 0;
     border-radius: 0;
     box-shadow: none;
-    background: var(--pm-c-muted);
+    background: var(--cls, var(--pm-c-muted)); /* the class's own colour, as in the Interface layout */
     mask: var(--cls-icon) center / contain no-repeat;
   }
-  .meter.slim .list .item.isUser .classIcon { background: var(--pm-accent); }
   .meter.slim .list .item :is(.name, .name.isCjk) {
     flex: 1 1 0;
     padding: 0;
@@ -1669,7 +1694,6 @@
   @media (hover: hover) and (pointer: fine) {
     .meter.slim .footerBtns :is(.pmLiveResetBtn, .onlyMeBtn, .pmTrainerBtn, .pmCustomBtn):hover { border-color: rgba(255, 255, 255, 0.3); color: #ffffff; background: transparent; }
   }
-  .pmCustomBtn,
   .pmCustom { display: none; }
 
   /* Customise panel */
@@ -1677,6 +1701,11 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
+    /* Scrolls past this, so the window (which follows .meter) stays on a 1080p screen. */
+    max-height: 440px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
     margin-top: 12px;
     padding: 12px;
     border: 1px solid var(--pm-card-line);
@@ -1742,6 +1771,10 @@
     background: var(--swatch);
   }
   .pmSwatches > button[aria-pressed="true"] { border-color: #ffffff; }
+  /* The "Class" swatch: the class colours ([data-cls] at the end of this file) round the dial. */
+  .pmCustom {
+    --pm-class-swatch: conic-gradient(#4da8e0 0 12.5%, #2f62e8 0 25%, #42c169 0 37.5%, #46c46e 0 50%, #a65be0 0 62.5%, #c84cb8 0 75%, #f5d547 0 87.5%, #ff8a2b 0);
+  }
 
   /* The cards' actions are laid out for the Interface width: at the compact width they wrap
      under the text, each label whole; the card's Reset is the footer's, right below. */
@@ -1754,9 +1787,155 @@
 
   @media (prefers-reduced-motion: reduce) {
     .meter.slim .footerBtns :is(.pmLiveResetBtn, .onlyMeBtn, .pmTrainerBtn, .pmCustomBtn),
-    .pmSeg > button { transition: opacity 150ms ease; transform: none !important; }
+    .pmSeg > button,
+    .pmCustomLink { transition: opacity 150ms ease; transform: none !important; }
     .pmKnob { transition: background-color 150ms ease; }
   }
+  /* --- Compact, November 2026 fixes (Nazario on 0.5.64) --- */
+  /* The character bar and its counters are the card's first band, inside its width: the counters wrap
+     onto a second line rather than run out of the window (only Odyle shows unless switched on). */
+  .meter.slim > .pmTopRow {
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    padding: 8px 10px 0;
+    border: 1px solid var(--pm-card-line);
+    border-bottom: 0;
+    border-radius: var(--pm-r-container) var(--pm-r-container) 0 0;
+    background: var(--pm-card);
+  }
+  .meter.slim:has(> .pmTopRow > :not([hidden])) > .header { border-top: 0; border-radius: 0; }
+  .meter.slim .pmEventStrip { flex: 1 1 100%; }
+  .meter.slim .pmCharBar {
+    flex: 1 1 100%;
+    max-width: none;
+    margin: 0;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    font-size: 12px;
+    line-height: 16px;
+  }
+  .meter.slim .pmCounters { flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; margin-left: auto; color: var(--pm-c-text); }
+  .meter.slim .pmCounterMax { color: var(--pm-c-muted); }
+  .meter.slim .pmCounter > img { width: 16px; height: 16px; }
+
+  /* Status: the dot alone (its colour, tooltip and name from pmWidget.js); the words never fit beside
+     the tabs in every language and showed cut ("Rilevamento della conn..."). */
+  .meter.slim .battleTime .analysisStatus { display: none; }
+  .meter.slim .battleTime .status { width: 8px; height: 8px; box-sizing: border-box; }
+
+  /* Legibility over a bright desktop: the card is 0.95 opaque by default (design 0.7, raised on request:
+     its muted text fell under 3:1 over white). "Transparent" keeps the see-through card and gives the
+     text a dark halo, so it never melts into what is behind. */
+  .meter.slim.pmBg-clear > :not(.pmCustom) {
+    --pm-c-muted: #c3c7e0;
+    text-shadow: 0 0 2px rgba(5, 6, 13, 0.95), 0 0 6px rgba(5, 6, 13, 0.7);
+  }
+
+  /* The settings button stays findable over a bright desktop in "Transparent" (a halo does not reach a border). */
+  .meter.slim.pmBg-clear .footerBtns .pmCustomBtn { border-color: rgba(255, 255, 255, 0.35); background: rgba(10, 11, 24, 0.75); }
+  /* Capture error card: the design's 10px padding, 8px radius around the card, 6px on the button. */
+  .meter.slim.pmMode-dps.pmView-error .pmError {
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px;
+  }
+  .meter.slim .pmError > svg { width: 16px; height: 16px; margin-top: 1px; }
+  .meter.slim .pmError .pmCardText { flex-basis: calc(100% - 24px); }
+  .meter.slim .pmCardTitle { font-size: 13px; font-weight: 600; line-height: 18px; color: var(--pm-c-text); }
+  .meter.slim .pmError .pmCardSub { margin-top: 2px; font-size: 11px; line-height: 16px; color: var(--pm-c-soft); }
+  .meter.slim .pmError .pmGhostBtn {
+    height: 28px;
+    border-color: var(--pm-c-ghost);
+    border-radius: var(--pm-r-btn);
+    color: var(--pm-c-text);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* The panel's links (Window controls, More settings), under its options. */
+  .pmCustomLinks { display: flex; flex-direction: column; gap: 4px; padding-top: 12px; border-top: 1px solid var(--pm-hair); }
+  .pmCustomLink {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 28px;
+    padding: 0 8px;
+    border: 1px solid var(--pm-c-ghost);
+    border-radius: var(--pm-r-btn);
+    background: transparent;
+    color: var(--pm-c-label);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: left;
+    transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .pmCustomLink > svg { flex: none; color: var(--pm-c-muted); }
+  .pmCustomLink:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    .pmCustomLink:hover { border-color: rgba(255, 255, 255, 0.3); color: #ffffff; }
+  }
+
+  /* Interface layout: the same button, last in the footer, opens the same panel over the list
+     (the window does not grow there), with only what applies to this layout. */
+  .meter:not(.slim) .footerBtns .pmCustomBtn {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--pm-r-btn);
+    background: transparent;
+    color: var(--pm-ui-icon);
+    cursor: pointer;
+  }
+  .meter:not(.slim) .footerBtns .pmCustomBtn[aria-expanded="true"] { border-color: #ffffff; color: #ffffff; }
+  .meter:not(.slim) .footerBtns .pmCustomBtn:focus-visible { outline: 2px solid #ffffff; outline-offset: 1px; }
+  @media (hover: hover) and (pointer: fine) {
+    .meter:not(.slim) .footerBtns .pmCustomBtn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
+  }
+  .meter:not(.slim) .pmCustom:not([hidden]) {
+    position: absolute;
+    right: 8px;
+    bottom: 34px;
+    z-index: 6;
+    /* Two columns (counters | mode and links), so it fits the meter's height without scrolling. */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    align-content: start;
+    gap: 14px 24px;
+    box-sizing: border-box;
+    width: min(520px, calc(100% - 16px));
+    max-height: calc(100% - 50px);
+    overflow-y: auto;
+    padding: 12px;
+    border: 1px solid var(--pm-card-line);
+    border-radius: var(--pm-r-container);
+    background: #0d0f1f;
+    color: var(--pm-c-text);
+    font-family: "Inter", "Segoe UI", sans-serif, var(--cjk-font-stack);
+    font-size: 12px;
+    scrollbar-width: thin;
+  }
+  .meter:not(.slim) .pmCustomCompact { display: none; }
+  /* A short meter (capture error, waiting) grows while the panel is open, so the panel fits whole. */
+  .meter:not(.slim):has(> .pmCustom:not([hidden])) { min-height: 340px; }
+  .meter:not(.slim):has(> .pmCustom:not([hidden])) > .meterFooter { margin-top: auto; }
+  .meter:not(.slim) .pmCustomHead { grid-column: 1 / -1; }
+  .meter:not(.slim) .pmCustom > .pmCustomGroup:not(.pmCustomCompact) { grid-row: span 2; }
+  .meter:not(.slim) .pmCustom > .pmCustomGroup:not(.pmCustomCompact) ~ .pmCustomGroup { grid-row: auto; }
+  .meter:not(.slim) .pmCustomLinks { padding-top: 0; border-top: 0; }
+  /* The list follows the opacity setting (30% at the lowest): its text keeps a dark halo over a bright game. */
+  /* The state cards are one message, not a table to see the game through: a near-solid surface. */
+  .meter:not(.slim) > :is(.pmEmpty, .pmError, .pmDetail, .pmTrainer) { background: color-mix(in srgb, var(--pm-wsurf) 94%, transparent); }
+  .meter:not(.slim) > :is(.pmCols, .list, .pmEmpty, .pmError, .pmLast) { text-shadow: 0 0 2px rgba(0, 0, 0, 0.9), 0 1px 3px rgba(0, 0, 0, 0.7); }
+
   .pmHpPct { display: none; }
   .meter.slim .bossHpBar:not([style*="none"]) .pmHpPct { display: inline; }
 
@@ -1865,7 +2044,8 @@
   /* An empty mode still shows what the engine is recording and the mode button, to switch to it. */
   .meter.pmMode-dps.pmView-waiting:not(.isPmAvg) .header .bossNames { display: grid; }
   /* The footer too: the Trainer starts from the dummy, before any fight is on screen. */
-  .meter.pmMode-dps.pmView-waiting.pmView-waiting:not(.isPmAvg) .meterFooter { display: flex; } /* class doubled: outweighs the :is() hide above */
+  .meter.pmMode-dps:is(.pmView-waiting, .pmView-error).pmView-waiting.pmView-waiting:not(.isPmAvg) .meterFooter,
+  .meter.pmMode-dps.pmView-error.pmView-error.pmView-error:not(.isPmAvg) .meterFooter { display: flex; } /* classes doubled: outweigh the :is() hide above; the footer holds the settings button */
   .meter.pmMode-dps.pmView-waiting { min-height: 220px; }
   /* Compact: the boss row stays dissolved into the header rows, and the card keeps its own height. */
   .meter.slim.pmMode-dps.pmView-waiting:not(.isPmAvg) .header .bossNames { display: contents; }
@@ -1900,10 +2080,10 @@
   }
   .pmLastDps { font-family: var(--pm-mono); }
 
-  /* --- 8.4 capture error: the whole widget is ringed in red --- */
+  /* --- 8.4 capture error: no ring round the widget (with a coloured theme it read as a window frame, Nazario
+     0.5.64); the error card says it. --- */
   .meter.pmMode-dps.pmView-error {
     min-height: 0;
-    box-shadow: 0 0 0 1px var(--pm-red);
   }
   .meter.pmMode-dps.pmView-error .pmError,
   .meter.pmMode-dps.pmView-ended.isPmUploaded .pmUploaded {
@@ -2151,6 +2331,19 @@
     min-height: 0;
   }
   .pmTrainerTitle { font-weight: 600; }
+  .pmTrainer[data-cls=""] .pmTrainerCls,
+  .pmTrainer:not([data-cls]) .pmTrainerCls { display: none; }
+  /* A long skill name takes a second line rather than lose its end. */
+  .pmSkill:has(> .pmSkillName) { height: auto; min-height: 24px; padding-block: 4px; }
+  .pmSkill > span.pmSkillName { display: flex; align-items: center; gap: 6px; white-space: normal; text-overflow: clip; overflow-wrap: anywhere; line-height: 16px; }
+  /* Each skill's icon before its name (pmWidget.js renderDetail, skillIcons.js). */
+  .pmSkillIcon {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    border-radius: 3px;
+    object-fit: cover;
+  }
   .pmTrainerBody {
     display: flex;
     flex: 1;

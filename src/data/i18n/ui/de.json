@@ -347,6 +347,7 @@
       "bgFull": "Voll",
       "color": "Balkenfarbe",
       "colors": {
+        "class": "Klasse",
         "azure": "Azur",
         "violet": "Violett",
         "green": "Grün",
@@ -354,7 +355,10 @@
         "pink": "Rosa"
       },
       "mode": "Modus",
-      "dummy": "Trainingspuppe"
+      "dummy": "Trainingspuppe",
+      "counters": "Zähler",
+      "controls": "Fenstersteuerung",
+      "more": "Weitere Einstellungen"
     },
     "controls": "Steuerung"
   }

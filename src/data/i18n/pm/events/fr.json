@@ -61,5 +61,6 @@
   "events.fb.hint": "Calculé à partir de l'heure où le boss est mort devant vous plus son délai de réapparition. Les intervalles sont estimés ; un autre joueur a pu le tuer entre-temps.",
   "events.timer.nextSiege": "Prochain siège",
   "events.timer.tabSiege": "Sièges",
-  "events.cat.siege": "Siège"
+  "events.cat.siege": "Siège",
+  "events.started": "Commencé"
 }

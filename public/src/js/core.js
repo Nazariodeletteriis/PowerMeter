@@ -2017,8 +2017,8 @@ class DpsApp {
 
     // settings.json first, as for every other option: the dashboard writes it there.
     const storedWindowOpacity = this.safeGetSetting(this.storageKeys.windowOpacity);
-    // 60: PowerMeter, the design's standard widget opacity.
-    this.applyWindowOpacity(String(storedWindowOpacity ?? "").trim() !== "" ? storedWindowOpacity : 60);
+    // 90: the design's 60 left the list unreadable over a bright game (Nazario, 0.5.64); the user's value wins.
+    this.applyWindowOpacity(String(storedWindowOpacity ?? "").trim() !== "" ? storedWindowOpacity : 90);
 
     // Mirror each Details slider's position into a CSS custom property so the
     // track can paint a filled portion. Presentation only — no setting reads it.

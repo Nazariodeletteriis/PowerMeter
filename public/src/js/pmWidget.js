@@ -72,11 +72,6 @@ const createPmWidget = (app) => {
     }
   };
 
-  // --- Controls window (src/dashboard/Controls.tsx, opened by the backend).
-  $(".pmControlsBtn")?.addEventListener("click", () =>
-    invoke("open_controls_window").catch((err) => console.error("[PowerMeter] open_controls_window failed", err))
-  );
-
   // --- lock: keeps the meter in place (start_drag does nothing), everything else stays clickable.
   // Also toggled by the global hotkey, hence the event.
   const lockBtn = $(".pmLockBtn");
@@ -214,13 +209,30 @@ const createPmWidget = (app) => {
       .map(([label, value]) => `<div class="pmBadge"><div>${label}</div><div>${pct(value)}</div></div>`)
       .join("");
     const top = list[0]?.dmg || 1;
+    // The icons already resolved, kept across the per-second redraw (no new fetch, no wand flashing).
+    const icons = new Map([...$in(".pmSkills").querySelectorAll(".pmSkillIcon")].map((img) => [img.dataset.key, img]));
     $in(".pmSkills").innerHTML = list
       .map((s) => {
         // Heal ticks carry no crit data from the engine.
         const crit = heal || !s.time ? "-" : pct((s.crit / s.time) * 100);
-        return `<div class="pmSkillGrid pmSkill"><div class="pmSkillBar" style="width:${((s.dmg / top) * 100).toFixed(1)}%"></div><span>${esc(s.name)}</span><span>${num(s.dmg)}</span><span>${pct(total ? (s.dmg / total) * 100 : 0)}</span><span>${num(s.time)}</span><span>${crit}</span></div>`;
+        return `<div class="pmSkillGrid pmSkill"><div class="pmSkillBar" style="width:${((s.dmg / top) * 100).toFixed(1)}%"></div><span class="pmSkillName"><img class="pmSkillIcon" alt="" referrerpolicy="no-referrer">${esc(s.name)}</span><span>${num(s.dmg)}</span><span>${pct(total ? (s.dmg / total) * 100 : 0)}</span><span>${num(s.time)}</span><span>${crit}</span></div>`;
       })
       .join("");
+    // Each skill's icon (skillIcons.js, as the Details window), by code and the player's class; the wand if none.
+    const job = app.latestRowsById?.get(String(row.id))?.job || row.job || "";
+    $in(".pmSkills")
+      .querySelectorAll(".pmSkillIcon")
+      .forEach((img, i) => {
+        const key = `${list[i].code}|${list[i].name}`;
+        const known = icons.get(key);
+        if (known) {
+          icons.delete(key);
+          return img.replaceWith(known);
+        }
+        img.dataset.key = key;
+        img.addEventListener("error", () => window.skillIcons?.handleImgError?.(img));
+        window.skillIcons?.applyIconToImage?.(img, { ...list[i], job });
+      });
   };
   const refreshDetail = async () => {
     if (!detailRow) return;
@@ -470,6 +482,7 @@ const createPmWidget = (app) => {
     const mode = app.safeParseJSON(window.dpsData?.getDpsData?.(), null)?.targetMode;
     trainer = { prevMode: mode && mode !== "dummyTargets" ? mode : app.targetSelection };
     meter.classList.add("isPmTrainer");
+    trainerEl.dataset.cls = $(".pmCharBar")?.dataset.cls || ""; // your class (src/widget/charBar.ts)
     countdown(TRAINER_COUNTDOWN);
     $(".pmTrainerClose").focus();
     syncCustom();
@@ -612,6 +625,21 @@ const createPmWidget = (app) => {
       app.pcapError ? t("pmWidget.error.title", "Capture stopped") : t("pmWidget.error.notConnected", "Not connected to the game")
     );
 
+    // Compact shows the status as its dot alone (the text did not fit): the dot's colour says the connection,
+    // its tooltip and name say the words (powermeter-theme.css [data-pm-conn]).
+    const statusRoot = document.querySelector(".battleTime");
+    const statusDot = statusRoot?.querySelector(".status");
+    if (statusDot) {
+      const conn = app._captureSuspended || !app.aionRunning ? "off" : app.isDetectingPort ? "detecting" : "ok";
+      if (statusRoot.dataset.pmConn !== conn) statusRoot.dataset.pmConn = conn;
+      const words = statusRoot.querySelector(".analysisStatus")?.textContent.trim() || "";
+      if (statusDot.title !== words) {
+        statusDot.title = words;
+        statusDot.setAttribute("aria-label", words);
+        statusDot.setAttribute("role", "img");
+      }
+    }
+
     const hasRows = !!app.elList?.classList.contains("hasRows");
     let next = "live";
     if (!hasRows) next = error ? "error" : "waiting";
@@ -678,13 +706,19 @@ const createPmWidget = (app) => {
   // whitelist, so nothing saved ever reaches a style unchecked. Applied as classes and two
   // custom properties on .meter, used by the Compact rules only (powermeter-theme.css).
   const PREFS_KEY = "pm.compactPrefs";
-  const ACCENTS = { azure: "#4cc2ff", violet: "#a78bfa", green: "#34d399", amber: "#fbbf24", pink: "#fb7185" };
-  const BGS = { clear: 0.4, soft: 0.7, full: 1 };
+  // "class" (default): each row's bar in its class colour, as in the Interface layout ([data-cls] --cls in
+  // powermeter-theme.css); the UI accent (switches, your ring, the HP bar) is then the azure.
+  const ACCENTS = { class: "#4cc2ff", azure: "#4cc2ff", violet: "#a78bfa", green: "#34d399", amber: "#fbbf24", pink: "#fb7185" };
+  const PREFS_VERSION = 2; // 2: "class" bars became the default
+  // Card opacity. The design's 0.4 / 0.7 left the text unreadable over a bright desktop (Nazario, 0.5.64):
+  // 0.95 keeps the muted text well over 4.5:1 on white and hides what is behind; "clear" stays see-through
+  // and gives the text a halo instead (powermeter-theme.css .pmBg-clear).
+  const BGS = { clear: 0.7, soft: 0.95, full: 1 };
   const ROW_COUNTS = [3, 5, 8];
   const SWITCHES = ["icons", "rank", "bars", "header", "cTotal", "cRate", "cShare", "cDeaths"];
   const PRESETS = {
     min: { icons: false, rank: false, bars: true, header: false, cTotal: false, cRate: true, cShare: false, cDeaths: false, dense: true, rows: 5, bg: "clear" },
-    std: { icons: false, rank: false, bars: true, header: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft" },
+    std: { icons: true, rank: false, bars: true, header: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft" },
     full: { icons: true, rank: true, bars: true, header: true, cTotal: true, cRate: true, cShare: true, cDeaths: true, dense: false, rows: 8, bg: "full" },
   };
   const readPrefs = () => {
@@ -694,20 +728,49 @@ const createPmWidget = (app) => {
     } catch {
       // unreadable: the defaults
     }
-    const prefs = { ...PRESETS.std, accent: "azure" };
+    const prefs = { ...PRESETS.std, accent: "class" };
     for (const key of [...SWITCHES, "dense"]) if (typeof saved[key] === "boolean") prefs[key] = saved[key];
+    if (saved.v !== PREFS_VERSION) prefs.icons = true; // class icons became the default with version 2
     if (ROW_COUNTS.includes(saved.rows)) prefs.rows = saved.rows;
     if (Object.hasOwn(BGS, saved.bg)) prefs.bg = saved.bg;
-    if (Object.hasOwn(ACCENTS, saved.accent)) prefs.accent = saved.accent;
+    // 0.5.64 saved its default azure with any change: only a colour picked since counts.
+    if (Object.hasOwn(ACCENTS, saved.accent) && (saved.v === PREFS_VERSION || saved.accent !== "azure")) prefs.accent = saved.accent;
     return prefs;
   };
   let prefs = readPrefs();
   const isSlim = () => meter.classList.contains("slim");
   const applyPrefs = () => {
     meter.style.setProperty("--pm-accent", ACCENTS[prefs.accent]);
+    meter.classList.toggle("pmBars-class", prefs.accent === "class");
     meter.style.setProperty("--pm-card-alpha", String(BGS[prefs.bg]));
     for (const key of [...SWITCHES, "dense"]) meter.classList.toggle(`pmPref-${key}`, prefs[key]);
+    meter.classList.toggle("pmBg-clear", prefs.bg === "clear");
   };
+  // Counters of the character bar (src/widget/charBar.ts, which draws them): one switch each, saved in the
+  // settings so the dashboard and every window agree. Unset = Odyle only. [game id, label key, fallback]
+  const COUNTER_KEY = "pm.counters.show.";
+  const COUNTERS = [
+    ["60000001", "counterOdyle", "Odyle"],
+    ["4", "counterNightmare", "Nightmare"],
+    ["101", "counterDailyDungeon", "Daily Dungeon"],
+    ["8", "counterBeritraKeys", "Beritra keys"],
+    ["1", "counterShugoKeys", "Shugo Festival keys"],
+  ];
+  let settings = {};
+  const counterShown = (id) => (settings[COUNTER_KEY + id] ?? (id === "60000001" ? "1" : "0")) === "1";
+  invoke("get_settings")
+    .then((s) => {
+      settings = { ...s, ...settings };
+      syncCustom();
+    })
+    .catch((err) => console.error("[PowerMeter] get_settings failed", err));
+  window.__TAURI__.event
+    .listen("setting-changed", ({ payload }) => {
+      if (!String(payload?.key).startsWith(COUNTER_KEY)) return;
+      settings[payload.key] = String(payload.value);
+      syncCustom();
+    })
+    .catch((err) => console.error("[PowerMeter] setting-changed listener failed", err));
   const customEl = $(".pmCustom");
   const customBtn = $(".pmCustomBtn");
   // The panel's controls, drawn once per language; their state is synced in place (syncCustom),
@@ -717,28 +780,39 @@ const createPmWidget = (app) => {
     const L = (key, fallback) => esc(t(`pmWidget.custom.${key}`, fallback));
     const seg = (attr, options) =>
       `<div class="pmSeg">${options.map(([value, label]) => `<button type="button" ${attr}="${value}">${label}</button>`).join("")}</div>`;
-    const group = (label, body) => `<div class="pmCustomGroup"><span class="pmCustomLabel">${label}</span>${body}</div>`;
+    // compact: a Compact-only group (the Interface layout ignores those preferences, so it does not offer them).
+    const group = (label, body, compact) =>
+      `<div class="pmCustomGroup${compact ? " pmCustomCompact" : ""}"><span class="pmCustomLabel">${label}</span>${body}</div>`;
     const swit = (attr, value, label) =>
       `<div class="pmSwitchRow"><span>${label}</span><button type="button" role="switch" ${attr}="${value}" aria-label="${label}"><span class="pmKnob"></span></button></div>`;
+    const link = (attr, label) =>
+      `<button type="button" class="pmCustomLink" ${attr}><span>${label}</span><svg viewBox="0 0 256 256" width="12" height="12" fill="currentColor" aria-hidden="true" focusable="false"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></button>`;
     customEl.innerHTML = [
       `<div class="pmCustomHead"><span id="pmCustomTitle">${L("title", "Customise")}</span><button type="button" class="pmCustomClose" aria-label="${L("closeLabel", "Close settings")}">${esc(t("pmWidget.close", "Close"))}</button></div>`,
-      group(L("preset", "Preset"), seg("data-preset", [["min", L("presets.min", "Minimal")], ["std", L("presets.std", "Standard")], ["full", L("presets.full", "Complete")]])),
+      group(L("preset", "Preset"), seg("data-preset", [["min", L("presets.min", "Minimal")], ["std", L("presets.std", "Standard")], ["full", L("presets.full", "Complete")]]), true),
       group(
         L("elements", "Elements"),
         [["icons", "Class icons"], ["rank", "Position (#)"], ["bars", "Background bars"], ["header", "Header and boss"], ["cTotal", "Total column"], ["cRate", "Per-second column"], ["cShare", "Share % column"], ["cDeaths", "Deaths column"]]
           .map(([key, fallback]) => swit("data-switch", key, L(key, fallback)))
-          .join("")
+          .join(""),
+        true
       ),
-      group(L("density", "Row density"), seg("data-dense", [["true", L("dense", "Compact")], ["false", L("normal", "Normal")]])),
-      group(L("rows", "Visible players"), seg("data-rows", ROW_COUNTS.map((n) => [n, n]))),
-      group(L("bg", "Background"), seg("data-bg", [["clear", L("bgClear", "Transparent")], ["soft", L("bgSoft", "Soft")], ["full", L("bgFull", "Solid")]])),
+      group(L("density", "Row density"), seg("data-dense", [["true", L("dense", "Compact")], ["false", L("normal", "Normal")]]), true),
+      group(L("rows", "Visible players"), seg("data-rows", ROW_COUNTS.map((n) => [n, n])), true),
+      group(L("bg", "Background"), seg("data-bg", [["clear", L("bgClear", "Transparent")], ["soft", L("bgSoft", "Soft")], ["full", L("bgFull", "Solid")]]), true),
       group(
         L("color", "Bar colour"),
         `<div class="pmSwatches">${Object.entries(ACCENTS)
-          .map(([key, hex]) => `<button type="button" data-accent="${key}" style="--swatch:${hex}" aria-label="${L(`colors.${key}`, key)}"></button>`)
-          .join("")}</div>`
+          .map(([key, hex]) => `<button type="button" data-accent="${key}" style="--swatch:${key === "class" ? "var(--pm-class-swatch)" : hex}" aria-label="${L(`colors.${key}`, key)}" title="${L(`colors.${key}`, key)}"></button>`)
+          .join("")}</div>`,
+        true
+      ),
+      group(
+        L("counters", "Counters"),
+        COUNTERS.map(([id, key, fallback]) => swit("data-counter", id, esc(t(`pmWidget.${key}`, fallback)))).join("")
       ),
       group(L("mode", "Mode"), swit("data-dummy", "on", L("dummy", "Training dummy"))),
+      `<div class="pmCustomLinks">${link("data-link=\"controls\"", L("controls", "Window controls"))}${link("data-link=\"settings\"", L("more", "More settings"))}</div>`,
     ].join("");
     syncCustom();
   };
@@ -753,12 +827,15 @@ const createPmWidget = (app) => {
     set("[data-bg]", (el) => prefs.bg === el.dataset.bg);
     set("[data-accent]", (el) => prefs.accent === el.dataset.accent);
     set("[data-dummy]", () => !!trainer, "aria-checked");
+    set("[data-counter]", (el) => counterShown(el.dataset.counter), "aria-checked");
   }
   const setCustomOpen = (open) => {
     if (!customEl) return;
     customEl.hidden = !open;
     customBtn?.setAttribute("aria-expanded", String(open));
-    if (open) customEl.focus(); // the panel itself: Tab goes on to its controls, no ring on a click
+    // The panel itself: Tab goes on to its controls, no ring on a click. No scroll: the window grows to the
+    // panel a moment later (tauriBridge.js), and a scroll made before that left the card's top out of view.
+    if (open) customEl.focus({ preventScroll: true });
     else customBtn?.focus();
   };
   customBtn?.addEventListener("click", () => setCustomOpen(customEl.hidden));
@@ -771,6 +848,17 @@ const createPmWidget = (app) => {
     const d = btn.dataset;
     if (btn.classList.contains("pmCustomClose")) return setCustomOpen(false);
     if (d.dummy) return trainer ? closeTrainer() : openTrainer();
+    if (d.counter) {
+      const value = counterShown(d.counter) ? "0" : "1";
+      settings[COUNTER_KEY + d.counter] = value; // at once; setting-changed confirms it
+      syncCustom();
+      return invoke("update_settings", { key: COUNTER_KEY + d.counter, value }).catch((err) =>
+        console.error("[PowerMeter] counter switch failed", err)
+      );
+    }
+    if (d.link === "controls")
+      return invoke("open_controls_window").catch((err) => console.error("[PowerMeter] open_controls_window failed", err));
+    if (d.link === "settings") return window.javaBridge?.openWidgetSettings?.();
     if (d.preset) prefs = { ...prefs, ...PRESETS[d.preset] };
     else if (d.switch) prefs = { ...prefs, [d.switch]: !prefs[d.switch] };
     else if (d.dense) prefs = { ...prefs, dense: d.dense === "true" };
@@ -778,7 +866,7 @@ const createPmWidget = (app) => {
     else if (d.bg) prefs = { ...prefs, bg: d.bg };
     else if (d.accent) prefs = { ...prefs, accent: d.accent };
     else return;
-    app.safeSetStorage(PREFS_KEY, JSON.stringify(prefs));
+    app.safeSetStorage(PREFS_KEY, JSON.stringify({ ...prefs, v: PREFS_VERSION }));
     applyPrefs();
     syncCustom();
     if (frame) app.meterUI.updateFromRows(frame.rows); // the visible players, at once

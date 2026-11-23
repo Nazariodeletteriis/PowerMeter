@@ -347,6 +347,7 @@
       "bgFull": "Solid",
       "color": "Bar colour",
       "colors": {
+        "class": "Class",
         "azure": "Azure",
         "violet": "Violet",
         "green": "Green",
@@ -354,7 +355,10 @@
         "pink": "Pink"
       },
       "mode": "Mode",
-      "dummy": "Training dummy"
+      "dummy": "Training dummy",
+      "counters": "Counters",
+      "controls": "Window controls",
+      "more": "More settings"
     },
     "controls": "Controls"
   }

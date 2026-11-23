@@ -18,9 +18,12 @@ type I18n = { format?: (key: string, vars: Record<string, string>, fallback: str
 const COUNTER_POLL_MS = 2000;
 /** Last counters read for a character (+ its name), in this window's storage. */
 const REMEMBER_KEY = "pm.counters.";
+const SHOW_KEY = "pm.counters.show.";
+const DEFAULT_SHOWN = 60000001; // Odyle
 /**
- * The counters shown, in order (Nazario's: Nightmare, Daily Dungeon, Beritra, Shugo, Odyle): game id (capture/counters.rs),
+ * The counters, in order (Nazario's: Nightmare, Daily Dungeon, Beritra, Shugo, Odyle): game id (capture/counters.rs),
  * the base's max from the game's tooltip (null: not known yet, shown without), label key, icon (the game's, Nazario's set).
+ * Each one shows by its switch in the Customise panel (pmWidget.js): `pm.counters.show.<id>` "1" / "0", unset = Odyle only.
  */
 const COUNTERS: [number, number | null, string, string, string][] = [
   [4, null, "pmWidget.counterNightmare", "Nightmare", nightmareIcon],
@@ -68,6 +71,7 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
       counts = remembered();
       showCounters();
     }
+    fold();
   };
 
   // Counter id → [base, charged]. Always shown: one not known yet reads "–" until the game sends it.
@@ -80,9 +84,10 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
     }
   };
   // Controls window: "Counters" off hides them (pm.counters.off).
+  const shown = (id: number) => (settings[SHOW_KEY + id] ?? (id === DEFAULT_SHOWN ? "1" : "0")) === "1";
   const showCounters = () => {
     slot.hidden = settings["pm.counters.off"] === "1";
-    const html = COUNTERS.map(([id, max, key, fallback, icon]) => {
+    const html = COUNTERS.filter(([id]) => shown(id)).map(([id, max, key, fallback, icon]) => {
       const c = counts[id];
       const label = i18n()?.format?.(key, {}, fallback) ?? fallback;
       const of = max === null ? "" : ` / ${max}`;
@@ -92,6 +97,11 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
       return `<span class="pmCounter" title="${title}" aria-label="${title}"><img src="${icon}" alt=""><span>${value}${maxText}</span></span>`;
     }).join("");
     if (slot.innerHTML !== html) slot.innerHTML = html;
+    fold();
+  };
+  // Nothing to show (no character, every counter off): the bar goes, and the top row with it (powermeter-theme.css).
+  const fold = () => {
+    bar.hidden = name.hidden && (slot.hidden || !slot.childElementCount);
   };
   const poll = () =>
     invoke<Record<string, [number, number]>>("get_counters").then((c) => {
@@ -125,10 +135,11 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
   invoke<Record<string, string>>("get_settings").then((s) => {
     settings = s;
     show();
+    showCounters(); // the switches saved last time
   }, () => {});
   listen<{ key: string; value: string }>("setting-changed", ({ payload }) => {
     settings = { ...settings, [payload.key]: String(payload.value) };
     show();
-    if (payload.key === "pm.counters.off") showCounters();
+    if (payload.key === "pm.counters.off" || payload.key.startsWith(SHOW_KEY)) showCounters();
   }).catch(() => {});
 }

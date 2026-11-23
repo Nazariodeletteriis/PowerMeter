@@ -347,6 +347,7 @@
       "bgFull": "不透明",
       "color": "バーの色",
       "colors": {
+        "class": "クラス",
         "azure": "空色",
         "violet": "紫",
         "green": "緑",
@@ -354,7 +355,10 @@
         "pink": "ピンク"
       },
       "mode": "モード",
-      "dummy": "訓練用かかし"
+      "dummy": "訓練用かかし",
+      "counters": "カウンター",
+      "controls": "ウィンドウ操作",
+      "more": "その他の設定"
     },
     "controls": "コントロール"
   }

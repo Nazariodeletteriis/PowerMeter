@@ -63,7 +63,7 @@ const TARGET_MODES = [
 // it uses when unset: what the Widget DPS tab shows and what its reset writes back. Each one reaches
 // the meter live: update_settings broadcasts it and core.js applyRemoteSettingChange applies it.
 const WIDGET_DEFAULTS: Record<string, string> = {
-  "dpsMeter.windowOpacity": "60",
+  "dpsMeter.windowOpacity": "90", // 0.5.65: 60 left the list unreadable over a bright game
   "dpsMeter.meterFillOpacity": "80",
   "dpsMeter.bossNameSize": "15",
   "dpsMeter.slimMode": "false",

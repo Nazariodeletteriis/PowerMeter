@@ -347,6 +347,7 @@
       "bgFull": "Sólido",
       "color": "Color de barras",
       "colors": {
+        "class": "Clase",
         "azure": "Celeste",
         "violet": "Violeta",
         "green": "Verde",
@@ -354,7 +355,10 @@
         "pink": "Rosa"
       },
       "mode": "Modo",
-      "dummy": "Muñeco de entrenamiento"
+      "dummy": "Muñeco de entrenamiento",
+      "counters": "Contadores",
+      "controls": "Control de ventanas",
+      "more": "Más ajustes"
     },
     "controls": "Controles"
   }

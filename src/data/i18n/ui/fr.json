@@ -347,6 +347,7 @@
       "bgFull": "Plein",
       "color": "Couleur des barres",
       "colors": {
+        "class": "Classe",
         "azure": "Azur",
         "violet": "Violet",
         "green": "Vert",
@@ -354,7 +355,10 @@
         "pink": "Rose"
       },
       "mode": "Mode",
-      "dummy": "Mannequin"
+      "dummy": "Mannequin",
+      "counters": "Compteurs",
+      "controls": "Contrôle des fenêtres",
+      "more": "Autres paramètres"
     },
     "controls": "Commandes"
   }

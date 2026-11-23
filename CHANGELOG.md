@@ -4,6 +4,14 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.65
+
+- Added: Event alerts now pop up in their own big card at the top centre of the screen (like the pet card), with the event name and a live countdown; they no longer sit inside the meter.
+- Added: Meter: class colours on the bars and coloured class icons in compact mode too; skill icons in the player details and in the training dummy test.
+- Changed: Meter: one settings button only (bottom right) that opens Customize, with the counters, the dummy, Window controls and More settings inside.
+- Changed: Counters: only Odyle is shown by default; turn the others on one by one in Customize. They no longer get cut off or overlap the meter.
+- Fixed: Compact meter: status text no longer cut off (a coloured dot, details on hover), more readable over bright backgrounds, cleaner error card, window buttons no longer cover the boss row, no coloured frame round the meter on a capture error.
+
 ## 0.5.64
 
 - Added: Controls window over the game (button on the meter and in the dashboard): show or hide the DPS meter, History, Map, Cube Finder, ping, event alerts and counters, start a training dummy test, and "Move windows" to line windows up on a grid (the grid can be hidden; 8, 16 or 32 px).

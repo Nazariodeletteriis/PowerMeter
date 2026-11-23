@@ -347,6 +347,7 @@
       "bgFull": "불투명",
       "color": "막대 색상",
       "colors": {
+        "class": "클래스",
         "azure": "하늘색",
         "violet": "보라",
         "green": "초록",
@@ -354,7 +355,10 @@
         "pink": "분홍"
       },
       "mode": "모드",
-      "dummy": "허수아비"
+      "dummy": "허수아비",
+      "counters": "카운터",
+      "controls": "창 제어",
+      "more": "기타 설정"
     },
     "controls": "컨트롤"
   }

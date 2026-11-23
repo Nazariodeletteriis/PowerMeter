@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.65
+
+- Aggiunto: Gli avvisi eventi ora compaiono in una card grande tutta loro in alto al centro dello schermo (come quella dei pet), con il nome dell'evento e il conto alla rovescia live; non stanno più dentro il meter.
+- Aggiunto: Meter: colori delle classi sulle barre e icone classe colorate anche in compatta; icone delle skill nel dettaglio giocatore e nel test sul manichino.
+- Modificato: Meter: un solo pulsante impostazioni (in basso a destra) che apre Personalizza, con dentro contatori, manichino, Controlli finestre e Altre impostazioni.
+- Modificato: Contatori: di default solo Odyle; gli altri si attivano uno per uno in Personalizza. Non vengono più tagliati né si sovrappongono al meter.
+- Corretto: Meter compatto: il testo di stato non viene più tagliato (un pallino colorato, dettagli al passaggio del mouse), più leggibile sopra sfondi chiari, card di errore più pulita, i pulsanti finestra non coprono più la riga del boss, niente cornice colorata attorno al meter in caso di errore di cattura.
+
 ## 0.5.64
 
 - Aggiunto: Finestra Controlli sopra il gioco (pulsante nel meter e nella dashboard): mostra o nascondi DPS meter, Storico, Mappa, Cube Finder, ping, avvisi eventi e contatori, avvia il test sul manichino e "Sposta finestre" per allinearle su una griglia (la griglia si può nascondere; 8, 16 o 32 px).

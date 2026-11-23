@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.65
+
+- Adicionado: Os alertas de eventos agora aparecem num cartão grande próprio no topo, no centro da tela (como o dos mascotes), com o nome do evento e uma contagem regressiva ao vivo; não ficam mais dentro do medidor.
+- Adicionado: Medidor: cores de classe nas barras e ícones de classe coloridos também no modo compacto; ícones de habilidades nos detalhes do jogador e no teste do boneco.
+- Alterado: Medidor: um só botão de configurações (embaixo à direita) que abre Personalizar, com contadores, boneco, Controles de janelas e Mais configurações.
+- Alterado: Contadores: por padrão só Odyle; ative os outros um a um em Personalizar. Não são mais cortados nem se sobrepõem ao medidor.
+- Corrigido: Medidor compacto: texto de status não é mais cortado (um ponto colorido, detalhes ao passar o mouse), mais legível sobre fundos claros, cartão de erro mais limpo, os botões da janela não cobrem mais a linha do chefe, sem moldura colorida em volta do medidor num erro de captura.
+
 ## 0.5.64
 
 - Adicionado: Janela de controles sobre o jogo (botão no medidor e no painel): mostre ou oculte o medidor de DPS, Histórico, Mapa, Cube Finder, ping, alertas de eventos e contadores, inicie um teste no boneco e "Mover janelas" para alinhá-las numa grade (a grade pode ser oculta; 8, 16 ou 32 px).

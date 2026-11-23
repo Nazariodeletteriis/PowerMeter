@@ -347,6 +347,7 @@
       "bgFull": "不透明",
       "color": "条形颜色",
       "colors": {
+        "class": "职业",
         "azure": "天蓝",
         "violet": "紫色",
         "green": "绿色",
@@ -354,7 +355,10 @@
         "pink": "粉色"
       },
       "mode": "模式",
-      "dummy": "训练假人"
+      "dummy": "训练假人",
+      "counters": "计数器",
+      "controls": "窗口控制",
+      "more": "更多设置"
     },
     "controls": "控制"
   }

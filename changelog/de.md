@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.65
+
+- Hinzugefügt: Event-Hinweise erscheinen jetzt in einer eigenen großen Karte oben in der Bildschirmmitte (wie die Pet-Karte), mit Eventname und Live-Countdown; sie sind nicht mehr im Meter.
+- Hinzugefügt: Meter: Klassenfarben auf den Balken und farbige Klassensymbole auch im Kompaktmodus; Skill-Symbole in den Spielerdetails und im Trainingspuppen-Test.
+- Geändert: Meter: nur noch ein Einstellungsknopf (unten rechts), der Anpassen öffnet, mit Zählern, Puppe, Fenstersteuerung und Weiteren Einstellungen.
+- Geändert: Zähler: standardmäßig nur Odyle; die anderen einzeln in Anpassen einschalten. Sie werden nicht mehr abgeschnitten und überdecken das Meter nicht mehr.
+- Behoben: Kompaktes Meter: Statustext nicht mehr abgeschnitten (farbiger Punkt, Details beim Überfahren), besser lesbar auf hellem Hintergrund, aufgeräumte Fehlerkarte, Fensterknöpfe überdecken die Bosszeile nicht mehr, kein farbiger Rahmen bei einem Erfassungsfehler.
+
 ## 0.5.64
 
 - Hinzugefügt: Steuerungsfenster über dem Spiel (Knopf im Meter und im Dashboard): DPS-Meter, Verlauf, Karte, Cube Finder, Ping, Event-Hinweise und Zähler ein- oder ausblenden, einen Trainingspuppen-Test starten und mit "Fenster verschieben" Fenster an einem Raster ausrichten (Raster ausblendbar; 8, 16 oder 32 px).
