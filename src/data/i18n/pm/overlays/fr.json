@@ -1,0 +1,20 @@
+{
+  "overlays.title": "Contrôles",
+  "overlays.windows": "Fenêtres",
+  "overlays.meter": "Compteur DPS",
+  "overlays.history": "Historique des combats",
+  "overlays.map": "Carte",
+  "overlays.cubes": "Cube Finder",
+  "overlays.dummy": "Mannequin d'entraînement",
+  "overlays.dummyStart": "Lancer",
+  "overlays.layout": "Disposition",
+  "overlays.move": "Déplacer les fenêtres",
+  "overlays.moveHint": "Les fenêtres s'alignent sur la grille quand vous les lâchez.",
+  "overlays.hideGrid": "Masquer la grille",
+  "overlays.gridSize": "Pas de la grille",
+  "overlays.open": "Contrôles",
+  "overlays.inMeter": "Dans le compteur",
+  "overlays.ping": "Ping",
+  "overlays.eventAlerts": "Alertes d'événements",
+  "overlays.counters": "Compteurs"
+}

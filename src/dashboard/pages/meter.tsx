@@ -9,7 +9,7 @@ import type { PageProps } from "./types";
 
 /** dps-update payload (src-tauri/src/entity/dps_data.rs), the fields shown here. */
 type Dps = {
-  map: Record<string, { job: string; dps: number; amount: number; nickname: string; combatPower: number; hitsTaken: number; damageTaken: number }>;
+  map: Record<string, { job: string; dps: number; amount: number; nickname: string; combatPower: number; hitsTaken: number; damageTaken: number; deaths?: number }>;
   targetName: string;
   targetMode: string;
   targetId: number;
@@ -93,7 +93,7 @@ export default function Meter({ t, lang, run, onError, settings, save }: PagePro
             cp: v.combatPower,
             dps: v.dps,
             dmg: v.amount,
-            deaths: 0,
+            deaths: v.deaths ?? 0,
             me: Number(id) === data.localPlayerId,
             i,
           })),

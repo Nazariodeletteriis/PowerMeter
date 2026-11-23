@@ -209,5 +209,11 @@
   "combat.trainerRestart": "Recomeçar",
   "combat.stop": "Parar",
   "combat.dummy": "Boneco",
-  "combat.windowEstimate": "Dano da janela estimado: golpes × golpe médio"
+  "combat.windowEstimate": "Dano da janela estimado: golpes × golpe médio",
+  "combat.tab.deaths": "Mortes",
+  "combat.viewing": "Vendo",
+  "combat.caption.deaths": "Quem morreu, quando e o último golpe recebido",
+  "combat.noDeaths": "Ninguém morreu neste combate.",
+  "combat.deathsOld": "As mortes são registradas a partir da versão 0.5.64: este combate é anterior.",
+  "combat.killerUnknown": "Desconhecido"
 }

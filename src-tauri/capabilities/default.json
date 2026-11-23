@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Overlay plus every tool window. Every window label must match something here — a window that is absent gets no permissions at all, so window.__TAURI__.opener is never injected and tauriBridge.js dies on its first destructure, leaving a blank window. details-* covers the per-fight windows, which are labelled by fight id. map is the Map widget, cubes the Cube Finder widget (powermeter.rs open_widget_window), petpop the pet popup and petmarket the Black Market panel (open_pet_popup_on_start).",
+  "description": "Overlay plus every tool window. Every window label must match something here — a window that is absent gets no permissions at all, so window.__TAURI__.opener is never injected and tauriBridge.js dies on its first destructure, leaving a blank window. details-* covers the per-fight windows, which are labelled by fight id. map is the Map widget, cubes the Cube Finder widget (powermeter.rs open_widget_window), petpop the pet popup and petmarket the Black Market panel (open_pet_popup_on_start), controls the Controls window and grid its alignment grid (open_controls_window, set_grid).",
   "windows": [
     "main",
     "details",
@@ -11,7 +11,9 @@
     "map",
     "cubes",
     "petpop",
-    "petmarket"
+    "petmarket",
+    "controls",
+    "grid"
   ],
   "permissions": [
     "core:default",

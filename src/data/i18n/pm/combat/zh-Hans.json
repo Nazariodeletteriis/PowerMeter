@@ -209,5 +209,11 @@
   "combat.trainerRestart": "重新开始",
   "combat.stop": "停止",
   "combat.dummy": "木桩",
-  "combat.windowEstimate": "区间伤害为估算值：命中数 × 平均伤害"
+  "combat.windowEstimate": "区间伤害为估算值：命中数 × 平均伤害",
+  "combat.tab.deaths": "死亡",
+  "combat.viewing": "正在查看",
+  "combat.caption.deaths": "谁在何时阵亡，以及受到的最后一击",
+  "combat.noDeaths": "本场战斗无人阵亡。",
+  "combat.deathsOld": "死亡记录从 0.5.64 版开始：此战斗更早。",
+  "combat.killerUnknown": "未知"
 }

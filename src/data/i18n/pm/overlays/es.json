@@ -1,0 +1,20 @@
+{
+  "overlays.title": "Controles",
+  "overlays.windows": "Ventanas",
+  "overlays.meter": "Medidor DPS",
+  "overlays.history": "Historial de combates",
+  "overlays.map": "Mapa",
+  "overlays.cubes": "Cube Finder",
+  "overlays.dummy": "Muñeco de prueba",
+  "overlays.dummyStart": "Iniciar",
+  "overlays.layout": "Disposición",
+  "overlays.move": "Mover ventanas",
+  "overlays.moveHint": "Las ventanas se ajustan a la cuadrícula al soltarlas.",
+  "overlays.hideGrid": "Ocultar cuadrícula",
+  "overlays.gridSize": "Tamaño de cuadrícula",
+  "overlays.open": "Controles",
+  "overlays.inMeter": "En el medidor",
+  "overlays.ping": "Ping",
+  "overlays.eventAlerts": "Avisos de eventos",
+  "overlays.counters": "Contadores"
+}

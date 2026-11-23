@@ -26,6 +26,8 @@ pub struct PersonalData {
     /// target; `hps` is it over the view's battle time, like `dps`.
     pub heal_done: i64,
     pub hps: f64,
+    /// Times this player died since the last reset (the meter's deaths column).
+    pub deaths: i32,
 }
 
 impl PersonalData {
@@ -42,6 +44,7 @@ impl PersonalData {
             damage_taken: 0,
             heal_done: 0,
             hps: 0.0,
+            deaths: 0,
         }
     }
 
@@ -58,6 +61,7 @@ impl PersonalData {
             damage_taken: 0,
             heal_done: 0,
             hps: 0.0,
+            deaths: 0,
         }
     }
 

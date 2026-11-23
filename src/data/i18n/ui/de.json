@@ -284,7 +284,9 @@
     "cols": {
       "name": "Name",
       "total": "Gesamt",
-      "hits": "Treffer"
+      "hits": "Treffer",
+      "player": "Spieler",
+      "deaths": "Tode"
     },
     "avg": {
       "button": "Durchschnitts-DPS pro Klasse",
@@ -308,6 +310,52 @@
     "counterDailyDungeon": "Täglicher Dungeon",
     "counterBeritraKeys": "Beritra-Schlüssel",
     "counterShugoKeys": "Shugo-Festival-Schlüssel",
-    "counterOdyle": "Odyle"
+    "counterOdyle": "Odyle",
+    "tabs": {
+      "dmg": "Schaden",
+      "heal": "Heilung",
+      "aggro": "Aggro"
+    },
+    "you": "(du)",
+    "total": "Gesamt",
+    "custom": {
+      "open": "Meter anpassen",
+      "title": "Anpassen",
+      "closeLabel": "Einstellungen schließen",
+      "preset": "Vorlage",
+      "presets": {
+        "min": "Minimal",
+        "std": "Standard",
+        "full": "Vollständig"
+      },
+      "elements": "Elemente",
+      "icons": "Klassensymbole",
+      "rank": "Position (#)",
+      "bars": "Hintergrundbalken",
+      "header": "Kopfzeile und Boss",
+      "cTotal": "Spalte Gesamt",
+      "cRate": "Spalte pro Sekunde",
+      "cShare": "Spalte Anteil %",
+      "cDeaths": "Spalte Tode",
+      "density": "Zeilendichte",
+      "dense": "Kompakt",
+      "normal": "Normal",
+      "rows": "Sichtbare Spieler",
+      "bg": "Hintergrund",
+      "bgClear": "Transparent",
+      "bgSoft": "Weich",
+      "bgFull": "Voll",
+      "color": "Balkenfarbe",
+      "colors": {
+        "azure": "Azur",
+        "violet": "Violett",
+        "green": "Grün",
+        "amber": "Bernstein",
+        "pink": "Rosa"
+      },
+      "mode": "Modus",
+      "dummy": "Trainingspuppe"
+    },
+    "controls": "Steuerung"
   }
 }

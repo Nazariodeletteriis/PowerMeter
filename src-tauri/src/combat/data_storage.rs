@@ -26,6 +26,16 @@ const STAGGER_BREAK_MS: i64 = 5_000;
 /// Cubes the game shows this soon after a zone load were standing before you came (DataStorage::add_cube).
 const CUBE_ON_LOAD_MS: i64 = 10_000;
 
+/// A player's death: who, when (ms), and the killing blow (mob entity, skill code, damage; 0 when no mob hit was seen).
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub struct Death {
+    pub actor_id: i32,
+    pub ts: i64,
+    pub killer_id: i32,
+    pub skill_code: i32,
+    pub damage: i64,
+}
+
 fn now_ms() -> i64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -268,6 +278,10 @@ struct Inner {
     /// other modes skip them, so PvE numbers are unchanged.
     pvp_target_ids: HashSet<i32>,
     dead_entity_ids: HashSet<i32>,
+    /// Players' deaths since the last flush, in order (see `mark_entity_dead`).
+    deaths: Vec<Death>,
+    /// The last hit a mob landed on each player: (mob, skill, damage). Becomes the death's killing blow.
+    last_hit_on: HashMap<i32, (i32, i32, i64)>,
     /// Boss entity IDs identified from NPC DB boss flags
     boss_entity_ids: HashSet<i32>,
     /// Healing received per player (summons resolved to their owner):
@@ -320,6 +334,8 @@ impl DataStorage {
                 hostile_target_ids: HashSet::new(),
                 pvp_target_ids: HashSet::new(),
                 dead_entity_ids: HashSet::new(),
+                deaths: Vec::new(),
+                last_hit_on: HashMap::new(),
                 boss_entity_ids: HashSet::new(),
                 heal_received: HashMap::new(),
                 mob_hits: HashMap::new(),
@@ -607,6 +623,7 @@ impl DataStorage {
                     .or_default();
                 e.0 += dmg;
                 e.1 += 1;
+                inner.last_hit_on.insert(resolved_target, (actor_id, skill_code, dmg));
                 self.damage_generation.fetch_add(1, Ordering::Relaxed);
                 for target_data in inner.target_combat.values_mut() {
                     if let Some(actor_data) = target_data.actors.get_mut(&resolved_target) {
@@ -802,8 +819,21 @@ impl DataStorage {
         }
     }
 
+    /// A combat death (the game's death record). A player's is also kept as a `Death`, with the last mob hit it
+    /// took as the killing blow, for the fight's deaths tab and the meter's deaths column.
     pub fn mark_entity_dead(&self, entity_id: i32) {
-        self.inner.write().dead_entity_ids.insert(entity_id);
+        let mut inner = self.inner.write();
+        inner.dead_entity_ids.insert(entity_id);
+        let player = inner.known_player_ids.contains(&entity_id) || inner.local_player_id == Some(entity_id as i64);
+        if player {
+            let (killer_id, skill_code, damage) = inner.last_hit_on.remove(&entity_id).unwrap_or_default();
+            inner.deaths.push(Death { actor_id: entity_id, ts: now_ms(), killer_id, skill_code, damage });
+        }
+    }
+
+    /// Players' deaths since the last reset, oldest first.
+    pub fn get_deaths(&self) -> Vec<Death> {
+        self.inner.read().deaths.clone()
     }
 
     pub fn is_entity_dead(&self, entity_id: i32) -> bool {
@@ -1234,6 +1264,8 @@ impl DataStorage {
         inner.hostile_target_ids.clear();
         inner.pvp_target_ids.clear();
         inner.dead_entity_ids.clear();
+        inner.deaths.clear();
+        inner.last_hit_on.clear();
         inner.mob_hp_data.clear();
         inner.mob_current_hp.clear();
         inner.stagger.clear();
@@ -1253,6 +1285,8 @@ impl DataStorage {
         inner.hostile_target_ids.clear();
         inner.pvp_target_ids.clear();
         inner.dead_entity_ids.clear();
+        inner.deaths.clear();
+        inner.last_hit_on.clear();
         inner.mob_hp_data.clear();
         inner.mob_current_hp.clear();
         inner.stagger.clear();
@@ -1453,6 +1487,10 @@ fn append_nickname_inner_with_force(inner: &mut Inner, uid: i32, nickname: &str,
         }
         if inner.local_player_id == Some(old_id as i64) {
             inner.local_player_id = Some(uid as i64);
+        }
+        // A death is what moves a player to a new id: it follows them, or the fight would lose it.
+        for d in inner.deaths.iter_mut().filter(|d| d.actor_id == old_id) {
+            d.actor_id = uid;
         }
     }
 
@@ -1805,6 +1843,18 @@ mod guess_local_tests {
         let actors = &t[&MOB].actors;
         assert!(!actors.contains_key(&300));
         assert_eq!(actors[&301].total_damage, 30);
+    }
+
+    #[test]
+    fn a_death_follows_the_player_to_the_new_id() {
+        let s = DataStorage::new();
+        s.append_nickname_authoritative(300, "Mate");
+        hit(&s, 300);
+        s.mark_entity_dead(300);
+        s.append_nickname_authoritative(301, "Mate"); // back on a new id
+        let deaths = s.get_deaths();
+        assert_eq!(deaths.len(), 1);
+        assert_eq!(deaths[0].actor_id, 301);
     }
 
     #[test]

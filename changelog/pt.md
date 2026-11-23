@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.64
+
+- Adicionado: Janela de controles sobre o jogo (botão no medidor e no painel): mostre ou oculte o medidor de DPS, Histórico, Mapa, Cube Finder, ping, alertas de eventos e contadores, inicie um teste no boneco e "Mover janelas" para alinhá-las numa grade (a grade pode ser oculta; 8, 16 ou 32 px).
+- Adicionado: Histórico de combates: nova aba Mortes (quem morreu, em que minuto e o último golpe recebido) e uma barra "Vendo" em cada aba que mostra claramente de quem você vê habilidades, linha do tempo, rotação, dano recebido e cura.
+- Adicionado: Medidor compacto redesenhado, com painel Personalizar: predefinições, colunas (total, por segundo, parcela, mortes), densidade das linhas, jogadores visíveis, fundo e cor das barras.
+- Adicionado: Boneco de treino: DPS, taxas de crítico/costas/aparo/perfeito/duplo e habilidades usadas na mesma janela, nos dois modos; inicie em Personalizar ou Controles.
+- Corrigido: Clicar num jogador (ou em você após um teste no boneco) mostrava detalhes vazios em Todos os monstros e no modo boneco: agora mostram estatísticas e habilidades.
+- Corrigido: O boneco às vezes não contava golpes: agora conta também um boneco que já estava à vista quando o PowerMeter iniciou.
+- Corrigido: Com um personagem de outra conta Steam ficavam o nome e a classe do anterior no medidor e no painel: agora seguem o personagem que o jogo indica.
+- Corrigido: Medidor: o cronômetro não cobre mais a aba AGGRO, o texto de status não é mais cortado, sem cronômetro duplo nem espaço vazio sob as linhas; a parcela % não muda mais com o número de jogadores visíveis; cantos um pouco mais arredondados.
+
 ## 0.5.63
 
 - Corrigido: Mascotes: cada nível agora tem seu próprio objetivo, 5 almas para desbloquear, 25 para o nível 2 e 75 para o nível 3 (105 no total). Mascotes de nível 1 contam x/25 e passam ao nível 2 no abate certo, em vez de contar sempre até 75.

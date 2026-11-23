@@ -284,7 +284,9 @@
     "cols": {
       "name": "名稱",
       "total": "總計",
-      "hits": "受擊"
+      "hits": "受擊",
+      "player": "玩家",
+      "deaths": "死亡"
     },
     "avg": {
       "button": "各職業平均DPS",
@@ -308,6 +310,52 @@
     "counterDailyDungeon": "每日副本",
     "counterBeritraKeys": "貝利特拉鑰匙",
     "counterShugoKeys": "修古慶典鑰匙",
-    "counterOdyle": "奧德"
+    "counterOdyle": "奧德",
+    "tabs": {
+      "dmg": "傷害",
+      "heal": "治療",
+      "aggro": "仇恨"
+    },
+    "you": "(你)",
+    "total": "總計",
+    "custom": {
+      "open": "自訂統計",
+      "title": "自訂",
+      "closeLabel": "關閉設定",
+      "preset": "預設",
+      "presets": {
+        "min": "最簡",
+        "std": "標準",
+        "full": "完整"
+      },
+      "elements": "元素",
+      "icons": "職業圖示",
+      "rank": "名次 (#)",
+      "bars": "背景條",
+      "header": "標題與首領",
+      "cTotal": "總計欄",
+      "cRate": "每秒欄",
+      "cShare": "佔比 % 欄",
+      "cDeaths": "死亡欄",
+      "density": "列密度",
+      "dense": "緊湊",
+      "normal": "正常",
+      "rows": "顯示人數",
+      "bg": "背景",
+      "bgClear": "透明",
+      "bgSoft": "柔和",
+      "bgFull": "不透明",
+      "color": "條形顏色",
+      "colors": {
+        "azure": "天藍",
+        "violet": "紫色",
+        "green": "綠色",
+        "amber": "琥珀",
+        "pink": "粉紅"
+      },
+      "mode": "模式",
+      "dummy": "訓練假人"
+    },
+    "controls": "控制"
   }
 }

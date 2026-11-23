@@ -601,7 +601,7 @@ html:lang(zh-Hant), html:lang(zh-Hant) body {
   position: relative;
   height: var(--hud-row-h);
   padding: 0 8px 0 6px;
-  border-radius: 4px;
+  border-radius: var(--pm-r-row);
   overflow: hidden;
   background: var(--hud-row-bg);
   cursor: pointer;
@@ -949,7 +949,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   height: 16px;
   padding: 0 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   background: rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.62);
   font-family: var(--hud-tech);
@@ -1067,7 +1067,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   user-select: none;
   font-size: 22px;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--pm-r-btn);
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -1150,7 +1150,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   margin: 8px 14px;
   padding: 6px 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
+  border-radius: var(--pm-r-btn);
   background: none;
   color: rgba(255, 255, 255, 0.7);
   font: inherit;
@@ -1192,7 +1192,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   font-size: 13px;
   font-weight: 500;
   padding: 4px 9px;
-  border-radius: 5px;
+  border-radius: var(--pm-r-btn);
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
@@ -1205,7 +1205,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
 .historyRowClassIcon {
   width: 24px;
   height: 24px;
-  border-radius: 3px;
+  border-radius: var(--pm-r-row);
   display: inline-block;
   background: var(--cls-icon, none) center / contain no-repeat;
 }
@@ -1277,7 +1277,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   right: 0;
   background: #1a1c22;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 6px;
+  border-radius: var(--pm-r-container);
   overflow: hidden;
   z-index: 300;
   max-height: 220px;
@@ -1325,7 +1325,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   background-repeat: no-repeat;
   background-position: right 8px center;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 6px;
+  border-radius: var(--pm-r-btn);
   color: var(--text-color);
   font-size: 12px;
   padding: 6px 26px 6px 10px;
@@ -1367,7 +1367,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   color: #e06b6b;
   cursor: pointer;
   padding: 4px 6px;
-  border-radius: 4px;
+  border-radius: var(--pm-r-btn);
   display: none;
   align-items: center;
   justify-content: center;
@@ -1390,7 +1390,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   font-size: 13px;
   font-weight: 600;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--pm-r-btn);
   line-height: 1.4;
   margin-left: auto;
   display: inline-flex;
@@ -1415,7 +1415,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   color: rgba(255, 255, 255, 0.45);
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--pm-r-btn);
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -1438,7 +1438,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   align-items: center;
   gap: 2px;
   padding: 2px;
-  border-radius: 6px;
+  border-radius: var(--pm-r-btn);
   background: rgba(255, 255, 255, 0.05);
 }
 .historyViewBtn {
@@ -1447,7 +1447,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   color: rgba(255, 255, 255, 0.45);
   cursor: pointer;
   padding: 3px 7px;
-  border-radius: 4px;
+  border-radius: var(--pm-r-btn);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1526,7 +1526,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   font-weight: 600;
   color: var(--dps-text);
   background: var(--row-fill);
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   padding: 1px 5px;
   margin-left: 6px;
   vertical-align: middle;
@@ -1540,7 +1540,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   font-weight: 700;
   color: #fff;
   background: #e05050;
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   padding: 1px 5px;
   margin-left: 6px;
   vertical-align: middle;
@@ -1563,7 +1563,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   font-size: 16px;
   font-weight: 700;
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: var(--pm-r-btn);
   white-space: nowrap;
   flex-shrink: 0;
   letter-spacing: 0.01em;
@@ -1714,7 +1714,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
       top: calc(100% + 6px);
       min-width: 200px;
       padding: 6px;
-      border-radius: 8px;
+      border-radius: var(--pm-r-container);
       border: 1px solid rgba(255, 255, 255, 0.12);
       background: rgba(12, 22, 40, 0.95);
       box-shadow: 0 16px 30px rgba(0, 0, 0, 0.35);
@@ -1734,7 +1734,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
       color: inherit;
       text-align: left;
       padding: 4px 8px;
-      border-radius: 6px;
+      border-radius: var(--pm-r-btn);
       cursor: pointer;
     }
 
@@ -1756,7 +1756,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
       align-items: center;
       justify-content: center;
       padding: 4px 6px;
-      border-radius: 6px;
+      border-radius: var(--pm-r-btn);
       border: none;
       background: transparent;
       color: var(--isUser-fill);
@@ -1799,7 +1799,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
       align-items: center;
       justify-content: center;
       padding: 4px 6px;
-      border-radius: 6px;
+      border-radius: var(--pm-r-btn);
       border: none;
       background: transparent;
       color: inherit;
@@ -1824,7 +1824,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
       align-items: center;
       justify-content: center;
       padding: 4px 6px;
-      border-radius: 6px;
+      border-radius: var(--pm-r-btn);
       border: none;
       background: transparent;
       color: inherit;
@@ -1853,7 +1853,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
       user-select: none;
       font-size: 22px;
       padding: 2px 8px;
-      border-radius: 4px;
+      border-radius: var(--pm-r-btn);
     }
     .closeX:hover {
       background: rgba(255, 255, 255, 0.08);
@@ -2044,7 +2044,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
       border: none;
       font-size: 18px;
       font-weight: bold;
-      border-radius: 8px;
+      border-radius: var(--pm-r-btn);
       padding: 8px;
       width: 100%;
       cursor: pointer;
@@ -2071,14 +2071,14 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
       width: 100%;
       height: 8px;
       background: rgba(255,255,255,0.15);
-      border-radius: 4px;
+      border-radius: var(--pm-r-row);
       overflow: hidden;
     }
     .updateProgressBar {
       height: 100%;
       width: 0%;
       background: #4caf50;
-      border-radius: 4px;
+      border-radius: var(--pm-r-row);
       transition: width 0.2s;
     }
     .updateProgressText {
@@ -2172,7 +2172,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   top: calc(100% + 6px);
   min-width: 200px;
   padding: 6px;
-  border-radius: 8px;
+  border-radius: var(--pm-r-container);
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(12, 22, 40, 0.95);
   box-shadow: 0 16px 30px rgba(0, 0, 0, 0.35);
@@ -2190,7 +2190,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   color: inherit;
   text-align: left;
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: var(--pm-r-btn);
   cursor: pointer;
 }
 .detailsPanel .detailsHeader .detailsDropdownItem:hover,
@@ -2215,7 +2215,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   align-items: center;
   justify-content: center;
   padding: 4px 6px;
-  border-radius: 6px;
+  border-radius: var(--pm-r-btn);
   border: none;
   background: transparent;
   color: var(--isUser-fill);
@@ -2252,7 +2252,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   align-items: center;
   justify-content: center;
   padding: 4px 6px;
-  border-radius: 6px;
+  border-radius: var(--pm-r-btn);
   border: none;
   background: transparent;
   color: inherit;
@@ -2272,7 +2272,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   gap: 2px;
   padding: 2px;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 6px;
+  border-radius: var(--pm-r-btn);
 }
 .detailsPanel .detailsHeader .detailsModeBtn {
   appearance: none;
@@ -2283,7 +2283,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   font-size: 11px;
   letter-spacing: 0.3px;
   padding: 3px 10px;
-  border-radius: 4px;
+  border-radius: var(--pm-r-btn);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
@@ -2308,7 +2308,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   align-items: center;
   justify-content: center;
   padding: 4px 6px;
-  border-radius: 6px;
+  border-radius: var(--pm-r-btn);
   border: none;
   background: transparent;
   color: inherit;
@@ -2337,7 +2337,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   user-select: none;
   font-size: 22px;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--pm-r-btn);
 }
 .detailsPanel .detailsHeader .closeX:hover {
   background: rgba(255, 255, 255, 0.08);
@@ -2669,7 +2669,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
 .detailsPanel .detailsSkills .cell.name .skillIcon {
   width: var(--details-skill-icon-size, 24px);
   height: var(--details-skill-icon-size, 24px);
-  border-radius: 3px;
+  border-radius: var(--pm-r-row);
   margin-right: 6px;
   flex: 0 0 auto;
   object-fit: cover;
@@ -2767,7 +2767,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   font-size: 13px;
   font-weight: 400;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--pm-r-row);
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
@@ -3074,7 +3074,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   border: none;
   font-size: 18px;
   font-weight: bold;
-  border-radius: 8px;
+  border-radius: var(--pm-r-btn);
   padding: 8px;
   width: 100%;
   cursor: pointer;
@@ -3104,14 +3104,14 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   width: 100%;
   height: 8px;
   background: rgba(255,255,255,0.15);
-  border-radius: 4px;
+  border-radius: var(--pm-r-row);
   overflow: hidden;
 }
 .updateModal .updateModalCard .updateProgressBar {
   height: 100%;
   width: 0%;
   background: #4caf50;
-  border-radius: 4px;
+  border-radius: var(--pm-r-row);
   transition: width 0.2s;
 }
 .updateModal .updateModalCard .updateProgressText {
@@ -3146,7 +3146,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   max-width: min(380px, calc(100vw - 20px));
   padding: 10px 12px;
   border: 1px solid var(--panel-border);
-  border-radius: 8px;
+  border-radius: var(--pm-r-container);
   background: rgba(12, 22, 40, 0.88);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   color: var(--title);
@@ -3218,7 +3218,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
 .hoverDetailsTooltipSkill .name .skillIcon {
   width: var(--tooltip-skill-icon-size, 20px);
   height: var(--tooltip-skill-icon-size, 20px);
-  border-radius: 3px;
+  border-radius: var(--pm-r-row);
   flex: 0 0 auto;
   object-fit: cover;
 }
@@ -3387,7 +3387,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   align-items: center;
   justify-content: center;
   border: 1px solid var(--pane-field-border);
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   background: var(--pane-field-bg);
   color: var(--hud-sub);
   font-family: var(--hud-tech);
@@ -3475,7 +3475,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   height: var(--pane-field-h);
   padding: 0 24px 0 8px;
   border: 1px solid var(--pane-field-border);
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   background-color: var(--pane-field-bg);
   background-position: right 7px center;
   color: rgba(255, 255, 255, 0.88);
@@ -3509,14 +3509,14 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
 .historyPanel .historyClassDropdownMenu {
   padding: 4px;
   border: 1px solid var(--panel-border);
-  border-radius: 4px;
+  border-radius: var(--pm-r-container);
   background: rgba(var(--hud-bg), 0.98);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
 }
 .historyPanel .historyClassOption {
   gap: 7px;
   padding: 4px 7px;
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   font-variation-settings: "wght" 500, "wdth" 87.5;
   font-weight: 500;
   font-size: 12px;
@@ -3616,7 +3616,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
 .historyPanel .historyIconWrap[data-tip]::after {
   background: rgba(var(--hud-bg), 0.97);
   border: 1px solid var(--panel-border);
-  border-radius: 3px;
+  border-radius: var(--pm-r-row);
   padding: 3px 7px;
   font-family: var(--hud-tech);
   font-variation-settings: "wght" 600, "wdth" 87.5;
@@ -3628,7 +3628,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
 }
 
 .historyPanel .historyDeleteBtn {
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   padding: 3px 5px;
   color: var(--error-fill);
 }
@@ -3669,7 +3669,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   flex: 0 0 auto;
   padding: 1px 6px;
   border: 1px solid var(--pane-field-border);
-  border-radius: 3px;
+  border-radius: var(--pm-r-row);
   background: var(--pane-field-bg);
   font-variation-settings: "wght" 700, "wdth" 75;
   font-variant-numeric: tabular-nums;
@@ -3707,7 +3707,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
 .historyPanel .historyLiveBadge {
   margin-left: 0;
   padding: 1px 5px;
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   font-family: var(--hud-tech);
   font-variation-settings: "wght" 700, "wdth" 75;
   font-size: 9.5px;
@@ -3795,7 +3795,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   padding: 0 8px;
   gap: 5px;
   border: 1px solid var(--pane-field-border);
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   background: var(--pane-field-bg);
   color: var(--hud-sub);
   font-family: var(--hud-tech);
@@ -3828,7 +3828,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   min-width: 42px;
   padding: 0 8px;
   border: 1px solid var(--pane-field-border);
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   background: var(--pane-field-bg);
   color: var(--hud-sub);
   font-family: var(--hud-tech);
@@ -3881,13 +3881,13 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
 .detailsPanel .detailsHeader .detailsDropdownMenu {
   padding: 4px;
   border: 1px solid var(--panel-border);
-  border-radius: 4px;
+  border-radius: var(--pm-r-container);
   background: rgba(var(--hud-bg), 0.98);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
 }
 .detailsPanel .detailsHeader .detailsDropdownItem {
   padding: 4px 8px;
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   font-variation-settings: "wght" 500, "wdth" 87.5;
   font-weight: 500;
   font-size: 13px;
@@ -3903,7 +3903,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   height: 20px;
   padding: 0 7px;
   border: 1px solid var(--pane-field-border);
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   background: var(--pane-field-bg);
   color: var(--hud-sub);
   font-family: var(--hud-tech);
@@ -4047,7 +4047,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
   height: var(--pane-field-h);
   padding: 0 9px;
   border: 1px solid var(--pane-field-border);
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   background: var(--pane-field-bg);
   color: rgba(255, 255, 255, 0.88);
   font-family: var(--hud-tech);
@@ -4236,7 +4236,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
 .detailsPanel .detailsSkills .skillHeader .cell[data-tip]::after {
   background: rgba(var(--hud-bg), 0.97);
   border: 1px solid var(--panel-border);
-  border-radius: 3px;
+  border-radius: var(--pm-r-row);
   padding: 3px 7px;
   font-family: var(--hud-tech);
   font-variation-settings: "wght" 500, "wdth" 87.5;
@@ -4296,7 +4296,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
 .detailsPanel .detailsSkills .skills .skillRow .rowFill {
   --bar: var(--row-fill);
   left: 0;
-  border-radius: 3px;
+  border-radius: var(--pm-r-row);
   opacity: var(--meter-fill-opacity, 0.8);
   background: linear-gradient(
     90deg,
@@ -4316,7 +4316,7 @@ body.mainPlayerDpsBold .meter .item .content .dps > p {
 .detailsPanel .detailsSkills .cell.name .skillIcon {
   width: var(--details-skill-icon-size, 24px);
   height: var(--details-skill-icon-size, 24px);
-  border-radius: 3px;
+  border-radius: var(--pm-r-row);
   margin-right: 5px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75));
 }
@@ -4593,7 +4593,7 @@ html.detailsWindow .detailsWindowClose {
   flex: 0 0 auto;
   padding: 0;
   border: 1px solid var(--pane-field-border, rgba(255, 255, 255, 0.1));
-  border-radius: 3px;
+  border-radius: var(--pm-r-btn);
   background: var(--pane-field-bg, rgba(255, 255, 255, 0.05));
   color: var(--hud-sub);
   cursor: pointer;

@@ -1,0 +1,20 @@
+{
+  "overlays.title": "Controles",
+  "overlays.windows": "Janelas",
+  "overlays.meter": "Medidor de DPS",
+  "overlays.history": "Histórico de combates",
+  "overlays.map": "Mapa",
+  "overlays.cubes": "Cube Finder",
+  "overlays.dummy": "Boneco de treino",
+  "overlays.dummyStart": "Iniciar",
+  "overlays.layout": "Disposição",
+  "overlays.move": "Mover janelas",
+  "overlays.moveHint": "As janelas se encaixam na grade ao soltá-las.",
+  "overlays.hideGrid": "Ocultar grade",
+  "overlays.gridSize": "Tamanho da grade",
+  "overlays.open": "Controles",
+  "overlays.inMeter": "No medidor",
+  "overlays.ping": "Ping",
+  "overlays.eventAlerts": "Alertas de eventos",
+  "overlays.counters": "Contadores"
+}

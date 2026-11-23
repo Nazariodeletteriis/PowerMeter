@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.64
+
+- Ajouté : Fenêtre Contrôles au-dessus du jeu (bouton dans le compteur et le tableau de bord) : afficher ou masquer le compteur DPS, l'Historique, la Carte, Cube Finder, le ping, les alertes d'événements et les compteurs, lancer un test sur mannequin, et « Déplacer les fenêtres » pour les aligner sur une grille (grille masquable ; 8, 16 ou 32 px).
+- Ajouté : Historique des combats : nouvel onglet Morts (qui est mort, à quelle minute et le dernier coup reçu), et une barre « Affichage de » sur chaque onglet qui montre clairement de qui vous voyez compétences, chronologie, rotation, dégâts subis et soins.
+- Ajouté : Compteur compact redessiné, avec un panneau Personnaliser : préréglages, colonnes (total, par seconde, part, morts), densité des lignes, joueurs visibles, fond et couleur des barres.
+- Ajouté : Mannequin : DPS, taux critique/dos/parade/parfait/double et compétences utilisées dans la même fenêtre, dans les deux modes ; à lancer depuis Personnaliser ou Contrôles.
+- Corrigé : Cliquer sur un joueur (ou sur vous après un test sur mannequin) affichait des détails vides en Tous les monstres et en mode mannequin : statistiques et compétences s'affichent désormais.
+- Corrigé : Le mannequin manquait parfois des coups : un mannequin déjà visible au lancement de PowerMeter compte désormais.
+- Corrigé : Avec un personnage d'un autre compte Steam, le nom et la classe du personnage précédent restaient dans le compteur et le tableau de bord : ils suivent désormais le personnage indiqué par le jeu.
+- Corrigé : Compteur : le minuteur ne recouvre plus l'onglet AGGRO, le texte d'état n'est plus coupé, plus de minuteur en double ni d'espace vide sous les lignes ; la part en % ne dépend plus du nombre de joueurs visibles ; coins un peu plus arrondis.
+
 ## 0.5.63
 
 - Corrigé : Familiers : chaque niveau a désormais son propre objectif, 5 âmes pour le débloquer, 25 pour le niveau 2 et 75 pour le niveau 3 (105 au total). Les familiers de niveau 1 comptent x/25 et passent au niveau 2 au bon kill, au lieu de compter toujours jusqu'à 75.

@@ -209,5 +209,11 @@
   "combat.trainerRestart": "Recommencer",
   "combat.stop": "Arrêter",
   "combat.dummy": "Mannequin",
-  "combat.windowEstimate": "Dégâts de la fenêtre estimés : coups × coup moyen"
+  "combat.windowEstimate": "Dégâts de la fenêtre estimés : coups × coup moyen",
+  "combat.tab.deaths": "Morts",
+  "combat.viewing": "Affichage de",
+  "combat.caption.deaths": "Qui est mort, quand, et le dernier coup reçu",
+  "combat.noDeaths": "Personne n'est mort pendant ce combat.",
+  "combat.deathsOld": "Les morts sont enregistrées depuis la version 0.5.64 : ce combat est plus ancien.",
+  "combat.killerUnknown": "Inconnu"
 }

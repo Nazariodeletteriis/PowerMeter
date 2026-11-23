@@ -37,6 +37,22 @@ pub struct FightRecord {
     /// server can still judge those by boss HP.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub killed: Option<bool>,
+    /// Players who died during the fight, in order. Empty on records saved before 0.5.64 (deaths were not kept).
+    #[serde(default)]
+    pub deaths: Vec<FightDeath>,
+}
+
+/// A player's death in a fight: when (ms from the fight's start) and the killing blow, as far as the meter saw it.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct FightDeath {
+    pub actor_id: i32,
+    pub at_ms: i64,
+    /// The mob that landed the last hit ("" when none was seen), its skill (code and name) and damage.
+    pub killer: String,
+    pub skill_code: i32,
+    pub skill: String,
+    pub damage: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

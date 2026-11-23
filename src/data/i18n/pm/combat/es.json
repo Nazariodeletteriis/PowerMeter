@@ -209,5 +209,11 @@
   "combat.trainerRestart": "Reiniciar",
   "combat.stop": "Detener",
   "combat.dummy": "Muñeco",
-  "combat.windowEstimate": "Daño de la ventana estimado: golpes × golpe medio"
+  "combat.windowEstimate": "Daño de la ventana estimado: golpes × golpe medio",
+  "combat.tab.deaths": "Muertes",
+  "combat.viewing": "Viendo",
+  "combat.caption.deaths": "Quién murió, cuándo y el último golpe recibido",
+  "combat.noDeaths": "Nadie murió en este combate.",
+  "combat.deathsOld": "Las muertes se registran desde la versión 0.5.64: este combate es anterior.",
+  "combat.killerUnknown": "Desconocido"
 }

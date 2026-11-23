@@ -209,5 +209,11 @@
   "combat.trainerRestart": "Начать заново",
   "combat.stop": "Стоп",
   "combat.dummy": "Манекен",
-  "combat.windowEstimate": "Урон в окне оценочный: удары × средний удар"
+  "combat.windowEstimate": "Урон в окне оценочный: удары × средний удар",
+  "combat.tab.deaths": "Смерти",
+  "combat.viewing": "Просмотр",
+  "combat.caption.deaths": "Кто погиб, когда и последний полученный удар",
+  "combat.noDeaths": "В этом бою никто не погиб.",
+  "combat.deathsOld": "Смерти записываются с версии 0.5.64: этот бой старше.",
+  "combat.killerUnknown": "Неизвестно"
 }

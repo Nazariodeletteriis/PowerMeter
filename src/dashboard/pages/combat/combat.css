@@ -107,6 +107,56 @@
   color: var(--pm-t1);
 }
 
+/* Report: who the tab is about (every tab but the overview). The picked player reads at a glance: filled, red
+   outline, check mark. */
+.cbPicker {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--pm-line);
+  border-radius: 10px;
+  background: var(--pm-s1);
+}
+.cbPickerLabel {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pm-t3);
+  margin-right: 4px;
+}
+.cbPickerChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px 0 4px;
+  border-radius: 8px;
+  border: 1px solid var(--pm-line);
+  background: transparent;
+  color: var(--pm-t2);
+  cursor: pointer;
+  font-size: 13px;
+}
+.cbPickerChip.me {
+  background: var(--pm-tint);
+}
+.cbPickerChip:hover {
+  color: var(--pm-t1);
+}
+.cbPickerChip.on {
+  background: var(--pm-s3);
+  border-color: var(--pm-red);
+  color: var(--pm-t1);
+  font-weight: 500;
+}
+.cbPickerChip:focus-visible {
+  outline: 2px solid var(--pm-red);
+  outline-offset: 2px;
+}
+
 /* Checkbox square of storico (prototype h.toggle). */
 .cbCheck {
   width: 16px;

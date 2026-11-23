@@ -83,9 +83,9 @@
           <!-- PowerMeter: what the party list shows: damage dealt, healing done, damage taken (pmWidget.js).
                Icons: Phosphor Sword (regular), Plus (bold), Shield (duotone). -->
           <div class="pmOnly pmTabs" role="tablist" aria-label="Widget mode" data-i18n-aria-label="pmWidget.modeLabel">
-            <button type="button" role="tab" class="pmTab" data-pm-mode="dps"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M216,32H152a8,8,0,0,0-6.34,3.12l-64,83.21L72,108.69a16,16,0,0,0-22.64,0l-12.69,12.7a16,16,0,0,0,0,22.63l20,20-28,28a16,16,0,0,0,0,22.63l12.69,12.68a16,16,0,0,0,22.62,0l28-28,20,20a16,16,0,0,0,22.64,0l12.69-12.7a16,16,0,0,0,0-22.63l-9.64-9.64,83.21-64A8,8,0,0,0,224,104V40A8,8,0,0,0,216,32ZM52.69,216,40,203.32l28-28L80.68,188Zm70.61-8L48,132.71,60.7,120,136,195.31ZM208,100.06l-81.74,62.88L115.32,152l50.34-50.34a8,8,0,0,0-11.32-11.31L104,140.68,93.07,129.74,155.94,48H208Z"/></svg>DPS</button>
-            <button type="button" role="tab" class="pmTab" data-pm-mode="heal"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M228,128a12,12,0,0,1-12,12H140v76a12,12,0,0,1-24,0V140H40a12,12,0,0,1,0-24h76V40a12,12,0,0,1,24,0v76h76A12,12,0,0,1,228,128Z"/></svg>HEAL</button>
-            <button type="button" role="tab" class="pmTab" data-pm-mode="aggro"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M216,56v56c0,96-88,120-88,120S40,208,40,112V56a8,8,0,0,1,8-8H208A8,8,0,0,1,216,56Z" opacity="0.35"/><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.27,47,25.53a8,8,0,0,0,4.2,0c1-.26,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0Z"/></svg>AGGRO</button>
+            <button type="button" role="tab" class="pmTab" data-pm-mode="dps"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M216,32H152a8,8,0,0,0-6.34,3.12l-64,83.21L72,108.69a16,16,0,0,0-22.64,0l-12.69,12.7a16,16,0,0,0,0,22.63l20,20-28,28a16,16,0,0,0,0,22.63l12.69,12.68a16,16,0,0,0,22.62,0l28-28,20,20a16,16,0,0,0,22.64,0l12.69-12.7a16,16,0,0,0,0-22.63l-9.64-9.64,83.21-64A8,8,0,0,0,224,104V40A8,8,0,0,0,216,32ZM52.69,216,40,203.32l28-28L80.68,188Zm70.61-8L48,132.71,60.7,120,136,195.31ZM208,100.06l-81.74,62.88L115.32,152l50.34-50.34a8,8,0,0,0-11.32-11.31L104,140.68,93.07,129.74,155.94,48H208Z"/></svg><span class="pmTabLabel">DPS</span><span class="pmTabName" data-i18n="pmWidget.tabs.dmg">Damage</span></button>
+            <button type="button" role="tab" class="pmTab" data-pm-mode="heal"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M228,128a12,12,0,0,1-12,12H140v76a12,12,0,0,1-24,0V140H40a12,12,0,0,1,0-24h76V40a12,12,0,0,1,24,0v76h76A12,12,0,0,1,228,128Z"/></svg><span class="pmTabLabel">HEAL</span><span class="pmTabName" data-i18n="pmWidget.tabs.heal">Healing</span></button>
+            <button type="button" role="tab" class="pmTab" data-pm-mode="aggro"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M216,56v56c0,96-88,120-88,120S40,208,40,112V56a8,8,0,0,1,8-8H208A8,8,0,0,1,216,56Z" opacity="0.35"/><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.27,47,25.53a8,8,0,0,0,4.2,0c1-.26,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0Z"/></svg><span class="pmTabLabel">AGGRO</span><span class="pmTabName" data-i18n="pmWidget.tabs.aggro">Aggro</span></button>
           </div>
           <span class="pmOnly pmBarTitle"></span>
           <span class="pmOnly pmSpacer"></span>
@@ -124,6 +124,8 @@
             <button type="button" class="pmOnly headerBtn pmAvgBtn" aria-pressed="false" aria-label="Average DPS by class" data-i18n-aria-label="pmWidget.avg.button" title="Average DPS by class" data-i18n-title="pmWidget.avg.button"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M120,56v48a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V56A16,16,0,0,1,56,40h48A16,16,0,0,1,120,56Zm80-16H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm-96,96H56a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,104,136Zm96,0H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,200,136Z"/></svg></button>
             <!-- PowerMeter: copies the widget as an image, to paste in Discord (pmWidget.js). Camera: Phosphor, as the screenshot icon above. -->
             <button type="button" class="pmOnly headerBtn pmCopyBtn" disabled aria-label="Copy as image for Discord" data-i18n-aria-label="pmWidget.copy" title="Copy as image for Discord" data-i18n-title="pmWidget.copy"><svg class="pmCopyIcon" viewBox="0 0 256 256" width="14" height="14" fill="currentColor" aria-hidden="true" focusable="false"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm-44,76a36,36,0,1,1-36-36A36,36,0,0,1,164,132Z"/></svg><svg class="pmCopiedIcon" viewBox="0 0 256 256" width="14" height="14" fill="currentColor" aria-hidden="true" focusable="false"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg></button>
+            <!-- PowerMeter: the Controls window (src/dashboard/Controls.tsx). Lucide sliders-vertical, apart from Customise's horizontal glyph. -->
+            <button type="button" class="pmOnly headerBtn pmControlsBtn" aria-label="Controls" data-i18n-aria-label="pmWidget.controls" title="Controls" data-i18n-title="pmWidget.controls"><i data-lucide="sliders-vertical" aria-hidden="true"></i></button>
             <button type="button" class="pmOnly headerBtn pmLockBtn" aria-pressed="false" aria-label="Lock position" data-i18n-aria-label="pmWidget.lock" title="Lock position" data-i18n-title="pmWidget.lock"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z"/></svg></button>
             <button type="button" class="pmOnly headerBtn pmOpacityBtn" aria-label="Opacity" data-i18n-aria-label="pmWidget.opacity" title="Opacity" data-i18n-title="pmWidget.opacity"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM40,128a88.1,88.1,0,0,1,88-88V216A88.1,88.1,0,0,1,40,128Z" transform="matrix(-1 0 0 1 256 0)"/></svg></button>
             <button type="button" class="pmOnly headerBtn pmPillBtn" aria-label="Minimise to pill" data-i18n-aria-label="pmWidget.pill" title="Minimise to pill" data-i18n-title="pmWidget.pill"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M222,128a6,6,0,0,1-6,6H40a6,6,0,0,1,0-12H216A6,6,0,0,1,222,128Z"/></svg></button>
@@ -153,6 +155,7 @@
         <div class="bossHpBar" style="display:none">
           <!-- PowerMeter: "HP - %" above the bar; pmWidget.js moves this block into the boss row. -->
           <span class="pmOnly pmHpText"></span>
+          <span class="pmOnly pmHpPct"></span>
           <div class="pmHpTrack">
             <div class="bossHpFill"></div>
             <span class="pmOnly pmHpNotch" style="left:25%"></span>
@@ -509,7 +512,7 @@
           </div>
         </div>
         <!-- PowerMeter: party table heads (design). -->
-        <div class="pmOnly pmCols"><span>#</span><span></span><span data-i18n="pmWidget.cols.name">Name</span><span class="pmColStat">DPS</span><span>%</span><span data-i18n="pmWidget.cols.total">Total</span></div>
+        <div class="pmOnly pmCols"><span>#</span><span></span><span data-i18n="pmWidget.cols.name">Name</span><span class="pmColStat">DPS</span><span>%</span><span data-i18n="pmWidget.cols.total">Total</span><span class="pmColPlayer" data-i18n="pmWidget.cols.player">Player</span><span class="pmColTab"></span><span class="pmColRate">/s</span><span class="pmColShare">%</span><span class="pmColDeaths" title="Deaths" data-i18n-title="pmWidget.cols.deaths">†</span></div>
         <div class="list"></div>
         <!-- PowerMeter: average DPS by class (community public logs, pm_class_stats), drawn by pmWidget.js. -->
         <div class="pmOnly pmAvg">
@@ -589,6 +592,14 @@
               <div><div class="pmTrainerLabel" data-i18n="pmWidget.trainer.total">Total damage</div><div class="pmTrainerValue pmTrainerDmg"></div></div>
             </div>
             <div class="pmTrainerHint pmTrainerHit" data-i18n="pmWidget.trainer.hit">Hit the training dummy to start measuring</div>
+            <!-- Your breakdown on the dummy (badges and skills), as the player breakdown above; pmWidget.js renderDetail. -->
+            <div class="pmTrainerDetail">
+              <div class="pmBadges"></div>
+              <div class="pmSkillGrid pmSkillHead">
+                <span data-i18n="pmWidget.detail.skill">Skill</span><span class="pmDetailColL" data-i18n="pmWidget.detail.damage">Damage</span><span>%</span><span data-i18n="pmWidget.detail.hits">Hits</span><span data-i18n="pmWidget.detail.crit">Crit%</span>
+              </div>
+              <div class="pmSkills"></div>
+            </div>
             <div class="pmTrainerTarget"></div>
             <div class="pmTrainerActions">
               <button type="button" class="pmGhostBtn pmTrainerRestart" data-i18n="pmWidget.trainer.restart">Restart</button>
@@ -615,7 +626,7 @@
             <span class="meterTotalDmg"></span>
           </div>
           <!-- PowerMeter: the party's total DPS, Compact footer (pmWidget.js renderTotal). -->
-          <span class="pmOnly pmTotal" hidden><span class="pmTotalLabel" data-i18n="pmWidget.totalDps">Total DPS</span><span class="pmTotalDps"></span></span>
+          <span class="pmOnly pmTotal" hidden><span class="pmTotalLabel" data-i18n="pmWidget.total">Total</span><span class="pmTotalDps"></span></span>
           <div class="footerBtns">
             <!-- What the meter shows. A native select: keyboard, screen readers and an
                  OS list that may overflow the small overlay window come for free.
@@ -633,6 +644,8 @@
             <button type="button" class="footerBtn onlyMeBtn" aria-pressed="false" aria-label="Only my DPS" data-i18n-aria-label="pmWidget.onlyMe" title="Only my DPS" data-i18n-title="pmWidget.onlyMe"><svg class="onlyMeOff" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M42.76,50A8,8,0,0,0,40,56V224a8,8,0,0,0,16,0V179.77c26.79-21.16,49.87-9.75,76.45,3.41,16.4,8.11,34.06,16.85,53,16.85,13.93,0,28.54-4.75,43.82-18a8,8,0,0,0,2.76-6V56A8,8,0,0,0,218.76,50c-28,24.23-51.72,12.49-79.21-1.12C111.07,34.76,78.78,18.79,42.76,50ZM216,172.25c-26.79,21.16-49.87,9.74-76.45-3.41-25-12.35-52.81-26.13-83.55-8.4V59.79c26.79-21.16,49.87-9.75,76.45,3.4,25,12.35,52.82,26.13,83.55,8.4Z"/></svg><svg class="onlyMeOn" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M232,56V176a8,8,0,0,1-2.76,6c-15.28,13.23-29.89,18-43.82,18-18.91,0-36.57-8.74-53-16.85C105.87,170,82.79,158.61,56,179.77V224a8,8,0,0,1-16,0V56a8,8,0,0,1,2.77-6h0c36-31.18,68.31-15.21,96.79-1.12C167,62.46,190.79,74.2,218.76,50A8,8,0,0,1,232,56Z"/></svg></button>
             <!-- PowerMeter: Trainer (pmWidget.js). Target: Phosphor regular, as the dashboard's button. -->
             <button type="button" class="pmOnly footerBtn pmTrainerBtn" aria-label="Training dummy test" data-i18n-aria-label="pmWidget.trainer.title" title="Training dummy test" data-i18n-title="pmWidget.trainer.title"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M221.87,83.16A104.1,104.1,0,1,1,195.67,49l22.67-22.68a8,8,0,0,1,11.32,11.32l-96,96a8,8,0,0,1-11.32-11.32l27.72-27.72a40,40,0,1,0,17.87,31.09,8,8,0,1,1,16-.9,56,56,0,1,1-22.38-41.65L184.3,60.39a87.88,87.88,0,1,0,23.13,29.67,8,8,0,0,1,14.44-6.9Z"/></svg></button>
+            <!-- PowerMeter: opens the Customise panel (Compact only, pmWidget.js). Icon: the design's own sliders glyph. -->
+            <button type="button" class="pmOnly footerBtn pmCustomBtn" aria-expanded="false" aria-controls="pmCustom" aria-label="Customise meter" data-i18n-aria-label="pmWidget.custom.open" title="Customise meter" data-i18n-title="pmWidget.custom.open"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
             <button
               class="footerBtn metricToggleBtn"
               type="button"
@@ -656,6 +669,9 @@
         </div>
         <!-- PowerMeter: last result, greyed, under the waiting state (design 8.4). -->
         <div class="pmOnly pmLast"><span class="pmLastText"></span><span class="pmSpacer"></span><span class="pmLastDps"></span></div>
+        <!-- PowerMeter: Customise panel of the compact meter (Main.dc.html). Its controls are drawn by
+             pmWidget.js (renderCustom) from the preference list there; preferences persist in pm.compactPrefs. -->
+        <section class="pmOnly pmCustom" id="pmCustom" hidden tabindex="-1" aria-labelledby="pmCustomTitle"></section>
         <div class="resizeHandle" aria-hidden="true"></div>
         <!-- PowerMeter: the other grips of the design's hover frame (8.1). The top-left
              one moves the widget: the window cannot grow up or left. -->

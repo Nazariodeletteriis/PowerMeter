@@ -37,6 +37,7 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
   const slot = bar.querySelector<HTMLElement>(".pmCounters")!;
   const i18n = () => (window as { i18n?: I18n }).i18n;
   let settings: Record<string, string> = {};
+  let playing = ""; // the game's name for the character being played, once it tied one to an entity
 
   // The active character's name: the counters read this session are remembered under it (REMEMBER_KEY), so they show
   // from the start, before the game sends them again on entering the world.
@@ -52,10 +53,15 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
       const onboarded = localStorage.getItem("dpsMeter.userName");
       list = onboarded && settings["pm.class"] ? [{ id: "c1", name: onboarded, cls: settings["pm.class"] }] : [];
     }
-    const char = list.find((c) => c.id === settings["pm.activeCharacter"]) ?? list[0];
+    // The character the game says you are playing wins over the roster's active one: another account's character
+    // (not in the roster) used to leave the last active name here. Its class only when the roster knows it.
+    const key = (s: string) => s.trim().toLowerCase();
+    const char = playing
+      ? (list.find((c) => key(c.name) === key(playing)) ?? { id: "", name: playing, cls: "" })
+      : (list.find((c) => c.id === settings["pm.activeCharacter"]) ?? list[0]);
     name.hidden = !char;
     name.textContent = char?.name ?? "";
-    if (char) bar.dataset.cls = char.cls.toLowerCase(); // powermeter-theme.css [data-cls]: the class's colour and icon
+    if (char?.cls) bar.dataset.cls = char.cls.toLowerCase(); // powermeter-theme.css [data-cls]: the class's colour and icon
     else delete bar.dataset.cls;
     if ((char?.name ?? "") !== charName) {
       charName = char?.name ?? "";
@@ -73,7 +79,9 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
       return {};
     }
   };
+  // Controls window: "Counters" off hides them (pm.counters.off).
   const showCounters = () => {
+    slot.hidden = settings["pm.counters.off"] === "1";
     const html = COUNTERS.map(([id, max, key, fallback, icon]) => {
       const c = counts[id];
       const label = i18n()?.format?.(key, {}, fallback) ?? fallback;
@@ -96,9 +104,22 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
       }
       showCounters();
     }, () => {});
+  type Capture = { locked?: boolean; localPlayerId?: number | null; characterName?: string | null };
+  const pollPlaying = () =>
+    invoke<Capture>("get_capture_status").then((c) => {
+      const next = c.locked && c.localPlayerId != null ? (c.characterName ?? "").trim() : "";
+      if (next && next !== playing) {
+        playing = next;
+        show();
+      }
+    }, () => {});
   showCounters();
   poll();
-  setInterval(poll, COUNTER_POLL_MS);
+  pollPlaying();
+  setInterval(() => {
+    poll();
+    pollPlaying();
+  }, COUNTER_POLL_MS);
   i18n()?.onChange?.(showCounters);
 
   invoke<Record<string, string>>("get_settings").then((s) => {
@@ -108,5 +129,6 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
   listen<{ key: string; value: string }>("setting-changed", ({ payload }) => {
     settings = { ...settings, [payload.key]: String(payload.value) };
     show();
+    if (payload.key === "pm.counters.off") showCounters();
   }).catch(() => {});
 }

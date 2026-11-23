@@ -209,5 +209,11 @@
   "combat.trainerRestart": "Restart",
   "combat.stop": "Stop",
   "combat.dummy": "Dummy",
-  "combat.windowEstimate": "Window damage estimated: hits × average hit"
+  "combat.windowEstimate": "Window damage estimated: hits × average hit",
+  "combat.tab.deaths": "Deaths",
+  "combat.viewing": "Viewing",
+  "combat.caption.deaths": "Who died, when, and the last hit they took",
+  "combat.noDeaths": "No one died in this fight.",
+  "combat.deathsOld": "Deaths are recorded from version 0.5.64: this fight is older.",
+  "combat.killerUnknown": "Unknown"
 }

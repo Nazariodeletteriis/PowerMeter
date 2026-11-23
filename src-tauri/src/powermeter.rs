@@ -3,7 +3,7 @@
 //! Kept in its own module so the A2Tools engine files stay close to upstream
 //! and `git merge upstream/main` keeps applying cleanly.
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, Ordering};
 
 use tauri::{Emitter, Manager};
 
@@ -57,8 +57,9 @@ struct Lock {
     on: AtomicBool,
 }
 
-static LOCKS: [Lock; 3] = [
+static LOCKS: [Lock; 4] = [
     Lock { label: "main", event: "pm-click-through", on: AtomicBool::new(false) },
+    Lock { label: "controls", event: "pm-controls-click-through", on: AtomicBool::new(false) },
     // Widget windows: the event is pm-<label>-click-through (Minimap.tsx useLock).
     Lock { label: "map", event: "pm-map-click-through", on: AtomicBool::new(false) },
     Lock { label: "cubes", event: "pm-cubes-click-through", on: AtomicBool::new(false) },
@@ -317,6 +318,127 @@ pub async fn open_map_window(app: tauri::AppHandle) -> Result<(), String> {
 #[tauri::command]
 pub async fn open_cube_window(app: tauri::AppHandle) -> Result<(), String> {
     open_widget_window(&app, "cubes", "cubeFinder", "PowerMeter — Cube Finder", (380.0, 380.0), (280.0, 280.0))
+}
+
+/// The Controls window (Controls.tsx): one switch per PowerMeter window that can float over the game, so they are
+/// shown or hidden from the game without going through the dashboard, and the grid to line them up.
+#[tauri::command]
+pub async fn open_controls_window(app: tauri::AppHandle) -> Result<(), String> {
+    open_widget_window(&app, "controls", "controls", "PowerMeter — Controls", (300.0, 460.0), (260.0, 320.0))
+}
+
+/// Windows the Controls window can close (the meter hides instead: hide_overlay).
+const CLOSABLE: [&str; 3] = ["history", "map", "cubes"];
+/// Windows that line up on the grid while it is on.
+const SNAPPING: [&str; 7] = ["main", "details", "history", "map", "cubes", "controls", "petmarket"];
+
+static GRID_ON: AtomicBool = AtomicBool::new(false);
+static GRID_HIDDEN: AtomicBool = AtomicBool::new(false);
+static GRID_STEP: AtomicU32 = AtomicU32::new(16);
+/// Bumped on every move of a snapping window: a snap waits for the moves to stop.
+static MOVE_SEQ: AtomicU64 = AtomicU64::new(0);
+/// A window snaps this long after its last move (the drag has ended).
+const SNAP_AFTER_MS: u64 = 400;
+
+/// What the Controls window shows: which windows are up, and the grid.
+#[tauri::command]
+pub fn overlay_state(app: tauri::AppHandle) -> serde_json::Value {
+    let up = |label: &str| app.get_webview_window(label).and_then(|w| w.is_visible().ok()).unwrap_or(false);
+    serde_json::json!({
+        "main": up("main"),
+        "history": up("history"),
+        "map": up("map"),
+        "cubes": up("cubes"),
+        "grid": GRID_ON.load(Ordering::SeqCst),
+        "gridHidden": GRID_HIDDEN.load(Ordering::SeqCst),
+        "gridStep": GRID_STEP.load(Ordering::SeqCst),
+    })
+}
+
+#[tauri::command]
+pub fn close_overlay_window(app: tauri::AppHandle, label: String) -> Result<(), String> {
+    if !CLOSABLE.contains(&label.as_str()) {
+        return Err(format!("{label} can't be closed from Controls"));
+    }
+    if let Some(window) = app.get_webview_window(&label) {
+        window.close().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+/// "Move windows": the windows snap to a grid of `step` px (logical) when a drag ends; the grid shows over the
+/// game's screen unless hidden. Off, the grid window closes.
+#[tauri::command]
+pub async fn set_grid(app: tauri::AppHandle, on: bool, hidden: bool, step: u32) -> Result<(), String> {
+    GRID_ON.store(on, Ordering::SeqCst);
+    GRID_HIDDEN.store(hidden, Ordering::SeqCst);
+    GRID_STEP.store(step.clamp(4, 128), Ordering::SeqCst);
+    let existing = app.get_webview_window("grid");
+    if !on || hidden {
+        if let Some(window) = existing {
+            let _ = window.close();
+        }
+        return Ok(());
+    }
+    if let Some(window) = existing {
+        let _ = app.emit_to("grid", "grid-step", GRID_STEP.load(Ordering::SeqCst));
+        return window.show().map_err(|e| e.to_string());
+    }
+    // The screen the meter is on: where the game is.
+    let monitor = app
+        .get_webview_window("main")
+        .and_then(|w| w.current_monitor().ok().flatten())
+        .or_else(|| app.primary_monitor().ok().flatten())
+        .ok_or("no monitor")?;
+    let scale = monitor.scale_factor();
+    let window = tauri::WebviewWindowBuilder::new(&app, "grid", tauri::WebviewUrl::App("dashboard.html".into()))
+        .initialization_script(format!("window.__PM_VIEW__ = 'grid'; window.__PM_GRID__ = {};", GRID_STEP.load(Ordering::SeqCst)))
+        .title("PowerMeter — Grid")
+        .decorations(false)
+        .transparent(true)
+        .shadow(false)
+        .always_on_top(true)
+        .focused(false)
+        .skip_taskbar(true)
+        .resizable(false)
+        .inner_size(monitor.size().width as f64 / scale, monitor.size().height as f64 / scale)
+        .build()
+        .map_err(|e| e.to_string())?;
+    let _ = window.set_ignore_cursor_events(true);
+    let _ = window.set_position(*monitor.position());
+    Ok(())
+}
+
+/// "Move windows" off and its grid closed (the Controls window went away).
+pub fn grid_off(app: &tauri::AppHandle) {
+    GRID_ON.store(false, Ordering::SeqCst);
+    if let Some(window) = app.get_webview_window("grid") {
+        let _ = window.close();
+    }
+}
+
+/// A snapping window moved (lib.rs on_window_event): once the moves stop, put it on the nearest grid point of its
+/// screen.
+pub fn snap_after_move(window: &tauri::Window) {
+    if !GRID_ON.load(Ordering::SeqCst) || !SNAPPING.contains(&window.label()) {
+        return;
+    }
+    let seq = MOVE_SEQ.fetch_add(1, Ordering::SeqCst) + 1;
+    let window = window.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_millis(SNAP_AFTER_MS));
+        if MOVE_SEQ.load(Ordering::SeqCst) != seq || !GRID_ON.load(Ordering::SeqCst) {
+            return;
+        }
+        let (Ok(pos), Ok(Some(monitor))) = (window.outer_position(), window.current_monitor()) else { return };
+        let step = GRID_STEP.load(Ordering::SeqCst) as f64 * monitor.scale_factor();
+        let origin = monitor.position();
+        let snap = |v: i32, o: i32| o + (((v - o) as f64 / step).round() * step) as i32;
+        let (x, y) = (snap(pos.x, origin.x), snap(pos.y, origin.y));
+        if (x, y) != (pos.x, pos.y) {
+            let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+        }
+    });
 }
 
 /// The pet overlays, made at launch so they are loaded before the first event; transparent, never focused, and clicks

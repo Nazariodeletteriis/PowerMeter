@@ -235,8 +235,8 @@
     async getBattleDetail(actorId) {
       try {
         const dps = cachedDpsJson ? JSON.parse(cachedDpsJson) : null;
-        const targetId = Number(dps?.targetId) || 0;
-        if (targetId <= 0) return null;
+        // 0 = no single target (all mobs, dummy test, fight just ended): the engine sums every current target.
+        const targetId = Math.max(0, Number(dps?.targetId) || 0);
         const aid = Number(actorId);
         const result = await invoke("get_skill_details", {
           targetId,

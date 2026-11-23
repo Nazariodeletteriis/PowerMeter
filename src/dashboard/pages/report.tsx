@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEve
 import {
   CaretLeftIcon,
   CaretRightIcon,
+  CheckIcon,
   ColumnsIcon,
   ExportIcon,
   ListNumbersIcon,
@@ -26,7 +27,7 @@ import { Locked } from "../Locked";
 import { ROTATION_TIER } from "../nav";
 
 // The latest boss fight (the latest PVE/PvP session is often a few seconds of trash); its attempts are the saved fights on the same boss, oldest first.
-const TABS = ["overview", "skill", "tl", "rot", "taken", "heal"] as const;
+const TABS = ["overview", "skill", "tl", "rot", "taken", "heal", "deaths"] as const;
 type Tab = (typeof TABS)[number];
 const OVERVIEW_COLS = "30px minmax(160px,1fr) 90px minmax(200px,1.4fr) 70px 64px";
 const SKILL_COLS = "minmax(220px,1.6fr) repeat(12,minmax(58px,1fr))";
@@ -139,7 +140,7 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
   }
   const list = (k: "taken" | "heal") =>
     playersOf(rec)
-      .map((a) => (k === "taken" ? { a: playerName(a), b: `${t("combat.col.hits")} ${fmt(a.hitsReceived, lang)}`, v: a.damageReceived } : { a: playerName(a), b: heals.get(a.actorId)?.top ?? "", v: heals.get(a.actorId)?.v ?? 0 }))
+      .map((a) => ({ id: a.actorId, ...(k === "taken" ? { a: playerName(a), b: `${t("combat.col.hits")} ${fmt(a.hitsReceived, lang)}`, v: a.damageReceived } : { a: playerName(a), b: heals.get(a.actorId)?.top ?? "", v: heals.get(a.actorId)?.v ?? 0 }) }))
       .filter((r) => r.v > 0)
       .sort((x, y) => y.v - x.v);
 
@@ -361,6 +362,23 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
         ))}
       </div>
 
+      {/* Who the tab is about: on every tab but the overview (whose rows are the picker), always in view. */}
+      {tab !== "overview" && p && (
+        <div className="cbPicker" role="group" aria-label={t("combat.viewing")}>
+          <span className="cbPickerLabel">{t("combat.viewing")}</span>
+          {party.map((q) => {
+            const on = q.key === p.key;
+            return (
+              <button key={q.key} type="button" aria-pressed={on} className={`cbPickerChip${on ? " on" : ""}${q.me ? " me" : ""}`} onClick={() => setSel(q.key)} style={{ "--cls": classColor(q.cls) } as CSSProperties}>
+                <Av cls={q.cls} size={22} radius={5} font={8} bare />
+                {q.n}
+                {on && <CheckIcon aria-hidden="true" weight="bold" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {tab === "overview" && (
         <div className="card" style={{ padding: "6px 8px", overflowX: "auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: OVERVIEW_COLS, gap: 10, padding: "8px 10px", fontSize: 11, color: "var(--pm-t3)", borderBottom: "1px solid var(--pm-line)", minWidth: 720 }}>
@@ -382,6 +400,7 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
               style={
                 {
                   "--bg": q.key === p?.key ? "var(--pm-s3)" : q.me ? "var(--pm-tint)" : "transparent",
+                  boxShadow: q.key === p?.key ? "inset 3px 0 0 var(--pm-red)" : undefined,
                   display: "grid",
                   gridTemplateColumns: OVERVIEW_COLS,
                   gap: 10,
@@ -422,31 +441,6 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
 
       {tab === "skill" && p && (
         <>
-          <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
-            {party.map((q) => (
-              <button
-                key={q.key}
-                type="button"
-                aria-pressed={q.key === p.key}
-                onClick={() => setSel(q.key)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  height: 30,
-                  padding: "0 10px 0 4px",
-                  borderRadius: 6,
-                  border: "1px solid var(--pm-line)",
-                  background: q.key === p.key ? "var(--pm-s3)" : q.me ? "var(--pm-tint)" : "transparent",
-                  color: "var(--pm-t1)",
-                  cursor: "pointer",
-                }}
-              >
-                <Av cls={q.cls} size={22} radius={5} font={8} bare />
-                {q.n}
-              </button>
-            ))}
-          </div>
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr) minmax(0,1.2fr)", gap: 12, marginBottom: 12 }}>
             <StatCard
               title={p.n}
@@ -549,19 +543,21 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
         <>
           <div style={{ fontSize: 12, color: "var(--pm-t3)", marginBottom: 8 }}>{t(`combat.caption.${tab}`)}</div>
           {!list(tab).length && noData}
-          {list(tab).map(({ a, b, v }, _, rows) => (
+          {list(tab).map(({ id, a, b, v }, _, rows) => (
             <div
               key={a}
+              aria-current={id === p?.key || undefined}
               style={{
+                boxShadow: id === p?.key ? "inset 3px 0 0 var(--pm-red)" : undefined,
                 display: "grid",
                 gridTemplateColumns: "220px minmax(0,1fr) 110px 110px",
                 gap: 12,
                 alignItems: "center",
                 minHeight: 40,
                 padding: "0 12px",
-                background: "var(--pm-s1)",
+                background: id === p?.key ? "var(--pm-s3)" : "var(--pm-s1)",
                 border: "1px solid var(--pm-line)",
-                borderRadius: 6,
+                borderRadius: 8,
                 marginBottom: 4,
               }}
             >
@@ -579,6 +575,52 @@ function FightView({ t, lang, run, go, onError, name, rec, attempts, att, dungeo
               </span>
             </div>
           ))}
+        </>
+      )}
+
+      {tab === "deaths" && (
+        <>
+          <div style={{ fontSize: 12, color: "var(--pm-t3)", marginBottom: 8 }}>{t("combat.caption.deaths")}</div>
+          {!rec.deaths ? (
+            <div style={{ padding: "12px 8px", fontSize: 12, color: "var(--pm-t3)" }}>{t("combat.deathsOld")}</div>
+          ) : !rec.deaths.length ? (
+            <div style={{ padding: "12px 8px", fontSize: 12, color: "var(--pm-t3)" }}>{t("combat.noDeaths")}</div>
+          ) : (
+            rec.deaths.map((d, k) => {
+              const q = full.find((r) => r.key === d.actorId);
+              const on = d.actorId === p?.key;
+              return (
+                <div
+                  key={k}
+                  aria-current={on || undefined}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "56px 200px minmax(0,1fr) 110px",
+                    gap: 12,
+                    alignItems: "center",
+                    minHeight: 40,
+                    padding: "0 12px",
+                    background: on ? "var(--pm-s3)" : "var(--pm-s1)",
+                    boxShadow: on ? "inset 3px 0 0 var(--pm-red)" : undefined,
+                    border: "1px solid var(--pm-line)",
+                    borderRadius: 8,
+                    marginBottom: 4,
+                  }}
+                >
+                  <span className="mono" style={{ color: "var(--pm-t2)" }}>{clock(d.atMs / 1000)}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                    {q && <Av cls={q.cls} size={22} radius={5} font={8} bare />}
+                    <span style={{ fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{q?.n ?? `#${d.actorId}`}</span>
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.killer || t("combat.killerUnknown")}</div>
+                    {d.skill && <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>{d.skill}</div>}
+                  </div>
+                  <span className="num">{d.damage > 0 ? fmt(d.damage, lang) : "—"}</span>
+                </div>
+              );
+            })
+          )}
         </>
       )}
 

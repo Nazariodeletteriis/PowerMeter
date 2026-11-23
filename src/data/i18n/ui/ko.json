@@ -284,7 +284,9 @@
     "cols": {
       "name": "이름",
       "total": "합계",
-      "hits": "피격"
+      "hits": "피격",
+      "player": "플레이어",
+      "deaths": "사망"
     },
     "avg": {
       "button": "직업별 평균 DPS",
@@ -308,6 +310,52 @@
     "counterDailyDungeon": "일일 던전",
     "counterBeritraKeys": "베리트라 열쇠",
     "counterShugoKeys": "슈고 페스티벌 열쇠",
-    "counterOdyle": "오드"
+    "counterOdyle": "오드",
+    "tabs": {
+      "dmg": "피해",
+      "heal": "치유",
+      "aggro": "어그로"
+    },
+    "you": "(나)",
+    "total": "합계",
+    "custom": {
+      "open": "미터 사용자 설정",
+      "title": "사용자 설정",
+      "closeLabel": "설정 닫기",
+      "preset": "프리셋",
+      "presets": {
+        "min": "최소",
+        "std": "표준",
+        "full": "전체"
+      },
+      "elements": "요소",
+      "icons": "직업 아이콘",
+      "rank": "순위 (#)",
+      "bars": "배경 막대",
+      "header": "헤더와 보스",
+      "cTotal": "합계 열",
+      "cRate": "초당 열",
+      "cShare": "비율 % 열",
+      "cDeaths": "사망 열",
+      "density": "행 밀도",
+      "dense": "좁게",
+      "normal": "보통",
+      "rows": "표시 인원",
+      "bg": "배경",
+      "bgClear": "투명",
+      "bgSoft": "부드럽게",
+      "bgFull": "불투명",
+      "color": "막대 색상",
+      "colors": {
+        "azure": "하늘색",
+        "violet": "보라",
+        "green": "초록",
+        "amber": "호박색",
+        "pink": "분홍"
+      },
+      "mode": "모드",
+      "dummy": "허수아비"
+    },
+    "controls": "컨트롤"
   }
 }

@@ -242,8 +242,10 @@ class DpsApp {
       getMetric: (row) => this.getMetricForRow(row),
       getSortDirection: () => this.listSortDirection,
       getPinUserToTop: () => this.pinMeToTop,
-      getPlayerLimit: () => this.playerLimit,
+      // Compact: the "Visible players" of its Customise panel (pmWidget.js); otherwise the Settings value.
+      getPlayerLimit: () => this.pmWidget?.rowLimit?.() || this.playerLimit,
       getOnlyUser: () => this.onlyShowUser,
+      getCompact: () => this.slimMode && !!this.pmWidget?.isActive(),
       onHoverUserRow: (row, event) => {
         if (this.shouldSuppressRowInteractions()) return;
         this.openHoverDetailsRow(row, event);
@@ -1216,6 +1218,8 @@ class DpsApp {
         hps: Number(isObj ? value.hps : 0) || 0,
         hitsTaken: Number(isObj ? value.hitsTaken : 0) || 0,
         damageTaken: Number(isObj ? value.damageTaken : 0) || 0,
+        // Deaths since the last reset (the compact meter's † column).
+        deaths: Math.max(0, Math.trunc(Number(isObj ? value.deaths : 0)) || 0),
         // By id too: "Only my DPS" and the highlight must not hang on the typed name.
         isUser: isMe || name === this.USER_NAME,
         isIdentifying,
@@ -2715,6 +2719,8 @@ class DpsApp {
     this.pmWidget?.syncTheme();
     // Compact hides the boss row, so the name is fitted again on the way back.
     this.fitBossName();
+    // Compact has its own figures (short) and number of players: redraw the rows now.
+    if (this.lastSnapshot?.length) this.meterUI?.updateFromRows(this.lastSnapshot);
   }
 
   setMainPlayerNamesBold(enabled) {
@@ -3473,7 +3479,9 @@ class DpsApp {
     const scaleOf = () => parseFloat(this.meterEl.style.zoom) || 1;
     const applySize = (scale, h) => {
       this.meterEl.style.zoom = String(scale);
-      if (h > 0) this.meterEl.style.minHeight = `${h / scale}px`;
+      // A cap, not a floor: with few players the meter (and the window) shrinks to its rows; past
+      // the cap the list scrolls. As min-height it left an empty block under one or two rows.
+      if (h > 0) this.meterEl.style.maxHeight = `${h / scale}px`;
     };
 
     // The size the user left the meter at (older saves had a width: start from scale 1).
@@ -3485,8 +3493,7 @@ class DpsApp {
       // unreadable: keep the default size
     }
 
-    // Height is dragged as min-height: the meter can still grow for new rows, and a
-    // fixed height would lose to the CSS min-height (420px) and never shrink.
+    // Height is dragged as max-height (see applySize).
     const onMove = (event) => {
       if (!isResizing) return;
       let scale = scaleOf();
@@ -3502,7 +3509,7 @@ class DpsApp {
       if (!isResizing) return;
       isResizing = false;
       const scale = scaleOf();
-      const h = (parseFloat(this.meterEl.style.minHeight) || 0) * scale;
+      const h = (parseFloat(this.meterEl.style.maxHeight) || 0) * scale;
       this.safeSetStorage(SIZE_KEY, JSON.stringify({ scale: Math.round(scale * 1000) / 1000, h: Math.round(h) }));
     };
 

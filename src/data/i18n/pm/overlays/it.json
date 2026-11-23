@@ -1,0 +1,20 @@
+{
+  "overlays.title": "Controlli",
+  "overlays.windows": "Finestre",
+  "overlays.meter": "DPS meter",
+  "overlays.history": "Storico combattimenti",
+  "overlays.map": "Mappa",
+  "overlays.cubes": "Cube Finder",
+  "overlays.dummy": "Test manichino",
+  "overlays.dummyStart": "Avvia",
+  "overlays.layout": "Disposizione",
+  "overlays.move": "Sposta finestre",
+  "overlays.moveHint": "Le finestre si agganciano alla griglia quando le lasci.",
+  "overlays.hideGrid": "Nascondi griglia",
+  "overlays.gridSize": "Passo griglia",
+  "overlays.open": "Controlli",
+  "overlays.inMeter": "Nel meter",
+  "overlays.ping": "Ping",
+  "overlays.eventAlerts": "Avvisi eventi",
+  "overlays.counters": "Contatori"
+}

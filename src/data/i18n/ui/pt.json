@@ -284,7 +284,9 @@
     "cols": {
       "name": "Nome",
       "total": "Total",
-      "hits": "Golpes"
+      "hits": "Golpes",
+      "player": "Jogador",
+      "deaths": "Mortes"
     },
     "avg": {
       "button": "DPS médio por classe",
@@ -308,6 +310,52 @@
     "counterDailyDungeon": "Masmorra diária",
     "counterBeritraKeys": "Chaves de Beritra",
     "counterShugoKeys": "Chaves do festival Shugo",
-    "counterOdyle": "Odyle"
+    "counterOdyle": "Odyle",
+    "tabs": {
+      "dmg": "Dano",
+      "heal": "Cura",
+      "aggro": "Aggro"
+    },
+    "you": "(você)",
+    "total": "Total",
+    "custom": {
+      "open": "Personalizar medidor",
+      "title": "Personalizar",
+      "closeLabel": "Fechar definições",
+      "preset": "Predefinição",
+      "presets": {
+        "min": "Mínimo",
+        "std": "Padrão",
+        "full": "Completo"
+      },
+      "elements": "Elementos",
+      "icons": "Ícones de classe",
+      "rank": "Posição (#)",
+      "bars": "Barras de fundo",
+      "header": "Cabeçalho e chefe",
+      "cTotal": "Coluna total",
+      "cRate": "Coluna por segundo",
+      "cShare": "Coluna quota %",
+      "cDeaths": "Coluna mortes",
+      "density": "Densidade das linhas",
+      "dense": "Compacta",
+      "normal": "Normal",
+      "rows": "Jogadores visíveis",
+      "bg": "Fundo",
+      "bgClear": "Transparente",
+      "bgSoft": "Suave",
+      "bgFull": "Sólido",
+      "color": "Cor das barras",
+      "colors": {
+        "azure": "Azul-celeste",
+        "violet": "Violeta",
+        "green": "Verde",
+        "amber": "Âmbar",
+        "pink": "Rosa"
+      },
+      "mode": "Modo",
+      "dummy": "Boneco de treino"
+    },
+    "controls": "Controlos"
   }
 }

@@ -284,7 +284,9 @@
     "cols": {
       "name": "Nome",
       "total": "Totale",
-      "hits": "Colpi"
+      "hits": "Colpi",
+      "player": "Giocatore",
+      "deaths": "Morti"
     },
     "avg": {
       "button": "Medie per classe",
@@ -308,6 +310,52 @@
     "counterDailyDungeon": "Dungeon giornaliero",
     "counterBeritraKeys": "Chiavi Beritra",
     "counterShugoKeys": "Chiavi Shugo Festival",
-    "counterOdyle": "Odyle"
+    "counterOdyle": "Odyle",
+    "tabs": {
+      "dmg": "Danno",
+      "heal": "Cure",
+      "aggro": "Aggro"
+    },
+    "you": "(tu)",
+    "total": "Totale",
+    "custom": {
+      "open": "Personalizza meter",
+      "title": "Personalizza",
+      "closeLabel": "Chiudi impostazioni",
+      "preset": "Preset",
+      "presets": {
+        "min": "Minimo",
+        "std": "Standard",
+        "full": "Completo"
+      },
+      "elements": "Elementi",
+      "icons": "Icone classe",
+      "rank": "Posizione (#)",
+      "bars": "Barre di fondo",
+      "header": "Intestazione e boss",
+      "cTotal": "Colonna totale",
+      "cRate": "Colonna al secondo",
+      "cShare": "Colonna quota %",
+      "cDeaths": "Colonna morti",
+      "density": "Densità righe",
+      "dense": "Compatta",
+      "normal": "Normale",
+      "rows": "Giocatori visibili",
+      "bg": "Sfondo",
+      "bgClear": "Trasparente",
+      "bgSoft": "Soft",
+      "bgFull": "Pieno",
+      "color": "Colore barre",
+      "colors": {
+        "azure": "Azzurro",
+        "violet": "Viola",
+        "green": "Verde",
+        "amber": "Ambra",
+        "pink": "Rosa"
+      },
+      "mode": "Modalità",
+      "dummy": "Manichino"
+    },
+    "controls": "Controlli"
   }
 }

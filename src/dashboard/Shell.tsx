@@ -10,10 +10,12 @@ import {
   LockSimpleIcon,
   MagnifyingGlassIcon,
   PictureInPictureIcon,
+  SlidersHorizontalIcon,
 } from "@phosphor-icons/react";
 import type { SaveSetting, Settings } from "./App";
 import { canOpen, PLANS_OPEN, useEntitlement } from "./entitlement";
 import { AutoCharacter } from "./AutoCharacter";
+import { findCharacter, readCharacters } from "./characters";
 import { CaptureSync } from "./CaptureSync";
 import { Home } from "./Home";
 import { Locked, TrialReminder } from "./Locked";
@@ -171,8 +173,11 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
     return () => clearTimeout(h);
   }, [tpHint, capture.data?.localPlayerId]);
 
-  const name = capture.data?.characterName || localStorage.getItem(USER_NAME_KEY) || t("home.notSet");
-  const cls = settings["pm.class"];
+  // The name the game tied to an entity first (as the class below and AutoCharacter): a backend name not confirmed
+  // yet can still be the last account's.
+  const name = playing || capture.data?.characterName || localStorage.getItem(USER_NAME_KEY) || t("home.notSet");
+  // The class of the character being played; one the roster does not know shows none rather than the last one's.
+  const cls = playing ? findCharacter(readCharacters(settings), playing)?.cls : settings["pm.class"];
   const run = (action: () => Promise<unknown>) => action().catch(onError);
   const openWidget = () => run(() => invoke("show_overlay"));
   const current = ALL_PAGES.find((x) => x.id === page) ?? ADMIN_PAGE;
@@ -292,6 +297,10 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
               </div>
             </div>
           </button>
+          <button type="button" className="btn" onClick={() => run(() => invoke("open_controls_window"))}>
+            <SlidersHorizontalIcon aria-hidden="true" />
+            {t("overlays.open")}
+          </button>
           <button type="button" className="btn fill" onClick={openWidget}>
             <PictureInPictureIcon aria-hidden="true" />
             {t("topbar.openWidget")}
@@ -326,6 +335,7 @@ export function Shell({ t, lang, settings, save, onError, reviewOnboarding }: Pr
                 go("report");
               }}
               reviewOnboarding={reviewOnboarding}
+              playing={playing}
             />
           ) : page === "supporter" ? (
             <Supporter t={t} lang={lang} onError={onError} />

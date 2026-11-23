@@ -209,5 +209,11 @@
   "combat.trainerRestart": "Neu starten",
   "combat.stop": "Stopp",
   "combat.dummy": "Trainingspuppe",
-  "combat.windowEstimate": "Schaden im Zeitfenster geschätzt: Treffer × Durchschnittstreffer"
+  "combat.windowEstimate": "Schaden im Zeitfenster geschätzt: Treffer × Durchschnittstreffer",
+  "combat.tab.deaths": "Tode",
+  "combat.viewing": "Ansicht für",
+  "combat.caption.deaths": "Wer starb, wann, und der letzte erlittene Treffer",
+  "combat.noDeaths": "In diesem Kampf ist niemand gestorben.",
+  "combat.deathsOld": "Tode werden ab Version 0.5.64 gespeichert: dieser Kampf ist älter.",
+  "combat.killerUnknown": "Unbekannt"
 }

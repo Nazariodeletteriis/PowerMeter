@@ -215,7 +215,10 @@ impl DpsCalculator {
         match self.target_selection_mode.kind() {
             Some(kind) => combat_data.retain(|&id, _| {
                 let k = self.target_kind(id, &mob_data, &pvp_ids);
-                k == kind || (kind == "pve" && k == "train")
+                // Trainer: a dummy whose spawn we never saw (already in view when capture started, or a dummy code
+                // not in the NPC data) has no code, so it read as "pve" and the test missed its hits.
+                let unseen_dummy = kind == "train" && k == "pve" && !mob_data.contains_key(&id);
+                k == kind || (kind == "pve" && k == "train") || unseen_dummy
             }),
             None => combat_data.retain(|id, _| !pvp_ids.contains(id)),
         }
@@ -509,6 +512,11 @@ impl DpsCalculator {
                     p.hits_taken += hits;
                     p.damage_taken += dmg;
                 }
+            }
+        }
+        for d in self.data_storage.get_deaths() {
+            if let Some(p) = dps_data.map.get_mut(&d.actor_id) {
+                p.deaths += 1;
             }
         }
         for h in &mut dps_data.heals {
@@ -919,7 +927,27 @@ impl DpsCalculator {
             mob_code,
             mode: mode.to_string(),
             killed: (mode == "boss").then(|| self.data_storage.is_entity_dead(target_id)),
+            deaths: self.fight_deaths(&record_actors, start_time_ms, duration_ms),
         }
+    }
+
+    /// The deaths of the fight's players between its start and a few seconds after its end (the death record can
+    /// trail the last hit).
+    fn fight_deaths(&self, players: &HashMap<i32, (String, String)>, start_ms: i64, duration_ms: i64) -> Vec<crate::entity::fight_record::FightDeath> {
+        const TRAIL_MS: i64 = 5_000;
+        self.data_storage
+            .get_deaths()
+            .into_iter()
+            .filter(|d| players.contains_key(&d.actor_id) && d.ts >= start_ms && d.ts <= start_ms + duration_ms + TRAIL_MS)
+            .map(|d| crate::entity::fight_record::FightDeath {
+                actor_id: d.actor_id,
+                at_ms: d.ts - start_ms,
+                killer: if d.killer_id != 0 { self.resolve_target_name(d.killer_id) } else { String::new() },
+                skill_code: d.skill_code,
+                skill: self.skill_lookup.get_skill_name(d.skill_code),
+                damage: d.damage,
+            })
+            .collect()
     }
 
     pub fn get_details_context(&self) -> DetailsContext {
@@ -1795,6 +1823,15 @@ mod mode_tests {
     }
 
     #[test]
+    fn trainer_counts_a_dummy_whose_spawn_was_not_seen() {
+        let (s, mut calc) = setup();
+        let t = now() - 60_000;
+        hit_at(&s, ME, WOLF_A, 1000, t); // a known normal mob stays out
+        hit_at(&s, ME, 9001, 400, t + 1000); // no spawn seen: no code
+        assert_eq!(mine(&mut calc, "dummyTargets"), 400.0);
+    }
+
+    #[test]
     fn pve_session_accumulates_across_mob_deaths() {
         let (s, mut calc) = setup();
         let t = now() - 60_000;
@@ -1923,6 +1960,26 @@ mod mode_tests {
         assert_eq!(d.map[&MATE].hits_taken, 3);
         assert_eq!(d.map[&MATE].damage_taken, 750);
         assert_eq!(d.map[&ME].hits_taken, 0);
+    }
+
+    #[test]
+    fn a_player_death_keeps_its_killing_blow() {
+        let (s, mut calc) = setup();
+        let t = now() - 30_000;
+        hit_at(&s, ME, WOLF_A, 100, t);
+        let mut p = ParsedDamagePacket::new();
+        p.set_actor_id(WOLF_A);
+        p.set_target_id(ME);
+        p.set_skill_code(MOB_SKILL);
+        p.set_damage(900);
+        s.append_damage(p);
+        s.mark_entity_dead(WOLF_B); // a mob's death is not a player's
+        s.mark_entity_dead(ME);
+        let deaths = s.get_deaths();
+        assert_eq!(deaths.len(), 1);
+        assert_eq!((deaths[0].actor_id, deaths[0].killer_id, deaths[0].skill_code, deaths[0].damage), (ME, WOLF_A, MOB_SKILL, 900));
+        calc.set_target_selection_mode("pveTargets");
+        assert_eq!(calc.get_dps().map[&ME].deaths, 1);
     }
 
     #[test]

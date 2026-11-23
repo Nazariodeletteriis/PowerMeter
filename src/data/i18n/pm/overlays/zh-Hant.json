@@ -1,0 +1,20 @@
+{
+  "overlays.title": "控制",
+  "overlays.windows": "視窗",
+  "overlays.meter": "DPS 統計",
+  "overlays.history": "戰鬥記錄",
+  "overlays.map": "地圖",
+  "overlays.cubes": "Cube Finder",
+  "overlays.dummy": "訓練假人",
+  "overlays.dummyStart": "開始",
+  "overlays.layout": "佈局",
+  "overlays.move": "移動視窗",
+  "overlays.moveHint": "放開時視窗會對齊網格。",
+  "overlays.hideGrid": "隱藏網格",
+  "overlays.gridSize": "網格間距",
+  "overlays.open": "控制",
+  "overlays.inMeter": "統計內",
+  "overlays.ping": "延遲",
+  "overlays.eventAlerts": "活動提醒",
+  "overlays.counters": "計數器"
+}

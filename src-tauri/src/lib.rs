@@ -1512,6 +1512,13 @@ pub fn run() {
             if window.label() == "dashboard" && matches!(event, tauri::WindowEvent::CloseRequested { .. }) {
                 window.app_handle().exit(0);
             }
+            if matches!(event, tauri::WindowEvent::Moved(_)) {
+                powermeter::snap_after_move(window);
+            }
+            // However Controls closes, "Move windows" ends with it: no grid left over the game.
+            if window.label() == "controls" && matches!(event, tauri::WindowEvent::Destroyed) {
+                powermeter::grid_off(window.app_handle());
+            }
         })
         .setup(|app| {
             // Resolve data directory
@@ -2042,6 +2049,10 @@ pub fn run() {
             powermeter::open_dashboard_window,
             powermeter::open_map_window,
             powermeter::open_cube_window,
+            powermeter::open_controls_window,
+            powermeter::overlay_state,
+            powermeter::close_overlay_window,
+            powermeter::set_grid,
             powermeter::take_update_prompt,
             powermeter::show_overlay,
             powermeter::hide_overlay,

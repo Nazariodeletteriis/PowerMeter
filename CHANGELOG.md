@@ -4,6 +4,17 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.64
+
+- Added: Controls window over the game (button on the meter and in the dashboard): show or hide the DPS meter, History, Map, Cube Finder, ping, event alerts and counters, start a training dummy test, and "Move windows" to line windows up on a grid (the grid can be hidden; 8, 16 or 32 px).
+- Added: Combat history: new Deaths tab (who died, at what minute, and the last hit they took), and a "Viewing" bar on every tab that shows clearly whose skills, timeline, rotation, damage taken and healing you are looking at.
+- Added: Compact meter redesigned, with a Customize panel: presets, columns (total, per second, share, deaths), row density, visible players, background and bar colour.
+- Added: Training dummy: DPS, crit/back/parry/perfect/double rates and the skills you used in the same window, in both meter modes; start it from Customize or from Controls.
+- Fixed: Clicking a player (or yourself after a dummy test) showed empty details in All mobs and dummy mode: stats and skills now show.
+- Fixed: Training dummy sometimes missed hits: a dummy that was already in view when PowerMeter started now counts.
+- Fixed: Playing a character of another Steam account kept the previous character's name and class on the meter and in the dashboard: they now follow the character the game says you are playing.
+- Fixed: Meter: the timer no longer overlaps the AGGRO tab, the status text is no longer cut off, no doubled timer and no empty space under the rows; the share % no longer changes with the number of visible players; slightly rounder corners.
+
 ## 0.5.63
 
 - Fixed: Pets: each level now has its own target, 5 souls to unlock, 25 for level 2 and 75 for level 3 (105 in all). Level 1 pets now count x/25 and move to level 2 at the right kill, instead of always counting to 75.

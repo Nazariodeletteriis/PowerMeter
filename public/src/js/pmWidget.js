@@ -72,6 +72,11 @@ const createPmWidget = (app) => {
     }
   };
 
+  // --- Controls window (src/dashboard/Controls.tsx, opened by the backend).
+  $(".pmControlsBtn")?.addEventListener("click", () =>
+    invoke("open_controls_window").catch((err) => console.error("[PowerMeter] open_controls_window failed", err))
+  );
+
   // --- lock: keeps the meter in place (start_drag does nothing), everything else stays clickable.
   // Also toggled by the global hotkey, hence the event.
   const lockBtn = $(".pmLockBtn");
@@ -187,15 +192,19 @@ const createPmWidget = (app) => {
 
   // --- player breakdown (8.3)
   const detailEl = $(".pmDetail");
-  const renderDetail = (row, d) => {
-    const heal = mode === "heal" || d.totalHeal > d.totalDmg;
+  // root: the player breakdown, or the Trainer's own copy of the badges and skills (heal: false there).
+  const renderDetail = (row, d, root = detailEl, healTab = mode === "heal") => {
+    const $in = (sel) => root.querySelector(sel);
+    const heal = healTab || d.totalHeal > d.totalDmg;
     const list = (heal ? d.healSkills : d.skills).slice().sort((a, b) => b.dmg - a.dmg);
     const total = heal ? d.totalHeal : d.totalDmg;
     const secs = (Number(d.battleTimeMs) || 0) / 1000;
-    $(".pmDetailTotal").textContent = heal ? (secs > 0 ? num(total / secs) : "0") : num(row.dps);
-    $(".pmDetailUnit").textContent = heal ? "HPS" : "DPS";
-    $(".pmDetailColL").textContent = heal ? t("pmWidget.detail.heal", "Healing") : t("pmWidget.detail.damage", "Damage");
-    $(".pmBadges").innerHTML = [
+    if (root === detailEl) {
+      $(".pmDetailTotal").textContent = heal ? (secs > 0 ? num(total / secs) : "0") : num(row.dps);
+      $(".pmDetailUnit").textContent = heal ? "HPS" : "DPS";
+    }
+    $in(".pmDetailColL").textContent = heal ? t("pmWidget.detail.heal", "Healing") : t("pmWidget.detail.damage", "Damage");
+    $in(".pmBadges").innerHTML = [
       ["CRIT", d.totalCritPct],
       ["BACK", d.totalBackPct],
       ["PARRY", d.totalParryPct],
@@ -205,7 +214,7 @@ const createPmWidget = (app) => {
       .map(([label, value]) => `<div class="pmBadge"><div>${label}</div><div>${pct(value)}</div></div>`)
       .join("");
     const top = list[0]?.dmg || 1;
-    $(".pmSkills").innerHTML = list
+    $in(".pmSkills").innerHTML = list
       .map((s) => {
         // Heal ticks carry no crit data from the engine.
         const crit = heal || !s.time ? "-" : pct((s.crit / s.time) * 100);
@@ -231,8 +240,8 @@ const createPmWidget = (app) => {
     const rowEl = app.elList?.querySelector(`.item[data-row-id="${CSS.escape(String(row.id))}"]`);
     detailEl.dataset.cls = rowEl?.dataset.cls || "";
     $(".pmDetailName").textContent = row.name || "";
-    $(".pmBadges").innerHTML = "";
-    $(".pmSkills").innerHTML = "";
+    detailEl.querySelector(".pmBadges").innerHTML = "";
+    detailEl.querySelector(".pmSkills").innerHTML = "";
     meter.classList.add("isPmDetail");
     refreshDetail();
     clearInterval(detailTimer);
@@ -403,9 +412,23 @@ const createPmWidget = (app) => {
   // You, or the only player hitting the dummy while the engine does not know you yet.
   const trainee = (d) => {
     if (!d?.map) return null;
-    if (d.localPlayerId != null && d.map[d.localPlayerId]) return d.map[d.localPlayerId];
+    if (d.localPlayerId != null && d.map[d.localPlayerId]) return { id: String(d.localPlayerId), ...d.map[d.localPlayerId] };
     const hitting = Object.entries(d.map).filter(([id, v]) => Number(id) > 0 && v?.amount > 0);
-    return hitting.length === 1 ? hitting[0][1] : null;
+    return hitting.length === 1 ? { id: hitting[0][0], ...hitting[0][1] } : null;
+  };
+  // Your badges and skills on the dummy, from the same breakdown as a row click (core.js getDetails),
+  // at most once a second; the backend sums every dummy hit.
+  const TRAINER_DETAIL_MS = 1000;
+  const trainerDetailEl = $(".pmTrainerDetail");
+  const refreshTrainerDetail = async (run, id) => {
+    if (!trainerDetailEl || Date.now() - (run.detailAt || 0) < TRAINER_DETAIL_MS) return;
+    run.detailAt = Date.now();
+    try {
+      const details = await app.getDetails({ id });
+      if (trainer === run && !run.frozen) renderDetail({ id }, details, trainerDetailEl, false);
+    } catch (err) {
+      console.error("[PowerMeter] trainer breakdown failed", err);
+    }
   };
   const renderTrainer = () => {
     const counting = trainer.n > 0;
@@ -441,12 +464,15 @@ const createPmWidget = (app) => {
       countdown(n - 1);
     }, 1000);
   };
+  const clearTrainerDetail = () => trainerDetailEl?.querySelectorAll(".pmBadges, .pmSkills").forEach((el) => (el.innerHTML = ""));
   const openTrainer = () => {
+    clearTrainerDetail();
     const mode = app.safeParseJSON(window.dpsData?.getDpsData?.(), null)?.targetMode;
     trainer = { prevMode: mode && mode !== "dummyTargets" ? mode : app.targetSelection };
     meter.classList.add("isPmTrainer");
     countdown(TRAINER_COUNTDOWN);
     $(".pmTrainerClose").focus();
+    syncCustom();
   };
   function closeTrainer() {
     if (!trainer) return;
@@ -457,6 +483,7 @@ const createPmWidget = (app) => {
     const hadFocus = trainerEl.contains(document.activeElement);
     meter.classList.remove("isPmTrainer");
     if (hadFocus) trainerBtn?.focus();
+    syncCustom();
   }
   // Every poll: the latest numbers, parsed only when a new update came in.
   const tickTrainer = () => {
@@ -468,8 +495,13 @@ const createPmWidget = (app) => {
     const me = trainee(d);
     trainer.cur = me?.amount > 0 ? { dps: me.dps, dmg: me.amount, ms: Number(d.battleTime) || 0, target: d.targetName || "" } : null;
     renderTrainer();
+    if (trainer.cur) refreshTrainerDetail(trainer, me.id);
   };
   trainerBtn?.addEventListener("click", openTrainer);
+  // The Controls window starts / stops the dummy test as the Customise switch does.
+  window.__TAURI__.event
+    .listen("pm-trainer-toggle", () => (trainer ? closeTrainer() : openTrainer()))
+    .catch((err) => console.error("[PowerMeter] pm-trainer-toggle listener failed", err));
   meter.querySelectorAll(".pmTrainerClose, .pmTrainerDone").forEach((btn) => btn.addEventListener("click", closeTrainer));
   trainerEl?.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeTrainer();
@@ -483,6 +515,8 @@ const createPmWidget = (app) => {
     trainer.frozen = null;
     trainer.cur = null;
     trainer.raw = null;
+    trainer.detailAt = 0;
+    clearTrainerDetail();
     countdown(TRAINER_COUNTDOWN);
     $(".pmTrainerClose").focus(); // the actions hide during the countdown
   });
@@ -492,14 +526,17 @@ const createPmWidget = (app) => {
     const el = $(sel);
     if (el && el.textContent !== text) el.textContent = text;
   };
-  // Compact footer: the party's total DPS (every player in the fight, as core.js updateMeterTotalBar),
-  // in the rows' own format. DPS tab only: the other tabs' rows are not damage per second.
+  // Compact footer (the only layout that shows it): the party's total for the tab, every player in
+  // the fight as core.js updateMeterTotalBar, short as the rows ("28,4k/s"). Aggro: damage taken.
+  const TOTAL_OF = { dps: (r) => r.dps, heal: (r) => r.hps, aggro: (r) => r.damageTaken };
   const renderTotal = () => {
     const el = $(".pmTotal");
     const rows = frame?.rows || [];
     if (!el) return;
-    el.hidden = mode !== "dps" || !rows.length;
-    if (!el.hidden) setText(".pmTotalDps", app.formatDpsThousands(rows.reduce((sum, r) => sum + (Number(r?.dps) || 0), 0)));
+    el.hidden = !rows.length;
+    if (el.hidden) return;
+    const sum = rows.reduce((acc, r) => acc + (Number(TOTAL_OF[mode](r)) || 0), 0);
+    setText(".pmTotalDps", `${app.meterUI.formatShort(sum)}${mode === "aggro" ? "" : "/s"}`);
   };
   const render = () => {
     meter.querySelectorAll(".pmTab").forEach((tab) => {
@@ -508,6 +545,9 @@ const createPmWidget = (app) => {
       tab.setAttribute("aria-selected", String(on));
     });
     setText(".pmColStat", mode === "heal" ? "HPS" : mode === "aggro" ? t("pmWidget.cols.hits", "Hits") : "DPS");
+    setText(".pmColTab", t(`pmWidget.tabs.${mode === "dps" ? "dmg" : mode}`, mode));
+    meter.classList.toggle("pmTab-aggro", mode === "aggro"); // Compact: no per-second column on Aggro
+    meter.style.setProperty("--pm-you-label", JSON.stringify(` ${t("pmWidget.you", "(you)")}`));
     let title = "";
     if (view === "ended") title = t("pmWidget.end.title", "Ended");
     if (copied) title = t("pmWidget.copied", "Copied, paste it in Discord");
@@ -599,6 +639,7 @@ const createPmWidget = (app) => {
       const live = Number(next.targetCurrentHp);
       const left = live >= 0 ? Math.min(maxHp, live) : Math.max(0, maxHp - (Number(next.targetTotalDamage) || 0));
       setText(".pmHpText", `${num(left)} HP - ${oneDec((left / maxHp) * 100)}%`);
+      setText(".pmHpPct", pct((left / maxHp) * 100));
       $(".bossHpBar")?.classList.toggle("isPmKilled", left <= 0);
     }
     const berserk = $(".pmBerserk");
@@ -632,10 +673,128 @@ const createPmWidget = (app) => {
     }
   };
 
-  window.i18n?.onChange?.(() => render());
+  // --- Compact preferences and the Customise panel (Main.dc.html). Stored as one JSON in
+  // localStorage (pm.compactPrefs, like pm.widgetMode); every value is read back through a
+  // whitelist, so nothing saved ever reaches a style unchecked. Applied as classes and two
+  // custom properties on .meter, used by the Compact rules only (powermeter-theme.css).
+  const PREFS_KEY = "pm.compactPrefs";
+  const ACCENTS = { azure: "#4cc2ff", violet: "#a78bfa", green: "#34d399", amber: "#fbbf24", pink: "#fb7185" };
+  const BGS = { clear: 0.4, soft: 0.7, full: 1 };
+  const ROW_COUNTS = [3, 5, 8];
+  const SWITCHES = ["icons", "rank", "bars", "header", "cTotal", "cRate", "cShare", "cDeaths"];
+  const PRESETS = {
+    min: { icons: false, rank: false, bars: true, header: false, cTotal: false, cRate: true, cShare: false, cDeaths: false, dense: true, rows: 5, bg: "clear" },
+    std: { icons: false, rank: false, bars: true, header: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft" },
+    full: { icons: true, rank: true, bars: true, header: true, cTotal: true, cRate: true, cShare: true, cDeaths: true, dense: false, rows: 8, bg: "full" },
+  };
+  const readPrefs = () => {
+    let saved = {};
+    try {
+      saved = JSON.parse(app.safeGetStorage(PREFS_KEY) || "{}") || {};
+    } catch {
+      // unreadable: the defaults
+    }
+    const prefs = { ...PRESETS.std, accent: "azure" };
+    for (const key of [...SWITCHES, "dense"]) if (typeof saved[key] === "boolean") prefs[key] = saved[key];
+    if (ROW_COUNTS.includes(saved.rows)) prefs.rows = saved.rows;
+    if (Object.hasOwn(BGS, saved.bg)) prefs.bg = saved.bg;
+    if (Object.hasOwn(ACCENTS, saved.accent)) prefs.accent = saved.accent;
+    return prefs;
+  };
+  let prefs = readPrefs();
+  const isSlim = () => meter.classList.contains("slim");
+  const applyPrefs = () => {
+    meter.style.setProperty("--pm-accent", ACCENTS[prefs.accent]);
+    meter.style.setProperty("--pm-card-alpha", String(BGS[prefs.bg]));
+    for (const key of [...SWITCHES, "dense"]) meter.classList.toggle(`pmPref-${key}`, prefs[key]);
+  };
+  const customEl = $(".pmCustom");
+  const customBtn = $(".pmCustomBtn");
+  // The panel's controls, drawn once per language; their state is synced in place (syncCustom),
+  // so a click never rebuilds the button it came from.
+  const renderCustom = () => {
+    if (!customEl) return;
+    const L = (key, fallback) => esc(t(`pmWidget.custom.${key}`, fallback));
+    const seg = (attr, options) =>
+      `<div class="pmSeg">${options.map(([value, label]) => `<button type="button" ${attr}="${value}">${label}</button>`).join("")}</div>`;
+    const group = (label, body) => `<div class="pmCustomGroup"><span class="pmCustomLabel">${label}</span>${body}</div>`;
+    const swit = (attr, value, label) =>
+      `<div class="pmSwitchRow"><span>${label}</span><button type="button" role="switch" ${attr}="${value}" aria-label="${label}"><span class="pmKnob"></span></button></div>`;
+    customEl.innerHTML = [
+      `<div class="pmCustomHead"><span id="pmCustomTitle">${L("title", "Customise")}</span><button type="button" class="pmCustomClose" aria-label="${L("closeLabel", "Close settings")}">${esc(t("pmWidget.close", "Close"))}</button></div>`,
+      group(L("preset", "Preset"), seg("data-preset", [["min", L("presets.min", "Minimal")], ["std", L("presets.std", "Standard")], ["full", L("presets.full", "Complete")]])),
+      group(
+        L("elements", "Elements"),
+        [["icons", "Class icons"], ["rank", "Position (#)"], ["bars", "Background bars"], ["header", "Header and boss"], ["cTotal", "Total column"], ["cRate", "Per-second column"], ["cShare", "Share % column"], ["cDeaths", "Deaths column"]]
+          .map(([key, fallback]) => swit("data-switch", key, L(key, fallback)))
+          .join("")
+      ),
+      group(L("density", "Row density"), seg("data-dense", [["true", L("dense", "Compact")], ["false", L("normal", "Normal")]])),
+      group(L("rows", "Visible players"), seg("data-rows", ROW_COUNTS.map((n) => [n, n]))),
+      group(L("bg", "Background"), seg("data-bg", [["clear", L("bgClear", "Transparent")], ["soft", L("bgSoft", "Soft")], ["full", L("bgFull", "Solid")]])),
+      group(
+        L("color", "Bar colour"),
+        `<div class="pmSwatches">${Object.entries(ACCENTS)
+          .map(([key, hex]) => `<button type="button" data-accent="${key}" style="--swatch:${hex}" aria-label="${L(`colors.${key}`, key)}"></button>`)
+          .join("")}</div>`
+      ),
+      group(L("mode", "Mode"), swit("data-dummy", "on", L("dummy", "Training dummy"))),
+    ].join("");
+    syncCustom();
+  };
+  function syncCustom() {
+    if (!customEl?.firstChild) return;
+    const same = (key) => Object.entries(PRESETS[key]).every(([k, v]) => prefs[k] === v);
+    const set = (sel, on, attr = "aria-pressed") => customEl.querySelectorAll(sel).forEach((el) => el.setAttribute(attr, String(on(el))));
+    set("[data-preset]", (el) => same(el.dataset.preset));
+    set("[data-switch]", (el) => prefs[el.dataset.switch], "aria-checked");
+    set("[data-dense]", (el) => String(prefs.dense) === el.dataset.dense);
+    set("[data-rows]", (el) => String(prefs.rows) === el.dataset.rows);
+    set("[data-bg]", (el) => prefs.bg === el.dataset.bg);
+    set("[data-accent]", (el) => prefs.accent === el.dataset.accent);
+    set("[data-dummy]", () => !!trainer, "aria-checked");
+  }
+  const setCustomOpen = (open) => {
+    if (!customEl) return;
+    customEl.hidden = !open;
+    customBtn?.setAttribute("aria-expanded", String(open));
+    if (open) customEl.focus(); // the panel itself: Tab goes on to its controls, no ring on a click
+    else customBtn?.focus();
+  };
+  customBtn?.addEventListener("click", () => setCustomOpen(customEl.hidden));
+  customEl?.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setCustomOpen(false);
+  });
+  customEl?.addEventListener("click", (event) => {
+    const btn = event.target.closest("button");
+    if (!btn) return;
+    const d = btn.dataset;
+    if (btn.classList.contains("pmCustomClose")) return setCustomOpen(false);
+    if (d.dummy) return trainer ? closeTrainer() : openTrainer();
+    if (d.preset) prefs = { ...prefs, ...PRESETS[d.preset] };
+    else if (d.switch) prefs = { ...prefs, [d.switch]: !prefs[d.switch] };
+    else if (d.dense) prefs = { ...prefs, dense: d.dense === "true" };
+    else if (d.rows) prefs = { ...prefs, rows: Number(d.rows) };
+    else if (d.bg) prefs = { ...prefs, bg: d.bg };
+    else if (d.accent) prefs = { ...prefs, accent: d.accent };
+    else return;
+    app.safeSetStorage(PREFS_KEY, JSON.stringify(prefs));
+    applyPrefs();
+    syncCustom();
+    if (frame) app.meterUI.updateFromRows(frame.rows); // the visible players, at once
+  });
+  // Compact shows the chosen number of players; the Interface layout keeps the Settings value.
+  const rowLimit = () => (isSlim() ? prefs.rows : 0);
+
+  window.i18n?.onChange?.(() => {
+    render();
+    renderCustom();
+  });
+  applyPrefs();
+  renderCustom();
   meter.classList.add("pmMode-dps"); // the three tabs share the DPS layout and states
   syncTheme();
   render();
 
-  return { isActive, syncTheme, tick, onFrame, openDetail, getStat: () => mode };
+  return { isActive, syncTheme, tick, onFrame, openDetail, getStat: () => mode, rowLimit };
 };

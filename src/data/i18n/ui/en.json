@@ -284,7 +284,9 @@
     "cols": {
       "name": "Name",
       "total": "Total",
-      "hits": "Hits"
+      "hits": "Hits",
+      "player": "Player",
+      "deaths": "Deaths"
     },
     "avg": {
       "button": "Average DPS by class",
@@ -308,6 +310,52 @@
     "counterDailyDungeon": "Daily Dungeon",
     "counterBeritraKeys": "Beritra keys",
     "counterShugoKeys": "Shugo Festival keys",
-    "counterOdyle": "Odyle"
+    "counterOdyle": "Odyle",
+    "tabs": {
+      "dmg": "Damage",
+      "heal": "Healing",
+      "aggro": "Aggro"
+    },
+    "you": "(you)",
+    "total": "Total",
+    "custom": {
+      "open": "Customise meter",
+      "title": "Customise",
+      "closeLabel": "Close settings",
+      "preset": "Preset",
+      "presets": {
+        "min": "Minimal",
+        "std": "Standard",
+        "full": "Complete"
+      },
+      "elements": "Elements",
+      "icons": "Class icons",
+      "rank": "Position (#)",
+      "bars": "Background bars",
+      "header": "Header and boss",
+      "cTotal": "Total column",
+      "cRate": "Per-second column",
+      "cShare": "Share % column",
+      "cDeaths": "Deaths column",
+      "density": "Row density",
+      "dense": "Compact",
+      "normal": "Normal",
+      "rows": "Visible players",
+      "bg": "Background",
+      "bgClear": "Transparent",
+      "bgSoft": "Soft",
+      "bgFull": "Solid",
+      "color": "Bar colour",
+      "colors": {
+        "azure": "Azure",
+        "violet": "Violet",
+        "green": "Green",
+        "amber": "Amber",
+        "pink": "Pink"
+      },
+      "mode": "Mode",
+      "dummy": "Training dummy"
+    },
+    "controls": "Controls"
   }
 }

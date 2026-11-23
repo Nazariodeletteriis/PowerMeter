@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.64
+
+- Añadido: Ventana de controles sobre el juego (botón en el medidor y en el panel): muestra u oculta el medidor DPS, Historial, Mapa, Cube Finder, ping, avisos de eventos y contadores, inicia una prueba con el muñeco y "Mover ventanas" para alinearlas en una cuadrícula (se puede ocultar; 8, 16 o 32 px).
+- Añadido: Historial de combates: nueva pestaña Muertes (quién murió, en qué minuto y el último golpe recibido) y una barra "Viendo" en cada pestaña que muestra claramente de quién ves habilidades, línea de tiempo, rotación, daño recibido y curación.
+- Añadido: Medidor compacto rediseñado, con panel Personalizar: preajustes, columnas (total, por segundo, cuota, muertes), densidad de filas, jugadores visibles, fondo y color de barras.
+- Añadido: Muñeco de prueba: DPS, tasas de crítico/espalda/parada/perfecto/doble y habilidades usadas en la misma ventana, en ambos modos; se inicia desde Personalizar o Controles.
+- Corregido: Al pulsar un jugador (o a ti tras una prueba con el muñeco) los detalles salían vacíos en Todos los monstruos y en modo muñeco: ahora muestran estadísticas y habilidades.
+- Corregido: El muñeco a veces no contaba golpes: ahora cuenta también un muñeco que ya estaba a la vista al iniciar PowerMeter.
+- Corregido: Con un personaje de otra cuenta de Steam quedaban el nombre y la clase del anterior en el medidor y en el panel: ahora siguen al personaje que indica el juego.
+- Corregido: Medidor: el temporizador ya no tapa la pestaña AGGRO, el texto de estado ya no se corta, sin temporizador doble ni espacio vacío bajo las filas; la cuota % ya no cambia con el número de jugadores visibles; esquinas algo más redondeadas.
+
 ## 0.5.63
 
 - Corregido: Mascotas: cada nivel tiene ahora su propio objetivo, 5 almas para desbloquear, 25 para el nivel 2 y 75 para el nivel 3 (105 en total). Las mascotas de nivel 1 cuentan x/25 y pasan al nivel 2 en la muerte correcta, en lugar de contar siempre hasta 75.

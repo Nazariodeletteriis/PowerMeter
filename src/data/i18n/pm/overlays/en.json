@@ -1,0 +1,20 @@
+{
+  "overlays.title": "Controls",
+  "overlays.windows": "Windows",
+  "overlays.meter": "DPS meter",
+  "overlays.history": "Combat history",
+  "overlays.map": "Map",
+  "overlays.cubes": "Cube Finder",
+  "overlays.dummy": "Training dummy",
+  "overlays.dummyStart": "Start",
+  "overlays.layout": "Layout",
+  "overlays.move": "Move windows",
+  "overlays.moveHint": "Windows snap to the grid when you let them go.",
+  "overlays.hideGrid": "Hide grid",
+  "overlays.gridSize": "Grid size",
+  "overlays.open": "Controls",
+  "overlays.inMeter": "In the meter",
+  "overlays.ping": "Ping",
+  "overlays.eventAlerts": "Event alerts",
+  "overlays.counters": "Counters"
+}

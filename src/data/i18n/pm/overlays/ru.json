@@ -1,0 +1,20 @@
+{
+  "overlays.title": "Управление",
+  "overlays.windows": "Окна",
+  "overlays.meter": "DPS-метр",
+  "overlays.history": "История боёв",
+  "overlays.map": "Карта",
+  "overlays.cubes": "Cube Finder",
+  "overlays.dummy": "Тренировочный манекен",
+  "overlays.dummyStart": "Начать",
+  "overlays.layout": "Расположение",
+  "overlays.move": "Перемещать окна",
+  "overlays.moveHint": "Окна прилипают к сетке, когда вы их отпускаете.",
+  "overlays.hideGrid": "Скрыть сетку",
+  "overlays.gridSize": "Шаг сетки",
+  "overlays.open": "Управление",
+  "overlays.inMeter": "В метре",
+  "overlays.ping": "Пинг",
+  "overlays.eventAlerts": "Оповещения о событиях",
+  "overlays.counters": "Счётчики"
+}

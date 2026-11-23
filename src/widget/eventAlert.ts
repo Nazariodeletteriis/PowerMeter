@@ -31,6 +31,16 @@ if (strip && w.A2_VIEW === "main") {
   invoke<Record<string, string>>("get_settings").then((s) => setLead(s[LEAD_KEY]), () => {});
   listen<{ key: string; value: string }>("setting-changed", ({ payload }) => payload.key === LEAD_KEY && setLead(String(payload.value))).catch(() => {});
 
+  // Controls window: "Event alerts" off hides the strip for good (until turned back on).
+  const OFF_KEY = "pm.eventAlerts.off";
+  let off = false;
+  const setOff = (value?: string) => {
+    off = value === "1";
+    if (off) strip.hidden = true;
+  };
+  invoke<Record<string, string>>("get_settings").then((s) => setOff(s[OFF_KEY]), () => {});
+  listen<{ key: string; value: string }>("setting-changed", ({ payload }) => payload.key === OFF_KEY && setOff(String(payload.value))).catch(() => {});
+
   strip.querySelector(".pmEventClose")!.addEventListener("click", () => {
     dismissed = last;
     strip.hidden = true;
@@ -97,7 +107,7 @@ if (strip && w.A2_VIEW === "main") {
       else popupTime.textContent = say("pmWidget.eventStartsIn", { time }, `in ${time}`);
     }
     const lines = soon.filter((s) => s.start > dismissed);
-    if (!lines.length) {
+    if (off || !lines.length) {
       strip.hidden = true;
       return;
     }

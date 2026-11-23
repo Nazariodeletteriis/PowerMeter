@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.64
+
+- Hinzugefügt: Steuerungsfenster über dem Spiel (Knopf im Meter und im Dashboard): DPS-Meter, Verlauf, Karte, Cube Finder, Ping, Event-Hinweise und Zähler ein- oder ausblenden, einen Trainingspuppen-Test starten und mit "Fenster verschieben" Fenster an einem Raster ausrichten (Raster ausblendbar; 8, 16 oder 32 px).
+- Hinzugefügt: Kampfverlauf: neuer Tab Tode (wer starb, in welcher Minute und der letzte erlittene Treffer) und eine Leiste "Ansicht für" in jedem Tab, die klar zeigt, wessen Skills, Timeline, Rotation, erlittenen Schaden und Heilung du siehst.
+- Hinzugefügt: Kompaktes Meter neu gestaltet, mit Anpassen-Panel: Voreinstellungen, Spalten (gesamt, pro Sekunde, Anteil, Tode), Zeilendichte, sichtbare Spieler, Hintergrund und Balkenfarbe.
+- Hinzugefügt: Trainingspuppe: DPS, Crit/Back/Parry/Perfect/Double-Raten und benutzte Skills im selben Fenster, in beiden Meter-Modi; Start über Anpassen oder Steuerung.
+- Behoben: Ein Klick auf einen Spieler (oder dich nach einem Puppentest) zeigte leere Details in Alle Mobs und im Puppenmodus: Werte und Skills werden jetzt angezeigt.
+- Behoben: Die Trainingspuppe verpasste manchmal Treffer: eine Puppe, die beim Start von PowerMeter schon sichtbar war, zählt jetzt.
+- Behoben: Mit einem Charakter eines anderen Steam-Kontos blieben Name und Klasse des vorherigen Charakters im Meter und im Dashboard: sie folgen jetzt dem Charakter, den das Spiel meldet.
+- Behoben: Meter: der Timer überdeckt den AGGRO-Tab nicht mehr, der Statustext wird nicht mehr abgeschnitten, kein doppelter Timer und kein leerer Raum unter den Zeilen; der Anteil in % hängt nicht mehr von der Zahl sichtbarer Spieler ab; etwas rundere Ecken.
+
 ## 0.5.63
 
 - Behoben: Haustiere: Jede Stufe hat jetzt ihr eigenes Ziel, 5 Seelen zum Freischalten, 25 für Stufe 2 und 75 für Stufe 3 (insgesamt 105). Haustiere auf Stufe 1 zählen jetzt x/25 und steigen beim richtigen Kill auf Stufe 2, statt immer bis 75 zu zählen.

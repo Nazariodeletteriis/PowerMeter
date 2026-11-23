@@ -209,5 +209,11 @@
   "combat.trainerRestart": "Ricomincia",
   "combat.stop": "Stop",
   "combat.dummy": "Manichino",
-  "combat.windowEstimate": "Danno della finestra stimato: colpi × colpo medio"
+  "combat.windowEstimate": "Danno della finestra stimato: colpi × colpo medio",
+  "combat.tab.deaths": "Morti",
+  "combat.viewing": "Stai guardando",
+  "combat.caption.deaths": "Chi è morto, quando, e l'ultimo colpo subito",
+  "combat.noDeaths": "Nessuna morte in questo combattimento.",
+  "combat.deathsOld": "Le morti vengono registrate dalla versione 0.5.64: questo combattimento è precedente.",
+  "combat.killerUnknown": "Sconosciuto"
 }

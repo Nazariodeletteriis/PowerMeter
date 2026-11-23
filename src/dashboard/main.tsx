@@ -4,14 +4,15 @@ import { App } from "./App";
 import { MapWindow } from "./MapWindow";
 import { PetPopup } from "./PetPopup";
 import { BlackMarket } from "./BlackMarket";
+import { Controls, Grid } from "./Controls";
 import "./dashboard.css";
 
 // Set by the window's initialization_script (powermeter.rs): a widget window draws only its widget.
 const view = (window as { __PM_VIEW__?: string }).__PM_VIEW__;
 
 // The pet overlays are always there over the game: transparent from the first frame (world.css .mmDoc).
-if (view === "petpop" || view === "petmarket") document.documentElement.classList.add("mmDoc");
+if (view === "petpop" || view === "petmarket" || view === "controls" || view === "grid") document.documentElement.classList.add("mmDoc");
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>{view === "petpop" ? <PetPopup /> : view === "petmarket" ? <BlackMarket /> : view === "map" || view === "cubes" ? <MapWindow view={view} /> : <App />}</StrictMode>,
+  <StrictMode>{view === "petpop" ? <PetPopup /> : view === "petmarket" ? <BlackMarket /> : view === "map" || view === "cubes" ? <MapWindow view={view} /> : view === "controls" ? <Controls /> : view === "grid" ? <Grid /> : <App />}</StrictMode>,
 );

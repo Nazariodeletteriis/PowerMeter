@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { ArrowSquareOutIcon, CaretRightIcon, ListChecksIcon, NewspaperIcon, ShieldIcon, SwordIcon, UserPlusIcon } from "@phosphor-icons/react";
 import type { Settings } from "./App";
-import { activeId, readCharacters } from "./characters";
+import { activeId, findCharacter, readCharacters } from "./characters";
 import { type FightOutcome, fightOutcome, groupDps } from "./fightRow";
 import type { T } from "./i18n";
 import { cleanNews, type NewsItem } from "./news";
@@ -49,6 +49,8 @@ type Props = {
   openCharacters: () => void;
   openFight: (id: string) => void;
   reviewOnboarding: (step: number) => void;
+  /** The character the game says you are playing (null until it ties one to an entity). */
+  playing?: string;
 };
 
 export function Home(props: Props) {
@@ -105,9 +107,21 @@ export function Home(props: Props) {
   );
 }
 
-function CharacterCard({ t, lang, settings, openCharacters }: Props) {
+function CharacterCard({ t, lang, settings, openCharacters, playing }: Props) {
   const characters = readCharacters(settings);
-  const c = characters.find((x) => x.id === activeId(settings, characters));
+  // The game's character wins: one from another account, not in the roster, used to leave the last active one here.
+  const c = playing ? findCharacter(characters, playing) : characters.find((x) => x.id === activeId(settings, characters));
+  if (!c && playing) {
+    return (
+      <Card title={t("nav.myCharacters")} style={{ gridColumn: "span 5" }}>
+        <EmptyState icon={<UserPlusIcon aria-hidden="true" />} title={playing} text={t("autochar.text", { name: playing })}>
+          <button type="button" className="btn fill" onClick={openCharacters}>
+            {t("autochar.create")}
+          </button>
+        </EmptyState>
+      </Card>
+    );
+  }
   if (!c) {
     return (
       <Card title={t("nav.myCharacters")} style={{ gridColumn: "span 5" }}>

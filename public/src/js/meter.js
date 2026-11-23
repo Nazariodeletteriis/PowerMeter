@@ -10,6 +10,7 @@ const createMeterUI = ({
   getPinUserToTop,
   getPlayerLimit,
   getOnlyUser,
+  getCompact,
 }) => {
   const MAX_CACHE = 32;
   const cjkRegex = /[\u3400-\u9FFF\uF900-\uFAFF]/;
@@ -41,6 +42,13 @@ const createMeterUI = ({
   // Total damage as the exact figure the character dealt, with the UI
   // language's thousands separators ("12.345.678").
   const formatDamage = (n) => dpsFormatter.format(Math.round(n));
+  // PowerMeter: the compact meter's short figures ("614,6k", "1,2M"), one decimal in the UI language.
+  const formatShort = (n) => {
+    const v = Number(n) || 0;
+    if (Math.abs(v) >= 1e6) return `${formatOneDecimal(v / 1e6)}M`;
+    if (Math.abs(v) >= 1e3) return `${formatOneDecimal(v / 1e3)}k`;
+    return formatDamage(v);
+  };
 
   const rowViewById = new Map();
   let lastVisibleIds = new Set();
@@ -96,9 +104,14 @@ const createMeterUI = ({
     const dpsTotal = document.createElement("p");
     dpsTotal.className = "dpsTotal";
 
+    // PowerMeter: deaths since the reset (compact meter, "†" column); empty at 0, as the design.
+    const dpsDeaths = document.createElement("p");
+    dpsDeaths.className = "dpsDeaths";
+
     dpsContainer.appendChild(dpsNumber);
     dpsContainer.appendChild(dpsContribution);
     dpsContainer.appendChild(dpsTotal);
+    dpsContainer.appendChild(dpsDeaths);
 
     contentEl.appendChild(rankEl);
     contentEl.appendChild(classIconEl);
@@ -120,6 +133,7 @@ const createMeterUI = ({
       dpsNumber,
       dpsContribution,
       dpsTotal,
+      dpsDeaths,
       fillEl,
       currentRow: null,
       lastSeenAt: 0,
@@ -130,6 +144,7 @@ const createMeterUI = ({
       lastMetricText: "",
       lastContributionText: "",
       lastTotalText: "",
+      lastDeathsText: "",
       lastRankText: "",
       lastFillRatio: -1,
       lastIsUser: false,
@@ -256,6 +271,7 @@ const createMeterUI = ({
     // taken) when it has one, the damage dealt otherwise.
     const totalOf = (row) => Number(resolveMetric(row)?.total ?? row?.totalDamage) || 0;
     const visibleTotalDamage = shareRows.reduce((sum, row) => sum + totalOf(row), 0);
+    const compact = typeof getCompact === "function" && getCompact();
 
     // Build order key to detect if DOM reordering is needed
     let orderKey = "";
@@ -353,7 +369,7 @@ const createMeterUI = ({
         view.prevContribClass = contributionClass;
       }
 
-      const metricText = metric.text;
+      const metricText = compact ? formatShort(metricValue) : metric.text;
       if (view.lastMetricText !== metricText) {
         view.dpsNumber.textContent = metricText;
         view.lastMetricText = metricText;
@@ -365,10 +381,17 @@ const createMeterUI = ({
         view.lastContributionText = contributionText;
       }
 
-      const totalText = formatDamage(totalOf(row));
+      const totalText = compact ? formatShort(totalOf(row)) : formatDamage(totalOf(row));
       if (view.lastTotalText !== totalText) {
         view.dpsTotal.textContent = totalText;
         view.lastTotalText = totalText;
+      }
+
+      const deaths = Number(row.deaths) || 0;
+      const deathsText = deaths > 0 ? String(deaths) : "";
+      if (view.lastDeathsText !== deathsText) {
+        view.dpsDeaths.textContent = deathsText;
+        view.lastDeathsText = deathsText;
       }
 
       const rankText = String(rankById?.get(id) ?? "");
@@ -441,7 +464,8 @@ const createMeterUI = ({
     // knows which row is yours it cannot pick one, so it shows them all.
     const onlyUser = typeof getOnlyUser === "function" && getOnlyUser() && arr.some((row) => row.isUser);
     if (onlyUser) renderRows(arr.filter((row) => row.isUser), rankById, arr);
-    else renderRows(getDisplayRows(arr), rankById);
+    // Shares against everyone, not the visible rows: the 3/5/8 rows setting must not change a player's %.
+    else renderRows(getDisplayRows(arr), rankById, arr);
   };
 
   const updateFromRows = (rows) => {
@@ -475,5 +499,5 @@ const createMeterUI = ({
     return view?.currentRow || null;
   };
 
-  return { updateFromRows, onResetMeterUi, getRowById };
+  return { updateFromRows, onResetMeterUi, getRowById, formatShort };
 };

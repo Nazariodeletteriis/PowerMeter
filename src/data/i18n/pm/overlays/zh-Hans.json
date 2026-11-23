@@ -1,0 +1,20 @@
+{
+  "overlays.title": "控制",
+  "overlays.windows": "窗口",
+  "overlays.meter": "DPS 统计",
+  "overlays.history": "战斗记录",
+  "overlays.map": "地图",
+  "overlays.cubes": "Cube Finder",
+  "overlays.dummy": "训练假人",
+  "overlays.dummyStart": "开始",
+  "overlays.layout": "布局",
+  "overlays.move": "移动窗口",
+  "overlays.moveHint": "松开时窗口会对齐网格。",
+  "overlays.hideGrid": "隐藏网格",
+  "overlays.gridSize": "网格间距",
+  "overlays.open": "控制",
+  "overlays.inMeter": "统计内",
+  "overlays.ping": "延迟",
+  "overlays.eventAlerts": "活动提醒",
+  "overlays.counters": "计数器"
+}

@@ -1,0 +1,20 @@
+{
+  "overlays.title": "Steuerung",
+  "overlays.windows": "Fenster",
+  "overlays.meter": "DPS-Meter",
+  "overlays.history": "Kampfverlauf",
+  "overlays.map": "Karte",
+  "overlays.cubes": "Cube Finder",
+  "overlays.dummy": "Trainingspuppe",
+  "overlays.dummyStart": "Starten",
+  "overlays.layout": "Anordnung",
+  "overlays.move": "Fenster verschieben",
+  "overlays.moveHint": "Fenster rasten beim Loslassen am Raster ein.",
+  "overlays.hideGrid": "Raster ausblenden",
+  "overlays.gridSize": "Rastergröße",
+  "overlays.open": "Steuerung",
+  "overlays.inMeter": "Im Meter",
+  "overlays.ping": "Ping",
+  "overlays.eventAlerts": "Event-Hinweise",
+  "overlays.counters": "Zähler"
+}

@@ -2,6 +2,17 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.64
+
+- Aggiunto: Finestra Controlli sopra il gioco (pulsante nel meter e nella dashboard): mostra o nascondi DPS meter, Storico, Mappa, Cube Finder, ping, avvisi eventi e contatori, avvia il test sul manichino e "Sposta finestre" per allinearle su una griglia (la griglia si può nascondere; 8, 16 o 32 px).
+- Aggiunto: Storico combattimenti: nuova scheda Morti (chi è morto, a che minuto e l'ultimo colpo subito) e una barra "Stai guardando" in ogni scheda che mostra chiaramente di chi stai vedendo skill, timeline, rotazione, danno ricevuto e cure.
+- Aggiunto: Meter compatto ridisegnato, con il pannello Personalizza: preset, colonne (totale, al secondo, quota, morti), densità righe, giocatori visibili, sfondo e colore barre.
+- Aggiunto: Manichino: DPS, percentuali crit/back/parry/perfect/double e skill usate nella stessa finestra, in entrambe le modalità del meter; si avvia da Personalizza o da Controlli.
+- Corretto: Cliccando un giocatore (o te stesso dopo un test sul manichino) i dettagli erano vuoti in Tutti i mob e nel manichino: ora mostrano statistiche e skill.
+- Corretto: Il manichino a volte non contava i colpi: ora conta anche un manichino già in vista quando PowerMeter è partito.
+- Corretto: Giocando un personaggio di un altro account Steam restavano nome e classe del personaggio precedente nel meter e nella dashboard: ora seguono il personaggio che il gioco dice che stai giocando.
+- Corretto: Meter: il timer non copre più la scheda AGGRO, il testo di stato non viene più tagliato, niente timer doppio né spazio vuoto sotto le righe; la quota % non cambia più col numero di giocatori visibili; angoli un po' più arrotondati.
+
 ## 0.5.63
 
 - Corretto: Pet: ogni livello ha ora il suo obiettivo, 5 anime per lo sblocco, 25 per il livello 2 e 75 per il livello 3 (105 in tutto). I pet di livello 1 contano x/25 e passano al livello 2 all'uccisione giusta, invece di contare sempre fino a 75.

@@ -209,5 +209,11 @@
   "combat.trainerRestart": "やり直す",
   "combat.stop": "停止",
   "combat.dummy": "訓練用人形",
-  "combat.windowEstimate": "範囲内のダメージは推定値：ヒット数 × 平均ダメージ"
+  "combat.windowEstimate": "範囲内のダメージは推定値：ヒット数 × 平均ダメージ",
+  "combat.tab.deaths": "死亡",
+  "combat.viewing": "表示中",
+  "combat.caption.deaths": "誰が、いつ倒れたか、最後に受けた攻撃",
+  "combat.noDeaths": "この戦闘で倒れた人はいません。",
+  "combat.deathsOld": "死亡はバージョン0.5.64から記録されます：この戦闘はそれ以前のものです。",
+  "combat.killerUnknown": "不明"
 }

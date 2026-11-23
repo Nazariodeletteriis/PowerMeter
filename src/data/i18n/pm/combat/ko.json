@@ -209,5 +209,11 @@
   "combat.trainerRestart": "다시 시작",
   "combat.stop": "정지",
   "combat.dummy": "허수아비",
-  "combat.windowEstimate": "구간 피해는 추정치: 적중 수 × 평균 피해"
+  "combat.windowEstimate": "구간 피해는 추정치: 적중 수 × 평균 피해",
+  "combat.tab.deaths": "사망",
+  "combat.viewing": "보는 중",
+  "combat.caption.deaths": "누가 언제 사망했는지, 마지막으로 받은 공격",
+  "combat.noDeaths": "이 전투에서 사망한 사람이 없습니다.",
+  "combat.deathsOld": "사망은 0.5.64 버전부터 기록됩니다: 이 전투는 그 이전입니다.",
+  "combat.killerUnknown": "알 수 없음"
 }
