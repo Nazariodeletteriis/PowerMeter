@@ -165,5 +165,10 @@
   "characters.builder.pets.location": "Где найти",
   "characters.builder.pets.showOnMap": "Показать на карте",
   "characters.builder.pets.noLocation": "Место неизвестно",
-  "characters.builder.pets.noCoords": "Нет координат его монстров на карте: известны только зоны."
+  "characters.builder.pets.noCoords": "Нет координат его монстров на карте: известны только зоны.",
+  "characters.playing": "Сейчас в игре",
+  "characters.level": "Ур. {n}",
+  "characters.cp": "Боевая мощь",
+  "characters.gs": "Уровень экипировки",
+  "characters.countersNone": "Счётчики ещё не считаны: играйте этим персонажем с открытым метром."
 }

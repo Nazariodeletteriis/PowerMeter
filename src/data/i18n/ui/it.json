@@ -104,6 +104,12 @@
     "mode": {
       "dmg": "DMG",
       "heal": "CURE"
+    },
+    "deaths": {
+      "title": "Morti",
+      "none": "Nessuna morte in questo combattimento.",
+      "old": "Le morti vengono registrate dalla versione 0.5.64: questo combattimento è precedente.",
+      "unknown": "Sconosciuto"
     }
   },
   "history": {
@@ -146,7 +152,8 @@
     "identifyingPlayer": "#{id}",
     "dpsSuffix": "/s",
     "duration": "Durata",
-    "partyDps": "DPS party"
+    "partyDps": "DPS party",
+    "combatPower": "Potere di combattimento"
   },
   "skills": {
     "fallback": "Skill {code}",
@@ -321,6 +328,11 @@
     "custom": {
       "open": "Opzioni"
     },
-    "controls": "Controlli"
+    "controls": "Controlli",
+    "who": {
+      "title": "Chi è?",
+      "cancel": "Annulla",
+      "none": "Nessun nome libero nel party"
+    }
   }
 }

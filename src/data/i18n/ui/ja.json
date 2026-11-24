@@ -104,6 +104,12 @@
     "mode": {
       "dmg": "ダメージ",
       "heal": "回復"
+    },
+    "deaths": {
+      "title": "死亡",
+      "none": "この戦闘で倒れた人はいません。",
+      "old": "死亡はバージョン0.5.64から記録されます：この戦闘はそれ以前のものです。",
+      "unknown": "不明"
     }
   },
   "history": {
@@ -146,7 +152,8 @@
     "identifyingPlayer": "#{id}",
     "dpsSuffix": "/s",
     "duration": "経過時間",
-    "partyDps": "パーティDPS"
+    "partyDps": "パーティDPS",
+    "combatPower": "戦闘力"
   },
   "skills": {
     "fallback": "スキル {code}",
@@ -321,6 +328,11 @@
     "custom": {
       "open": "オプション"
     },
-    "controls": "コントロール"
+    "controls": "コントロール",
+    "who": {
+      "title": "誰ですか？",
+      "cancel": "キャンセル",
+      "none": "パーティーに空いている名前がありません"
+    }
   }
 }

@@ -248,7 +248,90 @@ const createPmWidget = (app) => {
     }
     if (String(detailRow?.id) === id) renderDetail(row, details);
   };
+  // --- "Who is it?": a row still named "#<id>" (the engine has not tied a name to it) is named by hand from the
+  // party roster's names no row has yet (free_party_names); name_party_member tells the backend, whose next
+  // dps-update carries the name. Nothing free: the breakdown opens as for any row, with a note saying why.
+  const who = document.createElement("div");
+  who.className = "pmWho";
+  who.hidden = true;
+  who.setAttribute("role", "menu");
+  who.setAttribute("aria-labelledby", "pmWhoTitle");
+  meter.appendChild(who);
+  const closeWho = () => {
+    who.hidden = true;
+    who.replaceChildren();
+  };
+  const whoItem = (label, onPick, extra = "") => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `pmWhoItem${extra}`;
+    btn.setAttribute("role", "menuitem");
+    btn.textContent = label;
+    btn.addEventListener("click", onPick);
+    return btn;
+  };
+  const showWho = (row, names) => {
+    const rowEl = app.elList?.querySelector(`.item[data-row-id="${CSS.escape(String(row.id))}"]`);
+    if (!rowEl) return openDetailNow(row);
+    const title = document.createElement("div");
+    title.className = "pmWhoTitle";
+    title.id = "pmWhoTitle";
+    title.textContent = t("pmWidget.who.title", "Who is it?");
+    const pick = (name) => () => {
+      closeWho();
+      const nameEl = rowEl.querySelector(".name");
+      if (nameEl) nameEl.textContent = name; // at once; the next dps-update confirms it
+      invoke("name_party_member", { actorId: Number(row.id), name })
+        .then((ok) => ok || console.warn("[PowerMeter] name_party_member refused", row.id, name))
+        .catch((err) => console.error("[PowerMeter] name_party_member failed", err));
+    };
+    who.replaceChildren(title, ...names.map((name) => whoItem(name, pick(name))), whoItem(t("pmWidget.who.cancel", "Cancel"), closeWho, " isCancel"));
+    who.hidden = false;
+    // Under the row, or over it when the meter ends first (the window is as tall as the meter).
+    const box = meter.getBoundingClientRect();
+    const r = rowEl.getBoundingClientRect();
+    const below = r.bottom - box.top + 4;
+    const top = below + who.offsetHeight <= meter.clientHeight ? below : r.top - box.top - who.offsetHeight - 4;
+    who.style.top = `${Math.max(0, top)}px`;
+    who.style.left = `${r.left - box.left}px`;
+    who.style.width = `${Math.min(r.width, 280)}px`;
+    who.querySelector(".pmWhoItem")?.focus();
+  };
+  who.addEventListener("keydown", (event) => {
+    const items = [...who.querySelectorAll(".pmWhoItem")];
+    const i = items.indexOf(document.activeElement);
+    if (event.key === "Escape") closeWho();
+    else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      items[(i + (event.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]?.focus();
+    } else return;
+    event.stopPropagation();
+  });
+  document.addEventListener("pointerdown", (event) => !who.hidden && !who.contains(event.target) && closeWho(), true);
+  const whoNote = document.createElement("p");
+  whoNote.className = "pmWhoNote";
+  whoNote.setAttribute("role", "status");
+  whoNote.hidden = true;
+  $(".pmDetailHead")?.after(whoNote);
+
   const openDetail = (row) => {
+    closeWho();
+    whoNote.hidden = true;
+    if (!row?.isIdentifying) return openDetailNow(row);
+    invoke("free_party_names")
+      .then((names) => {
+        const free = Array.isArray(names) ? names.filter((n) => typeof n === "string" && n.trim()) : [];
+        if (free.length) return showWho(row, free);
+        whoNote.textContent = t("pmWidget.who.none", "No free name in the party");
+        whoNote.hidden = false;
+        openDetailNow(row);
+      })
+      .catch((err) => {
+        console.error("[PowerMeter] free_party_names failed", err);
+        openDetailNow(row);
+      });
+  };
+  const openDetailNow = (row) => {
     detailRow = row;
     const rowEl = app.elList?.querySelector(`.item[data-row-id="${CSS.escape(String(row.id))}"]`);
     detailEl.dataset.cls = rowEl?.dataset.cls || "";
@@ -715,17 +798,18 @@ const createPmWidget = (app) => {
   // on .meter, used by the Compact rules only (powermeter-theme.css).
   const PREFS_KEY = "pm.compactPrefs";
   // "class" (default): each row's bar in its class colour, as in the Interface layout ([data-cls] --cls in
-  // powermeter-theme.css); the UI accent (switches, your ring, the HP bar) is then the azure.
-  const ACCENTS = { class: "#4cc2ff", azure: "#4cc2ff", violet: "#a78bfa", green: "#34d399", amber: "#fbbf24", pink: "#fb7185" };
+  // powermeter-theme.css); "theme": every bar in the theme's accent. With either, the UI accent (your ring, the
+  // HP bar) is the theme's (--pm-m-accent); the five colours are the user's explicit picks.
+  const ACCENTS = { class: null, theme: null, azure: "#4cc2ff", violet: "#a78bfa", green: "#34d399", amber: "#fbbf24", pink: "#fb7185" };
   const PREFS_VERSION = 2; // 2: "class" bars became the default
   // Card opacity. The design's 0.4 / 0.7 left the text unreadable over a bright desktop (Nazario, 0.5.64):
   // 0.95 keeps the muted text well over 4.5:1 on white and hides what is behind; "clear" stays see-through
   // and gives the text a halo instead (powermeter-theme.css .pmBg-clear).
   const BGS = { clear: 0.7, soft: 0.95, full: 1 };
   const ROW_COUNTS = [3, 5, 8];
-  const SWITCHES = ["icons", "rank", "bars", "header", "cTotal", "cRate", "cShare", "cDeaths"];
+  const SWITCHES = ["icons", "rank", "bars", "header", "cp", "cTotal", "cRate", "cShare", "cDeaths"];
   // The Standard preset (Controls.tsx PRESETS.std).
-  const DEFAULTS = { icons: true, rank: false, bars: true, header: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft", accent: "class" };
+  const DEFAULTS = { icons: true, rank: false, bars: true, header: true, cp: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft", accent: "class" };
   const readPrefs = (raw) => {
     let saved = {};
     try {
@@ -746,7 +830,8 @@ const createPmWidget = (app) => {
   const isSlim = () => meter.classList.contains("slim");
   const usePrefs = (raw) => {
     prefs = readPrefs(raw);
-    meter.style.setProperty("--pm-accent", ACCENTS[prefs.accent]);
+    if (ACCENTS[prefs.accent]) meter.style.setProperty("--pm-accent", ACCENTS[prefs.accent]);
+    else meter.style.removeProperty("--pm-accent");
     meter.classList.toggle("pmBars-class", prefs.accent === "class");
     meter.style.setProperty("--pm-card-alpha", String(BGS[prefs.bg]));
     for (const key of [...SWITCHES, "dense"]) meter.classList.toggle(`pmPref-${key}`, prefs[key]);

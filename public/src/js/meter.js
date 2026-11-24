@@ -115,8 +115,14 @@ const createMeterUI = ({
 
     contentEl.appendChild(rankEl);
     contentEl.appendChild(classIconEl);
-    contentEl.appendChild(nameEl);
-    contentEl.appendChild(combatPowerEl);
+    // Name and combat power share a cell: in Compact it wraps, so the badge drops out of sight (the
+    // second line is clipped) rather than cut the name when the row is short of room. Elsewhere the
+    // cell is display: contents and both stay the row's own items.
+    const nameCellEl = document.createElement("span");
+    nameCellEl.className = "nameCell";
+    nameCellEl.appendChild(nameEl);
+    nameCellEl.appendChild(combatPowerEl);
+    contentEl.appendChild(nameCellEl);
     contentEl.appendChild(dpsContainer);
     rowEl.appendChild(fillTrackEl);
     rowEl.appendChild(contentEl);
@@ -327,20 +333,15 @@ const createMeterUI = ({
         view.lastIsCjk = isCjk;
       }
 
-      // Combat power sits beside the name, abbreviated to thousands the way
-      // players quote it — 889,100 reads as "889k", 889,545 as "890k". The
-      // exact figure stays on the row for the details panel. Below 500 the
-      // abbreviation would collapse to "0k", so show the raw number there.
+      // Combat power beside the name, short as the other figures ("116,9k" in Italian); the exact
+      // figure in its tooltip. 0 = unknown (no party roster packet for this player): no badge.
       const combatPower = Number(row.combatPower) || 0;
-      const combatPowerK = Math.round(combatPower / 1000);
-      const combatPowerText =
-        combatPower <= 0
-          ? ""
-          : combatPowerK > 0
-            ? `${combatPowerK.toLocaleString()}k`
-            : combatPower.toLocaleString();
+      const combatPowerText = combatPower > 0 ? formatShort(combatPower) : "";
       if (view.lastCombatPowerText !== combatPowerText) {
         view.combatPowerEl.textContent = combatPowerText;
+        view.combatPowerEl.title = combatPowerText
+          ? `${window.i18n?.t?.("meter.combatPower", "Combat power") ?? "Combat power"}: ${formatDamage(combatPower)}`
+          : "";
         view.combatPowerEl.style.display = combatPowerText ? "" : "none";
         view.lastCombatPowerText = combatPowerText;
       }

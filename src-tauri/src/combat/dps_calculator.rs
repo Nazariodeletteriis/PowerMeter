@@ -737,11 +737,10 @@ impl DpsCalculator {
 
         let mut records = Vec::new();
 
-        // Boss and training dummy fights: one record per target, saved 10 s after the last hit.
+        // Boss fights: one record per target, saved 10 s after the last hit.
         let boss_target_ids: Vec<i32> = combat_data.keys()
             .filter(|&&tid| {
-                !self.saved_boss_targets.contains(&tid)
-                    && matches!(self.target_kind(tid, &mob_data, &pvp_ids), "boss" | "train")
+                !self.saved_boss_targets.contains(&tid) && self.target_kind(tid, &mob_data, &pvp_ids) == "boss"
             })
             .cloned()
             .collect();
@@ -780,9 +779,10 @@ impl DpsCalculator {
             }
         }
 
-        // PVE and PvP: one record per session (all targets of that kind since the
-        // last long idle), rewritten under the same id while the session grows.
-        for kind in ["pve", "pvp"] {
+        // Training dummies, PVE and PvP: one record per session (all targets of that kind since the
+        // last long idle), rewritten under the same id while the session grows. Dummies too: in a party each
+        // player hits a dummy of their own, and one record per dummy held one player, nothing to compare.
+        for kind in ["train", "pve", "pvp"] {
             let mut session: HashMap<i32, TargetCombatData> = combat_data.iter()
                 .filter(|(id, _)| self.target_kind(**id, &mob_data, &pvp_ids) == kind)
                 .map(|(&id, td)| (id, td.clone()))
@@ -807,11 +807,17 @@ impl DpsCalculator {
             }
             let ids: Vec<i32> = session.keys().copied().collect();
             let details = self.merged_details(&combat_data, &ids, None);
+            // A dummy session is named after its dummy (and its code, for the name in every language).
+            let (name, code) = if kind == "train" {
+                (self.resolve_target_name(first_id), mob_data.get(&first_id).copied().unwrap_or(0))
+            } else {
+                (kind.to_uppercase(), 0)
+            };
             let record = self.build_record(
                 format!("auto_{}_{}", kind, start),
-                kind.to_uppercase(),
+                name,
                 0,
-                0,
+                code,
                 kind,
                 start,
                 battle_time,
@@ -1997,6 +2003,24 @@ mod mode_tests {
         assert_eq!(mode_of("train"), Some(35), "a dummy test is its own fight");
         assert!(recs.iter().any(|r| r.mode == "train" && r.is_train));
         assert_eq!(mode_of("pve"), Some(70));
+    }
+
+    #[test]
+    fn a_party_dummy_test_is_one_fight_with_everyone() {
+        let (s, mut calc) = setup();
+        s.append_nickname_authoritative(MATE, "Mate");
+        s.append_mob(7002, 2300229); // the dummy next to yours
+        let t = now() - 60_000;
+        for k in 0..7 {
+            hit_at(&s, ME, DUMMY, 100, t + k * 1000);
+            hit_at(&s, MATE, 7002, 50, t + k * 1000);
+        }
+        let recs = calc.snapshot_boss_fights_force();
+        let train: Vec<_> = recs.iter().filter(|r| r.mode == "train").collect();
+        assert_eq!(train.len(), 1);
+        assert_eq!(train[0].total_damage, 1050);
+        let ids: HashSet<i32> = train[0].actors.iter().map(|a| a.actor_id).collect();
+        assert!(ids.contains(&ME) && ids.contains(&MATE));
     }
 
     #[test]

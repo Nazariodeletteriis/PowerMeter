@@ -1,15 +1,34 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { CopyIcon, DownloadSimpleIcon, PlusIcon, TrashIcon, UploadSimpleIcon } from "@phosphor-icons/react";
 import { NEW_CHARACTER_KEY } from "../AutoCharacter";
+import { usePoll } from "../usePoll";
+import { COUNTERS, ODYLE, REMEMBER_KEY } from "../../widget/counterDefs";
 import { openBuild, OWN_BUILD } from "./characters/shared";
-import { activate, activeId, FACTIONS, newId, readCharacters, saveCharacters, type Character, type Faction } from "../characters";
+import { activate, activeId, FACTIONS, findCharacter, newId, readCharacters, saveCharacters, type Character, type Faction } from "../characters";
 import { REGIONS } from "../Onboarding";
-import { ClassAvatar, FactionTag, RELEASED_CLASSES as CLASS_OPTIONS } from "../ui";
+import { ClassAvatar, CLASSES, FactionTag, RELEASED_CLASSES as CLASS_OPTIONS } from "../ui";
 import type { PageProps } from "./types";
 
 const NAME_MAX_LENGTH = 32;
 const regionLabel = (v: string) => REGIONS.find((r) => r.value === v)?.label ?? v;
+
+// The character the game says you are playing (get_capture_status, as Shell.tsx reads it).
+type Capture = { locked?: boolean; localPlayerId?: number | null; characterName?: string | null };
+const getCapture = () => invoke<Capture>("get_capture_status");
+// Odyle first (the one with the bar), then the meter's order.
+const CARD_COUNTERS = [...COUNTERS].sort(([a], [b]) => Number(b === ODYLE) - Number(a === ODYLE));
+
+/** The counters the meter last read for this character (src/widget/charBar.ts), id → [base, charged]. */
+function readCounters(name: string): Record<string, [number, number]> {
+  try {
+    const saved = JSON.parse(localStorage.getItem(REMEMBER_KEY + name) ?? "{}");
+    return saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
+  } catch {
+    return {};
+  }
+}
+const isPair = (v: unknown): v is [number, number] => Array.isArray(v) && Number.isFinite(v[0]) && Number.isFinite(v[1]);
 
 // A character from an imported file, or null if it is not one.
 function parse(x: unknown): Character | null {
@@ -27,9 +46,22 @@ function parse(x: unknown): Character | null {
   };
 }
 
-export default function Personaggi({ t, settings, save, run, go }: PageProps) {
+export default function Personaggi({ t, lang, settings, save, run, go }: PageProps) {
   const list = readCharacters(settings);
   const active = activeId(settings, list);
+  const capture = usePoll(getCapture, 2000).data;
+  const playingName = capture?.locked && capture.localPlayerId != null ? capture.characterName?.trim() : undefined;
+  // By id: two characters can share a name (regions), and only one is in game: the active one if it has that name.
+  const activeChar = list.find((c) => c.id === active);
+  const playingId = !playingName ? undefined : findCharacter(activeChar ? [activeChar] : [], playingName)?.id ?? findCharacter(list, playingName)?.id;
+  // The meter remembers counters by name (charBar.ts): with a shared name they belong to one card only, the one in
+  // game, else the active one; the others say they have none rather than show another character's.
+  const countersOf = (c: Character) => {
+    const twins = list.filter((x) => x.name.trim().toLowerCase() === c.name.trim().toLowerCase());
+    const owner = twins.find((x) => x.id === playingId) ?? twins.find((x) => x.id === active);
+    return twins.length > 1 && owner?.id !== c.id ? {} : readCounters(c.name);
+  };
+  const num = (n: number) => n.toLocaleString(lang);
   const factionName = (f: string) => t(`collections.${f}`);
   // Coming from the "create the character you are playing" prompt (AutoCharacter): open the form with its name.
   const [fromGame] = useState(() => {
@@ -175,32 +207,25 @@ export default function Personaggi({ t, settings, save, run, go }: PageProps) {
 
       {!list.length && !adding && <p style={{ color: "var(--pm-t3)", fontSize: 13 }}>{t("roster.empty")}</p>}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 12 }}>
+      <div className="chRoster">
         {list.map((c) => {
           const isActive = c.id === active;
+          const isPlaying = c.id === playingId;
+          const counts = countersOf(c);
           return (
             <section
               key={c.id}
-              className="chCharCard"
+              className={`chCharCard chRosterCard${isActive ? " isActive" : ""}`}
+              style={{ "--c": CLASSES[c.cls]?.[1] ?? "var(--pm-grey)" } as CSSProperties}
               aria-label={c.name}
               // Bug 4: a click anywhere on the card opens the character's build; its own controls keep their action.
               // Keyboard users reach the same through the name button.
               onClick={(e) => !(e.target as HTMLElement).closest("button,select,input,a,label") && openBuild({ t: OWN_BUILD, au: c.name, cls: c.cls, own: true, char: c.id }, go)}
-              style={{
-                cursor: "pointer",
-                background: "var(--pm-s1)",
-                border: `1px solid ${isActive ? "var(--pm-red)" : "var(--pm-line)"}`,
-                borderRadius: 8,
-                padding: 14,
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <ClassAvatar cls={c.cls} size={36} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <h2 style={{ fontWeight: 500, fontSize: 15 }}>
+              <div className="chRosterHead">
+                <ClassAvatar cls={c.cls} size={40} />
+                <div className="chRosterId">
+                  <h2>
                     <button
                       type="button"
                       className="linkBtn chCardName"
@@ -210,19 +235,20 @@ export default function Personaggi({ t, settings, save, run, go }: PageProps) {
                       {c.name}
                     </button>
                   </h2>
-                  <div style={{ fontSize: 11, color: "var(--pm-t3)" }}>
-                    {[c.cls, c.level && `Lv ${c.level}`, regionLabel(c.region)].filter(Boolean).join(" · ")}
+                  <div className="chRosterMeta">
+                    <span className="chRosterCls">{c.cls}</span>
+                    {c.level ? ` · ${t("characters.level", { n: c.level })}` : ""}
+                    {` · ${regionLabel(c.region)}`}
                   </div>
                   {c.faction ? (
-                    <div style={{ fontSize: 11, marginTop: 3 }}>
+                    <div className="chRosterFaction">
                       <FactionTag faction={c.faction} label={factionName(c.faction)} size={12} />
                     </div>
                   ) : (
                     <select
-                      className="input"
+                      className="input chRosterPick"
                       aria-label={t("roster.faction")}
                       value=""
-                      style={{ marginTop: 4, height: 26, fontSize: 11, padding: "0 6px", borderColor: "var(--pm-red)" }}
                       onChange={(e) => setFaction(c, e.target.value as Faction)}
                     >
                       <option value="" disabled>
@@ -236,9 +262,57 @@ export default function Personaggi({ t, settings, save, run, go }: PageProps) {
                     </select>
                   )}
                 </div>
-                {isActive && <span className="chActiveTag">{t("characters.active")}</span>}
+                <div className="chRosterTags">
+                  {isPlaying && <span className="chPlayingTag">{t("characters.playing")}</span>}
+                  {isActive && <span className="chActiveTag">{t("characters.active")}</span>}
+                </div>
               </div>
-              <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
+
+              {!!(c.cp || c.gs) && (
+                <div className="chRosterStats">
+                  {!!c.cp && (
+                    <span className="chStat isCp" title={t("characters.cp")}>
+                      <abbr aria-label={t("characters.cp")}>CP</abbr> {num(c.cp)}
+                    </span>
+                  )}
+                  {!!c.gs && (
+                    <span className="chStat" title={t("characters.gs")}>
+                      <abbr aria-label={t("characters.gs")}>GS</abbr> {num(c.gs)}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {Object.keys(counts).length ? (
+                <ul className="chCounters" aria-label={t("overlays.counters")}>
+                  {CARD_COUNTERS.map(([id, max, key, fallback, icon]) => {
+                    const v = counts[id];
+                    const known = isPair(v);
+                    const label = t(`overlays.${key}`) || fallback;
+                    const value = known ? num(v[0]) : "–";
+                    return (
+                      <li key={id} className={id === ODYLE ? "chCounter isOdyle" : "chCounter"}>
+                        <img src={icon} alt="" />
+                        <span className="chCounterName">{label}</span>
+                        <span className="chCounterValue">
+                          {value}
+                          {known && v[1] > 0 && <span className="chCounterPlus"> (+{num(v[1])})</span>}
+                          {max !== null && <span className="chCounterMax">/{num(max)}</span>}
+                        </span>
+                        {id === ODYLE && max !== null && (
+                          <span className="chCounterBar" aria-hidden="true">
+                            <span style={{ width: `${known ? Math.min(100, (v[0] / max) * 100) : 0}%` }} />
+                          </span>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="chCountersNone">{t("characters.countersNone")}</p>
+              )}
+
+              <div className="chRosterActions">
                 {!isActive && (
                   <button type="button" className="btn sm" onClick={() => run(() => activate(save, c))}>
                     {t("characters.setActive")}

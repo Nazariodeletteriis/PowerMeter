@@ -337,6 +337,39 @@ pub async fn toggle_controls_window(app: tauri::AppHandle) -> Result<(), String>
     }
 }
 
+/// The meter stepped aside for the Black Market (`hide_meter_for_market`), until the shop closes.
+static MARKET_HID: AtomicBool = AtomicBool::new(false);
+
+/// The Black Market opened (lib.rs's tick saw its list): the meter hides, so the shop is clean, and comes back once
+/// the game locks the mouse pointer again (shop closed) for a second, or after 5 minutes at most. Only a meter that
+/// was showing: one the user hid stays hidden.
+pub fn hide_meter_for_market(app: &tauri::AppHandle) {
+    const LOCKED_MS: u128 = 1_000;
+    const CAP: std::time::Duration = std::time::Duration::from_secs(300);
+    let Some(main) = app.get_webview_window("main") else { return };
+    if !main.is_visible().unwrap_or(false) || MARKET_HID.swap(true, Ordering::SeqCst) {
+        return;
+    }
+    let _ = main.hide();
+    std::thread::spawn(move || {
+        let start = std::time::Instant::now();
+        let mut locked_since: Option<std::time::Instant> = None;
+        loop {
+            std::thread::sleep(std::time::Duration::from_millis(250));
+            let locked = crate::platform::window_detector::is_aion2_foreground() && !crate::platform::window_detector::cursor_shown();
+            locked_since = if locked { locked_since.or(Some(std::time::Instant::now())) } else { None };
+            if locked_since.is_some_and(|t| t.elapsed().as_millis() >= LOCKED_MS) || start.elapsed() >= CAP {
+                break;
+            }
+        }
+        MARKET_HID.store(false, Ordering::SeqCst);
+        if !user_hidden() {
+            let _ = main.show();
+            let _ = main.set_always_on_top(true);
+        }
+    });
+}
+
 /// Windows the Controls window can close (the meter hides instead: hide_overlay).
 const CLOSABLE: [&str; 3] = ["history", "map", "cubes"];
 /// Windows that line up on the grid while it is on.
@@ -460,14 +493,14 @@ pub fn snap_after_move(window: &tauri::Window) {
 pub fn open_pet_popup_on_start(app: &tauri::AppHandle) {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
-        pet_overlay(&app, "petpop", "PowerMeter — Pet", (360.0, 96.0), None, 72.0);
-        pet_overlay(&app, "petmarket", "PowerMeter — Black Market", (360.0, 480.0), Some("petMarket"), 72.0);
-        // The event popup (EventPopup.tsx): the same kind of card, bigger, just below the pet card.
-        pet_overlay(&app, "eventpop", "PowerMeter — Event", (460.0, 120.0), None, 176.0);
+        pet_overlay(&app, "petpop", "PowerMeter — Pet", (360.0, 96.0), None, false);
+        pet_overlay(&app, "petmarket", "PowerMeter — Black Market", (360.0, 480.0), Some("petMarket"), false);
+        // The event popup (EventPopup.tsx): a small card in the bottom right corner of the screen.
+        pet_overlay(&app, "eventpop", "PowerMeter — Event", (320.0, 88.0), None, true);
     });
 }
 
-fn pet_overlay(app: &tauri::AppHandle, label: &'static str, title: &str, (w, h): (f64, f64), key: Option<&'static str>, top: f64) {
+fn pet_overlay(app: &tauri::AppHandle, label: &'static str, title: &str, (w, h): (f64, f64), key: Option<&'static str>, corner: bool) {
     let built = tauri::WebviewWindowBuilder::new(app, label, tauri::WebviewUrl::App("dashboard.html".into()))
         .initialization_script(format!("window.__PM_VIEW__ = '{label}';"))
         .title(title)
@@ -505,7 +538,14 @@ fn pet_overlay(app: &tauri::AppHandle, label: &'static str, title: &str, (w, h):
         let scale = m.scale_factor();
         let centre = m.position().x + ((m.size().width as f64 - w * scale) / 2.0) as i32;
         let x = if key.is_some() { centre + (380.0 * scale) as i32 } else { centre };
-        let y = m.position().y + (top * scale) as i32;
+        let y = m.position().y + (72.0 * scale) as i32;
+        if corner {
+            // Bottom right, clear of the edge and of a taskbar.
+            let x = m.position().x + m.size().width as i32 - ((w + 16.0) * scale) as i32;
+            let y = m.position().y + m.size().height as i32 - ((h + 64.0) * scale) as i32;
+            let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+            return;
+        }
         let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
     }
 }

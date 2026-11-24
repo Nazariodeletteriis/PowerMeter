@@ -104,6 +104,12 @@
     "mode": {
       "dmg": "DMG",
       "heal": "治疗"
+    },
+    "deaths": {
+      "title": "死亡",
+      "none": "本场战斗无人阵亡。",
+      "old": "死亡记录从 0.5.64 版开始：此战斗更早。",
+      "unknown": "未知"
     }
   },
   "history": {
@@ -146,7 +152,8 @@
     "identifyingPlayer": "#{id}",
     "dpsSuffix": "/秒",
     "duration": "时长",
-    "partyDps": "队伍 DPS"
+    "partyDps": "队伍 DPS",
+    "combatPower": "战斗力"
   },
   "skills": {
     "fallback": "技能 {code}",
@@ -321,6 +328,11 @@
     "custom": {
       "open": "选项"
     },
-    "controls": "控制"
+    "controls": "控制",
+    "who": {
+      "title": "这是谁？",
+      "cancel": "取消",
+      "none": "队伍中没有可用的名字"
+    }
   }
 }

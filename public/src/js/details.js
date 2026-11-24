@@ -2277,6 +2277,7 @@ const createDetailsUI = ({
     detailsPanel.classList.remove("open");
     historyRecord = null;
     window._historyDetailsOverride = null;
+    renderDeaths(null);
     fightStartMs = 0;
     fightBossName = "";
     window._resumeFpsMonitor?.();
@@ -2287,6 +2288,38 @@ const createDetailsUI = ({
     close({ keepPinned: false });
     onBack?.();
   });
+
+  // ── Deaths (history fights: FightRecord.deaths) ──
+  const deathsSection = detailsPanel?.querySelector?.(".deathsSection");
+  const deathsList = detailsPanel?.querySelector?.(".deathsList");
+  const renderDeaths = (record) => {
+    if (!deathsSection || !deathsList) return;
+    deathsSection.hidden = !record;
+    if (!record) return;
+    const esc = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+    const note = (key, fallback) => `<div class="deathsNote">${esc(labelText(key, fallback))}</div>`;
+    if (!Array.isArray(record.deaths)) {
+      deathsList.innerHTML = note("details.deaths.old", "Deaths are recorded from version 0.5.64: this fight is older.");
+      return;
+    }
+    if (!record.deaths.length) {
+      deathsList.innerHTML = note("details.deaths.none", "No one died in this fight.");
+      return;
+    }
+    const clock = (ms) => {
+      const s = Math.max(0, Math.round((Number(ms) || 0) / 1000));
+      return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    };
+    deathsList.innerHTML = record.deaths
+      .map((d) => {
+        const actor = detailsActors.get(Number(d.actorId));
+        const name = actor?.nickname || `#${d.actorId}`;
+        const killer = d.killer || labelText("details.deaths.unknown", "Unknown");
+        const dmg = Number(d.damage) > 0 ? Number(d.damage).toLocaleString(i18n?.getLanguage?.() || "en") : "—";
+        return `<div class="deathsRow"><span class="deathsTime">${clock(d.atMs)}</span><span class="deathsName">${esc(name)}</span><span class="deathsKiller">${esc(killer)}${d.skill ? `<small>${esc(d.skill)}</small>` : ""}</span><span class="deathsDmg">${dmg}</span></div>`;
+      })
+      .join("");
+  };
 
   const openHistoryFight = async (record) => {
     if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
@@ -2333,6 +2366,7 @@ const createDetailsUI = ({
     };
     detailsTargets = [bossTargetSummary];
     detailsContext = { currentTargetId: record.targetId, targets: detailsTargets, actors: actorList };
+    renderDeaths(record);
 
     selectedTargetId = record.targetId;
     selectedAttackerIds = null;

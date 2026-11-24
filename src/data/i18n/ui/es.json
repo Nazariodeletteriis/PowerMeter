@@ -104,6 +104,12 @@
     "mode": {
       "dmg": "DÑO",
       "heal": "CURACIÓN"
+    },
+    "deaths": {
+      "title": "Muertes",
+      "none": "Nadie murió en este combate.",
+      "old": "Las muertes se registran desde la versión 0.5.64: este combate es anterior.",
+      "unknown": "Desconocido"
     }
   },
   "history": {
@@ -146,7 +152,8 @@
     "identifyingPlayer": "#{id}",
     "dpsSuffix": "/s",
     "duration": "Duración",
-    "partyDps": "DPS de grupo"
+    "partyDps": "DPS de grupo",
+    "combatPower": "Poder de combate"
   },
   "skills": {
     "fallback": "Habilidad {code}",
@@ -321,6 +328,11 @@
     "custom": {
       "open": "Opciones"
     },
-    "controls": "Controles"
+    "controls": "Controles",
+    "who": {
+      "title": "¿Quién es?",
+      "cancel": "Cancelar",
+      "none": "No hay nombres libres en el grupo"
+    }
   }
 }

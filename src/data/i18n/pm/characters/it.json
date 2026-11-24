@@ -173,5 +173,10 @@
   "characters.builder.pets.location": "Posizione",
   "characters.builder.pets.showOnMap": "Mostra sulla mappa",
   "characters.builder.pets.noLocation": "Nessuna posizione nota",
-  "characters.builder.pets.noCoords": "Nessuna coordinata per i suoi mostri: si conoscono solo le zone."
+  "characters.builder.pets.noCoords": "Nessuna coordinata per i suoi mostri: si conoscono solo le zone.",
+  "characters.playing": "In gioco ora",
+  "characters.level": "Liv. {n}",
+  "characters.cp": "Potere di combattimento",
+  "characters.gs": "Punteggio equipaggiamento",
+  "characters.countersNone": "Nessun contatore letto: gioca questo personaggio con il meter aperto."
 }

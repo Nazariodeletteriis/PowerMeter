@@ -4,6 +4,20 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.67
+
+- Added: Meter: combat power (CP) badge next to each player (Options → Elements to turn it off).
+- Added: A party member shown as "#number": click the row and pick who it is among the party's names. The meter also names party members more often when other players are fighting around you.
+- Added: Combat history: the Details window now lists the fight's deaths (minute, player, what killed them).
+- Added: My characters: each card shows class, level, CP, GS, "Playing now" and the character's counters (Odyle with its bar). A character you play that is not in the list is now added by itself.
+- Changed: Training dummy: a party test is now one fight with every player in it, so you can compare.
+- Changed: Event alerts: a small card in the bottom right corner that stays until the event starts.
+- Changed: The meter hides while the Black Market is open and comes back when you leave the shop.
+- Fixed: Switching character no longer stops after playing two characters with similar names (e.g. Angs and Angx); the right one is picked.
+- Fixed: Skill icons missing in the combat history and details.
+- Fixed: The meter now follows the theme you pick, in compact and full mode.
+- Fixed: Compact meter: rows spaced apart, cleaner end-of-fight buttons, bigger close button on the dummy test.
+
 ## 0.5.66
 
 - Changed: Meter: the settings button now opens a floating Options window you can drag anywhere on the screen (it remembers where you left it). It holds all the meter options, counters, training dummy, windows and layout; the panel under the meter is gone. Your choices are kept.

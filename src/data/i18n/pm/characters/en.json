@@ -173,5 +173,10 @@
   "characters.builder.pets.location": "Location",
   "characters.builder.pets.showOnMap": "Show on map",
   "characters.builder.pets.noLocation": "No known location",
-  "characters.builder.pets.noCoords": "No map coordinates for its monsters: only the zones are known."
+  "characters.builder.pets.noCoords": "No map coordinates for its monsters: only the zones are known.",
+  "characters.playing": "Playing now",
+  "characters.level": "Lv {n}",
+  "characters.cp": "Combat power",
+  "characters.gs": "Gear score",
+  "characters.countersNone": "No counters read yet: play this character with the meter open."
 }

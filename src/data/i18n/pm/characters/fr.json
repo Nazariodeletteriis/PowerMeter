@@ -165,5 +165,10 @@
   "characters.builder.pets.location": "Emplacement",
   "characters.builder.pets.showOnMap": "Afficher sur la carte",
   "characters.builder.pets.noLocation": "Aucun emplacement connu",
-  "characters.builder.pets.noCoords": "Aucune coordonnée pour ses monstres : seules les zones sont connues."
+  "characters.builder.pets.noCoords": "Aucune coordonnée pour ses monstres : seules les zones sont connues.",
+  "characters.playing": "En jeu",
+  "characters.level": "Niv. {n}",
+  "characters.cp": "Puissance de combat",
+  "characters.gs": "Score d'équipement",
+  "characters.countersNone": "Aucun compteur lu : joue ce personnage avec le meter ouvert."
 }

@@ -104,6 +104,12 @@
     "mode": {
       "dmg": "DMG",
       "heal": "치유"
+    },
+    "deaths": {
+      "title": "사망",
+      "none": "이 전투에서 사망한 사람이 없습니다.",
+      "old": "사망은 0.5.64 버전부터 기록됩니다: 이 전투는 그 이전입니다.",
+      "unknown": "알 수 없음"
     }
   },
   "history": {
@@ -146,7 +152,8 @@
     "identifyingPlayer": "#{id}",
     "dpsSuffix": "/초",
     "duration": "지속시간",
-    "partyDps": "파티 DPS"
+    "partyDps": "파티 DPS",
+    "combatPower": "전투력"
   },
   "skills": {
     "fallback": "스킬 {code}",
@@ -321,6 +328,11 @@
     "custom": {
       "open": "옵션"
     },
-    "controls": "컨트롤"
+    "controls": "컨트롤",
+    "who": {
+      "title": "누구인가요?",
+      "cancel": "취소",
+      "none": "파티에 남은 이름이 없습니다"
+    }
   }
 }

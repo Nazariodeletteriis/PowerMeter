@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.67
+
+- Hinzugefügt: Meter: Kampfkraft-Abzeichen (CP) neben jedem Spieler (abschaltbar unter Optionen → Elemente).
+- Hinzugefügt: Ein Gruppenmitglied als "#Nummer": Zeile anklicken und aus den Gruppennamen wählen, wer es ist. Das Meter erkennt Gruppenmitglieder auch öfter, wenn um dich herum andere kämpfen.
+- Hinzugefügt: Kampfverlauf: das Details-Fenster listet die Tode des Kampfes (Minute, Spieler, wodurch).
+- Hinzugefügt: Meine Charaktere: jede Karte zeigt Klasse, Stufe, CP, GS, "Jetzt im Spiel" und die Zähler des Charakters (Odyle mit Balken). Ein gespielter Charakter, der fehlt, wird jetzt selbst hinzugefügt.
+- Geändert: Trainingspuppe: ein Gruppentest ist jetzt ein einziger Kampf mit allen Spielern, zum Vergleichen.
+- Geändert: Event-Hinweise: eine kleine Karte unten rechts, die bis zum Eventstart bleibt.
+- Geändert: Das Meter blendet sich aus, solange der Schwarzmarkt offen ist, und kommt beim Verlassen zurück.
+- Behoben: Der Charakterwechsel hängt nicht mehr nach zwei Charakteren mit ähnlichen Namen (z. B. Angs und Angx); der richtige wird gewählt.
+- Behoben: Fehlende Skill-Symbole im Kampfverlauf und in den Details.
+- Behoben: Das Meter folgt jetzt dem gewählten Theme, kompakt und vollständig.
+- Behoben: Kompaktes Meter: Zeilen mit Abstand, aufgeräumte Knöpfe am Kampfende, größerer Schließen-Knopf beim Puppentest.
+
 ## 0.5.66
 
 - Geändert: Meter: der Einstellungsknopf öffnet jetzt ein schwebendes Optionen-Fenster, das du überall auf den Bildschirm ziehen kannst (es merkt sich die Position). Es enthält alle Meter-Optionen, Zähler, Trainingspuppe, Fenster und Anordnung; das Panel unter dem Meter entfällt. Deine Einstellungen bleiben erhalten.

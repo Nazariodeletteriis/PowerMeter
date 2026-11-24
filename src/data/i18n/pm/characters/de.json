@@ -165,5 +165,10 @@
   "characters.builder.pets.location": "Fundort",
   "characters.builder.pets.showOnMap": "Auf der Karte zeigen",
   "characters.builder.pets.noLocation": "Kein bekannter Fundort",
-  "characters.builder.pets.noCoords": "Keine Kartenkoordinaten für seine Monster: Nur die Zonen sind bekannt."
+  "characters.builder.pets.noCoords": "Keine Kartenkoordinaten für seine Monster: Nur die Zonen sind bekannt.",
+  "characters.playing": "Spielt gerade",
+  "characters.level": "St. {n}",
+  "characters.cp": "Kampfkraft",
+  "characters.gs": "Ausrüstungswert",
+  "characters.countersNone": "Noch keine Zähler gelesen: Spiele diesen Charakter mit offenem Meter."
 }

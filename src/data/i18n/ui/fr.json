@@ -104,6 +104,12 @@
     "mode": {
       "dmg": "DGT",
       "heal": "SOINS"
+    },
+    "deaths": {
+      "title": "Morts",
+      "none": "Personne n'est mort pendant ce combat.",
+      "old": "Les morts sont enregistrées depuis la version 0.5.64 : ce combat est plus ancien.",
+      "unknown": "Inconnu"
     }
   },
   "history": {
@@ -146,7 +152,8 @@
     "identifyingPlayer": "#{id}",
     "dpsSuffix": "/s",
     "duration": "Durée",
-    "partyDps": "DPS du groupe"
+    "partyDps": "DPS du groupe",
+    "combatPower": "Puissance de combat"
   },
   "skills": {
     "fallback": "Compétence {code}",
@@ -321,6 +328,11 @@
     "custom": {
       "open": "Options"
     },
-    "controls": "Commandes"
+    "controls": "Commandes",
+    "who": {
+      "title": "Qui est-ce ?",
+      "cancel": "Annuler",
+      "none": "Aucun nom libre dans le groupe"
+    }
   }
 }

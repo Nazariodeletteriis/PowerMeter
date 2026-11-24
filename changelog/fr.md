@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.67
+
+- Ajouté : Compteur : badge de puissance de combat (CP) à côté de chaque joueur (désactivable dans Options → Éléments).
+- Ajouté : Un membre affiché comme « #numéro » : cliquez sur la ligne et choisissez qui c'est parmi les noms du groupe. Le compteur reconnaît aussi plus souvent les membres quand d'autres joueurs combattent autour de vous.
+- Ajouté : Historique des combats : la fenêtre Détails liste les morts du combat (minute, joueur, cause).
+- Ajouté : Mes personnages : chaque carte affiche classe, niveau, CP, GS, « En jeu » et les compteurs du personnage (Odyle avec sa barre). Un personnage joué absent de la liste est désormais ajouté tout seul.
+- Modifié : Mannequin : un test en groupe est désormais un seul combat avec tous les joueurs, pour comparer.
+- Modifié : Alertes d'événements : une petite carte en bas à droite qui reste jusqu'au début de l'événement.
+- Modifié : Le compteur se masque pendant que le Marché noir est ouvert et revient à la sortie de la boutique.
+- Corrigé : Le changement de personnage ne se bloque plus après deux personnages aux noms proches (ex. Angs et Angx) ; le bon est choisi.
+- Corrigé : Icônes de compétences manquantes dans l'historique et les détails.
+- Corrigé : Le compteur suit désormais le thème choisi, en mode compact et complet.
+- Corrigé : Compteur compact : lignes espacées, boutons de fin de combat plus nets, bouton de fermeture du mannequin plus grand.
+
 ## 0.5.66
 
 - Modifié : Compteur : le bouton de réglages ouvre désormais une fenêtre Options flottante que vous pouvez faire glisser n'importe où à l'écran (elle se souvient de sa position). Elle regroupe toutes les options du compteur, les compteurs, le mannequin, les fenêtres et la disposition ; le panneau sous le compteur disparaît. Vos choix sont conservés.

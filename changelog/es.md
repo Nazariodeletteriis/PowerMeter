@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.67
+
+- Añadido: Medidor: insignia de poder de combate (CP) junto a cada jugador (se apaga en Opciones → Elementos).
+- Añadido: Un compañero mostrado como "#número": pulsa la fila y elige quién es entre los nombres del grupo. El medidor también reconoce más a menudo a los compañeros cuando otros jugadores combaten cerca.
+- Añadido: Historial de combates: la ventana Detalles lista las muertes del combate (minuto, jugador, qué lo mató).
+- Añadido: Mis personajes: cada tarjeta muestra clase, nivel, CP, GS, "Jugando ahora" y los contadores del personaje (Odyle con su barra). Un personaje que juegas y no está en la lista ahora se añade solo.
+- Cambiado: Muñeco: una prueba en grupo es ahora un único combate con todos los jugadores, para comparar.
+- Cambiado: Avisos de eventos: una tarjeta pequeña abajo a la derecha que se queda hasta que empieza el evento.
+- Cambiado: El medidor se oculta mientras el Mercado negro está abierto y vuelve al salir de la tienda.
+- Corregido: El cambio de personaje ya no se bloquea tras jugar dos personajes con nombres parecidos (p. ej. Angs y Angx); se elige el correcto.
+- Corregido: Iconos de habilidades que faltaban en el historial y en los detalles.
+- Corregido: El medidor sigue ahora el tema elegido, en modo compacto y completo.
+- Corregido: Medidor compacto: filas separadas, botones de fin de combate más ordenados, botón de cierre del muñeco más grande.
+
 ## 0.5.66
 
 - Cambiado: Medidor: el botón de ajustes ahora abre una ventana flotante de Opciones que puedes arrastrar a cualquier parte de la pantalla (recuerda dónde la dejas). Incluye todas las opciones del medidor, contadores, muñeco, ventanas y disposición; el panel bajo el medidor desaparece. Tus elecciones se conservan.

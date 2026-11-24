@@ -165,5 +165,10 @@
   "characters.builder.pets.location": "生息地",
   "characters.builder.pets.showOnMap": "マップで表示",
   "characters.builder.pets.noLocation": "生息地不明",
-  "characters.builder.pets.noCoords": "モンスターのマップ座標がありません：ゾーンのみ判明しています。"
+  "characters.builder.pets.noCoords": "モンスターのマップ座標がありません：ゾーンのみ判明しています。",
+  "characters.playing": "プレイ中",
+  "characters.level": "Lv {n}",
+  "characters.cp": "戦闘力",
+  "characters.gs": "装備スコア",
+  "characters.countersNone": "カウンターはまだ読み取られていません。メーターを開いたままこのキャラクターでプレイしてください。"
 }

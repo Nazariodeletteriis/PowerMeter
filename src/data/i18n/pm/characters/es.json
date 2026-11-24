@@ -165,5 +165,10 @@
   "characters.builder.pets.location": "Ubicación",
   "characters.builder.pets.showOnMap": "Mostrar en el mapa",
   "characters.builder.pets.noLocation": "Ubicación desconocida",
-  "characters.builder.pets.noCoords": "Sin coordenadas de mapa para sus monstruos: solo se conocen las zonas."
+  "characters.builder.pets.noCoords": "Sin coordenadas de mapa para sus monstruos: solo se conocen las zonas.",
+  "characters.playing": "Jugando ahora",
+  "characters.level": "Nv. {n}",
+  "characters.cp": "Poder de combate",
+  "characters.gs": "Puntuación de equipo",
+  "characters.countersNone": "Aún no hay contadores: juega este personaje con el medidor abierto."
 }

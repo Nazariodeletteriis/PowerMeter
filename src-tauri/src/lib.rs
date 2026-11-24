@@ -352,6 +352,18 @@ fn bind_local_actor_id(state: tauri::State<'_, AppState>, actor_id: i64) {
     }
 }
 
+/// Party names no row carries yet, for naming a `#id` row by hand.
+#[tauri::command]
+fn free_party_names(state: tauri::State<'_, AppState>) -> Vec<String> {
+    state.data_storage.free_party_names()
+}
+
+/// Names a `#id` row with a party member's name (only a roster name is accepted).
+#[tauri::command]
+fn name_party_member(state: tauri::State<'_, AppState>, actor_id: i32, name: String) -> bool {
+    state.data_storage.name_from_party(actor_id, name.trim())
+}
+
 #[tauri::command]
 fn bind_local_nickname(state: tauri::State<'_, AppState>, actor_id: i64, nickname: String) {
     // Always update if the stored nickname differs from the requested one.
@@ -1778,6 +1790,7 @@ pub fn run() {
                             let _ = handle.emit_to("petmarket", "pet-kill", &kills);
                         }
                         if let Some(items) = crate::capture::equip_parser::take_market() {
+                            powermeter::hide_meter_for_market(&handle);
                             if state.settings.get("petMarket.enabled").is_none_or(|v| v != "false") {
                                 let _ = handle.emit_to("petmarket", "black-market", &items);
                             }
@@ -2050,6 +2063,8 @@ pub fn run() {
             powermeter::open_map_window,
             powermeter::open_cube_window,
             powermeter::open_controls_window,
+            free_party_names,
+            name_party_member,
             powermeter::toggle_controls_window,
             powermeter::overlay_state,
             powermeter::close_overlay_window,

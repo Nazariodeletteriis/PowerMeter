@@ -104,6 +104,12 @@
     "mode": {
       "dmg": "DMG",
       "heal": "HEAL"
+    },
+    "deaths": {
+      "title": "Deaths",
+      "none": "No one died in this fight.",
+      "old": "Deaths are recorded from version 0.5.64: this fight is older.",
+      "unknown": "Unknown"
     }
   },
   "history": {
@@ -146,7 +152,8 @@
     "identifyingPlayer": "#{id}",
     "dpsSuffix": "/s",
     "duration": "Duration",
-    "partyDps": "Party DPS"
+    "partyDps": "Party DPS",
+    "combatPower": "Combat power"
   },
   "skills": {
     "fallback": "Skill {code}",
@@ -321,6 +328,11 @@
     "custom": {
       "open": "Options"
     },
-    "controls": "Controls"
+    "controls": "Controls",
+    "who": {
+      "title": "Who is it?",
+      "cancel": "Cancel",
+      "none": "No free name in the party"
+    }
   }
 }

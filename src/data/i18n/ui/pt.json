@@ -104,6 +104,12 @@
     "mode": {
       "dmg": "DAN",
       "heal": "CURA"
+    },
+    "deaths": {
+      "title": "Mortes",
+      "none": "Ninguém morreu neste combate.",
+      "old": "As mortes são registradas a partir da versão 0.5.64: este combate é anterior.",
+      "unknown": "Desconhecido"
     }
   },
   "history": {
@@ -146,7 +152,8 @@
     "identifyingPlayer": "#{id}",
     "dpsSuffix": "/s",
     "duration": "Duração",
-    "partyDps": "DPS do grupo"
+    "partyDps": "DPS do grupo",
+    "combatPower": "Poder de combate"
   },
   "skills": {
     "fallback": "Habilidade {code}",
@@ -321,6 +328,11 @@
     "custom": {
       "open": "Opções"
     },
-    "controls": "Controlos"
+    "controls": "Controlos",
+    "who": {
+      "title": "Quem é?",
+      "cancel": "Cancelar",
+      "none": "Nenhum nome livre no grupo"
+    }
   }
 }

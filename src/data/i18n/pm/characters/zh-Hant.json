@@ -165,5 +165,10 @@
   "characters.builder.pets.location": "位置",
   "characters.builder.pets.showOnMap": "在地圖上顯示",
   "characters.builder.pets.noLocation": "位置未知",
-  "characters.builder.pets.noCoords": "其怪物沒有地圖座標：只知道所在區域。"
+  "characters.builder.pets.noCoords": "其怪物沒有地圖座標：只知道所在區域。",
+  "characters.playing": "遊戲中",
+  "characters.level": "Lv {n}",
+  "characters.cp": "戰鬥力",
+  "characters.gs": "裝備評分",
+  "characters.countersNone": "尚未讀取計數器：開啟統計視窗並使用此角色遊戲。"
 }

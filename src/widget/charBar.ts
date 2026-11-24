@@ -6,32 +6,15 @@
 // Reads the settings keys of src/dashboard/characters.ts (not imported: it pulls in the dashboard shell).
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import beritraIcon from "../assets/pm/counters/beritra.png";
-import dailyIcon from "../assets/pm/counters/daily.png";
-import nightmareIcon from "../assets/pm/counters/nightmare.png";
-import odyleIcon from "../assets/pm/counters/odyle.png";
-import shugoIcon from "../assets/pm/counters/shugo.png";
+import { COUNTERS, ODYLE, REMEMBER_KEY } from "./counterDefs";
 
 type Character = { id: string; name: string; cls: string };
 type I18n = { format?: (key: string, vars: Record<string, string>, fallback: string) => string; onChange?: (f: () => void) => void };
 
 const COUNTER_POLL_MS = 2000;
-/** Last counters read for a character (+ its name), in this window's storage. */
-const REMEMBER_KEY = "pm.counters.";
 const SHOW_KEY = "pm.counters.show.";
-const DEFAULT_SHOWN = 60000001; // Odyle
-/**
- * The counters, in order (Nazario's: Nightmare, Daily Dungeon, Beritra, Shugo, Odyle): game id (capture/counters.rs),
- * the base's max from the game's tooltip (null: not known yet, shown without), label key, icon (the game's, Nazario's set).
- * Each one shows by its switch in the Customise panel (pmWidget.js): `pm.counters.show.<id>` "1" / "0", unset = Odyle only.
- */
-const COUNTERS: [number, number | null, string, string, string][] = [
-  [4, null, "pmWidget.counterNightmare", "Nightmare", nightmareIcon],
-  [101, 14, "pmWidget.counterDailyDungeon", "Daily Dungeon", dailyIcon],
-  [8, null, "pmWidget.counterBeritraKeys", "Beritra keys", beritraIcon],
-  [1, 21, "pmWidget.counterShugoKeys", "Shugo Festival keys", shugoIcon],
-  [60000001, 840, "pmWidget.counterOdyle", "Odyle", odyleIcon],
-];
+const DEFAULT_SHOWN = ODYLE;
+// Each counter shows by its switch in the Options window (Controls.tsx): `pm.counters.show.<id>` "1" / "0", unset = Odyle only.
 
 const bar = document.querySelector<HTMLElement>(".pmCharBar");
 // index.html also hosts the details/history windows: the bar is the overlay's only.
@@ -89,7 +72,7 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
     slot.hidden = settings["pm.counters.off"] === "1";
     const html = COUNTERS.filter(([id]) => shown(id)).map(([id, max, key, fallback, icon]) => {
       const c = counts[id];
-      const label = i18n()?.format?.(key, {}, fallback) ?? fallback;
+      const label = i18n()?.format?.(`pmWidget.${key}`, {}, fallback) ?? fallback;
       const of = max === null ? "" : ` / ${max}`;
       const value = c ? `${c[0]} <span class="pmCounterPlus">(+${c[1]})</span>` : "–";
       const title = `${label}: ${c ? `${c[0]} (+${c[1]})` : "–"}${of}`;

@@ -795,6 +795,7 @@ html:lang(zh-Hant), html:lang(zh-Hant) body {
    information about the player, not something that moves during a fight — and
    it holds its own width so the name ellipsis never fights it for space. Only
    rendered for players the party roster packet covers. */
+.list .item .nameCell { display: contents; }
 .list .item .combatPower {
   flex: 0 0 auto;
   /* Pulls back against the row's 7px flex gap so the figure reads as part of
@@ -4716,3 +4717,25 @@ body.windowDragFreeze * {
 html.detailsWindow .meter {
   cursor: auto;
 }
+
+/* PowerMeter: the Details window's Deaths section (history fights, details.js renderDeaths). */
+.deathsList { display: flex; flex-direction: column; gap: 4px; padding: 4px 0 8px; }
+.deathsRow {
+  display: grid;
+  grid-template-columns: 48px minmax(120px, 200px) minmax(0, 1fr) 96px;
+  gap: 12px;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 12px;
+}
+.deathsTime, .deathsDmg { font-variant-numeric: tabular-nums; }
+.deathsTime { color: #9aa0c0; }
+.deathsDmg { text-align: right; }
+.deathsName { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.deathsKiller { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.deathsKiller small { color: #9aa0c0; font-size: 11px; }
+.deathsNote { padding: 8px 4px; font-size: 12px; color: #9aa0c0; }

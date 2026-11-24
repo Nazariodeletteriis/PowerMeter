@@ -2,6 +2,20 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.67
+
+- Aggiunto: Meter: badge con la combat power (CP) accanto a ogni giocatore (si spegne da Opzioni → Elementi).
+- Aggiunto: Un compagno mostrato come "#numero": clicca la riga e scegli chi è tra i nomi del party. Il meter riconosce anche più spesso i compagni quando intorno a te combattono altri giocatori.
+- Aggiunto: Storico combattimenti: la finestra Dettagli elenca le morti del combattimento (minuto, giocatore, cosa l'ha ucciso).
+- Aggiunto: I miei personaggi: ogni card mostra classe, livello, CP, GS, "In gioco ora" e i contatori del personaggio (Odyle con la barra). Un personaggio che giochi e non è in lista ora si aggiunge da solo.
+- Modificato: Manichino: un test in party ora è un unico combattimento con tutti i giocatori, così puoi fare il confronto.
+- Modificato: Avvisi eventi: una card piccola in basso a destra che resta fino all'inizio dell'evento.
+- Modificato: Il meter si nasconde mentre il Black Market è aperto e ricompare quando esci dal negozio.
+- Corretto: Il cambio personaggio non si blocca più dopo aver giocato due personaggi con nomi simili (es. Angs e Angx); viene scelto quello giusto.
+- Corretto: Icone delle skill mancanti nello storico combattimenti e nei dettagli.
+- Corretto: Il meter ora segue il tema scelto, in compatta e in integrale.
+- Corretto: Meter compatto: righe staccate tra loro, pulsanti di fine combattimento più ordinati, pulsante di chiusura del manichino più grande.
+
 ## 0.5.66
 
 - Modificato: Meter: il pulsante impostazioni ora apre una finestra Opzioni floating che puoi trascinare ovunque sullo schermo (ricorda dove la lasci). Contiene tutte le opzioni del meter, contatori, manichino, finestre e disposizione; il pannello sotto il meter non c'è più. Le tue scelte restano.

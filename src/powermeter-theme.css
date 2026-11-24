@@ -82,6 +82,16 @@
   --pm-fill: var(--pm-deep);
   --pm-wsurf: oklch(from var(--row-fill) 0.16 calc(c * 0.3) h);
   --pm-wbar: color-mix(in srgb, var(--pm-deep) 85%, transparent);
+  /* The meter's own tokens (section 2), from the same swatch: accent (your row, HP bar, grips), surfaces (the
+     compact card, its menus) and the compact text greys, tinted by the theme's hue. */
+  --pm-m-accent: var(--pm-hot);
+  --pm-m-you: var(--pm-hot);
+  --pm-m-surf: var(--pm-wsurf);
+  --pm-m-pop: oklch(from var(--row-fill) 0.2 calc(c * 0.3) h);
+  --pm-m-text: oklch(from var(--row-fill) 0.94 calc(c * 0.08) h);
+  --pm-m-label: oklch(from var(--row-fill) 0.89 calc(c * 0.1) h);
+  --pm-m-soft: oklch(from var(--row-fill) 0.84 calc(c * 0.12) h);
+  --pm-m-muted: oklch(from var(--row-fill) 0.74 calc(c * 0.15) h);
 }
 
 :root[data-theme="powermeter"] {
@@ -95,6 +105,15 @@
   /* Widget surfaces (DPS Meter design) */
   --pm-wsurf: #0f1114;
   --pm-wbar: #821113;
+  /* The meter's own tokens (section 2): the compact design's azure and night blue, the reference's azure ring. */
+  --pm-m-accent: #4cc2ff;
+  --pm-m-you: #5fc0d6;
+  --pm-m-surf: #0a0b18;
+  --pm-m-pop: #0d0f1f;
+  --pm-m-text: #e8eaf6;
+  --pm-m-label: #d6d9ee;
+  --pm-m-soft: #c3c7e0;
+  --pm-m-muted: #9aa0c0;
 
   /* The app's own variables, re-pointed at the palette */
   --row-fill: var(--pm-deep);
@@ -147,10 +166,11 @@
     --pm-ui-muted: #a3acc2;
     --pm-ui-head: #8a93ab;
     --pm-ui-pct: #a9b7d6;
-    --pm-you: #5fc0d6;
-    /* The rows' columns, shared by the heads: rank, gap, class, gap, name, bar,
-       DPS, %, total. The name keeps 110px; past that the bar gives way. */
-    --pm-row-cols: 28px 20px 28px 19px minmax(110px, 1fr) minmax(0, 216px) 79px minmax(60px, 112px) 92px;
+    --pm-you: var(--pm-m-you);
+    /* The rows' columns, shared by the heads: rank, gap, class, gap, name, combat power, bar,
+       DPS, %, total. The name keeps 110px; past that the bar gives way. The combat power track
+       is as wide as its badge, nothing when no row has one (the reference layout). */
+    --pm-row-cols: 28px 20px 28px 19px minmax(110px, 1fr) auto minmax(0, 216px) 79px minmax(60px, 112px) 92px;
     width: 810px;
     /* Room for the grips that sit 4px outside the top and left edges: the window
        starts at the meter's corner and clipped them to half a hit area. The window
@@ -953,7 +973,7 @@
   .pmStaggerFill {
     height: 100%;
     border-radius: 3px;
-    background: #7fd8ff;
+    background: var(--pm-m-accent);
   }
   .pmStaggerHead {
     display: flex;
@@ -965,7 +985,7 @@
     color: var(--pm-ui-muted);
   }
   .pmStaggerPct { font-variant-numeric: tabular-nums; }
-  .pmStagger.isBroken .pmStaggerLabel { color: #7fd8ff; }
+  .pmStagger.isBroken .pmStaggerLabel { color: var(--pm-m-accent); }
 
   /* --- Party table: heads, then one rounded card per player: rank badge, class
      icon, name + class, DPS bar, DPS, %, total. --- */
@@ -987,10 +1007,10 @@
   .pmCols > * { position: relative; grid-row: 1; align-self: stretch; line-height: 27px; white-space: nowrap; }
   .pmCols > :nth-child(1) { grid-column: 1; text-align: center; }
   .pmCols > :nth-child(2) { grid-column: 3; }
-  .pmCols > :nth-child(3) { grid-column: 5 / 7; }
-  .pmCols > :nth-child(4) { grid-column: 7; text-align: right; }
-  .pmCols > :nth-child(5) { grid-column: 8; text-align: center; }
-  .pmCols > :nth-child(6) { grid-column: 9; text-align: right; }
+  .pmCols > :nth-child(3) { grid-column: 5 / 8; }
+  .pmCols > :nth-child(4) { grid-column: 8; text-align: right; }
+  .pmCols > :nth-child(5) { grid-column: 9; text-align: center; }
+  .pmCols > :nth-child(6) { grid-column: 10; text-align: right; }
   /* The list is sorted by the stat, highest first. */
   .pmColStat::after {
     content: "\25BC";
@@ -1040,7 +1060,33 @@
   .list .item.isUser::before { content: none; }
   .list .item .content { display: contents; }
   .list .item :is(.rank, .classIcon, .name, .fillTrack, .dps > p) { grid-row: 1; }
-  .list .item .combatPower { display: none; }
+  /* Combat power: a small badge after the name and its class (meter.js; hidden while unknown). The cyan the
+     game uses for the stat, on its own dark plate so it reads over any bar or background. */
+  .list .item .combatPower {
+    grid-row: 1;
+    grid-column: 6;
+    position: static;
+    margin: 0 8px 0 0;
+    padding: 0 6px;
+    border: 1px solid rgba(120, 242, 251, 0.3);
+    border-radius: var(--pm-r-row);
+    background: rgba(8, 20, 28, 0.78);
+    font-family: inherit;
+    font-variation-settings: normal;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+    letter-spacing: 0;
+    color: #8ef3fb;
+    text-shadow: none;
+  }
+  /* With a badge on screen the bar and the % column give it their room, so "Name Class" still reads whole at 810. */
+  .meter:not(.slim):has(.list .combatPower:not([style*="none"])) {
+    --pm-row-cols: 28px 20px 28px 19px minmax(110px, 1fr) auto minmax(0, 160px) 79px minmax(60px, 96px) 92px;
+  }
+  @container pmMeter (max-width: 499px) {
+    .meter:not(.slim) .list .item .combatPower { display: none; }
+  }
   /* Rank badge: the reference's frame (points top and bottom, scooped corners) in
      gold, silver and copper for the podium, steel for the rest. */
   .list .item .rank {
@@ -1114,7 +1160,7 @@
   /* DPS bar: meter.js sizes the fill to the stat against the top player's; the top
      one fills the whole track. */
   .list .item .fillTrack {
-    grid-column: 6;
+    grid-column: 7;
     position: relative;
     height: 11px;
     border-radius: 4px;
@@ -1161,7 +1207,7 @@
     text-shadow: none;
   }
   .list .item .dps > p:first-child {
-    grid-column: 7;
+    grid-column: 8;
     font-size: 15px;
     font-weight: 700;
     color: #ffffff;
@@ -1169,11 +1215,11 @@
   .list .item .dps .dpsContribution,
   .list .item .dps .dpsTotal { display: block; }
   .list .item .dps .dpsContribution {
-    grid-column: 8;
+    grid-column: 9;
     text-align: center;
     color: var(--pm-ui-pct);
   }
-  .list .item .dps .dpsTotal { grid-column: 9; }
+  .list .item .dps .dpsTotal { grid-column: 10; }
 
   /* --- Average DPS by class (the Medie button). With a boss on screen it
      replaces the party table under the HP bar (Main); without one it takes
@@ -1349,13 +1395,15 @@
      shows on hover / keyboard focus only, so the resting geometry is the design's.
      Preferences (pmWidget.js usePrefs, chosen in the Options window): .pmPref-* classes, --pm-accent, --pm-card-alpha. --- */
   .meter.slim {
-    --pm-card: rgba(10, 11, 24, var(--pm-card-alpha, 0.95));
+    --pm-card: rgb(from var(--pm-m-surf) r g b / var(--pm-card-alpha, 0.95));
     --pm-card-line: rgba(255, 255, 255, 0.09);
     --pm-hair: rgba(255, 255, 255, 0.06);
-    --pm-c-text: #e8eaf6;
-    --pm-c-muted: #9aa0c0;
-    --pm-c-soft: #c3c7e0;
-    --pm-c-label: #d6d9ee;
+    --pm-c-text: var(--pm-m-text);
+    --pm-c-muted: var(--pm-m-muted);
+    --pm-c-soft: var(--pm-m-soft);
+    --pm-c-label: var(--pm-m-label);
+    /* The theme's accent unless a bar colour is picked (pmWidget.js sets it inline then). */
+    --pm-accent: var(--pm-m-accent);
     --pm-c-ghost: rgba(255, 255, 255, 0.14);
   }
   .meter.slim {
@@ -1505,7 +1553,7 @@
     padding: 2px;
     border: 1px solid var(--pm-card-line);
     border-radius: var(--pm-r-btn);
-    background: #0d0f1f;
+    background: var(--pm-m-pop);
     opacity: 0;
     pointer-events: none;
     transition: opacity 150ms cubic-bezier(0.23, 1, 0.32, 1);
@@ -1553,8 +1601,9 @@
   .pmCols > :is(.pmColPlayer, .pmColTab, .pmColRate, .pmColShare, .pmColDeaths) { display: none; }
 
   /* Rows: background bar in the accent, you ringed in it with "(you)". */
+  /* 4px between the rows (Nazario: the bars ran into each other); each row clips its bar to the 4px row radius. */
   .meter.slim .list,
-  .meter.slim .list.hasRows { gap: 0; padding: 0 4px 4px; }
+  .meter.slim .list.hasRows { gap: 4px; padding: 0 4px 4px; }
   .meter.slim .list .item {
     position: relative;
     display: flex;
@@ -1625,6 +1674,28 @@
   .meter.slim .list .item .name::after { content: none; }
   .meter.slim .list .item.isUser .name::after { content: var(--pm-you-label, " (you)"); margin: 0; font: inherit; color: inherit; }
   .meter.slim .list .item.isIdentifying .content .name { font-size: 12px; color: var(--pm-c-muted); }
+  /* Name, then its combat power: one wrapping line 16px high, so the badge drops onto the clipped second line
+     when the name needs the room (Complete preset, "(you)", long names), and the name is never cut for it. */
+  .meter.slim .list .item .nameCell {
+    display: flex;
+    flex: 1 1 0;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 6px;
+    min-width: 0;
+    height: 16px;
+    overflow: hidden;
+  }
+  .meter.slim .list .item .nameCell > :is(.name, .name.isCjk) { flex: 0 1 auto; max-width: 100%; line-height: 16px; }
+  .meter.slim .list .item .combatPower {
+    position: relative;
+    top: 0;
+    flex: none;
+    margin: 0;
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 14px;
+  }
   .meter.slim .list .item .dps > p {
     display: block;
     font-size: 11px;
@@ -1645,7 +1716,8 @@
   .meter.slim:not(.pmPref-cTotal) :is(.pmColTab, .list .item .dps .dpsTotal),
   .meter.slim:is(:not(.pmPref-cRate), .pmTab-aggro) :is(.pmColRate, .list .item .dps > p:first-child),
   .meter.slim:not(.pmPref-cShare) :is(.pmColShare, .list .item .dps .dpsContribution),
-  .meter.slim:not(.pmPref-cDeaths) :is(.pmColDeaths, .list .item .dps .dpsDeaths) { display: none; }
+  .meter.slim:not(.pmPref-cDeaths) :is(.pmColDeaths, .list .item .dps .dpsDeaths),
+  .meter.slim:not(.pmPref-cp) .list .item .combatPower { display: none; }
 
   /* Footer: Total on the left, the Customise button on the right; Reset, Only me and the Trainer
      beside it on hover / focus. */
@@ -1699,6 +1771,20 @@
   .meter.slim .pmEndResetBtn { display: none; }
   .meter.slim .pmEndActions { flex-wrap: wrap; min-width: 0; }
   .meter.slim .pmEndActions > button { flex: 1 1 auto; }
+  /* Fight over / uploaded: the actions are the card's own band, set off from the rows by the footer's hairline
+     and 8px on the 4px grid, buttons as the footer's (28 high, 6 radius). */
+  .meter.slim.pmMode-dps.pmView-ended.pmView-ended :is(.pmEnd, .pmUploaded) { padding: 8px 10px; border-top: 1px solid var(--pm-hair); } /* class doubled: outweighs the layout-wide padding below */
+  .meter.slim.pmMode-dps.pmView-ended .list.hasRows { padding-bottom: 4px; }
+  .meter.slim.pmMode-dps.pmView-ended :is(.pmEnd, .pmUploaded) button {
+    height: 28px;
+    padding: 0 12px;
+    border-radius: var(--pm-r-btn);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .meter.slim.pmMode-dps.pmView-ended :is(.pmEnd, .pmUploaded) .pmGhostBtn { border-color: var(--pm-c-ghost); color: var(--pm-c-text); }
+  .meter.slim .pmUploaded .pmCardTitle { font-size: 13px; font-weight: 600; line-height: 18px; color: var(--pm-c-text); }
+  .meter.slim .pmUploaded .pmCardSub { margin-top: 2px; font-size: 11px; line-height: 16px; color: var(--pm-c-soft); }
   .meter.slim :is(.pmError, .pmUploaded) { flex-wrap: wrap; row-gap: 8px; }
   .meter.slim .pmCardText { flex-basis: calc(100% - 28px); } /* beside the 18px icon and its 10px gap */
   .meter.slim :is(.pmError, .pmUploaded) button { flex: 1 1 100%; height: 28px; }
@@ -1746,12 +1832,12 @@
      its muted text fell under 3:1 over white). "Transparent" keeps the see-through card and gives the
      text a dark halo, so it never melts into what is behind. */
   .meter.slim.pmBg-clear > * {
-    --pm-c-muted: #c3c7e0;
+    --pm-c-muted: var(--pm-m-soft);
     text-shadow: 0 0 2px rgba(5, 6, 13, 0.95), 0 0 6px rgba(5, 6, 13, 0.7);
   }
 
   /* The settings button stays findable over a bright desktop in "Transparent" (a halo does not reach a border). */
-  .meter.slim.pmBg-clear .footerBtns .pmCustomBtn { border-color: rgba(255, 255, 255, 0.35); background: rgba(10, 11, 24, 0.75); }
+  .meter.slim.pmBg-clear .footerBtns .pmCustomBtn { border-color: rgba(255, 255, 255, 0.35); background: rgb(from var(--pm-m-surf) r g b / 0.75); }
   /* Capture error card: the design's 10px padding, 8px radius around the card, 6px on the button. */
   .meter.slim.pmMode-dps.pmView-error .pmError {
     align-items: flex-start;
@@ -1981,6 +2067,9 @@
   /* The actions take the list's bottom padding, so five rows still fit 520x420. */
   .meter.pmMode-dps.pmView-ended .list.hasRows { padding-bottom: 0; }
   .meter.pmMode-dps.pmView-ended .pmUploaded { padding: 0 10px 10px; }
+  /* 8px between the last row and the actions, the list's own gap doubled: the buttons never sit on a row. */
+  .meter.pmMode-dps.pmView-ended:not(.isPmUploaded) .pmEnd,
+  .meter.pmMode-dps.pmView-ended .pmUploaded { padding-top: 8px; }
   .meter.pmMode-dps.pmView-ended :is(.pmEnd, .pmUploaded) button { height: 28px; }
   .pmEndHead,
   .pmEndStats { display: none; }
@@ -2188,7 +2277,71 @@
     flex-direction: column;
     min-height: 0;
   }
+  /* "Who is it?" (pmWidget.js showWho): the names the party roster has free, under an unnamed "#id" row. */
+  .pmWho {
+    position: absolute;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-sizing: border-box;
+    min-width: 180px;
+    max-width: calc(100% - 8px);
+    padding: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: var(--pm-r-container);
+    background: var(--pm-m-pop);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+    font-family: inherit;
+    text-shadow: none;
+  }
+  .pmWho[hidden] { display: none; }
+  .pmWhoTitle { padding: 2px 8px 4px; font-size: 11px; font-weight: 600; color: var(--pm-m-muted); }
+  .pmWhoItem {
+    height: 28px;
+    padding: 0 10px;
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--pm-r-btn);
+    background: transparent;
+    color: var(--pm-m-text);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .pmWhoItem:focus-visible { outline: 2px solid #ffffff; outline-offset: -2px; background: rgba(255, 255, 255, 0.08); }
+  @media (hover: hover) and (pointer: fine) {
+    .pmWhoItem:hover { background: rgba(255, 255, 255, 0.08); }
+  }
+  .pmWhoItem.isCancel { margin-top: 4px; border-top: 1px solid rgba(255, 255, 255, 0.08); border-radius: 0 0 var(--pm-r-btn) var(--pm-r-btn); font-weight: 400; color: var(--pm-m-soft); }
+  .pmWhoNote { margin: 0; padding: 6px 10px; font-size: 11px; color: var(--pm-t2, #c3c7e0); }
+  .pmWhoNote[hidden] { display: none; }
   .pmTrainerTitle { font-weight: 600; }
+  /* The test's way out: a real 28px button on the header (was a bare 12px glyph, hard to hit, Nazario). */
+  .pmTrainer .pmDetailHead { height: 40px; padding: 0 6px 0 10px; }
+  .pmTrainer button.pmTrainerClose {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: var(--pm-r-btn);
+    background: rgba(0, 0, 0, 0.18);
+    color: #ffffff;
+    transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1), background-color 120ms ease, border-color 120ms ease;
+  }
+  .pmTrainer .pmTrainerClose svg { width: 16px; height: 16px; }
+  .pmTrainer .pmTrainerClose:active { transform: scale(0.97); }
+  .pmTrainer .pmTrainerClose:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+  @media (hover: hover) and (pointer: fine) {
+    .pmTrainer .pmTrainerClose:hover { border-color: #ffffff; background: rgba(255, 255, 255, 0.16); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pmTrainer .pmTrainerClose { transition: background-color 120ms ease, border-color 120ms ease; transform: none !important; }
+  }
   .pmTrainer[data-cls=""] .pmTrainerCls,
   .pmTrainer:not([data-cls]) .pmTrainerCls { display: none; }
   /* A long skill name takes a second line rather than lose its end. */

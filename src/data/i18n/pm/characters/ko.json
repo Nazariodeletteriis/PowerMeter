@@ -165,5 +165,10 @@
   "characters.builder.pets.location": "위치",
   "characters.builder.pets.showOnMap": "지도에서 보기",
   "characters.builder.pets.noLocation": "알려진 위치 없음",
-  "characters.builder.pets.noCoords": "몬스터의 지도 좌표가 없습니다: 지역만 알려져 있습니다."
+  "characters.builder.pets.noCoords": "몬스터의 지도 좌표가 없습니다: 지역만 알려져 있습니다.",
+  "characters.playing": "플레이 중",
+  "characters.level": "Lv {n}",
+  "characters.cp": "전투력",
+  "characters.gs": "장비 점수",
+  "characters.countersNone": "아직 읽은 카운터가 없습니다. 미터를 연 상태로 이 캐릭터를 플레이하세요."
 }

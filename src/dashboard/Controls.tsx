@@ -23,17 +23,17 @@ const POLL_MS = 1000;
  */
 const PREFS_KEY = "pm.compactPrefs";
 const PREFS_VERSION = 2;
-const SWITCHES = ["icons", "rank", "bars", "header", "cTotal", "cRate", "cShare", "cDeaths"] as const;
+const SWITCHES = ["icons", "rank", "bars", "header", "cp", "cTotal", "cRate", "cShare", "cDeaths"] as const;
 const ROW_COUNTS = [3, 5, 8];
 const BGS = ["clear", "soft", "full"] as const;
 /** Bar colours: "class" paints each bar in its class colour (its swatch: the class colours round the dial). */
-const ACCENTS = { class: "var(--ct-class-swatch)", azure: "#4cc2ff", violet: "#a78bfa", green: "#34d399", amber: "#fbbf24", pink: "#fb7185" };
+const ACCENTS = { class: "var(--ct-class-swatch)", theme: "var(--pm-red)", azure: "#4cc2ff", violet: "#a78bfa", green: "#34d399", amber: "#fbbf24", pink: "#fb7185" };
 type Prefs = Record<(typeof SWITCHES)[number] | "dense", boolean> & { rows: number; bg: (typeof BGS)[number]; accent: keyof typeof ACCENTS };
 type Layout = Omit<Prefs, "accent">;
 const PRESETS: Record<"min" | "std" | "full", Layout> = {
-  min: { icons: false, rank: false, bars: true, header: false, cTotal: false, cRate: true, cShare: false, cDeaths: false, dense: true, rows: 5, bg: "clear" },
-  std: { icons: true, rank: false, bars: true, header: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft" },
-  full: { icons: true, rank: true, bars: true, header: true, cTotal: true, cRate: true, cShare: true, cDeaths: true, dense: false, rows: 8, bg: "full" },
+  min: { icons: false, rank: false, bars: true, header: false, cp: true, cTotal: false, cRate: true, cShare: false, cDeaths: false, dense: true, rows: 5, bg: "clear" },
+  std: { icons: true, rank: false, bars: true, header: true, cp: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft" },
+  full: { icons: true, rank: true, bars: true, header: true, cp: true, cTotal: true, cRate: true, cShare: true, cDeaths: true, dense: false, rows: 8, bg: "full" },
 };
 const readPrefs = (raw: string | undefined): Prefs => {
   let saved: Record<string, unknown> = {};

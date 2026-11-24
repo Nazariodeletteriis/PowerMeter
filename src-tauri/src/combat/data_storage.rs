@@ -570,19 +570,34 @@ impl DataStorage {
                 }
             }
         }
-        // More players fighting than the party holds: open world, the unnamed one may be a stranger.
-        let players_fighting = in_combat.iter().filter(|id| inner.known_player_ids.contains(id)).count();
-        if unnamed.len() != 1 || players_fighting > inner.party_members.len() {
+        if unnamed.len() != 1 {
             return;
         }
-        // Everyone else fighting must be a named party member (or you): an open-world stranger then
-        // can't take an absent member's name.
+        let unnamed_id = *unnamed.iter().next().unwrap();
         let local = inner.local_character_name.as_deref().map(str::trim).unwrap_or("");
-        let others_in_party = in_combat.iter().filter(|&&id| inner.known_player_ids.contains(&id) && !unnamed.contains(&id)).all(|id| {
-            inner.nickname_storage.get(id).is_some_and(|n| inner.party_members.contains_key(n) || n.trim() == local)
+        // The unnamed one fights what you (or a named party member) fight: a party mate, whoever else is around
+        // (strangers on their own training dummies in town used to stop the rules below every time).
+        let local_id = inner.local_player_id.map(|v| v as i32);
+        let shares_target = inner.target_combat.values().any(|t| {
+            t.actors.contains_key(&unnamed_id)
+                && t.actors.keys().any(|&a| {
+                    Some(a) == local_id || inner.nickname_storage.get(&a).is_some_and(|n| inner.party_members.contains_key(n))
+                })
         });
-        if !others_in_party {
-            return;
+        if !shares_target {
+            // More players fighting than the party holds: open world, the unnamed one may be a stranger.
+            let players_fighting = in_combat.iter().filter(|id| inner.known_player_ids.contains(id)).count();
+            if players_fighting > inner.party_members.len() {
+                return;
+            }
+            // Everyone else fighting must be a named party member (or you): an open-world stranger then
+            // can't take an absent member's name.
+            let others_in_party = in_combat.iter().filter(|&&id| inner.known_player_ids.contains(&id) && id != unnamed_id).all(|id| {
+                inner.nickname_storage.get(id).is_some_and(|n| inner.party_members.contains_key(n) || n.trim() == local)
+            });
+            if !others_in_party {
+                return;
+            }
         }
         let free: Vec<String> = inner
             .party_members
@@ -594,9 +609,8 @@ impl DataStorage {
         if free.len() != 1 {
             return;
         }
-        let id = *unnamed.iter().next().unwrap();
-        tracing::info!("party roster: entity {} named '{}'", id, free[0]);
-        append_nickname_inner(&mut inner, id, &free[0]);
+        tracing::info!("party roster: entity {} named '{}'", unnamed_id, free[0]);
+        append_nickname_inner(&mut inner, unnamed_id, &free[0]);
     }
 
     pub fn append_damage(&self, pdp: ParsedDamagePacket) {
@@ -832,6 +846,30 @@ impl DataStorage {
     }
 
     /// Players' deaths since the last reset, oldest first.
+    /// Names of the party roster no entity carries yet: the choices for naming a `#id` row by hand.
+    pub fn free_party_names(&self) -> Vec<String> {
+        let inner = self.inner.read();
+        let local = inner.local_character_name.as_deref().map(str::trim).unwrap_or("").to_string();
+        let mut names: Vec<String> = inner
+            .party_members
+            .keys()
+            .filter(|n| n.trim() != local && !inner.nickname_storage.values().any(|nn| nn == *n))
+            .cloned()
+            .collect();
+        names.sort();
+        names
+    }
+
+    /// A `#id` row named by hand (the widget's "Who is this?"): only a name of the party roster.
+    pub fn name_from_party(&self, id: i32, name: &str) -> bool {
+        let mut inner = self.inner.write();
+        if !inner.party_members.contains_key(name) || inner.nickname_storage.contains_key(&id) {
+            return false;
+        }
+        append_nickname_inner(&mut inner, id, name);
+        true
+    }
+
     pub fn get_deaths(&self) -> Vec<Death> {
         self.inner.read().deaths.clone()
     }
@@ -1873,6 +1911,31 @@ mod guess_local_tests {
         s.append_nickname_authoritative(100, "Me");
         hit(&s, 100);
         hit(&s, 400);
+        s.set_party_roster(
+            vec![("Me".to_string(), PartyMember::default()), ("Mate".to_string(), PartyMember::default())],
+            true,
+        );
+        s.name_unnamed_from_party();
+        assert_eq!(s.get_nickname(400).as_deref(), Some("Mate"));
+    }
+
+    #[test]
+    fn a_mate_on_my_target_is_named_with_strangers_around() {
+        let s = DataStorage::new();
+        s.set_local_character_name(Some("Me".to_string()));
+        s.append_nickname_authoritative(100, "Me");
+        s.set_local_player_id(Some(100));
+        hit(&s, 100);
+        hit(&s, 400); // the mate, no spawn record seen, on my target
+        s.append_nickname_authoritative(500, "Stranger");
+        for code in [11_020_000, 11_030_000, 11_040_000] {
+            let mut p = ParsedDamagePacket::new();
+            p.set_actor_id(500);
+            p.set_target_id(MOB + 1); // their own dummy
+            p.set_skill_code(code);
+            p.set_damage(10);
+            s.append_damage(p);
+        }
         s.set_party_roster(
             vec![("Me".to_string(), PartyMember::default()), ("Mate".to_string(), PartyMember::default())],
             true,

@@ -290,12 +290,9 @@
     fetchAsBlob(primaryUrl).then((blobUrl) => {
       // Only apply if this element still wants this icon
       if (imgEl.dataset.iconUrl !== primaryUrl) return;
-      if (blobUrl) {
-        imgEl.src = blobUrl;
-      } else {
-        // CDN fetch failed — fall through to next candidate
-        handleImgError(imgEl);
-      }
+      // The CDN sends no CORS headers, so fetch() fails on it in the webview: a plain <img> load needs none and
+      // works (the dashboard's icons load so). Its error handler moves on to the next candidate.
+      imgEl.src = blobUrl || primaryUrl;
     });
   };
 

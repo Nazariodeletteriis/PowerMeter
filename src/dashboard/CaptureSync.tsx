@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { SaveSetting, Settings } from "./App";
-import { findCharacter, readCharacters, saveCharacters } from "./characters";
+import { findCharacter, newId, readCharacters, saveCharacters } from "./characters";
 import PET_IDS from "../data/pet_ids.json";
 import { GAME_SLOTS, petsFromGame, type PetEffect } from "./pages/characters/calc";
 import { BAR_SLOTS, CAPTURED_BAR_KEY, CAPTURED_DAEV_KEY, CAPTURED_GEAR_KEY, CAPTURED_PETS_KEY, readCapturedBar, readCapturedDaev, readCapturedGear, readPets, setMem } from "./pages/characters/shared";
@@ -68,6 +68,19 @@ export function CaptureSync({ settings, save, onError }: { settings: Settings; s
     const grid = Object.fromEntries(cells.map((x) => [`${x.set},${x.row},${x.c}`, x.s.id]));
     if (char?.cls === cls && JSON.stringify(all[char.id]) !== JSON.stringify(grid)) save(CAPTURED_BAR_KEY, JSON.stringify({ ...all, [char.id]: grid })).catch(onError);
   }, [key, char?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A character the roster does not have yet is added by itself, once the game has said its name and its skill bar
+  // its class (AutoCharacter then makes it the active one).
+  const barClass = (() => {
+    const classes = new Set((bar ?? []).map((b) => GAME_SKILLS.find((x) => x.id === String(b.skillId))?.class).filter(Boolean));
+    return classes.size === 1 ? [...classes][0] : undefined;
+  })();
+  useEffect(() => {
+    if (!owner || char || !barClass) return;
+    const list = readCharacters(settings);
+    if (findCharacter(list, owner)) return;
+    saveCharacters(save, [...list, { id: newId(), name: owner, cls: barClass, region: settings["pm.region"] || "global-eu" }]).catch(onError);
+  }, [owner, !!char, barClass]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A guard (1150xxxxx) on a slot number not seen yet still is the off-hand (a Ranger's guard went missing, no log yet).
   // Arcana (game slots 41-45 in the same order) by their id: 810 + type digit (1 Grail ... 5 Mirror).
