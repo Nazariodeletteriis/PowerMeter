@@ -31,7 +31,7 @@
   "overlays.textNumbers": "数値",
   "overlays.textHeads": "列見出し",
   "overlays.textBold": "太字",
-  "overlays.pointerHide": "マウスを解放したときにメーターを隠す",
+  "overlays.pointerHide": "ゲームメニューを開いたときにメーターを隠す (Esc)",
   "overlays.density": "行の密度",
   "overlays.dense": "コンパクト",
   "overlays.normal": "標準",

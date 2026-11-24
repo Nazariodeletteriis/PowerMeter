@@ -31,7 +31,7 @@
   "overlays.textNumbers": "数字",
   "overlays.textHeads": "列标题",
   "overlays.textBold": "粗体",
-  "overlays.pointerHide": "释放鼠标时隐藏统计表",
+  "overlays.pointerHide": "打开游戏菜单时隐藏统计表 (Esc)",
   "overlays.density": "行密度",
   "overlays.dense": "紧凑",
   "overlays.normal": "正常",

@@ -31,7 +31,7 @@
   "overlays.textNumbers": "숫자",
   "overlays.textHeads": "열 제목",
   "overlays.textBold": "굵게",
-  "overlays.pointerHide": "마우스를 해제하면 미터 숨기기",
+  "overlays.pointerHide": "게임 메뉴를 열면 미터 숨기기 (Esc)",
   "overlays.density": "행 밀도",
   "overlays.dense": "좁게",
   "overlays.normal": "보통",

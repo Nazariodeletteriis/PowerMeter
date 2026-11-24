@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.70
+
+- Modificato: Il meter si nasconde solo quando apri il menu del gioco con Esc (e nel Black Market), non più ogni volta che sblocchi il mouse: col mouse libero puoi cliccare il meter. Ricompare in modalità action.
+
 ## 0.5.69
 
 - Aggiunto: La card degli avvisi eventi si trascina dove vuoi sullo schermo e resta lì.

@@ -201,6 +201,49 @@ pub fn game_menu_over(_rect: [i32; 4]) -> bool {
     false
 }
 
+/// Milliseconds since Esc last went down with Aion 2 in front (its menu), None if not since `clear_game_esc`. A free
+/// pointer alone is not a menu: players free it to click the meter. Read by polling the key every 20 ms on a thread of
+/// its own (a 250 ms tick misses a quick press), started on the first call; no keyboard hook.
+static GAME_ESC: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+fn now_ms() -> u64 {
+    std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(1, |d| d.as_millis() as u64)
+}
+
+pub fn game_esc_age_ms() -> Option<u64> {
+    #[cfg(windows)]
+    {
+        static WATCH: std::sync::Once = std::sync::Once::new();
+        WATCH.call_once(|| {
+            std::thread::spawn(|| {
+                use windows::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_ESCAPE};
+                let mut was_down = false;
+                loop {
+                    let down = unsafe { GetAsyncKeyState(VK_ESCAPE.0 as i32) } < 0;
+                    if down && !was_down && is_aion2_foreground() {
+                        GAME_ESC.store(now_ms(), std::sync::atomic::Ordering::SeqCst);
+                    }
+                    was_down = down;
+                    std::thread::sleep(std::time::Duration::from_millis(20));
+                }
+            });
+        });
+    }
+    match GAME_ESC.load(std::sync::atomic::Ordering::SeqCst) {
+        0 => None,
+        at => Some(now_ms().saturating_sub(at)),
+    }
+}
+
+/// A game window opened without Esc (the Black Market's shop list) counts as the menu.
+pub fn game_menu_opened() {
+    GAME_ESC.store(now_ms(), std::sync::atomic::Ordering::SeqCst);
+}
+
+pub fn clear_game_esc() {
+    GAME_ESC.store(0, std::sync::atomic::Ordering::SeqCst);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

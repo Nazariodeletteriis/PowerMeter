@@ -31,7 +31,7 @@
   "overlays.textNumbers": "Numbers",
   "overlays.textHeads": "Column headers",
   "overlays.textBold": "Bold",
-  "overlays.pointerHide": "Hide the meter when you free the mouse",
+  "overlays.pointerHide": "Hide the meter when you open the game menu (Esc)",
   "overlays.density": "Row density",
   "overlays.dense": "Compact",
   "overlays.normal": "Normal",

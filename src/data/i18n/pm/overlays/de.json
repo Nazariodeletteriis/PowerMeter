@@ -31,7 +31,7 @@
   "overlays.textNumbers": "Zahlen",
   "overlays.textHeads": "Spaltenköpfe",
   "overlays.textBold": "Fett",
-  "overlays.pointerHide": "Meter ausblenden, wenn du die Maus freigibst",
+  "overlays.pointerHide": "Meter ausblenden, wenn du das Spielmenü öffnest (Esc)",
   "overlays.density": "Zeilendichte",
   "overlays.dense": "Kompakt",
   "overlays.normal": "Normal",

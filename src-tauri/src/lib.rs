@@ -1799,9 +1799,10 @@ pub fn run() {
                             // The Black Market panel re-reads its counts on them, popup on or off.
                             let _ = handle.emit_to("petmarket", "pet-kill", &kills);
                         }
-                        // The meter steps aside while the game's pointer is free over it (the Black Market too).
+                        // The meter steps aside for the game's menu (Esc) and the Black Market.
                         powermeter::pointer_hide_tick(&handle);
                         if let Some(items) = crate::capture::equip_parser::take_market() {
+                            crate::platform::window_detector::game_menu_opened();
                             if state.settings.get("petMarket.enabled").is_none_or(|v| v != "false") {
                                 let _ = handle.emit_to("petmarket", "black-market", &items);
                             }

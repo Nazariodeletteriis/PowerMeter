@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.70
+
+- Cambiado: El medidor solo se oculta al abrir el menú del juego con Esc (y en el Mercado negro), ya no cada vez que liberas el ratón: con el ratón libre puedes hacer clic en el medidor. Vuelve en modo acción.
+
 ## 0.5.69
 
 - Añadido: La tarjeta de avisos de eventos se puede arrastrar a cualquier parte de la pantalla y conserva su sitio.

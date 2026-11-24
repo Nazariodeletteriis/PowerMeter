@@ -31,7 +31,7 @@
   "overlays.textNumbers": "Números",
   "overlays.textHeads": "Encabezados de columna",
   "overlays.textBold": "Negrita",
-  "overlays.pointerHide": "Ocultar el medidor al liberar el ratón",
+  "overlays.pointerHide": "Ocultar el medidor al abrir el menú del juego (Esc)",
   "overlays.density": "Densidad de filas",
   "overlays.dense": "Compacta",
   "overlays.normal": "Normal",

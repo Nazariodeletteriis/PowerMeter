@@ -360,13 +360,13 @@ pub fn pointer_hid() -> bool {
     POINTER_HID.load(Ordering::SeqCst)
 }
 
-/// Every tick of lib.rs's DPS loop (250 ms): Aion 2 in front showing its mouse pointer over the meter (Esc, a menu,
-/// the bag, the Black Market) hides the meter, so the game's windows are clean; it comes back, without taking the
+/// Every tick of lib.rs's DPS loop (250 ms): Aion 2 in front showing its mouse pointer over the meter after Esc (the
+/// game's menu) hides the meter, so the menu is clean; a pointer freed without Esc leaves it, to be clicked. It comes back, without taking the
 /// focus from the game, once the pointer is locked to the camera again or another window is in front. Each needs
 /// 2 ticks in a row, so a blink of the pointer does not flash it. A meter on another monitor never hides, one the
 /// user hid stays hidden. `pm.pointerHide.off` = "1" turns it off (default on).
 pub fn pointer_hide_tick(app: &tauri::AppHandle) {
-    use crate::platform::window_detector::{cursor_shown, game_menu_over, is_aion2_foreground};
+    use crate::platform::window_detector::{clear_game_esc, cursor_shown, game_esc_age_ms, game_menu_over, is_aion2_foreground};
     static STREAK: AtomicU32 = AtomicU32::new(0);
     let Some(main) = app.get_webview_window("main") else { return };
     let on = app.state::<AppState>().settings.get("pm.pointerHide.off").is_none_or(|v| v != "1");
@@ -396,6 +396,7 @@ pub fn pointer_hide_tick(app: &tauri::AppHandle) {
         let back = visible || user_hidden() || !on || two_ticks(!(is_aion2_foreground() && cursor_shown()));
         if back {
             POINTER_HID.store(false, Ordering::SeqCst);
+            clear_game_esc();
             if !visible && !user_hidden() {
                 show_no_activate(&main);
                 let _ = main.emit("force-resize", ());
@@ -403,7 +404,14 @@ pub fn pointer_hide_tick(app: &tauri::AppHandle) {
         }
         return;
     }
+    // Esc opened the game's menu: it counts until the pointer is locked to the camera again (or another window is in
+    // front). The first second is spared, the menu may not have shown the pointer yet.
+    let esc = game_esc_age_ms();
+    if esc.is_some_and(|age| age > 1000) && !(is_aion2_foreground() && cursor_shown()) {
+        clear_game_esc();
+    }
     let over = on
+        && esc.is_some()
         && visible
         && !user_hidden()
         && !main.is_minimized().unwrap_or(false)
@@ -412,8 +420,8 @@ pub fn pointer_hide_tick(app: &tauri::AppHandle) {
             _ => false,
         };
     pointer_log(app, &format!(
-        "fg={} cursor={} over={} visible={} userHidden={} on={}",
-        is_aion2_foreground(), cursor_shown(), over, visible, user_hidden(), on
+        "fg={} cursor={} esc={} over={} visible={} userHidden={} on={}",
+        is_aion2_foreground(), cursor_shown(), esc.is_some(), over, visible, user_hidden(), on
     ));
     if two_ticks(over) {
         POINTER_HID.store(true, Ordering::SeqCst);

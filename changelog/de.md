@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.70
+
+- Geändert: Das Meter verschwindet nur noch, wenn du das Spielmenü mit Esc öffnest (und im Schwarzmarkt), nicht mehr jedes Mal, wenn du die Maus freigibst: Mit freier Maus kannst du das Meter anklicken. Im Aktionsmodus kommt es zurück.
+
 ## 0.5.69
 
 - Hinzugefügt: Die Event-Hinweiskarte lässt sich überallhin ziehen und behält ihren Platz.

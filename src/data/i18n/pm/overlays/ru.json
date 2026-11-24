@@ -31,7 +31,7 @@
   "overlays.textNumbers": "Числа",
   "overlays.textHeads": "Заголовки столбцов",
   "overlays.textBold": "Жирный",
-  "overlays.pointerHide": "Скрывать метр, когда мышь свободна",
+  "overlays.pointerHide": "Скрывать метр при открытии меню игры (Esc)",
   "overlays.density": "Плотность строк",
   "overlays.dense": "Компактная",
   "overlays.normal": "Обычная",
