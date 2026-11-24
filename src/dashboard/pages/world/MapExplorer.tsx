@@ -685,12 +685,12 @@ export function MapExplorer({
               </button>
             </div>
             <div style={{ fontSize: 12, color: "var(--pm-t2)" }}>{t(char ? "world.map.petsHint" : "world.map.petsNoChar")}</div>
-            {picked.length === 0 ? (
-              <label style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 13, cursor: "pointer" }}>
-                <input type="checkbox" checked={allMissing} onChange={(e) => setAllMissing(e.target.checked)} />
-                {t("world.map.petsAllMissing")}
-              </label>
-            ) : (
+            {/* Also a filter: the grid below drops the pets at MAX. */}
+            <label style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 13, cursor: "pointer" }}>
+              <input type="checkbox" checked={allMissing} onChange={(e) => setAllMissing(e.target.checked)} />
+              {t("world.map.petsAllMissing")}
+            </label>
+            {picked.length > 0 && (
               <ul className="wPetPicked">
                 {picked.map((code) => {
                   const s = petStatus(code);
@@ -719,7 +719,7 @@ export function MapExplorer({
               </ul>
             )}
             {creatures.data ? (
-              <PetGrid t={t} rows={creatures.data} icons={icons} owned={owned} isOn={(id) => picked.includes(id)} onPick={togglePick} />
+              <PetGrid t={t} rows={allMissing ? creatures.data.filter((r) => !done(r.id)) : creatures.data} icons={icons} owned={owned} isOn={(id) => picked.includes(id)} onPick={togglePick} />
             ) : (
               <div style={{ fontSize: 12, color: "var(--pm-t3)" }}>{creatures.error ?? t("world.db.loading")}</div>
             )}

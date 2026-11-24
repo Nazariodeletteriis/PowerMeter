@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.72
+
+- Fixed: Map → Pets: "Show every pet I'm missing" also filters the pet list, hiding the pets at MAX; the switch stays visible with pets picked.
+
 ## 0.5.71
 
 - Fixed: PvP in battlefields: your side's damage on the enemy is counted again (it was taken for healing and the meter showed only you).

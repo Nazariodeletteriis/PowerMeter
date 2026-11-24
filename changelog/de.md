@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.72
+
+- Behoben: Karte → Pets: „Alle fehlenden Pets zeigen“ filtert auch die Pet-Liste und blendet Pets auf MAX aus; der Schalter bleibt auch mit gewählten Pets sichtbar.
+
 ## 0.5.71
 
 - Behoben: PvP auf Schlachtfeldern: Der Schaden deiner Seite am Gegner zählt wieder (er wurde als Heilung gewertet und das Meter zeigte nur dich).

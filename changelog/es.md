@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.72
+
+- Corregido: Mapa → Mascotas: "Mostrar todas las mascotas que me faltan" también filtra la lista y oculta las que están al MÁX.; la casilla sigue visible con mascotas elegidas.
+
 ## 0.5.71
 
 - Corregido: PvP en campos de batalla: el daño de tu bando al enemigo vuelve a contar (se tomaba por curación y el medidor solo te mostraba a ti).

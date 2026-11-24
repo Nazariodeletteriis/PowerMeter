@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.72
+
+- Corrigé : Carte → Familiers : « Afficher tous les familiers qui me manquent » filtre aussi la liste et masque ceux au MAX ; la case reste visible avec des familiers choisis.
+
 ## 0.5.71
 
 - Corrigé : PvP en champ de bataille : les dégâts de ton camp sur l'ennemi comptent à nouveau (ils étaient pris pour des soins et le meter n'affichait que toi).

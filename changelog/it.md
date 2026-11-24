@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.72
+
+- Corretto: Mappa → Pet: "Mostra tutti i pet che mi mancano" filtra anche l'elenco dei pet e nasconde quelli a MAX; la spunta resta visibile anche con pet scelti.
+
 ## 0.5.71
 
 - Corretto: PvP nei battlefield: i danni della tua squadra sui nemici tornano a contare (venivano presi per cure e il meter mostrava solo te).

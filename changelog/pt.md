@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.72
+
+- Corrigido: Mapa → Pets: "Mostrar todos os pets que me faltam" também filtra a lista e oculta os que estão no MÁX.; a opção continua visível com pets escolhidos.
+
 ## 0.5.71
 
 - Corrigido: PvP nos campos de batalha: o dano do seu lado no inimigo volta a contar (era tomado como cura e o medidor mostrava só você).
