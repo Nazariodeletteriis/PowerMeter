@@ -277,6 +277,8 @@ struct Inner {
     /// player (see `is_pvp_hit`). Only the PvP target mode reads these; the
     /// other modes skip them, so PvE numbers are unchanged.
     pvp_target_ids: HashSet<i32>,
+    /// Your side in a battlefield, by name (`set_battle_team`): the game sends it apart from the party roster.
+    battle_team: HashSet<String>,
     dead_entity_ids: HashSet<i32>,
     /// Players' deaths since the last flush, in order (see `mark_entity_dead`).
     deaths: Vec<Death>,
@@ -333,6 +335,7 @@ impl DataStorage {
                 actor_power_scalars: HashMap::new(),
                 hostile_target_ids: HashSet::new(),
                 pvp_target_ids: HashSet::new(),
+                battle_team: HashSet::new(),
                 dead_entity_ids: HashSet::new(),
                 deaths: Vec::new(),
                 last_hit_on: HashMap::new(),
@@ -961,6 +964,17 @@ impl DataStorage {
         }
     }
 
+    /// Names of your battlefield side (`00 92` your group, `xx 96` the rest of the force). A group of one is no
+    /// battlefield group any more: the side is forgotten.
+    pub fn set_battle_team(&self, names: Vec<String>, alone: bool) {
+        let mut inner = self.inner.write();
+        if alone {
+            inner.battle_team.clear();
+        } else {
+            inner.battle_team.extend(names);
+        }
+    }
+
     pub fn get_party_members(&self) -> HashMap<String, PartyMember> {
         self.inner.read().party_members.clone()
     }
@@ -1586,15 +1600,15 @@ fn is_friendly_action(inner: &Inner, actor_id: i32, target_id: i32) -> bool {
     inner.known_player_ids.contains(&resolved_actor) && target_is_player
 }
 
-/// The local player or a party member (by roster name). Party membership is the
-/// only friend/foe signal the packets are known to carry — there is no faction
-/// field decoded — so any other player counts as a potential PvP target.
+/// The local player, a party member or a battlefield teammate (by roster name). These rosters are the only
+/// friend/foe signal the packets are known to carry — there is no faction field decoded — so any other player
+/// counts as a potential PvP target.
 fn is_ally(inner: &Inner, id: i32) -> bool {
     inner.local_player_id == Some(id as i64)
         || inner
             .nickname_storage
             .get(&id)
-            .is_some_and(|name| inner.party_members.contains_key(name))
+            .is_some_and(|name| inner.party_members.contains_key(name) || inner.battle_team.contains(name))
 }
 
 /// Player-on-player record from us/our party onto a player outside the party.

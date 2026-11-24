@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.71
+
+- Corrigé : PvP en champ de bataille : les dégâts de ton camp sur l'ennemi comptent à nouveau (ils étaient pris pour des soins et le meter n'affichait que toi).
+
 ## 0.5.70
 
 - Modifié : Le meter se masque seulement quand tu ouvres le menu du jeu avec Échap (et au Marché noir), plus à chaque fois que tu libères la souris : souris libre, tu peux cliquer sur le meter. Il revient en mode action.

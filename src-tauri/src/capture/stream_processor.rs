@@ -269,6 +269,7 @@ impl StreamProcessor {
         }
 
         self.parse_self_record(packet);
+        self.parse_battle_team(packet);
         let parsed_damage = self.parsing_damage(packet, true, false);
         let parsed_ownership = self.parse_summon_ownership_packet(packet);
         let parsed_summon = self.parse_summon_packet(packet);
@@ -1046,6 +1047,46 @@ impl StreamProcessor {
     /// `33 36`, the record of the character *you* are playing, read only from the front of a whole packet
     /// (always its own packet: every login and switch in the packet logs, 10/11 to 10/19). The byte scan that used to
     /// find it anywhere also matched a `33 36` inside another packet, and an unknown player ("TopBanana") became you.
+    /// Your side in a battlefield, which never comes as a party roster (`02 97`): `00 92` your group, `xx 96` the
+    /// rest of the force, `22 92` one group member (packets_20261124_192028, 19:24:17, 10 names, exactly the players
+    /// healed and helped in the fight). Each member is `24 <36-char id> <u32> <u16> <server u16> <len u8> <name>`, e.g.
+    /// `24 "C96633AA-199D-4A75-A908-384BBBDEEC32" f5b50300 0000 fd08 06 "fatboy"`. A `00 92` naming one player alone
+    /// (queueing, leaving) is no group.
+    fn parse_battle_team(&self, packet: &[u8]) {
+        let len = read_varint(packet, 0);
+        if len.length <= 0 {
+            return;
+        }
+        let at = len.length as usize;
+        let Some(&[op0, op1]) = packet.get(at..at + 2) else { return };
+        if !(op1 == 0x96 || (op1 == 0x92 && matches!(op0, 0x00 | 0x22))) {
+            return;
+        }
+        let is_member_id = |b: &[u8]| {
+            b.iter().enumerate().all(|(k, &c)| if matches!(k, 8 | 13 | 18 | 23) { c == b'-' } else { c.is_ascii_hexdigit() })
+        };
+        let mut names = Vec::new();
+        let mut i = at + 2;
+        while i + 46 < packet.len() {
+            if packet[i] != 0x24 || !is_member_id(&packet[i + 1..i + 37]) {
+                i += 1;
+                continue;
+            }
+            let n = i + 37 + 8;
+            let name_len = packet[n] as usize;
+            if let Some(Ok(name)) = packet.get(n + 1..n + 1 + name_len).map(std::str::from_utf8) {
+                if (1..=24).contains(&name_len) {
+                    names.push(name.to_string());
+                }
+            }
+            i = n + 1;
+        }
+        if !names.is_empty() {
+            let alone = (op0, op1) == (0x00, 0x92) && names.len() == 1;
+            self.data_storage.set_battle_team(names, alone);
+        }
+    }
+
     fn parse_self_record(&self, packet: &[u8]) {
         let len = read_varint(packet, 0);
         if len.length <= 0 {
@@ -3206,5 +3247,50 @@ mod self_record_tests {
         assert!(!storage.get_pvp_target_ids().contains(&37850));
         let boss = &storage.get_combat_snapshot_light()[&37850];
         assert!(boss.actors.contains_key(&217) && boss.actors.contains_key(&4464), "{:?}", boss.actors.keys());
+    }
+}
+
+
+#[cfg(test)]
+mod battle_team_tests {
+    use super::*;
+
+    fn hex(s: &str) -> Vec<u8> {
+        (0..s.trim().len()).step_by(2).map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap()).collect()
+    }
+
+    fn hit(storage: &DataStorage, actor: i32, target: i32) {
+        let mut p = ParsedDamagePacket::new();
+        p.set_actor_id(actor);
+        p.set_target_id(target);
+        p.set_skill_code(11_020_000);
+        p.set_damage(500);
+        storage.append_damage(p);
+    }
+
+    /// A battlefield teammate's hit on another player is PvP damage, not a heal: packets_20261124_192028, where the
+    /// whole side was booked as heals and the PvP meter showed only the local player. Blaine joins the side with a
+    /// `0A 96` (19:24:17); the `00 92` naming the local player alone on the way out (19:27:53) ends it.
+    #[test]
+    fn a_battlefield_teammate_hitting_a_foe_is_pvp() {
+        let storage = Arc::new(DataStorage::new());
+        let mut sp = StreamProcessor::new(storage.clone(), Arc::new(SkillLookup::new()), Arc::new(NpcLookup::new()));
+        let (me, blaine, foe, foe2, mob) = (9477, 4530, 7126, 7150, 900);
+        storage.set_local_player_id(Some(me as i64));
+        storage.append_nickname_authoritative(blaine, "Blaine");
+        storage.append_nickname_authoritative(foe, "barabashka");
+        storage.append_nickname_authoritative(foe2, "Teutates");
+        for id in [me, blaine, foe, foe2] {
+            hit(&storage, id, mob);
+        }
+        sp.consume_stream(&hex(include_str!("testdata/battle_team_0a96_20261124_192417.hex").trim()));
+        hit(&storage, blaine, foe);
+        assert!(storage.get_pvp_target_ids().contains(&foe));
+        let combat = storage.get_combat_snapshot_light();
+        assert_eq!(combat.get(&foe).and_then(|t| t.actors.get(&blaine)).map(|a| a.total_damage), Some(500));
+
+        sp.consume_stream(&hex(include_str!("testdata/battle_group_0092_20261124_192753.hex").trim()));
+        hit(&storage, blaine, foe2);
+        assert!(!storage.get_pvp_target_ids().contains(&foe2));
     }
 }

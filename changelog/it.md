@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.71
+
+- Corretto: PvP nei battlefield: i danni della tua squadra sui nemici tornano a contare (venivano presi per cure e il meter mostrava solo te).
+
 ## 0.5.70
 
 - Modificato: Il meter si nasconde solo quando apri il menu del gioco con Esc (e nel Black Market), non più ogni volta che sblocchi il mouse: col mouse libero puoi cliccare il meter. Ricompare in modalità action.

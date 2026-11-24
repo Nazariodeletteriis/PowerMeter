@@ -4,6 +4,10 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.71
+
+- Fixed: PvP in battlefields: your side's damage on the enemy is counted again (it was taken for healing and the meter showed only you).
+
 ## 0.5.70
 
 - Changed: The meter hides only when you open the game menu with Esc (and in the Black Market), no longer every time you free the mouse: with the mouse free you can click the meter. It comes back in action mode.

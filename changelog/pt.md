@@ -2,6 +2,10 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.71
+
+- Corrigido: PvP nos campos de batalha: o dano do seu lado no inimigo volta a contar (era tomado como cura e o medidor mostrava só você).
+
 ## 0.5.70
 
 - Alterado: O medidor só se oculta ao abrir o menu do jogo com Esc (e no Mercado Negro), não mais toda vez que você libera o mouse: com o mouse livre dá para clicar no medidor. Ele volta no modo ação.
