@@ -162,6 +162,10 @@ export function BlackMarket() {
           <h2 id="bmTitle" className="bmTitle" onPointerDown={(e) => startMove(e, (action) => void action().catch(() => {}))}>
             {t("widgetset.blackMarket")}
           </h2>
+          {/* Closed by hand: gone until the next shop tab opens (the next "black-market" clears isLeaving). */}
+          <button type="button" className="bmClose" aria-label={t("window.close")} title={t("window.close")} onClick={() => setLeaving(true)}>
+            ×
+          </button>
           {empty && bought === undefined ? (
             <p className="bmEmpty">{t("widgetset.petMarketAllMax")}</p>
           ) : (

@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.68
+
+- Aggiunto: Meter compatto: scegli la dimensione di nomi, numeri e titoli delle colonne (100-130%) e mettili in grassetto (Opzioni → Meter). Il meter resta della stessa misura.
+- Aggiunto: La tua combat power (CP) accanto al nome del personaggio in alto nel meter, anche da solo (si spegne da Opzioni → Elementi).
+- Aggiunto: Pet del Black Market: un pulsante × chiude il pannello senza comprare.
+- Aggiunto: Il meter si toglie di mezzo mentre il gioco mostra il puntatore del mouse sopra di lui (Esc, menu, borsa, Black Market) e ricompare in modalità action. Un meter su un altro schermo resta. Interruttore nelle Opzioni.
+- Modificato: Meter compatto: il DPS è il valore in evidenza, prima del danno totale; la colonna si chiama "DPS" invece di "/s".
+- Modificato: Lo sfondo "Soft" ora è davvero trasparente, diverso da "Pieno".
+- Corretto: Le tue morti vengono di nuovo contate.
+- Corretto: Icone delle skill mancanti (bacchetta grigia) nel dettaglio del giocatore.
+- Corretto: Il dettaglio del giocatore non si allunga più fuori dallo schermo con tante skill: la lista scorre.
+
 ## 0.5.67
 
 - Aggiunto: Meter: badge con la combat power (CP) accanto a ogni giocatore (si spegne da Opzioni → Elementi).

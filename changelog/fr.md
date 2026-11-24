@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.68
+
+- Ajouté : Compteur compact : choisissez la taille des noms, des nombres et des titres de colonnes (100-130 %) et mettez-les en gras (Options → Compteur). Le compteur garde sa taille.
+- Ajouté : Votre puissance de combat (CP) à côté du nom de votre personnage en haut du compteur, en solo aussi (désactivable dans Options → Éléments).
+- Ajouté : Familiers du Marché noir : un bouton × ferme le panneau sans acheter.
+- Ajouté : Le compteur s'efface tant que le jeu affiche le pointeur de la souris par-dessus (Échap, menus, sac, Marché noir) et revient en mode action. Un compteur sur un autre écran reste. Interrupteur dans les Options.
+- Modifié : Compteur compact : le DPS est la valeur mise en avant, avant les dégâts totaux ; sa colonne s'appelle « DPS » au lieu de « /s ».
+- Modifié : Le fond « Doux » est maintenant vraiment transparent, différent de « Plein ».
+- Corrigé : Vos morts sont de nouveau comptées.
+- Corrigé : Icônes de compétences manquantes (baguette grise) dans le détail du joueur.
+- Corrigé : Le détail du joueur ne déborde plus de l'écran avec beaucoup de compétences : la liste défile.
+
 ## 0.5.67
 
 - Ajouté : Compteur : badge de puissance de combat (CP) à côté de chaque joueur (désactivable dans Options → Éléments).

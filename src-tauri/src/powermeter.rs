@@ -337,37 +337,77 @@ pub async fn toggle_controls_window(app: tauri::AppHandle) -> Result<(), String>
     }
 }
 
-/// The meter stepped aside for the Black Market (`hide_meter_for_market`), until the shop closes.
-static MARKET_HID: AtomicBool = AtomicBool::new(false);
+/// The meter stepped aside while the game's mouse pointer was free over it (`pointer_hide_tick`).
+static POINTER_HID: AtomicBool = AtomicBool::new(false);
 
-/// The Black Market opened (lib.rs's tick saw its list): the meter hides, so the shop is clean, and comes back once
-/// the game locks the mouse pointer again (shop closed) for a second, or after 5 minutes at most. Only a meter that
-/// was showing: one the user hid stays hidden.
-pub fn hide_meter_for_market(app: &tauri::AppHandle) {
-    const LOCKED_MS: u128 = 1_000;
-    const CAP: std::time::Duration = std::time::Duration::from_secs(300);
+pub fn pointer_hid() -> bool {
+    POINTER_HID.load(Ordering::SeqCst)
+}
+
+/// Every tick of lib.rs's DPS loop (250 ms): Aion 2 in front showing its mouse pointer over the meter (Esc, a menu,
+/// the bag, the Black Market) hides the meter, so the game's windows are clean; it comes back, without taking the
+/// focus from the game, once the pointer is locked to the camera again or another window is in front. Each needs
+/// 2 ticks in a row, so a blink of the pointer does not flash it. A meter on another monitor never hides, one the
+/// user hid stays hidden. `pm.pointerHide.off` = "1" turns it off (default on).
+pub fn pointer_hide_tick(app: &tauri::AppHandle) {
+    use crate::platform::window_detector::{cursor_shown, game_menu_over, is_aion2_foreground};
+    static STREAK: AtomicU32 = AtomicU32::new(0);
     let Some(main) = app.get_webview_window("main") else { return };
-    if !main.is_visible().unwrap_or(false) || MARKET_HID.swap(true, Ordering::SeqCst) {
-        return;
-    }
-    let _ = main.hide();
-    std::thread::spawn(move || {
-        let start = std::time::Instant::now();
-        let mut locked_since: Option<std::time::Instant> = None;
-        loop {
-            std::thread::sleep(std::time::Duration::from_millis(250));
-            let locked = crate::platform::window_detector::is_aion2_foreground() && !crate::platform::window_detector::cursor_shown();
-            locked_since = if locked { locked_since.or(Some(std::time::Instant::now())) } else { None };
-            if locked_since.is_some_and(|t| t.elapsed().as_millis() >= LOCKED_MS) || start.elapsed() >= CAP {
-                break;
+    let on = app.state::<AppState>().settings.get("pm.pointerHide.off").is_none_or(|v| v != "1");
+    let visible = main.is_visible().unwrap_or(false);
+    // True on the 2nd tick in a row that `hit`.
+    let two_ticks = |hit: bool| {
+        let n = if hit { STREAK.fetch_add(1, Ordering::SeqCst) + 1 } else { 0 };
+        if n == 0 || n >= 2 {
+            STREAK.store(0, Ordering::SeqCst);
+        }
+        n >= 2
+    };
+    if POINTER_HID.load(Ordering::SeqCst) {
+        // Shown again by someone else (the hotkey, the auto-hide, show_overlay) or closed by the user: theirs now.
+        // Turned off: back at once.
+        let back = visible || user_hidden() || !on || two_ticks(!(is_aion2_foreground() && cursor_shown()));
+        if back {
+            POINTER_HID.store(false, Ordering::SeqCst);
+            if !visible && !user_hidden() {
+                show_no_activate(&main);
+                let _ = main.emit("force-resize", ());
             }
         }
-        MARKET_HID.store(false, Ordering::SeqCst);
-        if !user_hidden() {
-            let _ = main.show();
-            let _ = main.set_always_on_top(true);
+        return;
+    }
+    let over = on
+        && visible
+        && !user_hidden()
+        && !main.is_minimized().unwrap_or(false)
+        && match (main.outer_position(), main.outer_size()) {
+            (Ok(p), Ok(s)) => game_menu_over([p.x, p.y, p.x + s.width as i32, p.y + s.height as i32]),
+            _ => false,
+        };
+    if two_ticks(over) {
+        POINTER_HID.store(true, Ordering::SeqCst);
+        let _ = main.hide();
+    }
+}
+
+/// Shows the meter topmost without activating it, as lib.rs's auto-hide does: window.show() would take the focus
+/// from the game.
+#[cfg(windows)]
+fn show_no_activate(window: &tauri::WebviewWindow) {
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::UI::WindowsAndMessaging::*;
+    if let Ok(raw) = window.hwnd() {
+        let hwnd = HWND(raw.0);
+        unsafe {
+            let _ = ShowWindow(hwnd, SW_SHOWNOACTIVATE);
+            let _ = SetWindowPos(hwnd, Some(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
         }
-    });
+    }
+}
+
+#[cfg(not(windows))]
+fn show_no_activate(window: &tauri::WebviewWindow) {
+    let _ = window.show();
 }
 
 /// Windows the Controls window can close (the meter hides instead: hide_overlay).
@@ -388,7 +428,8 @@ const SNAP_AFTER_MS: u64 = 400;
 pub fn overlay_state(app: tauri::AppHandle) -> serde_json::Value {
     let up = |label: &str| app.get_webview_window(label).and_then(|w| w.is_visible().ok()).unwrap_or(false);
     serde_json::json!({
-        "main": up("main"),
+        // Only stepped aside for the game's pointer: still open.
+        "main": up("main") || pointer_hid(),
         "history": up("history"),
         "map": up("map"),
         "cubes": up("cubes"),

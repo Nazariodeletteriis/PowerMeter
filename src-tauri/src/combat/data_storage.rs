@@ -839,9 +839,11 @@ impl DataStorage {
         let mut inner = self.inner.write();
         inner.dead_entity_ids.insert(entity_id);
         let player = inner.known_player_ids.contains(&entity_id) || inner.local_player_id == Some(entity_id as i64);
-        if player {
+        // The same death in a second record (`04 8D` and a flag 3) counts once.
+        let now = now_ms();
+        if player && !inner.deaths.iter().rev().any(|d| d.actor_id == entity_id && now - d.ts < 3_000) {
             let (killer_id, skill_code, damage) = inner.last_hit_on.remove(&entity_id).unwrap_or_default();
-            inner.deaths.push(Death { actor_id: entity_id, ts: now_ms(), killer_id, skill_code, damage });
+            inner.deaths.push(Death { actor_id: entity_id, ts: now, killer_id, skill_code, damage });
         }
     }
 

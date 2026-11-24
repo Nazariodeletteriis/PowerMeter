@@ -37,7 +37,8 @@
   const getSkillIconMap = () => {
     if (SKILL_ICON_MAP) return SKILL_ICON_MAP;
     try {
-      const raw = window.javaBridge?.readResource?.("/data/skill_icons.json");
+      // src/data in dev, emitted to the same path in the build (vite.config.ts); "/data/..." got the page itself.
+      const raw = window.javaBridge?.readResource?.("/src/data/skill_icons.json");
       if (typeof raw === "string" && raw.length) {
         SKILL_ICON_MAP = JSON.parse(raw);
       }
@@ -161,7 +162,8 @@
 
     // Use lookup table from game data (keyed by first 4 digits of skill code)
     const base4 = code.slice(0, 4);
-    const iconName = getSkillIconMap()[base4];
+    // A few entries carry the game's folder ("Item/ETC/..."): the CDN has every icon at its root.
+    const iconName = getSkillIconMap()[base4]?.split("/").pop();
     if (iconName) {
       return [`${BASE_URL}/${iconName}.png`, WAND_ICON];
     }

@@ -494,6 +494,16 @@ impl StreamProcessor {
         if offset + 1 >= packet.len() {
             return;
         }
+        // `04 8D <victim varint> <skill u32> <killer varint> ...`, a death and its killer (1016 of 1017 in the logs
+        // with the victim's HP at 0). A player's death comes only as this: packets_20261124_022543, 02:26:29.883, the
+        // local player 2902 at 0 HP, no `42 36`. Mobs keep the flag 3 below, which follows this record for them.
+        if packet[offset] == 0x04 && packet[offset + 1] == 0x8D {
+            let victim = read_varint(packet, offset + 2);
+            if victim.length > 0 && self.is_player_id(victim.value) {
+                self.data_storage.mark_entity_dead(victim.value);
+            }
+            return;
+        }
         // Death opcode. Pre-2026-06 it was 0x3641 ([0x41,0x36]); the June 2026
         // update shifted the 0x36 spawn/death family by +1, so it is now 0x3642
         // ([0x42,0x36]). Accept both — the flag==3 check below rejects anything
@@ -3048,6 +3058,22 @@ mod stagger_tests {
         // cur > max is rejected.
         sp.consume_stream(&hex("1205e0650301280000002900000002"));
         assert_eq!(storage.get_stagger(101), None);
+    }
+
+    /// packets_20261124_022543, 02:26:29.883: the local player (2902, `d6 16`) killed in an instance by mob 11895 with
+    /// skill 1218450. No `42 36` followed: the `04 8D` is the only death record. A second record of the same death
+    /// (a flag 3 too) does not count it twice.
+    #[test]
+    fn a_players_death_comes_as_04_8d() {
+        let (storage, mut sp) = processor();
+        storage.set_local_player_id(Some(2902));
+        sp.consume_stream(&hex("1f048dd61692971200f7dc01000000000000e6cd8d01000000000102"));
+        assert_eq!(storage.get_deaths().iter().map(|d| d.actor_id).collect::<Vec<_>>(), vec![2902]);
+        sp.consume_stream(&hex("0a4236d6160003"));
+        assert_eq!(storage.get_deaths().len(), 1);
+        // A mob's `04 8D` is left to its flag 3.
+        sp.consume_stream(&hex("1f048df7dc0192971200d61600000000000000e6cd8d01000000000102"));
+        assert!(!storage.is_entity_dead(11895));
     }
 
     /// A known player's own `8D <id> 02 01 00 <hp>` record must not land in the

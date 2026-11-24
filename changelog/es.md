@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.68
+
+- Añadido: Medidor compacto: elige el tamaño de nombres, números y títulos de columna (100-130 %) y ponlos en negrita (Opciones → Medidor). El medidor conserva su tamaño.
+- Añadido: Tu poder de combate (CP) junto al nombre de tu personaje en la parte superior del medidor, también en solitario (se desactiva en Opciones → Elementos).
+- Añadido: Mascotas del Mercado Negro: un botón × cierra el panel sin comprar.
+- Añadido: El medidor se aparta mientras el juego muestra el puntero del ratón sobre él (Esc, menús, bolsa, Mercado Negro) y vuelve en modo acción. Un medidor en otra pantalla se queda. Interruptor en Opciones.
+- Cambiado: Medidor compacto: el DPS es la cifra destacada, antes del daño total; su columna dice "DPS" en lugar de "/s".
+- Cambiado: El fondo "Suave" ahora es claramente transparente, distinto de "Completo".
+- Corregido: Tus muertes vuelven a contarse.
+- Corregido: Iconos de habilidades que faltaban (varita gris) en el desglose del jugador.
+- Corregido: El desglose del jugador ya no se sale de la pantalla con muchas habilidades: la lista se desplaza.
+
 ## 0.5.67
 
 - Añadido: Medidor: insignia de poder de combate (CP) junto a cada jugador (se apaga en Opciones → Elementos).

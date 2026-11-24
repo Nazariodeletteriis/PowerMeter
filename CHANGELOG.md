@@ -4,6 +4,18 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.68
+
+- Added: Compact meter: pick the size of names, numbers and column titles (100-130%) and make each bold (Options → Meter). The meter keeps its size.
+- Added: Your combat power (CP) next to your character's name at the top of the meter, solo too (Options → Elements to turn it off).
+- Added: Black Market pets: a × button closes the panel without buying.
+- Added: The meter steps aside while the game shows the mouse pointer over it (Esc, menus, bag, Black Market) and comes back in action mode. A meter on another screen stays. Switch in Options.
+- Changed: Compact meter: DPS is the highlighted figure, before the total damage; its column reads "DPS" instead of "/s".
+- Changed: The "Soft" background is now clearly see-through, unlike "Full".
+- Fixed: Your deaths are counted again.
+- Fixed: Missing skill icons (grey wand) in the player breakdown.
+- Fixed: The player breakdown no longer grows off screen with many skills: the list scrolls.
+
 ## 0.5.67
 
 - Added: Meter: combat power (CP) badge next to each player (Options → Elements to turn it off).

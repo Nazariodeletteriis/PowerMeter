@@ -26,10 +26,20 @@ const PREFS_VERSION = 2;
 const SWITCHES = ["icons", "rank", "bars", "header", "cp", "cTotal", "cRate", "cShare", "cDeaths"] as const;
 const ROW_COUNTS = [3, 5, 8];
 const BGS = ["clear", "soft", "full"] as const;
+/** Text: a size (%) and bold for the names, the numbers and the column heads. Kept when a preset is picked. */
+const FONT_SIZES = [100, 110, 120, 130];
+const FONT_PARTS = [
+  ["nameSize", "nameBold", "overlays.textNames"],
+  ["numSize", "numBold", "overlays.textNumbers"],
+  ["headSize", "headBold", "overlays.textHeads"],
+] as const;
+type FontSize = (typeof FONT_PARTS)[number][0];
+type FontBold = (typeof FONT_PARTS)[number][1];
 /** Bar colours: "class" paints each bar in its class colour (its swatch: the class colours round the dial). */
 const ACCENTS = { class: "var(--ct-class-swatch)", theme: "var(--pm-red)", azure: "#4cc2ff", violet: "#a78bfa", green: "#34d399", amber: "#fbbf24", pink: "#fb7185" };
-type Prefs = Record<(typeof SWITCHES)[number] | "dense", boolean> & { rows: number; bg: (typeof BGS)[number]; accent: keyof typeof ACCENTS };
-type Layout = Omit<Prefs, "accent">;
+type Prefs = Record<(typeof SWITCHES)[number] | "dense" | FontBold, boolean> &
+  Record<FontSize, number> & { rows: number; bg: (typeof BGS)[number]; accent: keyof typeof ACCENTS };
+type Layout = Omit<Prefs, "accent" | FontSize | FontBold>;
 const PRESETS: Record<"min" | "std" | "full", Layout> = {
   min: { icons: false, rank: false, bars: true, header: false, cp: true, cTotal: false, cRate: true, cShare: false, cDeaths: false, dense: true, rows: 5, bg: "clear" },
   std: { icons: true, rank: false, bars: true, header: true, cp: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft" },
@@ -42,8 +52,12 @@ const readPrefs = (raw: string | undefined): Prefs => {
   } catch {
     // unreadable: the defaults, as the meter does
   }
-  const prefs: Prefs = { ...PRESETS.std, accent: "class" };
+  const prefs: Prefs = { ...PRESETS.std, accent: "class", nameSize: 100, numSize: 100, headSize: 100, nameBold: false, numBold: false, headBold: false };
   for (const key of [...SWITCHES, "dense"] as const) if (typeof saved[key] === "boolean") prefs[key] = saved[key];
+  for (const [size, bold] of FONT_PARTS) {
+    if (FONT_SIZES.includes(saved[size] as number)) prefs[size] = saved[size] as number;
+    if (typeof saved[bold] === "boolean") prefs[bold] = saved[bold];
+  }
   if (ROW_COUNTS.includes(saved.rows as number)) prefs.rows = saved.rows as number;
   if (BGS.includes(saved.bg as Prefs["bg"])) prefs.bg = saved.bg as Prefs["bg"];
   if (Object.keys(ACCENTS).includes(saved.accent as string)) prefs.accent = saved.accent as Prefs["accent"];
@@ -92,6 +106,7 @@ const PARTS: [string, string, string][] = [
   ["dpsMeter.showPing", "false", "overlays.ping"],
   ["pm.eventAlerts.off", "1", "overlays.eventAlerts"],
   ["pm.counters.off", "1", "overlays.counters"],
+  ["pm.pointerHide.off", "1", "overlays.pointerHide"], // read by the backend: the meter hides while the mouse is free over the game
 ];
 
 /**
@@ -216,6 +231,18 @@ export function Controls() {
               value={prefs.bg}
               onPick={(bg) => setPrefs({ bg })}
             />
+            {FONT_PARTS.map(([size, bold, label]) => (
+              <div key={size} className="ctGroup" role="group" aria-labelledby={`ct-${size}`}>
+                <Seg
+                  id={`ct-${size}`}
+                  label={t(label)}
+                  options={FONT_SIZES.map((n) => [n, `${n}%`])}
+                  value={prefs[size]}
+                  onPick={(n) => setPrefs({ [size]: n })}
+                />
+                <Switch on={prefs[bold]} label={t("overlays.textBold")} onToggle={() => setPrefs({ [bold]: !prefs[bold] })} />
+              </div>
+            ))}
             <div className="ctGroup">
               <span id="ct-color">{t("overlays.color")}</span>
               <div className="ctSwatches" role="group" aria-labelledby="ct-color">

@@ -21,6 +21,9 @@ export default defineConfig(async () => ({
         for (const file of readdirSync(dir)) {
           this.emitFile({ type: "asset", fileName: `i18n/ui/${file}`, source: readFileSync(`${dir}/${file}`) });
         }
+        // The skill icon table (public/src/js/skillIcons.js), at the path dev serves it from: missing from the build,
+        // every skill fell back to a guessed icon name and showed the wand where the guess was wrong.
+        this.emitFile({ type: "asset", fileName: "src/data/skill_icons.json", source: readFileSync("src/data/skill_icons.json") });
       },
     },
   ],

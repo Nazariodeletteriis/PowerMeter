@@ -630,6 +630,9 @@
   /* The name whole, the counters wrapping onto a second line when they do not fit beside it. */
   .pmCharBar { flex-wrap: wrap; row-gap: 4px; }
   .pmCharName { flex: none; max-width: 100%; white-space: nowrap; color: var(--cls-text, var(--cls)); }
+  /* Your combat power beside your name (charBar.ts), in the game's CP cyan; the Options "cp" switch hides it. */
+  .pmCharCp { flex: none; font-size: 11px; white-space: nowrap; color: #78f2fb; }
+  .meter:not(.pmPref-cp) .pmCharCp { display: none; }
   .pmCounters { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px 10px; margin-left: auto; color: var(--pm-ui-icon); }
   .pmCounters:empty { display: none; }
   /* One counter (charBar.ts): icon, base, (+charged) in your colour, /max. */
@@ -1585,19 +1588,21 @@
     margin: 0;
     padding: 4px 10px;
     border-top: 1px solid var(--pm-hair);
-    font-size: 10px;
+    font-size: calc(10px * var(--pm-head-scale, 1));
     font-weight: 400;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--pm-c-muted);
   }
-  .meter.slim .pmCols > * { display: none; line-height: normal; text-align: right; }
+  .meter.slim.pmPref-headBold .pmCols { font-weight: 600; }
+  /* Same widths and order as the row figures below (DPS, total, %, deaths), scaled with the numbers. */
+  .meter.slim .pmCols > * { display: none; overflow: hidden; line-height: normal; text-align: right; text-overflow: clip; white-space: nowrap; }
   .meter.slim .pmCols > *::before { content: none; }
   .meter.slim .pmCols > .pmColPlayer { display: block; flex: 1; text-align: left; }
-  .meter.slim .pmCols > .pmColTab { display: block; width: 52px; }
-  .meter.slim .pmCols > .pmColRate { display: block; width: 44px; }
-  .meter.slim .pmCols > .pmColShare { display: block; width: 40px; }
-  .meter.slim .pmCols > .pmColDeaths { display: block; width: 20px; }
+  .meter.slim .pmCols > .pmColRate { display: block; width: calc(52px * var(--pm-num-scale, 1)); }
+  .meter.slim .pmCols > .pmColTab { display: block; order: 1; width: calc(44px * var(--pm-num-scale, 1)); }
+  .meter.slim .pmCols > .pmColShare { display: block; order: 2; width: calc(40px * var(--pm-num-scale, 1)); }
+  .meter.slim .pmCols > .pmColDeaths { display: block; order: 3; width: calc(20px * var(--pm-num-scale, 1)); }
   .pmCols > :is(.pmColPlayer, .pmColTab, .pmColRate, .pmColShare, .pmColDeaths) { display: none; }
 
   /* Rows: background bar in the accent, you ringed in it with "(you)". */
@@ -1666,48 +1671,50 @@
   .meter.slim .list .item :is(.name, .name.isCjk) {
     flex: 1 1 0;
     padding: 0;
-    font-size: 12px;
+    font-size: calc(12px * var(--pm-name-scale, 1));
     font-weight: 500;
     color: var(--pm-c-text);
   }
+  .meter.slim.pmPref-nameBold .list .item :is(.name, .name.isCjk),
   .meter.slim .list .item.isUser .name { font-weight: 700; }
   .meter.slim .list .item .name::after { content: none; }
   .meter.slim .list .item.isUser .name::after { content: var(--pm-you-label, " (you)"); margin: 0; font: inherit; color: inherit; }
-  .meter.slim .list .item.isIdentifying .content .name { font-size: 12px; color: var(--pm-c-muted); }
-  /* Name, then its combat power: one wrapping line 16px high, so the badge drops onto the clipped second line
-     when the name needs the room (Complete preset, "(you)", long names), and the name is never cut for it. */
+  .meter.slim .list .item.isIdentifying .content .name { font-size: calc(12px * var(--pm-name-scale, 1)); color: var(--pm-c-muted); }
+  /* The name (with "(you)") on one line, ellipsized; the line grows with the name size and still fits the
+     22px row at 130%. */
   .meter.slim .list .item .nameCell {
     display: flex;
     flex: 1 1 0;
-    flex-wrap: wrap;
     align-items: center;
     column-gap: 6px;
     min-width: 0;
-    height: 16px;
+    height: calc(16px * var(--pm-name-scale, 1));
     overflow: hidden;
   }
-  .meter.slim .list .item .nameCell > :is(.name, .name.isCjk) { flex: 0 1 auto; max-width: 100%; line-height: 16px; }
-  .meter.slim .list .item .combatPower {
-    position: relative;
-    top: 0;
-    flex: none;
-    margin: 0;
-    padding: 0 4px;
-    font-size: 10px;
-    line-height: 14px;
+  .meter.slim .list .item .nameCell > :is(.name, .name.isCjk) {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    line-height: calc(16px * var(--pm-name-scale, 1));
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+  /* Combat power: in the character bar for you (charBar.ts .pmCharCp), not on the rows (Nazario, 0.5.68). */
+  .meter.slim .list .item .combatPower { display: none; }
   .meter.slim .list .item .dps > p {
     display: block;
-    font-size: 11px;
+    font-size: calc(11px * var(--pm-num-scale, 1));
     font-weight: 400;
     line-height: normal;
     text-align: right;
     color: var(--pm-c-soft);
   }
-  .meter.slim .list .item .dps .dpsTotal { order: 1; width: 52px; font-size: 12px; font-weight: 600; color: var(--pm-c-text); }
-  .meter.slim .list .item .dps > p:first-child { order: 2; width: 44px; font-size: 11px; font-weight: 400; color: var(--pm-c-soft); }
-  .meter.slim .list .item .dps .dpsContribution { order: 3; width: 40px; text-align: right; }
-  .meter.slim .list .item .dps .dpsDeaths { order: 4; width: 20px; color: #ff8a9b; }
+  /* DPS (per second) is the figure to read: first and bright; the total follows, quieter. */
+  .meter.slim .list .item .dps > p:first-child { order: 1; width: calc(52px * var(--pm-num-scale, 1)); font-size: calc(12px * var(--pm-num-scale, 1)); font-weight: 600; color: var(--pm-c-text); }
+  .meter.slim .list .item .dps .dpsTotal { order: 2; width: calc(44px * var(--pm-num-scale, 1)); }
+  .meter.slim .list .item .dps .dpsContribution { order: 3; width: calc(40px * var(--pm-num-scale, 1)); text-align: right; }
+  .meter.slim .list .item .dps .dpsDeaths { order: 4; width: calc(20px * var(--pm-num-scale, 1)); color: #ff8a9b; }
+  .meter.slim.pmPref-numBold .list .item .dps > p { font-weight: 700; }
 
   /* Preferences: what the Customise switches turn off. */
   .meter.slim:not(.pmPref-rank) .list .item .rank,
@@ -1716,8 +1723,7 @@
   .meter.slim:not(.pmPref-cTotal) :is(.pmColTab, .list .item .dps .dpsTotal),
   .meter.slim:is(:not(.pmPref-cRate), .pmTab-aggro) :is(.pmColRate, .list .item .dps > p:first-child),
   .meter.slim:not(.pmPref-cShare) :is(.pmColShare, .list .item .dps .dpsContribution),
-  .meter.slim:not(.pmPref-cDeaths) :is(.pmColDeaths, .list .item .dps .dpsDeaths),
-  .meter.slim:not(.pmPref-cp) .list .item .combatPower { display: none; }
+  .meter.slim:not(.pmPref-cDeaths) :is(.pmColDeaths, .list .item .dps .dpsDeaths) { display: none; }
 
   /* Footer: Total on the left, the Customise button on the right; Reset, Only me and the Trainer
      beside it on hover / focus. */
@@ -1828,10 +1834,10 @@
   .meter.slim .battleTime .analysisStatus { display: none; }
   .meter.slim .battleTime .status { width: 8px; height: 8px; box-sizing: border-box; }
 
-  /* Legibility over a bright desktop: the card is 0.95 opaque by default (design 0.7, raised on request:
-     its muted text fell under 3:1 over white). "Transparent" keeps the see-through card and gives the
-     text a dark halo, so it never melts into what is behind. */
-  .meter.slim.pmBg-clear > * {
+  /* Legibility over a bright desktop: only "Solid" hides what is behind. "Transparent" (0.7) and "Soft"
+     (0.82, pmWidget.js BGS) keep a see-through card and give the text a dark halo, so it never melts
+     into what is behind. */
+  .meter.slim:is(.pmBg-clear, .pmBg-soft) > * {
     --pm-c-muted: var(--pm-m-soft);
     text-shadow: 0 0 2px rgba(5, 6, 13, 0.95), 0 0 6px rgba(5, 6, 13, 0.7);
   }
@@ -2234,6 +2240,10 @@
     padding: 0 6px;
     scrollbar-width: none;
   }
+  .pmSkills::-webkit-scrollbar { display: none; }
+  /* Compact: the window follows the meter's height (tauriBridge.js updateWindowSize), so a long skill list
+     grew it off screen. Capped; the skills scroll with the wheel. */
+  .meter.slim.isPmDetail .pmDetail { max-height: 360px; }
   .pmSkill {
     position: relative;
     align-items: center;

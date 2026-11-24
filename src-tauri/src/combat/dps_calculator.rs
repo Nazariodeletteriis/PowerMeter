@@ -481,13 +481,17 @@ impl DpsCalculator {
         let party_members = self.data_storage.get_party_members();
         let bt = battle_time.max(1000);
         let mut to_remove = Vec::new();
+        // Solo there is no roster: your own row takes your own record's figure.
+        let own = crate::capture::equip_parser::snapshot();
+        let own_power = own.combat_power_now.or(own.combat_power).unwrap_or(0) as i64;
         for (&uid, data) in &mut dps_data.map {
             // Combat power joins on the character name: the roster carries an
             // account-level dbid, not the session entity id keyed here.
             data.combat_power = party_members
                 .get(&data.nickname)
                 .map(|m| m.combat_power)
-                .unwrap_or(0);
+                .filter(|&cp| cp > 0)
+                .unwrap_or_else(|| if local_ids.as_ref().is_some_and(|ids| ids.contains(&uid)) { own_power } else { 0 });
             if data.job.is_empty() {
                 if local_ids.as_ref().is_some_and(|ids| ids.contains(&uid)) {
                     data.job = "Unknown".to_string();
@@ -2033,5 +2037,23 @@ mod mode_tests {
         calc.get_dps();
         let d = calc.get_target_details(0, Some(&[ME]));
         assert_eq!(d.skills.iter().map(|s| s.dmg).sum::<i32>(), 1500);
+    }
+
+    /// Solo there is no party roster: your row takes your own record's combat power, a stranger's stays 0.
+    #[test]
+    fn solo_your_row_shows_your_own_combat_power() {
+        let (s, mut calc) = setup();
+        let t = now() - 10_000;
+        crate::capture::equip_parser::set_power(912, 52553);
+        hit_at(&s, ME, BOSS, 1000, t);
+        hit_skill(&s, ASTRAEVIA, SORC[0], 1000, t + 100);
+        s.append_nickname_authoritative(ASTRAEVIA, "Astraevia");
+        calc.set_target_selection_mode("bossTargets");
+        let dps = calc.get_dps();
+        // Earlier tests may have left an exact current value: the row shows what the record holds now.
+        let own = crate::capture::equip_parser::snapshot();
+        assert_eq!(dps.map[&ME].combat_power, own.combat_power_now.or(own.combat_power).unwrap() as i64);
+        assert!(dps.map[&ME].combat_power > 0);
+        assert_eq!(dps.map[&ASTRAEVIA].combat_power, 0);
     }
 }

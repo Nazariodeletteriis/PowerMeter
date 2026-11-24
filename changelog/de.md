@@ -2,6 +2,18 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.68
+
+- Hinzugefügt: Kompakter Meter: Größe von Namen, Zahlen und Spaltentiteln wählen (100-130 %) und jeweils fett darstellen (Optionen → Meter). Der Meter behält seine Größe.
+- Hinzugefügt: Deine Kampfkraft (CP) neben dem Namen deines Charakters oben im Meter, auch solo (abschaltbar unter Optionen → Elemente).
+- Hinzugefügt: Schwarzmarkt-Pets: eine ×-Schaltfläche schließt das Panel ohne Kauf.
+- Hinzugefügt: Der Meter weicht aus, solange das Spiel den Mauszeiger über ihm zeigt (Esc, Menüs, Tasche, Schwarzmarkt), und kehrt im Aktionsmodus zurück. Ein Meter auf einem anderen Bildschirm bleibt. Schalter in den Optionen.
+- Geändert: Kompakter Meter: DPS ist der hervorgehobene Wert, vor dem Gesamtschaden; die Spalte heißt „DPS“ statt „/s“.
+- Geändert: Der Hintergrund „Soft“ ist jetzt deutlich durchscheinend, anders als „Voll“.
+- Behoben: Deine Tode werden wieder gezählt.
+- Behoben: Fehlende Skill-Icons (grauer Stab) in der Spieleraufschlüsselung.
+- Behoben: Die Spieleraufschlüsselung wächst bei vielen Skills nicht mehr über den Bildschirm: die Liste scrollt.
+
 ## 0.5.67
 
 - Hinzugefügt: Meter: Kampfkraft-Abzeichen (CP) neben jedem Spieler (abschaltbar unter Optionen → Elemente).

@@ -1730,7 +1730,8 @@ pub fn run() {
                     move || {
                         // Toggle window visibility
                         if let Some(window) = h.get_webview_window("main") {
-                            if window.is_visible().unwrap_or(false) {
+                            // Stepped aside for the game's pointer counts as shown: the press closes it.
+                            if window.is_visible().unwrap_or(false) || powermeter::pointer_hid() {
                                 powermeter::set_user_hidden(true);
                                 let _ = window.hide();
                             } else {
@@ -1789,8 +1790,9 @@ pub fn run() {
                             // The Black Market panel re-reads its counts on them, popup on or off.
                             let _ = handle.emit_to("petmarket", "pet-kill", &kills);
                         }
+                        // The meter steps aside while the game's pointer is free over it (the Black Market too).
+                        powermeter::pointer_hide_tick(&handle);
                         if let Some(items) = crate::capture::equip_parser::take_market() {
-                            powermeter::hide_meter_for_market(&handle);
                             if state.settings.get("petMarket.enabled").is_none_or(|v| v != "false") {
                                 let _ = handle.emit_to("petmarket", "black-market", &items);
                             }
@@ -1834,7 +1836,7 @@ pub fn run() {
                                     if let Ok(raw) = window.hwnd() {
                                         let hwnd = HWND(raw.0);
                                         // PowerMeter: a user-closed overlay stays closed.
-                                        if (aion_fg || is_self_fg) && !powermeter::user_hidden() {
+                                        if (aion_fg || is_self_fg) && !powermeter::user_hidden() && !powermeter::pointer_hid() {
                                             hide_delay = 0;
                                             if !is_visible || is_minimized {
                                                 unsafe {

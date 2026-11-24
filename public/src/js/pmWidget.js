@@ -649,6 +649,7 @@ const createPmWidget = (app) => {
       tab.setAttribute("aria-selected", String(on));
     });
     setText(".pmColStat", mode === "heal" ? "HPS" : mode === "aggro" ? t("pmWidget.cols.hits", "Hits") : "DPS");
+    setText(".pmColRate", mode === "heal" ? "HPS" : "DPS"); // Compact's per-second column (hidden on Aggro); was a bare "/s"
     setText(".pmColTab", t(`pmWidget.tabs.${mode === "dps" ? "dmg" : mode}`, mode));
     meter.classList.toggle("pmTab-aggro", mode === "aggro"); // Compact: no per-second column on Aggro
     meter.style.setProperty("--pm-you-label", JSON.stringify(` ${t("pmWidget.you", "(you)")}`));
@@ -794,7 +795,7 @@ const createPmWidget = (app) => {
 
   // --- Compact preferences, chosen in the Options window (Controls.tsx) and kept in the shared settings as one
   // JSON (pm.compactPrefs; localStorage up to 0.5.65, moved over once). Every value is read back through a
-  // whitelist, so nothing saved ever reaches a style unchecked. Applied as classes and two custom properties
+  // whitelist, so nothing saved ever reaches a style unchecked. Applied as classes and custom properties
   // on .meter, used by the Compact rules only (powermeter-theme.css).
   const PREFS_KEY = "pm.compactPrefs";
   // "class" (default): each row's bar in its class colour, as in the Interface layout ([data-cls] --cls in
@@ -802,14 +803,18 @@ const createPmWidget = (app) => {
   // HP bar) is the theme's (--pm-m-accent); the five colours are the user's explicit picks.
   const ACCENTS = { class: null, theme: null, azure: "#4cc2ff", violet: "#a78bfa", green: "#34d399", amber: "#fbbf24", pink: "#fb7185" };
   const PREFS_VERSION = 2; // 2: "class" bars became the default
-  // Card opacity. The design's 0.4 / 0.7 left the text unreadable over a bright desktop (Nazario, 0.5.64):
-  // 0.95 keeps the muted text well over 4.5:1 on white and hides what is behind; "clear" stays see-through
-  // and gives the text a halo instead (powermeter-theme.css .pmBg-clear).
-  const BGS = { clear: 0.7, soft: 0.95, full: 1 };
+  // Card opacity. The design's 0.4 / 0.7 left the text unreadable over a bright desktop (Nazario, 0.5.64).
+  // "soft" at 0.95 looked the same as "full"; at 0.82 the game shows through, and like "clear" it gives the
+  // text a halo so it stays readable (powermeter-theme.css .pmBg-clear, .pmBg-soft).
+  const BGS = { clear: 0.7, soft: 0.82, full: 1 };
   const ROW_COUNTS = [3, 5, 8];
   const SWITCHES = ["icons", "rank", "bars", "header", "cp", "cTotal", "cRate", "cShare", "cDeaths"];
-  // The Standard preset (Controls.tsx PRESETS.std).
-  const DEFAULTS = { icons: true, rank: false, bars: true, header: true, cp: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft", accent: "class" };
+  // Text: a size (%) and bold for the names, the numbers and the column heads; not part of the presets.
+  const FONT_SIZES = [100, 110, 120, 130];
+  const FONT_BOLDS = ["nameBold", "numBold", "headBold"];
+  const FONT_SCALES = { nameSize: "--pm-name-scale", numSize: "--pm-num-scale", headSize: "--pm-head-scale" };
+  // The Standard preset (Controls.tsx PRESETS.std), plain text.
+  const DEFAULTS = { icons: true, rank: false, bars: true, header: true, cp: true, cTotal: true, cRate: true, cShare: true, cDeaths: false, dense: true, rows: 5, bg: "soft", accent: "class", nameSize: 100, numSize: 100, headSize: 100, nameBold: false, numBold: false, headBold: false };
   const readPrefs = (raw) => {
     let saved = {};
     try {
@@ -818,7 +823,8 @@ const createPmWidget = (app) => {
       // unreadable: the defaults
     }
     const prefs = { ...DEFAULTS };
-    for (const key of [...SWITCHES, "dense"]) if (typeof saved[key] === "boolean") prefs[key] = saved[key];
+    for (const key of [...SWITCHES, "dense", ...FONT_BOLDS]) if (typeof saved[key] === "boolean") prefs[key] = saved[key];
+    for (const key in FONT_SCALES) if (FONT_SIZES.includes(saved[key])) prefs[key] = saved[key];
     if (saved.v !== PREFS_VERSION) prefs.icons = true; // class icons became the default with version 2
     if (ROW_COUNTS.includes(saved.rows)) prefs.rows = saved.rows;
     if (Object.hasOwn(BGS, saved.bg)) prefs.bg = saved.bg;
@@ -834,8 +840,10 @@ const createPmWidget = (app) => {
     else meter.style.removeProperty("--pm-accent");
     meter.classList.toggle("pmBars-class", prefs.accent === "class");
     meter.style.setProperty("--pm-card-alpha", String(BGS[prefs.bg]));
-    for (const key of [...SWITCHES, "dense"]) meter.classList.toggle(`pmPref-${key}`, prefs[key]);
+    for (const key of [...SWITCHES, "dense", ...FONT_BOLDS]) meter.classList.toggle(`pmPref-${key}`, prefs[key]);
+    for (const [key, prop] of Object.entries(FONT_SCALES)) meter.style.setProperty(prop, String(prefs[key] / 100));
     meter.classList.toggle("pmBg-clear", prefs.bg === "clear");
+    meter.classList.toggle("pmBg-soft", prefs.bg === "soft");
     if (frame) app.meterUI.updateFromRows(frame.rows); // the visible players, at once
   };
   invoke("get_settings")
