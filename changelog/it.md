@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.69
+
+- Aggiunto: La card degli avvisi eventi si trascina dove vuoi sullo schermo e resta lì.
+- Corretto: Il meter ora si nasconde davvero quando il gioco mostra il puntatore del mouse sopra di lui (Esc, menu, borsa, Black Market) e ricompare in modalità action.
+- Corretto: La × del meter e "Avvia DPS meter" dalla dashboard non danno più l'errore "overlay window not found"; il meter non si può più distruggere con Alt+F4.
+- Corretto: Odyle e gli altri contatori si caricano appena entri nel mondo, anche se il gioco è stato avviato dopo PowerMeter.
+- Corretto: Altre icone delle skill giuste: Theostone, skill del Chanter, Comrade in Arms, Schivata del Sorcerer, Earth Punishment.
+
 ## 0.5.68
 
 - Aggiunto: Meter compatto: scegli la dimensione di nomi, numeri e titoli delle colonne (100-130%) e mettili in grassetto (Opzioni → Meter). Il meter resta della stessa misura.

@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { BellRingingIcon } from "@phosphor-icons/react";
 import type { Settings } from "./App";
 import { initialLanguage, LANGUAGE_SETTING, translator } from "./i18n";
 import { applyPalette } from "./pages/system/theme";
+import { startMove } from "./pages/world/Minimap";
 import "./eventPopup.css";
 
 /** What the widget's event notice sends (src/widget/eventAlert.ts): the event names and its start (ms). */
@@ -65,11 +67,20 @@ export function EventPopup() {
   }, [lang]);
   useEffect(() => applyPalette(settings), [settings]);
   const t = translator(lang);
+  // Click-through, except while the card shows: then it takes the mouse to be moved (place kept under window.eventPop.*).
+  const shown = !!alert;
+  useEffect(() => {
+    getCurrentWindow().setIgnoreCursorEvents(!shown).catch(() => {});
+  }, [shown]);
 
   if (!alert) return null;
   const left = alert.start - now;
   return (
-    <div className={`evPop${leaving ? " isLeaving" : ""}`} role="alert">
+    <div
+      className={`evPop${leaving ? " isLeaving" : ""}`}
+      role="alert"
+      onPointerDown={(e) => startMove(e, (action) => void action().catch(() => {}))}
+    >
       <BellRingingIcon className="evPopIcon" weight="fill" aria-hidden="true" />
       <div className="evPopText">
         <span className="evPopLabel">{left > 0 ? t("events.startsIn") : t("events.started")}</span>

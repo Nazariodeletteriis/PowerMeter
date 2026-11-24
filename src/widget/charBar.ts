@@ -131,9 +131,10 @@ if (bar && (window as { A2_VIEW?: string }).A2_VIEW === "main") {
   const poll = () =>
     invoke<Record<string, [number, number]>>("get_counters").then((c) => {
       if (!Object.keys(c).length) return; // nothing read yet this session: keep the remembered ones
-      counts = c;
+      // Before the list on entering the world only the ones that changed are known: the others keep their remembered value.
+      counts = { ...counts, ...c };
       try {
-        localStorage.setItem(REMEMBER_KEY + charName, JSON.stringify(c));
+        localStorage.setItem(REMEMBER_KEY + charName, JSON.stringify(counts));
       } catch {
         // storage refused: they show until the app closes
       }

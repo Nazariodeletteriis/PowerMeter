@@ -275,12 +275,24 @@ impl CaptureDispatcher {
             // entirely (the port/direction filters above already gate traffic),
             // keeping the hot path cheap during heavy combat.
             let unlocked = current_port.is_none();
+            let mut signed = true;
             if unlocked {
                 if looks_like_tls(&cap.data) {
                     continue;
                 }
-                if !contains_any(&cap.data, &COMBAT_SIGNATURES) {
-                    continue;
+                signed = contains_any(&cap.data, &COMBAT_SIGNATURES);
+                if !signed {
+                    // Entering the world comes before the lock, and its burst (the counters' `0B 61`, the inventory)
+                    // is LZ4 bundles over ~20 segments without the signature (packets_20261118_235928 00:02:36):
+                    // dropping them lost the counters until they changed. The game's own connections go through.
+                    if now - game_ports_at_ms >= 1_000 {
+                        game_ports = window_detector::aion2_tcp_ports();
+                        game_ports_at_ms = now;
+                    }
+                    // ponytail: its HTTPS (packets_20261124_022543 OtherIn:443) is told apart by port only.
+                    if cap.src_port == 443 || !game_ports.contains(&cap.dst_port) {
+                        continue;
+                    }
                 }
             }
 
@@ -298,7 +310,7 @@ impl CaptureDispatcher {
                 (StreamAssembler::new(), proc)
             });
 
-            if unlocked {
+            if unlocked && signed {
                 self.port_detector.register_candidate(cap.src_port, key, cap.device_name.as_deref());
                 // Count this signature-bearing packet against its source port (the
                 // signature only ever travels server->client). The lock decision is

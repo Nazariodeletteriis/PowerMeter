@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.69
+
+- Adicionado: O cartão de alertas de eventos pode ser arrastado para qualquer lugar da tela e mantém a posição.
+- Corrigido: O medidor agora some de verdade enquanto o jogo mostra o ponteiro do mouse sobre ele (Esc, menus, bolsa, Mercado Negro) e volta no modo ação.
+- Corrigido: O × do medidor e "Iniciar medidor DPS" no painel não falham mais com "overlay window not found"; Alt+F4 não destrói mais o medidor.
+- Corrigido: Odyle e os outros contadores carregam assim que você entra no mundo, mesmo se o jogo foi aberto depois do PowerMeter.
+- Corrigido: Mais ícones de habilidades corretos: Teopedras, habilidades do Chanter, Comrade in Arms, Esquiva do Feiticeiro, Earth Punishment.
+
 ## 0.5.68
 
 - Adicionado: Medidor compacto: escolha o tamanho dos nomes, números e títulos das colunas (100-130%) e deixe-os em negrito (Opções → Medidor). O medidor mantém o tamanho.

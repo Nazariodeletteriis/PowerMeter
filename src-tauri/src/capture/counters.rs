@@ -106,4 +106,14 @@ mod tests {
         parse(&hex("09 0C 61 00 08 65000000 09 03"));
         assert_eq!(snapshot()[&101], (0, 9));
     }
+
+    /// The real list on entering the world (packets_20261118_235928, 00:02:36.745, out of an LZ4 bundle): 73 counters.
+    #[test]
+    fn reads_the_real_list_on_entering_the_world() {
+        parse(&hex(include_str!("testdata/counters_0b61_20261119_000236.hex").trim()));
+        let c = snapshot();
+        assert_eq!(c.len(), 73);
+        assert_eq!(c[&60000001], (0, 320));
+    }
 }
+

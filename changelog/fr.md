@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.69
+
+- Ajouté : La carte d'alerte d'événement se déplace où vous voulez à l'écran et garde sa place.
+- Corrigé : Le compteur se masque désormais vraiment quand le jeu affiche le pointeur de la souris par-dessus (Échap, menus, sac, Marché noir) et revient en mode action.
+- Corrigé : Le × du compteur et « Lancer le compteur DPS » dans le tableau de bord n'échouent plus avec « overlay window not found » ; Alt+F4 ne peut plus détruire le compteur.
+- Corrigé : Odyle et les autres compteurs se chargent dès l'entrée dans le monde, même si le jeu a été lancé après PowerMeter.
+- Corrigé : D'autres icônes de compétences corrigées : Théostones, compétences du Chantre, Comrade in Arms, Esquive du Sorcier, Earth Punishment.
+
 ## 0.5.68
 
 - Ajouté : Compteur compact : choisissez la taille des noms, des nombres et des titres de colonnes (100-130 %) et mettez-les en gras (Options → Compteur). Le compteur garde sa taille.

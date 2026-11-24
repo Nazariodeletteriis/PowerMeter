@@ -64,7 +64,7 @@ def meter_icon(code):
     code = code[:8].ljust(8, "0")
     if code.startswith("30"):
         n = int(code[5:7])
-        return f"Icon_Item_Usable_Godstone_WP_r_{n:03x}" if n > 0 else None
+        return f"Icon_Item_Usable_Godstone_WP_r_{max(n - 6, 0):03d}" if n > 0 else None  # as skillIcons.js parseTheostone
     if code[2:6] == "0000" and code[6:] != "00":
         return None
     if code[:4] in table:

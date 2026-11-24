@@ -108,15 +108,31 @@ pub fn set_user_hidden(hidden: bool) {
 #[tauri::command]
 pub fn hide_overlay(app: tauri::AppHandle) -> Result<(), String> {
     let window = app.get_webview_window("main").ok_or("overlay window not found")?;
+    // Hidden first: a tick seeing it still on screen would clear the flag again (pointer_hide_tick).
+    window.hide().map_err(|e| e.to_string())?;
     set_user_hidden(true);
-    window.hide().map_err(|e| e.to_string())
+    Ok(())
 }
 
 /// Brings the overlay back if it was hidden with the toggle hotkey.
 #[tauri::command]
 pub fn show_overlay(app: tauri::AppHandle) -> Result<(), String> {
-    let window = app.get_webview_window("main").ok_or("overlay window not found")?;
     set_user_hidden(false);
+    let window = match app.get_webview_window("main") {
+        Some(window) => window,
+        // Gone (closed by the system or Alt+F4 before 0.5.69 kept it): built again from tauri.conf.json, where it was.
+        None => {
+            let config = app.config().app.windows.first().ok_or("overlay window not configured")?.clone();
+            let window = tauri::WebviewWindowBuilder::from_config(&app, &config).and_then(|b| b.build()).map_err(|e| e.to_string())?;
+            if let Some(state) = app.try_state::<AppState>() {
+                let at = |k: &str| state.settings.get(k).and_then(|v| v.parse::<i32>().ok());
+                if let (Some(x), Some(y)) = (at("window.x"), at("window.y")) {
+                    let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+                }
+            }
+            window
+        }
+    };
     window.show().map_err(|e| e.to_string())?;
     let _ = window.unminimize();
     let _ = window.set_always_on_top(true);
@@ -355,6 +371,17 @@ pub fn pointer_hide_tick(app: &tauri::AppHandle) {
     let Some(main) = app.get_webview_window("main") else { return };
     let on = app.state::<AppState>().settings.get("pm.pointerHide.off").is_none_or(|v| v != "1");
     let visible = main.is_visible().unwrap_or(false);
+    // A meter on screen is not closed by the user: a show that left the flag set (one of the many ways back) would
+    // block this rule for the rest of the session (0.5.68: the meter stayed over the bag and the menus).
+    // A second on screen, so a hide still on its way (the ×, the hotkey) is not undone.
+    static STALE: AtomicU32 = AtomicU32::new(0);
+    if visible && user_hidden() && !POINTER_HID.load(Ordering::SeqCst) {
+        if STALE.fetch_add(1, Ordering::SeqCst) >= 4 {
+            set_user_hidden(false);
+        }
+    } else {
+        STALE.store(0, Ordering::SeqCst);
+    }
     // True on the 2nd tick in a row that `hit`.
     let two_ticks = |hit: bool| {
         let n = if hit { STREAK.fetch_add(1, Ordering::SeqCst) + 1 } else { 0 };
@@ -384,10 +411,55 @@ pub fn pointer_hide_tick(app: &tauri::AppHandle) {
             (Ok(p), Ok(s)) => game_menu_over([p.x, p.y, p.x + s.width as i32, p.y + s.height as i32]),
             _ => false,
         };
+    pointer_log(app, &format!(
+        "fg={} cursor={} over={} visible={} userHidden={} on={}",
+        is_aion2_foreground(), cursor_shown(), over, visible, user_hidden(), on
+    ));
     if two_ticks(over) {
         POINTER_HID.store(true, Ordering::SeqCst);
-        let _ = main.hide();
+        hide_now(&main);
     }
+}
+
+/// One line in pointer.log (app data) each time the rule's inputs change, for checking it against the game: the
+/// 0.5.68 rule never fired in game and nothing said why. Kept under 64 KB.
+fn pointer_log(app: &tauri::AppHandle, line: &str) {
+    static LAST: std::sync::Mutex<String> = std::sync::Mutex::new(String::new());
+    let mut last = LAST.lock().unwrap_or_else(|e| e.into_inner());
+    if *last == line {
+        return;
+    }
+    line.clone_into(&mut last);
+    let Ok(dir) = app.path().app_data_dir() else { return };
+    let path = dir.join("pointer.log");
+    if std::fs::metadata(&path).is_ok_and(|m| m.len() > 64 * 1024) {
+        let _ = std::fs::remove_file(&path);
+    }
+    use std::io::Write;
+    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(path) {
+        let _ = writeln!(f, "{} {line}", chrono::Local::now().format("%H:%M:%S%.3f"));
+    }
+}
+
+/// Hides the meter at once from this tick's thread: window.hide() from a spawned task may not take effect (as
+/// show() did not: tauriBridge.js toolWindowReady).
+#[cfg(windows)]
+fn hide_now(window: &tauri::WebviewWindow) {
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::UI::WindowsAndMessaging::{ShowWindow, SW_HIDE};
+    match window.hwnd() {
+        Ok(raw) => unsafe {
+            let _ = ShowWindow(HWND(raw.0), SW_HIDE);
+        },
+        Err(_) => {
+            let _ = window.hide();
+        }
+    }
+}
+
+#[cfg(not(windows))]
+fn hide_now(window: &tauri::WebviewWindow) {
+    let _ = window.hide();
 }
 
 /// Shows the meter topmost without activating it, as lib.rs's auto-hide does: window.show() would take the focus
@@ -536,8 +608,9 @@ pub fn open_pet_popup_on_start(app: &tauri::AppHandle) {
     tauri::async_runtime::spawn(async move {
         pet_overlay(&app, "petpop", "PowerMeter — Pet", (360.0, 96.0), None, false);
         pet_overlay(&app, "petmarket", "PowerMeter — Black Market", (360.0, 480.0), Some("petMarket"), false);
-        // The event popup (EventPopup.tsx): a small card in the bottom right corner of the screen.
-        pet_overlay(&app, "eventpop", "PowerMeter — Event", (320.0, 88.0), None, true);
+        // The event popup (EventPopup.tsx): a small card in the bottom right corner of the screen until it is moved;
+        // its place is kept under `window.eventPop.*`. 104 tall: save_widget_geometry skips windows under 100 px.
+        pet_overlay(&app, "eventpop", "PowerMeter — Event", (320.0, 104.0), Some("eventPop"), true);
     });
 }
 

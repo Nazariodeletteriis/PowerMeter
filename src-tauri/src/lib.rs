@@ -1524,6 +1524,15 @@ pub fn run() {
             if window.label() == "dashboard" && matches!(event, tauri::WindowEvent::CloseRequested { .. }) {
                 window.app_handle().exit(0);
             }
+            // The meter is never destroyed (Alt+F4 on it, the system): it hides as its × does, and the dashboard or
+            // the hotkey bring it back. Destroyed, every later call found no "overlay window".
+            if window.label() == "main" {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    api.prevent_close();
+                    powermeter::set_user_hidden(true);
+                    let _ = window.hide();
+                }
+            }
             if matches!(event, tauri::WindowEvent::Moved(_)) {
                 powermeter::snap_after_move(window);
             }

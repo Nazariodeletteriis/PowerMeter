@@ -4,6 +4,14 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.69
+
+- Added: The event alert card can be dragged anywhere on screen and keeps its place.
+- Fixed: The meter now really hides while the game's mouse pointer is free over it (Esc, menus, bag, Black Market) and comes back in action mode.
+- Fixed: The meter's × and "Start DPS meter" in the dashboard no longer fail with "overlay window not found"; the meter can no longer be destroyed by Alt+F4.
+- Fixed: Odyle and the other counters load as soon as you enter the world, also when the game was started after PowerMeter.
+- Fixed: More skill icons right: Theostones, Chanter skills, Comrade in Arms, Sorcerer's Dodge, Earth Punishment.
+
 ## 0.5.68
 
 - Added: Compact meter: pick the size of names, numbers and column titles (100-130%) and make each bold (Options → Meter). The meter keeps its size.

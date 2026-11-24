@@ -131,11 +131,12 @@
     const iconCode = Number(code.slice(5, 7));
     if (!Number.isFinite(iconCode) || iconCode <= 0) return null;
 
-    const iconHex = iconCode.toString(16).padStart(3, "0");
+    // Theostone items in the game data (tools/datamine/out/items.json, matched by name): digits 07-24 are
+    // Godstone_WP_r_001-018. 25-37 have no icon on the CDN (the error handler falls back to the wand).
     return {
       qualityCode,
       nameColor: THEOSTONE_NAME_COLOR_BY_CODE[qualityCode] || "",
-      iconUrl: `${BASE_URL}/${THEOSTONE_ICON_BASE}${iconHex}.png`,
+      iconUrl: `${BASE_URL}/${THEOSTONE_ICON_BASE}${pad3(iconCode - 6)}.png`,
     };
   };
 

@@ -2,6 +2,14 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.69
+
+- Hinzugefügt: Die Event-Hinweiskarte lässt sich überallhin ziehen und behält ihren Platz.
+- Behoben: Der Meter verschwindet jetzt wirklich, solange das Spiel den Mauszeiger über ihm zeigt (Esc, Menüs, Tasche, Schwarzmarkt), und kehrt im Aktionsmodus zurück.
+- Behoben: Das × des Meters und „DPS-Meter starten“ im Dashboard schlagen nicht mehr mit „overlay window not found“ fehl; Alt+F4 kann den Meter nicht mehr zerstören.
+- Behoben: Odyle und die anderen Zähler laden sofort beim Betreten der Welt, auch wenn das Spiel nach PowerMeter gestartet wurde.
+- Behoben: Weitere Skill-Icons korrigiert: Theosteine, Kantor-Skills, Comrade in Arms, Ausweichen der Zauberin, Earth Punishment.
+
 ## 0.5.68
 
 - Hinzugefügt: Kompakter Meter: Größe von Namen, Zahlen und Spaltentiteln wählen (100-130 %) und jeweils fett darstellen (Optionen → Meter). Der Meter behält seine Größe.

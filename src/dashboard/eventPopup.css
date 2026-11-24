@@ -1,4 +1,4 @@
-/* Event popup (EventPopup.tsx) in its 320x88 transparent window at the bottom right of the screen: small and compact,
+/* Event popup (EventPopup.tsx) in its 320x104 transparent window, at the bottom right of the screen until moved: small and compact,
    it stays until the event starts. Near-opaque: the window can't blur the game behind it. The card sits at the bottom
    of the window, so the entry offset and the shadow stay inside it. */
 /* Only this window (EventPopup adds .evDoc): the card sits at the bottom. */
@@ -23,6 +23,8 @@
   background: color-mix(in srgb, var(--pm-bg) 94%, transparent);
   box-shadow: 0 6px 16px rgb(0 0 0 / 0.45);
   color: var(--pm-t1);
+  cursor: grab; /* moved by dragging anywhere on it (startMove) */
+  user-select: none;
   transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1), transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 @starting-style {
