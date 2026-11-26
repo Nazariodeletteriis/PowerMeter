@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.73
+
+- Modifié : Dans une force de l'Abysse ou un camp de champ de bataille, le meter affiche ta force, ton groupe et toi, plus les inconnus qui combattent le même boss. Les parts sont calculées sur les dégâts de ta force.
+- Corrigé : Les invocations (esprits du Spiritmaster et autres) s'affichaient avec un numéro au lieu du nom de leur propriétaire dans les combats bondés de l'Abysse.
+
 ## 0.5.72
 
 - Corrigé : Carte → Familiers : « Afficher tous les familiers qui me manquent » filtre aussi la liste et masque ceux au MAX ; la case reste visible avec des familiers choisis.

@@ -1052,6 +1052,9 @@ impl StreamProcessor {
     /// healed and helped in the fight). Each member is `24 <36-char id> <u32> <u16> <server u16> <len u8> <name>`, e.g.
     /// `24 "C96633AA-199D-4A75-A908-384BBBDEEC32" f5b50300 0000 fd08 06 "fatboy"`. A `00 92` naming one player alone
     /// (queueing, leaving) is no group.
+    /// An Abyss force is the same (packets_20261126_204704): `02 96` the whole force in groups of up to five (on
+    /// joining one, 20:57:42), `1e 96` / `1d 96` some of its groups, `0a 96` one member joining, and
+    /// `22 96 <member key 8B> <group key 8B> <state>` one leaving (Banana at 20:51:19, gone from the next roster).
     fn parse_battle_team(&self, packet: &[u8]) {
         let len = read_varint(packet, 0);
         if len.length <= 0 {
@@ -1060,6 +1063,12 @@ impl StreamProcessor {
         let at = len.length as usize;
         let Some(&[op0, op1]) = packet.get(at..at + 2) else { return };
         if !(op1 == 0x96 || (op1 == 0x92 && matches!(op0, 0x00 | 0x22))) {
+            return;
+        }
+        if (op0, op1) == (0x22, 0x96) && packet.len() == at + 2 + 17 {
+            if let Ok(key) = packet[at + 2..at + 10].try_into() {
+                self.data_storage.remove_battle_member(&key);
+            }
             return;
         }
         let is_member_id = |b: &[u8]| {
@@ -1076,14 +1085,16 @@ impl StreamProcessor {
             let name_len = packet[n] as usize;
             if let Some(Ok(name)) = packet.get(n + 1..n + 1 + name_len).map(std::str::from_utf8) {
                 if (1..=24).contains(&name_len) {
-                    names.push(name.to_string());
+                    let mut key = [0u8; 8];
+                    key.copy_from_slice(&packet[i + 37..n]);
+                    names.push((key, name.to_string()));
                 }
             }
             i = n + 1;
         }
         if !names.is_empty() {
             let alone = (op0, op1) == (0x00, 0x92) && names.len() == 1;
-            self.data_storage.set_battle_team(names, alone);
+            self.data_storage.set_battle_team(names, (op0, op1) == (0x02, 0x96), alone);
         }
     }
 
@@ -1407,7 +1418,8 @@ impl StreamProcessor {
     /// <parent_key u32 LE> <legion_id u32> <u16 = 0> <u16 server_id> <len u8> <utf8 legion name>
     /// ```
     ///
-    /// preceded by the record's `mask & 0x0004` byte (constant `0x06`). Six
+    /// preceded by the record's `mask & 0x0004` byte, `0x06` or `0x01` (packets_20261126_204704, Abyss: 865 of the
+    /// spawns carry `07 02 01` / `47 0x 01` there, e.g. Potato's Water Spirit 20489, and stayed a bare id). Six
     /// independent constraints have to line up at once, which is why this pinned
     /// the owner on 81 of 81 summons in the reference capture with no false
     /// positives — including a Spiritmaster's 54 pets whose owner had never been
@@ -1415,7 +1427,7 @@ impl StreamProcessor {
     fn find_spawn_parent_key(&self, packet: &[u8], search_from: usize, self_id: i32) -> Option<i32> {
         let mut i = search_from.max(1);
         while i + 13 <= packet.len() {
-            if packet[i - 1] == 0x06
+            if matches!(packet[i - 1], 0x01 | 0x06)
                 && let Some(parent) = parse_spawn_owner_block(packet, i, self_id)
             {
                 return Some(parent);
@@ -3292,5 +3304,51 @@ mod battle_team_tests {
         sp.consume_stream(&hex(include_str!("testdata/battle_group_0092_20261124_192753.hex").trim()));
         hit(&storage, blaine, foe2);
         assert!(!storage.get_pvp_target_ids().contains(&foe2));
+    }
+
+    /// Abyss force, packets_20261126_204704: the `02 96` on joining a force (20:57:42) holds its three groups, twelve
+    /// names; Claudia's `22 96` (20:58:05) takes her out. The meter then shows that force and you, not the stranger
+    /// who out-damaged them on the same boss.
+    #[test]
+    fn the_meter_shows_your_force() {
+        use crate::combat::dps_calculator::DpsCalculator;
+        use crate::combat::ping_tracker::PingTracker;
+        let storage = Arc::new(DataStorage::new());
+        let mut sp = StreamProcessor::new(storage.clone(), Arc::new(SkillLookup::new()), Arc::new(NpcLookup::new()));
+        sp.consume_stream(&hex(include_str!("testdata/force_0296_20261126_205742.hex").trim()));
+        let force = storage.battle_team_names();
+        assert_eq!(force.len(), 12, "{force:?}");
+        assert!(force.contains("Agniezska") && force.contains("Claudia") && force.contains("Igris丶"));
+
+        sp.consume_stream(&hex("1722968A4003000000FF087E6007009733F84803"));
+        assert!(!storage.battle_team_names().contains("Claudia"));
+
+        let (me, altà, stranger, boss) = (7509, 8554, 2899, 900);
+        storage.set_local_player_id(Some(me as i64));
+        storage.set_local_character_name(Some("Agniezska".into()));
+        for (id, name) in [(me, "Agniezska"), (altà, "Altà"), (stranger, "StStrange")] {
+            storage.append_nickname_authoritative(id, name);
+        }
+        for (id, n) in [(me, 2), (altà, 1), (stranger, 5)] {
+            for _ in 0..n {
+                hit(&storage, id, boss);
+            }
+        }
+        let mut calc = DpsCalculator::new(storage.clone(), Arc::new(SkillLookup::new()), Arc::new(NpcLookup::new()), Arc::new(PingTracker::new()));
+        calc.set_target_selection_mode("allTargets");
+        let dps = calc.get_dps();
+        let mut rows: Vec<_> = dps.map.values().map(|d| (d.nickname.as_str(), d.damage_contribution.round() as i64)).collect();
+        rows.sort();
+        assert_eq!(rows, [("Agniezska", 67), ("Altà", 33)]);
+    }
+
+    /// A summon's owner block can follow a `01` instead of the `06` the parser used to require: Potato's Water Spirit
+    /// (20489, packets_20261126_204704 20:48:52) stayed a bare `#20489` row of 10,672 damage.
+    #[test]
+    fn a_summon_links_to_its_owner_after_a_01() {
+        let storage = Arc::new(DataStorage::new());
+        let mut sp = StreamProcessor::new(storage.clone(), Arc::new(SkillLookup::new()), Arc::new(NpcLookup::new()));
+        sp.consume_stream(&hex(include_str!("testdata/summon_4136_owner01_20261126_204852.hex").trim()));
+        assert_eq!(storage.get_summon_data().get(&20489), Some(&6836));
     }
 }

@@ -477,6 +477,24 @@ impl DpsCalculator {
             dps_data.map.insert(uid, healer);
         }
 
+        // In a force (Abyss) or on a battlefield side the meter shows that force and you: the hundreds of strangers on
+        // the same boss go (packets_20261126_204704: 1200 rows, the top ones strangers, the party nowhere). Shares are
+        // of the force's damage.
+        // Only once you are on that roster: the first packets name other groups before yours (20:47:10, your group at
+        // 20:50:19), and a force you left no longer names you.
+        let force = self.data_storage.battle_team_names();
+        let me = self.data_storage.local_character_name();
+        let mut share_total = total_damage;
+        if force.len() > 1 && me.is_some_and(|m| force.contains(m.trim())) {
+            let party = self.data_storage.get_party_members();
+            let keep = |uid: &i32, name: &String| {
+                force.contains(name) || party.contains_key(name) || local_ids.as_ref().is_some_and(|l| l.contains(uid))
+            };
+            dps_data.map.retain(|uid, d| keep(uid, &d.nickname));
+            dps_data.heals.retain(|h| keep(&h.id, &h.nickname));
+            share_total = dps_data.map.values().map(|d| d.amount).sum::<f64>().max(1.0);
+        }
+
         // Filter and compute DPS
         let party_members = self.data_storage.get_party_members();
         let bt = battle_time.max(1000);
@@ -502,7 +520,7 @@ impl DpsCalculator {
             }
             data.dps = data.amount / bt as f64 * 1000.0;
             data.hps = data.heal_done as f64 / bt as f64 * 1000.0;
-            data.damage_contribution = data.amount / total_damage * 100.0;
+            data.damage_contribution = data.amount / share_total * 100.0;
         }
         for uid in to_remove {
             dps_data.map.remove(&uid);

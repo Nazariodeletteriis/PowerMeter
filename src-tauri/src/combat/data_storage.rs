@@ -277,8 +277,9 @@ struct Inner {
     /// player (see `is_pvp_hit`). Only the PvP target mode reads these; the
     /// other modes skip them, so PvE numbers are unchanged.
     pvp_target_ids: HashSet<i32>,
-    /// Your side in a battlefield, by name (`set_battle_team`): the game sends it apart from the party roster.
-    battle_team: HashSet<String>,
+    /// Your force (Abyss) or battlefield side (`set_battle_team`), member key → name: the game sends it apart from
+    /// the party roster. The key is the 8 bytes after each member's GUID, the same key a `22 96` removal names.
+    battle_team: HashMap<[u8; 8], String>,
     dead_entity_ids: HashSet<i32>,
     /// Players' deaths since the last flush, in order (see `mark_entity_dead`).
     deaths: Vec<Death>,
@@ -335,7 +336,7 @@ impl DataStorage {
                 actor_power_scalars: HashMap::new(),
                 hostile_target_ids: HashSet::new(),
                 pvp_target_ids: HashSet::new(),
-                battle_team: HashSet::new(),
+                battle_team: HashMap::new(),
                 dead_entity_ids: HashSet::new(),
                 deaths: Vec::new(),
                 last_hit_on: HashMap::new(),
@@ -964,15 +965,27 @@ impl DataStorage {
         }
     }
 
-    /// Names of your battlefield side (`00 92` your group, `xx 96` the rest of the force). A group of one is no
-    /// battlefield group any more: the side is forgotten.
-    pub fn set_battle_team(&self, names: Vec<String>, alone: bool) {
+    /// Members of your force / battlefield side (`00 92` your group, `xx 96` the rest of the force). `full` (a `02 96`
+    /// roster) replaces the force, so a force you left goes with it. A group of one is no group any more: the side is
+    /// forgotten.
+    pub fn set_battle_team(&self, members: Vec<([u8; 8], String)>, full: bool, alone: bool) {
         let mut inner = self.inner.write();
-        if alone {
+        if alone || full {
             inner.battle_team.clear();
-        } else {
-            inner.battle_team.extend(names);
         }
+        if !alone {
+            inner.battle_team.extend(members);
+        }
+    }
+
+    /// A member left the force (`22 96 <member key> <group key>`).
+    pub fn remove_battle_member(&self, key: &[u8; 8]) {
+        self.inner.write().battle_team.remove(key);
+    }
+
+    /// Names of your force / battlefield side; empty outside one.
+    pub fn battle_team_names(&self) -> HashSet<String> {
+        self.inner.read().battle_team.values().cloned().collect()
     }
 
     pub fn get_party_members(&self) -> HashMap<String, PartyMember> {
@@ -1608,7 +1621,7 @@ fn is_ally(inner: &Inner, id: i32) -> bool {
         || inner
             .nickname_storage
             .get(&id)
-            .is_some_and(|name| inner.party_members.contains_key(name) || inner.battle_team.contains(name))
+            .is_some_and(|name| inner.party_members.contains_key(name) || inner.battle_team.values().any(|n| n == name))
 }
 
 /// Player-on-player record from us/our party onto a player outside the party.

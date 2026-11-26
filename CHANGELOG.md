@@ -4,6 +4,11 @@ Every release needs a `## <version>` section here: CI copies its bullet points i
 GitHub release and into the in-app update window, and refuses to publish without it.
 The same section must also exist, translated, in changelog/<lang>.md for every UI language.
 
+## 0.5.73
+
+- Changed: In an Abyss force or on a battlefield side, the meter shows your force, your party and you, no longer the strangers fighting the same boss. Shares are of your force's damage.
+- Fixed: Summons (Spiritmaster spirits and others) showing as a number instead of their owner's name in crowded Abyss fights.
+
 ## 0.5.72
 
 - Fixed: Map → Pets: "Show every pet I'm missing" also filters the pet list, hiding the pets at MAX; the switch stays visible with pets picked.

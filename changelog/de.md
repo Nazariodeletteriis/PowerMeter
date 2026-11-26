@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.73
+
+- Geändert: In einer Abyss-Streitmacht oder einer Schlachtfeld-Seite zeigt das Meter deine Streitmacht, deine Gruppe und dich, nicht mehr die Fremden am selben Boss. Die Anteile beziehen sich auf den Schaden deiner Streitmacht.
+- Behoben: Beschwörungen (Geister des Spiritmasters und andere) wurden in vollen Abyss-Kämpfen als Zahl statt mit dem Namen ihres Besitzers angezeigt.
+
 ## 0.5.72
 
 - Behoben: Karte → Pets: „Alle fehlenden Pets zeigen“ filtert auch die Pet-Liste und blendet Pets auf MAX aus; der Schalter bleibt auch mit gewählten Pets sichtbar.

@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.73
+
+- Cambiato: In un force dell'Abyss o in una squadra del battlefield il meter mostra il tuo force, il tuo party e te, non più gli sconosciuti che combattono lo stesso boss. Le percentuali sono sul danno del tuo force.
+- Corretto: Le evocazioni (spiriti dello Spiritmaster e altre) comparivano come un numero invece del nome del proprietario nelle battaglie affollate dell'Abyss.
+
 ## 0.5.72
 
 - Corretto: Mappa → Pet: "Mostra tutti i pet che mi mancano" filtra anche l'elenco dei pet e nasconde quelli a MAX; la spunta resta visibile anche con pet scelti.

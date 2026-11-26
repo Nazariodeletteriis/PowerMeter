@@ -2,6 +2,11 @@
 
 Translation of CHANGELOG.md: same `## <version>` sections and bullets.
 
+## 0.5.73
+
+- Alterado: Numa força do Abismo ou num lado de campo de batalha, o medidor mostra a tua força, o teu grupo e tu, já não os desconhecidos que lutam contra o mesmo chefe. As percentagens são sobre o dano da tua força.
+- Corrigido: As invocações (espíritos do Spiritmaster e outras) apareciam como um número em vez do nome do dono nos combates cheios do Abismo.
+
 ## 0.5.72
 
 - Corrigido: Mapa → Pets: "Mostrar todos os pets que me faltam" também filtra a lista e oculta os que estão no MÁX.; a opção continua visível com pets escolhidos.
